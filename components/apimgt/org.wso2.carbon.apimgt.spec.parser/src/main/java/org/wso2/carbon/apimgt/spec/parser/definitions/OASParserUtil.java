@@ -84,6 +84,7 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.spec.parser.definitions.mixin.License31Mixin;
 
 import java.io.File;
@@ -981,6 +982,7 @@ public class OASParserUtil {
      * @return APIDefinitionValidationResponse
      * @throws APIManagementException if error occurred while parsing definition
      */
+    @UsedByMigrationClient
     public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
             throws APIManagementException {
         String apiDefinitionProcessed = apiDefinition;
@@ -1105,7 +1107,8 @@ public class OASParserUtil {
      */
     public static void updateValidationResponseAsSuccess(APIDefinitionValidationResponse validationResponse,
                                                          String originalAPIDefinition, String openAPIVersion, String title, String version, String context,
-                                                         String description, List<String> endpoints) {
+                                                         String description, List<String> endpoints,
+                                                         List<URITemplate> uriTemplates) {
         validationResponse.setValid(true);
         validationResponse.setContent(originalAPIDefinition);
         APIDefinitionValidationResponse.Info info = new APIDefinitionValidationResponse.Info();
@@ -1115,6 +1118,7 @@ public class OASParserUtil {
         info.setContext(context);
         info.setDescription(description);
         info.setEndpoints(endpoints);
+        info.setUriTemplates(uriTemplates);
         validationResponse.setInfo(info);
     }
 

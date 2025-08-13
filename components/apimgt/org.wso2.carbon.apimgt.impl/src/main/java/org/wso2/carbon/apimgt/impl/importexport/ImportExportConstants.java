@@ -39,6 +39,8 @@ public final class ImportExportConstants {
     // Location of the API definition file
     public static final String API_FILE_LOCATION = File.separator + "api";
 
+    public static final String MCP_SERVER_FILE_LOCATION = File.separator + "mcp_server";
+
     // Location of the API definition file
     public static final String API_PRODUCT_FILE_LOCATION = File.separator + "api_product";
 
@@ -194,6 +196,7 @@ public final class ImportExportConstants {
     public static final String TYPE_API = "api";
 
     public static final String TYPE_API_PRODUCT = "api_product";
+    public static final String TYPE_MCP_SERVER = "mcp_server";
 
     public static final String TYPE_APPLICATION = "application";
 
@@ -328,6 +331,9 @@ public final class ImportExportConstants {
     // API Endpoints related constants
     public static final String API_ENDPOINTS_TYPE = "endpoints";
     public static final String API_ENDPOINTS_FILE_LOCATION = File.separator + "endpoints";
+
+    public static final String BACKENDS_TYPE = "backends";
+    public static final String BACKENDS_FILE_LOCATION = File.separator + "backends";
 
     public static final String API_NAME_DELIMITER = "-";
     public static final String INITIATED_FROM_GATEWAY_CONSTANT = "initiatedFromGateway";

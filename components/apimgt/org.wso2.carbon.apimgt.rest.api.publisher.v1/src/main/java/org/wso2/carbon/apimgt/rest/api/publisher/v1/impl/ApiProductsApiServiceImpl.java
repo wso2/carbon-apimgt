@@ -810,7 +810,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         try {
             APIProduct createdProduct = PublisherCommonUtils.addAPIProductWithGeneratedSwaggerDefinition(body,
                     RestApiCommonUtil.getLoggedInUsername(), organization);
-            APIProductDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(createdProduct);
+            APIProductDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(createdProduct, false);
             URI createdApiProductUri = new URI(
                     RestApiConstants.RESOURCE_PATH_API_PRODUCTS + "/" + createdApiProductDTO.getId());
             return Response.created(createdApiProductUri).entity(createdApiProductDTO).build();
@@ -1061,7 +1061,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProduct api = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
-            return APIMappingUtil.fromAPIProducttoDTO(api);
+            return APIMappingUtil.fromAPIProducttoDTO(api, false);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
@@ -1227,7 +1227,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProduct versionedAPIProduct = apiProvider.createNewAPIProductVersion(apiProductId, newVersion,
                     defaultVersion, tenantDomain);
-            newVersionedApiProduct = APIMappingUtil.fromAPIProducttoDTO(versionedAPIProduct);
+            newVersionedApiProduct = APIMappingUtil.fromAPIProducttoDTO(versionedAPIProduct, false);
             newVersionedApiProductUri = new URI(
                     RestApiConstants.RESOURCE_PATH_API_PRODUCTS + "/" + versionedAPIProduct.getUuid());
             return Response.created(newVersionedApiProductUri).entity(newVersionedApiProduct).build();

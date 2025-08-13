@@ -19,13 +19,13 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +56,7 @@ public abstract class APIDefinition {
      *
      * @return URI templates
      */
+    @UsedByMigrationClient
     public abstract Set<URITemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException;
 
     /**
@@ -269,4 +270,49 @@ public abstract class APIDefinition {
      * @return String parserType
      */
     public abstract String getType();
+
+    /**
+     * Generates MCP URITemplates based on the API definition.
+     *
+     * @param backendApiDefinition API definition of the backend.
+     * @param refApiId             Reference API identifier.
+     * @param backendId            Backend ID. It can be either backend endpoints ID or API UUID.
+     * @param mcpFeatureType       MCP feature type to filter generation
+     * @param mcpSubtype           MCP Subtype
+     * @param uriTemplates         URI templates to generate
+     * @return generated set of MCP tool URITemplates
+     */
+    public abstract Set<URITemplate> generateMCPTools(String backendApiDefinition,
+                                                      APIIdentifier refApiId, String backendId,
+                                                      String mcpFeatureType,
+                                                      String mcpSubtype,
+                                                      Set<URITemplate> uriTemplates) throws APIManagementException;
+
+    /**
+     * Updates MCP tool-related URI templates by resolving and matching backend operations.
+     *
+     * @param backendApiDefinition OpenAPI definition of the backend API as a string
+     * @param refApiId             Identifier of the reference API
+     * @param backendId            Backend identifier
+     * @param mcpFeatureType       HTTP verb (e.g., GET) to filter templates
+     * @param mcpSubtype           MCP subtype (e.g., direct endpoint or existing API)
+     * @param uriTemplates         Set of existing URI templates to process
+     * @return Updated set of URI templates with resolved operation details
+     */
+    public abstract Set<URITemplate> updateMCPTools(String backendApiDefinition,
+                                                    APIIdentifier refApiId, String backendId,
+                                                    String mcpFeatureType,
+                                                    String mcpSubtype,
+                                                    Set<URITemplate> uriTemplates) throws APIManagementException;
+
+    /**
+     * Generates an enriched OpenAPI Specification definition for backend APIs
+     *
+     * @param swaggerData   API
+     * @param apiDefinition OAS definition of the backend API
+     * @return Generated OAS definition
+     * @throws APIManagementException If an error occurred
+     */
+    public abstract String generateAPIDefinitionForBackendAPI(SwaggerData swaggerData, String apiDefinition)
+            throws APIManagementException;
 }

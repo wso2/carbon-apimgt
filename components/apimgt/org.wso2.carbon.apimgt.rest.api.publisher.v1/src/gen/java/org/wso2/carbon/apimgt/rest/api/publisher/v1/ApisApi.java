@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerMetadataListDTO;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
@@ -598,7 +599,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Endpoint deleted successfully. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response deleteApiEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId) throws APIManagementException{
+    public Response deleteApiEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint** ",required=true) @PathParam("endpointId") String endpointId) throws APIManagementException{
         return delegate.deleteApiEndpoint(apiId, endpointId, securityContext);
     }
 
@@ -721,7 +722,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Export Successful. ", response = File.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response exportAPI( @ApiParam(value = "UUID of the API")  @QueryParam("apiId") String apiId,  @ApiParam(value = "API Name ")  @QueryParam("name") String name,  @ApiParam(value = "Version of the API ")  @QueryParam("version") String version,  @ApiParam(value = "Revision number of the API artifact ")  @QueryParam("revisionNumber") String revisionNumber,  @ApiParam(value = "Provider name of the API ")  @QueryParam("providerName") String providerName,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format,  @ApiParam(value = "Preserve API Status during export ")  @QueryParam("preserveStatus") Boolean preserveStatus,  @ApiParam(value = "Export the latest revision of the API ", defaultValue="false") @DefaultValue("false") @QueryParam("latestRevision") Boolean latestRevision,  @ApiParam(value = "Gateway environment of the exported APIs ")  @QueryParam("gatewayEnvironment") String gatewayEnvironment,  @ApiParam(value = "Preserve endpoint configuration credentials ")  @QueryParam("preserveCredentials") Boolean preserveCredentials) throws APIManagementException{
+    public Response exportAPI( @ApiParam(value = "UUID of the API")  @QueryParam("apiId") String apiId,  @ApiParam(value = "API Name ")  @QueryParam("name") String name,  @ApiParam(value = "Version of the API ")  @QueryParam("version") String version,  @ApiParam(value = "Revision number of the API artifact ")  @QueryParam("revisionNumber") String revisionNumber,  @ApiParam(value = "Provider name of the API ")  @QueryParam("providerName") String providerName,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format,  @ApiParam(value = "Preserve API Status during export ")  @QueryParam("preserveStatus") Boolean preserveStatus,  @ApiParam(value = "Export the latest revision of the API ", defaultValue="false") @DefaultValue("false") @QueryParam("latestRevision") Boolean latestRevision,  @ApiParam(value = "Gateway environment of the exported APIs ")  @QueryParam("gatewayEnvironment") String gatewayEnvironment,  @ApiParam(value = "Preserve endpoint configuration credentials and secret parameters ", defaultValue="false") @DefaultValue("false") @QueryParam("preserveCredentials") Boolean preserveCredentials) throws APIManagementException{
         return delegate.exportAPI(apiId, name, version, revisionNumber, providerName, format, preserveStatus, latestRevision, gatewayEnvironment, preserveCredentials, securityContext);
     }
 
@@ -1373,7 +1374,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. API Endpoint object is returned. ", response = APIEndpointDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response getApiEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId) throws APIManagementException{
+    public Response getApiEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint** ",required=true) @PathParam("endpointId") String endpointId) throws APIManagementException{
         return delegate.getApiEndpoint(apiId, endpointId, securityContext);
     }
 
@@ -1551,6 +1552,27 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response getLabelsOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
         return delegate.getLabelsOfAPI(apiId, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/mcp-servers-usage")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve MCP Server(s) that uses the given API", notes = "This operation can be used to retrieve/identify MCP Server(s) that uses the API given by the `apiId` parameter. ", response = MCPServerMetadataListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates"),
+            @AuthorizationScope(scope = "apim:ep_certificates_manage", description = "View, create, update and remove endpoint certificates")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. List of qualifying MCP Servers returned. ", response = MCPServerMetadataListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getMCPServerUsage(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.getMCPServerUsage(apiId, securityContext);
     }
 
     @GET
@@ -2121,7 +2143,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response updateApiEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId, @ApiParam(value = "API Endpoint object with updated details" ) APIEndpointDTO apIEndpointDTO) throws APIManagementException{
+    public Response updateApiEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint** ",required=true) @PathParam("endpointId") String endpointId, @ApiParam(value = "API Endpoint object with updated details" ) APIEndpointDTO apIEndpointDTO) throws APIManagementException{
         return delegate.updateApiEndpoint(apiId, endpointId, apIEndpointDTO, securityContext);
     }
 

@@ -19,8 +19,11 @@
 
 package org.wso2.carbon.apimgt.spec.parser.definitions;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.swagger.oas.inflector.examples.ExampleBuilder;
 import io.swagger.oas.inflector.examples.XmlExampleSerializer;
@@ -37,6 +40,7 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -58,6 +62,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -65,9 +70,13 @@ import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -78,10 +87,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -97,6 +108,9 @@ public class OAS3Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS3Parser.class);
     static final String OPENAPI_SECURITY_SCHEMA_KEY = "default";
     static final String OPENAPI_DEFAULT_AUTHORIZATION_URL = "https://test.com";
+    private static final ObjectMapper OBJECT_MAPPER =
+            new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL);
     private List<String> otherSchemes;
     private List<String> getOtherSchemes() {
         return otherSchemes;
@@ -534,6 +548,18 @@ public class OAS3Parser extends APIDefinition {
     @Override
     public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(resourceConfigsJSON);
+        return getScopesFromOpenAPI(openAPI);
+    }
+
+    /**
+     * This method returns the scopes from the OpenAPI object.
+     *
+     * @param openAPI OpenAPI object
+     * @return Set of scopes
+     * @throws APIManagementException if an error occurs while retrieving scopes
+     */
+    private Set<Scope> getScopesFromOpenAPI(OpenAPI openAPI) throws APIManagementException {
+
         Map<String, SecurityScheme> securitySchemes;
         SecurityScheme securityScheme;
         OAuthFlows oAuthFlows;
@@ -552,7 +578,8 @@ public class OAS3Parser extends APIDefinition {
                     scope.setDescription(entry.getValue());
                     Map<String, String> scopeBindings;
                     if (oAuthFlow.getExtensions() != null && (scopeBindings =
-                            (Map<String, String>) oAuthFlow.getExtensions().get(APISpecParserConstants.SWAGGER_X_SCOPES_BINDINGS))
+                            (Map<String, String>) oAuthFlow.getExtensions()
+                                    .get(APISpecParserConstants.SWAGGER_X_SCOPES_BINDINGS))
                             != null) {
                         if (scopeBindings.get(scope.getKey()) != null) {
                             scope.setRoles(scopeBindings.get(scope.getKey()));
@@ -633,6 +660,9 @@ public class OAS3Parser extends APIDefinition {
         updateLegacyScopesFromSwagger(openAPI, swaggerData);
         if (APISpecParserConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
             modifyGraphQLSwagger(openAPI);
+        } else if (APISpecParserConstants.MCP_API.equals(swaggerData.getTransportType())) {
+            addDefaultPostPathToSwagger(openAPI, APISpecParserConstants.MCP_RESOURCES_MCP);
+            addAuthServerMetaEndpointPathToSwagger(openAPI, APISpecParserConstants.MCP_RESOURCES_WELL_KNOWN);
         } else {
             for (SwaggerData.Resource resource : swaggerData.getResources()) {
                 addOrUpdatePathToSwagger(openAPI, resource);
@@ -677,6 +707,7 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException if error occurred when generating API Definition
      */
     private String generateAPIDefinition(SwaggerData swaggerData, OpenAPI openAPI) throws APIManagementException {
+
         Set<SwaggerData.Resource> copy = new HashSet<>(swaggerData.getResources());
 
         Iterator<Map.Entry<String, PathItem>> itr = openAPI.getPaths().entrySet().iterator();
@@ -688,8 +719,8 @@ public class OAS3Parser extends APIDefinition {
                 Operation operation = entry.getValue();
                 boolean operationFound = false;
                 for (SwaggerData.Resource resource : swaggerData.getResources()) {
-                    if (pathKey.equalsIgnoreCase(resource.getPath()) && entry.getKey().name()
-                            .equalsIgnoreCase(resource.getVerb())) {
+                    if ((pathKey.equalsIgnoreCase(resource.getPath())
+                            && entry.getKey().name().equalsIgnoreCase(resource.getVerb()))) {
                         //update operations in definition
                         operationFound = true;
                         copy.remove(resource);
@@ -732,6 +763,98 @@ public class OAS3Parser extends APIDefinition {
             preserveResourcePathOrderFromAPI(swaggerData, openAPI);
         }
         return prettifyOAS3ToJson(openAPI);
+    }
+
+    @Override
+    public String generateAPIDefinitionForBackendAPI(SwaggerData swaggerData, String oasDefinition) {
+
+        OpenAPI openAPI = getOpenAPI(oasDefinition);
+        removePublisherSpecificInfo(openAPI);
+        cleanUpPathItems(openAPI, swaggerData.getResources());
+
+        updateOpenAPIMetadata(openAPI, swaggerData);
+        updateSwaggerSecurityDefinition(openAPI, swaggerData, OPENAPI_DEFAULT_AUTHORIZATION_URL,
+                new KeyManagerConfigurationDTO());
+        updateLegacyScopesFromSwagger(openAPI, swaggerData);
+
+        return prettifyOAS3ToJson(openAPI);
+    }
+
+    /**
+     * Clean up path items in the OpenAPI definition by matching them with the resources from the Swagger data.
+     * If a resource matches a path item, it updates the operation with the resource's managed info.
+     * If a path item has no operations left, it removes that path item.
+     *
+     * @param openAPI            OpenAPI object to be cleaned up
+     * @param unmatchedResources Set of unmatched SwaggerData.Resource objects
+     */
+    private void cleanUpPathItems(OpenAPI openAPI, Set<SwaggerData.Resource> unmatchedResources) {
+
+        Iterator<Map.Entry<String, PathItem>> pathIterator = openAPI.getPaths().entrySet().iterator();
+
+        while (pathIterator.hasNext()) {
+            Map.Entry<String, PathItem> pathEntry = pathIterator.next();
+            String path = pathEntry.getKey();
+            PathItem pathItem = pathEntry.getValue();
+
+            for (Map.Entry<PathItem.HttpMethod, Operation> methodEntry : pathItem.readOperationsMap().entrySet()) {
+                PathItem.HttpMethod httpMethod = methodEntry.getKey();
+                Operation operation = methodEntry.getValue();
+
+                SwaggerData.Resource matchedResource =
+                        findMatchingResource(unmatchedResources, path, httpMethod.name());
+                if (matchedResource != null) {
+                    unmatchedResources.remove(matchedResource);
+                    updateOperationManagedInfo(matchedResource, operation);
+                }
+            }
+
+            if (pathItem.readOperations().isEmpty()) {
+                pathIterator.remove();
+            }
+        }
+    }
+
+    /**
+     * Find a matching resource in the set of resources based on the path and method.
+     *
+     * @param resources Set of SwaggerData.Resource objects
+     * @param path      Path to match
+     * @param method    HTTP method to match
+     * @return Matching SwaggerData.Resource object or null if not found
+     */
+    private SwaggerData.Resource findMatchingResource(Set<SwaggerData.Resource> resources, String path, String method) {
+
+        for (SwaggerData.Resource resource : resources) {
+            if (APISpecParserConstants.HTTP_VERB_TOOL.equalsIgnoreCase(resource.getVerb())
+                    && resource.getBackendOperationMapping() != null) {
+                APIConstants.SupportedHTTPVerbs mappedMethod =
+                        resource.getBackendOperationMapping().getBackendOperation().getVerb();
+                String mappedTarget =
+                        resource.getBackendOperationMapping().getBackendOperation().getTarget();
+                if (method.equalsIgnoreCase(mappedMethod.toString()) && path.equalsIgnoreCase(mappedTarget)) {
+                    return resource;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Update OpenAPI metadata such as title and version.
+     *
+     * @param openAPI     OpenAPI object to be updated
+     * @param swaggerData Swagger data containing the title and version
+     */
+    private void updateOpenAPIMetadata(OpenAPI openAPI, SwaggerData swaggerData) {
+
+        Info info = openAPI.getInfo();
+        if (info == null) {
+            info = new Info();
+            openAPI.setInfo(info);
+        }
+        info.setTitle(swaggerData.getTitle());
+        info.setVersion(swaggerData.getVersion());
     }
 
     /**
@@ -847,6 +970,25 @@ public class OAS3Parser extends APIDefinition {
                     }
                 }
             }
+            List<URITemplate> uriTemplates;
+            if (openAPI.getPaths() == null || openAPI.getPaths().isEmpty()) {
+                uriTemplates = null;
+            } else {
+                uriTemplates = new ArrayList<>();
+                for (String pathKey : openAPI.getPaths().keySet()) {
+                    PathItem pathItem = openAPI.getPaths().get(pathKey);
+                    for (Map.Entry<PathItem.HttpMethod, Operation> entry : pathItem.readOperationsMap().entrySet()) {
+                        URITemplate template = new URITemplate();
+                        if (APISpecParserConstants.SUPPORTED_METHODS.contains(entry.getKey().name().toLowerCase())) {
+                            template.setHTTPVerb(entry.getKey().name().toUpperCase());
+                            template.setHttpVerbs(entry.getKey().name().toUpperCase());
+                            template.setUriTemplate(pathKey);
+                            uriTemplates.add(template);
+                        }
+                    }
+                }
+            }
+
             String title = null;
             String context = null;
             String version = null;
@@ -870,7 +1012,7 @@ public class OAS3Parser extends APIDefinition {
             OASParserUtil.updateValidationResponseAsSuccess(
                     validationResponse, apiDefinition, openAPI.getOpenapi(),
                     title, version, context,
-                    description, endpoints
+                    description, endpoints, uriTemplates
             );
             validationResponse.setParser(this);
             if (returnJsonContent) {
@@ -2437,5 +2579,507 @@ public class OAS3Parser extends APIDefinition {
     }
     public void setSpecVersion(String specVersion) {
         this.specVersion = specVersion;
+    }
+
+    @Override
+    public Set<URITemplate> generateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
+                                             String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates)
+            throws APIManagementException {
+
+        OpenAPI backendDefinition = getOpenAPI(backendApiDefinition);
+        if (backendDefinition.getPaths() == null || backendDefinition.getPaths().isEmpty()) {
+            log.warn("Backend API definition has no paths defined");
+            return new HashSet<>();
+        }
+        Set<URITemplate> generatedTools = new HashSet<>();
+        for (URITemplate template : uriTemplates) {
+            if (!mcpFeatureType.equalsIgnoreCase(template.getHttpVerb())) {
+                continue;
+            }
+            BackendOperation backendOperation = null;
+            if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
+                BackendOperationMapping mapping = template.getBackendOperationMapping();
+                if (mapping != null && mapping.getBackendOperation() != null) {
+                    backendOperation = mapping.getBackendOperation();
+                }
+            } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
+                APIOperationMapping mapping = template.getExistingAPIOperationMapping();
+                if (mapping != null && mapping.getBackendOperation() != null) {
+                    backendOperation = mapping.getBackendOperation();
+                }
+            }
+
+            if (backendOperation == null) {
+                log.warn("URITemplate does not have valid backend or API operation mapping: " + template);
+                continue;
+            }
+
+            OperationMatch match =
+                    findMatchingOperation(backendDefinition, backendOperation.getTarget(), backendOperation.getVerb());
+            if (match != null) {
+                URITemplate toolTemplate = populateURITemplate(template, match, mcpFeatureType, backendDefinition,
+                        backendId, refApiId);
+                generatedTools.add(toolTemplate);
+            }
+        }
+
+        return generatedTools;
+    }
+
+    @Override
+    public Set<URITemplate> updateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
+                                           String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates)
+            throws APIManagementException {
+
+        OpenAPI backendDefinition = getOpenAPI(backendApiDefinition);
+        if (backendDefinition.getPaths() == null || backendDefinition.getPaths().isEmpty()) {
+            log.warn("Backend API definition has no paths defined");
+            return new HashSet<>();
+        }
+        Set<URITemplate> updatedTools = new HashSet<>();
+
+        for (URITemplate template : uriTemplates) {
+            if (!mcpFeatureType.equalsIgnoreCase(template.getHttpVerb())) {
+                continue;
+            }
+
+            BackendOperation backendOperation = null;
+
+            if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
+                BackendOperationMapping mapping = template.getBackendOperationMapping();
+                if (mapping != null && mapping.getBackendOperation() != null) {
+                    backendOperation = mapping.getBackendOperation();
+                }
+            } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
+                APIOperationMapping mapping = template.getExistingAPIOperationMapping();
+                if (mapping != null && mapping.getBackendOperation() != null) {
+                    backendOperation = mapping.getBackendOperation();
+                }
+            }
+
+            if (backendOperation == null) {
+                log.warn("URITemplate does not have valid backend or API operation mapping: " + template);
+                continue;
+            }
+
+            OperationMatch match = findMatchingOperation(backendDefinition, backendOperation.getTarget(),
+                    backendOperation.getVerb());
+
+            if (match != null) {
+                URITemplate populated = populateURITemplate(template, match, mcpFeatureType, backendDefinition,
+                        backendId, refApiId);
+                updatedTools.add(populated);
+                continue;
+            }
+            updatedTools.add(template);
+        }
+        return updatedTools;
+    }
+
+    /**
+     * Populates a URITemplate with details from a matched OpenAPI operation.
+     * Sets the template’s name, description, HTTP verb, JSON schema, and backend or proxy mappings.
+     *
+     * @param uriTemplate          the URITemplate to populate
+     * @param match                the matched OpenAPI operation details
+     * @param mcpFeatureType       the MCP feature type (used as the HTTP verb)
+     * @param backendId            the backend ID to associate
+     * @param backendAPIDefinition the backend OpenAPI definition
+     * @param refApiId
+     * @return the populated URITemplate
+     */
+    private URITemplate populateURITemplate(URITemplate uriTemplate, OperationMatch match, String mcpFeatureType,
+                                            OpenAPI backendAPIDefinition, String backendId, APIIdentifier refApiId)
+            throws APIManagementException {
+
+        if (uriTemplate.getUriTemplate() == null || uriTemplate.getUriTemplate().isEmpty()) {
+            String operationId = Optional.ofNullable(match.operation.getOperationId())
+                    .orElseGet(() -> match.method.toString().toLowerCase() +
+                            match.path.replaceAll("/+$", "")
+                                    .replaceAll("\\{([^/}]+)\\}", "by_$1")
+                                    .replace("/", "_"));
+            uriTemplate.setUriTemplate(operationId);
+        }
+
+        if (uriTemplate.getDescription() == null || uriTemplate.getDescription().isEmpty()) {
+            String description = Optional.ofNullable(match.operation.getDescription())
+                    .filter(desc -> !desc.isEmpty())
+                    .orElse(match.operation.getSummary());
+            uriTemplate.setDescription(description);
+        }
+
+        uriTemplate.setHTTPVerb(mcpFeatureType);
+
+        if (uriTemplate.getSchemaDefinition() == null || uriTemplate.getSchemaDefinition().isEmpty()) {
+            try {
+                String jsonSchema = getObjectMapper()
+                        .writeValueAsString(buildUnifiedInputSchema(
+                                match.operation.getParameters(),
+                                match.operation.getRequestBody(),
+                                backendAPIDefinition));
+                uriTemplate.setSchemaDefinition(jsonSchema);
+            } catch (JsonProcessingException e) {
+                log.error("Error generating JSON schema for operation: " + uriTemplate.getUriTemplate(), e);
+                throw new APIManagementException(
+                        "Error generating JSON schema for operation: " + uriTemplate.getUriTemplate(), e);
+            }
+        }
+
+        BackendOperation backendOperation = new BackendOperation();
+        String methodStr = match.method.toString();
+        try {
+            APIConstants.SupportedHTTPVerbs verb = APIConstants.SupportedHTTPVerbs.fromValue(methodStr);
+            backendOperation.setVerb(verb);
+        } catch (IllegalArgumentException e) {
+            throw new APIManagementException("Unsupported HTTP verb: " + methodStr, e);
+        }
+        backendOperation.setTarget(match.path);
+
+        if (uriTemplate.getBackendOperationMapping() != null) {
+            BackendOperationMapping backendOperationMap = new BackendOperationMapping();
+            backendOperationMap.setBackendId(backendId);
+            backendOperationMap.setBackendOperation(backendOperation);
+            uriTemplate.setBackendOperationMapping(backendOperationMap);
+        } else if (uriTemplate.getExistingAPIOperationMapping() != null) {
+            APIOperationMapping apiOperationMap = new APIOperationMapping();
+            apiOperationMap.setApiUuid(refApiId.getUUID());
+            apiOperationMap.setApiName(refApiId.getApiName());
+            apiOperationMap.setApiVersion(refApiId.getVersion());
+            apiOperationMap.setBackendOperation(backendOperation);
+            uriTemplate.setExistingAPIOperationMapping(apiOperationMap);
+        }
+        Map<String, Object> extensions = match.operation.getExtensions();
+        if (extensions != null) {
+            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_AUTH_TYPE)) {
+                String scopeKey = (String) extensions.get(APISpecParserConstants.SWAGGER_X_AUTH_TYPE);
+                uriTemplate.setAuthType(scopeKey);
+                uriTemplate.setAuthTypes(scopeKey);
+            } else {
+                uriTemplate.setAuthType(APISpecParserConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+                uriTemplate.setAuthTypes(APISpecParserConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+            }
+            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER)) {
+                String throttlingTier = (String) extensions.get(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER);
+                uriTemplate.setThrottlingTier(throttlingTier);
+                uriTemplate.setThrottlingTiers(throttlingTier);
+            }
+            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
+                String mediationScript = (String) extensions.get(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT);
+                uriTemplate.setMediationScript(mediationScript);
+                uriTemplate.setMediationScripts(uriTemplate.getHTTPVerb(), mediationScript);
+            }
+        }
+        return uriTemplate;
+    }
+
+    /**
+     * Returns the ObjectMapper instance used for JSON processing.
+     * This is a singleton instance to avoid creating multiple ObjectMapper instances.
+     *
+     * @return ObjectMapper instance
+     */
+    private ObjectMapper getObjectMapper() {
+
+        return OBJECT_MAPPER;
+    }
+
+    /**
+     * Finds a matching operation in the OpenAPI definition based on the target path and HTTP verb.
+     * Returns an OperationMatch object containing the path, method, and operation details if found.
+     *
+     * @param openAPI OpenAPI definition
+     * @param target  Target path to match
+     * @param verb    HTTP verb to match
+     * @return OperationMatch if found, null otherwise
+     */
+    private OperationMatch findMatchingOperation(OpenAPI openAPI, String target, APIConstants.SupportedHTTPVerbs verb) {
+
+        for (Map.Entry<String, PathItem> pathEntry : openAPI.getPaths().entrySet()) {
+            for (Map.Entry<PathItem.HttpMethod, Operation> opEntry :
+                    pathEntry.getValue().readOperationsMap().entrySet()) {
+                if (pathEntry.getKey().equals(target) &&
+                        opEntry.getKey().toString().equalsIgnoreCase(verb.toString())) {
+                    return new OperationMatch(pathEntry.getKey(), opEntry.getKey(), opEntry.getValue());
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Builds a unified input schema for the operation, combining parameters and request body.
+     * Returns a Map representing the schema structure.
+     *
+     * @param parameters   List of parameters for the operation
+     * @param requestBody  Request body schema if available
+     * @param openAPI      OpenAPI definition to resolve schemas
+     * @return Map representing the unified input schema
+     */
+    private Map<String, Object> buildUnifiedInputSchema(List<Parameter> parameters, RequestBody requestBody,
+                                                        OpenAPI openAPI) {
+
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put(APISpecParserConstants.TYPE, APISpecParserConstants.OBJECT);
+
+        Map<String, Object> props = new LinkedHashMap<>();
+        List<String> requiredFields = new ArrayList<>();
+        if (parameters != null) {
+            for (Parameter param : parameters) {
+                String name = param.getIn() + "_" + param.getName();
+                Map<String, Object> paramSchema = new LinkedHashMap<>();
+                Schema<?> schema = resolveSchema(param.getSchema(), openAPI);
+
+                if (schema != null) {
+                    paramSchema.put(APISpecParserConstants.TYPE, schema.getType());
+                    if (schema.getFormat() != null) {
+                        paramSchema.put(APISpecParserConstants.FORMAT, schema.getFormat());
+                    }
+                    if (schema.getEnum() != null) {
+                        paramSchema.put(APISpecParserConstants.ENUM, schema.getEnum());
+                    }
+                    if (schema.getDefault() != null) {
+                        paramSchema.put(APISpecParserConstants.DEFAULT, schema.getDefault());
+                    }
+                    if (param.getDescription() != null) {
+                        paramSchema.put(APISpecParserConstants.DESCRIPTION, param.getDescription());
+                    }
+                }
+                props.put(name, paramSchema);
+                if (Boolean.TRUE.equals(param.getRequired())) {
+                    requiredFields.add(name);
+                }
+            }
+        }
+
+        if (requestBody != null &&
+                requestBody.getContent() != null &&
+                requestBody.getContent().get(APISpecParserConstants.APPLICATION_JSON_MEDIA_TYPE) != null) {
+            Schema<?> rawSchema =
+                    requestBody.getContent().get(APISpecParserConstants.APPLICATION_JSON_MEDIA_TYPE).getSchema();
+
+            Schema<?> bodySchema = resolveSchema(rawSchema, openAPI);
+            Map<String, Object> requestBodyNode = new LinkedHashMap<>();
+            requestBodyNode.put(APISpecParserConstants.TYPE, APISpecParserConstants.OBJECT);
+            requestBodyNode.put(APISpecParserConstants.CONTENT_TYPE, APPLICATION_JSON_MEDIA_TYPE);
+
+            if (bodySchema.getProperties() != null) {
+                requestBodyNode.put(APISpecParserConstants.PROPERTIES, bodySchema.getProperties());
+            }
+
+            if (bodySchema.getRequired() != null) {
+                requestBodyNode.put(APISpecParserConstants.REQUIRED, bodySchema.getRequired());
+            }
+
+            props.put(APISpecParserConstants.REQUEST_BODY, requestBodyNode);
+            requiredFields.add(APISpecParserConstants.REQUEST_BODY);
+        }
+
+        root.put(APISpecParserConstants.PROPERTIES, props);
+        if (!requiredFields.isEmpty()) {
+            root.put(APISpecParserConstants.REQUIRED, requiredFields);
+        }
+
+        return root;
+    }
+
+    /**
+     * Resolves a schema by recursively resolving $ref, allOf, oneOf, anyOf, and not properties.
+     * Returns the resolved Schema object.
+     *
+     * @param schema   Schema to resolve
+     * @param openAPI  OpenAPI definition to resolve against
+     * @return Resolved Schema object
+     */
+    private Schema<?> resolveSchema(Schema<?> schema, OpenAPI openAPI) {
+
+        return resolveSchema(schema, openAPI, new HashSet<>());
+    }
+
+    /**
+     * Resolves a schema by recursively resolving $ref, allOf, oneOf, anyOf, and not properties.
+     * This version tracks visited references to prevent circular references.
+     *
+     * @param schema      Schema to resolve
+     * @param openAPI     OpenAPI definition to resolve against
+     * @param visitedRefs Set of visited reference names to detect circular references
+     * @return Resolved Schema object
+     */
+    private Schema<?> resolveSchema(Schema<?> schema, OpenAPI openAPI, Set<String> visitedRefs) {
+
+        if (schema == null) return null;
+
+        // Resolve $ref
+        while (schema.get$ref() != null) {
+            String refName = schema.get$ref().replace("#/components/schemas/", "");
+            if (visitedRefs.contains(refName)) {
+                log.warn("Circular reference detected: " + refName);
+                break;
+            }
+            visitedRefs.add(refName);
+            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(refName);
+            if (refSchema == null) break;
+            schema = refSchema;
+        }
+
+        // Resolve allOf
+        if (schema.getAllOf() != null && !schema.getAllOf().isEmpty()) {
+            Schema<?> merged = new ObjectSchema();
+            Map<String, Schema> mergedProps = new LinkedHashMap<>();
+            List<String> mergedRequired = new ArrayList<>();
+
+            for (Schema<?> part : schema.getAllOf()) {
+                Schema<?> resolved = resolveSchema(part, openAPI);
+                if (resolved.getProperties() != null) mergedProps.putAll(resolved.getProperties());
+                if (resolved.getRequired() != null) mergedRequired.addAll(resolved.getRequired());
+            }
+
+            merged.setProperties(mergedProps);
+            merged.setRequired(mergedRequired);
+            return merged;
+        }
+
+        // oneOf / anyOf
+        if (schema.getOneOf() != null) {
+            schema.setOneOf(schema.getOneOf().stream()
+                    .map(s -> resolveSchema(s, openAPI))
+                    .collect(Collectors.toList()));
+        }
+
+        if (schema.getAnyOf() != null) {
+            schema.setAnyOf(schema.getAnyOf().stream()
+                    .map(s -> resolveSchema(s, openAPI))
+                    .collect(Collectors.toList()));
+        }
+
+        if (schema.getNot() != null) {
+            schema.setNot(resolveSchema(schema.getNot(), openAPI));
+        }
+
+        // Recursively resolve properties
+        if (schema.getProperties() != null) {
+            Map<String, Schema> resolvedProps = new LinkedHashMap<>();
+            for (Map.Entry<String, Schema> entry : schema.getProperties().entrySet()) {
+                resolvedProps.put(entry.getKey(), resolveSchema(entry.getValue(), openAPI));
+            }
+            schema.setProperties(resolvedProps);
+        }
+
+        // Array items
+        if ("array".equals(schema.getType()) && schema.getItems() != null) {
+            schema.setItems(resolveSchema(schema.getItems(), openAPI));
+        }
+
+        // Additional properties
+        if (schema.getAdditionalProperties() instanceof Schema) {
+            schema.setAdditionalProperties(resolveSchema((Schema<?>) schema.getAdditionalProperties(), openAPI));
+        }
+
+        return schema;
+    }
+
+    /**
+     * Adds a resource to the given {@link OpenAPI} definition with the specified HTTP verb and request body.
+     * Builds the {@link Operation}, configures authentication extensions, and optionally includes a request body
+     * schema.
+     *
+     * @param openAPI        the {@link OpenAPI} object to which the resource will be added
+     * @param resource       the {@link SwaggerData.Resource} describing the path, verb, policy, and auth type
+     * @param hasRequestBody whether the resource requires a JSON request body
+     */
+    private void addResourceToSwagger(OpenAPI openAPI, SwaggerData.Resource resource,
+                                      boolean hasRequestBody) {
+
+        Operation operation = createOperation(resource);
+
+        if (hasRequestBody) {
+            // Create request body
+            RequestBody requestBody = new RequestBody();
+            requestBody.setDescription("Request payload to send to the server");
+            requestBody.setRequired(true);
+
+            JSONObject typeOfPayload = new JSONObject();
+            JSONObject payload = new JSONObject();
+            typeOfPayload.put(APISpecParserConstants.TYPE, APISpecParserConstants.STRING);
+            payload.put(APISpecParserConstants.OperationParameter.PAYLOAD_PARAM_NAME, typeOfPayload);
+
+            Schema postSchema = new Schema();
+            postSchema.setType(APISpecParserConstants.OBJECT);
+            postSchema.setProperties(payload);
+
+            MediaType mediaType = new MediaType();
+            mediaType.setSchema(postSchema);
+
+            Content content = new Content();
+            content.addMediaType(APISpecParserConstants.APPLICATION_JSON_MEDIA_TYPE, mediaType);
+            requestBody.setContent(content);
+
+            operation.setRequestBody(requestBody);
+        }
+        if (resource.getAuthType().equals(APISpecParserConstants.AUTH_NO_AUTHENTICATION)) {
+            operation.addExtension(APISpecParserConstants.SWAGGER_X_AUTH_TYPE,
+                    APISpecParserConstants.AUTH_NO_AUTHENTICATION);
+            operation.addExtension(APISpecParserConstants.X_WSO2_DISABLE_SECURITY, true);
+        }
+
+        PathItem pathItem = new PathItem();
+        switch (resource.getVerb()) {
+            case APISpecParserConstants.HTTP_POST:
+                pathItem.setPost(operation);
+                break;
+            case APISpecParserConstants.HTTP_GET:
+                pathItem.setGet(operation);
+                break;
+        }
+        if (openAPI.getPaths() == null) {
+            openAPI.setPaths(new Paths());
+        }
+        openAPI.getPaths().addPathItem(resource.getPath(), pathItem);
+    }
+
+    /**
+     * Adds a default HTTP POST resource to the given {@link OpenAPI} definition.
+     * This resource is configured with application or user-level token authentication and unlimited subscription
+     * policy.
+     *
+     * @param openAPI the {@link OpenAPI} object to which the resource will be added
+     * @param path    the resource path to add
+     */
+    private void addDefaultPostPathToSwagger(OpenAPI openAPI, String path) {
+
+        SwaggerData.Resource resource = new SwaggerData.Resource();
+        resource.setAuthType(APISpecParserConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+        resource.setPolicy(APISpecParserConstants.DEFAULT_SUB_POLICY_UNLIMITED);
+        resource.setPath(path);
+        resource.setVerb(APISpecParserConstants.HTTP_POST);
+        addResourceToSwagger(openAPI, resource, true);
+    }
+
+    /**
+     * Adds a default HTTP GET resource to the given {@link OpenAPI} definition with no authentication required.
+     * Typically used for adding metadata endpoints like authentication server info.
+     *
+     * @param openAPI the {@link OpenAPI} object to which the resource will be added
+     * @param path    the resource path to add
+     */
+    private void addAuthServerMetaEndpointPathToSwagger(OpenAPI openAPI, String path) {
+
+        SwaggerData.Resource resource = new SwaggerData.Resource();
+        resource.setAuthType(APISpecParserConstants.AUTH_NO_AUTHENTICATION);
+        resource.setPolicy(APISpecParserConstants.DEFAULT_SUB_POLICY_UNLIMITED);
+        resource.setPath(path);
+        resource.setVerb(APISpecParserConstants.HTTP_GET);
+        addResourceToSwagger(openAPI, resource, false);
+    }
+
+    private static class OperationMatch {
+        String path;
+        PathItem.HttpMethod method;
+        Operation operation;
+
+        OperationMatch(String path, PathItem.HttpMethod method, Operation operation) {
+            this.path = path;
+            this.method = method;
+            this.operation = operation;
+        }
     }
 }

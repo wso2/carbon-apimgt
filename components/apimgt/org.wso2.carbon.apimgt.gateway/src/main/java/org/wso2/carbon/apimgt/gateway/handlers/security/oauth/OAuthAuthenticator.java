@@ -197,7 +197,8 @@ public class OAuthAuthenticator implements Authenticator {
             log.debug("Default Version API invoked");
         }
 
-        if (removeOAuthHeadersFromOutMessage) {
+        String apiType = (String) synCtx.getProperty(APIMgtGatewayConstants.API_TYPE);
+        if (removeOAuthHeadersFromOutMessage && !APIConstants.API_TYPE_MCP.equals(apiType)) {
             //Remove authorization headers sent for authentication at the gateway and pass others to the backend
             if (StringUtils.isNotBlank(remainingAuthHeader.get())) {
                 if (log.isDebugEnabled()) {
@@ -221,6 +222,11 @@ public class OAuthAuthenticator implements Authenticator {
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+
+        if (StringUtils.equals(APIConstants.API_TYPE_MCP, apiType)) {
+            httpMethod = synCtx.getProperty("MCP_HTTP_METHOD").toString();
+            matchingResource = (String) synCtx.getProperty("MCP_API_ELECTED_RESOURCE");
+        }
         SignedJWTInfo signedJWTInfo = null;
 
         //If the matching resource does not require authentication

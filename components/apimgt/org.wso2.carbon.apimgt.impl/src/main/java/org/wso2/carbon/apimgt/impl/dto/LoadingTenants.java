@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LoadingTenants {
-    private boolean includeAllTenants = true;
+    private boolean includeAllTenants = false;
     private List<String> includingTenants= new ArrayList<>();
     private List<String> excludingTenants= new ArrayList<>();
 

@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants.GatewayNotification.GatewayRegistrationResponse;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataLoader;
@@ -54,6 +55,9 @@ public class DataHolder {
 
     private boolean isAllGatewayPoliciesDeployed = false;
     private boolean tenantsProvisioned = false;
+    private static GatewayRegistrationResponse gatewayRegistrationResponse = GatewayRegistrationResponse.NOT_RESPONDED;
+    private String gatewayID;
+
     private DataHolder() {
     }
 
@@ -392,6 +396,32 @@ public class DataHolder {
     public synchronized void releaseCache(String apiKey) {
 
         apiSuspendedEndpoints.remove(apiKey);
+    }
+
+    public String getGatewayID() {
+        return gatewayID;
+    }
+
+    public void setGatewayID(String gatewayID) {
+        this.gatewayID = gatewayID;
+    }
+
+    public GatewayRegistrationResponse getGatewayRegistrationResponse() {
+        return gatewayRegistrationResponse;
+    }
+
+    /**
+     * Checks if the gateway is registered or acknowledged.
+     *
+     * @return true if the gateway registration response is REGISTERED or ACKNOWLEDGED, false otherwise
+     */
+    public boolean isGatewayRegistered() {
+        return gatewayRegistrationResponse == GatewayRegistrationResponse.REGISTERED
+                || gatewayRegistrationResponse == GatewayRegistrationResponse.ACKNOWLEDGED;
+    }
+
+    public static void setGatewayRegistrationResponse(GatewayRegistrationResponse gatewayRegistrationResponse) {
+        DataHolder.gatewayRegistrationResponse = gatewayRegistrationResponse;
     }
 
 }

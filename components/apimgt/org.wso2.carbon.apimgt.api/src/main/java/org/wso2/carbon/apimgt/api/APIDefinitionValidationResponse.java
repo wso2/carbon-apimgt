@@ -19,6 +19,8 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +37,7 @@ public class APIDefinitionValidationResponse {
     private ArrayList<ErrorHandler> errorItems = new ArrayList<>();
     private boolean isInit = false;
 
+    @UsedByMigrationClient
     public boolean isValid() {
         return isValid;
     }
@@ -63,6 +66,7 @@ public class APIDefinitionValidationResponse {
         this.errorItems = errorItems;
     }
 
+    @UsedByMigrationClient
     public ArrayList<ErrorHandler> getErrorItems() {
         return errorItems;
     }
@@ -90,6 +94,7 @@ public class APIDefinitionValidationResponse {
         private String context;
         private String description;
         private List<String> endpoints;
+        private List<URITemplate> uriTemplates = new ArrayList<>();
 
         public String getOpenAPIVersion() {
             return openAPIVersion;
@@ -134,8 +139,17 @@ public class APIDefinitionValidationResponse {
         public List<String> getEndpoints() { return endpoints; }
 
         public void setEndpoints(List<String> endpoints) { this.endpoints = endpoints; }
+
+        public List<URITemplate> getUriTemplates() {
+            return uriTemplates;
+        }
+
+        public void setUriTemplates(List<URITemplate> uriTemplates) {
+            this.uriTemplates = uriTemplates;
+        }
     }
 
+    @UsedByMigrationClient
     public APIDefinition getParser() {
         return parser;
     }
@@ -153,4 +167,6 @@ public class APIDefinitionValidationResponse {
 
         this.protocol = protocol;
     }
+
+
 }

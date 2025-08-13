@@ -17,6 +17,8 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+
 import java.util.Objects;
 
 /**
@@ -42,6 +44,7 @@ public class APICategory {
         this.name = name;
     }
 
+    @UsedByMigrationClient
     public String getName() {
         return name;
     }

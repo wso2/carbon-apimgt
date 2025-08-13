@@ -1276,6 +1276,7 @@ public interface APIProvider extends APIManager {
      * @return APIProduct product
      * @throws APIManagementException
      */
+    @UsedByMigrationClient
     APIProduct getAPIProductbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
     /**
      * Delete API Product
@@ -2009,6 +2010,18 @@ public interface APIProvider extends APIManager {
     boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification, OperationPolicy
             appliedPolicy, String apiType) throws APIManagementException;
 
+    /***
+     * Process and update secret parameters in the applied policy based on specification and existing API data.
+     *
+     * @param policySpecification The policy specification containing attribute definitions.
+     * @param appliedPolicy       The operation policy being applied.
+     * @param existingPolicies    The list of existing policies from which secret parameters may be copied, if
+     *                            necessary.
+     * @throws APIManagementException If an error occurs while processing policy parameters.
+     */
+    void processSecretPolicyParameters(OperationPolicySpecification policySpecification, OperationPolicy appliedPolicy,
+            List<OperationPolicy> existingPolicies) throws APIManagementException;
+
     /**
      * Resume API revision deployment process
      *
@@ -2294,6 +2307,49 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If a database error occurs.
      */
     Map<String, String> getApiThemes(String organization, String apiId) throws APIManagementException;
+
+    /**
+     * Retrieves the MCP server backend for the given API UUID and backend ID.
+     * Handles both regular API UUIDs and API revision UUIDs transparently.
+     *
+     * @param apiUuid      the UUID of the API or API revision
+     * @param backendId    the ID of the backend
+     * @param organization the organization name
+     * @return a {@link Backend} object representing the MCP server endpoint; null if not found
+     * @throws APIManagementException if an error occurs while accessing the database
+     */
+    Backend getMCPServerBackend(String apiUuid, String backendId, String organization) throws APIManagementException;
+
+    /**
+     * Retrieves the list of MCP server backends for the given API UUID.
+     * Handles both regular API UUIDs and API revision UUIDs transparently.
+     *
+     * @param apiUuid      the UUID of the API or API revision
+     * @param organization the organization name
+     * @return a list of {@link Backend} objects representing the MCP server backend APIs
+     * @throws APIManagementException if an error occurs while accessing the database
+     */
+    List<Backend> getMCPServerBackends(String apiUuid, String organization) throws APIManagementException;
+
+    /**
+     * Updates the MCP server backend with the provided details.
+     *
+     * @param apiId        the UUID of the API or API revision
+     * @param backend      the {@link Backend} object containing updated details
+     * @param organization the organization name
+     * @throws APIManagementException if an error occurs while updating the backend API
+     */
+    void updateMCPServerBackend(String apiId, Backend backend, String organization) throws APIManagementException;
+
+    /**
+     * Retrieves the list of MCP servers used by a specific API.
+     *
+     * @param apiId        the UUID of the API or API revision
+     * @param organization the organization name
+     * @return a list of {@link API} objects representing the MCP servers used by the API
+     * @throws APIManagementException if an error occurs while accessing the database
+     */
+    List<API> getMCPServersUsedByAPI(String apiId, String organization) throws APIManagementException;
 
     /**
      * Checks whether the API is initiated from the gateway.

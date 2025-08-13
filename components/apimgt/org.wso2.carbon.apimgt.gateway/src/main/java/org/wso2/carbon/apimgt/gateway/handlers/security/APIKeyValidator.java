@@ -30,13 +30,19 @@ import org.apache.synapse.api.Resource;
 import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.mcp.request.McpRequest;
+import org.wso2.carbon.apimgt.gateway.mcp.request.Params;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -339,8 +345,40 @@ public class APIKeyValidator {
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String fullRequestPath = (String) synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
-
         String electedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+
+        org.wso2.carbon.apimgt.keymgt.model.entity.API api = GatewayUtils.getAPI(synCtx);
+        if (api != null && api.getApiType() != null && StringUtils.equals(api.getApiType(),
+                APIConstants.API_TYPE_MCP)) {
+            McpRequest requestBody = (McpRequest) synCtx.getProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY);
+            if (requestBody != null) {
+                Params params = requestBody.getParams();
+                String toolName = params != null ? params.getToolName() : null;
+                if (!StringUtils.isEmpty(toolName)) {
+                    URLMapping extendedOperation = api.getUrlMappings()
+                            .stream()
+                            .filter(operation -> operation.getUrlPattern().equals(toolName))
+                            .findFirst()
+                            .orElse(null);
+                    if (extendedOperation != null) {
+                        BackendOperation backendOperation = null;
+                        if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_DIRECT_ENDPOINT)) {
+                            BackendOperationMapping backendAPIOperationMapping = extendedOperation.getBackendOperationMapping();
+                            backendOperation = backendAPIOperationMapping.getBackendOperation();
+                        } else if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_EXISTING_API))  {
+                            APIOperationMapping existingAPIOperationMapping = extendedOperation.getApiOperationMapping();
+                            backendOperation = existingAPIOperationMapping.getBackendOperation();
+                            apiContext = existingAPIOperationMapping.getApiContext();
+                            apiVersion = existingAPIOperationMapping.getApiVersion();
+                        }
+                        if (backendOperation != null) {
+                            httpMethod = backendOperation.getVerb().toString();
+                            electedResource = backendOperation.getTarget();
+                        }
+                    }
+                }
+            }
+        }
         ArrayList<String> resourceArray = null;
 
         if (electedResource != null) {
@@ -351,7 +389,13 @@ public class APIKeyValidator {
             }
         }
 
-        String requestPath = getRequestPath(synCtx, apiContext, apiVersion, fullRequestPath);
+        String requestPath = null;
+        if (api != null && StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_EXISTING_API)) {
+            requestPath = electedResource;
+        } else {
+            requestPath = getRequestPath(synCtx, apiContext, apiVersion, fullRequestPath);
+        }
+
         if ("".equals(requestPath)) {
             requestPath = "/";
         }
@@ -393,6 +437,7 @@ public class APIKeyValidator {
                 return verbInfoList;
             }
         } else {
+            // This block won't get executed for MCP Servers and GraphQL APIs
             API selectedApi = Utils.getSelectedAPI(synCtx);
             Resource selectedResource = null;
             String resourceString;
@@ -494,7 +539,15 @@ public class APIKeyValidator {
             for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
                 Set<VerbInfoDTO> verbDTOList = resourceInfoDTO.getHttpVerbs();
                 for (VerbInfoDTO verb : verbDTOList) {
-                    if (verb.getHttpVerb().equals(httpMethod)) {
+                    //mcp direct_endpoint scenario
+                    String httpVerb = verb.getHttpVerb();
+                    if (verb.getBackendAPIOperationMapping() != null) {
+                        BackendOperation backendOperation = verb.getBackendAPIOperationMapping().getBackendOperation();
+                        if (backendOperation != null) {
+                            httpVerb = backendOperation.getVerb().toString();
+                        }
+                    }
+                    if (httpVerb.equals(httpMethod)) {
                         for (String resourceString : resourceArray) {
                             if (isResourcePathMatching(resourceString, resourceInfoDTO)) {
                                 resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
@@ -539,6 +592,18 @@ public class APIKeyValidator {
     private boolean isResourcePathMatching(String resourceString, ResourceInfoDTO resourceInfoDTO) {
         String resource = resourceString.trim();
         String urlPattern = resourceInfoDTO.getUrlPattern().trim();
+
+        //MCP direct_ep
+        if (resourceInfoDTO.getHttpVerbs() != null && !resourceInfoDTO.getHttpVerbs().isEmpty()) {
+            VerbInfoDTO verbInfoDTO = (VerbInfoDTO) resourceInfoDTO.getHttpVerbs().toArray()[0];
+            BackendOperationMapping backendAPIOperationMapping = verbInfoDTO.getBackendAPIOperationMapping();
+            if (backendAPIOperationMapping != null) {
+                BackendOperation backendOperation = backendAPIOperationMapping.getBackendOperation();
+                if (backendOperation != null) {
+                    urlPattern = backendOperation.getTarget();
+                }
+            }
+        }
 
         if (resource.equalsIgnoreCase(urlPattern)) {
             return true;
@@ -599,6 +664,13 @@ public class APIKeyValidator {
             verbInfoDTO.setThrottlingConditions(uriTemplate.getThrottlingConditions());
             verbInfoDTO.setConditionGroups(uriTemplate.getConditionGroups());
             verbInfoDTO.setApplicableLevel(uriTemplate.getApplicableLevel());
+
+            //MCP
+            BackendOperationMapping backendAPIOperationMapping = uriTemplate.getBackendOperationMapping();
+            if (backendAPIOperationMapping != null) {
+                verbInfoDTO.setBackendOperationMapping(backendAPIOperationMapping);
+            }
+
             resourceInfoDTO.getHttpVerbs().add(verbInfoDTO);
         }
 

@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
@@ -59,6 +60,7 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
  * @deprecated use org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil instead
  */
 @Deprecated
+@UsedByMigrationClient
 public class OASParserUtil extends org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil {
 
     private static final Log log = LogFactory.getLog(OASParserUtil.class);

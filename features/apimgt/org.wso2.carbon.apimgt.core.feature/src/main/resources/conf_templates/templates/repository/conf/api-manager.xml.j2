@@ -490,6 +490,9 @@
       <EnableLightWeightAPIKeyGeneration>{{apim.key_manager.enable_lightweight_apikey_generation}}</EnableLightWeightAPIKeyGeneration>
       {% endif %}
       <AllowSubscriptionValidationDisabling>{{apim.key_manager.allow_subscription_validation_disabling}}</AllowSubscriptionValidationDisabling>
+      {% if apim.key_manager.enable_application_scopes_for_resident_km is defined %}
+      <EnableApplicationScopesForResidentKM>{{apim.key_manager.enable_application_scopes_for_resident_km}}</EnableApplicationScopesForResidentKM>
+      {% endif %}
       <SkipCreateResidentKeyManager>{{apim.key_manager.skip_create_resident_key_manager}}</SkipCreateResidentKeyManager>
     </APIKeyValidator>
 
@@ -1858,4 +1861,33 @@
               {% endfor %}
           </EmbeddingProvider>
       </AI>
+
+      <GatewayNotificationConfiguration>
+          <Enabled>{{apim.gateway_notification.enabled}}</Enabled>
+          <GatewayID>{{apim.gateway_notification.gateway_id}}</GatewayID>
+          <Heartbeat>
+              <NotifyIntervalSeconds>{{apim.gateway_notification.heartbeat.notify_interval}}</NotifyIntervalSeconds>
+          </Heartbeat>
+          <DeploymentAcknowledgement>
+              <BatchSize>{{apim.gateway_notification.deployment_ack.batch_size}}</BatchSize>
+              <BatchIntervalMillis>{{apim.gateway_notification.deployment_ack.batch_interval}}</BatchIntervalMillis>
+              <MaxRetryCount>{{apim.gateway_notification.deployment_ack.max_retry_count}}</MaxRetryCount>
+              <RetryDuration>{{apim.gateway_notification.deployment_ack.retry_duration}}</RetryDuration>
+              <RetryProgressionFactor>{{apim.gateway_notification.deployment_ack.retry_progression_factor}}</RetryProgressionFactor>
+              <BatchProcessorMinThread>{{apim.gateway_notification.deployment_ack.batch_processor_min_thread}}</BatchProcessorMinThread>
+              <BatchProcessorMaxThread>{{apim.gateway_notification.deployment_ack.batch_processor_max_thread}}</BatchProcessorMaxThread>
+              <BatchProcessorKeepAlive>{{apim.gateway_notification.deployment_ack.batch_processor_keep_alive}}</BatchProcessorKeepAlive>
+              <BatchProcessorQueueSize>{{apim.gateway_notification.deployment_ack.batch_processor_queue_size}}</BatchProcessorQueueSize>
+          </DeploymentAcknowledgement>
+          <Registration>
+              <MaxRetryCount>{{apim.gateway_notification.registration.max_retry_count}}</MaxRetryCount>
+              <RetryDuration>{{apim.gateway_notification.registration.retry_duration}}</RetryDuration>
+              <RetryProgressionFactor>{{apim.gateway_notification.registration.retry_progression_factor}}</RetryProgressionFactor>
+          </Registration>
+          <GatewayCleanup>
+              <ExpireTimeSeconds>{{apim.gateway_cleanup.expire_time}}</ExpireTimeSeconds>
+              <DataRetentionPeriodSeconds>{{apim.gateway_cleanup.data_retention_period}}</DataRetentionPeriodSeconds>
+              <CleanupIntervalSeconds>{{apim.gateway_cleanup.cleanup_interval}}</CleanupIntervalSeconds>
+          </GatewayCleanup>
+      </GatewayNotificationConfiguration>
 </APIManager>
