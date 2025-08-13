@@ -14329,9 +14329,6 @@ components:
         name:
           type: string
           example: PizzaShackAPI
-        context:
-          type: string
-          example: /pizza-shack
         version:
           type: string
           example: 1.0.0

@@ -30,6 +30,7 @@ import java.util.Set;
 public final class APISpecParserConstants {
     public static final String STRING = "string";
     public static final String OBJECT = "object";
+    public static final String PATH = "path";
     public static final String CONTENT_TYPE = "contentType";
     public static final String REQUEST_BODY = "requestBody";
     public static final String PROPERTIES = "properties";

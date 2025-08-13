@@ -2587,6 +2587,7 @@ public class OAS3Parser extends APIDefinition {
             throws APIManagementException {
 
         OpenAPI backendDefinition = getOpenAPI(backendApiDefinition);
+        mergePathParametersIntoOperations(backendDefinition);
         if (backendDefinition.getPaths() == null || backendDefinition.getPaths().isEmpty()) {
             log.warn("Backend API definition has no paths defined");
             return new HashSet<>();
@@ -2629,6 +2630,7 @@ public class OAS3Parser extends APIDefinition {
             throws APIManagementException {
 
         OpenAPI backendDefinition = getOpenAPI(backendApiDefinition);
+        mergePathParametersIntoOperations(backendDefinition);
         if (backendDefinition.getPaths() == null || backendDefinition.getPaths().isEmpty()) {
             log.warn("Backend API definition has no paths defined");
             return new HashSet<>();
@@ -2668,6 +2670,95 @@ public class OAS3Parser extends APIDefinition {
             updatedTools.add(template);
         }
         return updatedTools;
+    }
+
+    /**
+     * Merges path-level parameters into each operation under that path.
+     * Path parameters are added to operations unless they are already defined at the operation level.
+     *
+     * @param openAPI OpenAPI definition to process
+     */
+    private static void mergePathParametersIntoOperations(OpenAPI openAPI) {
+
+        if (openAPI == null || openAPI.getPaths() == null) {
+            return;
+        }
+        for (PathItem pathItem : openAPI.getPaths().values()) {
+            if (pathItem == null || pathItem.getParameters() == null || pathItem.getParameters().isEmpty()) continue;
+            List<Parameter> pathParams = new ArrayList<>();
+            for (Parameter parameter : pathItem.getParameters()) {
+                Parameter reference = resolveParameterRef(parameter, openAPI);
+                if (reference == null) continue;
+                Parameter copy = deepCopyParameter(reference);
+                if (APISpecParserConstants.PATH.equalsIgnoreCase(copy.getIn())) copy.setRequired(Boolean.TRUE);
+                pathParams.add(copy);
+            }
+            if (pathParams.isEmpty()) continue;
+            for (Operation operation : Arrays.asList(pathItem.getGet(), pathItem.getPost(), pathItem.getPut(),
+                    pathItem.getDelete(), pathItem.getPatch(), pathItem.getHead(),
+                    pathItem.getOptions(), pathItem.getTrace())) {
+                if (operation == null) continue;
+
+                if (operation.getParameters() == null) {
+                    operation.setParameters(new ArrayList<>());
+                }
+                Map<String, Integer> parameterMap = new LinkedHashMap<>();
+                for (int i = 0; i < operation.getParameters().size(); i++) {
+                    Parameter parameter = operation.getParameters().get(i);
+                    parameterMap.put(paramKey(parameter), i);
+                }
+                for (Parameter parameter : pathParams) {
+                    String key = paramKey(parameter);
+                    if (!parameterMap.containsKey(key)) {
+                        operation.getParameters().add(parameter);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Generates a unique key for a parameter based on its location and name.
+     * This is used to identify parameters uniquely across different operations.
+     *
+     * @param parameter Parameter to generate the key for
+     * @return Unique key for the parameter
+     */
+    private static String paramKey(Parameter parameter) {
+
+        return (parameter.getIn() == null ? StringUtils.EMPTY : parameter.getIn()) + ":" +
+                (parameter.getName() == null ? StringUtils.EMPTY : parameter.getName());
+    }
+
+    /**
+     * Resolves a parameter reference to its actual definition in the OpenAPI components.
+     * If the parameter is a reference, it retrieves the corresponding parameter from the components.
+     *
+     * @param parameter Parameter to resolve
+     * @param openAPI   OpenAPI definition containing components
+     * @return Resolved Parameter or original if not a reference
+     */
+    private static Parameter resolveParameterRef(Parameter parameter, OpenAPI openAPI) {
+
+        if (parameter == null || parameter.get$ref() == null) return parameter;
+        if (openAPI == null || openAPI.getComponents() == null || openAPI.getComponents().getParameters() == null)
+            return parameter;
+        String ref = parameter.get$ref();
+        String name = ref.substring(ref.lastIndexOf('/') + 1);
+        Parameter target = openAPI.getComponents().getParameters().get(name);
+        return target != null ? target : parameter;
+    }
+
+    /**
+     * Creates a deep copy of a Parameter object.
+     * This is necessary to avoid modifying the original parameter when making changes.
+     *
+     * @param parameter Parameter to copy
+     * @return Deep copied Parameter
+     */
+    private static Parameter deepCopyParameter(Parameter parameter) {
+
+        return Json.mapper().convertValue(Json.mapper().valueToTree(parameter), Parameter.class);
     }
 
     /**

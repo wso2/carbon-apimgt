@@ -2213,6 +2213,48 @@ paths:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"
 
+  /apis/{apiId}/mcp-servers-usage:
+    get:
+      tags:
+        - APIs
+      summary: Retrieve MCP Server(s) that uses the given API
+      description: |
+        This operation can be used to retrieve/identify MCP Server(s) that uses the API given by the `apiId` parameter.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying MCP Servers returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MCPServerMetadataList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:ep_certificates_view
+            - apim:ep_certificates_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+              "https://127.0.0.1:9443/api/am/publisher/v4/apis/e93fb282-b456-48fc-8981-003fb89086ae/mcp-servers-usage"'
+      operationId: getMCPServerUsage
+
   /mcp-servers/validate-mcp-server:
     post:
       tags:
@@ -12009,9 +12051,6 @@ components:
         name:
           type: string
           example: PizzaShackAPI
-        context:
-          type: string
-          example: /pizza-shack
         version:
           type: string
           example: 1.0.0
