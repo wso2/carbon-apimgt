@@ -22,7 +22,9 @@ package org.wso2.carbon.apimgt.api.gateway;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This Contains the API Related data to deploy in Gateway.
@@ -51,6 +53,7 @@ public class GatewayAPIDTO implements Serializable {
     private CredentialDto[] credentialsToBeAdd ;
     private String[] credentialsToBeRemove;
     private List<String> keyManagers = new ArrayList<>();
+    private Map<String, String> additionalProperties = new HashMap<>();
     public String getName() {
 
         return name;
@@ -243,5 +246,13 @@ public class GatewayAPIDTO implements Serializable {
 
     public void setRevision(String revision) {
         this.revision = revision;
+    }
+
+    public Map<String, String> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(Map<String, String> additionalProperties) {
+        this.additionalProperties = additionalProperties;
     }
 }

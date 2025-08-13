@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -893,6 +894,45 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         @Override
         public Thread newThread(Runnable r) {
             return new Thread(r, "InternalSubscriptionThread-thread-" + count++);
+        }
+    }
+
+    /**
+     * Updates API properties in the data store using the given {@link GatewayAPIDTO}.
+     * Synchronizes on API context/version key, loads API if missing, and updates its properties.
+     *
+     * @param gatewayAPIDTO DTO with API context, version, and properties.
+     */
+    @Override
+    public void updateAPIPropertiesFromGatewayDTO(GatewayAPIDTO gatewayAPIDTO) {
+        String key = gatewayAPIDTO.getApiContext() + DELEM_PERIOD + gatewayAPIDTO.getVersion();
+        String synchronizeKey = "SubscriptionDataStoreImpl-API-" + key;
+        synchronized (synchronizeKey.intern()) {
+            // Direct map access to avoid nested synchronization
+            API subscriptionAPI = apiMap.get(key);
+            if (subscriptionAPI == null) {
+                // If API not found, try to load it without nested synchronization
+                try {
+                    subscriptionAPI = new SubscriptionDataLoaderImpl().getApi(gatewayAPIDTO.getApiContext(),
+                            gatewayAPIDTO.getVersion());
+                    if (subscriptionAPI != null && subscriptionAPI.getApiId() != 0) {
+                        // load to the memory
+                        addOrUpdateAPI(subscriptionAPI);
+                    }
+                } catch (DataLoadingException e) {
+                    log.error("Error while Retrieving Data From Internal Rest API", e);
+                }
+            }
+            if (subscriptionAPI != null) {
+                subscriptionAPI.setApiProperties(gatewayAPIDTO.getAdditionalProperties());
+                if (log.isDebugEnabled()) {
+                    log.debug("Updated API properties in SubscriptionDataStore for API: " + subscriptionAPI.getName() +
+                            " (Context: " + subscriptionAPI.getContext() + ", Version: " +
+                            subscriptionAPI.getVersion() + ")");
+                }
+            } else if (log.isDebugEnabled()) {
+                log.debug("API not found in SubscriptionDataStore for key: " + key);
+            }
         }
     }
 }

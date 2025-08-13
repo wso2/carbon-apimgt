@@ -23,7 +23,9 @@ import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Entity for keeping API related information.
@@ -44,6 +46,7 @@ public class API implements CacheableEntity<String> {
     private boolean isDefaultVersion = false;
     private String securityScheme;
     private String revisionId;
+    private Map<String, String> apiProperties = new HashMap<>();
     private List<OperationPolicy> apiPolicies = new ArrayList<>();
     private boolean isSubscriptionValidationDisabled = false;
     private Boolean isEgress = null;
@@ -363,5 +366,13 @@ public class API implements CacheableEntity<String> {
 
     public void setSubtype(String subtype) {
         this.subtype = subtype;
+    }
+
+    public Map<String, String> getApiProperties() {
+        return apiProperties;
+    }
+
+    public void setApiProperties(Map<String, String> apiProperties) {
+        this.apiProperties = apiProperties;
     }
 }
