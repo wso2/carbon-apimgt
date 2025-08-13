@@ -49,6 +49,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -171,14 +172,22 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     boolean update = alreadyDiscoveredAPIsList.contains(apiKey) ||
                             alreadyDiscoveredAPIsList.contains(envScopedKey);
                     boolean alreadyExistsWithEnvScope = alreadyDiscoveredAPIsList.contains(envScopedKey);
-                    Optional<String> match = alreadyDiscoveredAPIsList.stream()
-                            .map(s -> s.split(DELEM_COLON, 2))
-                            .filter(parts -> parts[0].equals(apidto.getName())
-                                    && !parts[1].equals(apidto.getVersion()))
-                            .map(parts -> String.join(":", parts))
+                    Optional<String> existingApiOpt = alreadyDiscoveredAPIsList.stream()
+                            .map(String::trim)
+                            .map(s -> {
+                                int idx = s.lastIndexOf(DELEM_COLON);
+                                if (idx <= 0 || idx >= s.length() - 1) return null;
+                                String name = s.substring(0, idx);
+                                String version = s.substring(idx + 1);
+                                return new String[]{name, version};
+                            })
+                            .filter(Objects::nonNull)
+                            .filter(parts -> parts[0].equals(apidto.getName()) &&
+                                    !parts[1].equals(apidto.getVersion()))
+                            .map(parts -> parts[0] + DELEM_COLON + parts[1])
                             .findFirst();
-                    boolean isNewVersion = match.isPresent();
-                    String existingAPI = match.orElse(null);
+                    boolean isNewVersion = existingApiOpt.isPresent();
+                    String existingAPI = existingApiOpt.orElse(null);
 
                     if (isPublishedAPIFromCP) {
                         continue;
