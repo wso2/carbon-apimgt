@@ -566,7 +566,10 @@ public abstract class AbstractAPIManager implements APIManager {
             if (keyManager != null) {
                 try {
                     boolean scopeExistsInKeyManager = keyManager.isScopeExists(scopeKey) ||
-                            keyManager.getAllScopes().containsKey(scopeKey);
+                    boolean scopeExistsInKeyManager = keyManager.isScopeExists(scopeKey);
+                    if (!scopeExistsInKeyManager) {
+                        scopeExistsInKeyManager = keyManager.getAllScopes().containsKey(scopeKey);
+                    }
                     if (scopeExistsInKeyManager) {
                         if (log.isDebugEnabled()) {
                             log.debug("Scope key '" + scopeKey + "' is already defined in Key Manager: "
