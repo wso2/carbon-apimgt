@@ -34,6 +34,8 @@ import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import javax.naming.Context;
@@ -61,6 +63,7 @@ public final class APIMgtDBUtil {
      *
      * @throws APIManagementException if an error occurs while loading DB configuration
      */
+    @UsedByMigrationClient
     public static void initialize() throws APIManagerDatabaseException {
         if (dataSource != null) {
             return;
@@ -94,8 +97,9 @@ public final class APIMgtDBUtil {
      * Utility method to get a new database connection
      *
      * @return Connection
-     * @throws java.sql.SQLException if failed to get Connection
+     * @throws SQLException if failed to get Connection
      */
+    @UsedByMigrationClient
     public static Connection getConnection() throws SQLException {
         if (dataSource != null) {
             return dataSource.getConnection();
@@ -109,6 +113,7 @@ public final class APIMgtDBUtil {
      * @param connection Connection
      * @param resultSet ResultSet
      */
+    @UsedByMigrationClient
     public static void closeAllConnections(PreparedStatement preparedStatement, Connection connection,
                                            ResultSet resultSet) {
         closeConnection(connection);
@@ -168,6 +173,7 @@ public final class APIMgtDBUtil {
      * @param is - The Input Stream
      * @return - The inputStream as a String
      */
+    @UsedByMigrationClient
     public static String getStringFromInputStream(InputStream is) {
         String str = null;
         try {
@@ -235,7 +241,7 @@ public final class APIMgtDBUtil {
      * @throws SQLException sql exception
      * @throws APIManagementException api management exception
      */
-    public static List<APIRevisionDeployment> mergeRevisionDeploymentDTOs(ResultSet rs) throws APIManagementException,
+    public static List<APIRevisionDeployment> mergeRevisionDeploymentDTOs(ResultSet rs, String apiUuid) throws APIManagementException,
             SQLException {
         List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
         Map<String, APIRevisionDeployment> uniqueSet = new HashMap<>();
@@ -283,6 +289,11 @@ public final class APIMgtDBUtil {
                 apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                 apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
                 apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
+
+                GatewayManagementDAO gatewayManagementDAO = getGatewayManagementDAO();
+                gatewayManagementDAO.calculateGatewayDeploymentStats(apiRevisionDeployment, revisionUuid,
+                                                                     environmentName, apiUuid);
+
                 apiRevisionDeploymentList.add(apiRevisionDeployment);
                 uniqueSet.put(uniqueKey, apiRevisionDeployment);
             } else {
@@ -301,6 +312,10 @@ public final class APIMgtDBUtil {
         return  apiRevisionDeploymentList;
     }
 
+    private static GatewayManagementDAO getGatewayManagementDAO() {
+        return GatewayManagementDAO.getInstance();
+    }
+
     /**
      * Converts a JSON Object String to a String Map
      *
@@ -308,6 +323,7 @@ public final class APIMgtDBUtil {
      * @return              String Map
      * @throws APIManagementException if errors occur during parsing the json string
      */
+    @UsedByMigrationClient
     public static Map<String, Object> convertJSONStringToMap(String jsonString) throws APIManagementException {
         Map<String, Object> map = null;
         if (StringUtils.isNotEmpty(jsonString)) {

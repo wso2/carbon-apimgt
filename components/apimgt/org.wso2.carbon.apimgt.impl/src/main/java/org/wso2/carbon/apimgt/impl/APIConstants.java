@@ -966,6 +966,8 @@ public final class APIConstants {
     public static final String KEY_VALIDATION_HANDLER_CLASSNAME = API_KEY_VALIDATOR + "KeyValidationHandlerClassName";
     public static final String SKIP_CREATE_RESIDENT_KEY_MANAGER = API_KEY_VALIDATOR + "SkipCreateResidentKeyManager";
     // Constants needed for KeyManager section
+    public static final String ENABLE_APPLICATION_SCOPES_RESIDENT_KM = API_KEY_VALIDATOR +
+            "EnableApplicationScopesForResidentKM";
     public static final String API_KEY_MANAGER = "APIKeyManager.";
     public static final String KEY_MANAGER_CLIENT = API_KEY_MANAGER + "KeyManagerClientImpl";
     public static final String KEY_MANAGER = "KeyManager";
@@ -2365,6 +2367,8 @@ public final class APIConstants {
         public static final String CREATED = "created";
         public static final String UPDATED = "updated";
         public static final String DELETED = "deleted";
+        public static final String DEPLOY = "DEPLOY";
+        public static final String UNDEPLOY = "UNDEPLOY";
         public static final String DEPLOYED = "deployed";
         public static final String UNDEPLOYED = "undeployed";
         public static final String LIFECYCLE_CHANGED = "lifecycle-changed";
@@ -2939,6 +2943,8 @@ public final class APIConstants {
         public static final String PASSWORD = "Password";
 
         public static final String KM_ADMIN_AS_APP_OWNER = "km_admin_as_app_owner";
+        public static final String ENABLE_APPLICATION_SCOPES = "enable_application_scopes";
+        public static final String APPLICATION_SCOPES = "application_scopes";
         public static final String SELF_VALIDATE_JWT = "self_validate_jwt";
         public static final String CLAIM_MAPPING = "claim_mappings";
         public static final String VALIDATION_TYPE = "validation_type";
@@ -2977,6 +2983,7 @@ public final class APIConstants {
         public static final String REFRESH_TOKEN_EXPIRY_TIME = "refresh_token_expiry_time";
         public static final String ID_TOKEN_EXPIRY_TIME = "id_token_expiry_time";
         public static final String NOT_APPLICABLE_VALUE = "N/A";
+        public static final String EMPTY_VALUE = "";
         public static final String PKCE_MANDATORY = "pkceMandatory";
         public static final String PKCE_SUPPORT_PLAIN = "pkceSupportPlain";
         public static final String BYPASS_CLIENT_CREDENTIALS = "bypassClientCredentials";
@@ -2989,7 +2996,7 @@ public final class APIConstants {
         public static final String PASSWORD_GRANT_TYPE = "password";
         public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
         public static final String APPLICATION_GRANT_TYPE = "application";
-        public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";
+        public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";        
 
         public static class KeyManagerEvent {
 
@@ -3007,6 +3014,16 @@ public final class APIConstants {
             public static final String TOKEN_TYPE = "tokenType";
             public static final String KEY_MANAGER_STREAM_ID = "org.wso2.apimgt.keymgt.stream:1.0.0";
         }
+        
+    }
+    
+    public static class TenantManagementEvent {
+        public static final String TENANT_MANAGEMENT_TYPE = "TENANT_MANAGEMENT";
+        public static final String TYPE_ADD_TENANT = "CREATE";
+        public static final String TYPE_UPDATE_TENANT = "UPDATE";
+        public static final String TYPE_ACTIVATE_TENANT = "ACTIVATE";
+        public static final String TYPE_DEACTIVATE_TENANT = "DEACTIVATE";
+        
     }
 
     public static class GlobalCacheInvalidation {
@@ -3351,6 +3368,10 @@ public final class APIConstants {
         public static final String IDP_DATA_REMOVER = "IDPDataRemover";
         public static final String KM_DATA_REMOVER = "KMDataRemover";
         public static final String KM_ORGANIZATION_EXIST = "IDPOrganizationExist";
+
+        public static final String GATEWAY_DATA_EXIST = "GatewayDataExist";
+        public static final String GATEWAY_EXPIRED_UPDATER = "GatewayExpiredUpdater";
+        public static final String GATEWAY_OLD_DATA_REMOVER = "GatewayOldDataRemover";
     }
 
     public static class SystemScopeConstants {
@@ -3621,4 +3642,81 @@ public final class APIConstants {
     }
 
     public static final String SYNAPSE_API_NAME_PREFIX = "prod";
+    
+    // Constants related to Gateway Notifications  
+    public static class GatewayNotification {
+        public static final String PAYLOAD_TYPE = "payloadType";
+        public static final String PAYLOAD_TYPE_REGISTER = "REGISTER";
+        public static final String PAYLOAD_TYPE_HEARTBEAT = "HEARTBEAT";
+        public static final String GATEWAY_ID = "gatewayId";
+        public static final String  LOADING_TENANTS = "loadingTenants";
+        public static final String ENVIRONMENT_LABELS = "environmentLabels";
+        public static final String GATEWAY_PROPERTIES = "gatewayProperties";
+        public static final String TIMESTAMP = "timeStamp";
+        public static final String GATEWAY_NOTIFICATION_ENDPOINT = INTERNAL_WEB_APP_EP + "/notify-gateway";
+        public static final String NOTIFY_API_DEPLOYMENT_STATUS_BATCH_PATH = INTERNAL_WEB_APP_EP + "/notify-api"
+                + "-deployment-status";
+        
+        public static final String STATUS_REGISTERED = "REGISTERED";
+        public static final String STATUS_ACKNOWLEDGED = "ACKNOWLEDGED";
+        public static final String WSO2_ALL_TENANTS = "WSO2-ALL-TENANTS";
+        
+        public static final String ERROR_INVALID_PAYLOAD = "Invalid payload: payloadType is required.";
+        public static final String ERROR_INVALID_PAYLOAD_TYPE = "Invalid payloadType: ";
+        public static final String ERROR_DATABASE_REGISTRATION = "Database error during registration: ";
+        public static final String ERROR_HEARTBEAT_REGISTRATION = "Error during registering heartbeat: ";
+        public static final String ERROR_GATEWAY_NOT_FOUND = "Gateway not found for ID: ";
+
+        public static final String GATEWAY_NOTIFICATION_CONFIGURATION = "GatewayNotificationConfiguration";
+        public static final String HEARTBEAT = "Heartbeat";
+        public static final String DEPLOYMENT_ACKNOWLEDGEMENT = "DeploymentAcknowledgement";
+        public static final String GATEWAY_CLEANUP = "GatewayCleanup";
+        public static final String GATEWAY_NOTIFICATION_ENABLED = "Enabled";
+        public static final String NOTIFY_INTERVAL_SECONDS = "NotifyIntervalSeconds";
+        public static final String GATEWAY_IDENTIFIER = "GatewayID";
+        public static final String BATCH_SIZE = "BatchSize";
+        public static final String BATCH_INTERVAL_MILLIS = "BatchIntervalMillis";
+        public static final String REGISTRATION = "Registration";
+        public static final String MAX_RETRY_COUNT = "MaxRetryCount";
+        public static final String RETRY_DURATION = "RetryDuration";
+        public static final String RETRY_PROGRESSION_FACTOR = "RetryProgressionFactor";
+        public static final String BATCH_PROCESSOR_MIN_THREAD = "BatchProcessorMinThread";
+        public static final String BATCH_PROCESSOR_MAX_THREAD = "BatchProcessorMaxThread";
+        public static final String BATCH_PROCESSOR_KEEP_ALIVE = "BatchProcessorKeepAlive";
+        public static final String BATCH_PROCESSOR_QUEUE_SIZE = "BatchProcessorQueueSize";
+
+        public static final int MAX_QUEUE_SIZE = 5000;
+
+        public static final String STATUS_ACTIVE = "ACTIVE";
+        public static final String STATUS_EXPIRED = "EXPIRED";
+
+        public static final String DB_COLUMN_STATUS = "STATUS";
+        public static final String DB_COLUMN_LAST_UPDATED = "LAST_UPDATED";
+        public static final String DB_COLUMN_GATEWAY_UUID = "GATEWAY_UUID";
+        public static final String DB_COLUMN_ORGANIZATION = "ORGANIZATION";
+
+        public static final String DEPLOYMENT_STATUS_SUCCESS = "SUCCESS";
+        public static final String DEPLOYMENT_STATUS_FAILURE = "FAILURE";
+
+        public static final String DEPLOYMENT_ACTION_DEPLOY = "DEPLOY";
+        public static final String DEPLOYMENT_ACTION_UNDEPLOY = "UNDEPLOY";
+
+        public static final String LIVE_COUNT = "LIVE_COUNT";
+        public static final String DEPLOYED_COUNT = "DEPLOYED_COUNT";
+        public static final String FAILED_COUNT = "FAILED_COUNT";
+        public static final String LATEST_SUCCESS_TIME = "LATEST_SUCCESS_TIME";
+
+        public static final String CONTENT_TYPE = "application/json";
+
+        public static final String EXPIRE_TIME_SECONDS = "ExpireTimeSeconds";
+        public static final String DATA_RETENTION_PERIOD_SECONDS = "DataRetentionPeriodSeconds";
+        public static final String CLEANUP_INTERVAL_SECONDS = "CleanupIntervalSeconds";
+        public static final int DEFAULT_CLEANUP_STARTUP_DELAY = 60;
+
+        public enum GatewayRegistrationResponse {
+            NOT_RESPONDED,
+            ACKNOWLEDGED,
+            REGISTERED
+        }
+    }
 }

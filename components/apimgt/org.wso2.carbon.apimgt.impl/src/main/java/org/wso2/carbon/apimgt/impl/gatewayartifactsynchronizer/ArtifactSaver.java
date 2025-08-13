@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 
 import java.io.File;
@@ -45,6 +46,7 @@ public interface ArtifactSaver {
      * @param artifact
      * @throws ArtifactSynchronizerException
      */
+    @UsedByMigrationClient
     void saveArtifact(String apiId, String name, String version, String revision, String organization, File artifact)
             throws ArtifactSynchronizerException;
 

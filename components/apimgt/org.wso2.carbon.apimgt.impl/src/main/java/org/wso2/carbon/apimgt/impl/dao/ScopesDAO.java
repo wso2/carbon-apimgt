@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
@@ -53,6 +54,7 @@ public class ScopesDAO {
 
     }
 
+    @UsedByMigrationClient
     public boolean addScopes(Set<Scope> scopeSet, int tenantId) throws APIManagementException {
 
         if (scopeSet == null || scopeSet.isEmpty()) {
@@ -178,6 +180,7 @@ public class ScopesDAO {
         }
     }
 
+    @UsedByMigrationClient
     public Scope getScope(String name, int tenantId) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {

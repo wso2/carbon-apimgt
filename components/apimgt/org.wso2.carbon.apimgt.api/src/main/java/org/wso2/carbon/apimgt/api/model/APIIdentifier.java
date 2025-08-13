@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 
 import java.io.Serializable;
 
@@ -85,10 +86,12 @@ public class APIIdentifier implements Serializable, Identifier {
         return providerName;
     }
 
+    @UsedByMigrationClient
     public String getApiName() {
         return apiName;
     }
 
+    @UsedByMigrationClient
     public String getVersion() {
         return version;
     }
@@ -123,6 +126,7 @@ public class APIIdentifier implements Serializable, Identifier {
     }
 
     @Override
+    @UsedByMigrationClient
     public String getUUID() {
         return uuid;
     }

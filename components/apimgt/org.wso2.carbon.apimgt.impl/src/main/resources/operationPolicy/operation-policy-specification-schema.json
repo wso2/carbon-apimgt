@@ -114,6 +114,7 @@
               "Integer",
               "Enum",
               "Map",
+              "Secret",
               "JSON"
             ]
           },
