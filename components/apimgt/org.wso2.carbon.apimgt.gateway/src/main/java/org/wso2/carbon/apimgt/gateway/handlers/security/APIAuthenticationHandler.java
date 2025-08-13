@@ -753,9 +753,25 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             Map<String, String> headers =
                     (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (headers != null) {
-                headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
-                        " error=\"invalid_token\"" +
-                        ", error_description=\"The provided token is invalid\"");
+                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) &&
+                        headers.get(APIMgtGatewayConstants.HOST) != null || !("")
+                        .equals(headers.get(APIMgtGatewayConstants.HOST))) {
+                        // Derive the outward facing host and port from host header
+                        String hostHeader = headers.get(APIMgtGatewayConstants.HOST);
+                        String contextPath = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+                        String transportScheme = (String) messageContext.getProperty("TRANSPORT_IN_NAME");
+                        transportScheme = !StringUtils.isEmpty(transportScheme) ? transportScheme : "https";
+                        String resourceMetadata = transportScheme + APIConstants.URL_SCHEME_SEPARATOR +
+                                hostHeader + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
+                        headers.put(HttpHeaders.WWW_AUTHENTICATE, "Bearer resource_metadata=" +
+                                "\"" + resourceMetadata + "\","
+                                + " error=\"invalid_token\","
+                                + " error_description=\"Access token is missing or expired\"");
+                } else {
+                    headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
+                            " error=\"invalid_token\"" +
+                            ", error_description=\"The provided token is invalid\"");
+                }
                 axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
             }
         }

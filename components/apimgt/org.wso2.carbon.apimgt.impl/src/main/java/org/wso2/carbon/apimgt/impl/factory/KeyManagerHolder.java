@@ -276,6 +276,14 @@ public class KeyManagerHolder {
         return null;
     }
 
+    public static KeyManagerDto getKeyManagerByName(String tenantDomain, String keyManagerName) {
+        OrganizationKeyManagerDto organizationKeyManagerDto = getTenantKeyManagerDto(tenantDomain);
+        if (organizationKeyManagerDto != null) {
+            return organizationKeyManagerDto.getKeyManagerByName(keyManagerName);
+        }
+        return null;
+    }
+
     private static OrganizationKeyManagerDto getTenantKeyManagerDto(String tenantDomain) {
 
         OrganizationKeyManagerDto organizationKeyManagerDto = getTenantKeyManagerDtoFromMap(tenantDomain);
