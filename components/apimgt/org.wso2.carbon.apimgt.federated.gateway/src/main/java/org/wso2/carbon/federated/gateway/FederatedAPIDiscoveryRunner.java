@@ -79,8 +79,8 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     /**
      * Schedules the discovery of APIs at a specified interval.
      *
-     * @param environment The environment from which APIs will be discovered.
-     * @param organization  The organization context for the discovery.
+     * @param environment  The environment from which APIs will be discovered.
+     * @param organization The organization context for the discovery.
      */
     public void scheduleDiscovery(Environment environment, String organization) {
         if (log.isDebugEnabled()) {
@@ -179,27 +179,34 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             + environment.getName() + DELEM_COLON + apidto.getVersion();
 
                     // Determine import mode
+                    boolean isNewVersion = false;
+                    String existingAPI = null;
                     boolean isPublishedAPIFromCP = alreadyAvailableAPIs.get(PUBLISHED_API_LIST).contains(apiKey) ||
                             alreadyAvailableAPIs.get(PUBLISHED_API_LIST).contains(envScopedKey);
                     boolean update = alreadyDiscoveredAPIsList.contains(apiKey) ||
                             alreadyDiscoveredAPIsList.contains(envScopedKey);
                     boolean alreadyExistsWithEnvScope = alreadyDiscoveredAPIsList.contains(envScopedKey);
-                    Optional<String> existingApiOpt = alreadyDiscoveredAPIsList.stream()
-                            .map(String::trim)
-                            .map(s -> {
-                                int idx = s.lastIndexOf(DELEM_COLON);
-                                if (idx <= 0 || idx >= s.length() - 1) return null;
-                                String name = s.substring(0, idx);
-                                String version = s.substring(idx + 1);
-                                return new String[]{name, version};
-                            })
-                            .filter(Objects::nonNull)
-                            .filter(parts -> parts[0].equals(apidto.getName()) &&
-                                    !parts[1].equals(apidto.getVersion()))
-                            .map(parts -> parts[0] + DELEM_COLON + parts[1])
-                            .findFirst();
-                    boolean isNewVersion = existingApiOpt.isPresent();
-                    String existingAPI = existingApiOpt.orElse(null);
+                    if (!update && !alreadyExistsWithEnvScope) {
+                        String envPathName = apidto.getName() + APIConstants.DELEM_UNDERSCORE
+                                + environment.getName();
+                        Optional<String> existingApiOpt = alreadyDiscoveredAPIsList.stream()
+                                .map(String::trim)
+                                .map(s -> {
+                                    int idx = s.lastIndexOf(DELEM_COLON);
+                                    if (idx <= 0 || idx >= s.length() - 1) return null;
+                                    String name = s.substring(0, idx);
+                                    String version = s.substring(idx + 1);
+                                    return new String[]{name, version};
+                                })
+                                .filter(Objects::nonNull)
+                                .filter(parts -> parts[0].equals(apidto.getName())
+                                        || parts[0].equals(envPathName)
+                                        && !parts[1].equals(apidto.getVersion()))
+                                .map(parts -> parts[0] + DELEM_COLON + parts[1])
+                                .findFirst();
+                        isNewVersion = existingApiOpt.isPresent();
+                        existingAPI = existingApiOpt.orElse(null);
+                    }
 
                     if (isPublishedAPIFromCP) {
                         continue;
