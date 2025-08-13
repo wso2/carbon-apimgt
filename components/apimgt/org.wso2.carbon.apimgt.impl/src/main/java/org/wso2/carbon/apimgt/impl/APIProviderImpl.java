@@ -212,6 +212,8 @@ import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -680,8 +682,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if an error occurs while adding the policies
      */
     private void addAPIPolicies(API api, String tenantDomain) throws APIManagementException {
-        // Validate API level and operation level policies
-        validateAPIPolicyParameters(api, tenantDomain);
+        // Validate and process API level and operation level policies
+        validateAndProcessAPIPolicyParameters(api, null, tenantDomain);
         // Add API level and operation level policies
         apiMgtDAO.addAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain);
     }
@@ -1049,7 +1051,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         updateAPI(api, tenantId, userNameWithoutChange);
         updateProductResourceMappings(api, organization, productResources);
 
-        updateAPIPolicies(api, tenantDomain);
+        updateAPIPolicies(api, existingAPI, tenantDomain);
 
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " in the database");
@@ -1112,12 +1114,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * This method is used to validate and update API level and Operation level policy mappings.
      *
      * @param api          API object
+     * @param existingApi  The already existing API object
      * @param tenantDomain Tenant domain
      * @throws APIManagementException if an error occurs while updating the policy mappings
      */
-    private void updateAPIPolicies(API api, String tenantDomain) throws APIManagementException {
-        // Validate API level and operation level policies
-        validateAPIPolicyParameters(api, tenantDomain);
+    private void updateAPIPolicies(API api, API existingApi, String tenantDomain) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Updating API level and operation level policies for API: " + api.getId().getApiName());
+        }
+        // Validate and process API level and operation level policies
+        validateAndProcessAPIPolicyParameters(api, existingApi, tenantDomain);
         // Update API level and operation level policies
         apiMgtDAO.updateAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain);
     }
@@ -1847,13 +1853,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * This method is used to validate API level and operation level policies and it's parameters
+     * This method is used to validate and process API level and operation level policies and it's parameters
      *
      * @param api          API object
+     * @param existingAPI  The already existing API object
      * @param tenantDomain Tenant domain
      * @throws APIManagementException if an error occurs while validating policies
      */
-    private void validateAPIPolicyParameters(API api, String tenantDomain) throws APIManagementException {
+    private void validateAndProcessAPIPolicyParameters(API api, API existingAPI, String tenantDomain)
+            throws APIManagementException {
 
         if (APIConstants.API_TYPE_SSE.equals(api.getType())
                 || APIConstants.API_TYPE_WEBSUB.equals(api.getType())) {
@@ -1866,18 +1874,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             return;
         }
 
-        // Validate API level policies
+        // Validate and process API level policies
         if (api.getApiPolicies() != null && !api.getApiPolicies().isEmpty()) {
-            List<OperationPolicy> validatedPolicies = validatePolicies(api.getApiPolicies(), api, tenantDomain);
+            List<OperationPolicy> existingPolicies = existingAPI != null ? existingAPI.getApiPolicies() : null;
+            List<OperationPolicy> validatedPolicies = validateAndProcessPolicies(api.getApiPolicies(), api,
+                    existingPolicies, tenantDomain);
             api.setApiPolicies(validatedPolicies);
         }
 
-        // Validate operation level policies
+        // Validate and process operation level policies
         for (URITemplate uriTemplate : api.getUriTemplates()) {
             List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
             List<OperationPolicy> validatedPolicies = new ArrayList<>();
             if (operationPolicies != null && !operationPolicies.isEmpty()) {
-                validatedPolicies = validatePolicies(operationPolicies, api, tenantDomain);
+                // Get the existing list of policies to preserve existing values in secret parameter scenarios
+                List<OperationPolicy> existingPolicies = null;
+                if (existingAPI != null) {
+                    for (URITemplate existingUriTemplate : existingAPI.getUriTemplates()) {
+                        if (existingUriTemplate.getHTTPVerb().equals(uriTemplate.getHTTPVerb()) &&
+                                existingUriTemplate.getUriTemplate().equals(uriTemplate.getUriTemplate())) {
+                            existingPolicies = existingUriTemplate.getOperationPolicies();
+                            break;
+                        }
+                    }
+                }
+                validatedPolicies = validateAndProcessPolicies(operationPolicies, api, existingPolicies, tenantDomain);
             }
             uriTemplate.setOperationPolicies(validatedPolicies);
         }
@@ -1885,22 +1906,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     /**
      * This method will validate a list of policies and throw error if validation fails
+     * This will also process (encrypt/preserve) the secret policy parameters
      *
-     * @param apiPoliciesList Policy list
-     * @param api             API object
-     * @param tenantDomain    Tenant domain
+     * @param apiPoliciesList      Policy list
+     * @param api                  API object. Can be null in global policy scenarios
+     * @param existingPoliciesList Existing policies list to preserve secret parameters
+     * @param tenantDomain         Tenant domain
      * @throws APIManagementException if an error occurs while validating policies
      */
-    private List<OperationPolicy> validatePolicies(List<OperationPolicy> apiPoliciesList, API api, String tenantDomain)
-            throws APIManagementException {
-
+    private List<OperationPolicy> validateAndProcessPolicies(List<OperationPolicy> apiPoliciesList, API api,
+            List<OperationPolicy> existingPoliciesList, String tenantDomain) throws APIManagementException {
         List<OperationPolicy> validatedPolicies = new ArrayList<>();
         for (OperationPolicy policy : apiPoliciesList) {
             String policyId = policy.getPolicyId();
+            OperationPolicyData policyData = null;
             if (policyId != null) {
                 // First check the API specific operation policy list
-                OperationPolicyData policyData =
-                        getAPISpecificOperationPolicyByPolicyId(policyId, api.getUuid(), tenantDomain, false);
+                if (api != null) {
+                    policyData = getAPISpecificOperationPolicyByPolicyId(policyId, api.getUuid(), tenantDomain, false);
+                }
                 if (policyData != null) {
                     if (log.isDebugEnabled()) {
                         log.debug("A policy is found for " + policyId + " as " +
@@ -1926,9 +1950,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                     OperationPolicySpecification policySpecification = policyData.getSpecification();
                     if (validateAppliedPolicyWithSpecification(policySpecification, policy, api.getType())) {
+                        processSecretPolicyParameters(policySpecification, policy, existingPoliciesList);
                         validatedPolicies.add(policy);
                     }
                 } else {
+                    // If the policy is not found in API specific policies, check the common policies
                     OperationPolicyData commonPolicyData =
                             getCommonOperationPolicyByPolicyId(policyId, tenantDomain, false);
                     if (commonPolicyData != null) {
@@ -1954,7 +1980,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
 
                         OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
-                        if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api.getType())) {
+                        String apiType = (api != null) ? api.getType() : null;
+                        if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, apiType)) {
+                            processSecretPolicyParameters(commonPolicySpec, policy, existingPoliciesList);
                             validatedPolicies.add(policy);
                         }
                     } else {
@@ -1964,9 +1992,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             } else {
                 // check the API specific operation policy list
-                OperationPolicyData policyData =
-                        getAPISpecificOperationPolicyByPolicyName(policy.getPolicyName(),
-                                policy.getPolicyVersion(), api.getUuid(), null, tenantDomain, false);
+                if (api != null) {
+                    policyData = getAPISpecificOperationPolicyByPolicyName(policy.getPolicyName(),
+                            policy.getPolicyVersion(), api.getUuid(), null, tenantDomain, false);
+                }
                 if (policyData != null) {
                     if (log.isDebugEnabled()) {
                         log.debug("Policy Id is not defined and an API specific policy is found for "
@@ -1975,9 +2004,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     OperationPolicySpecification policySpecification = policyData.getSpecification();
                     if (validateAppliedPolicyWithSpecification(policySpecification, policy, api.getType())) {
                         policy.setPolicyId(policyData.getPolicyId());
+                        processSecretPolicyParameters(policySpecification, policy, existingPoliciesList);
                         validatedPolicies.add(policy);
                     }
                 } else {
+                    // If the policy is not found in API specific policies, check the common policies
                     OperationPolicyData commonPolicyData =
                             getCommonOperationPolicyByPolicyName(policy.getPolicyName(),
                                     policy.getPolicyVersion(), tenantDomain, false);
@@ -1990,8 +2021,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                     + policy.getPolicyName() + ". Validating the policy");
                         }
                         OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
-                        if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, api.getType())) {
+                        String apiType = (api != null) ? api.getType() : null;
+                        if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, apiType)) {
                             policy.setPolicyId(commonPolicyData.getPolicyId());
+                            processSecretPolicyParameters(commonPolicySpec, policy, existingPoliciesList);
                             validatedPolicies.add(policy);
                         }
                     } else {
@@ -2018,20 +2051,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
         }
 
-        //Validate the API type
-        boolean isApiTypeValid = isApiTypeValid(policySpecification.getSupportedApiTypes(), apiType);
-        if (!isApiTypeValid) {
-            throw new APIManagementException(policySpecification.getName() + " cannot be used for the "
-                    + apiType + " API type.",
-                    ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
+        //Validate the API type. Skip the validation if the API type is null (global policy scenarios)
+        if (apiType != null) {
+            boolean isApiTypeValid = isApiTypeValid(policySpecification.getSupportedApiTypes(), apiType);
+            if (!isApiTypeValid) {
+                throw new APIManagementException(policySpecification.getName() + " cannot be used for the "
+                        + apiType + " API type.",
+                        ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
+            }
         }
 
         //Validate policy Attributes
         if (policySpecification.getPolicyAttributes() != null) {
             for (OperationPolicySpecAttribute attribute : policySpecification.getPolicyAttributes()) {
                 if (attribute.isRequired()) {
-                    Object appliedPolicyAttribute = appliedPolicy.getParameters().get(attribute.getName());
+                    Map<String, Object> params = appliedPolicy.getParameters();
+                    if (params == null || !params.containsKey(attribute.getName())) {
+                        throw new APIManagementException(
+                                "Required policy attribute " + attribute.getName() + " is not found for the policy "
+                                        + policySpecification.getName() + " " + appliedPolicy.getDirection() + " flow.",
+                                ExceptionCodes.MISSING_MANDATORY_POLICY_ATTRIBUTES);
+                    }
+                    Object appliedPolicyAttribute = params.get(attribute.getName());
+
                     if (appliedPolicyAttribute != null) {
+                        // Handle validation for secret type attributes
+                        if (attribute.getType().equals(OperationPolicySpecAttribute.AttributeType.Secret)) {
+                            String attributeValue = appliedPolicyAttribute.toString();
+                            if (log.isDebugEnabled()) {
+                                log.debug("Validating secret attribute: " + attribute.getName());
+                            }
+
+                            // Skip validation if the value is empty, as it will preserve the existing value
+                            if (attributeValue.isEmpty()) {
+                                continue;
+                            }
+
+                            // Skip validation if the value is already encrypted
+                            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                            try {
+                                if (cryptoUtil.base64DecodeAndIsSelfContainedCipherText(attributeValue)) {
+                                    continue;
+                                }
+                            } catch (CryptoException e) {
+                                throw new APIManagementException(
+                                        "Error processing the policy attribute: " + attribute.getName(), e);
+                            }
+                        }
+
                         if (attribute.getValidationRegex() != null) {
                             Pattern pattern = Pattern.compile(attribute.getValidationRegex(), Pattern.CASE_INSENSITIVE);
                             Matcher matcher;
@@ -2064,6 +2131,96 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         return true;
+    }
+
+    @Override
+    public void processSecretPolicyParameters(OperationPolicySpecification policySpecification,
+            OperationPolicy appliedPolicy, List<OperationPolicy> existingPolicies) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Processing secret policy parameters for policy: " + appliedPolicy.getPolicyName());
+        }
+
+        Map<String, Object> parameters = appliedPolicy.getParameters();
+        List<OperationPolicySpecAttribute> attributes = policySpecification.getPolicyAttributes();
+
+        if (parameters == null || attributes == null || attributes.isEmpty()) {
+            return;
+        }
+
+        for (OperationPolicySpecAttribute attribute : attributes) {
+            String paramName = attribute.getName();
+            if (parameters.containsKey(paramName)
+                    && attribute.getType() == OperationPolicySpecAttribute.AttributeType.Secret) {
+                Object updatedValue = parameters.get(paramName);
+
+                if (updatedValue instanceof String) {
+                    String updatedStrValue = (String) updatedValue;
+
+                    if (updatedStrValue.isEmpty()) {
+                        // If value is empty string, copy from existing policy
+                        if (log.isDebugEnabled()) {
+                            log.debug(
+                                    "Empty value received for secret parameter: " + paramName
+                                            + ". Attempting to preserve existing value.");
+                        }
+
+                        Object existingValue = null;
+                        if (existingPolicies != null) {
+                            // Find the matching policy
+                            for (OperationPolicy policy : existingPolicies) {
+                                if (policy.getPolicyName().equals(appliedPolicy.getPolicyName())
+                                        && policy.getPolicyVersion().equals(appliedPolicy.getPolicyVersion())
+                                        && policy.getDirection().equals(appliedPolicy.getDirection())
+                                        && policy.getOrder() == appliedPolicy.getOrder()) {
+                                    Map<String, Object> existingParams = policy.getParameters();
+                                    if (existingParams != null) {
+                                        // Get the matching value of the matching parameter
+                                        existingValue = existingParams.get(paramName);
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (existingValue != null) {
+                            parameters.put(paramName, existingValue);
+                        } else {
+                            if (attribute.isRequired()) {
+                                // If the value is empty and no existing value found for a required parameter,
+                                // throw an exception
+                                throw new APIManagementException("Required policy attribute " + paramName
+                                        + " is not found for the policy " + appliedPolicy.getPolicyName() + ".",
+                                        ExceptionCodes.MISSING_MANDATORY_POLICY_ATTRIBUTES);
+                            }
+                            // Otherwise, drop the parameter
+                            parameters.remove(paramName);
+                        }
+                    } else {
+                        // If value is not empty, encrypt it
+                        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                        try {
+                            boolean isAlreadyEncrypted = cryptoUtil.base64DecodeAndIsSelfContainedCipherText(
+                                    updatedStrValue);
+                            if (!isAlreadyEncrypted) {
+                                // Encrypt the value and store it
+                                String encryptedValue = cryptoUtil.encryptAndBase64Encode(updatedStrValue.getBytes());
+                                parameters.put(paramName, encryptedValue);
+                            }
+                        } catch (CryptoException e) {
+                            throw new APIManagementException("Error processing the policy attribute: " + paramName, e);
+                        }
+                    }
+                } else {
+                    if (attribute.isRequired()) {
+                        throw new APIManagementException(
+                                "Required policy attribute " + paramName + " is not found for the policy "
+                                        + appliedPolicy.getPolicyName() + ".",
+                                ExceptionCodes.MISSING_MANDATORY_POLICY_ATTRIBUTES);
+                    }
+                    parameters.remove(paramName);
+                }
+            }
+        }
     }
 
     /**
@@ -8002,7 +8159,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public String applyGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPoliciesList, String description,
                                              String name, String orgId) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Applying gateway global policies for policy mapping: " + name);
+        }
         String policyMappingUUID = UUID.randomUUID().toString();
+
+        // Validate and process the policies before adding them to DB
+        validateAndProcessPolicies(gatewayGlobalPoliciesList, null, null, orgId);
+
         return apiMgtDAO.addGatewayGlobalPolicy(gatewayGlobalPoliciesList, description, name, orgId, policyMappingUUID);
     }
 
@@ -8126,6 +8290,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public String updateGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPolicyList, String description,
                                               String name, String orgId, String policyMappingId) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Updating gateway global policies for policy mapping: " + policyMappingId
+                    + " in organization: " + orgId);
+        }
+
         List<OperationPolicy> policyList = apiMgtDAO.getGatewayPoliciesOfPolicyMapping(policyMappingId);
         if (policyList.isEmpty()) {
             String message = "Cannot update the gateway policy mapping. The policy mapping ID: " + policyMappingId
@@ -8133,10 +8302,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(message);
             throw new APIManagementException(message);
         }
+
+        // Validate and process the policies before deleting the existing policies
+        // The secret policy attributes will be encrypted during this
+        validateAndProcessPolicies(gatewayGlobalPolicyList, null, policyList, orgId);
+
         // Keep the existing deployments and update the policy mapping.
         Set<String> activeGatewayLabels = apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(policyMappingId,
                 orgId);
         apiMgtDAO.deleteGatewayPolicyMappingByPolicyId(policyMappingId, false);
+
         String mappingID = apiMgtDAO.updateGatewayGlobalPolicy(gatewayGlobalPolicyList, description, name, orgId, policyMappingId);
         // Redeploy the updated policy mappings to the gateways.
         if (activeGatewayLabels.size() > 0) {

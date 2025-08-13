@@ -1795,7 +1795,8 @@ public class APIMappingUtil {
         dto.setMediationPolicies(mediationPolicies);
         dto.setLifeCycleStatus(model.getStatus());
         if (model.getApiPolicies() != null) {
-            dto.setApiPolicies(OperationPolicyMappingUtil.fromOperationPolicyListToDTO(model.getApiPolicies()));
+            dto.setApiPolicies(OperationPolicyMappingUtil.fromOperationPolicyListToDTO(model.getApiPolicies(),
+                    model.getUuid(), preserveCredentials));
         }
         String subscriptionAvailability = model.getSubscriptionAvailability();
         if (subscriptionAvailability != null) {
@@ -1825,16 +1826,16 @@ public class APIMappingUtil {
             // table entries may have API level throttling tiers listed in case API level throttling is selected
             // for the API. This will lead the x-throttling-tiers of API definition to get overwritten.
             // (wso2/product-apim#11240)
-            apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
+            apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition, preserveCredentials);
             // since the operation details goes missing after fetching operations list from the swagger
             // definition, we have to set them back from the original API model.
-            setOperationPoliciesToOperationsDTO(model, apiOperationsDTO);
+            setOperationPoliciesToOperationsDTO(model, apiOperationsDTO, preserveCredentials);
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
         } else {
             // Get from asyncapi definition
-            List<APIOperationsDTO> apiOperationsDTO = getOperationsFromAPI(model);
+            List<APIOperationsDTO> apiOperationsDTO = getOperationsFromAPI(model, preserveCredentials);
             dto.setOperations(apiOperationsDTO);
             String asyncAPIDefinition;
             if (model.getAsyncApiDefinition() != null) {
@@ -3488,14 +3489,21 @@ public class APIMappingUtil {
     /**
      * Returns a set of operations from a API.
      *
-     * @param api API object
+     * @param api                 API object
+     * @param preserveCredentials Condition to preserve secret parameter values
      * @return a set of operations from a given swagger definition
+     * @throws APIManagementException if error occurred while handling the secret parameters
      */
-    private static List<APIOperationsDTO> getOperationsFromAPI(API api) {
+    private static List<APIOperationsDTO> getOperationsFromAPI(API api, boolean preserveCredentials)
+            throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting operations from API. API UUID: " + api.getUuid() + ", Type: " + api.getType());
+        }
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         for (URITemplate uriTemplate : uriTemplates) {
-            APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate);
+            APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate, api.getUuid(),
+                    preserveCredentials);
 
             if (api.getType().equals(APIConstants.API_TYPE_WS)) {
                 Map<String, String> wsUriMappings = api.getWsUriMapping();
@@ -3532,13 +3540,17 @@ public class APIMappingUtil {
      * Returns a set of operations from a API
      * Returns a set of operations from a given swagger definition
      *
-     * @param api               API object
-     * @param swaggerDefinition Swagger definition
+     * @param api                 API object
+     * @param swaggerDefinition   Swagger definition
+     * @param preserveCredentials Condition to preserve secret parameter values
      * @return a set of operations from a given swagger definition
      * @throws APIManagementException error while trying to retrieve URI templates of the given API
      */
-    private static List<APIOperationsDTO> getOperationsFromSwaggerDef(API api, String swaggerDefinition)
-         throws APIManagementException {
+    private static List<APIOperationsDTO> getOperationsFromSwaggerDef(API api, String swaggerDefinition,
+            boolean preserveCredentials) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Extracting operations from swagger definition for API UUID: " + api.getUuid());
+        }
         APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerDefinition);
         Set<URITemplate> uriTemplates;
         if (APIConstants.GRAPHQL_API.equals(api.getType())) {
@@ -3550,7 +3562,8 @@ public class APIMappingUtil {
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         if (!StringUtils.isEmpty(swaggerDefinition)) {
             for (URITemplate uriTemplate : uriTemplates) {
-                APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate);
+                APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate, api.getUuid(),
+                        preserveCredentials);
                 operationsDTOList.add(operationsDTO);
             }
         }
@@ -3560,10 +3573,17 @@ public class APIMappingUtil {
     /**
      * Reads the operationPolicies from the API object passed in, and sets them back to the API Operations DTO
      *
-     * @param api               API object
-     * @param apiOperationsDTO  List of API Operations DTO
+     * @param api                 API object
+     * @param apiOperationsDTO    List of API Operations DTO
+     * @param preserveCredentials Condition to preserve secret parameter values
+     * @throws APIManagementException if error occurred while handling the secret parameters
      */
-    private static void setOperationPoliciesToOperationsDTO(API api, List<APIOperationsDTO> apiOperationsDTO) {
+    private static void setOperationPoliciesToOperationsDTO(API api, List<APIOperationsDTO> apiOperationsDTO,
+            boolean preserveCredentials) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting operation policies to operations DTO for API UUID: " + api.getUuid());
+        }
+
         Set<URITemplate> uriTemplates = api.getUriTemplates();
 
         Map<String, URITemplate> uriTemplateMap = new HashMap<>();
@@ -3576,9 +3596,13 @@ public class APIMappingUtil {
             String key = operationsDTO.getTarget() + ":" + operationsDTO.getVerb();
             if (uriTemplateMap.get(key) != null) {
                 List<OperationPolicy> operationPolicies = uriTemplateMap.get(key).getOperationPolicies();
-                if (!operationPolicies.isEmpty()) {
+                if (operationPolicies != null && !operationPolicies.isEmpty()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Found " + operationPolicies.size() + " operation policies for " + key);
+                    }
                     operationsDTO.setOperationPolicies(
-                            OperationPolicyMappingUtil.fromOperationPolicyListToDTO(operationPolicies));
+                            OperationPolicyMappingUtil.fromOperationPolicyListToDTO(operationPolicies, api.getUuid(),
+                                    preserveCredentials));
                 }
             }
         }
@@ -3632,16 +3656,20 @@ public class APIMappingUtil {
     /**
      * Populates common fields for API operation DTO from URITemplate.
      *
-     * @param dto         the APIOperationsDTO to populate
-     * @param uriTemplate the URITemplate containing the data
+     * @param dto                 the APIOperationsDTO to populate
+     * @param uriTemplate         the URITemplate containing the data
+     * @param apiUuid             the UUID of the API
+     * @param preserveCredentials whether to preserve secret parameter values
+     * @throws APIManagementException if an error occurs while handling secret parameters
      */
-    private static void populateCommonOperationFields(APIOperationsDTO dto, URITemplate uriTemplate) {
+    private static void populateCommonOperationFields(APIOperationsDTO dto, URITemplate uriTemplate, String apiUuid,
+            boolean preserveCredentials) throws APIManagementException {
         dto.setId(EMPTY_STRING);
         dto.setAuthType(mapInternalToOASAuthType(uriTemplate.getAuthType()));
         dto.setTarget(uriTemplate.getUriTemplate());
         dto.setScopes(extractScopes(uriTemplate));
         dto.setOperationPolicies(OperationPolicyMappingUtil
-                .fromOperationPolicyListToDTO(uriTemplate.getOperationPolicies()));
+                .fromOperationPolicyListToDTO(uriTemplate.getOperationPolicies(), apiUuid, preserveCredentials));
         dto.setThrottlingPolicy(uriTemplate.getThrottlingTier());
         List<String> usedProductIds = extractUsedProductIds(uriTemplate);
         if (!usedProductIds.isEmpty()) {
@@ -3708,12 +3736,16 @@ public class APIMappingUtil {
     /**
      * Returns an API operation DTO from a URITemplate.
      *
-     * @param uriTemplate URITemplate object
+     * @param uriTemplate         URITemplate object
+     * @param apiUuid             API UUID
+     * @param preserveCredentials Condition to preserve secret parameter values
      * @return APIOperationsDTO object
+     * @throws APIManagementException if an error occurs while handling secret parameters
      */
-    private static APIOperationsDTO getOperationFromURITemplate(URITemplate uriTemplate) {
+    private static APIOperationsDTO getOperationFromURITemplate(URITemplate uriTemplate, String apiUuid,
+            boolean preserveCredentials) throws APIManagementException {
         APIOperationsDTO dto = new APIOperationsDTO();
-        populateCommonOperationFields(dto, uriTemplate);
+        populateCommonOperationFields(dto, uriTemplate, apiUuid, preserveCredentials);
         dto.setVerb(uriTemplate.getHTTPVerb());
         return dto;
     }
@@ -3821,8 +3853,30 @@ public class APIMappingUtil {
         return listDto;
     }
 
+    /**
+     * @deprecated Use {@link #fromAPIProducttoDTO(APIProduct, boolean)} instead.
+     */
     @UsedByMigrationClient
+    @Deprecated
     public static APIProductDTO fromAPIProducttoDTO(APIProduct product) throws APIManagementException {
+        return fromAPIProducttoDTO(product, false);
+    }
+
+    /**
+     * Converts an APIProduct to APIProductDTO.
+     *
+     * @param product             APIProduct object
+     * @param preserveCredentials Condition to preserve secret parameter values
+     * @return APIProductDTO object
+     * @throws APIManagementException if an error occurs while converting to dto
+     */
+    public static APIProductDTO fromAPIProducttoDTO(APIProduct product, boolean preserveCredentials)
+            throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "Converting APIProduct to DTO. Product UUID: " + product.getUuid()
+                            + ", preserveCredentials: " + preserveCredentials);
+        }
 
         APIProductDTO productDto = new APIProductDTO();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -3907,7 +3961,7 @@ public class APIMappingUtil {
                 ProductAPIDTO productAPI = aggregatedAPIs.get(uuid);
                 URITemplate template = apiProductResource.getUriTemplate();
                 List<APIOperationsDTO> operations = productAPI.getOperations();
-                APIOperationsDTO operation = getOperationFromURITemplate(template);
+                APIOperationsDTO operation = getOperationFromURITemplate(template, uuid, preserveCredentials);
                 operations.add(operation);
             } else {
                 ProductAPIDTO productAPI = new ProductAPIDTO();
@@ -3917,7 +3971,7 @@ public class APIMappingUtil {
                 List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
                 URITemplate template = apiProductResource.getUriTemplate();
 
-                APIOperationsDTO operation = getOperationFromURITemplate(template);
+                APIOperationsDTO operation = getOperationFromURITemplate(template, uuid, preserveCredentials);
                 operations.add(operation);
 
                 productAPI.setOperations(operations);

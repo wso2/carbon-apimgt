@@ -2010,6 +2010,18 @@ public interface APIProvider extends APIManager {
     boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification, OperationPolicy
             appliedPolicy, String apiType) throws APIManagementException;
 
+    /***
+     * Process and update secret parameters in the applied policy based on specification and existing API data.
+     *
+     * @param policySpecification The policy specification containing attribute definitions.
+     * @param appliedPolicy       The operation policy being applied.
+     * @param existingPolicies    The list of existing policies from which secret parameters may be copied, if
+     *                            necessary.
+     * @throws APIManagementException If an error occurs while processing policy parameters.
+     */
+    void processSecretPolicyParameters(OperationPolicySpecification policySpecification, OperationPolicy appliedPolicy,
+            List<OperationPolicy> existingPolicies) throws APIManagementException;
+
     /**
      * Resume API revision deployment process
      *
