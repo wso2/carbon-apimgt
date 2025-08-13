@@ -537,6 +537,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateResourceThrottlingTiers(api, tenantDomain);
         validateKeyManagers(api);
+        validateKeyManagerScopes(api, tenantDomain);
         String apiName = api.getId().getApiName();
         String provider = APIUtil.replaceEmailDomain(api.getId().getProviderName());
 
@@ -1007,6 +1008,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
         validateKeyManagers(api);
+        validateKeyManagerScopes(api, tenantDomain);
         String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
         String prevDefaultVersion = getDefaultVersion(api.getId());
         api.setMonetizationEnabled(existingAPI.isMonetizationEnabled());
@@ -1108,6 +1110,56 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         return api;
+    }
+
+    private void validateKeyManagerScopes(API api, String tenantDomain) throws APIManagementException {
+
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        boolean isCreateNewVersion = false;
+
+        Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(api.getId().getApiName(),
+                api.getOrganization(), uriTemplates);
+        Set<String> newLocalScopeKeys = newLocalScopes.stream().filter(Objects::nonNull)
+                .map(Scope::getKey).filter(key -> key != null && !key.trim().isEmpty()).collect(Collectors.toSet());
+
+        Set<String> oldLocalScopeKeys;
+        Set<String> oldVersionedLocalScopeKeys;
+
+        Set<String> scopesToAdd = new HashSet<>(newLocalScopeKeys);
+
+        if (api.getUuid() != null && !api.getUuid().isEmpty()) {
+            oldLocalScopeKeys = new HashSet<>(apiMgtDAO.getAllLocalScopeKeysForAPI(api.getUuid(), tenantId));
+            oldVersionedLocalScopeKeys = apiMgtDAO.getVersionedLocalScopeKeysForAPI(api.getUuid(), tenantId);
+        } else {
+            oldLocalScopeKeys = Collections.emptySet();
+            oldVersionedLocalScopeKeys = Collections.emptySet();
+            Set<String> apiVersions = getAPIVersions(api.getId().getProviderName(),
+                    api.getId().getApiName(), organization);
+            if (!apiVersions.isEmpty()) {
+                isCreateNewVersion = true;
+            }
+        }
+
+        if (!oldLocalScopeKeys.isEmpty()) {
+            scopesToAdd = newLocalScopeKeys.stream()
+                    .filter(scope -> !oldLocalScopeKeys.contains(scope))
+                    .collect(Collectors.toSet());
+        }
+
+        if (!oldVersionedLocalScopeKeys.isEmpty()) {
+            scopesToAdd = scopesToAdd.stream()
+                    .filter(scope -> !oldVersionedLocalScopeKeys.contains(scope))
+                    .collect(Collectors.toSet());
+        }
+
+        for (String scope : scopesToAdd) {
+            if (isScopeKeyExistInKeyManager(scope, tenantDomain)) {
+                log.error("Scope: " + scope + " is already registered in Key Manager.");
+                if (!isCreateNewVersion) {
+                    throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.SCOPE_ALREADY_REGISTERED, scope));
+                }
+            }
+        }
     }
 
     /**

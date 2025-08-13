@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -547,6 +548,41 @@ public abstract class AbstractAPIManager implements APIManager {
 
         return scopesDAO.isScopeExist(scopeKey, tenantid);
     }
+
+    /**
+     *
+     * Check whether the given scope key is already available in any of the Key Managers
+     *
+     * @param scopeKey candidate scope key
+     * @param tenantDomain tenant domain
+     * @return true if the scope key is already available
+     */
+    @Override
+    public boolean isScopeKeyExistInKeyManager(String scopeKey, String tenantDomain) {
+
+        Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getGlobalAndTenantKeyManagers(tenantDomain);
+        for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
+            KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
+            if (keyManager != null) {
+                try {
+                    boolean scopeExistsInKeyManager = keyManager.isScopeExists(scopeKey) ||
+                            keyManager.getAllScopes().containsKey(scopeKey);
+                    if (scopeExistsInKeyManager) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Scope key '" + scopeKey + "' is already defined in Key Manager: "
+                                    + keyManagerDtoEntry.getKey());
+                        }
+                        return true;
+                    }
+                } catch (APIManagementException e) {
+                    log.error("Error while checking for scope key in Key Manager: "
+                            + keyManagerDtoEntry.getKey(), e);
+                }
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Check whether the given scope key is already assigned to any API under given tenant.
