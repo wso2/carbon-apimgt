@@ -49,6 +49,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -169,9 +170,15 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     boolean update = alreadyDiscoveredAPIsList.contains(apiKey) ||
                             alreadyDiscoveredAPIsList.contains(envScopedKey);
                     boolean alreadyExistsWithEnvScope = alreadyDiscoveredAPIsList.contains(envScopedKey);
-                    boolean isNewVersion = alreadyDiscoveredAPIsList.stream().map(s -> s.split(":", 2))
-                            .anyMatch(parts -> parts[0].equals(apidto.getName())
-                                    && !parts[1].equals(apidto.getVersion()));
+                    Optional<String> match = alreadyDiscoveredAPIsList.stream()
+                            .map(s -> s.split(":", 2))
+                            .filter(parts -> parts[0].equals(apidto.getName())
+                                    && !parts[1].equals(apidto.getVersion()))
+                            .map(parts -> String.join(":", parts))
+                            .findFirst();
+                    boolean isNewVersion = match.isPresent();
+                    String existingAPI = match.orElse(null);
+
                     if (isPublishedAPIFromCP) {
                         continue;
                     }
@@ -184,7 +191,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     }
 
                     if (isNewVersion) {
-                        String existingApiUUID = FederatedGatewayUtil.getAPIUUID(apiKey, adminUsername, organization);
+                        String existingApiUUID = FederatedGatewayUtil.getAPIUUID(existingAPI, adminUsername, organization);
                         if (existingApiUUID != null) {
                             FederatedGatewayUtil.createNewAPIVersion(existingApiUUID, apidto.getVersion(),
                                     organization);
@@ -202,7 +209,6 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             apidto.getName());
 
                     ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-
 
                     // Import API
                     importExportAPI.importAPI(apiZip, true, true, update, true,
