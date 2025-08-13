@@ -33,6 +33,9 @@ public class APIRevisionDeployment implements Serializable {
     private boolean isDisplayOnDevportal;
     private String deployedTime;
     private String successDeployedTime;
+    private int deployedGatewayCount;
+    private int failedGatewayCount;
+    private int liveGatewayCount;
 
     public int getId() {
         return id;
@@ -100,5 +103,29 @@ public class APIRevisionDeployment implements Serializable {
 
     public void setStatus(WorkflowStatus status) {
         this.status = status;
+    }
+
+    public int getDeployedGatewayCount() {
+        return deployedGatewayCount;
+    }
+
+    public void setDeployedGatewayCount(int deployedGatewayCount) {
+        this.deployedGatewayCount = deployedGatewayCount;
+    }
+
+    public int getFailedGatewayCount() {
+        return failedGatewayCount;
+    }
+
+    public void setFailedGatewayCount(int failedGatewayCount) {
+        this.failedGatewayCount = failedGatewayCount;
+    }
+
+    public int getLiveGatewayCount() {
+        return liveGatewayCount;
+    }
+
+    public void setLiveGatewayCount(int liveGatewayCount) {
+        this.liveGatewayCount = liveGatewayCount;
     }
 }

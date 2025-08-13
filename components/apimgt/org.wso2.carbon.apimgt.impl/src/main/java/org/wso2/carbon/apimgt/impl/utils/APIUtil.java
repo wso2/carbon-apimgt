@@ -5778,7 +5778,7 @@ public final class APIUtil {
         }
     }
 
-    private static InetAddress getLocalAddress() {
+    public static InetAddress getLocalAddress() {
 
         Enumeration<NetworkInterface> ifaces = null;
         try {
@@ -10619,6 +10619,16 @@ public final class APIUtil {
     public static boolean isOrganizationAccessControlEnabled() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getOrgAccessControl().isEnabled();
+    }
+
+    /**
+     * Check whether gateway notification is enabled
+     *
+     * @return true if enabled, false otherwise
+     */
+    public static boolean isGatewayNotificationEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getGatewayNotificationConfiguration().isEnabled();
     }
 
     /**

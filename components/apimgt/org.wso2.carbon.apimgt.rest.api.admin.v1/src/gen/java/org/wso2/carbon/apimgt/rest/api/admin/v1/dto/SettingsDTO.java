@@ -32,6 +32,7 @@ public class SettingsDTO   {
     private List<SettingsGatewayConfigurationDTO> gatewayConfiguration = new ArrayList<SettingsGatewayConfigurationDTO>();
     private Boolean analyticsEnabled = null;
     private Boolean transactionCounterEnable = null;
+    private Boolean isGatewayNotificationEnabled = false;
 
   /**
    **/
@@ -174,6 +175,24 @@ public class SettingsDTO   {
     this.transactionCounterEnable = transactionCounterEnable;
   }
 
+  /**
+   * Is Gateway Notification Enabled
+   **/
+  public SettingsDTO isGatewayNotificationEnabled(Boolean isGatewayNotificationEnabled) {
+    this.isGatewayNotificationEnabled = isGatewayNotificationEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Is Gateway Notification Enabled")
+  @JsonProperty("isGatewayNotificationEnabled")
+  public Boolean isIsGatewayNotificationEnabled() {
+    return isGatewayNotificationEnabled;
+  }
+  public void setIsGatewayNotificationEnabled(Boolean isGatewayNotificationEnabled) {
+    this.isGatewayNotificationEnabled = isGatewayNotificationEnabled;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -191,12 +210,13 @@ public class SettingsDTO   {
         Objects.equals(keyManagerConfiguration, settings.keyManagerConfiguration) &&
         Objects.equals(gatewayConfiguration, settings.gatewayConfiguration) &&
         Objects.equals(analyticsEnabled, settings.analyticsEnabled) &&
-        Objects.equals(transactionCounterEnable, settings.transactionCounterEnable);
+        Objects.equals(transactionCounterEnable, settings.transactionCounterEnable) &&
+        Objects.equals(isGatewayNotificationEnabled, settings.isGatewayNotificationEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable);
+    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable, isGatewayNotificationEnabled);
   }
 
   @Override
@@ -212,6 +232,7 @@ public class SettingsDTO   {
     sb.append("    gatewayConfiguration: ").append(toIndentedString(gatewayConfiguration)).append("\n");
     sb.append("    analyticsEnabled: ").append(toIndentedString(analyticsEnabled)).append("\n");
     sb.append("    transactionCounterEnable: ").append(toIndentedString(transactionCounterEnable)).append("\n");
+    sb.append("    isGatewayNotificationEnabled: ").append(toIndentedString(isGatewayNotificationEnabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }
