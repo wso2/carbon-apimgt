@@ -66,10 +66,11 @@ public interface ImportExportAPI {
      * @param preserveStatus       Preserve MCP Server status on export
      * @param format               Format of output documents. Can be YAML or JSON
      * @param preserveDocs         Preserve documentation on Export.
+     * @param preserveCredentials  Preserve credentials on Export.
      * @param exportLatestRevision Export the latest revision.
      * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
      *                             (This is used for advertise only APIs).
-     * @param organization          Organization
+     * @param organization         Organization
      * @return MCP Server artifact.
      * @throws APIManagementException
      * @throws APIImportExportException

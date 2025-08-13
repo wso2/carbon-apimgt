@@ -2585,7 +2585,7 @@ paths:
           source: 'curl -k -X POST "https://127.0.0.1:9443/api/am/publisher/v3/apis/validate-mcp-server" \
               -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" \
               -H "Content-Type: application/json" \
-              -d "{ 
+              -d "{
                 "url": "https://example.com/api?wsdl",
                 "securityInfo": {
                   "isSecure": true,
@@ -2602,7 +2602,7 @@ paths:
       summary: |
         Create a MCP server using an OpenAPI definition.
       description: |
-        This operation can be used to create a MCP server using the OpenAPI definition. 
+        This operation can be used to create a MCP server using the OpenAPI definition.
         Provide either `url` or `file` to specify the definition.
 
         Specify additionalProperties with **at least** API's name, version, context and endpointConfig.
@@ -2658,7 +2658,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file=@openapi.json 
-          -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/create-from-backend-definition"'
+          -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/generate-from-openapi"'
       operationId: createMCPServerFromOpenAPI
 
   /mcp-servers/generate-from-mcp-server:
@@ -2666,9 +2666,9 @@ paths:
       tags:
         - MCP Servers
       summary: |
-        Create a MCP server using a third party MCP Server.
+        Create an MCP server by proxying a third-party MCP Server
       description: |
-        This operation can be used to create a MCP server using a third party MCP Server. 
+        This operation can be used to create a MCP server using a third party MCP Server.
 
         Specify additionalProperties with **at least** API's name, version, context and endpointConfig.
       requestBody:
@@ -2724,8 +2724,8 @@ paths:
             - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file=@openapi.json 
-          -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/create-from-backend-definition"'
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file=@openapi.json
+          -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/generate-from-mcp-servers"'
       operationId: createMCPServerProxy
 
   /mcp-servers/generate-from-api:
@@ -2789,7 +2789,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/generate-from-api"'
       operationId: createMCPServerFromAPI
 
   /mcp-servers:
@@ -16449,7 +16449,7 @@ components:
           example: listBooks
         feature:
           type: string
-          description: Backend target method
+          description: Operation type for MCP Server (e.g., TOOL)
           enum:
             - TOOL
         authType:
@@ -17045,9 +17045,9 @@ components:
           description: |
             This attribute declares the validation error message
         content:
-            type: string
-            description: |
-                MCP Server schema definition content.
+          type: string
+          description: |
+            MCP Server schema definition content.
         toolInfo:
           type: object
           properties:

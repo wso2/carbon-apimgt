@@ -2285,6 +2285,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     public Response validateThirdPartyMCPServer(MCPServerValidationRequestDTO dto, MessageContext messageContext)
             throws APIManagementException {
 
+        if (dto == null) {
+            RestApiUtil.handleBadRequest("Request body cannot be empty.", log);
+        }
         final String serverUrl = StringUtils.trimToEmpty(dto.getUrl());
         if (StringUtils.isBlank(serverUrl)) {
             RestApiUtil.handleBadRequest("MCP server URL cannot be empty.", log);

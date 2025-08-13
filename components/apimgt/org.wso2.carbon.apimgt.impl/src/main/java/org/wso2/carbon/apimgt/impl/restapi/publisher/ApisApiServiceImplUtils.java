@@ -111,7 +111,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -816,9 +815,9 @@ public class ApisApiServiceImplUtils {
             mcpTools = findMatchingTools(backendApiDefinition, uriTemplates, backendId);
         } else {
             mcpTools = parser.generateMCPTools(backendApiDefinition, null, backendId, subtype, uriTemplates);
-            if (mcpTools == null) {
-                throw new APIManagementException("Failed to generate MCP feature.");
-            }
+        }
+        if (mcpTools == null || mcpTools.isEmpty()) {
+            throw new APIManagementException("Failed to generate MCP features: no URI templates were produced.");
         }
         return mcpTools;
     }
@@ -852,13 +851,13 @@ public class ApisApiServiceImplUtils {
 
         if (StringUtils.isBlank(backendJson)) {
             throw new APIManagementException("Backend API definition cannot be empty.",
-                    ExceptionCodes.INVALID_MCP_SEVER_VALIDATION);
+                    ExceptionCodes.MCP_SERVER_VALIDATION_FAILED);
         }
         try {
             return new org.json.JSONObject(backendJson);
         } catch (org.json.JSONException e) {
             throw new APIManagementException("Invalid backend API definition JSON: " + e.getMessage(), e,
-                    ExceptionCodes.INVALID_MCP_SEVER_VALIDATION);
+                    ExceptionCodes.MCP_SERVER_VALIDATION_FAILED);
         }
     }
 

@@ -28,7 +28,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -169,9 +168,17 @@ public class MCPInitializerAndToolFetcher {
         request.setEntity(new StringEntity(jsonBody.toString(), StandardCharsets.UTF_8));
 
         try (CloseableHttpResponse response = httpClient.execute(request)) {
-            String body = response.getEntity() != null
-                    ? EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8)
-                    : StringUtils.EMPTY;
+            final int status = response.getStatusLine() != null ? response.getStatusLine().getStatusCode() : 0;
+            if (status < 200 || status >= 300) {
+                String reason = response.getStatusLine() != null ?
+                        response.getStatusLine().getReasonPhrase() : "Unknown";
+                String bodySnippet = response.getEntity() != null
+                        ? EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8) : StringUtils.EMPTY;
+                throw new APIManagementException("MCP request failed: HTTP " + status + " " + reason + " Body: "
+                        + bodySnippet);
+            }
+            String body = response.getEntity() != null ?
+                    EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8) : StringUtils.EMPTY;
             Header sessionHeader = response.getFirstHeader(APIConstants.MCP.HEADER_MCP_SESSION_ID);
             String returnedSessionId = sessionHeader != null ? sessionHeader.getValue() : null;
 
@@ -244,24 +251,24 @@ public class MCPInitializerAndToolFetcher {
 
         if (toolsJson == null) {
             throw new APIManagementException("No response received from MCP server (tools/list).",
-                    ExceptionCodes.INVALID_MCP_SEVER_VALIDATION);
+                    ExceptionCodes.MCP_SERVER_VALIDATION_FAILED);
         }
         if (!toolsJson.has(APIConstants.MCP.TOOLS_KEY)) {
             throw new APIManagementException("Missing 'tools' field in tools/list response.",
-                    ExceptionCodes.INVALID_MCP_SEVER_VALIDATION);
+                    ExceptionCodes.MCP_SERVER_VALIDATION_FAILED);
         }
 
         org.json.JSONArray toolsArray = toolsJson.optJSONArray(APIConstants.MCP.TOOLS_KEY);
         if (toolsArray == null) {
             throw new APIManagementException("Unexpected 'tools' format: expected an array.",
-                    ExceptionCodes.INVALID_MCP_SEVER_VALIDATION);
+                    ExceptionCodes.MCP_SERVER_VALIDATION_FAILED);
         }
         if (toolsArray.length() == 0) {
             if (log.isDebugEnabled()) {
                 log.debug("Retrieved 0 tool(s) from MCP server.");
             }
             throw new APIManagementException("MCP server returned an empty tool list.",
-                    ExceptionCodes.INVALID_MCP_SEVER_VALIDATION);
+                    ExceptionCodes.MCP_SERVER_VALIDATION_FAILED);
         }
 
         return toolsArray;

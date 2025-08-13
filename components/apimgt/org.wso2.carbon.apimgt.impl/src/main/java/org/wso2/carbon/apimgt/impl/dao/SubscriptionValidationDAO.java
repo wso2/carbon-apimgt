@@ -18,7 +18,6 @@
 package org.wso2.carbon.apimgt.impl.dao;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1323,7 +1322,7 @@ public class SubscriptionValidationDAO {
                     String description = null;
                     try (InputStream descriptionDefStream = resultSet.getBinaryStream("DESCRIPTION")) {
                         if (descriptionDefStream != null) {
-                            description = IOUtils.toString(descriptionDefStream);
+                            description = APIMgtDBUtil.getStringFromInputStream(descriptionDefStream);
                         }
                     } catch (IOException e) {
                         log.error("Error while reading description of the URI template", e);
@@ -1331,7 +1330,7 @@ public class SubscriptionValidationDAO {
                     String schemaDefinition = null;
                     try (InputStream schemaDefStream = resultSet.getBinaryStream("SCHEMA_DEFINITION")) {
                         if (schemaDefStream != null) {
-                            schemaDefinition = IOUtils.toString(schemaDefStream);
+                            schemaDefinition = APIMgtDBUtil.getStringFromInputStream(schemaDefStream);
                         }
                     } catch (IOException e) {
                         log.error("Error while reading schema definition of the URI template", e);

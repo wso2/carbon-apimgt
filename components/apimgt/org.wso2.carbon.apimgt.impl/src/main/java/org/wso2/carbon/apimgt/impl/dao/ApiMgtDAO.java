@@ -7739,7 +7739,7 @@ public class ApiMgtDAO {
                             description = IOUtils.toString(descriptionStream);
                         }
                     } catch (IOException e) {
-                        log.error("Error while reading schema definition of the URI template", e);
+                        log.error("Error while reading description of the URI template", e);
                     }
                     String schemaDefinition = null;
                     try (InputStream schemaDefStream = rs.getBinaryStream("SCHEMA_DEFINITION")) {
@@ -19319,7 +19319,7 @@ public class ApiMgtDAO {
                                 description = IOUtils.toString(descriptionStream);
                             }
                         } catch (IOException e) {
-                            log.error("Error while reading schema definition of the URI template", e);
+                            log.error("Error while reading description of the URI template", e);
                         }
                         uriTemplate.setDescription(description);
                         uriTemplate.setMediationScript(script);
@@ -20435,7 +20435,7 @@ public class ApiMgtDAO {
                                 description = IOUtils.toString(descriptionStream);
                             }
                         } catch (IOException e) {
-                            log.error("Error while reading schema definition of the URI template", e);
+                            log.error("Error while reading description of the URI template", e);
                         }
                         uriTemplate.setDescription(description);
                         if (!StringUtils.isEmpty(rs.getString(8))) {
