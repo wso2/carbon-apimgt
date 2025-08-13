@@ -522,6 +522,16 @@ public final class APIConstants {
     public static final String HASHING = "Hashing";
     public static final String HASGING_ALGORITHM= "HashingAlgorithm";
     public static final String ENDPOINT_SECURITY_AWS_SECRET_KEY = "secretKey";
+    public static final String DEVPORTAL_MODE_HYBRID = "HYBRID";
+    public static final String DEVPORTAL_MODE_MCP_ONLY = "MCP_ONLY";
+    public static final String DEVPORTAL_MODE_API_ONLY = "API_ONLY";
+
+    public static final Set<String> DEVPORTAL_MODES = Set.of(
+            DEVPORTAL_MODE_HYBRID,
+            DEVPORTAL_MODE_MCP_ONLY,
+            DEVPORTAL_MODE_API_ONLY
+    );
+
 
     public static class AWSConstants{
         // AWS S4 Constants
@@ -580,7 +590,7 @@ public final class APIConstants {
         public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE = "ApiCountResource";
         public static final String AI_CONFIGURATION = "AiConfiguration";
         public static final String MCP = "MCP";
-        public static final String MCP_PORTAL_ENABLED = "MCPPortalEnabled";
+        public static final String MCP_SUPPORT_ENABLED = "Enabled";
         public static final String AI_CONFIGURATION_FAILOVER_CONFIGURATIONS = "FailoverConfigurations";
         public static final String AI_CONFIGURATION_ROUND_ROBIN_CONFIGURATIONS = "RoundRobinConfigurations";
         public static final String AI_CONFIGURATION_FAILOVER_CONFIGURATIONS_FAILOVER_ENDPOINTS_LIMIT =
@@ -1022,6 +1032,7 @@ public final class APIConstants {
 
     public static final String API_KEY_VALIDATOR_ENABLE_ASSERTIONS = API_KEY_VALIDATOR + "EnableAssertions.";
 
+    public static final String API_STORE_TAG = "APIStore";
     public static final String API_STORE = "APIStore.";
     public static final String SHOW_API_STORE_URL_FROM_PUBLISHER = API_STORE + "DisplayURL";
     public static final String API_STORE_URL = API_STORE + "URL";
@@ -1050,6 +1061,7 @@ public final class APIConstants {
     public static final String ENABLE_ANONYMOUS_MODE = "EnableAnonymous";
     public static final String API_DEVPORTAL_ENABLE_CROSS_TENANT_SUBSCRIPTION = API_STORE +
             "EnableCrossTenantSubscription";
+    public static final String DEVPORTAL_MODE = "Mode";
     public static final String API_DEVPORTAL_DEFAULT_RESERVED_USERNAME = API_STORE +
             "DefaultReservedUsername";
     public static final String API_STORE_CREATE_DEFAULT_APPLICATION = API_STORE + "CreateDefaultApplication";
