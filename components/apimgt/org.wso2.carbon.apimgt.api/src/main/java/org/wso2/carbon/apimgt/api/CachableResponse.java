@@ -22,6 +22,11 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+/**
+ * This class represents a cached response in the API Management system.
+ * It contains the response payload, timeout, HTTP headers, status code,
+ * and other relevant information for caching purposes.
+ */
 public class CachableResponse implements Serializable {
     private static final long serialVersionUID = 1L;
 

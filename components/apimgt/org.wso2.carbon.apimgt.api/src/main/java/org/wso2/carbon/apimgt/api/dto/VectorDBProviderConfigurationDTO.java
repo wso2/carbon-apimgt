@@ -21,6 +21,10 @@ package org.wso2.carbon.apimgt.api.dto;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class represents the Vector Database Provider Configuration DTO.
+ * It contains the type of the provider and its properties.
+ */
 public class VectorDBProviderConfigurationDTO {
     private String type;
     private Map<String, String> properties = new HashMap<>();

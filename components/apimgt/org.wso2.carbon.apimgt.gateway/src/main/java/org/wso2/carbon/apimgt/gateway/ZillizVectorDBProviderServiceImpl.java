@@ -39,6 +39,10 @@ import java.util.UUID;
 
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+/**
+ * This class is responsible for interacting with the Zilliz Vector Database
+ * to create indexes, store embeddings, and retrieve similar responses.
+ */
 public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderService {
     private static final Log log = LogFactory.getLog(ZillizVectorDBProviderServiceImpl.class);
 

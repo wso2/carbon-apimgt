@@ -22,6 +22,11 @@ import org.wso2.carbon.apimgt.api.dto.VectorDBProviderConfigurationDTO;
 
 import java.util.Map;
 
+/**
+ * This interface defines the contract for a Vector Database Provider Service.
+ * It provides methods to initialize the provider, create indexes, store responses,
+ * and retrieve cached responses based on embeddings.
+ */
 public interface VectorDBProviderService {
 
     /**
