@@ -100,6 +100,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationRespons
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubtypeConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
@@ -2122,12 +2123,19 @@ public class ImportUtils {
 
         JsonObject mcpServer = retrievedMCPDtoJson(pathToArchive);
         MCPServerDTO mcpServerDTO = new Gson().fromJson(mcpServer, MCPServerDTO.class);
-        if (StringUtils.equals(mcpServerDTO.getSubtypeConfiguration().getSubtype(),
-                APIConstants.API_SUBTYPE_DIRECT_BACKEND)) {
-            JsonObject backendAPI = retrievedBackendAPIDtoJson(pathToArchive);
-            JSONParser parser = new JSONParser();
-            JSONObject endpointConfig = (JSONObject) parser.parse(backendAPI.get("endpointConfig").getAsString());
-            mcpServerDTO.endpointConfig(endpointConfig);
+        SubtypeConfigurationDTO subtypeConfigurationDTO = mcpServerDTO.getSubtypeConfiguration();
+        if (subtypeConfigurationDTO != null) {
+            String subtype = subtypeConfigurationDTO.getSubtype();
+            if (!StringUtils.isBlank(subtype)) {
+                if (StringUtils.equals(subtype, APIConstants.API_SUBTYPE_DIRECT_BACKEND) || StringUtils.equals(subtype,
+                        APIConstants.API_SUBTYPE_SERVER_PROXY)) {
+                    JsonObject backendAPI = retrievedBackendAPIDtoJson(pathToArchive);
+                    JSONParser parser = new JSONParser();
+                    JSONObject endpointConfig = (JSONObject) parser.parse(backendAPI.get("endpointConfig")
+                            .getAsString());
+                    mcpServerDTO.endpointConfig(endpointConfig);
+                }
+            }
         }
 
         return mcpServerDTO;
