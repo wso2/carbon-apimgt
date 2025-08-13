@@ -399,12 +399,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                         if (scope instanceof String) {
                             applicationScopes.add((String) scope);
                         } else {
-                            log.warn("Skipping non-string application scope: " + scope);
+                            log.debug("Skipping non-string application scope: " + scope);
                         }
                     }
                     clientInfo.setApplicationScopes(applicationScopes);
                 } else {
-                    log.warn("Application scopes property is not a List, ignoring: " + scopesObject);
+                    log.debug("Application scopes property is not a List, ignoring: " + scopesObject);
                     // If application scopes are not provided in the expected format, set it to an empty list
                     clientInfo.setApplicationScopes(new ArrayList<>());
                 }
