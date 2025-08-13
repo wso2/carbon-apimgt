@@ -12,14 +12,16 @@ public class OAuthProtectedResourceDTO implements Serializable {
     private List<String> authorizationServers = new java.util.ArrayList<>();
 
     @SerializedName("resource_scopes")
-    private List<String> resourceScopes = new java.util.ArrayList<>();
+    private final List<String> resourceScopes = new java.util.ArrayList<>();
 
     public List<String> getAuthorizationServers() {
         return authorizationServers;
     }
 
     public void addAuthorizationServers(List<String> authorizationServers) {
+        if (authorizationServers != null) {
             this.authorizationServers.addAll(authorizationServers);
+        }
     }
 
     public List<String> getResourceScopes() {
@@ -27,7 +29,9 @@ public class OAuthProtectedResourceDTO implements Serializable {
     }
 
     public void addResourceScopes(List<String> resourceScopes) {
-        this.resourceScopes.addAll(resourceScopes);
+        if (resourceScopes != null) {
+            this.resourceScopes.addAll(resourceScopes);
+        }
     }
 
     public void addAuthorizationServer(String server) {

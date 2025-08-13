@@ -156,7 +156,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         if (APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManagers.get(0))) {
             Map<String, KeyManagerDto> keyManagerMap =
                     KeyManagerHolder.getTenantKeyManagers(matchedAPI.getOrganization());
-            if(keyManagerMap.size() > 1) {
+            if (keyManagerMap.size() > 1) {
                 log.error("Multiple Key Managers found for MCP Server: " + matchedAPI.getUuid() + ".");
                 return false;
             }
@@ -166,6 +166,10 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                     KeyManagerHolder.getKeyManagerByName(matchedAPI.getOrganization(), keyManagers.get(0));
             if (keyManager != null) {
                 oAuthProtectedResourceDTO.addAuthorizationServer(keyManager.getIssuer());
+            } else {
+                log.error("Key Manager: " + keyManagers.get(0) + " not found for MCP Server: " +
+                        matchedAPI.getUuid() + ".");
+                return false;
             }
         }
 

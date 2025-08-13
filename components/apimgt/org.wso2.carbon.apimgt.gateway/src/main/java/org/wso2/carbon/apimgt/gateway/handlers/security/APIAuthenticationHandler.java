@@ -753,12 +753,21 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             Map<String, String> headers =
                     (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (headers != null) {
-                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) &&
-                        headers.get(APIMgtGatewayConstants.HOST) != null || !("")
-                        .equals(headers.get(APIMgtGatewayConstants.HOST))) {
-                        // Derive the outward facing host and port from host header
-                        String hostHeader = headers.get(APIMgtGatewayConstants.HOST);
-                        String contextPath = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
+                    // Derive the outward facing host and port from host header
+                    String hostHeader = headers.get(APIMgtGatewayConstants.HOST);
+                    Pattern validHostHeaderPattern = Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
+
+                    if (StringUtils.isBlank(hostHeader) || !validHostHeaderPattern.matcher(hostHeader).matches()) {
+                        log.debug("Missing or malformed host header in request.Extracting host header form config.");
+                        hostHeader = APIUtil.getHostAddress();
+                    }
+                    String contextPath = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+                    if (StringUtils.isEmpty(contextPath)) {
+                        headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
+                                " error=\"invalid_token\"" +
+                                ", error_description=\"The provided token is invalid\"");
+                    } else {
                         String transportScheme = (String) messageContext.getProperty("TRANSPORT_IN_NAME");
                         transportScheme = !StringUtils.isEmpty(transportScheme) ? transportScheme : "https";
                         String resourceMetadata = transportScheme + APIConstants.URL_SCHEME_SEPARATOR +
@@ -767,6 +776,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                                 "\"" + resourceMetadata + "\","
                                 + " error=\"invalid_token\","
                                 + " error_description=\"Access token is missing or expired\"");
+                    }
                 } else {
                     headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
                             " error=\"invalid_token\"" +
