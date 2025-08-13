@@ -49,12 +49,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.DELEM_COLON;
 import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil.fromAPItoDTO;
 import static org.wso2.carbon.federated.gateway.util.FederatedGatewayConstants.DISCOVERED_API_LIST;
 import static org.wso2.carbon.federated.gateway.util.FederatedGatewayConstants.PUBLISHED_API_LIST;
@@ -159,9 +161,9 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                 }
                 APIDTO apidto = fromAPItoDTO(api);
                 try {
-                    String apiKey = apidto.getName() + APIConstants.DELEM_COLON + apidto.getVersion();
+                    String apiKey = apidto.getName() + DELEM_COLON + apidto.getVersion();
                     String envScopedKey = apidto.getName() + APIConstants.DELEM_UNDERSCORE
-                            + environment.getName() + APIConstants.DELEM_COLON + apidto.getVersion();
+                            + environment.getName() + DELEM_COLON + apidto.getVersion();
 
                     // Determine import mode
                     boolean isPublishedAPIFromCP = alreadyAvailableAPIs.get(PUBLISHED_API_LIST).contains(apiKey) ||
@@ -169,9 +171,15 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     boolean update = alreadyDiscoveredAPIsList.contains(apiKey) ||
                             alreadyDiscoveredAPIsList.contains(envScopedKey);
                     boolean alreadyExistsWithEnvScope = alreadyDiscoveredAPIsList.contains(envScopedKey);
-                    boolean isNewVersion = alreadyDiscoveredAPIsList.stream().map(s -> s.split(":", 2))
-                            .anyMatch(parts -> parts[0].equals(apidto.getName())
-                                    && !parts[1].equals(apidto.getVersion()));
+                    Optional<String> match = alreadyDiscoveredAPIsList.stream()
+                            .map(s -> s.split(DELEM_COLON, 2))
+                            .filter(parts -> parts[0].equals(apidto.getName())
+                                    && !parts[1].equals(apidto.getVersion()))
+                            .map(parts -> String.join(":", parts))
+                            .findFirst();
+                    boolean isNewVersion = match.isPresent();
+                    String existingAPI = match.orElse(null);
+
                     if (isPublishedAPIFromCP) {
                         continue;
                     }
@@ -184,7 +192,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     }
 
                     if (isNewVersion) {
-                        String existingApiUUID = FederatedGatewayUtil.getAPIUUID(apiKey, adminUsername, organization);
+                        String existingApiUUID = FederatedGatewayUtil.getAPIUUID(existingAPI, adminUsername, organization);
                         if (existingApiUUID != null) {
                             FederatedGatewayUtil.createNewAPIVersion(existingApiUUID, apidto.getVersion(),
                                     organization);
@@ -202,7 +210,6 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             apidto.getName());
 
                     ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-
 
                     // Import API
                     importExportAPI.importAPI(apiZip, true, true, update, true,

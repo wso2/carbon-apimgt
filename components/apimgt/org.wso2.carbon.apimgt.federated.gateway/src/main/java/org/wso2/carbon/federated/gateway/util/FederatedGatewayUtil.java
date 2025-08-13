@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
@@ -155,7 +154,11 @@ public class FederatedGatewayUtil {
         }
 
         APIIdentifier apiIdentifier = new APIIdentifier(adminUsername, parts[0], parts[1]);
-        return APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
+        String uuid = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieved UUID: " + uuid + " for API: " + apiName + " in organization: " + organization);
+        }
+        return uuid;
     }
 
     public static Map<String, List<String>> getDiscoveredAPIsFromFederatedGateway(Environment environment,
