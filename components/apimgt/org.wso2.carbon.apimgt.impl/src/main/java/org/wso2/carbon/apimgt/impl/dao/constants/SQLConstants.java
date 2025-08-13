@@ -4125,8 +4125,6 @@ public class SQLConstants {
         public static final String ADD_DEPLOYED_API_REVISION =
                 "INSERT INTO AM_DEPLOYED_REVISION (NAME, VHOST, REVISION_UUID, DEPLOYED_TIME)" +
                         " VALUES (?,?,?,?)";
-        public static final String DELETE_API_REVISION_DEPLOYMENTS_MAPPING_BY_REVISION_UUID =
-                " DELETE FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE REVISION_UUID = ?";
         public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_NAME_AND_REVISION_UUID
                 = "SELECT * FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ? AND REVISION_UUID = ? ";
         public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_REVISION_UUID
@@ -4219,10 +4217,6 @@ public class SQLConstants {
                 "DELETE FROM AM_API_CLIENT_CERTIFICATE WHERE API_ID = ? AND REVISION_UUID = ?";
         public static final String REMOVE_REVISION_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_REVISION_UUID =
                 "DELETE FROM AM_GRAPHQL_COMPLEXITY WHERE API_ID = ? AND REVISION_UUID = ?";
-        public static final String REMOVE_CURRENT_API_ENTRIES_IN_AM_API_PRODUCT_MAPPING_BY_API_PRODUCT_ID =
-                "DELETE FROM AM_API_PRODUCT_MAPPING WHERE API_ID = ? AND REVISION_UUID='Current API'";
-        public static final String GET_PRODUCT_RESOURCES_BY_REVISION_UUID = "SELECT URL_MAPPING_ID " +
-                "FROM AM_API_PRODUCT_MAPPING WHERE API_ID = ? AND REVISION_UUID = ?";
         public static final String REMOVE_REVISION_ENTRIES_IN_AM_API_PRODUCT_MAPPING_BY_REVISION_UUID =
                 "DELETE FROM AM_API_PRODUCT_MAPPING WHERE API_ID = ? AND REVISION_UUID = ?";
         public static final String GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID_BY_PRODUCT_ID = "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, " +
@@ -4251,6 +4245,23 @@ public class SQLConstants {
                 "SELECT AUM.HTTP_METHOD, AUM.URL_PATTERN, ARSM.SCOPE_NAME, ARSM.URL_MAPPING_ID " +
                 "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM LEFT JOIN AM_API_URL_MAPPING AUM " +
                 "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID WHERE AUM.REVISION_UUID = ?";
+
+        public static final String GATEWAY_DEPLOYMENT_STATS_QUERY =
+                "SELECT " +
+                        "SUM(CASE WHEN grd.STATUS = 'SUCCESS' THEN 1 ELSE 0 END) AS DEPLOYED_COUNT, " +
+                        "SUM(CASE WHEN grd.STATUS = 'FAILURE' THEN 1 ELSE 0 END) AS FAILED_COUNT, " +
+                        "MAX(CASE WHEN grd.STATUS = 'SUCCESS' THEN grd.LAST_UPDATED END) AS LATEST_SUCCESS_TIME " +
+                        "FROM AM_GW_REVISION_DEPLOYMENT grd " +
+                        "INNER JOIN AM_GW_INSTANCES gwi ON grd.GATEWAY_ID = gwi.GATEWAY_ID " +
+                        "INNER JOIN AM_GW_INSTANCE_ENV_MAPPING envmap ON gwi.GATEWAY_ID = envmap.GATEWAY_ID " +
+                        "WHERE grd.REVISION_UUID = ? " +
+                        "AND envmap.ENV_LABEL = ? AND gwi.LAST_UPDATED >= ?";
+
+        public static final String GATEWAY_LIVE_COUNT_WITH_API_ORGANIZATION_QUERY = "SELECT COUNT(gwi.ORGANIZATION) AS LIVE_COUNT FROM AM_GW_INSTANCES gwi " +
+                "INNER JOIN AM_GW_INSTANCE_ENV_MAPPING envmap ON gwi.GATEWAY_ID = envmap.GATEWAY_ID " +
+                "WHERE gwi.LAST_UPDATED >= ? AND envmap.ENV_LABEL = ? AND (gwi.ORGANIZATION = (" +
+                "SELECT ORGANIZATION FROM AM_API WHERE API_UUID = ?) OR gwi.ORGANIZATION = 'WSO2-ALL-TENANTS')";
+
     }
 
     /**
@@ -4991,4 +5002,39 @@ public class SQLConstants {
         public static final String DELETE_API_ENDPOINTS_BY_API_UUID = "DELETE FROM AM_API_ENDPOINTS WHERE API_UUID = ?";
     }
 
+    public static class GatewayManagementSQLConstants {
+        public static final String DELETE_OLD_GATEWAYS_SQL = "DELETE FROM AM_GW_INSTANCES WHERE LAST_UPDATED < ?";
+        public static final String INSERT_GATEWAY_INSTANCE_SQL =
+                "INSERT INTO AM_GW_INSTANCES (GATEWAY_UUID, ORGANIZATION, LAST_UPDATED, GW_PROPERTIES) VALUES (?, ?, ?, ?) ";
+        public static final String SELECT_GATEWAY_SQL =
+                "SELECT 1 FROM AM_GW_INSTANCES WHERE GATEWAY_UUID=? AND (ORGANIZATION=? OR ORGANIZATION='WSO2-ALL-TENANTS')";
+        public static final String SELECT_DEPLOYMENT_SQL =
+                "SELECT 1 FROM AM_GW_REVISION_DEPLOYMENT grd INNER JOIN AM_GW_INSTANCES gwi ON grd.GATEWAY_ID = gwi"
+                        + ".GATEWAY_ID WHERE gwi.GATEWAY_UUID = ? AND grd.API_ID = ?";
+        public static final String INSERT_DEPLOYMENT_SQL =
+                "INSERT INTO AM_GW_REVISION_DEPLOYMENT (GATEWAY_ID, API_ID, ORGANIZATION, STATUS, ACTION, REVISION_UUID, LAST_UPDATED) "
+                        + "SELECT gwi.GATEWAY_ID, ?, ?, ?, ?, ?, ? FROM AM_GW_INSTANCES gwi WHERE gwi.GATEWAY_UUID = "
+                        + "?  AND (gwi.ORGANIZATION = ? OR gwi.ORGANIZATION = 'WSO2-ALL-TENANTS')";
+        public static final String UPDATE_DEPLOYMENT_SQL =
+                "UPDATE AM_GW_REVISION_DEPLOYMENT SET STATUS = ?, ACTION = ?, REVISION_UUID = ?, LAST_UPDATED = ?, ORGANIZATION = ? "
+                        + "WHERE GATEWAY_ID = (SELECT gwi.GATEWAY_ID FROM AM_GW_INSTANCES gwi WHERE gwi.GATEWAY_UUID = ? "
+                        + "AND (gwi.ORGANIZATION = ? OR gwi.ORGANIZATION = 'WSO2-ALL-TENANTS')) AND API_ID = ?";
+        public static final String UPDATE_GATEWAY_HEARTBEAT_SQL =
+                "UPDATE AM_GW_INSTANCES SET LAST_UPDATED=? WHERE GATEWAY_UUID=? AND ORGANIZATION=?";
+        public static final String UPDATE_GATEWAY_INSTANCE_SQL =
+                "UPDATE AM_GW_INSTANCES SET LAST_UPDATED=?, GW_PROPERTIES=? WHERE GATEWAY_UUID=? AND ORGANIZATION=?";
+        public static final String SELECT_GATEWAYS_BY_ENV_SQL =
+                "SELECT gwi.GATEWAY_UUID, gwi.LAST_UPDATED FROM AM_GW_INSTANCES gwi "
+                        + "INNER JOIN AM_GW_INSTANCE_ENV_MAPPING envmap ON gwi.GATEWAY_ID = envmap.GATEWAY_ID "
+                        + "WHERE envmap.ENV_LABEL = ? AND (gwi.ORGANIZATION = ? OR gwi.ORGANIZATION = 'WSO2-ALL-TENANTS')";
+        public static final String SELECT_GATEWAY_TIMESTAMP_SQL =
+                "SELECT LAST_UPDATED FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ? AND (ORGANIZATION = ? OR ORGANIZATION='WSO2-ALL-TENANTS')";
+        public static final String SELECT_DEPLOYMENT_TIMESTAMP_SQL =
+                "SELECT grd.LAST_UPDATED FROM AM_GW_REVISION_DEPLOYMENT grd INNER JOIN AM_GW_INSTANCES gwi ON grd.GATEWAY_ID = gwi.GATEWAY_ID WHERE gwi.GATEWAY_UUID = ? AND grd.API_ID = ?";
+        public static final String INSERT_GATEWAY_ENV_MAPPING_SQL =
+                "INSERT INTO AM_GW_INSTANCE_ENV_MAPPING (GATEWAY_ID, ENV_LABEL) SELECT gwi.GATEWAY_ID, ? FROM AM_GW_INSTANCES gwi WHERE gwi.GATEWAY_UUID = ? AND gwi.ORGANIZATION = ?";
+        public static final String DELETE_GATEWAY_ENV_MAPPING_SQL =
+                "DELETE FROM AM_GW_INSTANCE_ENV_MAPPING WHERE GATEWAY_ID = (SELECT GATEWAY_ID FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ? AND ORGANIZATION = ?)";
+        public static final String SELECT_API_SQL = "SELECT 1 FROM AM_API WHERE API_UUID = ?";
+    }
 }

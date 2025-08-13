@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayPolicyDeploymentDTO;
@@ -129,16 +130,21 @@ public class GatewayPolicyMappingUtil {
      *
      * @param policyData The GatewayPolicyData object
      * @return A GatewayPolicyMappingsDTO object
+     * @throws APIManagementException if error occurred while processing the policies
      */
-    public static GatewayPolicyMappingsDTO fromGatewayPolicyDataToDTO(GatewayPolicyData policyData) {
+    public static GatewayPolicyMappingsDTO fromGatewayPolicyDataToDTO(GatewayPolicyData policyData)
+            throws APIManagementException {
 
         GatewayPolicyMappingsDTO gatewayPolicyMappingsDTO = new GatewayPolicyMappingsDTO();
         gatewayPolicyMappingsDTO.appliedGatewayLabels(new ArrayList<>(policyData.getGatewayLabels()));
         gatewayPolicyMappingsDTO.description(policyData.getPolicyMappingDescription());
         gatewayPolicyMappingsDTO.displayName(policyData.getPolicyMappingName());
         gatewayPolicyMappingsDTO.id(policyData.getPolicyMappingId());
+
+        // When calling fromOperationPolicyListToDTO, apiUuid is null because this is a global policy mapping
+        // preserveCredentials is set to false as it is not yet supported via the REST API
         gatewayPolicyMappingsDTO.policyMapping(
-                OperationPolicyMappingUtil.fromOperationPolicyListToDTO(policyData.getGatewayPolicies()));
+                OperationPolicyMappingUtil.fromOperationPolicyListToDTO(policyData.getGatewayPolicies(), null, false));
 
         return gatewayPolicyMappingsDTO;
     }

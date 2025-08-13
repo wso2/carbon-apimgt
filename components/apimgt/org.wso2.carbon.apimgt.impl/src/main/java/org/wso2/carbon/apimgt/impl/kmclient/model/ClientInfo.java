@@ -60,6 +60,8 @@ public class ClientInfo {
     private Boolean pkceSupportPlain;
     @SerializedName("bypassClientCredentials")
     private Boolean bypassClientCredentials;
+    @SerializedName("application_scopes")
+    private List<String> applicationScopes;
 
     public String getClientId() {
 
@@ -233,5 +235,15 @@ public class ClientInfo {
 
     public void setBypassClientCredentials(Boolean bypassClientCredentials) {
         this.bypassClientCredentials = bypassClientCredentials;
+    }
+
+    public List<String> getApplicationScopes() {
+
+        return applicationScopes;
+    }
+
+    public void setApplicationScopes(List<String> applicationScopes) {
+
+        this.applicationScopes = applicationScopes;
     }
 }
