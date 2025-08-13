@@ -955,6 +955,8 @@ public final class APIConstants {
     public static final String KEY_VALIDATION_HANDLER_CLASSNAME = API_KEY_VALIDATOR + "KeyValidationHandlerClassName";
     public static final String SKIP_CREATE_RESIDENT_KEY_MANAGER = API_KEY_VALIDATOR + "SkipCreateResidentKeyManager";
     // Constants needed for KeyManager section
+    public static final String ENABLE_APPLICATION_SCOPES_RESIDENT_KM = API_KEY_VALIDATOR +
+            "EnableApplicationScopesForResidentKM";
     public static final String API_KEY_MANAGER = "APIKeyManager.";
     public static final String KEY_MANAGER_CLIENT = API_KEY_MANAGER + "KeyManagerClientImpl";
     public static final String KEY_MANAGER = "KeyManager";
@@ -2929,6 +2931,8 @@ public final class APIConstants {
         public static final String PASSWORD = "Password";
 
         public static final String KM_ADMIN_AS_APP_OWNER = "km_admin_as_app_owner";
+        public static final String ENABLE_APPLICATION_SCOPES = "enable_application_scopes";
+        public static final String APPLICATION_SCOPES = "application_scopes";
         public static final String SELF_VALIDATE_JWT = "self_validate_jwt";
         public static final String CLAIM_MAPPING = "claim_mappings";
         public static final String VALIDATION_TYPE = "validation_type";
@@ -2967,6 +2971,7 @@ public final class APIConstants {
         public static final String REFRESH_TOKEN_EXPIRY_TIME = "refresh_token_expiry_time";
         public static final String ID_TOKEN_EXPIRY_TIME = "id_token_expiry_time";
         public static final String NOT_APPLICABLE_VALUE = "N/A";
+        public static final String EMPTY_VALUE = "";
         public static final String PKCE_MANDATORY = "pkceMandatory";
         public static final String PKCE_SUPPORT_PLAIN = "pkceSupportPlain";
         public static final String BYPASS_CLIENT_CREDENTIALS = "bypassClientCredentials";
