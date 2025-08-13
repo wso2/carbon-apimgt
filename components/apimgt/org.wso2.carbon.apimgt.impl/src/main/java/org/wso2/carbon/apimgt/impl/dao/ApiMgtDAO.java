@@ -22091,21 +22091,21 @@ public class ApiMgtDAO {
      */
     public List<Backend> getBackends(String apiUuid, String organization) throws APIManagementException {
 
+        List<Backend> backendList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                List<Backend> backendList = getBackends(apiUuid, connection, organization);
+                backendList = getBackends(apiUuid, connection, organization);
                 connection.commit();
-                return backendList;
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Error while retrieving backends for apiUuid : " + apiUuid, e);
-                return Collections.emptyList(); // unreachable, handleException always throws
             }
         } catch (SQLException e) {
-            handleException("Error while establishing DB connection for retrieving backends of apiUuid : " + apiUuid, e);
-            return Collections.emptyList(); // unreachable
+            handleException("Error while establishing DB connection for retrieving backends of apiUuid : " + apiUuid,
+                    e);
         }
+        return backendList;
     }
 
     /**
@@ -22147,21 +22147,20 @@ public class ApiMgtDAO {
      */
     public Backend getBackend(String apiUuid, String backendId, String organization) throws APIManagementException {
 
+        Backend backend = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                Backend backend = getBackend(apiUuid, backendId, connection, organization);
+                backend = getBackend(apiUuid, backendId, connection, organization);
                 connection.commit();
-                return backend;
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Error while retrieving backends for API: " + apiUuid, e);
-                return null; // unreachable, handleException always throws
             }
         } catch (SQLException e) {
             handleException("Error while establishing DB connection for retrieving backends of API: " + apiUuid, e);
-            return null; // unreachable
         }
+        return backend;
     }
 
     /**
@@ -22229,8 +22228,7 @@ public class ApiMgtDAO {
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             for (URITemplate uriTemplate : uriTemplates) {
                 if (uriTemplate.getBackendOperationMapping() != null) {
-                    preparedStatement.setInt(1,
-                            uriTemplate.getId());
+                    preparedStatement.setInt(1, uriTemplate.getId());
                     preparedStatement.setString(2,
                             uriTemplate.getBackendOperationMapping().getBackendId());
                     preparedStatement.addBatch();
@@ -22276,8 +22274,7 @@ public class ApiMgtDAO {
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             for (URITemplate uriTemplate : uriTemplates) {
                 if (uriTemplate.getAPIOperationMapping() != null) {
-                    preparedStatement.setInt(1,
-                            uriTemplate.getId());
+                    preparedStatement.setInt(1, uriTemplate.getId());
                     preparedStatement.addBatch();
                 }
             }
@@ -22298,21 +22295,21 @@ public class ApiMgtDAO {
     public List<Backend> getBackendRevisions(String apiUuid, String revisionUuid, String organization)
             throws APIManagementException {
 
+        List<Backend> backendList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                List<Backend> backendList = getBackendRevisions(connection, apiUuid, revisionUuid, organization);
+                backendList = getBackendRevisions(connection, apiUuid, revisionUuid, organization);
                 connection.commit();
-                return backendList;
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Error while retrieving backends for apiUuid : " + apiUuid, e);
-                return Collections.emptyList(); // unreachable, handleException always throws
             }
         } catch (SQLException e) {
-            handleException("Error while establishing DB connection for retrieving backends of apiUuid : " + apiUuid, e);
-            return Collections.emptyList(); // unreachable
+            handleException("Error while establishing DB connection for retrieving backends of apiUuid : " + apiUuid,
+                    e);
         }
+        return backendList;
     }
 
     /**
@@ -22361,21 +22358,20 @@ public class ApiMgtDAO {
     public Backend getBackendRevision(String apiUuid, String revisionUuid, String backendId, String organization)
             throws APIManagementException {
 
+        Backend backend = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                Backend endpoints = getBackendRevision(connection, apiUuid, revisionUuid, backendId, organization);
+                backend = getBackendRevision(connection, apiUuid, revisionUuid, backendId, organization);
                 connection.commit();
-                return endpoints;
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Error while retrieving backends for API: " + apiUuid, e);
-                return null; // unreachable, handleException always throws
             }
         } catch (SQLException e) {
             handleException("Error while establishing DB connection for retrieving backends of API: " + apiUuid, e);
-            return null; // unreachable
         }
+        return backend;
     }
 
     /**
@@ -22411,7 +22407,6 @@ public class ApiMgtDAO {
 
     /**
      * Extracts a {@link Backend} object from the current row of the given {@link ResultSet}.
-     * <p>
      * Reads backend ID, name, endpoint configuration, and backend API definition from the result set.
      *
      * @param resultSet the {@link ResultSet} positioned at a valid row containing backend endpoint data
@@ -22499,13 +22494,22 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Gets MCP servers referenced by the given API.
+     *
+     * @param apiId        API identifier
+     * @param organization API organization
+     * @return list of referenced MCP servers
+     * @throws APIManagementException if DB access fails
+     */
     public List<API> getMCPServersUsedByAPI(int apiId, String organization) throws APIManagementException {
+
+        List<API> mcpServers = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                List<API> mcpServers = getMCPServersUsedByAPI(connection, apiId, organization);
+                mcpServers = getMCPServersUsedByAPI(connection, apiId, organization);
                 connection.commit();
-                return mcpServers;
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Error while retrieving backends for apiId : " + apiId, e);
@@ -22513,19 +22517,27 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while establishing DB connection for retrieving backends of apiId : " + apiId, e);
         }
-        return new ArrayList<>();
+        return mcpServers;
     }
 
+    /**
+     * Queries MCP servers linked to the given API using the provided DB connection.
+     *
+     * @param connection   database connection
+     * @param apiId        API identifier
+     * @param organization API organization
+     * @return list of referenced MCP servers
+     * @throws SQLException if query execution fails
+     */
     private List<API> getMCPServersUsedByAPI(Connection connection, int apiId, String organization)
             throws SQLException {
+
         String query = SQLConstants.GET_MCP_SERVER_BY_REFERENCED_API_ID;
-
         List<API> referencedMCPServers = new ArrayList<>();
-
         try (PreparedStatement getBackendPrepStmt = connection.prepareStatement(query)) {
             getBackendPrepStmt.setInt(1, apiId);
             getBackendPrepStmt.setString(2, organization);
-
+            getBackendPrepStmt.setString(3, APIConstants.API_TYPE_MCP);
             try (ResultSet resultSet = getBackendPrepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     String apiName = resultSet.getString("API_NAME");
@@ -22588,35 +22600,7 @@ public class ApiMgtDAO {
             }
             ps.executeBatch();
         } catch (SQLException e) {
-            throw new APIManagementException("Failed to add API metadata for API: " + apiUuid, e);
-        }
-    }
-
-    /**
-     * Adds metadata for a given API revision in a new DB transaction.
-     *
-     * @param apiId      API UUID
-     * @param revisionId Revision UUID
-     * @param metadata   key-value map
-     * @throws APIManagementException on DB errors
-     */
-    public void addAPIMetadataRevision(String apiId, String revisionId, Map<String, String> metadata)
-            throws APIManagementException {
-
-        if (metadata == null || metadata.isEmpty()) return;
-
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            connection.setAutoCommit(false);
-            try {
-                addAPIMetadataRevision(connection, apiId, revisionId, metadata);
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException("Failed to add API revision metadata for API: " + apiId
-                        + ", revision: " + revisionId, e);
-            }
-        } catch (SQLException e) {
-            handleException("Error establishing DB connection for adding revision metadata of API: " + apiId, e);
+            handleException("Failed to add API metadata for API: " + apiUuid, e);
         }
     }
 
@@ -22645,8 +22629,8 @@ public class ApiMgtDAO {
             }
             ps.executeBatch();
         } catch (SQLException e) {
-            throw new APIManagementException("Failed to add API revision metadata for API: "
-                    + apiUuid + ", revision: " + revisionUuid, e);
+            handleException("Failed to add API revision metadata for API: " + apiUuid + ", revision: " + revisionUuid,
+                    e);
         }
     }
 
@@ -22659,11 +22643,14 @@ public class ApiMgtDAO {
      */
     public Map<String, String> getCurrentAPIMetadata(String apiId) throws APIManagementException {
 
+        Map<String, String> metadataMap = new HashMap<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            return getCurrentAPIMetadata(connection, apiId);
+            metadataMap = getCurrentAPIMetadata(connection, apiId);
+            connection.commit();
         } catch (SQLException e) {
-            throw new APIManagementException("Error reading API metadata for API: " + apiId, e);
+            handleException("Error reading API metadata for API: " + apiId, e);
         }
+        return metadataMap;
     }
 
     /**
@@ -22686,7 +22673,7 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Failed to read API metadata for API: " + apiUuid, e);
+            handleException("Failed to read API metadata for API: " + apiUuid, e);
         }
         return metadata;
     }
@@ -22702,12 +22689,14 @@ public class ApiMgtDAO {
     public Map<String, String> getAPIMetadataRevision(String apiId, String revisionId)
             throws APIManagementException {
 
+        Map<String, String> metadataMap = new HashMap<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            return getAPIMetadataRevision(connection, apiId, revisionId);
+            metadataMap = getAPIMetadataRevision(connection, apiId, revisionId);
+            connection.commit();
         } catch (SQLException e) {
-            throw new APIManagementException("Error reading API revision metadata for API: "
-                    + apiId + ", revision: " + revisionId, e);
+            handleException("Error reading API revision metadata for API: " + apiId + ", revision: " + revisionId, e);
         }
+        return metadataMap;
     }
 
     /**
@@ -22722,20 +22711,20 @@ public class ApiMgtDAO {
     public Map<String, String> getAPIMetadataRevision(Connection connection, String apiUuid, String revisionUuid)
             throws APIManagementException {
 
-        Map<String, String> metadata = new HashMap<>();
+        Map<String, String> metadataMap = new HashMap<>();
         try (PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_API_METADATA_REVISION)) {
             ps.setString(1, apiUuid);
             ps.setString(2, revisionUuid);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    metadata.put(rs.getString("METADATA_KEY"), rs.getString("METADATA_VALUE"));
+                    metadataMap.put(rs.getString("METADATA_KEY"), rs.getString("METADATA_VALUE"));
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Failed to read API revision metadata for API: "
-                    + apiUuid + ", revision: " + revisionUuid, e);
+            handleException("Failed to read API revision metadata for API: " + apiUuid + ", revision: " + revisionUuid,
+                    e);
         }
-        return metadata;
+        return metadataMap;
     }
 
     /**
@@ -22773,7 +22762,7 @@ public class ApiMgtDAO {
             ps.setString(1, apiUuid);
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new APIManagementException("Failed to delete all API metadata for API: " + apiUuid, e);
+            handleException("Failed to delete all API metadata for API: " + apiUuid, e);
         }
     }
 
@@ -22793,8 +22782,8 @@ public class ApiMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to delete all API revision metadata for API: "
-                        + apiId + ", revision: " + revisionId, e);
+                handleException("Failed to delete all API revision metadata for API: " + apiId + ", revision: "
+                        + revisionId, e);
             }
         } catch (SQLException e) {
             handleException("Error establishing DB connection for deleting all revision metadata of API: " + apiId, e);
@@ -22817,8 +22806,8 @@ public class ApiMgtDAO {
             ps.setString(2, revisionUuid);
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new APIManagementException("Failed to delete all API revision metadata for API: "
-                    + apiUuid + ", revision: " + revisionUuid, e);
+            handleException("Failed to delete all API revision metadata for API: " + apiUuid + ", revision: "
+                    + revisionUuid, e);
         }
     }
 
@@ -22858,7 +22847,7 @@ public class ApiMgtDAO {
             ps.setString(1, apiUuid);
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new APIManagementException("Failed to delete all metadata (incl. revisions) for API: " + apiUuid, e);
+            handleException("Failed to delete all metadata (incl. revisions) for API: " + apiUuid, e);
         }
     }
 

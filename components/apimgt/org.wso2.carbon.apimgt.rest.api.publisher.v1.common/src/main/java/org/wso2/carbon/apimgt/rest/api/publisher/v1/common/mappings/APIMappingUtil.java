@@ -792,6 +792,10 @@ public class APIMappingUtil {
         if (protocolVersion != null && !protocolVersion.isEmpty()) {
             model.getMetadata().put(APIConstants.MCP.PROTOCOL_VERSION_KEY, protocolVersion);
         }
+        String displayName = dto.getDisplayName();
+        if (displayName != null && !displayName.isEmpty()) {
+            model.setDisplayName(displayName);
+        }
 
         try {
             GatewayAgentConfiguration gatewayConfiguration =
@@ -1157,19 +1161,12 @@ public class APIMappingUtil {
      */
     public static MCPServerMetadataDTO fromAPIToMCPServerMetadataDTO(API api) {
 
-        String context = api.getContextTemplate();
-        if (context.endsWith(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM)) {
-            context = context.replace(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM, EMPTY_STRING);
-        }
-
+        APIIdentifier apiId = api.getId();;
         MCPServerMetadataDTO mcpServerMetadataDTO = new MCPServerMetadataDTO();
-        mcpServerMetadataDTO.setContext(context);
-        mcpServerMetadataDTO.setId(api.getUuid());
-        APIIdentifier apiId = api.getId();
+        mcpServerMetadataDTO.setId(apiId.getUUID());
         mcpServerMetadataDTO.setName(apiId.getApiName());
         mcpServerMetadataDTO.setVersion(apiId.getVersion());
-        String providerName = api.getId().getProviderName();
-        mcpServerMetadataDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+        mcpServerMetadataDTO.setProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
 
         return mcpServerMetadataDTO;
     }
