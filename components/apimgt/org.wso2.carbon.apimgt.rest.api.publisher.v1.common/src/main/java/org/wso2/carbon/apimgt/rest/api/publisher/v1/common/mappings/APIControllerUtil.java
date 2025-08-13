@@ -235,7 +235,9 @@ public class APIControllerUtil {
                     }
                 }
             }
-            importedApiDto.setAdditionalPropertiesMap(additionalPropertiesMap);
+            if (!additionalPropertiesMap.isEmpty()) {
+                importedApiDto.setAdditionalPropertiesMap(additionalPropertiesMap);
+            }
         }
         return importedApiDto;
     }

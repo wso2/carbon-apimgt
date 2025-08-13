@@ -104,7 +104,7 @@ return null;
   }
 
   /**
-   * Backend target method
+   * Operation type for MCP Server (e.g., TOOL)
    **/
   public MCPServerOperationDTO feature(FeatureEnum feature) {
     this.feature = feature;
@@ -112,7 +112,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Backend target method")
+  @ApiModelProperty(value = "Operation type for MCP Server (e.g., TOOL)")
   @JsonProperty("feature")
   public FeatureEnum getFeature() {
     return feature;

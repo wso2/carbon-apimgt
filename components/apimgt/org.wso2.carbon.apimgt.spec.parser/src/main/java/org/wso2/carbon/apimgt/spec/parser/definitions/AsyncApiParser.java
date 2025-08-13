@@ -2232,13 +2232,13 @@ public class AsyncApiParser extends APIDefinition {
     public Set<URITemplate> generateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
                                              String mcpSubtype, Set<URITemplate> uriTemplates) {
 
-        return null;
+        throw new UnsupportedOperationException("MCP tool generation is not supported for Async API definitions.");
     }
 
     @Override
     public Set<URITemplate> updateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
                                            String mcpSubtype, Set<URITemplate> uriTemplates) {
 
-        return null;
+        throw new UnsupportedOperationException("MCP tool generation is not supported for Async API definitions.");
     }
 }

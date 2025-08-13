@@ -211,6 +211,6 @@ public class APIMgtGatewayConstants {
     public static final String MCP_REQUEST_BODY = "MCP_REQUEST_BODY";
     public static final String MCP_NO_AUTH_REQUEST = "MCP_NO_AUTH_REQUEST";
     public static final String MCP_RESOURCE= "/mcp";
-    public static final String MCP_WELL_KNOWN_RESOURCE = "/.well-known/oauth-authorization-server";
+    public static final String MCP_WELL_KNOWN_RESOURCE = "/.well-known/oauth-protected-resource";
 }
 

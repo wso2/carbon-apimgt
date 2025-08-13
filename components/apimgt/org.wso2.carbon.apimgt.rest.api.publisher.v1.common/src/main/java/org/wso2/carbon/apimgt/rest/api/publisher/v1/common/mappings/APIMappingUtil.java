@@ -1161,7 +1161,7 @@ public class APIMappingUtil {
      */
     public static MCPServerMetadataDTO fromAPIToMCPServerMetadataDTO(API api) {
 
-        APIIdentifier apiId = api.getId();;
+        APIIdentifier apiId = api.getId();
         MCPServerMetadataDTO mcpServerMetadataDTO = new MCPServerMetadataDTO();
         mcpServerMetadataDTO.setId(apiId.getUUID());
         mcpServerMetadataDTO.setName(apiId.getApiName());

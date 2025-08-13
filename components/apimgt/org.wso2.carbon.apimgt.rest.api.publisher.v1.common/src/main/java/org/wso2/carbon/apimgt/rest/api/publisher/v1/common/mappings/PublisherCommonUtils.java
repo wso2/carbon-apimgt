@@ -4775,8 +4775,8 @@ public class PublisherCommonUtils {
             throws APIManagementException {
 
         Set<URITemplate> mcpTools = parser.generateMCPTools(apiDefinition, refApiId, null, apiSubtype, uriTemplates);
-        if (mcpTools == null) {
-            throw new APIManagementException("Failed to generate MCP feature.");
+        if (mcpTools == null || mcpTools.isEmpty()) {
+            throw new APIManagementException("Failed to generate MCP features: no URI templates were produced.");
         }
         return mcpTools;
     }

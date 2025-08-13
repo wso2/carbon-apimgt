@@ -2368,7 +2368,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file=@openapi.json 
-          -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/create-from-backend-definition"'
+          -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/generate-from-openapi"'
       operationId: createMCPServerFromOpenAPI
 
   /mcp-servers/generate-from-mcp-server:
@@ -2376,7 +2376,7 @@ paths:
       tags:
         - MCP Servers
       summary: |
-        Create a MCP server using a third party MCP Server.
+        Create an MCP server by proxying a third-party MCP Server
       description: |
         This operation can be used to create a MCP server using a third party MCP Server. 
 
@@ -2435,7 +2435,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file=@openapi.json 
-          -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/create-from-backend-definition"'
+          -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/generate-from-mcp-server"'
       operationId: createMCPServerProxy
 
   /mcp-servers/generate-from-api:
@@ -2499,7 +2499,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/generate-from-api"'
       operationId: createMCPServerFromAPI
 
   /mcp-servers:
@@ -13884,7 +13884,7 @@ components:
           example: listBooks
         feature:
           type: string
-          description: Backend target method
+          description: Operation type for MCP Server (e.g., TOOL)
           enum:
             - TOOL
         authType:

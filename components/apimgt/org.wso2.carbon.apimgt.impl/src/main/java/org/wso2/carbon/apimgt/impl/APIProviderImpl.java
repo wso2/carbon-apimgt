@@ -626,7 +626,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (api.getBackends() != null && !api.getBackends().isEmpty()) {
             addBackend(api.getUuid(), api.getBackends(), api.getOrganization());
         }
-        if (!api.getMetadata().isEmpty()) {
+        if (api.getMetadata() != null && !api.getMetadata().isEmpty()) {
             apiMgtDAO.addAPIMetadata(api.getUuid(), api.getMetadata());
         }
         addURITemplates(apiId, api, tenantId);
@@ -2874,9 +2874,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
             apiMgtDAO.deleteAIConfiguration(api.getUuid());
         }
-        if (!api.getMetadata().isEmpty()) {
-            apiMgtDAO.deleteAllAPIMetadata(api.getUuid());
-        }
+        apiMgtDAO.deleteAllAPIMetadata(api.getUuid());
         if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
             if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
                 apiMgtDAO.removeApiOperationMapping(uriTemplates);
