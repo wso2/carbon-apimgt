@@ -89,7 +89,8 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.throttling.siddhi.extension.*;version="${project.version}"
+                            org.wso2.carbon.apimgt.throttling.siddhi.extension,
+                            org.wso2.carbon.apimgt.throttling.siddhi.extension.*
                         </Export-Package>
                         <Private-Package>
                             redis.clients.jedis.*,
@@ -105,7 +106,7 @@
                             org.slf4j.*;version="[1.6,2)",
                             *;resolution:=optional
                         </Import-Package>
-                        <Bundle-ClassPath>.</Bundle-ClassPath>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
