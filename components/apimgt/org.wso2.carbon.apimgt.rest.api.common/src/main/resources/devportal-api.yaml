@@ -6669,6 +6669,19 @@ components:
         orgWideAppUpdateEnabled:
           type: boolean
           default: false
+        devportalMode:
+          type: string
+          description: >
+            This indicates the mode of the Developer Portal.
+            Possible values are:
+            - HYBRID: Both MCP and API portals are enabled.
+            - MCP_ONLY: Only the MCP portal is enabled.
+            - API_ONLY: Only the API portal is enabled.
+          enum:
+            - HYBRID
+            - MCP_ONLY
+            - API_ONLY
+          default: HYBRID
     ApplicationAttribute:
       title: Application attributes
       type: object

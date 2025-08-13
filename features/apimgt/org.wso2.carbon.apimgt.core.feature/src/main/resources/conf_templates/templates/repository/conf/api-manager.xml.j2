@@ -415,7 +415,7 @@
     </AiConfiguration>
 
     <MCP>
-        <MCPPortalEnabled>{{apim.ai.mcp_portal_enabled}}</MCPPortalEnabled>
+        <Enabled>{{apim.ai.mcp_support_enabled}}</Enabled>
     </MCP>
 
     <!--
@@ -644,6 +644,7 @@
         {% if apim.devportal.create_default_application is defined %}
         <CreateDefaultApplication>{{apim.devportal.create_default_application}}</CreateDefaultApplication>
         {% endif %}
+        <Mode>{{apim.devportal.mode}}</Mode>
     </APIStore>
 
     <APIPublisher>

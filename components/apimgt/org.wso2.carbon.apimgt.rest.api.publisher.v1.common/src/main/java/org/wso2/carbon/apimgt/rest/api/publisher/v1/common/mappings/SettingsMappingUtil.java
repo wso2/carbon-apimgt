@@ -111,7 +111,7 @@ public class SettingsMappingUtil {
             settingsDTO.setDesignAssistantEnabled(config.getDesignAssistantConfigurationDto().isEnabled());
             settingsDTO.setAiAuthTokenProvided(config.getDesignAssistantConfigurationDto().isAuthTokenProvided() ||
                     config.getDesignAssistantConfigurationDto().isKeyProvided());
-            settingsDTO.setIsMCPPortalEnabled(config.isMCPPortalEnabled());
+            settingsDTO.setIsMCPSupportEnabled(config.isMCPSupportEnabled());
         }
         return settingsDTO;
     }
