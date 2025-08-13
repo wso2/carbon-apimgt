@@ -46,9 +46,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.DELEM_COLON;
+import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.API_NAME_DELIMITER;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.API_YAML_FILE_NAME;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.DEPLOYMENT_ENVIRONMENTS_FILE_NAME;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.DEPLOYMENT_ENVIRONMENT_VERSION;
@@ -88,6 +91,9 @@ public class FederatedGatewayUtil {
 
     public static void createNewAPIVersion(String apiUUID, String newVersion, String organization)
             throws APIManagementException {
+        if (Objects.isNull(newVersion)) {
+            throw new APIManagementException("Invalid new API version format: " + newVersion + " for API: " + apiUUID);
+        }
         APIProvider provider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                 getThreadLocalCarbonContext().getUsername());
         provider.createNewAPIVersion(apiUUID, newVersion, true, organization);
@@ -141,9 +147,10 @@ public class FederatedGatewayUtil {
         return yaml.dump(yamlRoot);
     }
 
-    public static String getAPIUUID(String apiName, String adminUsername, String organization) throws APIManagementException {
-        String[] parts = apiName.split(APIConstants.DELEM_COLON);
-        if (parts.length < 2) {
+    public static String getAPIUUID(String apiName, String adminUsername, String organization)
+            throws APIManagementException {
+        String[] parts = apiName.split(DELEM_COLON, apiName.lastIndexOf(DELEM_COLON));
+        if (parts.length != 2) {
             throw new APIManagementException("Invalid API identifier format: " + apiName);
         }
 
