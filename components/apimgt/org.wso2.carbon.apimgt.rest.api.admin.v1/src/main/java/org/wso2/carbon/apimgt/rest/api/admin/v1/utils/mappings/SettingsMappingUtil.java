@@ -188,6 +188,9 @@ public class SettingsMappingUtil {
             if (APIConstants.API_GATEWAY_TYPE_REGULAR.equals(type) || APIConstants.API_GATEWAY_TYPE_APK.equals(type)) {
                 List<String> supportedModes = new ArrayList<>();
                 supportedModes.add(GatewayMode.WRITE_ONLY.getMode());
+                if (APIConstants.API_GATEWAY_TYPE_APK.equals(type)) {
+                    supportedModes.add(GatewayMode.READ_ONLY.getMode());
+                }
                 gateway.setSupportedModes(supportedModes);
             }
             if (list.stream().noneMatch(obj -> obj.getType().equals(type))) {
