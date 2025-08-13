@@ -55,7 +55,7 @@ public interface VectorDBProviderService {
      * @param filter a map of filter criteria to apply when storing the response.
      * @throws APIManagementException if an error occurs during the storage operation.
      */
-    void store(double[] embeddings, CachableResponse response, Map<String, String> filter) throws APIManagementException;
+    void store(double[] embeddings, CacheableResponse response, Map<String, String> filter) throws APIManagementException;
 
     /**
      * Retrieves the most relevant response from the vector database for the given embedding.
@@ -64,6 +64,6 @@ public interface VectorDBProviderService {
      * @return The most relevant cached response.
      * @throws APIManagementException if an error occurs while retrieving the response.
      */
-    CachableResponse retrieve(double[] embeddings, Map<String, String> filter) throws APIManagementException;
+    CacheableResponse retrieve(double[] embeddings, Map<String, String> filter) throws APIManagementException;
 
 }

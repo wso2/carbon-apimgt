@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * It contains the response payload, timeout, HTTP headers, status code,
  * and other relevant information for caching purposes.
  */
-public class CachableResponse implements Serializable {
+public class CacheableResponse implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**

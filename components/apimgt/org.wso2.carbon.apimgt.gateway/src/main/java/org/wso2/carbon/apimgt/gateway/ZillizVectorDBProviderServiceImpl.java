@@ -21,19 +21,25 @@ package org.wso2.carbon.apimgt.gateway;
 import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.CachableResponse;
+import org.wso2.carbon.apimgt.api.CacheableResponse;
 import org.wso2.carbon.apimgt.api.VectorDBProviderService;
 import org.wso2.carbon.apimgt.api.dto.VectorDBProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Map;
 import java.util.UUID;
 
@@ -92,7 +98,7 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
             JSONObject checkPayload = new JSONObject();
             checkPayload.put(APIConstants.AI.VECTOR_DB_PROVIDER_COLLECTION_NAME, collectionName);
 
-            try (CloseableHttpResponse checkResponse = APIUtil.invokeZillizAPI(checkUrl, token, checkPayload.toString())) {
+            try (CloseableHttpResponse checkResponse = invokeZillizAPI(checkUrl, token, checkPayload.toString())) {
                 int checkStatusCode = checkResponse.getStatusLine().getStatusCode();
                 String responseStr = EntityUtils.toString(checkResponse.getEntity());
                 JSONObject checkObj = new JSONObject(responseStr);
@@ -142,7 +148,7 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
 
             String createUrl = uri + APIConstants.AI.VECTOR_DB_PROVIDER_ZILLIZ_CREATE_COLLECTION_ENDPOINT;
 
-            try (CloseableHttpResponse createResponse = APIUtil.invokeZillizAPI(createUrl, token, createPayload.toString())) {
+            try (CloseableHttpResponse createResponse = invokeZillizAPI(createUrl, token, createPayload.toString())) {
                 int createStatusCode = createResponse.getStatusLine().getStatusCode();
                 String createResponseStr = EntityUtils.toString(createResponse.getEntity());
                 if (createStatusCode != HttpStatus.SC_OK) {
@@ -228,7 +234,7 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
     }
 
     @Override
-    public void store(double[] embeddings, CachableResponse response, Map<String, String> filter) throws APIManagementException {
+    public void store(double[] embeddings, CacheableResponse response, Map<String, String> filter) throws APIManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Storing embeddings in Zilliz for API ID: " + filter.get(APIConstants.AI.VECTOR_DB_PROVIDER_API_ID));
         }
@@ -257,7 +263,7 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
         insertPayload.put(APIConstants.AI.VECTOR_DB_PROVIDER_COLLECTION_NAME, collectionName);
         insertPayload.put(APIConstants.AI.VECTOR_DB_PROVIDER_ZILLIZ_DATA, dataArr);
 
-        try (CloseableHttpResponse insertResponse = APIUtil.invokeZillizAPI(insertUrl, token, insertPayload.toString())) {
+        try (CloseableHttpResponse insertResponse = invokeZillizAPI(insertUrl, token, insertPayload.toString())) {
             int insertStatusCode = insertResponse.getStatusLine().getStatusCode();
             if (insertStatusCode != HttpStatus.SC_OK) {
                 String errorMsg = "Failed to insert entity for API ID " + filter.get(APIConstants.AI.VECTOR_DB_PROVIDER_API_ID)
@@ -280,7 +286,7 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
      * Retrieve the most similar response from the vector database.
      */
     @Override
-    public CachableResponse retrieve(double[] embeddings, Map<String, String> filter) throws APIManagementException {
+    public CacheableResponse retrieve(double[] embeddings, Map<String, String> filter) throws APIManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Retrieving similar response from Zilliz for API ID: " + filter.get(APIConstants.AI.VECTOR_DB_PROVIDER_API_ID));
         }
@@ -324,7 +330,7 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
             searchParams.put(APIConstants.AI.VECTOR_DB_PROVIDER_ZILLIZ_PARAMS, params);
             payload.put(APIConstants.AI.VECTOR_DB_PROVIDER_ZILLIZ_SEARCH_PARAMS, searchParams);
 
-            try (CloseableHttpResponse retrieveResponse = APIUtil.invokeZillizAPI(queryUrl, token, payload.toString())) {
+            try (CloseableHttpResponse retrieveResponse = invokeZillizAPI(queryUrl, token, payload.toString())) {
 
                 int responseStatusCode = retrieveResponse.getStatusLine().getStatusCode();
                 String responseString = EntityUtils.toString(retrieveResponse.getEntity());
@@ -345,7 +351,7 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
                 String responseJson = (String) topResult.get(APIConstants.AI.VECTOR_DB_PROVIDER_RESPONSE);
                 log.debug("Successfully retrieved similar response from Zilliz");
 
-                return gson.fromJson(responseJson, CachableResponse.class);
+                return gson.fromJson(responseJson, CacheableResponse.class);
             }
         } catch (IOException | org.json.JSONException e) {
             log.error("Error retrieving response from Zilliz. Query URL: " + uri
@@ -353,6 +359,33 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
                     + ", Collection: " + collectionName + ", Filter: " + filter, e);
             throw new APIManagementException("Error retrieving response from Zilliz (collection: " + collectionName +
                     ", filter: " + filter + "): " + e.getMessage(), e);
+        }
+    }
+
+    // This method is used to invoke Zilliz API with the provided endpoint, token, and payload.
+    private static CloseableHttpResponse invokeZillizAPI(String endpoint, String token, String payload)
+            throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Invoking Zilliz API endpoint: " + endpoint);
+        }
+        try {
+            HttpPost postRequest = new HttpPost(endpoint);
+            postRequest.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                    APIConstants.AUTHORIZATION_BEARER + token);
+            postRequest.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+
+            StringEntity entity = new StringEntity(payload, ContentType.APPLICATION_JSON);
+            postRequest.setEntity(entity);
+
+            URL url = new URL(endpoint);
+            int port = url.getPort();
+            String protocol = url.getProtocol();
+            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+
+            return APIUtil.executeHTTPRequest(postRequest, httpClient);
+        } catch (Exception e) {
+            log.error("Error invoking Zilliz API at endpoint: " + endpoint, e);
+            throw new APIManagementException("Error invoking Zilliz API at endpoint [" + endpoint + "]: " + e.getMessage(), e);
         }
     }
 }
