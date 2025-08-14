@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.VectorDBProviderConfigurationDTO;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -55,7 +56,7 @@ public interface VectorDBProviderService {
      * @param filter a map of filter criteria to apply when storing the response.
      * @throws APIManagementException if an error occurs during the storage operation.
      */
-    void store(double[] embeddings, CacheableResponse response, Map<String, String> filter) throws APIManagementException;
+    void store(double[] embeddings, Serializable response, Map<String, String> filter) throws APIManagementException;
 
     /**
      * Retrieves the most relevant response from the vector database for the given embedding.
@@ -64,6 +65,6 @@ public interface VectorDBProviderService {
      * @return The most relevant cached response.
      * @throws APIManagementException if an error occurs while retrieving the response.
      */
-    CacheableResponse retrieve(double[] embeddings, Map<String, String> filter) throws APIManagementException;
+    Serializable retrieve(double[] embeddings, Map<String, String> filter) throws APIManagementException;
 
 }

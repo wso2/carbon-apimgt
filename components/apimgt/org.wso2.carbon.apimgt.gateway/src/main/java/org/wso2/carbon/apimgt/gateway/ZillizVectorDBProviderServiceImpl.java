@@ -33,12 +33,12 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.CacheableResponse;
 import org.wso2.carbon.apimgt.api.VectorDBProviderService;
 import org.wso2.carbon.apimgt.api.dto.VectorDBProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.Map;
 import java.util.UUID;
@@ -234,7 +234,7 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
     }
 
     @Override
-    public void store(double[] embeddings, CacheableResponse response, Map<String, String> filter) throws APIManagementException {
+    public void store(double[] embeddings, Serializable response, Map<String, String> filter) throws APIManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Storing embeddings in Zilliz for API ID: " + filter.get(APIConstants.AI.VECTOR_DB_PROVIDER_API_ID));
         }
@@ -286,7 +286,7 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
      * Retrieve the most similar response from the vector database.
      */
     @Override
-    public CacheableResponse retrieve(double[] embeddings, Map<String, String> filter) throws APIManagementException {
+    public Serializable retrieve(double[] embeddings, Map<String, String> filter) throws APIManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Retrieving similar response from Zilliz for API ID: " + filter.get(APIConstants.AI.VECTOR_DB_PROVIDER_API_ID));
         }
@@ -351,7 +351,7 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
                 String responseJson = (String) topResult.get(APIConstants.AI.VECTOR_DB_PROVIDER_RESPONSE);
                 log.debug("Successfully retrieved similar response from Zilliz");
 
-                return gson.fromJson(responseJson, CacheableResponse.class);
+                return responseJson;
             }
         } catch (IOException | org.json.JSONException e) {
             log.error("Error retrieving response from Zilliz. Query URL: " + uri
