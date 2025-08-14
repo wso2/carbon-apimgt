@@ -18702,10 +18702,7 @@ components:
         type: string
         default: createdTime
         enum:
-          - apiName
-          - version
-          - createdTime
-          - status
+          - lastUpdatedTime
     sortOrder:
       name: sortOrder
       in: query

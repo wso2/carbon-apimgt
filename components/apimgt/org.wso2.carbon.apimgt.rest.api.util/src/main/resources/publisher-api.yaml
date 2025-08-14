@@ -15717,6 +15717,7 @@ components:
           - version
           - createdTime
           - status
+          - lastUpdated
     sortOrder:
       name: sortOrder
       in: query
