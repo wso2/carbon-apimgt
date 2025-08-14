@@ -3551,12 +3551,6 @@ public final class APIUtil {
         Map<String, GatewayAgentConfiguration> externalGatewayConnectorConfigurationMap =
                 ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
 
-        // Process OOTB supported external gateway types first to ensure correct order in publisher UI
-        if (externalGatewayConnectorConfigurationMap.containsKey(APIConstants.EXTERNAL_AWS_GATEWAY)) {
-            processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, externalGatewayConnectorConfigurationMap.get(APIConstants.EXTERNAL_AWS_GATEWAY));
-            externalGatewayConnectorConfigurationMap.remove(APIConstants.EXTERNAL_AWS_GATEWAY);
-        }
-
         externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
             processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, gatewayConfiguration);
         });
