@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
@@ -44,9 +45,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.DELEM_COLON;
+import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.API_NAME_DELIMITER;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.API_YAML_FILE_NAME;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.DEPLOYMENT_ENVIRONMENTS_FILE_NAME;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.DEPLOYMENT_ENVIRONMENT_VERSION;
@@ -72,16 +76,28 @@ public class FederatedGatewayUtil {
         context.setTenantId(APIUtil.getTenantId(adminUsername));
     }
 
-    public static void deleteAPI(String apiUUID, String organization, Environment environment) {
+    public static void deleteDeployment(String apiUUID, String organization, Environment environment) {
         try {
             APIProvider provider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
             provider.deleteAPIRevisions(apiUUID, organization);
-            provider.deleteAPI(apiUUID, organization);
-            log.debug("Deleted API: " + apiUUID + " organization: " + organization + " from environment: "
+            log.debug("Deleted Revision for: " + apiUUID + " organization: " + organization + " from environment: "
                     + environment.getName());
         } catch (APIManagementException e) {
-            log.error("Error deleting API: " + apiUUID + " organization: " + organization, e);
+            log.error("Error deleting Revision for API: " + apiUUID + " organization: " + organization, e);
+        }
+    }
+
+    public static void createNewAPIVersion(String apiUUID, String newVersion, String organization)
+            throws APIManagementException {
+        if (Objects.isNull(newVersion)) {
+            throw new APIManagementException("Invalid new API version format: " + newVersion + " for API: " + apiUUID);
+        }
+        APIProvider provider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
+                getThreadLocalCarbonContext().getUsername());
+        provider.createNewAPIVersion(apiUUID, newVersion, true, organization);
+        if (log.isDebugEnabled()) {
+            log.debug("Created new API version for: " + apiUUID + " in organization: " + organization);
         }
     }
 
@@ -128,6 +144,21 @@ public class FederatedGatewayUtil {
 
         Yaml yaml = new Yaml();
         return yaml.dump(yamlRoot);
+    }
+
+    public static String getAPIUUID(String apiName, String adminUsername, String organization)
+            throws APIManagementException {
+        String[] parts = apiName.split(DELEM_COLON, apiName.lastIndexOf(DELEM_COLON));
+        if (parts.length != 2) {
+            throw new APIManagementException("Invalid API identifier format: " + apiName);
+        }
+
+        APIIdentifier apiIdentifier = new APIIdentifier(adminUsername, parts[0], parts[1]);
+        String uuid = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieved UUID: " + uuid + " for API: " + apiName + " in organization: " + organization);
+        }
+        return uuid;
     }
 
     public static Map<String, List<String>> getDiscoveredAPIsFromFederatedGateway(Environment environment,

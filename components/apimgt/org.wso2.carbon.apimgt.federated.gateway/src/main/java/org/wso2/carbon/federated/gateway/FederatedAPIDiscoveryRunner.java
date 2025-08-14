@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscovery;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayMode;
@@ -50,12 +49,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.DELEM_COLON;
 import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil.fromAPItoDTO;
 import static org.wso2.carbon.federated.gateway.util.FederatedGatewayConstants.DISCOVERED_API_LIST;
 import static org.wso2.carbon.federated.gateway.util.FederatedGatewayConstants.PUBLISHED_API_LIST;
@@ -77,10 +79,14 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     /**
      * Schedules the discovery of APIs at a specified interval.
      *
-     * @param environment The environment from which APIs will be discovered.
-     * @param organization  The organization context for the discovery.
+     * @param environment  The environment from which APIs will be discovered.
+     * @param organization The organization context for the discovery.
      */
     public void scheduleDiscovery(Environment environment, String organization) {
+        if (log.isDebugEnabled()) {
+            log.debug("Scheduling federated API discovery for environment: " + environment.getName()
+                    + " in organization: " + organization);
+        }
         GatewayAgentConfiguration gatewayConfiguration = org.wso2.carbon.apimgt.impl.internal.
                 ServiceReferenceHolder.getInstance().
                 getExternalGatewayConnectorConfiguration(environment.getGatewayType());
@@ -121,6 +127,11 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                         }, 0, environment.getApiDiscoveryScheduledWindow(), TimeUnit.MINUTES);
                         scheduledDiscoveryTasks.put(environment.getName() + ":" + organization, newTask);
                     }
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully scheduled federated API discovery for environment: "
+                                + environment.getName() + " in organization: " + organization + " with interval: " +
+                                environment.getApiDiscoveryScheduledWindow() + " minutes");
+                    }
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException |
                          NoSuchMethodException | InvocationTargetException | APIManagementException e) {
                     log.error("Error while loading federated API discovery for environment "
@@ -142,8 +153,11 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
      */
     private void processDiscoveredAPIs(List<API> apisToDeployInGatewayEnv, Environment environment,
                                        String organization) {
-
         boolean debugLogEnabled = log.isDebugEnabled();
+        if (debugLogEnabled) {
+            log.debug("Processing discovered APIs for environment: " + environment.getName()
+                    + " in organization: " + organization);
+        }
         try {
             FederatedGatewayUtil.startTenantFlow(organization);
             String adminUsername = APIUtil.getAdminUsername();
@@ -160,16 +174,39 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                 }
                 APIDTO apidto = fromAPItoDTO(api);
                 try {
-                    String apiKey = apidto.getName() + APIConstants.DELEM_COLON + apidto.getVersion();
+                    String apiKey = apidto.getName() + DELEM_COLON + apidto.getVersion();
                     String envScopedKey = apidto.getName() + APIConstants.DELEM_UNDERSCORE
-                            + environment.getName() + APIConstants.DELEM_COLON + apidto.getVersion();
+                            + environment.getName() + DELEM_COLON + apidto.getVersion();
 
                     // Determine import mode
+                    boolean isNewVersion = false;
+                    String existingAPI = null;
                     boolean isPublishedAPIFromCP = alreadyAvailableAPIs.get(PUBLISHED_API_LIST).contains(apiKey) ||
                             alreadyAvailableAPIs.get(PUBLISHED_API_LIST).contains(envScopedKey);
                     boolean update = alreadyDiscoveredAPIsList.contains(apiKey) ||
                             alreadyDiscoveredAPIsList.contains(envScopedKey);
                     boolean alreadyExistsWithEnvScope = alreadyDiscoveredAPIsList.contains(envScopedKey);
+                    if (!update && !alreadyExistsWithEnvScope) {
+                        String envPathName = apidto.getName() + APIConstants.DELEM_UNDERSCORE
+                                + environment.getName();
+                        Optional<String> existingApiOpt = alreadyDiscoveredAPIsList.stream()
+                                .map(String::trim)
+                                .map(s -> {
+                                    int idx = s.lastIndexOf(DELEM_COLON);
+                                    if (idx <= 0 || idx >= s.length() - 1) return null;
+                                    String name = s.substring(0, idx);
+                                    String version = s.substring(idx + 1);
+                                    return new String[]{name, version};
+                                })
+                                .filter(Objects::nonNull)
+                                .filter(parts -> parts[0].equals(apidto.getName())
+                                        || parts[0].equals(envPathName)
+                                        && !parts[1].equals(apidto.getVersion()))
+                                .map(parts -> parts[0] + DELEM_COLON + parts[1])
+                                .findFirst();
+                        isNewVersion = existingApiOpt.isPresent();
+                        existingAPI = existingApiOpt.orElse(null);
+                    }
 
                     if (isPublishedAPIFromCP) {
                         continue;
@@ -180,6 +217,15 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             apidto.displayName(apidto.getName());
                         }
                         apidto.setName(apidto.getName() + APIConstants.DELEM_UNDERSCORE + environment.getName());
+                    }
+
+                    if (isNewVersion) {
+                        String existingApiUUID = FederatedGatewayUtil.getAPIUUID(existingAPI, adminUsername, organization);
+                        if (existingApiUUID != null) {
+                            FederatedGatewayUtil.createNewAPIVersion(existingApiUUID, apidto.getVersion(),
+                                    organization);
+                            update = true;
+                        }
                     }
 
                     // Map to DTO and create ZIP
@@ -193,7 +239,6 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
 
                     ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
 
-
                     // Import API
                     importExportAPI.importAPI(apiZip, true, true, update, true,
                             new String[]{APIConstants.APIM_PUBLISHER_SCOPE, APIConstants.APIM_CREATOR_SCOPE},
@@ -205,10 +250,10 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                         alreadyDiscoveredAPIsList.add(apidto.getName() + APIConstants.DELEM_COLON
                                 + apidto.getVersion());
                     }
-
-                    log.info((update ? "Updated" : "Created") + " API: " + api.getId().getName()
-                            + " in environment: " + environment.getName());
-
+                    if (debugLogEnabled) {
+                        log.debug((update ? "Updated" : "Created") + " API: " + api.getId().getName()
+                                + " in environment: " + environment.getName());
+                    }
                 } catch (IOException e) {
                     log.error("IO error while processing API: " + api.getId().getName()
                             + " in organization: " + organization, e);
@@ -217,38 +262,28 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             + " in organization: " + organization, e);
                 }
             }
-
             for (String apiName : alreadyDiscoveredAPIsList) {
                 if (!discoveredAPIsFromFederatedGW.contains(apiName)) {
                     try {
-                        String[] parts = apiName.split(APIConstants.DELEM_COLON);
-                        if (parts.length < 2) {
-                            log.warn("Invalid API identifier format for: " + apiName);
-                            continue;
-                        }
-
-                        APIIdentifier apiIdentifier = new APIIdentifier(adminUsername, parts[0], parts[1]);
-                        String apiUUID = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
-
+                        String apiUUID = FederatedGatewayUtil.getAPIUUID(apiName, adminUsername, organization);
                         if (apiUUID != null) {
-                            FederatedGatewayUtil.deleteAPI(apiUUID, organization, environment);
-                            if (debugLogEnabled) {
-                                log.debug("Removed API: " + apiName + " from environment: " + environment.getName());
-                            }
+                            FederatedGatewayUtil.deleteDeployment(apiUUID, organization, environment);
                         } else {
                             if (debugLogEnabled) {
                                 log.debug("API UUID not found for: " + apiName
                                         + ". Skipping removal from environment: " + environment.getName());
                             }
                         }
-
                     } catch (Exception e) {
-                        log.error("Failed to delete API: " + apiName + " from environment: "
+                        log.error("Failed to delete revision for API: " + apiName + " from environment: "
                                 + environment.getName(), e);
                     }
                 }
             }
-
+            if (debugLogEnabled) {
+                log.debug("Successfully processed discovered APIs for environment: " + environment.getName()
+                        + " in organization: " + organization);
+            }
         } catch (APIManagementException e) {
             log.error("Failed during federated API processing for environment: " + environment.getName() +
                     " and organization: " + organization, e);
