@@ -120,6 +120,7 @@ import java.util.UUID;
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.constructEndpointConfigForService;
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.validateScopes;
 import static org.wso2.carbon.apimgt.impl.restapi.Constants.CHARSET;
+import static org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs;
 
 public class ApisApiServiceImplUtils {
 
@@ -789,7 +790,7 @@ public class ApisApiServiceImplUtils {
 
         Backend backend = new Backend();
         backend.setId(backendApiId);
-        backend.setName(APIConstants.AI.MCP_DEFAULT_BACKEND_NAME);
+        backend.setName(APIConstants.MCP.MCP_DEFAULT_BACKEND_NAME);
         backend.setDefinition(backendDefinition);
         backend.setEndpointConfig(endpointConfig);
         return backend;
@@ -811,7 +812,7 @@ public class ApisApiServiceImplUtils {
             throws APIManagementException {
 
         Set<URITemplate> mcpTools;
-        if (subtype.equals(APIConstants.API_SUBTYPE_SERVER_PROXY)) {
+        if (APIConstants.API_SUBTYPE_SERVER_PROXY.equals(subtype)) {
             mcpTools = findMatchingTools(backendApiDefinition, uriTemplates, backendId);
         } else {
             mcpTools = parser.generateMCPTools(backendApiDefinition, null, backendId, subtype, uriTemplates);
@@ -851,13 +852,13 @@ public class ApisApiServiceImplUtils {
 
         if (StringUtils.isBlank(backendJson)) {
             throw new APIManagementException("Backend API definition cannot be empty.",
-                    ExceptionCodes.MCP_SERVER_VALIDATION_FAILED);
+                    ExceptionCodes.MCP_SERVER_TOOL_LIST_GENERATION_FAILED);
         }
         try {
             return new org.json.JSONObject(backendJson);
         } catch (org.json.JSONException e) {
             throw new APIManagementException("Invalid backend API definition JSON: " + e.getMessage(), e,
-                    ExceptionCodes.MCP_SERVER_VALIDATION_FAILED);
+                    ExceptionCodes.MCP_SERVER_TOOL_LIST_GENERATION_FAILED);
         }
     }
 
@@ -937,7 +938,7 @@ public class ApisApiServiceImplUtils {
             String operationVerb = (backendOperation.getVerb() != null) ? backendOperation.getVerb().toString() : null;
             String operationTarget = StringUtils.trimToNull(backendOperation.getTarget());
 
-            if (!APIConstants.MCP.MCP_FEATURE_TYPE_TOOL.equalsIgnoreCase(operationVerb) || operationTarget == null) {
+            if (!SupportedHTTPVerbs.TOOL.toString().equalsIgnoreCase(operationVerb) || operationTarget == null) {
                 continue;
             }
 

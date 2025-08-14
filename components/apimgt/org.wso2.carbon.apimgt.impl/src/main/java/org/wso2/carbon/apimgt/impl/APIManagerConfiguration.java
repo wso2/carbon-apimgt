@@ -847,17 +847,20 @@ public class APIManagerConfiguration {
     private void setDevportalConfigurations(OMElement omElement) {
 
         if (omElement == null) {
-            log.debug("MCP Server configuration element is null. Skipping configuration parsing.");
+            log.debug("Devportal configuration element is null. Skipping configuration parsing.");
             return;
         }
-        OMElement devportalModeOmElement =
-                omElement.getFirstChildWithName(new QName(APIConstants.DEVPORTAL_MODE));
-        if (devportalModeOmElement != null) {
+        OMElement devportalModeOmElement = omElement.getFirstChildWithName(new QName(APIConstants.DEVPORTAL_MODE));
+        if (devportalModeOmElement != null && StringUtils.isNotEmpty(devportalModeOmElement.getText())) {
             String devportalModeStr = devportalModeOmElement.getText().trim().toUpperCase();
-
             if (APIConstants.DEVPORTAL_MODES.contains(devportalModeStr)) {
                 devportalMode = devportalModeStr;
+            } else {
+                log.warn("Invalid Devportal mode '" + devportalModeStr + "'. Falling back to default: "
+                        + devportalMode);
             }
+        } else if (log.isDebugEnabled()) {
+            log.debug("Devportal mode is not specified. Using default: " + devportalMode);
         }
     }
 

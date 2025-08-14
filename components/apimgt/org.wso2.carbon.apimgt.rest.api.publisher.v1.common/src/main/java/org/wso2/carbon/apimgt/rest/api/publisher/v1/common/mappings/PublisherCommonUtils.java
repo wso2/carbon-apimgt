@@ -471,13 +471,13 @@ public class PublisherCommonUtils {
     private static void populateExistingSchemaDefinitions(API apiToUpdate, Set<URITemplate> existingTemplates) {
 
         for (URITemplate uriTemplate : apiToUpdate.getUriTemplates()) {
-            if (!APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE.equals(uriTemplate.getHTTPVerb())) {
+            if (!APIConstants.MCP.MCP_DEFAULT_FEATURE_TYPE.equals(uriTemplate.getHTTPVerb())) {
                 continue;
             }
             uriTemplate.setSchemaDefinition(
                     existingTemplates.stream()
                             .filter(existing ->
-                                    APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE.equals(existing.getHTTPVerb()) &&
+                                    APIConstants.MCP.MCP_DEFAULT_FEATURE_TYPE.equals(existing.getHTTPVerb()) &&
                                             Objects.equals(existing.getUriTemplate(), uriTemplate.getUriTemplate()))
                             .map(URITemplate::getSchemaDefinition)
                             .findFirst()

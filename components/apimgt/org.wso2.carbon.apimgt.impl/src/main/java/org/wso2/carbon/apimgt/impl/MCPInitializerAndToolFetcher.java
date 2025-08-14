@@ -251,24 +251,24 @@ public class MCPInitializerAndToolFetcher {
 
         if (toolsJson == null) {
             throw new APIManagementException("No response received from MCP server (tools/list).",
-                    ExceptionCodes.MCP_SERVER_VALIDATION_FAILED);
+                    ExceptionCodes.MCP_SERVER_TOOL_LIST_GENERATION_FAILED);
         }
         if (!toolsJson.has(APIConstants.MCP.TOOLS_KEY)) {
             throw new APIManagementException("Missing 'tools' field in tools/list response.",
-                    ExceptionCodes.MCP_SERVER_VALIDATION_FAILED);
+                    ExceptionCodes.MCP_SERVER_TOOL_LIST_GENERATION_FAILED);
         }
 
         org.json.JSONArray toolsArray = toolsJson.optJSONArray(APIConstants.MCP.TOOLS_KEY);
         if (toolsArray == null) {
             throw new APIManagementException("Unexpected 'tools' format: expected an array.",
-                    ExceptionCodes.MCP_SERVER_VALIDATION_FAILED);
+                    ExceptionCodes.MCP_SERVER_TOOL_LIST_GENERATION_FAILED);
         }
         if (toolsArray.length() == 0) {
             if (log.isDebugEnabled()) {
                 log.debug("Retrieved 0 tool(s) from MCP server.");
             }
             throw new APIManagementException("MCP server returned an empty tool list.",
-                    ExceptionCodes.MCP_SERVER_VALIDATION_FAILED);
+                    ExceptionCodes.MCP_SERVER_TOOL_LIST_GENERATION_FAILED);
         }
 
         return toolsArray;

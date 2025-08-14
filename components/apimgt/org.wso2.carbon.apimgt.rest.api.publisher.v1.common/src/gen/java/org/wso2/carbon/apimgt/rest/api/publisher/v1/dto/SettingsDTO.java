@@ -48,8 +48,8 @@ public class SettingsDTO   {
     private Boolean allowSubscriptionValidationDisabling = true;
     private Boolean designAssistantEnabled = true;
     private Boolean aiAuthTokenProvided = false;
-    private Boolean isMCPSupportEnabled = true;
     private Boolean isGatewayNotificationEnabled = false;
+    private Boolean isMCPSupportEnabled = true;
     private List<SettingsCustomPropertiesDTO> customProperties = new ArrayList<SettingsCustomPropertiesDTO>();
 
   /**
@@ -428,6 +428,24 @@ public class SettingsDTO   {
   }
 
   /**
+   * Is Gateway Notification Enabled
+   **/
+  public SettingsDTO isGatewayNotificationEnabled(Boolean isGatewayNotificationEnabled) {
+    this.isGatewayNotificationEnabled = isGatewayNotificationEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Is Gateway Notification Enabled")
+  @JsonProperty("isGatewayNotificationEnabled")
+  public Boolean isIsGatewayNotificationEnabled() {
+    return isGatewayNotificationEnabled;
+  }
+  public void setIsGatewayNotificationEnabled(Boolean isGatewayNotificationEnabled) {
+    this.isGatewayNotificationEnabled = isGatewayNotificationEnabled;
+  }
+
+  /**
    * This indicates whether the MCP support is enabled or not.
    **/
   public SettingsDTO isMCPSupportEnabled(Boolean isMCPSupportEnabled) {
@@ -435,7 +453,7 @@ public class SettingsDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "This indicates whether the MCP support is enabled or not.")
   @JsonProperty("isMCPSupportEnabled")
   public Boolean isIsMCPSupportEnabled() {
@@ -445,25 +463,7 @@ public class SettingsDTO   {
     this.isMCPSupportEnabled = isMCPSupportEnabled;
   }
 
-    /**
-     * Is Gateway Notification Enabled
-     **/
-    public SettingsDTO isGatewayNotificationEnabled(Boolean isGatewayNotificationEnabled) {
-        this.isGatewayNotificationEnabled = isGatewayNotificationEnabled;
-        return this;
-    }
-
-
-    @ApiModelProperty(value = "Is Gateway Notification Enabled")
-    @JsonProperty("isGatewayNotificationEnabled")
-    public Boolean isIsGatewayNotificationEnabled() {
-        return isGatewayNotificationEnabled;
-    }
-    public void setIsGatewayNotificationEnabled(Boolean isGatewayNotificationEnabled) {
-        this.isGatewayNotificationEnabled = isGatewayNotificationEnabled;
-    }
-
-    /**
+  /**
    **/
   public SettingsDTO customProperties(List<SettingsCustomPropertiesDTO> customProperties) {
     this.customProperties = customProperties;
@@ -512,14 +512,14 @@ public class SettingsDTO   {
         Objects.equals(allowSubscriptionValidationDisabling, settings.allowSubscriptionValidationDisabling) &&
         Objects.equals(designAssistantEnabled, settings.designAssistantEnabled) &&
         Objects.equals(aiAuthTokenProvided, settings.aiAuthTokenProvided) &&
-        Objects.equals(isMCPSupportEnabled, settings.isMCPSupportEnabled) &&
         Objects.equals(isGatewayNotificationEnabled, settings.isGatewayNotificationEnabled) &&
+        Objects.equals(isMCPSupportEnabled, settings.isMCPSupportEnabled) &&
         Objects.equals(customProperties, settings.customProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, designAssistantEnabled, aiAuthTokenProvided, isMCPSupportEnabled, isGatewayNotificationEnabled,  customProperties);
+    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, designAssistantEnabled, aiAuthTokenProvided, isGatewayNotificationEnabled, isMCPSupportEnabled, customProperties);
   }
 
   @Override
@@ -548,8 +548,8 @@ public class SettingsDTO   {
     sb.append("    allowSubscriptionValidationDisabling: ").append(toIndentedString(allowSubscriptionValidationDisabling)).append("\n");
     sb.append("    designAssistantEnabled: ").append(toIndentedString(designAssistantEnabled)).append("\n");
     sb.append("    aiAuthTokenProvided: ").append(toIndentedString(aiAuthTokenProvided)).append("\n");
+    sb.append("    isGatewayNotificationEnabled: ").append(toIndentedString(isGatewayNotificationEnabled)).append("\n");
     sb.append("    isMCPSupportEnabled: ").append(toIndentedString(isMCPSupportEnabled)).append("\n");
-      sb.append("    isGatewayNotificationEnabled: ").append(toIndentedString(isGatewayNotificationEnabled)).append("\n");
     sb.append("    customProperties: ").append(toIndentedString(customProperties)).append("\n");
     sb.append("}");
     return sb.toString();

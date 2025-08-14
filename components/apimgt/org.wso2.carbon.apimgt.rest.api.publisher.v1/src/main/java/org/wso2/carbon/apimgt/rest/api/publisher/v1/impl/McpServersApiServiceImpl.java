@@ -92,6 +92,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ImportAPIResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerProxyRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
@@ -888,19 +889,25 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * Creates a new MCP server using the provided additional properties and endpoint configurations.
-     * Validates the input parameters and performs the creation operation.
+     * Creates a new MCP server proxy using the provided request DTO.
+     * Validates the request and extracts necessary parameters for the MCP server.
      *
-     * @param url                  URL of the OpenAPI definition
-     * @param additionalProperties JSON string containing additional properties for the API
-     * @param securityInfo         JSON string containing security information for the API
-     * @param messageContext       Message context of the request
-     * @return Response containing the created MCPServerDTO or an error response
-     * @throws APIManagementException if an error occurs during import or validation
+     * @param mcPServerProxyRequest    The request DTO containing MCP server details.
+     * @param messageContext           Message context of the request.
+     * @return Response containing the created MCPServerDTO or an error response.
+     * @throws APIManagementException if an error occurs during creation or validation.
      */
-    public Response createMCPServerProxy(String url, String additionalProperties, String securityInfo,
-                                         MessageContext messageContext)
+    public Response createMCPServerProxy(MCPServerProxyRequestDTO mcPServerProxyRequest, MessageContext messageContext)
             throws APIManagementException {
+
+        if (mcPServerProxyRequest == null) {
+            throw new APIManagementException("Request body cannot be null",
+                    ExceptionCodes.MCP_REQUEST_BODY_CANNOT_BE_NULL);
+        }
+
+        String url = StringUtils.trimToEmpty(mcPServerProxyRequest.getUrl());
+        String additionalProperties = StringUtils.trimToEmpty(mcPServerProxyRequest.getAdditionalProperties());
+        String securityInfo = StringUtils.trimToEmpty(mcPServerProxyRequest.getSecurityInfo());
 
         if (StringUtils.isBlank(additionalProperties)) {
             throw new APIManagementException("'additionalProperties' is required and should not be null",
@@ -2307,6 +2314,11 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
             if ((header == null) != (value == null)) {
                 RestApiUtil.handleBadRequest("Provide both security header and value together.", log);
+            }
+
+            if ((header != null && (header.contains("\r") || header.contains("\n"))) ||
+                    (value != null && (value.contains("\r") || value.contains("\n")))) {
+                RestApiUtil.handleBadRequest("Security header/value must not contain CR or LF characters.", log);
             }
 
             securityInfo.setHeader(header);

@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerProxyRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
@@ -50,7 +51,7 @@ public interface McpServersApiService {
       public Response changeMCPServerLifecycle(String action, String mcpServerId, String lifecycleChecklist, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response createMCPServerFromAPI(MCPServerDTO mcPServerDTO, String openAPIVersion, MessageContext messageContext) throws APIManagementException;
       public Response createMCPServerFromOpenAPI(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, MessageContext messageContext) throws APIManagementException;
-      public Response createMCPServerProxy(String url, String additionalProperties, String securityInfo, MessageContext messageContext) throws APIManagementException;
+      public Response createMCPServerProxy(MCPServerProxyRequestDTO mcPServerProxyRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response createMCPServerRevision(String mcpServerId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) throws APIManagementException;
       public Response createNewMCPServerVersion(String newVersion, String mcpServerId, Boolean defaultVersion, String serviceVersion, MessageContext messageContext) throws APIManagementException;
       public Response deleteCommentOfMCPServer(String commentId, String mcpServerId, String ifMatch, MessageContext messageContext) throws APIManagementException;
