@@ -23,7 +23,7 @@
         <field type="text" required="true">
             <name>Name</name>
         </field>
-        <field type="text" required="true">
+        <field type="text">
             <name>Display Name</name>
         </field>
         <field type="text" required="true">

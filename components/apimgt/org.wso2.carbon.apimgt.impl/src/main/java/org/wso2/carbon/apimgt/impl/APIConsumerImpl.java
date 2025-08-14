@@ -3761,8 +3761,12 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     gatewayConfiguration.getDiscoveryImplementation()) && api.isInitiatedFromGateway()) {
                 Map<String, String> extractedURLs = extractEndpointUrlsForDiscoveredApi(api);
                 if (extractedURLs == null) {
-                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, vhost.getHttpsUrl());
-                    hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, vhost.getHttpUrl());
+                    if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)) {
+                        hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, vhost.getHttpUrl());
+                    }
+                    if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)) {
+                        hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, vhost.getHttpsUrl());
+                    }
                 } else {
                     hostsWithSchemes = extractedURLs;
                 }
@@ -3794,21 +3798,47 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
 
     private static Map<String, String> extractEndpointUrlsForDiscoveredApi(API api) {
-        JsonElement configElement = new JsonParser().parse(api.getSwaggerDefinition());
-        JsonObject configObject = configElement.getAsJsonObject();  //swaggerDefinition as a json object
-        JsonArray servers = configObject.getAsJsonArray("servers");
-        JsonObject server = servers.get(0).getAsJsonObject();
-        String url = server.get("url").getAsString();
-        JsonObject variables = server.getAsJsonObject("variables");
-        JsonObject basePath = variables.getAsJsonObject("basePath");
-        String stageName = basePath.get("default").getAsString();
-        String serverUrl = url.replace("{basePath}", stageName);
-        if (StringUtils.isEmpty(serverUrl)) {
+        try {
+            if (StringUtils.isBlank(api.getSwaggerDefinition())) {
+                return null;
+            }
+            JsonElement configElement = JsonParser.parseString(api.getSwaggerDefinition());
+            if (!configElement.isJsonObject()) {
+                return null;
+            }
+            JsonObject configObject = configElement.getAsJsonObject();
+            JsonArray servers = configObject.getAsJsonArray("servers");
+            if (servers == null || servers.isEmpty()) {
+                return null;
+            }
+            JsonObject server = servers.get(0).getAsJsonObject();
+            if (server == null || !server.has("url")) {
+                return null;
+            }
+            String resolvedUrl = server.get("url").getAsString();
+            JsonObject variables = server.getAsJsonObject("variables");
+            if (variables != null && variables.has("basePath")) {
+                JsonObject basePath = variables.getAsJsonObject("basePath");
+                if (basePath != null && basePath.has("default")) {
+                    String stageName = basePath.get("default").getAsString();
+                    resolvedUrl = resolvedUrl
+                            .replace("/{basePath}", "/" + stageName)
+                            .replace("{basePath}", stageName);
+                }
+            }
+            if (StringUtils.isBlank(resolvedUrl)) {
+                return null;
+            }
+            Map<String, String> hostsWithSchemes = new HashMap<>();
+            if (StringUtils.startsWithIgnoreCase(resolvedUrl, APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
+                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, resolvedUrl);
+            } else {
+                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, resolvedUrl);
+            }
+            return hostsWithSchemes;
+        } catch (RuntimeException e) {
             return null;
         }
-        Map<String, String> hostsWithSchemes = new HashMap<>();
-        hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, serverUrl);
-        return hostsWithSchemes;
     }
 
     private String getBasePath(String apiTenantDomain, String basePath) throws APIManagementException {
