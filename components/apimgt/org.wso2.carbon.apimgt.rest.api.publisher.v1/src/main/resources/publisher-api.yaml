@@ -18710,7 +18710,7 @@ components:
       name: sortOrder
       in: query
       description: |
-        Order of sorting(ascending/descending).
+        Order of sorting (ascending/descending).
       schema:
         type: string
         default: desc
