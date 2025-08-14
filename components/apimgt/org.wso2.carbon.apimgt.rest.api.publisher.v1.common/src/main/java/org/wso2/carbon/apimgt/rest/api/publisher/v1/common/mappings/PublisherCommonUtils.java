@@ -105,6 +105,7 @@ import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.MCPInitializerAndToolFetcher;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
@@ -129,7 +130,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationRespons
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerOperationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationResponseToolInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityInfoDTO;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS2Parser;
@@ -401,7 +406,7 @@ public class PublisherCommonUtils {
      * @param apiProvider API Provider instance.
      * @throws APIManagementException If an error occurs while handling the direct endpoint subtype.
      */
-    private static void handleDirectEndpointSubtype(API apiToUpdate, API originalAPI, APIProvider apiProvider)
+    private static void handleBackendSubtypes(API apiToUpdate, API originalAPI, APIProvider apiProvider)
             throws APIManagementException {
 
         populateExistingSchemaDefinitions(apiToUpdate, originalAPI.getUriTemplates());
@@ -415,13 +420,18 @@ public class PublisherCommonUtils {
         }
         Backend backend = backends.get(0);
 
-        Set<URITemplate> updatedTemplates = updateTemplatesFromDefinition(
-                backend.getDefinition(),
-                null,
-                backend.getId(),
-                originalAPI.getSubtype(),
-                apiToUpdate.getUriTemplates()
-        );
+        Set<URITemplate> updatedTemplates = new HashSet<>();
+        if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(originalAPI.getSubtype())) {
+            updatedTemplates = updateTemplatesFromDefinition(backend.getDefinition(), null,
+                    backend.getId(), originalAPI.getSubtype(), apiToUpdate.getUriTemplates()
+            );
+        } else if (APIConstants.API_SUBTYPE_SERVER_PROXY.equals(originalAPI.getSubtype())) {
+            updatedTemplates = ApisApiServiceImplUtils.findMatchingTools(backend.getDefinition(),
+                    apiToUpdate.getUriTemplates(), backend.getId());
+        }
+        if (updatedTemplates == null || updatedTemplates.isEmpty()) {
+            throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
+        }
         apiToUpdate.setUriTemplates(updatedTemplates);
     }
 
@@ -442,19 +452,15 @@ public class PublisherCommonUtils {
             throw new APIManagementException("No URI templates defined for existing API subtype.");
         }
 
-        APIOperationMapping mapping = uriTemplates.iterator().next().getExistingAPIOperationMapping();
+        APIOperationMapping mapping = uriTemplates.iterator().next().getAPIOperationMapping();
         if (mapping == null) {
             throw new APIManagementException("API operation mapping is missing in the URI template.");
         }
 
         API refApi = fetchReferencedApi(mapping, apiProvider, originalAPI.getOrganization());
 
-        Set<URITemplate> updatedTemplates = updateTemplatesFromDefinition(
-                refApi.getSwaggerDefinition(),
-                refApi.getId(),
-                null,
-                originalAPI.getSubtype(),
-                uriTemplates
+        Set<URITemplate> updatedTemplates = updateTemplatesFromDefinition(refApi.getSwaggerDefinition(), refApi.getId(),
+                null, originalAPI.getSubtype(), uriTemplates
         );
         apiToUpdate.setUriTemplates(updatedTemplates);
     }
@@ -468,13 +474,13 @@ public class PublisherCommonUtils {
     private static void populateExistingSchemaDefinitions(API apiToUpdate, Set<URITemplate> existingTemplates) {
 
         for (URITemplate uriTemplate : apiToUpdate.getUriTemplates()) {
-            if (!APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE.equals(uriTemplate.getHTTPVerb())) {
+            if (!APIConstants.MCP.MCP_DEFAULT_FEATURE_TYPE.equals(uriTemplate.getHTTPVerb())) {
                 continue;
             }
             uriTemplate.setSchemaDefinition(
                     existingTemplates.stream()
                             .filter(existing ->
-                                    APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE.equals(existing.getHTTPVerb()) &&
+                                    APIConstants.MCP.MCP_DEFAULT_FEATURE_TYPE.equals(existing.getHTTPVerb()) &&
                                             Objects.equals(existing.getUriTemplate(), uriTemplate.getUriTemplate()))
                             .map(URITemplate::getSchemaDefinition)
                             .findFirst()
@@ -502,14 +508,7 @@ public class PublisherCommonUtils {
         APIDefinitionValidationResponse validationResponse =
                 ApisApiServiceImplUtils.validateOpenAPIDefinition(null, null, definition, null, true);
 
-        return validationResponse.getParser().updateMCPTools(
-                definition,
-                refApiId,
-                backendId,
-                APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE,
-                subtype,
-                templates
-        );
+        return validationResponse.getParser().updateMCPTools(definition, refApiId, backendId, subtype, templates);
     }
 
     /**
@@ -940,10 +939,8 @@ public class PublisherCommonUtils {
      * @param tokenScopes    token scopes
      * @return updated API
      * @throws APIManagementException If an error occurs while updating the API and API definition
-     * @throws ParseException         If an error occurs while parsing the endpoint configuration
-     * @throws CryptoException        If an error occurs while encrypting the secret key of API
      */
-    private static API prepareForUpdateApi(API originalAPI, MCPServerDTO apiDtoToUpdate, APIProvider apiProvider,
+    public static API prepareForUpdateApi(API originalAPI, MCPServerDTO apiDtoToUpdate, APIProvider apiProvider,
                                            String[] tokenScopes)
             throws APIManagementException {
 
@@ -1088,10 +1085,10 @@ public class PublisherCommonUtils {
         } else {
             apiToUpdate.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         }
-        if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(originalAPI.getSubtype())) {
-            handleDirectEndpointSubtype(apiToUpdate, originalAPI, apiProvider);
-        } else if (APIConstants.API_SUBTYPE_EXISTING_API.equals(originalAPI.getSubtype())) {
+        if (APIConstants.API_SUBTYPE_EXISTING_API.equals(originalAPI.getSubtype())) {
             handleExistingApiSubtype(apiToUpdate, originalAPI, apiProvider);
+        } else {
+            handleBackendSubtypes(apiToUpdate, originalAPI, apiProvider);
         }
         apiToUpdate.setGatewayType(apiDtoToUpdate.getGatewayType());
         List<APICategory> apiCategories = apiToUpdate.getApiCategories();
@@ -1113,6 +1110,7 @@ public class PublisherCommonUtils {
 
         apiToUpdate.setOrganization(originalAPI.getOrganization());
         apiToUpdate.setSubtype(originalAPI.getSubtype());
+
         return apiToUpdate;
     }
 
@@ -2420,11 +2418,11 @@ public class PublisherCommonUtils {
 
         URITemplate template = apiToAdd.getUriTemplates().iterator().next();
 
-        if (template == null || template.getExistingAPIOperationMapping() == null) {
+        if (template == null || template.getAPIOperationMapping() == null) {
             return apiToAdd.getUriTemplates();
         }
 
-        String backendApiUuid = template.getExistingAPIOperationMapping().getApiUuid();
+        String backendApiUuid = template.getAPIOperationMapping().getApiUuid();
 
         API refApi = StringUtils.isNotEmpty(backendApiUuid)
                 ? apiProvider.getAPIbyUUID(backendApiUuid, organization)
@@ -2894,7 +2892,14 @@ public class PublisherCommonUtils {
         api.setEgress(apiDtoTypeWrapper.isEgress() ? 1 : 0);
         api.setSubtype(apiDtoTypeWrapper.getResolvedApiSubtype());
         api.setAiConfiguration(apiDtoTypeWrapper.getAiConfiguration());
-
+        api.setInitiatedFromGateway(apiDtoTypeWrapper.getInitiatedFromGateway());
+        api.setDisplayName(apiDtoTypeWrapper.getDisplayName());
+        if (apiDtoTypeWrapper.isMCPServerDTO()) {
+            String protocolVersion = apiDtoTypeWrapper.getProtocolVersion();
+            api.getMetadata().put(APIConstants.MCP.PROTOCOL_VERSION_KEY,
+                    (protocolVersion != null && !protocolVersion.isEmpty()) ? protocolVersion
+                            : APIConstants.MCP.PROTOCOL_VERSION_2025_JUNE);
+        }
         return api;
     }
 
@@ -4774,10 +4779,9 @@ public class PublisherCommonUtils {
                                                         APIDefinition parser)
             throws APIManagementException {
 
-        Set<URITemplate> mcpTools = parser.generateMCPTools(apiDefinition, refApiId, null,
-                APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE, apiSubtype, uriTemplates);
-        if (mcpTools == null) {
-            throw new APIManagementException("Failed to generate MCP feature.");
+        Set<URITemplate> mcpTools = parser.generateMCPTools(apiDefinition, refApiId, null, apiSubtype, uriTemplates);
+        if (mcpTools == null || mcpTools.isEmpty()) {
+            throw new APIManagementException("Failed to generate MCP features: no URI templates were produced.");
         }
         return mcpTools;
     }
@@ -4853,5 +4857,130 @@ public class PublisherCommonUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Validate an MCP server by fetching the tools/list payload and (optionally) building tool info.
+     *
+     * @param serverUrl    MCP server URL
+     * @param securityInfo Security info (HTTPS flag and optional auth header/value); may be null
+     * @param returnTools  If true, include parsed tool operations in the response DTO
+     * @param organization Organization identifier for logging
+     * @return Validation result with isValid/errorMessage and optional toolInfo
+     * @throws APIManagementException On unexpected internal errors
+     */
+    public static MCPServerValidationResponseDTO validateMCPServer(String serverUrl, SecurityInfoDTO securityInfo,
+                                                                   boolean returnTools, String organization)
+            throws APIManagementException {
+
+        MCPServerValidationResponseDTO response =
+                new MCPServerValidationResponseDTO().isValid(false).errorMessage(StringUtils.EMPTY);
+
+        // Basic input checks (soft-fail)
+        if (StringUtils.isBlank(serverUrl)) {
+            return response.errorMessage("MCP server URL cannot be empty.");
+        }
+
+        final boolean secureRequested = securityInfo != null && Boolean.TRUE.equals(securityInfo.isIsSecure());
+        if (secureRequested && !StringUtils.startsWithIgnoreCase(serverUrl, "https://")) {
+            return response.errorMessage("Secure validation requires an HTTPS URL.");
+        }
+
+        try {
+            final String authHeader = securityInfo != null ? securityInfo.getHeader() : null;
+            final String authValue = securityInfo != null ? securityInfo.getValue() : null;
+
+            MCPInitializerAndToolFetcher fetcher =
+                    new MCPInitializerAndToolFetcher(serverUrl, authHeader, authValue, secureRequested);
+
+            org.json.JSONObject toolsJson = fetcher.initializeAndFetchTools();
+            response.setContent(toolsJson != null ? toolsJson.toString() : null);
+
+            org.json.JSONArray parseResult = MCPInitializerAndToolFetcher.extractToolsArray(toolsJson);
+
+            if (returnTools) {
+                response.setToolInfo(buildToolInfo(parseResult));
+            }
+
+            response.setIsValid(true);
+            response.setErrorMessage(StringUtils.EMPTY);
+            return response;
+
+        } catch (APIManagementException e) {
+            String msg = "Error validating MCP server: " + e.getMessage() + " (org: " + organization + ")";
+            if (log.isDebugEnabled()) {
+                log.debug(msg, e);
+            }
+            return response.errorMessage(msg);
+        } catch (Exception e) {
+            String msg = "Unexpected error during MCP server validation: " + e.getMessage() + " (org: "
+                    + organization + ")";
+            log.warn(msg, e);
+            return response.errorMessage(msg);
+        }
+    }
+
+    /**
+     * Build tool info DTO from the tools array.
+     *
+     * @param toolsArray JSON array of tools
+     * @return Tool info DTO with mapped operations
+     */
+    private static MCPServerValidationResponseToolInfoDTO buildToolInfo(org.json.JSONArray toolsArray)
+            throws APIManagementException {
+
+        MCPServerValidationResponseToolInfoDTO toolInfo = new MCPServerValidationResponseToolInfoDTO();
+        toolInfo.setOperations(generateMCPToolOperationList(toolsArray));
+        return toolInfo;
+    }
+
+    /**
+     * Builds a list of tool operations from a JSON array returned by the MCP server.
+     * Validates required fields (name, description, input schema) per entry.
+     *
+     * @param toolJsonArray JSON array of tool objects.
+     * @return List of operations mapped from tools (empty if no tools).
+     * @throws APIManagementException if a required field is missing or malformed.
+     */
+    public static List<MCPServerOperationDTO> generateMCPToolOperationList(org.json.JSONArray toolJsonArray)
+            throws APIManagementException {
+
+        List<MCPServerOperationDTO> operationList = new ArrayList<>();
+        if (toolJsonArray == null || toolJsonArray.length() == 0) {
+            return operationList;
+        }
+
+        for (int index = 0; index < toolJsonArray.length(); index++) {
+            org.json.JSONObject toolJsonObject = toolJsonArray.getJSONObject(index);
+
+            String toolName = StringUtils.trimToNull(
+                    toolJsonObject.optString(APIConstants.MCP.TOOL_NAME_KEY, null));
+            String toolDescription = StringUtils.trimToNull(
+                    toolJsonObject.optString(APIConstants.MCP.TOOL_DESCRIPTION_KEY, null));
+            org.json.JSONObject inputSchemaObject =
+                    toolJsonObject.optJSONObject(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY);
+            String inputSchema = (inputSchemaObject != null) ? inputSchemaObject.toString() : null;
+
+            if (StringUtils.isBlank(toolName)) {
+                throw new APIManagementException("Tool[" + index + "]: name is required.",
+                        ExceptionCodes.PARAMETER_NOT_PROVIDED);
+            }
+            if (StringUtils.isBlank(toolDescription)) {
+                throw new APIManagementException("Tool[" + index + "]: description is required.",
+                        ExceptionCodes.PARAMETER_NOT_PROVIDED);
+            }
+            if (StringUtils.isBlank(inputSchema)) {
+                throw new APIManagementException("Tool[" + index + "]: input schema is required.",
+                        ExceptionCodes.PARAMETER_NOT_PROVIDED);
+            }
+
+            MCPServerOperationDTO serverOperation = new MCPServerOperationDTO();
+            serverOperation.setFeature(MCPServerOperationDTO.FeatureEnum.TOOL);
+            serverOperation.setTarget(toolName);
+            serverOperation.setDescription(toolDescription);
+            serverOperation.setSchemaDefinition(inputSchema);
+            operationList.add(serverOperation);
+        }
+        return operationList;
     }
 }

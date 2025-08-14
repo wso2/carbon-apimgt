@@ -22,7 +22,6 @@ public class MCPServerMetadataDTO   {
   
     private String id = null;
     private String name = null;
-    private String context = null;
     private String version = null;
     private String provider = null;
 
@@ -58,23 +57,6 @@ public class MCPServerMetadataDTO   {
   }
   public void setName(String name) {
     this.name = name;
-  }
-
-  /**
-   **/
-  public MCPServerMetadataDTO context(String context) {
-    this.context = context;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "/pizza-shack", value = "")
-  @JsonProperty("context")
-  public String getContext() {
-    return context;
-  }
-  public void setContext(String context) {
-    this.context = context;
   }
 
   /**
@@ -124,14 +106,13 @@ public class MCPServerMetadataDTO   {
     MCPServerMetadataDTO mcPServerMetadata = (MCPServerMetadataDTO) o;
     return Objects.equals(id, mcPServerMetadata.id) &&
         Objects.equals(name, mcPServerMetadata.name) &&
-        Objects.equals(context, mcPServerMetadata.context) &&
         Objects.equals(version, mcPServerMetadata.version) &&
         Objects.equals(provider, mcPServerMetadata.provider);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, version, provider);
+    return Objects.hash(id, name, version, provider);
   }
 
   @Override
@@ -141,7 +122,6 @@ public class MCPServerMetadataDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("}");

@@ -31,7 +31,8 @@ public class BackendOperationDTO   {
         DELETE("DELETE"),
         PATCH("PATCH"),
         HEAD("HEAD"),
-        OPTIONS("OPTIONS");
+        OPTIONS("OPTIONS"),
+        TOOL("TOOL");
         private String value;
 
         VerbEnum (String v) {

@@ -541,4 +541,40 @@ public class APIDTOTypeWrapper {
             return null;
         }
     }
+
+    public String getSubtype() {
+
+        if (isAPIDTO()) {
+            return apiDto.getSubtypeConfiguration() != null ? apiDto.getSubtypeConfiguration().getSubtype() : null;
+        } else {
+            return mcpServerDto.getSubtypeConfiguration() != null ?
+                    mcpServerDto.getSubtypeConfiguration().getSubtype() : null;
+        }
+    }
+
+    public boolean getInitiatedFromGateway() {
+        if (isAPIDTO()) {
+            return apiDto.isInitiatedFromGateway() != null ? apiDto.isInitiatedFromGateway() : false;
+        } else {
+            return false;
+        }
+
+    }
+
+    public String getDisplayName() {
+        if (isAPIDTO()) {
+            return apiDto.getDisplayName();
+        } else {
+            return mcpServerDto.getDisplayName();
+        }
+    }
+
+    public String getProtocolVersion() {
+
+        if (isAPIDTO()) {
+            return null;
+        } else {
+            return mcpServerDto.getProtocolVersion();
+        }
+    }
 }

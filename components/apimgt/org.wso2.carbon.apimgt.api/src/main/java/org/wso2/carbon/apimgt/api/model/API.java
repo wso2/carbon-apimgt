@@ -33,6 +33,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -248,6 +249,8 @@ public class API implements Serializable {
     private String primaryProductionEndpointId;
 
     private List<Backend> backends = new ArrayList<>();
+
+    private Map<String, String> metadata = new HashMap<>();
 
     public AIConfiguration getAiConfiguration() {
 
@@ -1731,5 +1734,15 @@ public class API implements Serializable {
     public void setBackends(List<Backend> backends) {
 
         this.backends = backends;
+    }
+
+    public Map<String, String> getMetadata() {
+
+        return metadata;
+    }
+
+    public void setMetadata(Map<String, String> metadata) {
+
+        this.metadata = metadata;
     }
 }

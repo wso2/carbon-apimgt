@@ -131,6 +131,8 @@ public class SettingsMappingUtil {
         settingsDTO.setMarketplaceAssistantEnabled(config.getMarketplaceAssistantConfigurationDto().isEnabled());
         settingsDTO.setAiAuthTokenProvided(config.getApiChatConfigurationDto().isAuthTokenProvided() ||
                 config.getApiChatConfigurationDto().isKeyProvided());
+        settingsDTO.setDevportalMode(
+                SettingsDTO.DevportalModeEnum.fromValue(config.getDevportalMode()));
 
         if (isUserAvailable) {
             settingsDTO.setGrantTypes(APIUtil.getGrantTypes());

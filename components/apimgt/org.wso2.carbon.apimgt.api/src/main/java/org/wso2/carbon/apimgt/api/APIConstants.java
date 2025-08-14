@@ -54,7 +54,8 @@ public class APIConstants {
         DELETE,
         PATCH,
         HEAD,
-        OPTIONS;
+        OPTIONS,
+        TOOL;
 
         /**
          * Returns the SupportedHTTPVerbs enum constant corresponding to the given HTTP method string.

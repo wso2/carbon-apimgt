@@ -6254,8 +6254,8 @@ public class ApiMgtDAO {
             Set<URITemplate> templates = api.getUriTemplates();
             if (templates != null && !templates.isEmpty()) {
                 URITemplate template = templates.iterator().next();
-                if (template.getExistingAPIOperationMapping() != null) {
-                    String refApiId = template.getExistingAPIOperationMapping().getApiUuid();
+                if (template.getAPIOperationMapping() != null) {
+                    String refApiId = template.getAPIOperationMapping().getApiUuid();
                     refUriTemplates = getURITemplatesOfAPI(refApiId);
                     if (refUriTemplates == null) {
                         log.error("Failed to retrieve URI templates for referenced API: " + refApiId);
@@ -6295,9 +6295,12 @@ public class ApiMgtDAO {
                 } else {
                     uriMappingPrepStmt.setBinaryStream(6, is);
                 }
-
-                uriMappingPrepStmt.setString(7, uriTemplate.getDescription());
-
+                if (uriTemplate.getDescription() != null) {
+                    uriMappingPrepStmt.setBinaryStream(7,
+                            new ByteArrayInputStream(uriTemplate.getDescription().getBytes()));
+                } else {
+                    uriMappingPrepStmt.setBinaryStream(7, null);
+                }
                 if (uriTemplate.getSchemaDefinition() != null) {
                     uriMappingPrepStmt.setBinaryStream(8,
                             new ByteArrayInputStream(uriTemplate.getSchemaDefinition().getBytes()));
@@ -6338,12 +6341,12 @@ public class ApiMgtDAO {
                     addBackendOperationMappingPrepStmt.setString(4,
                             uriTemplate.getBackendOperationMapping().getBackendOperation().getVerb().toString());
                     addBackendOperationMappingPrepStmt.addBatch();
-                } else if (uriTemplate.getExistingAPIOperationMapping() != null && refUriTemplates != null
+                } else if (uriTemplate.getAPIOperationMapping() != null && refUriTemplates != null
                         && !refUriTemplates.isEmpty()) {
                     String target =
-                            uriTemplate.getExistingAPIOperationMapping().getBackendOperation().getTarget();
+                            uriTemplate.getAPIOperationMapping().getBackendOperation().getTarget();
                     String verb =
-                            uriTemplate.getExistingAPIOperationMapping().getBackendOperation().getVerb().toString();
+                            uriTemplate.getAPIOperationMapping().getBackendOperation().getVerb().toString();
                     URITemplate match = findMatchingTemplate(refUriTemplates, target, verb);
                     if (match != null) {
                         addApiOperationMappingPrepStmt.setInt(1, uriMappingId);
@@ -7477,6 +7480,7 @@ public class ApiMgtDAO {
         String deleteAPIQuery = SQLConstants.REMOVE_FROM_API_SQL_BY_UUID;
         String deleteResourceScopeMappingsQuery = SQLConstants.REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL;
         String deleteAPIBackendQuery = SQLConstants.REMOVE_AM_BACKEND_SQL;
+        String deleteAPIMetadataQuery = SQLConstants.DELETE_ALL_API_METADATA;
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
         String deleteGraphqlComplexityQuery = SQLConstants.REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL;
         try {
@@ -7527,6 +7531,10 @@ public class ApiMgtDAO {
 
             //Delete API backend endpoints for MCP APIs
             prepStmt = connection.prepareStatement(deleteAPIBackendQuery);
+            prepStmt.setString(1, uuid);
+            prepStmt.execute();
+
+            prepStmt = connection.prepareStatement(deleteAPIMetadataQuery);
             prepStmt.setString(1, uuid);
             prepStmt.execute();
 
@@ -7726,17 +7734,22 @@ public class ApiMgtDAO {
 
                     String urlPattern = rs.getString("URL_PATTERN");
                     String verb = rs.getString("HTTP_METHOD");
-                    String description = rs.getString("DESCRIPTION");
+                    String description = null;
+                    try (InputStream descriptionStream = rs.getBinaryStream("DESCRIPTION")) {
+                        if (descriptionStream != null) {
+                            description = IOUtils.toString(descriptionStream);
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while reading description of the URI template", e);
+                    }
                     String schemaDefinition = null;
-
-                    try (InputStream apiDefStream = rs.getBinaryStream("SCHEMA_DEFINITION")) {
-                        if (apiDefStream != null) {
-                            schemaDefinition = IOUtils.toString(apiDefStream);
+                    try (InputStream schemaDefStream = rs.getBinaryStream("SCHEMA_DEFINITION")) {
+                        if (schemaDefStream != null) {
+                            schemaDefinition = IOUtils.toString(schemaDefStream);
                         }
                     } catch (IOException e) {
                         log.error("Error while reading schema definition of the URI template", e);
                     }
-
                     URITemplate uriTemplate = new URITemplate();
                     uriTemplate.setUriTemplate(urlPattern);
                     uriTemplate.setHTTPVerb(verb);
@@ -7799,7 +7812,14 @@ public class ApiMgtDAO {
                 while (rs.next()) {
                     Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
                     String scopeName = rs.getString("SCOPE_NAME");
-                    String description = rs.getString("DESCRIPTION");
+                    String description = null;
+                    try (InputStream descriptionStream = rs.getBinaryStream("DESCRIPTION")) {
+                        if (descriptionStream != null) {
+                            description = IOUtils.toString(descriptionStream);
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while reading description of the URI template", e);
+                    }
                     String schemaDefinition = null;
                     try (InputStream schemaDefStream = rs.getBinaryStream("SCHEMA_DEFINITION")) {
                         if (schemaDefStream != null) {
@@ -16586,7 +16606,12 @@ public class ApiMgtDAO {
                     insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
                     insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
                     insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
-                    insertURLMappingsStatement.setString(6, urlMapping.getDescription());
+                    if (urlMapping.getDescription() != null) {
+                        insertURLMappingsStatement.setBinaryStream(6,
+                                new ByteArrayInputStream(urlMapping.getDescription().getBytes()));
+                    } else {
+                        insertURLMappingsStatement.setBinaryStream(6, null);
+                    }
                     if (urlMapping.getSchemaDefinition() != null) {
                         insertURLMappingsStatement.setBinaryStream(7,
                                 new ByteArrayInputStream(urlMapping.getSchemaDefinition().getBytes()));
@@ -19258,7 +19283,11 @@ public class ApiMgtDAO {
                     }
                     insertBackendStatement.executeBatch();
                 }
-
+                Map<String, String> metadataMap = getCurrentAPIMetadata(connection, apiRevision.getApiUUID());
+                if (!metadataMap.isEmpty()) {
+                    addAPIMetadataRevision(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID(),
+                            metadataMap);
+                }
                 // Adding to AM_API_URL_MAPPING table
                 PreparedStatement getURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants
@@ -19286,8 +19315,15 @@ public class ApiMgtDAO {
                             log.error("Error while reading schema definition of the URI template", e);
                         }
                         uriTemplate.setSchemaDefinition(schemaDefinition);
-                        uriTemplate.setDescription(rs.getString(7));
-
+                        String description = null;
+                        try (InputStream descriptionStream = rs.getBinaryStream(7)) {
+                            if (descriptionStream != null) {
+                                description = IOUtils.toString(descriptionStream);
+                            }
+                        } catch (IOException e) {
+                            log.error("Error while reading description of the URI template", e);
+                        }
+                        uriTemplate.setDescription(description);
                         uriTemplate.setMediationScript(script);
                         if (!StringUtils.isEmpty(rs.getString(8))) {
                             Scope scope = new Scope();
@@ -19318,7 +19354,7 @@ public class ApiMgtDAO {
 
                             APIOperationMapping APIOperationMapping = new APIOperationMapping();
                             APIOperationMapping.setBackendOperation(backendOperation);
-                            uriTemplate.setExistingAPIOperationMapping(APIOperationMapping);
+                            uriTemplate.setAPIOperationMapping(APIOperationMapping);
                         }
                         urlMappingList.add(uriTemplate);
                     }
@@ -19433,10 +19469,10 @@ public class ApiMgtDAO {
                         addBackendOperationMappingPrepStmt.setString(4,
                                 urlMapping.getBackendOperationMapping().getBackendOperation().getVerb().toString());
                         addBackendOperationMappingPrepStmt.addBatch();
-                    } else if (urlMapping.getExistingAPIOperationMapping() != null) {
+                    } else if (urlMapping.getAPIOperationMapping() != null) {
                         addApiOperationMappingPrepStmt.setInt(1, urlMapping.getId());
                         addApiOperationMappingPrepStmt.setInt(2,
-                                urlMapping.getExistingAPIOperationMapping().getBackendOperation().getRefUriMappingId());
+                                urlMapping.getAPIOperationMapping().getBackendOperation().getRefUriMappingId());
                         addApiOperationMappingPrepStmt.addBatch();
                     }
                 }
@@ -20326,7 +20362,7 @@ public class ApiMgtDAO {
                 removeURLMappingsStatement.executeUpdate();
 
                 removeBackendOfCurrentAPI(connection, apiRevision.getApiUUID());
-
+                deleteCurrentAPIMetadata(connection, apiRevision.getApiUUID());
                 // Removing related Current API Endpoint from AM_API_ENDPOINTS table
                 PreparedStatement removeAPIEndpointsStatement = connection.prepareStatement(SQLConstants
                         .APIEndpointsSQLConstants.DELETE_CURRENT_API_ENDPOINTS);
@@ -20341,6 +20377,12 @@ public class ApiMgtDAO {
                         backend.setId(backendId);
                     }
                     addBackends(connection, apiRevision.getApiUUID(), backends, organization);
+                }
+
+                Map<String, String> apiMetadata = getAPIMetadataRevision(connection, apiRevision.getApiUUID(),
+                        apiRevision.getRevisionUUID());
+                if (!apiMetadata.isEmpty()) {
+                    addAPIMetadata(connection, apiRevision.getApiUUID(), apiMetadata);
                 }
 
                 // Restoring to AM_API_ENDPOINTS_TABLE
@@ -20389,8 +20431,15 @@ public class ApiMgtDAO {
                             log.error("Error while reading schema definition of the URI template", e);
                         }
                         uriTemplate.setSchemaDefinition(schemaDefinition);
-                        uriTemplate.setDescription(rs.getString(7));
-
+                        String description = null;
+                        try (InputStream descriptionStream = rs.getBinaryStream(7)) {
+                            if (descriptionStream != null) {
+                                description = IOUtils.toString(descriptionStream);
+                            }
+                        } catch (IOException e) {
+                            log.error("Error while reading description of the URI template", e);
+                        }
+                        uriTemplate.setDescription(description);
                         if (!StringUtils.isEmpty(rs.getString(8))) {
                             Scope scope = new Scope();
                             scope.setKey(rs.getString(8));
@@ -20420,7 +20469,7 @@ public class ApiMgtDAO {
 
                             APIOperationMapping APIOperationMapping = new APIOperationMapping();
                             APIOperationMapping.setBackendOperation(backendOperation);
-                            uriTemplate.setExistingAPIOperationMapping(APIOperationMapping);
+                            uriTemplate.setAPIOperationMapping(APIOperationMapping);
                         }
                         urlMappingList.add(uriTemplate);
                     }
@@ -20458,7 +20507,12 @@ public class ApiMgtDAO {
                     insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
                     insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
                     insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
-                    insertURLMappingsStatement.setString(6, urlMapping.getDescription());
+                    if (urlMapping.getDescription() != null) {
+                        insertURLMappingsStatement.setBinaryStream(6,
+                                new ByteArrayInputStream(urlMapping.getDescription().getBytes()));
+                    } else {
+                        insertURLMappingsStatement.setBinaryStream(6, null);
+                    }
                     if (urlMapping.getSchemaDefinition() != null) {
                         insertURLMappingsStatement.setBinaryStream(7,
                                 new ByteArrayInputStream(urlMapping.getSchemaDefinition().getBytes()));
@@ -20515,11 +20569,11 @@ public class ApiMgtDAO {
                                             urlMapping.getBackendOperationMapping().getBackendOperation().getVerb()
                                                     .toString());
                                     addBackendOperationMappingPrepStmt.addBatch();
-                                } else if (urlMapping.getExistingAPIOperationMapping() != null) {
+                                } else if (urlMapping.getAPIOperationMapping() != null) {
                                     addApiOperationMappingPrepStmt.setInt(1,
                                             restoredUrlMappingID);
                                     addApiOperationMappingPrepStmt.setInt(2,
-                                            urlMapping.getExistingAPIOperationMapping().getBackendOperation().getRefUriMappingId());
+                                            urlMapping.getAPIOperationMapping().getBackendOperation().getRefUriMappingId());
                                     addApiOperationMappingPrepStmt.addBatch();
                                 }
                             }
@@ -20663,7 +20717,7 @@ public class ApiMgtDAO {
                 removeApiOperationMapping(connection, uriTemplates);
 
                 deleteAPIBackendRevision(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
-
+                deleteAllAPIMetadataRevision(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
                 // Removing related revision entries from AM_API_URL_MAPPING table
                 // This will cascade remove entries from AM_API_RESOURCE_SCOPE_MAPPING and AM_API_PRODUCT_MAPPING tables
                 PreparedStatement removeURLMappingsStatement = connection.prepareStatement(SQLConstants
@@ -22039,21 +22093,21 @@ public class ApiMgtDAO {
      */
     public List<Backend> getBackends(String apiUuid, String organization) throws APIManagementException {
 
+        List<Backend> backendList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                List<Backend> backendList = getBackends(apiUuid, connection, organization);
+                backendList = getBackends(apiUuid, connection, organization);
                 connection.commit();
-                return backendList;
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Error while retrieving backends for apiUuid : " + apiUuid, e);
-                return Collections.emptyList(); // unreachable, handleException always throws
             }
         } catch (SQLException e) {
-            handleException("Error while establishing DB connection for retrieving backends of apiUuid : " + apiUuid, e);
-            return Collections.emptyList(); // unreachable
+            handleException("Error while establishing DB connection for retrieving backends of apiUuid : " + apiUuid,
+                    e);
         }
+        return backendList;
     }
 
     /**
@@ -22095,21 +22149,20 @@ public class ApiMgtDAO {
      */
     public Backend getBackend(String apiUuid, String backendId, String organization) throws APIManagementException {
 
+        Backend backend = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                Backend backend = getBackend(apiUuid, backendId, connection, organization);
+                backend = getBackend(apiUuid, backendId, connection, organization);
                 connection.commit();
-                return backend;
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Error while retrieving backends for API: " + apiUuid, e);
-                return null; // unreachable, handleException always throws
             }
         } catch (SQLException e) {
             handleException("Error while establishing DB connection for retrieving backends of API: " + apiUuid, e);
-            return null; // unreachable
         }
+        return backend;
     }
 
     /**
@@ -22177,8 +22230,7 @@ public class ApiMgtDAO {
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             for (URITemplate uriTemplate : uriTemplates) {
                 if (uriTemplate.getBackendOperationMapping() != null) {
-                    preparedStatement.setInt(1,
-                            uriTemplate.getId());
+                    preparedStatement.setInt(1, uriTemplate.getId());
                     preparedStatement.setString(2,
                             uriTemplate.getBackendOperationMapping().getBackendId());
                     preparedStatement.addBatch();
@@ -22223,9 +22275,8 @@ public class ApiMgtDAO {
         String query = SQLConstants.REMOVE_FROM_AM_API_OPERATION_MAPPING_SQL;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             for (URITemplate uriTemplate : uriTemplates) {
-                if (uriTemplate.getExistingAPIOperationMapping() != null) {
-                    preparedStatement.setInt(1,
-                            uriTemplate.getId());
+                if (uriTemplate.getAPIOperationMapping() != null) {
+                    preparedStatement.setInt(1, uriTemplate.getId());
                     preparedStatement.addBatch();
                 }
             }
@@ -22246,21 +22297,21 @@ public class ApiMgtDAO {
     public List<Backend> getBackendRevisions(String apiUuid, String revisionUuid, String organization)
             throws APIManagementException {
 
+        List<Backend> backendList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                List<Backend> backendList = getBackendRevisions(connection, apiUuid, revisionUuid, organization);
+                backendList = getBackendRevisions(connection, apiUuid, revisionUuid, organization);
                 connection.commit();
-                return backendList;
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Error while retrieving backends for apiUuid : " + apiUuid, e);
-                return Collections.emptyList(); // unreachable, handleException always throws
             }
         } catch (SQLException e) {
-            handleException("Error while establishing DB connection for retrieving backends of apiUuid : " + apiUuid, e);
-            return Collections.emptyList(); // unreachable
+            handleException("Error while establishing DB connection for retrieving backends of apiUuid : " + apiUuid,
+                    e);
         }
+        return backendList;
     }
 
     /**
@@ -22309,21 +22360,20 @@ public class ApiMgtDAO {
     public Backend getBackendRevision(String apiUuid, String revisionUuid, String backendId, String organization)
             throws APIManagementException {
 
+        Backend backend = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                Backend endpoints = getBackendRevision(connection, apiUuid, revisionUuid, backendId, organization);
+                backend = getBackendRevision(connection, apiUuid, revisionUuid, backendId, organization);
                 connection.commit();
-                return endpoints;
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Error while retrieving backends for API: " + apiUuid, e);
-                return null; // unreachable, handleException always throws
             }
         } catch (SQLException e) {
             handleException("Error while establishing DB connection for retrieving backends of API: " + apiUuid, e);
-            return null; // unreachable
         }
+        return backend;
     }
 
     /**
@@ -22359,7 +22409,6 @@ public class ApiMgtDAO {
 
     /**
      * Extracts a {@link Backend} object from the current row of the given {@link ResultSet}.
-     * <p>
      * Reads backend ID, name, endpoint configuration, and backend API definition from the result set.
      *
      * @param resultSet the {@link ResultSet} positioned at a valid row containing backend endpoint data
@@ -22447,13 +22496,22 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Gets MCP servers referenced by the given API.
+     *
+     * @param apiId        API identifier
+     * @param organization API organization
+     * @return list of referenced MCP servers
+     * @throws APIManagementException if DB access fails
+     */
     public List<API> getMCPServersUsedByAPI(int apiId, String organization) throws APIManagementException {
+
+        List<API> mcpServers = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                List<API> mcpServers = getMCPServersUsedByAPI(connection, apiId, organization);
+                mcpServers = getMCPServersUsedByAPI(connection, apiId, organization);
                 connection.commit();
-                return mcpServers;
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Error while retrieving backends for apiId : " + apiId, e);
@@ -22461,19 +22519,27 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while establishing DB connection for retrieving backends of apiId : " + apiId, e);
         }
-        return null;
+        return mcpServers;
     }
 
+    /**
+     * Queries MCP servers linked to the given API using the provided DB connection.
+     *
+     * @param connection   database connection
+     * @param apiId        API identifier
+     * @param organization API organization
+     * @return list of referenced MCP servers
+     * @throws SQLException if query execution fails
+     */
     private List<API> getMCPServersUsedByAPI(Connection connection, int apiId, String organization)
             throws SQLException {
+
         String query = SQLConstants.GET_MCP_SERVER_BY_REFERENCED_API_ID;
-
         List<API> referencedMCPServers = new ArrayList<>();
-
         try (PreparedStatement getBackendPrepStmt = connection.prepareStatement(query)) {
             getBackendPrepStmt.setInt(1, apiId);
             getBackendPrepStmt.setString(2, organization);
-
+            getBackendPrepStmt.setString(3, APIConstants.API_TYPE_MCP);
             try (ResultSet resultSet = getBackendPrepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     String apiName = resultSet.getString("API_NAME");
@@ -22487,6 +22553,304 @@ public class ApiMgtDAO {
             }
         }
         return referencedMCPServers;
+    }
+
+    /**
+     * Adds metadata for a given API in a new DB transaction.
+     *
+     * @param apiId    UUID of the API
+     * @param metadata Map of metadata key-value pairs
+     * @throws APIManagementException if a database error occurs
+     */
+    public void addAPIMetadata(String apiId, Map<String, String> metadata) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                addAPIMetadata(connection, apiId, metadata);
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to add API metadata for API: " + apiId, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error while establishing DB connection for adding metadata of API: " + apiId, e);
+        }
+    }
+
+    /**
+     * Adds metadata for a given API using an existing DB connection.
+     *
+     * @param connection Database connection
+     * @param apiUuid    UUID of the API
+     * @param metadata   Map of metadata key-value pairs
+     * @throws APIManagementException if a database error occurs
+     */
+    public void addAPIMetadata(Connection connection, String apiUuid, Map<String, String> metadata)
+            throws APIManagementException {
+
+        if (metadata == null || metadata.isEmpty()) {
+            return;
+        }
+        String sql = SQLConstants.ADD_CURRENT_API_METADATA;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            for (Map.Entry<String, String> entry : metadata.entrySet()) {
+                ps.setString(1, apiUuid);
+                ps.setString(2, entry.getKey());
+                ps.setString(3, entry.getValue());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        } catch (SQLException e) {
+            handleException("Failed to add API metadata for API: " + apiUuid, e);
+        }
+    }
+
+    /**
+     * Adds metadata for a given API revision using an existing DB connection.
+     *
+     * @param connection   DB connection
+     * @param apiUuid      API UUID
+     * @param revisionUuid Revision UUID
+     * @param metadata     key-value map
+     * @throws APIManagementException on DB errors
+     */
+    public void addAPIMetadataRevision(Connection connection, String apiUuid, String revisionUuid,
+                                       Map<String, String> metadata) throws APIManagementException {
+
+        if (metadata == null || metadata.isEmpty()) return;
+
+        String sql = SQLConstants.ADD_API_METADATA_REVISION;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            for (Map.Entry<String, String> entry : metadata.entrySet()) {
+                ps.setString(1, apiUuid);
+                ps.setString(2, revisionUuid);
+                ps.setString(3, entry.getKey());
+                ps.setString(4, entry.getValue());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        } catch (SQLException e) {
+            handleException("Failed to add API revision metadata for API: " + apiUuid + ", revision: " + revisionUuid,
+                    e);
+        }
+    }
+
+    /**
+     * Fetches all metadata (non-revision) for an API.
+     *
+     * @param apiId API UUID
+     * @return map of key->value (empty if none)
+     * @throws APIManagementException on DB errors
+     */
+    public Map<String, String> getCurrentAPIMetadata(String apiId) throws APIManagementException {
+
+        Map<String, String> metadataMap = new HashMap<>();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            metadataMap = getCurrentAPIMetadata(connection, apiId);
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error reading API metadata for API: " + apiId, e);
+        }
+        return metadataMap;
+    }
+
+    /**
+     * Fetches all metadata (non-revision) for an API using an existing connection.
+     *
+     * @param connection DB connection
+     * @param apiUuid    API UUID
+     * @return map of key->value
+     * @throws APIManagementException on DB errors
+     */
+    public Map<String, String> getCurrentAPIMetadata(Connection connection, String apiUuid)
+            throws APIManagementException {
+
+        Map<String, String> metadata = new HashMap<>();
+        try (PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_CURRENT_API_METADATA)) {
+            ps.setString(1, apiUuid);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    metadata.put(rs.getString("METADATA_KEY"), rs.getString("METADATA_VALUE"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to read API metadata for API: " + apiUuid, e);
+        }
+        return metadata;
+    }
+
+    /**
+     * Fetches all metadata for an API revision.
+     *
+     * @param apiId      API UUID
+     * @param revisionId Revision UUID
+     * @return map of key->value
+     * @throws APIManagementException on DB errors
+     */
+    public Map<String, String> getAPIMetadataRevision(String apiId, String revisionId)
+            throws APIManagementException {
+
+        Map<String, String> metadataMap = new HashMap<>();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            metadataMap = getAPIMetadataRevision(connection, apiId, revisionId);
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error reading API revision metadata for API: " + apiId + ", revision: " + revisionId, e);
+        }
+        return metadataMap;
+    }
+
+    /**
+     * Fetches all metadata for an API revision using an existing connection.
+     *
+     * @param connection   DB connection
+     * @param apiUuid      API UUID
+     * @param revisionUuid Revision UUID
+     * @return map of key->value
+     * @throws APIManagementException on DB errors
+     */
+    public Map<String, String> getAPIMetadataRevision(Connection connection, String apiUuid, String revisionUuid)
+            throws APIManagementException {
+
+        Map<String, String> metadataMap = new HashMap<>();
+        try (PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_API_METADATA_REVISION)) {
+            ps.setString(1, apiUuid);
+            ps.setString(2, revisionUuid);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    metadataMap.put(rs.getString("METADATA_KEY"), rs.getString("METADATA_VALUE"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to read API revision metadata for API: " + apiUuid + ", revision: " + revisionUuid,
+                    e);
+        }
+        return metadataMap;
+    }
+
+    /**
+     * Deletes all metadata (non-revision) for an API in a new transaction.
+     *
+     * @param apiId API UUID
+     * @throws APIManagementException on DB errors
+     */
+    public void deleteCurrentAPIMetadata(String apiId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                deleteCurrentAPIMetadata(connection, apiId);
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to delete all API metadata for API: " + apiId, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error establishing DB connection for deleting all metadata of API: " + apiId, e);
+        }
+    }
+
+    /**
+     * Deletes all metadata (non-revision) for an API using an existing connection.
+     *
+     * @param connection DB connection
+     * @param apiUuid    API UUID
+     * @throws APIManagementException on DB errors
+     */
+    public void deleteCurrentAPIMetadata(Connection connection, String apiUuid) throws APIManagementException {
+
+        try (PreparedStatement ps = connection.prepareStatement(SQLConstants.DELETE_CURRENT_API_METADATA)) {
+            ps.setString(1, apiUuid);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to delete all API metadata for API: " + apiUuid, e);
+        }
+    }
+
+    /**
+     * Deletes all metadata for an API revision in a new transaction.
+     *
+     * @param apiId      API UUID
+     * @param revisionId Revision UUID
+     * @throws APIManagementException on DB errors
+     */
+    public void deleteAllAPIMetadataRevision(String apiId, String revisionId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                deleteAllAPIMetadataRevision(connection, apiId, revisionId);
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to delete all API revision metadata for API: " + apiId + ", revision: "
+                        + revisionId, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error establishing DB connection for deleting all revision metadata of API: " + apiId, e);
+        }
+    }
+
+    /**
+     * Deletes all metadata for an API revision using an existing connection.
+     *
+     * @param connection   DB connection
+     * @param apiUuid      API UUID
+     * @param revisionUuid Revision UUID
+     * @throws APIManagementException on DB errors
+     */
+    public void deleteAllAPIMetadataRevision(Connection connection, String apiUuid, String revisionUuid)
+            throws APIManagementException {
+
+        try (PreparedStatement ps = connection.prepareStatement(SQLConstants.DELETE_ALL_API_METADATA_REVISION)) {
+            ps.setString(1, apiUuid);
+            ps.setString(2, revisionUuid);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to delete all API revision metadata for API: " + apiUuid + ", revision: "
+                    + revisionUuid, e);
+        }
+    }
+
+    /**
+     * Deletes all metadata (base + revisions) for an API in a new transaction.
+     *
+     * @param apiId API UUID
+     * @throws APIManagementException on DB errors
+     */
+    public void deleteAllAPIMetadata(String apiId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                deleteAllAPIMetadata(connection, apiId);
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to delete all metadata (incl. revisions) for API: " + apiId, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error establishing DB connection for deleting all metadata of API: " + apiId, e);
+        }
+    }
+
+    /**
+     * Deletes all metadata (base + revisions) for an API using an existing connection.
+     *
+     * @param connection DB connection
+     * @param apiUuid    API UUID
+     * @throws APIManagementException on DB errors
+     */
+    public void deleteAllAPIMetadata(Connection connection, String apiUuid)
+            throws APIManagementException {
+
+        try (PreparedStatement ps = connection.prepareStatement(SQLConstants.DELETE_ALL_API_METADATA)) {
+            ps.setString(1, apiUuid);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to delete all metadata (incl. revisions) for API: " + apiUuid, e);
+        }
     }
 
     private class SubscriptionInfo {
@@ -23045,7 +23409,7 @@ public class ApiMgtDAO {
                     APIOperationMapping.setApiVersion(rs.getString("REF_API_VERSION"));
                     APIOperationMapping.setBackendOperation(backendOperation);
 
-                    uriTemplate.setExistingAPIOperationMapping(APIOperationMapping);
+                    uriTemplate.setAPIOperationMapping(APIOperationMapping);
 
                 }
             }

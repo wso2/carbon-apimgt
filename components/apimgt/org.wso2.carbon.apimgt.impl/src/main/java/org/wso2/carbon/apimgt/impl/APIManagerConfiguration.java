@@ -72,6 +72,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.MonetizationConfigurationDto;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -172,6 +173,8 @@ public class APIManagerConfiguration {
     private boolean enableAiConfiguration;
     private String hashingAlgorithm = SHA_256;
     private boolean isTransactionCounterEnabled;
+    private static boolean isMCPSupportEnabled = true;
+    private static String devportalMode = APIConstants.DEVPORTAL_MODE_HYBRID;
 
     public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
@@ -705,12 +708,16 @@ public class APIManagerConfiguration {
                 setApiChatConfiguration(element);
             } else if (APIConstants.AI.DESIGN_ASSISTANT.equals(localName)) {
                 setDesignAssistantConfiguration(element);
-            } else if (APIConstants.AI.AI_CONFIGURATION.equals(localName)){
+            } else if (APIConstants.AI.AI_CONFIGURATION.equals(localName)) {
                 setAiConfiguration(element);
+            } else if (APIConstants.AI.MCP.equals(localName)) {
+                setMCPConfigurations(element);
             } else if (APIConstants.TokenValidationConstants.TOKEN_VALIDATION_CONFIG.equals(localName)) {
                 setTokenValidation(element);
             } else if (APIConstants.ORG_BASED_ACCESS_CONTROL.equals(localName)) {
                 setOrgBasedAccessControlConfigs(element);
+            } else if (APIConstants.API_STORE_TAG.equals(localName)) {
+                setDevportalConfigurations(element);
             } else if (APIConstants.TENANT_SHARING_CONFIGS.equals(localName)) {
                     // Iterate through each <TenantSharingConfig>
                     for (Iterator<?> tenantSharingConfigs = element.getChildElements(); tenantSharingConfigs.hasNext(); ) {
@@ -866,6 +873,26 @@ public class APIManagerConfiguration {
             }
             readChildElements(element, nameStack);
             nameStack.pop();
+        }
+    }
+
+    private void setDevportalConfigurations(OMElement omElement) {
+
+        if (omElement == null) {
+            log.debug("Devportal configuration element is null. Skipping configuration parsing.");
+            return;
+        }
+        OMElement devportalModeOmElement = omElement.getFirstChildWithName(new QName(APIConstants.DEVPORTAL_MODE));
+        if (devportalModeOmElement != null && StringUtils.isNotEmpty(devportalModeOmElement.getText())) {
+            String devportalModeStr = devportalModeOmElement.getText().trim().toUpperCase();
+            if (APIConstants.DEVPORTAL_MODES.contains(devportalModeStr)) {
+                devportalMode = devportalModeStr;
+            } else {
+                log.warn("Invalid Devportal mode '" + devportalModeStr + "'. Falling back to default: "
+                        + devportalMode);
+            }
+        } else if (log.isDebugEnabled()) {
+            log.debug("Devportal mode is not specified. Using default: " + devportalMode);
         }
     }
 
@@ -2912,6 +2939,49 @@ public class APIManagerConfiguration {
     public static AIAPIConfigurationsDTO getAiApiConfigurationsDTO() {
 
         return aiapiConfigurationsDTO;
+    }
+
+    /**
+     * Set MCP Portal Configuration
+     *
+     * @param omElement XML Config
+     */
+    private void setMCPConfigurations(OMElement omElement) {
+
+        if (omElement == null) {
+            log.debug("MCP Server configuration element is null. Skipping configuration parsing.");
+            return;
+        }
+        OMElement mcpServerConfigElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.MCP_SUPPORT_ENABLED));
+        if (mcpServerConfigElement != null
+                && StringUtils.isNotEmpty(mcpServerConfigElement.getText())) {
+
+            isMCPSupportEnabled = Boolean.parseBoolean(mcpServerConfigElement.getText().trim());
+        }
+    }
+
+    /**
+     * Returns whether the MCP Portal is enabled or not.
+     *
+     * @return true if MCP Portal is enabled, false otherwise.
+     */
+    public boolean isMCPSupportEnabled() {
+
+        return isMCPSupportEnabled;
+    }
+
+    /**
+     * Set Devportal Mode
+     *
+     * @return Devportal mode.
+     */
+    public String getDevportalMode() {
+
+        if (isMCPSupportEnabled()) {
+            return devportalMode;
+        }
+        return APIConstants.DEVPORTAL_MODE_API_ONLY;
     }
 
     private void setHashingAlgorithm(OMElement omElement) {
