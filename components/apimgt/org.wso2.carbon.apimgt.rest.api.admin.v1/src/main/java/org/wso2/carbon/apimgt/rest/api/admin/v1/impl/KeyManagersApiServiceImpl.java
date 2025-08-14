@@ -111,7 +111,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             List<String> allowedOrgs = keyManagerDTO.getAllowedOrganizations();
             OrganizationInfo userOrganizationInfo = RestApiUtil.getOrganizationInfo(messageContext);
             if (userOrganizationInfo != null) {
-                if (allowedOrgs != null && allowedOrgs.size() == 1 && allowedOrgs.contains(userOrganizationInfo.getOrganizationId())) {
+                if (allowedOrgs != null && allowedOrgs.size() == 1 && allowedOrgs.contains(
+                        userOrganizationInfo.getOrganizationId())) {
                     allowedOrgs.clear();
                     allowedOrgs.add("NONE");
                     keyManagerDTO.setAllowedOrganizations(allowedOrgs);

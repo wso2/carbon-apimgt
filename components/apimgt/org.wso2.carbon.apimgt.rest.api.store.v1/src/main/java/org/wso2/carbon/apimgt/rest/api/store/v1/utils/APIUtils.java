@@ -211,10 +211,11 @@ public class APIUtils {
         String organization = orgInfo.getOrganizationId();
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keymanagerConfigs) {
             List<String> allowedOrgs = keyManagerConfigurationDTO.getAllowedOrganizations();
-            if (allowedOrgs == null || allowedOrgs.isEmpty() || allowedOrgs.contains("ALL") || allowedOrgs.contains(organization)) {
+            if (allowedOrgs == null || allowedOrgs.isEmpty() || allowedOrgs.contains("ALL") || allowedOrgs.contains(
+                    organization)) {
                 allowedList.add(keyManagerConfigurationDTO);
             }
-            
+
         }
 
         return allowedList;
