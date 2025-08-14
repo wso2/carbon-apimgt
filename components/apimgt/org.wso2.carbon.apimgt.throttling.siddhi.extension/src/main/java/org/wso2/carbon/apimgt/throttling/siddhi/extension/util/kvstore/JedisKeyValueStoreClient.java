@@ -20,8 +20,9 @@ package org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.dto.DistributedThrottleConfig;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
-//get this from siddhi extension
+//todo--get this from siddhi extension
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -38,72 +39,97 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
 
     // Connection pool
     private static volatile JedisPool jedisPool;
+    //todo-make these constants
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 6379;
 
-    private static RedisConfig getKeyValueConfig() {
-        //check apimconfig is null or not
-        try {
-            RedisConfig kvStoreConfig = ServiceReferenceHolder.getInstance()
+    //kvstore configs
+    //todo - add default values here
+    private static String host;
+    private static int port;
+    private static String user;
+    private static char[] password;
+    private static int connectionTimeout;
+    private static boolean sslEnabled;
+    private static JedisPoolConfig poolConfig = new JedisPoolConfig();
+
+
+    private static void populateKeyValueStoreConfigs() {
+        DistributedThrottleConfig distributedConfig = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration()
+                .getDistributedThrottleConfig();
+        if (distributedConfig != null) {
+            host = distributedConfig.getHost();
+            port = distributedConfig.getPort();
+            user = distributedConfig.getUser();
+            password = distributedConfig.getPassword();
+            connectionTimeout = distributedConfig.getConnectionTimeout();
+            sslEnabled = distributedConfig.isSslEnabled();
+            poolConfig.setMaxTotal(distributedConfig.getMaxTotal());
+            poolConfig.setMaxIdle(distributedConfig.getMaxIdle());
+            poolConfig.setMinIdle(distributedConfig.getMinIdle());
+            poolConfig.setBlockWhenExhausted(distributedConfig.isBlockWhenExhausted());
+            poolConfig.setTestOnBorrow(distributedConfig.isTestOnBorrow());
+            poolConfig.setTestOnReturn(distributedConfig.isTestOnReturn());
+            poolConfig.setTestWhileIdle(distributedConfig.isTestWhileIdle());
+
+        } else {
+            RedisConfig redisConfig = ServiceReferenceHolder.getInstance()
                     .getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration()
-                    .getKVStoreConfig();
-            if (kvStoreConfig == null) {
-                kvStoreConfig = ServiceReferenceHolder.getInstance()
-                        .getAPIManagerConfigurationService()
-                        .getAPIManagerConfiguration()
-                        .getRedisConfig();
+                    .getRedisConfig();
+            if (redisConfig != null) {
+                host = redisConfig.getHost();
+                port = redisConfig.getPort();
+                user = redisConfig.getUser();
+                password = redisConfig.getPassword();
+                connectionTimeout = redisConfig.getConnectionTimeout();
+                sslEnabled = redisConfig.isSslEnabled();
+                poolConfig.setMaxTotal(redisConfig.getMaxTotal());
+                poolConfig.setMaxIdle(redisConfig.getMaxIdle());
+                poolConfig.setMinIdle(redisConfig.getMinIdle());
+                poolConfig.setBlockWhenExhausted(redisConfig.isBlockWhenExhausted());
+                poolConfig.setTestOnBorrow(redisConfig.isTestOnBorrow());
+                poolConfig.setTestOnReturn(redisConfig.isTestOnReturn());
+                poolConfig.setTestWhileIdle(redisConfig.isTestWhileIdle());
             }
-            return kvStoreConfig;
-        } catch (Exception e) {
-            log.warn("Failed to load key-value configuration from API Manager config. Using defaults.", e);
-            return null;
+            else {
+                // Set default values if config type is not recognized
+
+                poolConfig.setMaxTotal(8);
+                poolConfig.setMaxIdle(8);
+                poolConfig.setMinIdle(0);
+                poolConfig.setBlockWhenExhausted(true);
+                poolConfig.setTestOnBorrow(false);
+                poolConfig.setTestOnReturn(false);
+                poolConfig.setTestWhileIdle(false);
+
+                log.warn("Unknown config type provided to createPoolConfig. Using default JedisPoolConfig values.");
+            }
+
         }
-    }
 
-    private static JedisPoolConfig createPoolConfig(RedisConfig config) {
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-
-        poolConfig.setMaxTotal(config.getMaxTotal());
-        poolConfig.setMaxIdle(config.getMaxIdle());
-        poolConfig.setMinIdle(config.getMinIdle());
-        poolConfig.setBlockWhenExhausted(config.isBlockWhenExhausted());
-        poolConfig.setTestOnBorrow(config.isTestOnBorrow());
-        poolConfig.setTestOnReturn(config.isTestOnReturn());
-        poolConfig.setTestWhileIdle(config.isTestWhileIdle());
-
-        return poolConfig;
     }
 
     private JedisPool getJedisPool() {
         if (jedisPool == null) {
             synchronized (JedisKeyValueStoreClient.class) {
                 if (jedisPool == null) {
-                    RedisConfig config = getKeyValueConfig();
-                    String host = config != null && config.getHost() != null ?
-                            config.getHost() : DEFAULT_HOST;
-
-                    int port = config != null && config.getPort() > 0 ?
-                            config.getPort() : DEFAULT_PORT;
-
-                    if (config != null) {
-                        JedisPoolConfig jedisPoolConfig = createPoolConfig(config);
-                        try {
-                            if (StringUtils.isNotEmpty(config.getUser()) && config.getPassword() != null) {
-                                jedisPool = new JedisPool(jedisPoolConfig, config.getHost(), config.getPort(),
-                                        config.getConnectionTimeout(), config.getUser(),
-                                        String.valueOf(config.getPassword()), config.isSslEnabled());
-                            } else if (config.getPassword() != null) {
-                                jedisPool = new JedisPool(jedisPoolConfig, config.getHost(), config.getPort(),
-                                        config.getConnectionTimeout(), String.valueOf(config.getPassword()), config.isSslEnabled());
-                            } else {
-                                jedisPool = new JedisPool(jedisPoolConfig, config.getHost(), config.getPort(),
-                                        config.getConnectionTimeout(), config.isSslEnabled());
-                            }
-                            return jedisPool;
-                        } catch (Exception e) {
-                            log.error("Failed to initialize KeyValue JedisPool for server at " + host + ":" + port, e);
+                    populateKeyValueStoreConfigs();
+                    try {
+                        if (StringUtils.isNotEmpty(user) && password != null) {
+                            jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout, user,
+                                    String.valueOf(password), sslEnabled);
+                        } else if (password != null) {
+                            jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout,
+                                    String.valueOf(password), sslEnabled);
+                        } else {
+                            jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout, sslEnabled);
                         }
+                        return jedisPool;
+                    } catch (Exception e) {
+                        log.error("Failed to initialize KeyValue JedisPool for server at " + host + ":" + port, e);
                     }
                 }
             }

@@ -565,20 +565,19 @@ public class APIManagerConfiguration {
                     }
                 }
                 if (propertiesElement != null) {
-                    kvStoreConfig = new RedisConfig();
                     OMElement host = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_HOST));
                     OMElement port = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PORT));
                     OMElement user = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_USER));
                     OMElement password = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PASSWORD));
 
-                    kvStoreConfig.setHost(host.getText());
-                    kvStoreConfig.setPort(Integer.parseInt(port.getText()));
+                    distributedThrottleConfig.setHost(host.getText());
+                    distributedThrottleConfig.setPort(Integer.parseInt(port.getText()));
 
                     if (user != null) {
-                        kvStoreConfig.setUser(user.getText());
+                        distributedThrottleConfig.setUser(user.getText());
                     }
                     if (password != null) {
-                        kvStoreConfig.setPassword(MiscellaneousUtil.resolve(password, secretResolver).toCharArray());
+                        distributedThrottleConfig.setPassword(MiscellaneousUtil.resolve(password, secretResolver).toCharArray());
                     }
 
                     Iterator<OMElement> properties = propertiesElement.getChildElements();
@@ -586,31 +585,29 @@ public class APIManagerConfiguration {
                         while (properties.hasNext()) {
                             OMElement propertyNode = properties.next();
                             if (APIConstants.DISTRIBUTED_THROTTLE_MAX_TOTAL.equals(propertyNode.getLocalName())) {
-                                kvStoreConfig.setMaxTotal(Integer.parseInt(propertyNode.getText()));
+                                distributedThrottleConfig.setMaxTotal(Integer.parseInt(propertyNode.getText()));
                             } else if (APIConstants.DISTRIBUTED_THROTTLE_MAX_IDLE.equals(propertyNode.getLocalName())) {
-                                kvStoreConfig.setMaxIdle(Integer.parseInt(propertyNode.getText()));
+                                distributedThrottleConfig.setMaxIdle(Integer.parseInt(propertyNode.getText()));
                             } else if (APIConstants.DISTRIBUTED_THROTTLE_MIN_IDLE.equals(propertyNode.getLocalName())) {
-                                kvStoreConfig.setMinIdle(Integer.parseInt(propertyNode.getText()));
+                                distributedThrottleConfig.setMinIdle(Integer.parseInt(propertyNode.getText()));
                             } else if (APIConstants.DISTRIBUTED_THROTTLE_TEST_ON_BORROW.equals(propertyNode.getLocalName())) {
-                                kvStoreConfig.setTestOnBorrow(Boolean.parseBoolean(propertyNode.getText()));
+                                distributedThrottleConfig.setTestOnBorrow(Boolean.parseBoolean(propertyNode.getText()));
                             } else if (APIConstants.DISTRIBUTED_THROTTLE_TEST_ON_RETURN.equals(propertyNode.getLocalName())) {
-                                kvStoreConfig.setTestOnReturn(Boolean.parseBoolean(propertyNode.getText()));
+                                distributedThrottleConfig.setTestOnReturn(Boolean.parseBoolean(propertyNode.getText()));
                             } else if (APIConstants.DISTRIBUTED_THROTTLE_TEST_WHILE_IDLE.equals(propertyNode.getLocalName())) {
-                                kvStoreConfig.setTestWhileIdle(Boolean.parseBoolean(propertyNode.getText()));
+                                distributedThrottleConfig.setTestWhileIdle(Boolean.parseBoolean(propertyNode.getText()));
                             } else if (APIConstants.DISTRIBUTED_THROTTLE_BLOCK_WHEN_EXHAUSTED.equals(propertyNode.getLocalName())) {
-                                kvStoreConfig.setBlockWhenExhausted(Boolean.parseBoolean(propertyNode.getText()));
+                                distributedThrottleConfig.setBlockWhenExhausted(Boolean.parseBoolean(propertyNode.getText()));
                             } else if (APIConstants.DISTRIBUTED_THROTTLE_MIN_EVICTABLE_IDLE_TIME_IN_MILLIS.equals(propertyNode.getLocalName())) {
-                                kvStoreConfig.setMinEvictableIdleTimeMillis(Long.parseLong(propertyNode.getText()));
+                                distributedThrottleConfig.setMinEvictableIdleTimeMillis(Long.parseLong(propertyNode.getText()));
                             } else if (APIConstants.DISTRIBUTED_THROTTLE_TIME_BETWEEN_EVICTION_RUNS_IN_MILLIS.equals(propertyNode.getLocalName())) {
-                                kvStoreConfig.setTimeBetweenEvictionRunsMillis(Long.parseLong(propertyNode.getText()));
+                                distributedThrottleConfig.setTimeBetweenEvictionRunsMillis(Long.parseLong(propertyNode.getText()));
                             } else if (APIConstants.DISTRIBUTED_THROTTLE_NUM_TESTS_PER_EVICTION_RUNS.equals(propertyNode.getLocalName())) {
-                                kvStoreConfig.setNumTestsPerEvictionRun(Integer.parseInt(propertyNode.getText()));
+                                distributedThrottleConfig.setNumTestsPerEvictionRun(Integer.parseInt(propertyNode.getText()));
                             }
                         }
                     }
                 }
-                // Set distributed throttle configurations as system properties
-                addDistributedThrottleConfigsAsSystemProperties(distributedThrottleConfig);
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
                 String value = MiscellaneousUtil.resolve(element, secretResolver);
@@ -1465,24 +1462,6 @@ public class APIManagerConfiguration {
     }
 
     /**
-     * Set distributed throttle configuration values as System properties.
-     *
-     * @param distributedThrottleConfig DistributedThrottleConfig object containing distributed throttle configuration
-     */
-    private void addDistributedThrottleConfigsAsSystemProperties(DistributedThrottleConfig distributedThrottleConfig) {
-        try {
-            if (distributedThrottleConfig != null) {
-                System.setProperty("distributed.throttle.enabled", String.valueOf(distributedThrottleConfig.isEnabled()));
-                System.setProperty("distributed.throttle.type", distributedThrottleConfig.getType());
-                System.setProperty("distributed.throttle.sync.interval", String.valueOf(distributedThrottleConfig.getSyncInterval()));
-                System.setProperty("distributed.throttle.core.pool.size", String.valueOf(distributedThrottleConfig.getCorePoolSize()));
-            }
-        } catch (Exception e) {
-            log.error("Exception while setting distributed throttle configuration as system properties: " + e.getMessage(), e);
-        }
-    }
-
-    /**
      * set workflow related configurations
      *
      * @param element
@@ -2213,11 +2192,6 @@ public class APIManagerConfiguration {
     public DistributedThrottleConfig getDistributedThrottleConfig() {
 
         return distributedThrottleConfig;
-    }
-
-    public RedisConfig getKVStoreConfig() {
-
-        return kvStoreConfig;
     }
 
     /**
