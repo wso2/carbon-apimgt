@@ -24,6 +24,9 @@
             <name>Name</name>
         </field>
         <field type="text" required="true">
+            <name>Display Name</name>
+        </field>
+        <field type="text" required="true">
             <name>Context</name>
         </field>
         <field type="text" required="true">
