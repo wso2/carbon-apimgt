@@ -54,7 +54,9 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class is responsible for heartbeat notifications and handling gateway registration.
@@ -83,16 +85,17 @@ public class GatewayNotifier {
      * Initializes the scheduler, loads configuration settings, and sets up heartbeat parameters
      */
     private GatewayNotifier() {
-        heartbeatScheduler = Executors.newSingleThreadScheduledExecutor();
-        registrationExecutor = Executors.newSingleThreadScheduledExecutor();
+        heartbeatScheduler = Executors.newSingleThreadScheduledExecutor(
+                createThreadFactory("GatewayHeartbeatScheduler"));
+        registrationExecutor = Executors.newSingleThreadScheduledExecutor(
+                createThreadFactory("GatewayRegistrationExecutor"));
         gatewayNotificationConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getGatewayNotificationConfiguration();
         gatewayArtifactSynchronizerProperties = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
                 .getGatewayArtifactSynchronizerProperties();
 
         gatewayNotificationEnabled = gatewayNotificationConfiguration.isEnabled();
-        heartbeatConfiguration
-                = gatewayNotificationConfiguration.getHeartbeat();
+        heartbeatConfiguration = gatewayNotificationConfiguration.getHeartbeat();
         notifyIntervalSeconds = heartbeatConfiguration.getNotifyIntervalSeconds();
         registrationConfiguration = gatewayNotificationConfiguration.getRegistration();
         maxRetryCount = registrationConfiguration.getMaxRetryCount();
@@ -126,6 +129,15 @@ public class GatewayNotifier {
             }
         }
         return instance;
+    }
+
+    private ThreadFactory createThreadFactory(String namePrefix) {
+        AtomicInteger threadNumber = new AtomicInteger(1);
+        return r -> {
+            Thread t = new Thread(r, namePrefix + "-" + threadNumber.getAndIncrement());
+            t.setDaemon(true);
+            return t;
+        };
     }
 
     /**
@@ -178,116 +190,6 @@ public class GatewayNotifier {
         }
     }
 
-    private class GatewayRegistrationWorker implements Runnable {
-        public void run() {
-            if (log.isDebugEnabled()) {
-                log.debug("Registering Gateway with ID: " + gatewayID);
-            }
-            
-            GatewayProperties gatewayProperties = new GatewayProperties(ipAddress);
-            GatewayRegistrationPayload payload = new GatewayRegistrationPayload(
-                    APIConstants.GatewayNotification.PAYLOAD_TYPE_REGISTER,
-                    gatewayID,
-                    Instant.now().toEpochMilli(),
-                    gatewayProperties,
-                    environmentLabels,
-                    loadingTenants
-            );
-            String registrationPayload = gson.toJson(payload);
-
-            try {
-                EventHubConfigurationDto config =
-                        ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEventHubConfigurationDto();
-                String serviceURLStr = config.getServiceUrl().concat(
-                        APIConstants.GatewayNotification.GATEWAY_NOTIFICATION_ENDPOINT);
-                URL url = new URL(serviceURLStr);
-                HttpClient httpClient = APIUtil.getHttpClient(url.getPort(), url.getProtocol());
-                HttpPost request = new HttpPost(serviceURLStr);
-                request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
-                                  APIConstants.AUTHORIZATION_BASIC + new String(Base64.encodeBase64(
-                                          (config.getUsername() + APIConstants.DELEM_COLON
-                                                  + config.getPassword()).getBytes(StandardCharsets.UTF_8)),
-                                                                                StandardCharsets.UTF_8));
-                request.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-                request.setEntity(new StringEntity(registrationPayload, ContentType.APPLICATION_JSON));
-                DataHolder.setGatewayRegistrationResponse(GatewayRegistrationResponse.NOT_RESPONDED);
-
-                try (CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(request, httpClient,
-                                                                                            retryDuration,
-                                                                                            maxRetryCount,
-                                                                                            retryProgressionFactor)) {
-                    int statusCode = response.getStatusLine().getStatusCode();
-                    String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-                    String status = null;
-                    try {
-                        JsonObject jsonObject = JsonParser.parseString(responseBody).getAsJsonObject();
-                        status = jsonObject.get("status").getAsString();
-                    } catch (RuntimeException ex) {
-                        log.error("Invalid registration response payload: " + responseBody, ex);
-                    }
-                    if (log.isDebugEnabled()) {
-                        log.debug("/notify-gateway called. Status: " + statusCode + ", Response: " + responseBody);
-                    }
-
-                    if (APIConstants.GatewayNotification.STATUS_REGISTERED.equals(status)) {
-                        DataHolder.setGatewayRegistrationResponse(
-                                GatewayRegistrationResponse.REGISTERED);
-                        log.info("Gateway registered successfully with ID: " + gatewayID);
-                    } else if (APIConstants.GatewayNotification.STATUS_ACKNOWLEDGED.equals(status)) {
-                        DataHolder.setGatewayRegistrationResponse(GatewayRegistrationResponse.ACKNOWLEDGED);
-                    }
-
-                }
-            } catch (IOException | APIManagementException e) {
-                log.error("Error occurred while executing Gateway Registration", e);
-            }
-        }
-    }
-
-    private class Heartbeat implements Runnable {
-        @Override
-        public void run() {
-            GatewayHeartbeatPayload payload = new GatewayHeartbeatPayload(
-                    APIConstants.GatewayNotification.PAYLOAD_TYPE_HEARTBEAT,
-                    gatewayID,
-                    Instant.now().toEpochMilli(),
-                    loadingTenants
-            );
-            String heartbeatPayload = gson.toJson(payload);
-            
-            try {
-                EventHubConfigurationDto config =
-                        ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEventHubConfigurationDto();
-                String serviceURLStr = config.getServiceUrl().concat(
-                        APIConstants.GatewayNotification.GATEWAY_NOTIFICATION_ENDPOINT);
-                URL url = new URL(serviceURLStr);
-
-                HttpClient httpClient = APIUtil.getHttpClient(url.getPort(), url.getProtocol());
-
-                HttpPost request = new HttpPost(serviceURLStr);
-                request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
-                                  APIConstants.AUTHORIZATION_BASIC + new String(Base64.encodeBase64(
-                                          (config.getUsername() + APIConstants.DELEM_COLON
-                                                  + config.getPassword()).getBytes(StandardCharsets.UTF_8)),
-                                                                                StandardCharsets.UTF_8));
-                request.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-                request.setEntity(new StringEntity(heartbeatPayload, ContentType.APPLICATION_JSON));
-                HttpResponse response = httpClient.execute(request);
-
-                int statusCode = response.getStatusLine().getStatusCode();
-                String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-                if (log.isDebugEnabled()) {
-                    log.debug("/notify-gateway called. Status: " + statusCode + ", Response: " + responseBody);
-                }
-                if (statusCode != HttpStatus.SC_OK) {
-                    log.error("Failed to send heartbeat notification. Status: " + statusCode + ", Response: "
-                                      + responseBody);
-                }
-            } catch (IOException e) {
-                log.error("Error occurred while executing Gateway Heartbeat notifier", e);
-            }
-        }
-    }
     /**
      * Retrieves the local IP address of the gateway.
      *
@@ -351,6 +253,108 @@ public class GatewayNotifier {
             this.gatewayId = gatewayId;
             this.timeStamp = timeStamp;
             this.loadingTenants = loadingTenants;
+        }
+    }
+
+    private class GatewayRegistrationWorker implements Runnable {
+        public void run() {
+            if (log.isDebugEnabled()) {
+                log.debug("Registering Gateway with ID: " + gatewayID);
+            }
+
+            GatewayProperties gatewayProperties = new GatewayProperties(ipAddress);
+            GatewayRegistrationPayload payload = new GatewayRegistrationPayload(
+                    APIConstants.GatewayNotification.PAYLOAD_TYPE_REGISTER, gatewayID, Instant.now().toEpochMilli(),
+                    gatewayProperties, environmentLabels, loadingTenants);
+            String registrationPayload = gson.toJson(payload);
+
+            try {
+                EventHubConfigurationDto config =
+                        ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEventHubConfigurationDto();
+                String serviceURLStr = config.getServiceUrl().concat(
+                        APIConstants.GatewayNotification.GATEWAY_NOTIFICATION_ENDPOINT);
+                URL url = new URL(serviceURLStr);
+                HttpClient httpClient = APIUtil.getHttpClient(url.getPort(), url.getProtocol());
+                HttpPost request = new HttpPost(serviceURLStr);
+                request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                                  APIConstants.AUTHORIZATION_BASIC + new String(Base64.encodeBase64(
+                                          (config.getUsername() + APIConstants.DELEM_COLON
+                                                  + config.getPassword()).getBytes(StandardCharsets.UTF_8)),
+                                                                                StandardCharsets.UTF_8));
+                request.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                request.setEntity(new StringEntity(registrationPayload, ContentType.APPLICATION_JSON));
+                DataHolder.setGatewayRegistrationResponse(GatewayRegistrationResponse.NOT_RESPONDED);
+
+                try (CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(request, httpClient,
+                                                                                            retryDuration,
+                                                                                            maxRetryCount,
+                                                                                            retryProgressionFactor)) {
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                    String status = null;
+                    try {
+                        JsonObject jsonObject = JsonParser.parseString(responseBody).getAsJsonObject();
+                        status = jsonObject.get("status").getAsString();
+                    } catch (RuntimeException ex) {
+                        log.error("Invalid registration response payload: " + responseBody, ex);
+                    }
+                    if (log.isDebugEnabled()) {
+                        log.debug("/notify-gateway called. Status: " + statusCode + ", Response: " + responseBody);
+                    }
+
+                    if (APIConstants.GatewayNotification.STATUS_REGISTERED.equals(status)) {
+                        DataHolder.setGatewayRegistrationResponse(GatewayRegistrationResponse.REGISTERED);
+                        log.info("Gateway registered successfully with ID: " + gatewayID);
+                    } else if (APIConstants.GatewayNotification.STATUS_ACKNOWLEDGED.equals(status)) {
+                        DataHolder.setGatewayRegistrationResponse(GatewayRegistrationResponse.ACKNOWLEDGED);
+                    }
+
+                }
+            } catch (IOException | APIManagementException e) {
+                log.error("Error occurred while executing Gateway Registration", e);
+            }
+        }
+    }
+
+    private class Heartbeat implements Runnable {
+        @Override
+        public void run() {
+            GatewayHeartbeatPayload payload = new GatewayHeartbeatPayload(
+                    APIConstants.GatewayNotification.PAYLOAD_TYPE_HEARTBEAT, gatewayID, Instant.now().toEpochMilli(),
+                    loadingTenants);
+            String heartbeatPayload = gson.toJson(payload);
+
+            try {
+                EventHubConfigurationDto config =
+                        ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEventHubConfigurationDto();
+                String serviceURLStr = config.getServiceUrl().concat(
+                        APIConstants.GatewayNotification.GATEWAY_NOTIFICATION_ENDPOINT);
+                URL url = new URL(serviceURLStr);
+
+                HttpClient httpClient = APIUtil.getHttpClient(url.getPort(), url.getProtocol());
+
+                HttpPost request = new HttpPost(serviceURLStr);
+                request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                                  APIConstants.AUTHORIZATION_BASIC + new String(Base64.encodeBase64(
+                                          (config.getUsername() + APIConstants.DELEM_COLON
+                                                  + config.getPassword()).getBytes(StandardCharsets.UTF_8)),
+                                                                                StandardCharsets.UTF_8));
+                request.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                request.setEntity(new StringEntity(heartbeatPayload, ContentType.APPLICATION_JSON));
+                HttpResponse response = httpClient.execute(request);
+
+                int statusCode = response.getStatusLine().getStatusCode();
+                String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                if (log.isDebugEnabled()) {
+                    log.debug("/notify-gateway called. Status: " + statusCode + ", Response: " + responseBody);
+                }
+                if (statusCode != HttpStatus.SC_OK) {
+                    log.error("Failed to send heartbeat notification. Status: " + statusCode + ", Response: "
+                                      + responseBody);
+                }
+            } catch (IOException e) {
+                log.error("Error occurred while executing Gateway Heartbeat notifier", e);
+            }
         }
     }
 
