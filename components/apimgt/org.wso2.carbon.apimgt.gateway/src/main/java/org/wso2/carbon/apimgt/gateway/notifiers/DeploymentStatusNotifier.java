@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration.DeploymentAcknowledgementConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -73,11 +74,13 @@ public class DeploymentStatusNotifier {
     private final int batchProcessorMaxThread;
     private final long batchProcessorKeepAlive;
     private final int batchProcessorQueueSize;
+    private GatewayNotificationConfiguration gatewayNotificationConfig;
 
     private DeploymentStatusNotifier() {
-        DeploymentAcknowledgementConfiguration config =
+        gatewayNotificationConfig =
                 ServiceReferenceHolder.getInstance().getApiManagerConfigurationService().getAPIManagerConfiguration()
-                        .getGatewayNotificationConfiguration().getDeploymentAcknowledgement();
+                        .getGatewayNotificationConfiguration();
+        DeploymentAcknowledgementConfiguration config = gatewayNotificationConfig.getDeploymentAcknowledgement();
         this.batchSize = config.getBatchSize();
         this.batchIntervalMillis = config.getBatchIntervalMillis();
         this.maxRetryCount = config.getMaxRetryCount();
@@ -124,6 +127,9 @@ public class DeploymentStatusNotifier {
     }
 
     private void startPeriodicBatchProcessing() {
+        if (!gatewayNotificationConfig.isEnabled()){
+            return;
+        }
         periodicBatchProcessor.scheduleAtFixedRate(this::processPeriodicBatch, batchIntervalMillis, batchIntervalMillis,
                                                    TimeUnit.MILLISECONDS);
     }
@@ -175,6 +181,9 @@ public class DeploymentStatusNotifier {
      */
     public void submitDeploymentStatus(String apiId, String revisionId, boolean success, String action, Long errorCode,
                                        String errorMessage, String tenantDomain) {
+        if (!gatewayNotificationConfig.isEnabled()){
+            return;
+        }
         if (apiId == null || action == null || tenantDomain == null) {
             log.warn("Invalid deployment status submission: apiId, action, and tenantDomain cannot be null");
             return;

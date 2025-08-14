@@ -133,6 +133,10 @@ public class GatewayNotifier {
      * Registers the gateway with the control plan.
      */
     public void registerGateway() {
+        if (!gatewayNotificationEnabled) {
+            log.warn("Gateway Notification is disabled by configuration.");
+            return;
+        }
         if (log.isDebugEnabled()) {
             log.debug("Registering Gateway with ID: " + gatewayID);
         }
