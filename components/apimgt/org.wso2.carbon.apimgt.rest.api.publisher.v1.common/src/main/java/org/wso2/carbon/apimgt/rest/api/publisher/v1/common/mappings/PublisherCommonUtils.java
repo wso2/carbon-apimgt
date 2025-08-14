@@ -429,6 +429,9 @@ public class PublisherCommonUtils {
             updatedTemplates = ApisApiServiceImplUtils.findMatchingTools(backend.getDefinition(),
                     apiToUpdate.getUriTemplates(), backend.getId());
         }
+        if (updatedTemplates == null || updatedTemplates.isEmpty()) {
+            throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
+        }
         apiToUpdate.setUriTemplates(updatedTemplates);
     }
 

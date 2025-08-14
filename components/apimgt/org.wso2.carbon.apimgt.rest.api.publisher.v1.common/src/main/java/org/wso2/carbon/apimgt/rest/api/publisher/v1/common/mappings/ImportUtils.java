@@ -726,7 +726,9 @@ public class ImportUtils {
                 }
             }
 
-            deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, dependentAPIFromProduct);
+            if (deploymentInfoArray == null) {
+                deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, dependentAPIFromProduct);
+            }
             final List<APIRevisionDeployment> apiRevisionDeployments =
                     getValidatedDeploymentsList(deploymentInfoArray, tenantDomain, apiProvider, organization);
 
@@ -820,6 +822,10 @@ public class ImportUtils {
                         || APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(subtype)) {
 
                     final List<Backend> backendList = getMCPServerBackends(extractedFolderPath);
+                    if (backendList.isEmpty()) {
+                        throw new APIManagementException("No backends found in backends.yaml/backends.json for MCP " +
+                                "Server subtype: " + subtype, ExceptionCodes.MCP_BACKENDS_NOT_FOUND);
+                    }
                     final Backend backend = backendList.get(0);
 
                     final JSONObject endpointObject =
@@ -840,7 +846,6 @@ public class ImportUtils {
 
                     if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(subtype)) {
                         validationResponse = retrieveValidatedSwaggerDefinition(backendDefinition);
-                        validationResponse.getJsonContent();
 
                         final API apiToAdd = PublisherCommonUtils
                                 .prepareToCreateAPIByDTO(apiDtoTypeWrapper, apiProvider, userName, organization);

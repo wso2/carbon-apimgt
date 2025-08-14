@@ -2429,7 +2429,7 @@ public class APIMappingUtil {
         subtypeConfigurationDTO.setSubtype(model.getSubtype());
         dto.setSubtypeConfiguration(subtypeConfigurationDTO);
         dto.setInitiatedFromGateway(model.isInitiatedFromGateway());
-        dto.displayName(model.getDisplayName());
+        dto.setDisplayName(model.getDisplayName());
         String protocolVersion = model.getMetadata() != null
                 ? model.getMetadata().get(APIConstants.MCP.PROTOCOL_VERSION_KEY) : null;
         if (protocolVersion != null) {

@@ -27,7 +27,7 @@ public class MCPServerValidationResponseDTO   {
     private MCPServerValidationResponseToolInfoDTO toolInfo = null;
 
   /**
-   * This attribute declares whether this definition is valid or not. example: true 
+   * This attribute declares whether this definition is valid or not. 
    **/
   public MCPServerValidationResponseDTO isValid(Boolean isValid) {
     this.isValid = isValid;
@@ -35,7 +35,7 @@ public class MCPServerValidationResponseDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "This attribute declares whether this definition is valid or not. example: true ")
+  @ApiModelProperty(example = "true", required = true, value = "This attribute declares whether this definition is valid or not. ")
   @JsonProperty("isValid")
   @NotNull
   public Boolean isIsValid() {

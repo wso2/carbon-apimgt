@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -21,8 +23,8 @@ import javax.validation.Valid;
 public class MCPServerProxyRequestDTO   {
   
     private String url = null;
-    private String additionalProperties = null;
-    private String securityInfo = null;
+    private MCPServerDTO additionalProperties = null;
+    private SecurityInfoDTO securityInfo = null;
 
   /**
    * Definition url
@@ -33,8 +35,9 @@ public class MCPServerProxyRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "Definition url")
+  @ApiModelProperty(required = true, value = "Definition url")
   @JsonProperty("url")
+  @NotNull
   public String getUrl() {
     return url;
   }
@@ -43,38 +46,40 @@ public class MCPServerProxyRequestDTO   {
   }
 
   /**
-   * Additional attributes specified as a stringified JSON with MCP Server&#39;s schema
    **/
-  public MCPServerProxyRequestDTO additionalProperties(String additionalProperties) {
+  public MCPServerProxyRequestDTO additionalProperties(MCPServerDTO additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Additional attributes specified as a stringified JSON with MCP Server's schema")
+  @ApiModelProperty(required = true, value = "")
+      @Valid
   @JsonProperty("additionalProperties")
-  public String getAdditionalProperties() {
+  @NotNull
+  public MCPServerDTO getAdditionalProperties() {
     return additionalProperties;
   }
-  public void setAdditionalProperties(String additionalProperties) {
+  public void setAdditionalProperties(MCPServerDTO additionalProperties) {
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * SecurityInfo object specified as a stringified JSON
    **/
-  public MCPServerProxyRequestDTO securityInfo(String securityInfo) {
+  public MCPServerProxyRequestDTO securityInfo(SecurityInfoDTO securityInfo) {
     this.securityInfo = securityInfo;
     return this;
   }
 
   
-  @ApiModelProperty(value = "SecurityInfo object specified as a stringified JSON")
+  @ApiModelProperty(required = true, value = "")
+      @Valid
   @JsonProperty("securityInfo")
-  public String getSecurityInfo() {
+  @NotNull
+  public SecurityInfoDTO getSecurityInfo() {
     return securityInfo;
   }
-  public void setSecurityInfo(String securityInfo) {
+  public void setSecurityInfo(SecurityInfoDTO securityInfo) {
     this.securityInfo = securityInfo;
   }
 
