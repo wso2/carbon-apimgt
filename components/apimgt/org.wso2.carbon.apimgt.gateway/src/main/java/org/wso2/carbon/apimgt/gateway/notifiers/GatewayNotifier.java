@@ -83,16 +83,17 @@ public class GatewayNotifier {
      * Initializes the scheduler, loads configuration settings, and sets up heartbeat parameters
      */
     private GatewayNotifier() {
-        heartbeatScheduler = Executors.newSingleThreadScheduledExecutor();
-        registrationExecutor = Executors.newSingleThreadScheduledExecutor();
+        heartbeatScheduler = Executors.newSingleThreadScheduledExecutor(
+                r -> new Thread(r, "GatewayHeartbeatScheduler"));
+        registrationExecutor = Executors.newSingleThreadScheduledExecutor(
+                r -> new Thread(r, "GatewayRegistrationExecutor"));
         gatewayNotificationConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getGatewayNotificationConfiguration();
         gatewayArtifactSynchronizerProperties = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
                 .getGatewayArtifactSynchronizerProperties();
 
         gatewayNotificationEnabled = gatewayNotificationConfiguration.isEnabled();
-        heartbeatConfiguration
-                = gatewayNotificationConfiguration.getHeartbeat();
+        heartbeatConfiguration = gatewayNotificationConfiguration.getHeartbeat();
         notifyIntervalSeconds = heartbeatConfiguration.getNotifyIntervalSeconds();
         registrationConfiguration = gatewayNotificationConfiguration.getRegistration();
         maxRetryCount = registrationConfiguration.getMaxRetryCount();
@@ -186,13 +187,8 @@ public class GatewayNotifier {
             
             GatewayProperties gatewayProperties = new GatewayProperties(ipAddress);
             GatewayRegistrationPayload payload = new GatewayRegistrationPayload(
-                    APIConstants.GatewayNotification.PAYLOAD_TYPE_REGISTER,
-                    gatewayID,
-                    Instant.now().toEpochMilli(),
-                    gatewayProperties,
-                    environmentLabels,
-                    loadingTenants
-            );
+                    APIConstants.GatewayNotification.PAYLOAD_TYPE_REGISTER, gatewayID, Instant.now().toEpochMilli(),
+                    gatewayProperties, environmentLabels, loadingTenants);
             String registrationPayload = gson.toJson(payload);
 
             try {
@@ -230,8 +226,7 @@ public class GatewayNotifier {
                     }
 
                     if (APIConstants.GatewayNotification.STATUS_REGISTERED.equals(status)) {
-                        DataHolder.setGatewayRegistrationResponse(
-                                GatewayRegistrationResponse.REGISTERED);
+                        DataHolder.setGatewayRegistrationResponse(GatewayRegistrationResponse.REGISTERED);
                         log.info("Gateway registered successfully with ID: " + gatewayID);
                     } else if (APIConstants.GatewayNotification.STATUS_ACKNOWLEDGED.equals(status)) {
                         DataHolder.setGatewayRegistrationResponse(GatewayRegistrationResponse.ACKNOWLEDGED);
@@ -248,11 +243,8 @@ public class GatewayNotifier {
         @Override
         public void run() {
             GatewayHeartbeatPayload payload = new GatewayHeartbeatPayload(
-                    APIConstants.GatewayNotification.PAYLOAD_TYPE_HEARTBEAT,
-                    gatewayID,
-                    Instant.now().toEpochMilli(),
-                    loadingTenants
-            );
+                    APIConstants.GatewayNotification.PAYLOAD_TYPE_HEARTBEAT, gatewayID, Instant.now().toEpochMilli(),
+                    loadingTenants);
             String heartbeatPayload = gson.toJson(payload);
             
             try {

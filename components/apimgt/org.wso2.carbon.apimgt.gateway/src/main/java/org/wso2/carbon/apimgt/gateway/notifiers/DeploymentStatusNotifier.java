@@ -119,12 +119,8 @@ public class DeploymentStatusNotifier {
     }
 
     private ThreadFactory createThreadFactory(String namePrefix) {
-        AtomicInteger threadNumber = new AtomicInteger(1);
-        return r -> {
-            Thread t = new Thread(r, namePrefix + "-" + threadNumber.getAndIncrement());
-            t.setDaemon(true);
-            return t;
-        };
+        final AtomicInteger threadNumber = new AtomicInteger(1);
+        return r -> new Thread(r, namePrefix + "-" + threadNumber.getAndIncrement());
     }
 
     private void startPeriodicBatchProcessing() {
