@@ -39,7 +39,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.URL;
 import java.util.Map;
 import java.util.UUID;
 
@@ -68,12 +67,26 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
         uri = providerConfig.getProperties().get(APIConstants.AI.VECTOR_DB_PROVIDER_URI);
         token = providerConfig.getProperties().get(APIConstants.AI.VECTOR_DB_PROVIDER_TOKEN);
 
-        if (uri == null || token == null) {
-            throw new IllegalArgumentException(
-                    "Missing required Zilliz configuration: 'uri' or 'token'");
+        java.util.List<String> missingParams = new java.util.ArrayList<>();
+        if (uri == null) {
+            missingParams.add("'uri'");
         }
-        ttl = Integer.parseInt(providerConfig.getProperties().getOrDefault(APIConstants.AI.VECTOR_DB_PROVIDER_TTL,
-                APIConstants.AI.VECTOR_DB_PROVIDER_TTL_DEFAULT));
+        if (token == null) {
+            missingParams.add("'token'");
+        }
+        if (!missingParams.isEmpty()) {
+            throw new IllegalArgumentException("Missing required Zilliz configuration parameter(s): " +
+                    String.join(", ", missingParams));
+        }
+        String ttlStr = providerConfig.getProperties()
+                .getOrDefault(APIConstants.AI.VECTOR_DB_PROVIDER_TTL, APIConstants.AI.VECTOR_DB_PROVIDER_TTL_DEFAULT);
+        try {
+            ttl = Integer.parseInt(ttlStr);
+        } catch (NumberFormatException nfe) {
+            log.warn("Invalid TTL value '" + ttlStr + "', falling back to default: " +
+                    APIConstants.AI.VECTOR_DB_PROVIDER_TTL_DEFAULT);
+            ttl = Integer.parseInt(APIConstants.AI.VECTOR_DB_PROVIDER_TTL_DEFAULT);
+        }
 
         log.info("Initializing Zilliz REST client with URI: " + uri);
     }
@@ -89,9 +102,19 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
         try {
             // Check if collection exists
             String checkUrl = uri + APIConstants.AI.VECTOR_DB_PROVIDER_ZILLIZ_HAS_COLLECTION_ENDPOINT;
-            dimension = Integer.parseInt(providerConfig.
-                    get(APIConstants.AI.VECTOR_DB_PROVIDER_EMBEDDING_DIMENSION));
-
+            String dimStr = providerConfig.get(APIConstants.AI.VECTOR_DB_PROVIDER_EMBEDDING_DIMENSION);
+            if (dimStr == null) {
+                throw new APIManagementException("Missing required config: '" +
+                        APIConstants.AI.VECTOR_DB_PROVIDER_EMBEDDING_DIMENSION + "'");
+            }
+            try {
+                dimension = Integer.parseInt(dimStr);
+            } catch (NumberFormatException nfe) {
+                throw new APIManagementException("Invalid embedding dimension: '" + dimStr + "'", nfe);
+            }
+            if (dimension <= 0) {
+                throw new APIManagementException("Embedding dimension must be > 0. Received: " + dimension);
+            }
             collectionName = APIConstants.AI.VECTOR_INDEX_PREFIX + dimension;
             log.debug("Checking if collection exists: " + collectionName);
 
@@ -103,8 +126,8 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
                 String responseStr = EntityUtils.toString(checkResponse.getEntity());
                 JSONObject checkObj = new JSONObject(responseStr);
                 if (checkStatusCode == HttpStatus.SC_OK) {
-                    boolean exists = checkObj.optJSONObject(APIConstants.AI.VECTOR_DB_PROVIDER_ZILLIZ_DATA).
-                            optBoolean(APIConstants.AI.VECTOR_DB_PROVIDER_ZILLIZ_HAS);
+                    JSONObject dataObj = checkObj.optJSONObject(APIConstants.AI.VECTOR_DB_PROVIDER_ZILLIZ_DATA);
+                    boolean exists = dataObj != null && dataObj.optBoolean(APIConstants.AI.VECTOR_DB_PROVIDER_ZILLIZ_HAS, false);
                     if (exists) {
                         log.info("Collection already exists: " + collectionName);
                         return;
@@ -234,16 +257,16 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
     }
 
     @Override
-    public void store(double[] embeddings, Serializable response, Map<String, String> filter) throws APIManagementException {
-        if (log.isDebugEnabled()) {
-            log.debug("Storing embeddings in Zilliz for API ID: " + filter.get(APIConstants.AI.VECTOR_DB_PROVIDER_API_ID));
-        }
+    public <T extends Serializable> void store(double[] embeddings, T response, Map<String, String> filter) throws APIManagementException {
         if (embeddings == null || embeddings.length != dimension) {
             throw new APIManagementException("Invalid embedding dimension. Expected: " + dimension +
                     ", Received: " + (embeddings != null ? embeddings.length : "null"));
         }
         if (filter == null || !filter.containsKey(APIConstants.AI.VECTOR_DB_PROVIDER_API_ID)) {
             throw new APIManagementException("Missing required filter: 'api_id'");
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Storing embeddings in Zilliz for API ID: " + filter.get(APIConstants.AI.VECTOR_DB_PROVIDER_API_ID));
         }
 
         // Check if collection exists
@@ -286,10 +309,7 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
      * Retrieve the most similar response from the vector database.
      */
     @Override
-    public Serializable retrieve(double[] embeddings, Map<String, String> filter) throws APIManagementException {
-        if (log.isDebugEnabled()) {
-            log.debug("Retrieving similar response from Zilliz for API ID: " + filter.get(APIConstants.AI.VECTOR_DB_PROVIDER_API_ID));
-        }
+    public <T extends Serializable> T retrieve(double[] embeddings, Map<String, String> filter) throws APIManagementException {
         if (embeddings == null || embeddings.length != dimension) {
             throw new APIManagementException("Invalid embedding dimension. Expected: " + dimension +
                     ", Received: " + (embeddings != null ? embeddings.length : "null"));
@@ -297,6 +317,9 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
         if (filter == null || !filter.containsKey(APIConstants.AI.VECTOR_DB_PROVIDER_API_ID)
                 || !filter.containsKey(APIConstants.AI.VECTOR_DB_PROVIDER_THRESHOLD)) {
             throw new APIManagementException("Missing required filter: 'api_id' or 'threshold'");
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving similar response from Zilliz for API ID: " + filter.get(APIConstants.AI.VECTOR_DB_PROVIDER_API_ID));
         }
         try {
             String queryUrl = uri + APIConstants.AI.VECTOR_DB_PROVIDER_ZILLIZ_SEARCH_ENDPOINT;
@@ -351,7 +374,7 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
                 String responseJson = (String) topResult.get(APIConstants.AI.VECTOR_DB_PROVIDER_RESPONSE);
                 log.debug("Successfully retrieved similar response from Zilliz");
 
-                return responseJson;
+                return (T) responseJson;
             }
         } catch (IOException | org.json.JSONException e) {
             log.error("Error retrieving response from Zilliz. Query URL: " + uri
@@ -377,10 +400,7 @@ public class ZillizVectorDBProviderServiceImpl implements VectorDBProviderServic
             StringEntity entity = new StringEntity(payload, ContentType.APPLICATION_JSON);
             postRequest.setEntity(entity);
 
-            URL url = new URL(endpoint);
-            int port = url.getPort();
-            String protocol = url.getProtocol();
-            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+            HttpClient httpClient = APIUtil.getHttpClient(endpoint);
 
             return APIUtil.executeHTTPRequest(postRequest, httpClient);
         } catch (Exception e) {
