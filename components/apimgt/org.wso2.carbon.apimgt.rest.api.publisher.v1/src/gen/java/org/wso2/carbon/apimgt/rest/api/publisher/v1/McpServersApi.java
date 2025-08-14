@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerProxyRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
@@ -177,7 +178,7 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
 
     @POST
     @Path("/generate-from-mcp-server")
-    @Consumes({ "multipart/form-data" })
+    @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Create an MCP server by proxying a third-party MCP Server ", notes = "This operation can be used to create a MCP server using a third party MCP Server.  Specify additionalProperties with **at least** API's name, version, context and endpointConfig. ", response = MCPServerDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -189,8 +190,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = MCPServerDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response createMCPServerProxy(@Multipart(value = "url", required = false)  String url, @Multipart(value = "additionalProperties", required = false)  String additionalProperties, @Multipart(value = "securityInfo", required = false)  String securityInfo) throws APIManagementException{
-        return delegate.createMCPServerProxy(url, additionalProperties, securityInfo, securityContext);
+    public Response createMCPServerProxy(@ApiParam(value = "" ) MCPServerProxyRequestDTO mcPServerProxyRequestDTO) throws APIManagementException{
+        return delegate.createMCPServerProxy(mcPServerProxyRequestDTO, securityContext);
     }
 
     @POST

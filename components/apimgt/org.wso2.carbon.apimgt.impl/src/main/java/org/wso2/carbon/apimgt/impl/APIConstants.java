@@ -3618,8 +3618,6 @@ public final class APIConstants {
         // SSE parsing
         public static final String SSE_DATA_PREFIX = "data:";
 
-        public static final String MCP_FEATURE_TYPE_TOOL = "TOOL";
-
         /**
          * This class contains constants used for RPC processing
          */

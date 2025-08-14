@@ -2381,8 +2381,10 @@ paths:
         Specify additionalProperties with **at least** API's name, version, context and endpointConfig.
       requestBody:
         content:
-          multipart/form-data:
+          application/json:
             schema:
+              title: MCP Server Proxy Request
+              type: object
               properties:
                 url:
                   type: string
@@ -2393,9 +2395,6 @@ paths:
                 securityInfo:
                   type: string
                   description: SecurityInfo object specified as a stringified JSON
-            encoding:
-              securityInfo:
-                contentType: application/json
       responses:
         201:
           description: |
@@ -4350,7 +4349,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v3/mcp-servers/7a2298c4-c905-403f-8fac-38c73301631f/generate-key"'
+          "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/7a2298c4-c905-403f-8fac-38c73301631f/generate-key"'
       operationId: generateInternalAPIKeyMCPServer
 
   /mcp-servers/{mcpServerId}/comments:

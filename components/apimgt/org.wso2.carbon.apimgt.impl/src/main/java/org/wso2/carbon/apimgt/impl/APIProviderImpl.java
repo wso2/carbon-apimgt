@@ -1008,6 +1008,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         //Validate Transports
         validateAndSetTransports(api);
+        validateUriTemplateChangesForMcpUsage(api, existingAPI);
         validateAndSetAPISecurity(api);
         validateKeyManagers(api);
         String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
@@ -1111,6 +1112,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         return api;
+    }
+
+    /**
+     * Validates the URI template changes for MCP usage.
+     *
+     * @param api         API object
+     * @param existingAPI Existing API object
+     * @throws APIManagementException if the URI template changes are not allowed due to MCP usage
+     */
+    private void validateUriTemplateChangesForMcpUsage(API api, API existingAPI) throws APIManagementException {
+
+        List<API> mcpServers = getMCPServersUsedByAPI(api.getUuid(), organization);
+        if (mcpServers == null || mcpServers.isEmpty()) {
+            return;
+        }
+
+        Set<URITemplate> newSet = api.getUriTemplates() != null ? api.getUriTemplates() : Collections.emptySet();
+        Set<URITemplate> oldSet =
+                existingAPI.getUriTemplates() != null ? existingAPI.getUriTemplates() : Collections.emptySet();
+
+        if (!newSet.equals(oldSet)) {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_MCP_USAGE));
+        }
     }
 
     /**
