@@ -953,7 +953,7 @@ public class ImportUtils {
             throw new APIManagementException("Error while reading meta information from path: " + extractedFolderPath,
                     e, ExceptionCodes.ERROR_READING_META_DATA);
         } catch (FaultGatewaysException e) {
-            throw new APIManagementException("Error while updating MCP Server: " + importedApi.getId().getApiName(), e);
+            throw new APIManagementException("Error while updating MCP Server: " + importedApiDTO.getName(), e);
         } catch (APIMgtAuthorizationFailedException e) {
             throw new APIManagementException("Please enable preserveProvider property for cross tenant import.", e,
                     ExceptionCodes.TENANT_MISMATCH);
