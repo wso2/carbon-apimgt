@@ -789,7 +789,7 @@ public class ApisApiServiceImplUtils {
 
         Backend backend = new Backend();
         backend.setId(backendApiId);
-        backend.setName(APIConstants.AI.MCP_DEFAULT_BACKEND_NAME);
+        backend.setName(APIConstants.MCP.MCP_DEFAULT_BACKEND_NAME);
         backend.setDefinition(backendDefinition);
         backend.setEndpointConfig(endpointConfig);
         return backend;
@@ -811,7 +811,7 @@ public class ApisApiServiceImplUtils {
             throws APIManagementException {
 
         Set<URITemplate> mcpTools;
-        if (subtype.equals(APIConstants.API_SUBTYPE_SERVER_PROXY)) {
+        if (APIConstants.API_SUBTYPE_SERVER_PROXY.equals(subtype)) {
             mcpTools = findMatchingTools(backendApiDefinition, uriTemplates, backendId);
         } else {
             mcpTools = parser.generateMCPTools(backendApiDefinition, null, backendId, subtype, uriTemplates);

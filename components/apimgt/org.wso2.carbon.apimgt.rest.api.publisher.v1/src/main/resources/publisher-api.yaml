@@ -2537,8 +2537,6 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
-            - apim:ep_certificates_view
-            - apim:ep_certificates_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2551,7 +2549,7 @@ paths:
         - Validation
       summary: Validate a third-party MCP Server
       description: >
-        This operation can be used to validate an `url` of third party mcp server
+        This operation can be used to validate a `url` of third party mcp server
       requestBody:
         description: Object containing validation input parameters
         required: true
@@ -2582,7 +2580,7 @@ paths:
             - apim:api_manage
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -X POST "https://127.0.0.1:9443/api/am/publisher/v3/apis/validate-mcp-server" \
+          source: 'curl -k -X POST "https://127.0.0.1:9443/api/am/publisher/v3/mcp-servers/validate-mcp-server" \
               -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" \
               -H "Content-Type: application/json" \
               -d "{
@@ -2658,7 +2656,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file=@openapi.json 
-          -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/generate-from-openapi"'
+          -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/generate-from-openapi"'
       operationId: createMCPServerFromOpenAPI
 
   /mcp-servers/generate-from-mcp-server:
@@ -2725,7 +2723,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file=@openapi.json
-          -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/generate-from-mcp-servers"'
+          -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/generate-from-mcp-servers"'
       operationId: createMCPServerProxy
 
   /mcp-servers/generate-from-api:
@@ -2789,7 +2787,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/generate-from-api"'
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/generate-from-api"'
       operationId: createMCPServerFromAPI
 
   /mcp-servers:
@@ -3252,7 +3250,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/96077508-fd01-4fae-bc64-5de0e2baf43c/backend-apis"'
+          "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/96077508-fd01-4fae-bc64-5de0e2baf43c/backends"'
       operationId: getMCPServerBackends
 
   /mcp-servers/{mcpServerId}/backends/{backendId}:
@@ -3294,7 +3292,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/96077508-fd01-4fae-bc64-5de0e2baf43c/backend-apis/13092607-ed01-4fa1-bc64-5da0e2abe92c"'
+          "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/96077508-fd01-4fae-bc64-5de0e2baf43c/backends/13092607-ed01-4fa1-bc64-5da0e2abe92c"'
       operationId: getMCPServerBackend
 
     put:
@@ -3345,7 +3343,7 @@ paths:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json 
-          "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/96077508-fd01-4fae-bc64-5de0e2baf43c/backend-apis/13092607-ed01-4fa1-bc64-5da0e2abe92c"'
+          "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/96077508-fd01-4fae-bc64-5de0e2baf43c/backends/13092607-ed01-4fa1-bc64-5da0e2abe92c"'
       operationId: updateMCPServerBackend
 
   /mcp-servers/{mcpServerId}/deploy-revision:
@@ -4699,7 +4697,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-              -H "Content-Type: application/json" -d @data.json "https://localhost:9443/mcp-servers/am/publisher/v4/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"'
+              -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/publisher/v4/mcp-servers/e93fb282-b456-48fc-8981-003fb89086ae/comments"'
       operationId: addCommentToMCPServer
 
   /mcp-servers/{mcpServerId}/comments/{commentId}:
@@ -14258,7 +14256,7 @@ components:
               authType: Application & Application User
               throttlingPolicy: Unlimited
             - target: addBook
-              verb: TOOL
+              feature: TOOL
               authType: Application & Application User
               throttlingPolicy: Unlimited
           items:

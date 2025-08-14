@@ -1561,9 +1561,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Retrieve MCP Server(s) that uses the given API", notes = "This operation can be used to retrieve/identify MCP Server(s) that uses the API given by the `apiId` parameter. ", response = MCPServerMetadataListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
-            @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates"),
-            @AuthorizationScope(scope = "apim:ep_certificates_manage", description = "View, create, update and remove endpoint certificates")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 

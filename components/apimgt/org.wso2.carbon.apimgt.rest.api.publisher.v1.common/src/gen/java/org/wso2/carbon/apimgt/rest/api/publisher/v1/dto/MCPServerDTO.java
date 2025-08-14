@@ -1012,7 +1012,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "[{\"target\":\"listBooks\",\"feature\":\"TOOL\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"},{\"target\":\"addBook\",\"verb\":\"TOOL\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"}]", value = "")
+  @ApiModelProperty(example = "[{\"target\":\"listBooks\",\"feature\":\"TOOL\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"},{\"target\":\"addBook\",\"feature\":\"TOOL\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"}]", value = "")
       @Valid
   @JsonProperty("operations")
   public List<MCPServerOperationDTO> getOperations() {
