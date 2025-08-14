@@ -1369,7 +1369,8 @@ public class SubscriptionValidationDAO {
     private void populateMcpOperationMappings(Connection connection, int urlMappingId, URLMapping urlMapping, API api)
             throws SQLException {
         String sql;
-        if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(api.getSubtype())) {
+        if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(api.getSubtype()) ||
+                APIConstants.API_SUBTYPE_SERVER_PROXY.equals(api.getSubtype())) {
             sql = SubscriptionValidationSQLConstants.GET_MCP_BACKEND_OPERATION_MAPPING_BY_REF_URL_MAPPING_ID;
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
                 ps.setInt(1, urlMappingId);

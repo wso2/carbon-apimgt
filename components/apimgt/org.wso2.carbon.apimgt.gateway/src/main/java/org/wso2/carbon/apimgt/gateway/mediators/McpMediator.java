@@ -91,9 +91,11 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             return false;
         }
         String subType = matchedAPI.getSubtype();
+        String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
 
         if ("IN".equals(mcpDirection)) {
-            if (StringUtils.equals(subType, APIConstants.API_SUBTYPE_SERVER_PROXY)) {
+            if (StringUtils.equals(subType, APIConstants.API_SUBTYPE_SERVER_PROXY) &&
+                    !StringUtils.equals(APIConstants.MCP.METHOD_TOOL_LIST,mcpMethod)) {
                 // For server proxy APIs, we do not handle MCP requests
                 log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
                         matchedAPI.getVersion());
