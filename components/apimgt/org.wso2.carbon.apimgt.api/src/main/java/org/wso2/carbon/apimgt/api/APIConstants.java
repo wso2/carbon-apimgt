@@ -164,6 +164,7 @@ public class APIConstants {
         public static final String DEFAULT_SANDBOX_ENDPOINT_NAME = "DEFAULT SANDBOX ENDPOINT";
         public static final String ENDPOINT_SEQUENCE = "_EndpointsSeq";
         public static final String REQUEST_TIMEOUT = "REQUEST_TIMEOUT";
+        public static final String HTTP_PROTOCOL_TYPE = "HTTP";
         public static final String QUERY_API_TYPE_MCP = "type:MCP";
         public static final String LLM_PROVIDER_SERVICE_AWSBEDROCK_OPENAI_API_DEFINITION_FILE_NAME =
                 "aws_bedrock_api.yaml";
