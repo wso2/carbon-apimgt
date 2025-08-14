@@ -904,43 +904,13 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             throw new APIManagementException("Request body cannot be null",
                     ExceptionCodes.MCP_REQUEST_BODY_CANNOT_BE_NULL);
         }
-
         String url = StringUtils.trimToEmpty(mcPServerProxyRequest.getUrl());
-        String additionalProperties = StringUtils.trimToEmpty(mcPServerProxyRequest.getAdditionalProperties());
-        String securityInfo = StringUtils.trimToEmpty(mcPServerProxyRequest.getSecurityInfo());
+        MCPServerDTO mcpServerDTO = mcPServerProxyRequest.getAdditionalProperties();
+        SecurityInfoDTO securityInfoDTO = mcPServerProxyRequest.getSecurityInfo();
 
-        if (StringUtils.isBlank(additionalProperties)) {
-            throw new APIManagementException("'additionalProperties' is required and should not be null",
-                    ExceptionCodes.ADDITIONAL_PROPERTIES_CANNOT_BE_NULL);
-        }
-        ObjectMapper objectMapper = new ObjectMapper();
-        MCPServerDTO apiDTOFromProperties;
-        try {
-            apiDTOFromProperties = objectMapper.readValue(additionalProperties, MCPServerDTO.class);
-            APIUtil.validateCharacterLengthOfAPIParams(apiDTOFromProperties.getName(),
-                    apiDTOFromProperties.getVersion(), apiDTOFromProperties.getContext(),
-                    RestApiCommonUtil.getLoggedInUsername());
-            try {
-                APIUtil.validateAPIContext(apiDTOFromProperties.getContext(), apiDTOFromProperties.getName());
-            } catch (APIManagementException e) {
-                throw new APIManagementException(e.getMessage(),
-                        ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
-            }
-        } catch (IOException e) {
-            throw new APIManagementException("Error while parsing 'additionalProperties'", e,
-                    ExceptionCodes.ADDITIONAL_PROPERTIES_PARSE_ERROR);
-        }
-        SecurityInfoDTO securityInfoDTO = null;
-        if (securityInfo != null && !securityInfo.isEmpty()) {
-            try {
-                securityInfoDTO = objectMapper.readValue(securityInfo, SecurityInfoDTO.class);
-            } catch (IOException e) {
-                throw new APIManagementException("Error while parsing 'securityInfo'", e);
-            }
-        }
-        populateDefaultValuesForMCPServer(apiDTOFromProperties, APIConstants.API_SUBTYPE_SERVER_PROXY);
+        populateDefaultValuesForMCPServer(mcpServerDTO, APIConstants.API_SUBTYPE_SERVER_PROXY);
 
-        APIDTOTypeWrapper dtoWrapper = new APIDTOTypeWrapper(apiDTOFromProperties);
+        APIDTOTypeWrapper dtoWrapper = new APIDTOTypeWrapper(mcpServerDTO);
         if (!PublisherCommonUtils.validateEndpoints(dtoWrapper)) {
             throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                     ExceptionCodes.INVALID_ENDPOINT_URL);

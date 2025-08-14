@@ -894,7 +894,7 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @Path("/validate-mcp-server")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Validate a third-party MCP Server", notes = "This operation can be used to validate a `url` of third party mcp server ", response = MCPServerValidationResponseDTO.class, authorizations = {
+    @ApiOperation(value = "Validate a third-party MCP Server", notes = "This operation can be used to validate a `url` of a third party mcp server ", response = MCPServerValidationResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")

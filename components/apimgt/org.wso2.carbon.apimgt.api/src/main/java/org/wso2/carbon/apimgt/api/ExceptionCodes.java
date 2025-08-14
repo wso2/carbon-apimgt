@@ -820,10 +820,14 @@ public enum ExceptionCodes implements ErrorHandler {
     // MCP server related codes
     MCP_SERVER_TOOL_LIST_GENERATION_FAILED(900801, "Failed to generate tool list", 400,
             "The MCP server returned an invalid or empty response when generating the tool list."),
-    API_UPDATE_FORBIDDEN_PER_MCP_USAGE(900801, "API update not allowed due to MCP server usage", 403,
+    API_UPDATE_FORBIDDEN_PER_MCP_USAGE(900802, "API update not allowed due to MCP server usage", 403,
             "Updating this API's resources is forbidden because it is used to generate one or more MCP servers."),
-    MCP_REQUEST_BODY_CANNOT_BE_NULL(900801, "MCP request body cannot be null", 400,
+    MCP_REQUEST_BODY_CANNOT_BE_NULL(900803, "MCP request body cannot be null", 400,
             "The request body is required and cannot be null or empty."),
+    MCP_REQUEST_URL_CANNOT_BE_NULL(900804, "Server URL cannot be null", 400,
+            "Server URL is required and cannot be null or empty."),
+    MCP_BACKENDS_NOT_FOUND(900805, "No backends found for MCP Server subtype", 400,
+            "No backends are defined in backends.yaml or backends.json for the specified MCP Server subtype."),
 
     // gateway notification related codes
     GATEWAY_NOTIFICATION_BAD_REQUEST(902052, "Invalid request for gateway notification", 400,
