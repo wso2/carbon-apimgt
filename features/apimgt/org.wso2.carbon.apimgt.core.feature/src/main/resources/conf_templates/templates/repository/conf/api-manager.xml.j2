@@ -1885,8 +1885,8 @@
               <RetryProgressionFactor>{{apim.gateway_notification.registration.retry_progression_factor}}</RetryProgressionFactor>
           </Registration>
           <GatewayCleanup>
-              <ExpireTimeSeconds>{{apim.gateway_cleanup.expire_time}}</ExpireTimeSeconds>
-              <DataRetentionPeriodSeconds>{{apim.gateway_cleanup.data_retention_period}}</DataRetentionPeriodSeconds>
+              <ExpireTimeSeconds>{{apim.gateway_notification.cleanup.expiry_time}}</ExpireTimeSeconds>
+              <DataRetentionPeriodSeconds>{{apim.gateway_notification.cleanup.data_retention_period}}</DataRetentionPeriodSeconds>
           </GatewayCleanup>
       </GatewayNotificationConfiguration>
 </APIManager>
