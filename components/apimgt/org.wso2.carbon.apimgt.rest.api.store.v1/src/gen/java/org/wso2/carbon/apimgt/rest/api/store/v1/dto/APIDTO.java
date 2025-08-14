@@ -595,6 +595,7 @@ public class APIDTO   {
   }
 
   /**
+   * Flag indicating this API was discovered/initiated via the gateway (federated discovery) rather than created in the Control Plane.
    **/
   public APIDTO initiatedFromGateway(Boolean initiatedFromGateway) {
     this.initiatedFromGateway = initiatedFromGateway;
@@ -602,7 +603,7 @@ public class APIDTO   {
   }
 
   
-  @ApiModelProperty(example = "false", value = "")
+  @ApiModelProperty(example = "false", value = "Flag indicating this API was discovered/initiated via the gateway (federated discovery) rather than created in the Control Plane.")
   @JsonProperty("initiatedFromGateway")
   public Boolean isInitiatedFromGateway() {
     return initiatedFromGateway;

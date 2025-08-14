@@ -343,11 +343,11 @@ public class Environment implements Serializable {
         return  31 * result + getName().hashCode();
     }
     public String getMode() {
-        return mode;
+        return StringUtils.defaultIfBlank(mode, GatewayMode.WRITE_ONLY.getMode());
     }
 
     public void setMode(String mode) {
-        this.mode = mode;
+        this.mode = StringUtils.defaultIfBlank(mode, GatewayMode.WRITE_ONLY.getMode());
     }
 
     public int getApiDiscoveryScheduledWindow() {

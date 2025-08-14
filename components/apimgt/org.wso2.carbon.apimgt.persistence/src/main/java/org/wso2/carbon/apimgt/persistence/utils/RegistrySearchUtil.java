@@ -459,7 +459,7 @@ public class RegistrySearchUtil {
                         searchKeys[1] = searchKeys[1].replace("*", "");
                     } else if (searchKeys[0].equals(ADVERTISE_ONLY_SEARCH_TYPE_PREFIX)) {
                         searchKeys[0] = ADVERTISE_ONLY_ADVERTISED_PROPERTY;
-                    } else if (searchKeys[0].equals(VENDOR_SEARCH_TYPE_PREFIX)) {
+                    } else if (VENDOR_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKeys[0])) {
                         searchKeys[0] = GATEWAY_VENDOR_SEARCH_PREFIX;
                     }
 

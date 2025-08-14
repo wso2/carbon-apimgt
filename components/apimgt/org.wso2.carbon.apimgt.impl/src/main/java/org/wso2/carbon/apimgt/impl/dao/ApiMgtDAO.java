@@ -70,6 +70,7 @@ import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayMode;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -15588,7 +15589,13 @@ public class ApiMgtDAO {
                     String provider = rs.getString("PROVIDER");
                     String gatewayType = rs.getString("GATEWAY_TYPE");
                     String mode = rs.getString("MODE");
+                    if (StringUtils.isEmpty(mode)) {
+                        mode = GatewayMode.WRITE_ONLY.getMode();
+                    }
                     int scheduledTime = rs.getInt("SCHEDULED_TIME");
+                    if (rs.wasNull()) {
+                        scheduledTime = 60;
+                    }
                     Map<String, String> additionalProperties = new HashMap();
                     try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
                         if (configuration != null) {
@@ -15646,7 +15653,13 @@ public class ApiMgtDAO {
                     String provider = rs.getString("PROVIDER");
                     String gatewayType = rs.getString("GATEWAY_TYPE");
                     String mode = rs.getString("MODE");
+                    if (StringUtils.isEmpty(mode)) {
+                        mode = GatewayMode.WRITE_ONLY.getMode();
+                    }
                     int scheduledTime = rs.getInt("SCHEDULED_TIME");
+                    if (rs.wasNull()) {
+                        scheduledTime = 60;
+                    }
                     Map<String, String> additionalProperties = new HashMap();
                     try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
                         if (configuration != null) {
@@ -15706,7 +15719,7 @@ public class ApiMgtDAO {
                 String configurationJson = new Gson().toJson(environment.getAdditionalProperties());
                 prepStmt.setBinaryStream(8, new ByteArrayInputStream(configurationJson.getBytes()));
                 prepStmt.setString(9, tenantDomain);
-                prepStmt.setString(10, environment.getMode());
+                prepStmt.setString(10, (StringUtils.isEmpty(environment.getMode()) ? GatewayMode.WRITE_ONLY.getMode() : environment.getMode()));
                 prepStmt.setInt(11, environment.getApiDiscoveryScheduledWindow());
                 prepStmt.executeUpdate();
 

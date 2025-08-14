@@ -17016,18 +17016,15 @@ components:
               type: boolean
               example: true
             gatewayVendor:
-              title: field to identify gateway vendor
+              title: Field to identify gateway vendor
               type: string
-              example:
-                wso2
-                external
+              description: Vendor of the gateway where the API is deployed.
+              example: wso2
             gatewayType:
               title: Field to identify gateway type.
               type: string
-              example:
-                wso2/synapse
-                wso2/apk
-                AWS
+              description: The type of the gateway.
+              example: wso2/synapse
             hasThumbnail:
               type: boolean
               example: true

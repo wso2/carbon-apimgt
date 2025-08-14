@@ -203,14 +203,21 @@ public class SettingsMappingUtil {
     private static List<String> getSupportedGatewayModes(GatewayAgentConfiguration gatewayConfiguration) {
         //Deriving the supported modes from the gateway connector
         List<String> supportedModes = new ArrayList<>();
-        if (gatewayConfiguration.getGatewayDeployerImplementation() != null) {
+        if (gatewayConfiguration.getGatewayDeployerImplementation() != null
+                && !gatewayConfiguration.getGatewayDeployerImplementation().trim().isEmpty()) {
             supportedModes.add(GatewayMode.WRITE_ONLY.getMode());
         }
-        if (gatewayConfiguration.getDiscoveryImplementation() != null) {
+        if (gatewayConfiguration.getDiscoveryImplementation() != null
+                && !gatewayConfiguration.getDiscoveryImplementation().trim().isEmpty()) {
             supportedModes.add(GatewayMode.READ_ONLY.getMode());
         }
         if (supportedModes.size() == 2) {
             supportedModes.add(GatewayMode.READ_WRITE.getMode());
+        }
+        if (supportedModes.isEmpty()) {
+            log.warn(String.format(
+                    "No supported modes derived for gateway connector type '%s'.",
+                    gatewayConfiguration.getType()));
         }
         return supportedModes;
     }

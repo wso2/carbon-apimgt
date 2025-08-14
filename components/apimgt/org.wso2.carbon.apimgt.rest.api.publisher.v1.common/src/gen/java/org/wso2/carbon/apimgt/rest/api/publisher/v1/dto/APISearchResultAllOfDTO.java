@@ -180,6 +180,7 @@ public class APISearchResultAllOfDTO   {
   }
 
   /**
+   * Vendor of the gateway where the API is deployed.
    **/
   public APISearchResultAllOfDTO gatewayVendor(String gatewayVendor) {
     this.gatewayVendor = gatewayVendor;
@@ -187,7 +188,7 @@ public class APISearchResultAllOfDTO   {
   }
 
   
-  @ApiModelProperty(example = "wso2 external", value = "")
+  @ApiModelProperty(example = "wso2", value = "Vendor of the gateway where the API is deployed.")
   @JsonProperty("gatewayVendor")
   public String getGatewayVendor() {
     return gatewayVendor;
@@ -197,6 +198,7 @@ public class APISearchResultAllOfDTO   {
   }
 
   /**
+   * The type of the gateway.
    **/
   public APISearchResultAllOfDTO gatewayType(String gatewayType) {
     this.gatewayType = gatewayType;
@@ -204,7 +206,7 @@ public class APISearchResultAllOfDTO   {
   }
 
   
-  @ApiModelProperty(example = "wso2/synapse wso2/apk AWS", value = "")
+  @ApiModelProperty(example = "wso2/synapse", value = "The type of the gateway.")
   @JsonProperty("gatewayType")
   public String getGatewayType() {
     return gatewayType;
