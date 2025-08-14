@@ -21675,7 +21675,7 @@ public class ApiMgtDAO {
             try (ResultSet result = ps.executeQuery()) {
                 int index = 0;
                 while (result.next()) {
-                    if (index >= offset && index < limit) {
+                    if (index >= offset && index < (limit + offset)) {
                         String apiType = result.getString("TYPE");
 
                         if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiType)) {
@@ -21698,7 +21698,7 @@ public class ApiMgtDAO {
                             subscribedAPIs.add(subscribedAPI);
                         }
 
-                        if (index == limit - 1) {
+                        if (index == limit + offset - 1) {
                             break;
                         }
                     }
