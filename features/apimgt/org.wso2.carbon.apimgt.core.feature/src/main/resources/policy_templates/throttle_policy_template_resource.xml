@@ -25,7 +25,12 @@ INSERT INTO EligibilityStream;
 #if($quotaPolicy != "")
 FROM EligibilityStream[isEligible==true]#throttler:timeBatch($quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit(), 0)
 #if($quotaPolicy.getQuotaType() == $REQUEST_COUNT_TYPE)
-select throttleKey, (count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey
+select throttleKey,
+#if($isDistributed == true)
+(throttler:distributedCount(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey
+#else
+count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey
+#end
 #else
 select throttleKey, (sum(cast(map:get(propertiesMap,'messageSize'),'long')) >= $quotaPolicy.getLimit().getStandardDataAmount()L) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey
 #end

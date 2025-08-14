@@ -42,6 +42,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     private KeyValueStoreClient kvStoreClient;
     private String key;
     private final AtomicLong localCounter = new AtomicLong(0L);
+    // Store the net change of local counter since last sync task
     private final AtomicLong unsyncedCounter = new AtomicLong(0L);
     private static final ConcurrentHashMap<String, DistributedCountAttributeAggregator> ACTIVE_AGGREGATORS =
             new ConcurrentHashMap<>();
@@ -317,6 +318,13 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             }
             kvStoreSyncScheduler = null;
             schedulerStarted = false;
+
+            // Shutdown the KeyValueStoreManager to close JedisPool
+            try {
+                KeyValueStoreManager.shutdown();
+            } catch (Exception e) {
+                log.error("Error shutting down KeyValueStoreManager", e);
+            }
         }
     }
 

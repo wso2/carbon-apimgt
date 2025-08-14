@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.api.model.policy.JWTClaimsCondition;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.DistributedThrottleConfig;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.APIPolicyConditionGroup;
@@ -43,6 +44,7 @@ import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.ApplicationPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.Condition;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.GlobalPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.throttle.policy.deployer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
@@ -269,6 +271,7 @@ public class ThrottlePolicyTemplateBuilder {
                     setConstantContext(context);
                     context.put("policy", policy);
                     context.put("quotaPolicy", conditionGroup.getDefaultLimit());
+                    context.put("isDistributed", getDistributedStatus());
                     context.put("pipeline", "condition_" + conditionGroup.getConditionGroupId());
 
                     String conditionString = getPolicyCondition(conditionGroup.getCondition());
@@ -341,6 +344,7 @@ public class ThrottlePolicyTemplateBuilder {
             setConstantContext(context);
             context.put("policy", policy);
             context.put("quotaPolicy", policy.getDefaultLimit());
+            context.put("isDistributed", getDistributedStatus());
             context.put("evaluatedConditions",
                     new String(Base64.encodeBase64(policyConditionJson.toJSONString()
                             .getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
@@ -472,7 +476,7 @@ public class ThrottlePolicyTemplateBuilder {
             setConstantContext(context);
             context.put("policy", policy);
             context.put("quotaPolicy", policy.getDefaultLimit());
-            context.put("isDistributed", false);
+            context.put("isDistributed", getDistributedStatus());
             template.merge(context, writer);
             if (log.isDebugEnabled()) {
                 log.debug("Policy : " + writer.toString());
@@ -510,5 +514,17 @@ public class ThrottlePolicyTemplateBuilder {
 
     private String getTemplatePathForAISubscription() {
         return policyTemplateLocation + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_AI_SUB + ".xml";
+    }
+
+    private Boolean getDistributedStatus() {
+        try {
+            DistributedThrottleConfig dtConfig =  ServiceReferenceHolder.getInstance()
+                    .getAPIMConfiguration()
+                    .getDistributedThrottleConfig();
+            return dtConfig.isEnabled();
+        } catch (Exception e) {
+            log.warn("Failed to load distributed throttle configuration from API Manager config. Using defaults.", e);
+            return false;
+        }
     }
 }

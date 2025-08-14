@@ -17,8 +17,10 @@
  */
 package org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.dto.DistributedThrottleConfig;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.lang.reflect.Constructor;
 
@@ -27,8 +29,8 @@ import java.lang.reflect.Constructor;
  */
 public class KeyValueStoreManager {
 
-    private static final Logger log = LoggerFactory.getLogger(KeyValueStoreManager.class);
-    public static final String kvStoreType = System.getProperty("distributed.throttle.type");
+    private static final Log log = LogFactory.getLog(KeyValueStoreManager.class);
+    public static String kvStoreType;
     public static final String REDIS_TYPE = "redis";//move to constants
     private static volatile KeyValueStoreClient clientInstance;
 
@@ -51,39 +53,27 @@ public class KeyValueStoreManager {
     }
 
     private static KeyValueStoreClient createClient() throws KeyValueStoreException {
-        String clientClassName = resolveClientClassName();//directly read
-
-        try {
-            Class<?> clazz = Class.forName(clientClassName);
-
-            if (!KeyValueStoreClient.class.isAssignableFrom(clazz)) {
-                throw new KeyValueStoreException("Class " + clientClassName +
-                        " does not implement KeyValueStoreClient interface");
-            }
-
-            Constructor<?> constructor = clazz.getDeclaredConstructor();
-
-            return (KeyValueStoreClient) constructor.newInstance();
-
-        } catch (Exception e) {
-            throw new KeyValueStoreException("Error creating KeyValueStoreClient: " + clientClassName, e);
-        }
-    }
-
-    /**
-     * Resolves the client class name based on system properties.
-     */
-    private static String resolveClientClassName() {
-        if (kvStoreType == null) {
-            throw new KeyValueStoreException("The key value store type is null");
-        }
-
+        kvStoreType = getKeyValueStore();
         if (REDIS_TYPE.equals(kvStoreType)) {
-            return "org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.JedisKeyValueStoreClient";
-            //
+            return new JedisKeyValueStoreClient();
         }
+        else {
+            try {
+                Class<?> clazz = Class.forName(kvStoreType);
 
-        return kvStoreType; // Allow custom class names
+                if (!KeyValueStoreClient.class.isAssignableFrom(clazz)) {
+                    throw new KeyValueStoreException("Class " + kvStoreType +
+                            " does not implement KeyValueStoreClient interface");
+                }
+
+                Constructor<?> constructor = clazz.getDeclaredConstructor();
+
+                return (KeyValueStoreClient) constructor.newInstance();
+
+            } catch (Exception e) {
+                throw new KeyValueStoreException("Error creating KeyValueStoreClient: " + kvStoreType, e);
+            }
+        }
     }
 
     /**
@@ -103,6 +93,19 @@ public class KeyValueStoreManager {
             }
         }
         log.info("KeyValueStoreManager shutdown completed.");
+    }
+
+    private static String getKeyValueStore() {
+        try {
+            DistributedThrottleConfig dtConfig =  ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration()
+                    .getDistributedThrottleConfig();
+            return dtConfig.getType();
+        } catch (Exception e) {
+            log.warn("Failed to load distributed throttle configuration from API Manager config. Using defaults.", e);
+            return REDIS_TYPE;
+        }
     }
 }
 
