@@ -22,6 +22,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -3753,37 +3757,57 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
             boolean isExternalGateway = false;
             GatewayDeployer gatewayDeployer = null;
-            String httpUrl;
-            String httpsUrl;
             if (gatewayConfiguration != null && StringUtils.isNotEmpty(
                     gatewayConfiguration.getDiscoveryImplementation()) && api.isInitiatedFromGateway()) {
-                httpUrl = vhost.getHttpUrl();
-                httpsUrl = vhost.getHttpsUrl();
+                Map<String, String> extractedURLs = extractEndpointUrlsForDiscoveredApi(api);
+                if (extractedURLs == null) {
+                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, vhost.getHttpsUrl());
+                    hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, vhost.getHttpUrl());
+                } else {
+                    hostsWithSchemes = extractedURLs;
+                }
             } else {
                 if (gatewayConfiguration != null && StringUtils.isNotEmpty(
                         gatewayConfiguration.getGatewayDeployerImplementation())) {
                     gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain, environmentName);
                     isExternalGateway = true;
                 }
-
                 String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(),
                         environment.getUuid());
-                httpUrl = isExternalGateway ?
+                String httpUrl = isExternalGateway ?
                         gatewayDeployer.getAPIExecutionURL(externalReference) :
                         vhost.getHttpUrl();
-                httpsUrl = isExternalGateway ?
+                String httpsUrl = isExternalGateway ?
                         gatewayDeployer.getAPIExecutionURL(externalReference) :
                         vhost.getHttpsUrl();
-            }
-            if (StringUtils.containsIgnoreCase(api.getTransports(),
-                    APIConstants.HTTP_PROTOCOL) && vhost.getHttpPort() != -1) {
-                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, httpUrl);
-            }
-            if (StringUtils.containsIgnoreCase(api.getTransports(),
-                    APIConstants.HTTPS_PROTOCOL) && vhost.getHttpsPort() != -1) {
-                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, httpsUrl);
+                if (StringUtils.containsIgnoreCase(api.getTransports(),
+                        APIConstants.HTTP_PROTOCOL) && vhost.getHttpPort() != -1) {
+                    hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, httpUrl);
+                }
+                if (StringUtils.containsIgnoreCase(api.getTransports(),
+                        APIConstants.HTTPS_PROTOCOL) && vhost.getHttpsPort() != -1) {
+                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, httpsUrl);
+                }
             }
         }
+        return hostsWithSchemes;
+    }
+
+    private static Map<String, String> extractEndpointUrlsForDiscoveredApi(API api) {
+        JsonElement configElement = new JsonParser().parse(api.getSwaggerDefinition());
+        JsonObject configObject = configElement.getAsJsonObject();  //swaggerDefinition as a json object
+        JsonArray servers = configObject.getAsJsonArray("servers");
+        JsonObject server = servers.get(0).getAsJsonObject();
+        String url = server.get("url").getAsString();
+        JsonObject variables = server.getAsJsonObject("variables");
+        JsonObject basePath = variables.getAsJsonObject("basePath");
+        String stageName = basePath.get("default").getAsString();
+        String serverUrl = url.replace("{basePath}", stageName);
+        if (StringUtils.isEmpty(serverUrl)) {
+            return null;
+        }
+        Map<String, String> hostsWithSchemes = new HashMap<>();
+        hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, serverUrl);
         return hostsWithSchemes;
     }
 
