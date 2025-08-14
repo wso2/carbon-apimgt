@@ -246,7 +246,6 @@
   "apim.gateway_notification.registration.max_retry_count": "5",
   "apim.gateway_notification.registration.retry_duration": "10000",
   "apim.gateway_notification.registration.retry_progression_factor": "2.0",
-  "apim.gateway_cleanup.expire_time": "60",
-  "apim.gateway_cleanup.data_retention_period": "2629800",
-  "apim.gateway_cleanup.cleanup_interval": "60"
+  "apim.gateway_notification.cleanup.expiry_time": "120",
+  "apim.gateway_notification.cleanup.data_retention_period": "2629800"
 }
