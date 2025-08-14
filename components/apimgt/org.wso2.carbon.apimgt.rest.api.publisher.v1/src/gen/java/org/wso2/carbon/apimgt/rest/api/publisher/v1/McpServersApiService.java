@@ -62,7 +62,7 @@ public interface McpServersApiService {
       public Response editCommentOfMCPServer(String commentId, String mcpServerId, CommentRequestDTO commentRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response exportMCPServer(String mcpServerId, String name, String version, String revisionNumber, String providerName, String format, Boolean preserveStatus, Boolean latestRevision, String gatewayEnvironment, Boolean preserveCredentials, MessageContext messageContext) throws APIManagementException;
       public Response generateInternalAPIKeyMCPServer(String mcpServerId, MessageContext messageContext) throws APIManagementException;
-      public Response getAllMCPServers(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, String accept, MessageContext messageContext) throws APIManagementException;
+      public Response getAllMCPServers(Integer limit, Integer offset, String sortOrder, String sortBy, String xWSO2Tenant, String query, String ifNoneMatch, String accept, MessageContext messageContext) throws APIManagementException;
       public Response getCommentOfMCPServer(String commentId, String mcpServerId, String xWSO2Tenant, String ifNoneMatch, Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset, MessageContext messageContext) throws APIManagementException;
       public Response getMCPServer(String mcpServerId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getMCPServerBackend(String mcpServerId, String backendId, MessageContext messageContext) throws APIManagementException;

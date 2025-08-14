@@ -153,9 +153,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException if an error occurs while retrieving MCP server data
      */
     @Override
-    public Response getAllMCPServers(Integer limit, Integer offset, String xWSO2Tenant, String query,
-                                     String ifNoneMatch, String accept, MessageContext messageContext)
-            throws APIManagementException {
+    public Response getAllMCPServers(Integer limit, Integer offset, String sortOrder, String sortBy,
+                                     String xWSO2Tenant, String query, String ifNoneMatch, String accept,
+                                     MessageContext messageContext) throws APIManagementException {
 
         List<API> allMatchedApis = new ArrayList<>();
         Object apiListDTO;
