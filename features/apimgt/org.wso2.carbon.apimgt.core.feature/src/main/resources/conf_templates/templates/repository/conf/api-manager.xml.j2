@@ -1429,8 +1429,8 @@
         <KeyLockRetrievalTimeout>50</KeyLockRetrievalTimeout>
         {% endif %}
         <Properties>
-            <!-- Pool Size Configurations -->
-            <MaxTotal>{{apim.redis_config.pool_options.max_total}}</MaxTotal>
+        <!-- Pool Size Configurations -->
+            <MaxTotal>{{apim.redis_config.pool_options.max_total | default(3000)}}</MaxTotal>
             <MaxIdle>{{apim.redis_config.pool_options.max_idle | default(3000)}}</MaxIdle>
             <MinIdle>{{apim.redis_config.pool_options.min_idle | default(300)}}</MinIdle>
             <BlockWhenExhausted>{{apim.redis_config.pool_options.block_when_exhausted | default('true')}}</BlockWhenExhausted>
@@ -1846,6 +1846,31 @@
             </CustomProperties>
         </PropertyConfigurations>
       {% endif %}
+
+      {% if apim.distributed_throttle_properties is defined %}
+        <DistributedThrottleConfig>
+            {% if apim.distributed_throttle_properties.enable is defined %}
+            <Enabled>{{apim.distributed_throttle_properties.enable}}</Enabled>
+            {% else %}
+            <Enabled>false</Enabled>
+            {% endif %}
+            {% if apim.distributed_throttle_properties.type is defined %}
+            <Type>{{apim.distributed_throttle_properties.type}}</Type>
+            {% else %}
+            <Type>redis</Type>
+            {% endif %}
+            {% if apim.distributed_throttle_properties.sync_interval is defined %}
+            <SyncInterval>{{apim.distributed_throttle_properties.sync_interval}}</SyncInterval>
+            {% else %}
+            <SyncInterval>1</SyncInterval>
+            {% endif %}
+            {% if apim.distributed_throttle_properties.core_pool_size is defined %}
+            <CorePoolSize>{{apim.distributed_throttle_properties.core_pool_size}}</CorePoolSize>
+            {% else %}
+            <CorePoolSize>200</CorePoolSize>
+            {% endif %}
+        </DistributedThrottleConfig>
+        {% endif %}
 
       <TenantSharingConfigs>
         {% for tenant_sharing_config in apim.tenant_sharing %}
