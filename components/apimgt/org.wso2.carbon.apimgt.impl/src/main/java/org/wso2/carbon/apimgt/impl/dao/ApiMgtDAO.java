@@ -5636,6 +5636,46 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Checks whether a given API Context template already exists for the organization and gateway vendor.
+     *
+     * @param contextTemplate API context template to check
+     * @param gatewayVendor Gateway vendor type
+     * @param organization Identifier of the organization
+     * @return true if context template exists for the organization and gateway vendor, false otherwise
+     * @throws APIManagementException if failed to check context template existence
+     */
+    public boolean isDuplicateContextTemplateMatchesOrganizationAndGatewayVendor(String contextTemplate,
+                                                                               String gatewayVendor,
+                                                                               String organization)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SQLConstants
+                     .GET_CONTEXT_TEMPLATE_COUNT_SQL_MATCHES_ORGANIZATION_AND_GATEWAY_VENDOR)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            ps.setString(1, contextTemplate.toLowerCase());
+            ps.setString(2, organization);
+            ps.setString(3, gatewayVendor);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    int count = resultSet.getInt("CTX_COUNT");
+                    return count > 0;
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                APIMgtDBUtil.rollbackConnection(connection,
+                        "Failed to rollback in getting count matches context and organization", e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to count contexts which match " + contextTemplate + " for the organization : "
+                    + organization, e);
+        }
+        return false;
+    }
+
+    /**
      * Add API metadata.
      *
      * @param api          API to add
