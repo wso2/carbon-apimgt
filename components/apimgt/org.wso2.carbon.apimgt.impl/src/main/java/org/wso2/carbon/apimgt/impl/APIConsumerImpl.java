@@ -3808,7 +3808,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
             JsonObject configObject = configElement.getAsJsonObject();
             JsonArray servers = configObject.getAsJsonArray("servers");
-            if (servers == null || servers.isEmpty()) {
+            if (servers == null || servers.size() == 0) {
                 return null;
             }
             JsonObject server = servers.get(0).getAsJsonObject();
