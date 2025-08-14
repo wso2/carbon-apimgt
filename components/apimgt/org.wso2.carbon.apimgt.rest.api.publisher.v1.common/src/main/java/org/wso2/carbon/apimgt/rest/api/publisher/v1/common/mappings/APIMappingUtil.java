@@ -768,6 +768,9 @@ public class APIMappingUtil {
         }
         corsConfiguration.setAccessControlAllowHeaders(updatedAllowHeaders);
 
+        //temporarily set the CORS enabled to true for MCP servers
+        corsConfiguration.setCorsConfigurationEnabled(true);
+
         model.setCorsConfiguration(corsConfiguration);
         setMaxTpsFromMcpServerDTOToModel(dto, model);
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
