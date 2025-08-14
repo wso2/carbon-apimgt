@@ -62,9 +62,12 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUt
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -605,8 +608,8 @@ public class RestApiPublisherUtils {
                                                         Attachment fileDetail, ServiceEntry service,
                                                         String organization) throws APIManagementException {
 
-        API api = createAPIFromOpenAPIDefinition(definition, definitionUrl, inlineDefinition, wrapper, fileDetail,
-                service, organization);
+        API api = createAPIFromDefinition(definition, definitionUrl, inlineDefinition, wrapper, fileDetail,
+                service, organization, null);
         return APIMappingUtil.fromAPItoDTO(api);
     }
 
@@ -623,59 +626,88 @@ public class RestApiPublisherUtils {
      * @return MCPServerDTO object created from the OpenAPI definition
      * @throws APIManagementException if an error occurs during import
      */
-    public static MCPServerDTO importOpenAPIDefinitionForMCPServers(InputStream definition, String definitionUrl,
-                                                                    String inlineDefinition,
-                                                                    APIDTOTypeWrapper wrapper, Attachment fileDetail,
-                                                                    ServiceEntry service,
-                                                                    String organization) throws APIManagementException {
+    public static MCPServerDTO importDefinitionForMCPServers(InputStream definition, String definitionUrl,
+                                                             String inlineDefinition, APIDTOTypeWrapper wrapper,
+                                                             Attachment fileDetail, ServiceEntry service,
+                                                             String organization, SecurityInfoDTO securityInfo)
+            throws APIManagementException {
 
-        API api = createAPIFromOpenAPIDefinition(definition, definitionUrl, inlineDefinition, wrapper, fileDetail,
-                service, organization);
+        API api = createAPIFromDefinition(definition, definitionUrl, inlineDefinition, wrapper, fileDetail, service,
+                organization, securityInfo);
         return APIMappingUtil.fromAPItoMCPServerDTO(api);
     }
 
     /**
-     * Creates an API object from the provided OpenAPI definition and properties.
+     * Creates an API from the provided OpenAPI definition and returns the API object.
      *
      * @param definition        InputStream of the OpenAPI definition
      * @param definitionUrl     URL of the OpenAPI definition
      * @param inlineDefinition  Inline OpenAPI definition as a string
-     * @param apiDtoTypeWrapper Properties for APIDTO or MCPServerDTO
+     * @param apiDtoTypeWrapper APIDTOTypeWrapper containing properties for APIDTO or MCPServerDTO
      * @param fileDetail        Attachment containing file details
      * @param service           ServiceEntry object if applicable
      * @param organization      Organization identifier
+     * @param securityInfo      Security information for MCP Server validation, if applicable
      * @return API object created from the OpenAPI definition
-     * @throws APIManagementException if an error occurs during creation
+     * @throws APIManagementException if an error occurs during API creation
      */
-    public static API createAPIFromOpenAPIDefinition(InputStream definition, String definitionUrl,
-                                                     String inlineDefinition, APIDTOTypeWrapper apiDtoTypeWrapper,
-                                                     Attachment fileDetail, ServiceEntry service,
-                                                     String organization) throws APIManagementException {
+    public static API createAPIFromDefinition(InputStream definition, String definitionUrl,
+                                              String inlineDefinition, APIDTOTypeWrapper apiDtoTypeWrapper,
+                                              Attachment fileDetail, ServiceEntry service, String organization,
+                                              SecurityInfoDTO securityInfo)
+            throws APIManagementException {
 
         Map validationResponseMap;
         boolean isServiceAPI = (service != null);
 
-        try {
-            validationResponseMap = validateOpenAPIDefinition(definitionUrl, definition, fileDetail, inlineDefinition,
-                    true, isServiceAPI);
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
-            return null;
-        }
+        OpenAPIDefinitionValidationResponseDTO validationResponseDTO = null;
+        APIDefinitionValidationResponse validationResponse = null;
+        if (apiDtoTypeWrapper.isAPIDTO() || (apiDtoTypeWrapper.isMCPServerDTO()
+                && !apiDtoTypeWrapper.getSubtype().equals(APIConstants.API_SUBTYPE_SERVER_PROXY))) {
+            try {
+                validationResponseMap =
+                        validateOpenAPIDefinition(definitionUrl, definition, fileDetail, inlineDefinition,
+                                true, isServiceAPI);
+            } catch (APIManagementException e) {
+                RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+                return null;
+            }
 
-        OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
-                (OpenAPIDefinitionValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
-        APIDefinitionValidationResponse validationResponse =
-                (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
+            validationResponseDTO =
+                    (OpenAPIDefinitionValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
+            validationResponse =
+                    (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
 
-        if (!validationResponseDTO.isIsValid()) {
-            ErrorDTO errorDTO = APIMappingUtil.getErrorDTOFromErrorListItems(validationResponseDTO.getErrors());
-            throw RestApiUtil.buildBadRequestException(errorDTO);
-        }
+            if (!validationResponseDTO.isIsValid()) {
+                ErrorDTO errorDTO = APIMappingUtil.getErrorDTOFromErrorListItems(validationResponseDTO.getErrors());
+                throw RestApiUtil.buildBadRequestException(errorDTO);
+            }
 
-        // Set description if missing
-        if (validationResponseDTO.getInfo().getDescription() != null && apiDtoTypeWrapper.getDescription() == null) {
-            apiDtoTypeWrapper.setDescription(validationResponseDTO.getInfo().getDescription());
+            // Set description if missing
+            if (validationResponseDTO.getInfo().getDescription() != null
+                    && apiDtoTypeWrapper.getDescription() == null) {
+                apiDtoTypeWrapper.setDescription(validationResponseDTO.getInfo().getDescription());
+            }
+        } else {
+            validationResponse = new APIDefinitionValidationResponse();
+            validationResponse.setParser(new OAS3Parser());
+
+            MCPServerValidationResponseDTO result =
+                    PublisherCommonUtils.validateMCPServer(definitionUrl, securityInfo, false, organization);
+
+            boolean isValid = Boolean.TRUE.equals(result.isIsValid());
+            validationResponse.setValid(isValid);
+
+            if (isValid) {
+                if (result.getContent() != null) {
+                    validationResponse.setJsonContent(result.getContent());
+                    validationResponse.setContent(result.getContent());
+                }
+            } else {
+                String msg = StringUtils.defaultIfBlank(result.getErrorMessage(),
+                        "MCP server validation failed for URL: " + definitionUrl);
+                throw RestApiUtil.buildBadRequestException(msg);
+            }
         }
 
         // Set API type if service-based and using APIDTO
@@ -686,14 +718,16 @@ public class RestApiPublisherUtils {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String username = RestApiCommonUtil.getLoggedInUsername();
 
-        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDtoTypeWrapper, apiProvider, username, organization);
+        API apiToAdd =
+                PublisherCommonUtils.prepareToCreateAPIByDTO(apiDtoTypeWrapper, apiProvider, username, organization);
         boolean syncOperations = !apiDtoTypeWrapper.isOperationsEmpty();
 
         boolean isNotMCPServer = !APIConstants.API_TYPE_MCP.equals(apiToAdd.getType());
 
         if (isNotMCPServer) {
-            Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiToAdd.getUuid(),
-                    APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
+            Map<String, String> complianceResult =
+                    PublisherCommonUtils.checkGovernanceComplianceSync(apiToAdd.getUuid(),
+                            APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
             if (!complianceResult.isEmpty()
                     && Boolean.FALSE.toString()
                     .equalsIgnoreCase(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
@@ -708,7 +742,6 @@ public class RestApiPublisherUtils {
             PublisherCommonUtils.checkGovernanceComplianceAsync(addedAPI.getUuid(), APIMGovernableState.API_CREATE,
                     ArtifactType.API, organization);
         }
-
 
         return addedAPI;
     }

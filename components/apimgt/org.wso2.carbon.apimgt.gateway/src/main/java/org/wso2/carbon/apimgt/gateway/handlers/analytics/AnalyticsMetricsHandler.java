@@ -79,6 +79,10 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
+        if (messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
+            return true;
+        }
+
         if (GatewayUtils.checkForFileBasedApiContexts(ApiUtils.getFullRequestPath(messageContext),
                 GatewayUtils.getTenantDomain())) {
             return true;
@@ -89,9 +93,6 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
             return true;
         }
 
-        if (messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
-            return true;
-        }
         AnalyticsDataProvider provider;
         Object isAsyncAPI = messageContext.getProperty(Constants.IS_ASYNC_API);
         if (isAsyncAPI != null && (Boolean) isAsyncAPI) {

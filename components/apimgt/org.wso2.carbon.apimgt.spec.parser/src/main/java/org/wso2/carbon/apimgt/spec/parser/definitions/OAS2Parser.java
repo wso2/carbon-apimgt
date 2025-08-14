@@ -2244,27 +2244,25 @@ public class OAS2Parser extends APIDefinition {
 
     @Override
     public Set<URITemplate> generateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
-                                             String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates)
+                                             String mcpSubtype, Set<URITemplate> uriTemplates)
             throws APIManagementException {
 
         Swagger backendDefinition = getSwagger(backendApiDefinition);
+        mergePathParametersIntoOperations(backendDefinition);
         if (backendDefinition.getPaths() == null || backendDefinition.getPaths().isEmpty()) {
             log.warn("Backend API definition has no paths defined");
             return new HashSet<>();
         }
         Set<URITemplate> generatedTools = new HashSet<>();
         for (URITemplate template : uriTemplates) {
-            if (!mcpFeatureType.equalsIgnoreCase(template.getHttpVerb())) {
-                continue;
-            }
             BackendOperation backendOperation = null;
-            if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
+            if (APISpecParserConstants.API_SUBTYPE_DIRECT_BACKEND.equals(mcpSubtype)) {
                 BackendOperationMapping mapping = template.getBackendOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
             } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
-                APIOperationMapping mapping = template.getExistingAPIOperationMapping();
+                APIOperationMapping mapping = template.getAPIOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
@@ -2278,8 +2276,8 @@ public class OAS2Parser extends APIDefinition {
             OperationMatch match =
                     findMatchingOperation(backendDefinition, backendOperation.getTarget(), backendOperation.getVerb());
             if (match != null) {
-                URITemplate toolTemplate = populateURITemplate(template, match, mcpFeatureType, backendDefinition,
-                        backendId, refApiId);
+                URITemplate toolTemplate = populateURITemplate(template, match, backendDefinition, backendId,
+                        refApiId, true);
                 generatedTools.add(toolTemplate);
             }
         }
@@ -2289,10 +2287,11 @@ public class OAS2Parser extends APIDefinition {
 
     @Override
     public Set<URITemplate> updateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
-                                           String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates)
+                                           String mcpSubtype, Set<URITemplate> uriTemplates)
             throws APIManagementException {
 
         Swagger backendDefinition = getSwagger(backendApiDefinition);
+        mergePathParametersIntoOperations(backendDefinition);
         if (backendDefinition.getPaths() == null || backendDefinition.getPaths().isEmpty()) {
             log.warn("Backend API definition has no paths defined");
             return new HashSet<>();
@@ -2300,19 +2299,14 @@ public class OAS2Parser extends APIDefinition {
         Set<URITemplate> updatedTools = new HashSet<>();
 
         for (URITemplate template : uriTemplates) {
-            if (!mcpFeatureType.equalsIgnoreCase(template.getHttpVerb())) {
-                continue;
-            }
-
             BackendOperation backendOperation = null;
-
-            if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
+            if (APISpecParserConstants.API_SUBTYPE_DIRECT_BACKEND.equals(mcpSubtype)) {
                 BackendOperationMapping mapping = template.getBackendOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
             } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
-                APIOperationMapping mapping = template.getExistingAPIOperationMapping();
+                APIOperationMapping mapping = template.getAPIOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
@@ -2324,12 +2318,11 @@ public class OAS2Parser extends APIDefinition {
             }
 
             OperationMatch match =
-                    findMatchingOperation(backendDefinition, backendOperation.getTarget(),
-                            backendOperation.getVerb());
+                    findMatchingOperation(backendDefinition, backendOperation.getTarget(), backendOperation.getVerb());
 
             if (match != null) {
-                URITemplate populated = populateURITemplate(template, match, mcpFeatureType, backendDefinition,
-                        backendId, refApiId);
+                URITemplate populated = populateURITemplate(template, match, backendDefinition, backendId, refApiId,
+                        false);
                 updatedTools.add(populated);
                 continue;
             }
@@ -2339,19 +2332,124 @@ public class OAS2Parser extends APIDefinition {
     }
 
     /**
+     * Merges path-level parameters into operations under each path.
+     * This ensures that path parameters are available in all operations
+     * without duplicating definitions.
+     *
+     * @param swagger the Swagger definition to process
+     */
+    private static void mergePathParametersIntoOperations(Swagger swagger) {
+
+        if (swagger == null || swagger.getPaths() == null) {
+            return;
+        }
+        for (Path pathItem : swagger.getPaths().values()) {
+            if (pathItem == null || pathItem.getParameters() == null || pathItem.getParameters().isEmpty()) continue;
+            List<Parameter> pathParams = new ArrayList<>();
+            for (Parameter parameter : pathItem.getParameters()) {
+                Parameter resolveParameterRef = resolveParameterRef(parameter, swagger);
+                if (resolveParameterRef == null) continue;
+                Parameter copy = deepCopyParameter(resolveParameterRef);
+                if (APISpecParserConstants.PATH.equalsIgnoreCase(copy.getIn())) ensureRequired(copy);
+                pathParams.add(copy);
+            }
+            if (pathParams.isEmpty()) continue;
+
+            List<Operation> operationList = Arrays.asList(
+                    pathItem.getGet(), pathItem.getPost(), pathItem.getPut(), pathItem.getDelete(),
+                    pathItem.getPatch(), pathItem.getHead(), pathItem.getOptions()
+            );
+            for (Operation operation : operationList) {
+                if (operation == null) continue;
+
+                if (operation.getParameters() == null) operation.setParameters(new ArrayList<>());
+                Map<String, Integer> parameterMap = new LinkedHashMap<>();
+                for (int i = 0; i < operation.getParameters().size(); i++) {
+                    Parameter parameter = operation.getParameters().get(i);
+                    parameterMap.put(paramKey(parameter), i);
+                }
+                for (Parameter parameter : pathParams) {
+                    String key = paramKey(parameter);
+                    if (!parameterMap.containsKey(key)) {
+                        operation.getParameters().add(parameter);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Generates a unique key for a parameter based on its location and name.
+     * This is used to identify parameters across different operations.
+     *
+     * @param parameter the Parameter object
+     * @return a string key representing the parameter
+     */
+    private static String paramKey(Parameter parameter) {
+
+        return (parameter.getIn() == null ? StringUtils.EMPTY : parameter.getIn()) + ":" +
+                (parameter.getName() == null ? StringUtils.EMPTY : parameter.getName());
+    }
+
+    /**
+     * Ensures that a parameter is marked as required if it is a serializable or body parameter.
+     * This is necessary for proper API definition compliance.
+     *
+     * @param parameter the Parameter object to check and modify
+     */
+    private static void ensureRequired(Parameter parameter) {
+
+        if (parameter instanceof AbstractSerializableParameter) {
+            ((AbstractSerializableParameter<?>) parameter).setRequired(true);
+        } else if (parameter instanceof BodyParameter) {
+            ((BodyParameter) parameter).setRequired(true);
+        }
+    }
+
+    /**
+     * Resolves a parameter reference to its actual definition in the Swagger document.
+     * If the parameter is a reference, it retrieves the referenced parameter from the Swagger parameters map.
+     *
+     * @param parameter the Parameter object to resolve
+     * @param swagger   the Swagger definition containing parameters
+     * @return the resolved Parameter object, or the original if not a reference
+     */
+    private static Parameter resolveParameterRef(Parameter parameter, Swagger swagger) {
+
+        if (!(parameter instanceof RefParameter)) return parameter;
+        if (swagger == null || swagger.getParameters() == null) return parameter;
+        String ref = ((RefParameter) parameter).get$ref();
+        if (ref == null || ref.isEmpty()) return parameter;
+        String name = ref.contains("/") ? ref.substring(ref.lastIndexOf('/') + 1) : ref;
+        Parameter target = swagger.getParameters().get(name);
+        return (target != null) ? deepCopyParameter(target) : parameter;
+    }
+
+    /**
+     * Creates a deep copy of a Parameter object using JSON serialization.
+     * This is necessary to ensure that modifications to the copied parameter do not affect the original.
+     *
+     * @param parameter the Parameter object to copy
+     * @return a new Parameter object that is a deep copy of the original
+     */
+    private static Parameter deepCopyParameter(Parameter parameter) {
+
+        return Json.mapper().convertValue(Json.mapper().valueToTree(parameter), Parameter.class);
+    }
+
+    /**
      * Populates a URITemplate with details from a matched OpenAPI operation.
      * Sets the template’s name, description, HTTP verb, JSON schema, and backend or proxy mappings.
      *
      * @param uriTemplate          the URITemplate to populate
      * @param match                the matched OpenAPI operation details
-     * @param mcpFeatureType       the MCP feature type (used as the HTTP verb)
      * @param backendId            the backend ID to associate
      * @param backendAPIDefinition the backend OpenAPI definition
      * @param refApiId
      * @return the populated URITemplate
      */
-    private URITemplate populateURITemplate(URITemplate uriTemplate, OperationMatch match, String mcpFeatureType,
-                                            Swagger backendAPIDefinition, String backendId, APIIdentifier refApiId)
+    private URITemplate populateURITemplate(URITemplate uriTemplate, OperationMatch match, Swagger backendAPIDefinition,
+                                            String backendId, APIIdentifier refApiId, boolean setPropsFromDefinition)
             throws APIManagementException {
 
         if (uriTemplate.getUriTemplate() == null || uriTemplate.getUriTemplate().isEmpty()) {
@@ -2369,8 +2467,6 @@ public class OAS2Parser extends APIDefinition {
                     .orElse(match.operation.getSummary());
             uriTemplate.setDescription(description);
         }
-
-        uriTemplate.setHTTPVerb(mcpFeatureType);
 
         if (uriTemplate.getSchemaDefinition() == null || uriTemplate.getSchemaDefinition().isEmpty()) {
             try {
@@ -2401,38 +2497,39 @@ public class OAS2Parser extends APIDefinition {
             backendOperationMap.setBackendId(backendId);
             backendOperationMap.setBackendOperation(backendOperation);
             uriTemplate.setBackendOperationMapping(backendOperationMap);
-        } else if (uriTemplate.getExistingAPIOperationMapping() != null) {
+        } else if (uriTemplate.getAPIOperationMapping() != null) {
             APIOperationMapping apiOperationMap = new APIOperationMapping();
             apiOperationMap.setApiUuid(refApiId.getUUID());
             apiOperationMap.setApiName(refApiId.getApiName());
             apiOperationMap.setApiVersion(refApiId.getVersion());
             apiOperationMap.setBackendOperation(backendOperation);
-            uriTemplate.setExistingAPIOperationMapping(apiOperationMap);
+            uriTemplate.setAPIOperationMapping(apiOperationMap);
         }
-        Map<String, Object> extensions = match.operation.getVendorExtensions();
-        if (extensions != null) {
-            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_AUTH_TYPE)) {
-                String authType = (String) extensions.get(APISpecParserConstants.SWAGGER_X_AUTH_TYPE);
-                uriTemplate.setAuthType(authType);
-                uriTemplate.setAuthTypes(authType);
-            } else {
-                uriTemplate.setAuthType(APISpecParserConstants.AUTH_TYPE_ANY);
-                uriTemplate.setAuthTypes(APISpecParserConstants.AUTH_TYPE_ANY);
-            }
-            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER)) {
-                String throttlingTier =
-                        (String) extensions.get(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER);
-                uriTemplate.setThrottlingTier(throttlingTier);
-                uriTemplate.setThrottlingTiers(throttlingTier);
-            }
-            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
-                String mediationScript =
-                        (String) extensions.get(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT);
-                uriTemplate.setMediationScript(mediationScript);
-                uriTemplate.setMediationScripts(uriTemplate.getHTTPVerb(), mediationScript);
+        if (setPropsFromDefinition) {
+            Map<String, Object> extensions = match.operation.getVendorExtensions();
+            if (extensions != null) {
+                if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_AUTH_TYPE)) {
+                    String authType = (String) extensions.get(APISpecParserConstants.SWAGGER_X_AUTH_TYPE);
+                    uriTemplate.setAuthType(authType);
+                    uriTemplate.setAuthTypes(authType);
+                } else {
+                    uriTemplate.setAuthType(APISpecParserConstants.AUTH_TYPE_ANY);
+                    uriTemplate.setAuthTypes(APISpecParserConstants.AUTH_TYPE_ANY);
+                }
+                if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER)) {
+                    String throttlingTier =
+                            (String) extensions.get(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER);
+                    uriTemplate.setThrottlingTier(throttlingTier);
+                    uriTemplate.setThrottlingTiers(throttlingTier);
+                }
+                if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
+                    String mediationScript =
+                            (String) extensions.get(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT);
+                    uriTemplate.setMediationScript(mediationScript);
+                    uriTemplate.setMediationScripts(uriTemplate.getHTTPVerb(), mediationScript);
+                }
             }
         }
-
         return uriTemplate;
     }
 

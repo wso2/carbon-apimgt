@@ -491,7 +491,6 @@ public final class APIConstants {
     public static final String API_KEY_HEADER = "ApiKeyHeader";
     public static final String API_SECURITY = "APISecurity";
     public static final String API_LEVEL_POLICY = "APILevelPolicy";
-    public static final String API_TYPE_PROP = "ApiType";
     public static final String CERTIFICATE_INFORMATION = "CertificateInformation";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
     public static final String API_KEY_HEADER_DEFAULT = "ApiKey";
@@ -523,6 +522,16 @@ public final class APIConstants {
     public static final String HASHING = "Hashing";
     public static final String HASGING_ALGORITHM= "HashingAlgorithm";
     public static final String ENDPOINT_SECURITY_AWS_SECRET_KEY = "secretKey";
+    public static final String DEVPORTAL_MODE_HYBRID = "HYBRID";
+    public static final String DEVPORTAL_MODE_MCP_ONLY = "MCP_ONLY";
+    public static final String DEVPORTAL_MODE_API_ONLY = "API_ONLY";
+
+    public static final Set<String> DEVPORTAL_MODES = Set.of(
+            DEVPORTAL_MODE_HYBRID,
+            DEVPORTAL_MODE_MCP_ONLY,
+            DEVPORTAL_MODE_API_ONLY
+    );
+
 
     public static class AWSConstants{
         // AWS S4 Constants
@@ -580,6 +589,8 @@ public final class APIConstants {
         public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
         public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE = "ApiCountResource";
         public static final String AI_CONFIGURATION = "AiConfiguration";
+        public static final String MCP = "MCP";
+        public static final String MCP_SUPPORT_ENABLED = "Enabled";
         public static final String AI_CONFIGURATION_FAILOVER_CONFIGURATIONS = "FailoverConfigurations";
         public static final String AI_CONFIGURATION_ROUND_ROBIN_CONFIGURATIONS = "RoundRobinConfigurations";
         public static final String AI_CONFIGURATION_FAILOVER_CONFIGURATIONS_FAILOVER_ENDPOINTS_LIMIT =
@@ -594,8 +605,6 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_TOKEN_ENDPOINT = "TokenEndpoint";
         public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
-        public static final String MCP_DEFAULT_FEATURE_TYPE = "TOOL";
-        public static final String MCP_DEFAULT_BACKEND_NAME = "Default Backend";
 
         public static final String OPENAI_EMBEDDING_PROVIDER_TYPE = "openai";
         public static final String AZURE_OPENAI_EMBEDDING_PROVIDER_TYPE = "azure-openai";
@@ -610,6 +619,65 @@ public final class APIConstants {
         public static final String EMBEDDING_PROVIDER_EMBEDDING_REQUEST_MODEL = "model";
         public static final String EMBEDDING_PROVIDER_EMBEDDING_REQUEST_INPUT = "input";
         public static final String EMBEDDING_PROVIDER_RESPONSE_EMBEDDING_PATH = "/data/0/embedding";
+
+        public static final String VECTOR_DB_PROVIDER = "VectorDBProvider";
+        public static final String VECTOR_DB_PROVIDER_TYPE = "type";
+        public static final String VECTOR_DB_PROVIDER_PROPERTY = "Property";
+        public static final String VECTOR_DB_PROVIDER_PROPERTY_KEY = "name";
+        public static final String VECTOR_INDEX_PREFIX = "apim_semantic_cache_";
+        public static final String VECTOR_DB_PROVIDER_COLLECTION_NAME = "collectionName";
+        public static final String VECTOR_DB_PROVIDER_EMBEDDING_DIMENSION = "embedding_dimension";
+        public static final String VECTOR_DB_PROVIDER_EMBEDDING = "embedding";
+        public static final String VECTOR_DB_PROVIDER_RESPONSE = "response";
+        public static final String VECTOR_DB_PROVIDER_CREATED_AT = "created_at";
+        public static final String VECTOR_DB_PROVIDER_API_ID = "api_id";
+        public static final String VECTOR_DB_PROVIDER_ID = "id";
+        public static final String VECTOR_DB_PROVIDER_THRESHOLD = "threshold";
+        public static final String VECTOR_DB_PROVIDER_TTL = "ttl";
+        public static final String VECTOR_DB_PROVIDER_TTL_DEFAULT = "3600";
+
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_TYPE = "zilliz";
+        public static final String VECTOR_DB_PROVIDER_URI = "uri";
+        public static final String VECTOR_DB_PROVIDER_TOKEN = "token";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_DATA = "data";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_HAS = "has";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_AUTO_ID = "autoId";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_ENABLE_DYNAMIC_FIELD = "enabledDynamicField";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_FIELD_NAME = "fieldName";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_DATA_TYPE = "dataType";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_VARCHAR = "VarChar";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_IS_PRIMARY = "isPrimary";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_MAX_LENGTH = "max_length";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_ELEMENT_TYPE_PARAMS = "elementTypeParams";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_FLOAT_VECTOR = "FloatVector";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_INT64 = "Int64";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_DIMENSION = "dim";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_IS_NULLABLE = "isNullable";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_FIELDS = "fields";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_INDEX_TYPE= "indexType";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_HNSW = "HNSW";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_INDEX_NAME = "indexName";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_INDEX_SUFFIX = "_index";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_METRIC_TYPE = "metricType";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_L2= "L2";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_M = "M";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_EF_CONSTRUCTION = "efConstruction";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_EXTRA_PARAMS = "extraParams";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_SCHEMA = "schema";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_INDEX_PARAMS = "indexParams";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_TTL_SECONDS = "ttlSeconds";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_FILTER = "filter";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_ANNS_FIELD = "annsField";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_OUTPUT_FIELDS = "outputFields";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_LIMIT = "limit";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_SEARCH_PARAMS = "searchParams";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_RADIUS = "radius";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_PARAMS = "params";
+
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_HAS_COLLECTION_ENDPOINT = "/v2/vectordb/collections/has";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_CREATE_COLLECTION_ENDPOINT = "/v2/vectordb/collections/create";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_INSERT_ENDPOINT = "/v2/vectordb/entities/insert";
+        public static final String VECTOR_DB_PROVIDER_ZILLIZ_SEARCH_ENDPOINT = "/v2/vectordb/entities/search";
 
         public static final String GUARDRAIL_PROVIDERS = "GuardrailProviders";
         public static final String GUARDRAIL_PROVIDER = "GuardrailProvider";
@@ -1023,6 +1091,7 @@ public final class APIConstants {
 
     public static final String API_KEY_VALIDATOR_ENABLE_ASSERTIONS = API_KEY_VALIDATOR + "EnableAssertions.";
 
+    public static final String API_STORE_TAG = "APIStore";
     public static final String API_STORE = "APIStore.";
     public static final String SHOW_API_STORE_URL_FROM_PUBLISHER = API_STORE + "DisplayURL";
     public static final String API_STORE_URL = API_STORE + "URL";
@@ -1051,6 +1120,7 @@ public final class APIConstants {
     public static final String ENABLE_ANONYMOUS_MODE = "EnableAnonymous";
     public static final String API_DEVPORTAL_ENABLE_CROSS_TENANT_SUBSCRIPTION = API_STORE +
             "EnableCrossTenantSubscription";
+    public static final String DEVPORTAL_MODE = "Mode";
     public static final String API_DEVPORTAL_DEFAULT_RESERVED_USERNAME = API_STORE +
             "DefaultReservedUsername";
     public static final String API_STORE_CREATE_DEFAULT_APPLICATION = API_STORE + "CreateDefaultApplication";
@@ -1557,8 +1627,6 @@ public final class APIConstants {
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE"})));
     public static final Set<String> WS_SUPPORTED_METHOD_LIST =
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE", "PUBLISH"})));
-    public static final Set<String> MCP_SUPPORTED_FEATURE_LIST =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"TOOL"})));
 
     public static final String HTTP_VERB_PUBLISH = "PUBLISH";
     public static final String HTTP_VERB_SUBSCRIBE = "SUBSCRIBE";
@@ -2250,7 +2318,8 @@ public final class APIConstants {
             "C"};
     public static final String API_SUBTYPE_DEFAULT = "DEFAULT";
     public static final String API_SUBTYPE_AI_API = "AIAPI";
-    public static final String API_SUBTYPE_DIRECT_ENDPOINT = "DIRECT_ENDPOINT";
+    public static final String API_SUBTYPE_SERVER_PROXY = "SERVER_PROXY";
+    public static final String API_SUBTYPE_DIRECT_BACKEND = "DIRECT_BACKEND";
     public static final String API_SUBTYPE_EXISTING_API = "EXISTING_API";
     public static final String API_PRODUCT_REVISION = "Current";
     public static class AdvancedThrottleConstants {
@@ -3534,6 +3603,12 @@ public final class APIConstants {
     }
 
     public static class MCP {
+        public static final String MCP_RESOURCES_MCP_WITHOUT_TRAILING_SLASH = "mcp";
+        public static final String MCP_RESOURCES_MCP = "/mcp";
+        public static final String MCP_RESOURCES_WELL_KNOWN = "/.well-known/oauth-protected-resource";
+
+        public static final String MCP_DEFAULT_FEATURE_TYPE = "TOOL";
+        public static final String MCP_DEFAULT_BACKEND_NAME = "Default Backend";
         public static final String MCP_ENABLED = "MCP_ENABLED";
         public static final String METHOD_INITIALIZE = "initialize";
         public static final String METHOD_TOOL_LIST = "tools/list";
@@ -3556,11 +3631,15 @@ public final class APIConstants {
         public static final String PROTOCOL_MISMATCH_ERROR = "Unsupported protocol version";
         public static final String PARAMS_KEY = "params";
         public static final String TOOL_NAME_KEY = "name";
-        public static final String TOOL_DESC_KEY = "description";
+        public static final String TOOL_DESCRIPTION_KEY = "description";
         public static final String REQUIRED_KEY = "required";
         public static final String PROPERTIES_KEY = "properties";
         public static final String ARGUMENTS_KEY = "arguments";
         public static final String RESULT_KEY = "result";
+        public static final String ERROR_KEY = "error";
+        public static final String BODY_KEY = "body";
+        public static final String TOOLS_KEY = "tools";
+        public static final String SESSION_ID_KEY = "sessionId";
         public static final String VHOST_HEADER = "x-wso2-mcp-vhost";
         public static final String BASEPATH_HEADER = "x-wso2-mcp-basepath";
         public static final String VERSION_HEADER = "x-wso2-mcp-version";
@@ -3577,6 +3656,30 @@ public final class APIConstants {
         public static final String ASGARDEO_WK_PLACEHOLDER
                 = "https://api.asgardeo.io/t/{organization}/oauth2/token/.well-known/openid-configuration";
         public static final String MCP_PROTOCOL_VERSION_HEADER = "MCP-Protocol-Version";
+        public static final String HEADER_CONTENT_TYPE = "Content-Type";
+        public static final String HEADER_ACCEPT = "Accept";
+        public static final String HEADER_MCP_SESSION_ID = "Mcp-Session-Id";
+        public static final String ACCEPT_JSON_AND_SSE = "application/json, text/event-stream";
+
+        // JSON keys used in payloads
+        public static final String CAPABILITIES_KEY = "capabilities";
+        public static final String ROOTS_KEY = "roots";
+        public static final String LIST_CHANGED_KEY = "listChanged";
+        public static final String SAMPLING_KEY = "sampling";
+        public static final String CLIENT_INFO_KEY = "clientInfo";
+        public static final String CLIENT_NAME_KEY = "name";
+        public static final String CLIENT_VERSION_KEY = "version";
+
+        // Client identity
+        public static final String CLIENT_NAME = "WSO2_API_Manager";
+        public static final String CLIENT_VERSION = "1.0";
+
+        // Tools payload
+        public static final String TOOLS_METHOD = METHOD_TOOL_LIST;
+        public static final String TOOL_INPUT_SCHEMA_KEY = "inputSchema";
+
+        // SSE parsing
+        public static final String SSE_DATA_PREFIX = "data:";
 
         /**
          * This class contains constants used for RPC processing

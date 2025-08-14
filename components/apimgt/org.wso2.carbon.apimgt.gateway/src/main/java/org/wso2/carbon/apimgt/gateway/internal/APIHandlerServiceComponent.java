@@ -32,8 +32,10 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EmbeddingProviderService;
+import org.wso2.carbon.apimgt.api.VectorDBProviderService;
 import org.wso2.carbon.apimgt.api.GuardrailProviderService;
 import org.wso2.carbon.apimgt.api.dto.EmbeddingProviderConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.VectorDBProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.common.analytics.AnalyticsCommonConfiguration;
 import org.wso2.carbon.apimgt.common.analytics.AnalyticsServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
@@ -45,6 +47,7 @@ import org.wso2.carbon.apimgt.gateway.AzureOpenAIEmbeddingProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.HybridThrottleProcessor;
 import org.wso2.carbon.apimgt.gateway.MistralEmbeddingProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.OpenAIEmbeddingProviderServiceImpl;
+import org.wso2.carbon.apimgt.gateway.ZillizVectorDBProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.RedisBaseDistributedCountManager;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.WebSocketProcessor;
@@ -231,6 +234,33 @@ public class APIHandlerServiceComponent {
             } catch (APIManagementException e) {
                 // TODO: Notify ACP
                 log.error("Error initializing Embedding provider service", e);
+            }
+        }
+
+        // Register the vector db provider services
+        VectorDBProviderConfigurationDTO vectorDBProviderConfigurationDTO =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getVectorDBProvider();
+        if (vectorDBProviderConfigurationDTO.getType() != null) {
+            try {
+                String vectorDBProviderType = vectorDBProviderConfigurationDTO.getType();
+                VectorDBProviderService vectorDBProviderService;
+                switch (vectorDBProviderType) {
+                    case APIConstants.AI.VECTOR_DB_PROVIDER_ZILLIZ_TYPE:
+                        vectorDBProviderService = new ZillizVectorDBProviderServiceImpl();
+                        break;
+                    default:
+                        throw new APIManagementException("Unsupported vector DB provider type: "
+                                + vectorDBProviderType);
+                }
+                vectorDBProviderService.init(vectorDBProviderConfigurationDTO);
+                context.getBundleContext().registerService(
+                        VectorDBProviderService.class.getName(),
+                        vectorDBProviderService,
+                        null
+                );
+            } catch (APIManagementException e) {
+                // TODO: Notify ACP
+                log.error("Error initializing Vector DB provider service", e);
             }
         }
 

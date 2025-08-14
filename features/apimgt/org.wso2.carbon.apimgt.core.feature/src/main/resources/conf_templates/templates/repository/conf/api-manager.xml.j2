@@ -414,6 +414,10 @@
         <DefaultRequestTimout>{{apim.ai.default_request_timeout}}</DefaultRequestTimout>
     </AiConfiguration>
 
+    <MCP>
+        <Enabled>{{apim.ai.mcp_support_enabled}}</Enabled>
+    </MCP>
+
     <!--
         Configurations relevant to enable rate limit feature.
         This enables to use resources considering subscription levels.
@@ -643,6 +647,7 @@
         {% if apim.devportal.create_default_application is defined %}
         <CreateDefaultApplication>{{apim.devportal.create_default_application}}</CreateDefaultApplication>
         {% endif %}
+        <Mode>{{apim.devportal.mode}}</Mode>
     </APIStore>
 
     <APIPublisher>
@@ -1860,6 +1865,12 @@
               <Property name="{{key}}">{{value}}</Property>
               {% endfor %}
           </EmbeddingProvider>
+
+          <VectorDBProvider type="{{apim.ai.vector_db_provider.type}}">
+                {% for key,value in apim.ai.vector_db_provider.properties.items() %}
+                <Property name="{{key}}">{{value}}</Property>
+                {% endfor %}
+          </VectorDBProvider>
       </AI>
 
       <GatewayNotificationConfiguration>

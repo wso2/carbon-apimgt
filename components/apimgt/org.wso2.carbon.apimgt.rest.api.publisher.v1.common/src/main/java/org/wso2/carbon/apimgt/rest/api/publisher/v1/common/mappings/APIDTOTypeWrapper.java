@@ -565,7 +565,7 @@ public class APIDTOTypeWrapper {
         if (isAPIDTO()) {
             return apiDto.getDisplayName();
         } else {
-            return null;
+            return mcpServerDto.getDisplayName();
         }
     }
 
@@ -574,7 +574,7 @@ public class APIDTOTypeWrapper {
         if (isAPIDTO()) {
             return null;
         } else {
-            return null;
+            return mcpServerDto.getProtocolVersion();
         }
     }
 }

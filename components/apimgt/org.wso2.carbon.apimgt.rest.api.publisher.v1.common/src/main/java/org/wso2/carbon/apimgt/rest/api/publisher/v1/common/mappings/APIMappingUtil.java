@@ -789,6 +789,14 @@ public class APIMappingUtil {
         if (dto.getSubtypeConfiguration() != null && dto.getSubtypeConfiguration().getSubtype() != null) {
             model.setSubtype(dto.getSubtypeConfiguration().getSubtype());
         }
+        String protocolVersion = dto.getProtocolVersion();
+        if (protocolVersion != null && !protocolVersion.isEmpty()) {
+            model.getMetadata().put(APIConstants.MCP.PROTOCOL_VERSION_KEY, protocolVersion);
+        }
+        String displayName = dto.getDisplayName();
+        if (displayName != null && !displayName.isEmpty()) {
+            model.setDisplayName(displayName);
+        }
 
         try {
             GatewayAgentConfiguration gatewayConfiguration =
@@ -806,6 +814,7 @@ public class APIMappingUtil {
             String msg = "Error while fetching gateway deployer instance";
             handleException(msg, e);
         }
+
         return model;
     }
 
@@ -1153,19 +1162,12 @@ public class APIMappingUtil {
      */
     public static MCPServerMetadataDTO fromAPIToMCPServerMetadataDTO(API api) {
 
-        String context = api.getContextTemplate();
-        if (context.endsWith(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM)) {
-            context = context.replace(FORWARD_SLASH + RestApiConstants.API_VERSION_PARAM, EMPTY_STRING);
-        }
-
-        MCPServerMetadataDTO mcpServerMetadataDTO = new MCPServerMetadataDTO();
-        mcpServerMetadataDTO.setContext(context);
-        mcpServerMetadataDTO.setId(api.getUuid());
         APIIdentifier apiId = api.getId();
+        MCPServerMetadataDTO mcpServerMetadataDTO = new MCPServerMetadataDTO();
+        mcpServerMetadataDTO.setId(apiId.getUUID());
         mcpServerMetadataDTO.setName(apiId.getApiName());
         mcpServerMetadataDTO.setVersion(apiId.getVersion());
-        String providerName = api.getId().getProviderName();
-        mcpServerMetadataDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+        mcpServerMetadataDTO.setProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
 
         return mcpServerMetadataDTO;
     }
@@ -2426,7 +2428,13 @@ public class APIMappingUtil {
         SubtypeConfigurationDTO subtypeConfigurationDTO = new SubtypeConfigurationDTO();
         subtypeConfigurationDTO.setSubtype(model.getSubtype());
         dto.setSubtypeConfiguration(subtypeConfigurationDTO);
-
+        dto.setInitiatedFromGateway(model.isInitiatedFromGateway());
+        dto.setDisplayName(model.getDisplayName());
+        String protocolVersion = model.getMetadata() != null
+                ? model.getMetadata().get(APIConstants.MCP.PROTOCOL_VERSION_KEY) : null;
+        if (protocolVersion != null) {
+            dto.setProtocolVersion(protocolVersion);
+        }
         return dto;
     }
 
@@ -2870,8 +2878,7 @@ public class APIMappingUtil {
             String uriTempVal = operation.getTarget();
             String httpVerb = operation.getVerb();
 
-            if (StringUtils.isEmpty(uriTempVal)
-                    && !APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE.equalsIgnoreCase(httpVerb)) {
+            if (StringUtils.isEmpty(uriTempVal)) {
                 throw new APIManagementException("Resource URI template value (target) is not specified",
                         ExceptionCodes.RESOURCE_URI_TEMPLATE_NOT_DEFINED);
             }
@@ -2972,57 +2979,38 @@ public class APIMappingUtil {
     public static Set<URITemplate> getURITemplatesForMCPServers(API model, List<MCPServerOperationDTO> operations)
             throws APIManagementException {
 
-        boolean isHttpVerbDefined = false;
         Set<URITemplate> uriTemplates = new LinkedHashSet<>();
 
         for (MCPServerOperationDTO operation : operations) {
             URITemplate template = new URITemplate();
             String uriTempVal = operation.getTarget();
-            String httpVerb = operation.getFeature();
-
-            if (StringUtils.isEmpty(uriTempVal)
-                    && !APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE.equalsIgnoreCase(httpVerb)) {
-                throw new APIManagementException("Resource URI template value (target) is not specified",
-                        ExceptionCodes.RESOURCE_URI_TEMPLATE_NOT_DEFINED);
-            }
+            String verb = operation.getFeature().toString();
 
             assignScopes(model, operation.getScopes(), template);
 
-            if (StringUtils.isEmpty(httpVerb)) {
+            if (StringUtils.isEmpty(verb)) {
                 throw new APIManagementException(
                         "Operation type/http method is not specified for the operation/resource " + uriTempVal,
                         ExceptionCodes.from(ExceptionCodes.OPERATION_OR_RESOURCE_TYPE_OR_METHOD_NOT_DEFINED,
                                 uriTempVal));
             }
 
-            if (APIConstants.MCP_SUPPORTED_FEATURE_LIST.contains(httpVerb.toUpperCase())) {
-                isHttpVerbDefined = true;
-                String authType = mapOASToInternalAuthType(operation.getAuthType());
-                setCommonTemplateFields(template, uriTempVal, httpVerb, authType,
-                        operation.getThrottlingPolicy(), operation.getOperationPolicies());
+            String authType = mapOASToInternalAuthType(operation.getAuthType());
+            setCommonTemplateFields(template, uriTempVal, verb, authType,
+                    operation.getThrottlingPolicy(), operation.getOperationPolicies());
 
-                template.setSchemaDefinition(operation.getSchemaDefinition());
-                template.setDescription(operation.getDescription());
+            template.setSchemaDefinition(operation.getSchemaDefinition());
+            template.setDescription(operation.getDescription());
 
-                if (operation.getBackendOperationMapping() != null) {
-                    template.setBackendOperationMapping(OperationPolicyMappingUtil
-                            .fromDTOToBackendOperationMapping(operation.getBackendOperationMapping()));
-                }
-                if (operation.getApiOperationMapping() != null) {
-                    template.setExistingAPIOperationMapping(OperationPolicyMappingUtil
-                            .fromDTOToAPIOperationMapping(operation.getApiOperationMapping()));
-                }
-
-                uriTemplates.add(template);
-            } else {
-                throw new APIManagementException(
-                        "The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal + "' is invalid",
-                        ExceptionCodes.from(ExceptionCodes.HTTP_METHOD_INVALID, httpVerb, uriTempVal));
+            if (operation.getBackendOperationMapping() != null) {
+                template.setBackendOperationMapping(OperationPolicyMappingUtil
+                        .fromDTOToBackendOperationMapping(operation.getBackendOperationMapping()));
             }
-
-            if (!isHttpVerbDefined) {
-                handleException("Tool '" + uriTempVal + "' has global parameters without Operation Type");
+            if (operation.getApiOperationMapping() != null) {
+                template.setAPIOperationMapping(OperationPolicyMappingUtil
+                        .fromDTOToAPIOperationMapping(operation.getApiOperationMapping()));
             }
+            uriTemplates.add(template);
         }
         return uriTemplates;
     }
@@ -3055,13 +3043,19 @@ public class APIMappingUtil {
         return APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
     }
 
-    private static void setCommonTemplateFields(
-            URITemplate template,
-            String uriTemplate,
-            String httpVerb,
-            String authType,
-            String throttlingPolicy,
-            APIOperationPoliciesDTO operationPolicies) {
+    /**
+     * Sets common fields for a URITemplate.
+     *
+     * @param template            the URITemplate to set fields on
+     * @param uriTemplate         the URI template string
+     * @param httpVerb            the HTTP verb (method)
+     * @param authType            the authentication type
+     * @param throttlingPolicy    the throttling policy
+     * @param operationPolicies   the operation policies DTO
+     */
+    private static void setCommonTemplateFields(URITemplate template, String uriTemplate, String httpVerb,
+                                                String authType, String throttlingPolicy,
+                                                APIOperationPoliciesDTO operationPolicies) {
 
         template.setThrottlingTier(throttlingPolicy);
         template.setThrottlingTiers(throttlingPolicy);
@@ -3759,15 +3753,15 @@ public class APIMappingUtil {
     private static MCPServerOperationDTO getMCPServerOperationFromURITemplate(URITemplate uriTemplate) {
         MCPServerOperationDTO dto = new MCPServerOperationDTO();
         populateCommonOperationFields(dto, uriTemplate);
-        dto.setFeature(uriTemplate.getHTTPVerb());
+        dto.setFeature(MCPServerOperationDTO.FeatureEnum.fromValue(uriTemplate.getHTTPVerb()));
         dto.setDescription(uriTemplate.getDescription());
         dto.setSchemaDefinition(uriTemplate.getSchemaDefinition());
 
         if (uriTemplate.getBackendOperationMapping() != null) {
             dto.setBackendOperationMapping(mapBackendOperationMapping(uriTemplate.getBackendOperationMapping()));
         }
-        if (uriTemplate.getExistingAPIOperationMapping() != null) {
-            dto.setApiOperationMapping(mapApiOperationMapping(uriTemplate.getExistingAPIOperationMapping()));
+        if (uriTemplate.getAPIOperationMapping() != null) {
+            dto.setApiOperationMapping(mapApiOperationMapping(uriTemplate.getAPIOperationMapping()));
         }
         return dto;
     }

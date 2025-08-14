@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.impl.dao;
 
-import com.google.gson.Gson;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -60,7 +59,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1321,8 +1319,22 @@ public class SubscriptionValidationDAO {
                     String urlPattern = resultSet.getString("URL_PATTERN");
                     String throttlingTier = resultSet.getString("THROTTLING_TIER");
                     String scopeName = resultSet.getString("SCOPE_NAME");
-                    String description = resultSet.getString("DESCRIPTION");
-                    String schemaDefinition = resultSet.getString("SCHEMA_DEFINITION");
+                    String description = null;
+                    try (InputStream descriptionDefStream = resultSet.getBinaryStream("DESCRIPTION")) {
+                        if (descriptionDefStream != null) {
+                            description = APIMgtDBUtil.getStringFromInputStream(descriptionDefStream);
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while reading description of the URI template", e);
+                    }
+                    String schemaDefinition = null;
+                    try (InputStream schemaDefStream = resultSet.getBinaryStream("SCHEMA_DEFINITION")) {
+                        if (schemaDefStream != null) {
+                            schemaDefinition = APIMgtDBUtil.getStringFromInputStream(schemaDefStream);
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while reading schema definition of the URI template", e);
+                    }
                     int urlMappingId = resultSet.getInt("URL_MAPPING_ID");
                     URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
                     if (urlMapping == null) {
@@ -1357,7 +1369,7 @@ public class SubscriptionValidationDAO {
     private void populateMcpOperationMappings(Connection connection, int urlMappingId, URLMapping urlMapping, API api)
             throws SQLException {
         String sql;
-        if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
+        if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(api.getSubtype())) {
             sql = SubscriptionValidationSQLConstants.GET_MCP_BACKEND_OPERATION_MAPPING_BY_REF_URL_MAPPING_ID;
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
                 ps.setInt(1, urlMappingId);
