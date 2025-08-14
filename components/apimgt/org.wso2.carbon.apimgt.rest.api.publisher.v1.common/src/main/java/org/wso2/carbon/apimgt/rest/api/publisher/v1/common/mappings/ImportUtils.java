@@ -859,6 +859,7 @@ public class ImportUtils {
                         validationResponse.setParser(new OAS3Parser());
                         validationResponse.setJsonContent(backendDefinition);
                         validationResponse.setContent(backendDefinition);
+                        validationResponse.setValid(true);
 
                         final API apiToAdd = PublisherCommonUtils
                                 .prepareToCreateAPIByDTO(apiDtoTypeWrapper, apiProvider, userName, organization);

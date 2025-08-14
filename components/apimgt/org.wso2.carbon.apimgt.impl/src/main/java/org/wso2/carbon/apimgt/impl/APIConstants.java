@@ -3544,6 +3544,10 @@ public final class APIConstants {
     }
 
     public static class MCP {
+        public static final String MCP_RESOURCES_MCP_WITHOUT_TRAILING_SLASH = "mcp";
+        public static final String MCP_RESOURCES_MCP = "/mcp";
+        public static final String MCP_RESOURCES_WELL_KNOWN = "/.well-known/oauth-protected-resource";
+
         public static final String MCP_DEFAULT_FEATURE_TYPE = "TOOL";
         public static final String MCP_DEFAULT_BACKEND_NAME = "Default Backend";
         public static final String MCP_ENABLED = "MCP_ENABLED";

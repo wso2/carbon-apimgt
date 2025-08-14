@@ -153,6 +153,9 @@ public class MCPInitializerAndToolFetcher {
     private JSONObject sendJsonRpcRequest(CloseableHttpClient httpClient, String targetUrl, JSONObject jsonBody,
                                           String sessionId) throws Exception {
 
+        targetUrl = targetUrl.endsWith("/") ?
+                targetUrl + APIConstants.MCP.MCP_RESOURCES_MCP_WITHOUT_TRAILING_SLASH :
+                targetUrl + APIConstants.MCP.MCP_RESOURCES_MCP;
         HttpPost request = new HttpPost(targetUrl);
         request.setHeader(APIConstants.MCP.HEADER_CONTENT_TYPE,
                 ContentType.APPLICATION_JSON.withCharset(StandardCharsets.UTF_8).toString());
