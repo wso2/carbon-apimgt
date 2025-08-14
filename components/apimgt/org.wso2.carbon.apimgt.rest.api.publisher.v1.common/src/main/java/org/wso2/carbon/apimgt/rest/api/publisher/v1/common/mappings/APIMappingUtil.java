@@ -756,6 +756,18 @@ public class APIMappingUtil {
         } else {
             corsConfiguration = APIUtil.getDefaultCorsConfiguration();
         }
+
+        // Set Mandatory CORS Headers for MCP servers if they are not already present
+        List<String> updatedAllowHeaders = new ArrayList<>(corsConfiguration.getAccessControlAllowHeaders());
+        if (!updatedAllowHeaders.contains("mcp-protocol-version")) {
+            updatedAllowHeaders.add("mcp-protocol-version");
+        }
+
+        if (!updatedAllowHeaders.contains("mcp-session-id")) {
+            updatedAllowHeaders.add("mcp-session-id");
+        }
+        corsConfiguration.setAccessControlAllowHeaders(updatedAllowHeaders);
+
         model.setCorsConfiguration(corsConfiguration);
         setMaxTpsFromMcpServerDTOToModel(dto, model);
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
