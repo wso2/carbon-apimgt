@@ -1310,7 +1310,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
-            if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(api.getSubtype())) {
+            if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(api.getSubtype())
+                    || APIConstants.API_SUBTYPE_SERVER_PROXY.equals(api.getSubtype())) {
                 apiMgtDAO.removeBackendOperationMapping(oldURITemplates);
             } else if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
                 apiMgtDAO.removeApiOperationMapping(oldURITemplates);
