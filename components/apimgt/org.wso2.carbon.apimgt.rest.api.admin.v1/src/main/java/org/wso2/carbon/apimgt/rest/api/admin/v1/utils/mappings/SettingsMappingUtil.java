@@ -169,13 +169,14 @@ public class SettingsMappingUtil {
             settingsFederatedGatewayConfigurationDTO.setDisplayName(gatewayConfiguration.getType());
             settingsFederatedGatewayConfigurationDTO.setDefaultHostnameTemplate(gatewayConfiguration.getDefaultHostnameTemplate());
             List<String> supportedModes = gatewayConfiguration.getSupportedModes();
-            if (supportedModes.isEmpty()) {
+            List<String> effectiveModes = (supportedModes == null) ? new ArrayList<>() : new ArrayList<>(supportedModes);
+            if (effectiveModes.isEmpty()) {
                 log.warn(String.format(
                         "No supported modes derived for gateway type '%s'. Defaulting to '%s'",
                         gatewayConfiguration.getType(), GatewayMode.WRITE_ONLY.getMode()));
-                supportedModes.add(GatewayMode.WRITE_ONLY.getMode());
+                effectiveModes.add(GatewayMode.WRITE_ONLY.getMode());
             }
-            settingsFederatedGatewayConfigurationDTO.setSupportedModes(supportedModes);
+            settingsFederatedGatewayConfigurationDTO.setSupportedModes(effectiveModes);
             List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
             if (connectionConfigurations != null) {
                 for (ConfigurationDto dto : connectionConfigurations) {
