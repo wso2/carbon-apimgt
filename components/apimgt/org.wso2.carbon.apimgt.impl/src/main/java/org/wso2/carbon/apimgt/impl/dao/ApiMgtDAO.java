@@ -179,6 +179,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -189,6 +190,7 @@ import java.util.stream.Collectors;
 import org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.SUPER_TENANT_DOMAIN;
+import static org.wso2.carbon.apimgt.impl.APIConstants.WSO2_GATEWAY_ENVIRONMENT;
 
 /**
  * This class represent the ApiMgtDAO.
@@ -5655,7 +5657,7 @@ public class ApiMgtDAO {
             boolean initialAutoCommit = connection.getAutoCommit();
             ps.setString(1, contextTemplate.toLowerCase());
             ps.setString(2, organization);
-            ps.setString(3, gatewayVendor);
+            ps.setString(3, Objects.requireNonNullElse(gatewayVendor, WSO2_GATEWAY_ENVIRONMENT));
             try (ResultSet resultSet = ps.executeQuery()) {
                 if (resultSet.next()) {
                     int count = resultSet.getInt("CTX_COUNT");
