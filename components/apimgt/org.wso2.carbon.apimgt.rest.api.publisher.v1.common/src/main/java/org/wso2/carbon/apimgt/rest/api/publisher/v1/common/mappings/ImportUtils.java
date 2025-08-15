@@ -2139,8 +2139,7 @@ public class ImportUtils {
                         mcpServerDTO.endpointConfig(endpointConfig);
                     } else {
                         if (log.isDebugEnabled()) {
-                            log.debug("No endpointConfig found in backend API definition. skipping endpointConfig " +
-                                    "injection to MCPServerDTO");
+                            log.debug("No endpointConfig found in backend API definition.");
                         }
                     }
                 }
