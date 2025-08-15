@@ -2043,13 +2043,13 @@ public class ImportUtils {
     }
 
     @NotNull
-    private static JsonObject retrievedBackendAPIDtoJson(String pathToArchive) throws IOException,
+    private static JsonObject retrieveBackendDtoJson(String pathToArchive) throws IOException,
             APIManagementException {
         // Get MCP Backend API Definition as JSON
         String jsonContent =
                 getFileContentAsJson(pathToArchive + ImportExportConstants.BACKENDS_FILE_LOCATION);
         if (jsonContent == null) {
-            throw new APIManagementException("Cannot find API definition. api.yaml or api.json should present",
+            throw new APIManagementException("Cannot find backend definition.",
                     ExceptionCodes.ERROR_FETCHING_DEFINITION_FILE);
         }
         return processRetrievedDefinition(jsonContent);
@@ -2131,15 +2131,15 @@ public class ImportUtils {
             String subtype = subtypeConfigurationDTO.getSubtype();
             if (!StringUtils.isBlank(subtype)) {
                 if (backendAPIDefSupportedMCPSubtypes.contains(subtype)) {
-                    JsonObject backendAPI = retrievedBackendAPIDtoJson(pathToArchive);
+                    JsonObject backends = retrieveBackendDtoJson(pathToArchive);
                     JSONParser parser = new JSONParser();
-                    JsonElement endpointConfigElement = backendAPI.get(ImportExportConstants.ENDPOINT_CONFIG);
+                    JsonElement endpointConfigElement = backends.get(ImportExportConstants.ENDPOINT_CONFIG);
                     if (endpointConfigElement != null && !endpointConfigElement.isJsonNull()) {
                         JSONObject endpointConfig = (JSONObject) parser.parse(endpointConfigElement.getAsString());
                         mcpServerDTO.endpointConfig(endpointConfig);
                     } else {
                         if (log.isDebugEnabled()) {
-                            log.debug("No endpointConfig found in backend API definition.");
+                            log.debug("No endpointConfig found in backend definition.");
                         }
                     }
                 }
