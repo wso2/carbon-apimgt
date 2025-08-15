@@ -24,4 +24,5 @@ public class ThrottlingConstants {
     public static final String DEFAULT_HOST = "localhost";
     public static final int DEFAULT_PORT = 6379;
     public static final String REDIS_TYPE = "redis";
+    public static final String VALKEY_TYPE = "valkey";
 }

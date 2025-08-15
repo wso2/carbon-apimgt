@@ -31,7 +31,7 @@ import java.lang.reflect.Constructor;
 public class KeyValueStoreManager {
 
     private static final Log log = LogFactory.getLog(KeyValueStoreManager.class);
-    public static String kvStoreType;
+    private static volatile String kvStoreType;
     private static volatile KeyValueStoreClient clientInstance;
 
     private KeyValueStoreManager() {
@@ -54,7 +54,8 @@ public class KeyValueStoreManager {
 
     private static KeyValueStoreClient createClient() throws KeyValueStoreException {
         kvStoreType = getKeyValueStore();
-        if (ThrottlingConstants.REDIS_TYPE.equals(kvStoreType)) {
+        if (ThrottlingConstants.REDIS_TYPE.equalsIgnoreCase(kvStoreType)
+                || ThrottlingConstants.VALKEY_TYPE.equalsIgnoreCase(kvStoreType)) {
             return new JedisKeyValueStoreClient();
         }
         else {
@@ -83,7 +84,7 @@ public class KeyValueStoreManager {
         synchronized (KeyValueStoreManager.class) {
             if (clientInstance != null) {
                 try {
-                    log.info("Disconnecting KeyValueStoreClient");
+                    log.debug("Disconnecting KeyValueStoreClient");
                     clientInstance.disconnect();
                 } catch (Exception e) {
                     log.error("Error disconnecting KeyValueStoreClient", e);
@@ -92,7 +93,7 @@ public class KeyValueStoreManager {
                 }
             }
         }
-        log.info("KeyValueStoreManager shutdown completed.");
+        log.debug("KeyValueStoreManager shutdown completed.");
     }
 
     private static String getKeyValueStore() {

@@ -41,13 +41,13 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
     private static volatile JedisPool jedisPool;
 
     //key-value store configs
-    private static String host = ThrottlingConstants.DEFAULT_HOST;
-    private static int port = ThrottlingConstants.DEFAULT_PORT;
-    private static String user;
-    private static char[] password;
-    private static int connectionTimeout;
-    private static boolean sslEnabled;
-    private static JedisPoolConfig poolConfig = new JedisPoolConfig();
+    private static volatile String host = ThrottlingConstants.DEFAULT_HOST;
+    private static volatile int port = ThrottlingConstants.DEFAULT_PORT;
+    private static volatile String user;
+    private static volatile char[] password;
+    private static volatile int connectionTimeout;
+    private static volatile boolean sslEnabled;
+    private static volatile JedisPoolConfig poolConfig = new JedisPoolConfig();
 
 
     private static void populateKeyValueStoreConfigs() {
@@ -92,22 +92,12 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                     poolConfig.setTestWhileIdle(redisConfig.isTestWhileIdle());
                 }
                 else {
-                    // Set default values if config type is not recognized
-
-                    poolConfig.setMaxTotal(8);
-                    poolConfig.setMaxIdle(8);
-                    poolConfig.setMinIdle(0);
-                    poolConfig.setBlockWhenExhausted(true);
-                    poolConfig.setTestOnBorrow(false);
-                    poolConfig.setTestOnReturn(false);
-                    poolConfig.setTestWhileIdle(false);
-
                     log.warn("Unknown config type provided to createPoolConfig. Using default JedisPoolConfig values.");
                 }
 
             }
         } catch (Exception e) {
-            log.warn("Failed to load distributed throttle configuration from API Manager config. Using defaults.", e);
+            log.warn("Failed to load distributed throttle configuration from API Manager config. Using JedisPool defaults.", e);
         }
     }
 
@@ -142,7 +132,7 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
             try {
                 return pool.getResource();
             } catch (JedisException e) {
-                log.error("Failed to get Jedis resource from pool. Is server running and accessible?", e);
+                log.error("Failed to get Jedis resource from pool. Check whether the server is running and accessible.", e);
                 return null;
             }
         }

@@ -157,7 +157,6 @@ public class APIManagerConfiguration {
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
     private DistributedThrottleConfig distributedThrottleConfig = new DistributedThrottleConfig();
-    private RedisConfig kvStoreConfig;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     private RedisConfig redisConfig = new RedisConfig();
     private OrgAccessControl orgAccessControl = new OrgAccessControl();
@@ -570,8 +569,20 @@ public class APIManagerConfiguration {
                     OMElement user = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_USER));
                     OMElement password = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PASSWORD));
 
-                    distributedThrottleConfig.setHost(host.getText());
-                    distributedThrottleConfig.setPort(Integer.parseInt(port.getText()));
+                    if (host != null && StringUtils.isNotBlank(host.getText())) {
+                        distributedThrottleConfig.setHost(host.getText());
+                    } else {
+                        log.warn("DistributedThrottleConfig: KeyValueStoreOptions.Host is not specified");
+                    }
+                    if (port != null && StringUtils.isNotBlank(port.getText())) {
+                        try {
+                            distributedThrottleConfig.setPort(Integer.parseInt(port.getText()));
+                        } catch (NumberFormatException e) {
+                            log.warn("DistributedThrottleConfig: invalid Port value: " + port.getText(), e);
+                        }
+                    } else {
+                        log.warn("DistributedThrottleConfig: KeyValueStoreOptions.Port is not specified");
+                    }
 
                     if (user != null) {
                         distributedThrottleConfig.setUser(user.getText());
