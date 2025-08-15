@@ -175,7 +175,7 @@ public class SettingsMappingUtil {
                         gatewayConfiguration.getType(), GatewayMode.WRITE_ONLY.getMode()));
                 supportedModes.add(GatewayMode.WRITE_ONLY.getMode());
             }
-            settingsFederatedGatewayConfigurationDTO.setSupportedModes(gatewayConfiguration.getSupportedModes());
+            settingsFederatedGatewayConfigurationDTO.setSupportedModes(supportedModes);
             List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
             if (connectionConfigurations != null) {
                 for (ConfigurationDto dto : connectionConfigurations) {
