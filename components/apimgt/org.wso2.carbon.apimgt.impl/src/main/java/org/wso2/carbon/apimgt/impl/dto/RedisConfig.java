@@ -42,7 +42,7 @@ public class RedisConfig {
     private long timeBetweenEvictionRunsMillis = 30000L;
     private int numTestsPerEvictionRun = -1;
     private String gatewayId;
-    private int minGatewayCount;
+    private Long minGatewayCount;
     private long keyLockRetrievalTimeout;
     private String hybridThrottleProcessorType;
     public int getMaxTotal() {
@@ -240,10 +240,10 @@ public class RedisConfig {
         return gatewayId;
     }
 
-    public void setMinGatewayCount(int minGatewayCount) {
+    public void setMinGatewayCount(Long minGatewayCount) {
         this.minGatewayCount = minGatewayCount;
     }
-    public int getMinGatewayCount() {
+    public Long getMinGatewayCount() {
         return minGatewayCount;
     }
 

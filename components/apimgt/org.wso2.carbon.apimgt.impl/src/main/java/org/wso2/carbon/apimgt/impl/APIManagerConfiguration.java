@@ -488,7 +488,7 @@ public class APIManagerConfiguration {
                             " configuration under [apim.redis_config] section in deployment.toml");
                 }
                 if (minGatewayCount != null) {
-                    redisConfig.setMinGatewayCount(Integer.parseInt(minGatewayCount.getText()));
+                    redisConfig.setMinGatewayCount(Long.parseLong(minGatewayCount.getText()));
                 }
                 if (keyLockRetrievalTimeout != null) {
                     redisConfig.setKeyLockRetrievalTimeout(Integer.parseInt(keyLockRetrievalTimeout.getText()));

@@ -58,19 +58,16 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>5.1.0</version>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.jedis</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
-            <version>2.12.0</version>
         </dependency>
         <dependency>
-            <groupId>org.json</groupId>
+            <groupId>org.json.wso2</groupId>
             <artifactId>json</artifactId>
-            <version>20240303</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -83,28 +80,20 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>5.1.9</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.throttling.siddhi.extension,
                             org.wso2.carbon.apimgt.throttling.siddhi.extension.*
                         </Export-Package>
                         <Private-Package>
+                        </Private-Package>
+                        <Import-Package>
                             redis.clients.jedis.*,
                             org.apache.commons.pool2.*,
                             org.json.*,
-                        </Private-Package>
-                        <Import-Package>
-                            !redis.clients.jedis.*,
-                            !org.apache.commons.pool2.*,
-                            !org.json.*,
-<!--                            org.wso2.siddhi.core.*,-->
-<!--                            org.wso2.carbon.*,-->
-<!--                            org.slf4j.*;version="[1.6,2)",-->
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
