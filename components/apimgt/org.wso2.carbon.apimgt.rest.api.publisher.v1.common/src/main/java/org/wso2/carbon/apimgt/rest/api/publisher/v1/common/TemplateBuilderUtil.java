@@ -860,6 +860,7 @@ public class TemplateBuilderUtil {
         productAPIDto.setTenantDomain(tenantDomain);
         productAPIDto.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         productAPIDto.setAdditionalProperties(toStringMap(apiProduct.getAdditionalProperties()));
+        productAPIDto.setVhosts(environment.getVhosts());
         String definition = apiProduct.getDefinition();
         productAPIDto.setLocalEntriesToBeRemove(GatewayUtils.addStringToList(apiProduct.getUuid(),
                 productAPIDto.getLocalEntriesToBeRemove()));
@@ -973,6 +974,7 @@ public class TemplateBuilderUtil {
         gatewayAPIDTO.setTenantDomain(tenantDomain);
         gatewayAPIDTO.setKeyManagers(api.getKeyManagers());
         gatewayAPIDTO.setAdditionalProperties(toStringMap(api.getAdditionalProperties()));
+        gatewayAPIDTO.setVhosts(environment.getVhosts());
 
         String definition;
         boolean isGraphQLSubscriptionAPI = false;
@@ -1124,7 +1126,7 @@ public class TemplateBuilderUtil {
         setSecureVaultPropertyToBeAdded(null, api, gatewayAPIDTO);
         return gatewayAPIDTO;
     }
-    
+
     /**
      * Converts a JSONObject to a Map<String, String>.
      *

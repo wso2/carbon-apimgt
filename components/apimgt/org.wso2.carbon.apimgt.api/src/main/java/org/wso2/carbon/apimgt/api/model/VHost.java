@@ -21,13 +21,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
  * This class represent an Virtual Host
  */
-public class VHost {
+public class VHost implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     // host name from the http endpoint
     private String host;
     private String httpContext = "";

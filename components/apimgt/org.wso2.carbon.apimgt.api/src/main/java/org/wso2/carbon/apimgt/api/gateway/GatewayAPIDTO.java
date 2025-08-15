@@ -20,6 +20,10 @@
 
 package org.wso2.carbon.apimgt.api.gateway;
 
+import org.wso2.carbon.apimgt.api.model.VHost;
+
+import org.wso2.carbon.apimgt.api.model.VHost;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,6 +58,8 @@ public class GatewayAPIDTO implements Serializable {
     private String[] credentialsToBeRemove;
     private List<String> keyManagers = new ArrayList<>();
     private Map<String, String> additionalProperties = new HashMap<>();
+    private List<VHost> vhosts = new ArrayList<>();
+
     public String getName() {
 
         return name;
@@ -254,5 +260,13 @@ public class GatewayAPIDTO implements Serializable {
 
     public void setAdditionalProperties(Map<String, String> additionalProperties) {
         this.additionalProperties = additionalProperties;
+    }
+
+    public List<VHost> getVhosts() {
+        return vhosts;
+    }
+
+    public void setVhosts(List<VHost> vhosts) {
+        this.vhosts = vhosts;
     }
 }
