@@ -82,7 +82,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         }
         String throttleKey = QuerySelector.getThreadLocalGroupByKey();
         if (distributedThrottlingEnabled && throttleKey != null) {
-            this.key = "distributed_count:" + throttleKey;
+            this.key = "wso2_throttler:" + throttleKey;
             try {
                 this.kvStoreClient = KeyValueStoreManager.getClient();
                 if (this.kvStoreClient != null) {
