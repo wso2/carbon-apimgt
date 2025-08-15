@@ -62,6 +62,8 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
     private static final Log log = LogFactory.getLog(McpMediator.class);
     private String mcpDirection = "";
     private static final String MCP_PROCESSED = "MCP_PROCESSED";
+    private static final String IN_FLOW = "IN";
+    private static final String OUT_FLOW = "OUT";
 
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
@@ -95,7 +97,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         String subType = matchedAPI.getSubtype();
         String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
 
-        if ("IN".equals(mcpDirection)) {
+        if (IN_FLOW.equals(mcpDirection)) {
             if (StringUtils.equals(subType, APIConstants.API_SUBTYPE_SERVER_PROXY) &&
                     !StringUtils.equals(APIConstants.MCP.METHOD_TOOL_LIST, mcpMethod)) {
                 // For server proxy APIs, we do not handle MCP requests
@@ -108,7 +110,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             } else if (path.startsWith(APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE) && httpMethod.equals(APIConstants.HTTP_GET)) {
                 return handleProtectedResourceMetadataResponse(messageContext, matchedAPI);
             }
-        } else if ("OUT".equals(mcpDirection)) {
+        } else if (OUT_FLOW.equals(mcpDirection)) {
             if (StringUtils.equals(subType, APIConstants.API_SUBTYPE_SERVER_PROXY)) {
                 // For server proxy APIs, we do not handle MCP requests
                 log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
