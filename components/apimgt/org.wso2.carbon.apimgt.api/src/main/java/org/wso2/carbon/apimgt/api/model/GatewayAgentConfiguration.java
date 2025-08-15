@@ -83,6 +83,10 @@ public interface GatewayAgentConfiguration {
      * @return List of supported gateway modes
      */
     default List<String> getSupportedModes() {
-        return new ArrayList<>();
+        List<String> supportedModes = new ArrayList<>();
+        supportedModes.add(GatewayMode.WRITE_ONLY.getMode());
+        supportedModes.add(GatewayMode.READ_ONLY.getMode());
+        supportedModes.add(GatewayMode.READ_WRITE.getMode());
+        return supportedModes;
     }
 }
