@@ -151,6 +151,8 @@ public class ImportUtils {
     public static final String OUT = "out";
     private static final Log log = LogFactory.getLog(ImportUtils.class);
     private static final String SOAPTOREST = "SoapToRest";
+    private static final List<String> backendAPIDefSupportedMCPSubtypes =
+            Arrays.asList(APIConstants.API_SUBTYPE_DIRECT_BACKEND, APIConstants.API_SUBTYPE_SERVER_PROXY);
 
     public static APIDTO getImportAPIDto(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
                                          String userName) throws APIManagementException {
@@ -818,9 +820,10 @@ public class ImportUtils {
                             Arrays.asList(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
                 }
 
-                final String subtype = importedApiDTO.getSubtypeConfiguration().getSubtype();
-                if (APIConstants.API_SUBTYPE_SERVER_PROXY.equals(subtype)
-                        || APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(subtype)) {
+                SubtypeConfigurationDTO subtypeConfigurationDTO = importedApiDTO.getSubtypeConfiguration();
+                final String subtype = (subtypeConfigurationDTO != null) ? subtypeConfigurationDTO.getSubtype() : null;
+                if (!StringUtils.isBlank(subtype) && (APIConstants.API_SUBTYPE_SERVER_PROXY.equals(subtype)
+                        || APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(subtype))) {
 
                     final List<Backend> backendList = getMCPServerBackends(extractedFolderPath);
                     if (backendList.isEmpty()) {
@@ -2127,13 +2130,18 @@ public class ImportUtils {
         if (subtypeConfigurationDTO != null) {
             String subtype = subtypeConfigurationDTO.getSubtype();
             if (!StringUtils.isBlank(subtype)) {
-                if (Arrays.asList(APIConstants.API_SUBTYPE_DIRECT_BACKEND, APIConstants.API_SUBTYPE_SERVER_PROXY).
-                        contains(subtype)) {
+                if (backendAPIDefSupportedMCPSubtypes.contains(subtype)) {
                     JsonObject backendAPI = retrievedBackendAPIDtoJson(pathToArchive);
                     JSONParser parser = new JSONParser();
-                    JSONObject endpointConfig = (JSONObject) parser.parse(backendAPI.get("endpointConfig")
-                            .getAsString());
-                    mcpServerDTO.endpointConfig(endpointConfig);
+                    JsonElement endpointConfigElement = backendAPI.get(ImportExportConstants.ENDPOINT_CONFIG);
+                    if (endpointConfigElement != null && !endpointConfigElement.isJsonNull()) {
+                        JSONObject endpointConfig = (JSONObject) parser.parse(endpointConfigElement.getAsString());
+                        mcpServerDTO.endpointConfig(endpointConfig);
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("No endpointConfig found in backend API definition.");
+                        }
+                    }
                 }
             }
         }
