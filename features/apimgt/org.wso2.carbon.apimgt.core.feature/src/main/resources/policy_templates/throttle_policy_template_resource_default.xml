@@ -29,7 +29,7 @@ select throttleKey,
 #if($isDistributed == true)
 (throttler:distributedCount(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey
 #else
-count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey
+(count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey
 #end
 #else
 select throttleKey, (sum(cast(map:get(propertiesMap,'messageSize'),'long')) >= $quotaPolicy.getLimit().getStandardDataAmount()L) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey

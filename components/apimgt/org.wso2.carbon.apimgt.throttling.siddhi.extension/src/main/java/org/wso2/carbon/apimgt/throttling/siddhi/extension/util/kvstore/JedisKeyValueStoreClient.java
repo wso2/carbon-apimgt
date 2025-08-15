@@ -56,7 +56,7 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                     .getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration()
                     .getDistributedThrottleConfig();
-            if (distributedConfig != null) {
+            if (distributedConfig != null && distributedConfig.getHost() != null && distributedConfig.getPort() > 0) {
                 host = distributedConfig.getHost();
                 port = distributedConfig.getPort();
                 user = distributedConfig.getUser();
