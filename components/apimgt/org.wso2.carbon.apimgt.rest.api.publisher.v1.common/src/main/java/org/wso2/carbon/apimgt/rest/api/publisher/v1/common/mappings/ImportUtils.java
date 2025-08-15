@@ -822,8 +822,8 @@ public class ImportUtils {
 
                 SubtypeConfigurationDTO subtypeConfigurationDTO = importedApiDTO.getSubtypeConfiguration();
                 final String subtype = (subtypeConfigurationDTO != null) ? subtypeConfigurationDTO.getSubtype() : null;
-                if (!StringUtils.isBlank(subtype) && APIConstants.API_SUBTYPE_SERVER_PROXY.equals(subtype)
-                        || APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(subtype)) {
+                if (!StringUtils.isBlank(subtype) && (APIConstants.API_SUBTYPE_SERVER_PROXY.equals(subtype)
+                        || APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(subtype))) {
 
                     final List<Backend> backendList = getMCPServerBackends(extractedFolderPath);
                     if (backendList.isEmpty()) {

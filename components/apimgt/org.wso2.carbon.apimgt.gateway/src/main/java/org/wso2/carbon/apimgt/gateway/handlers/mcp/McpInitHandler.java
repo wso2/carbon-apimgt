@@ -94,7 +94,7 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
 
         Object exposeHeadersList = headers.get(APIConstants.CORSHeaders.ACCESS_CONTROL_EXPOSE_HEADERS);
         String exposeHeaders = APIConstants.MCP.HEADER_MCP_SESSION_ID;
-        if (exposeHeadersList != null) {
+        if (exposeHeadersList instanceof String) {
             exposeHeaders = (String) exposeHeadersList;
             if (!StringUtils.isEmpty(exposeHeaders) && !exposeHeaders.contains(APIConstants.MCP.HEADER_MCP_SESSION_ID)) {
                 exposeHeaders += "," + APIConstants.MCP.HEADER_MCP_SESSION_ID;
