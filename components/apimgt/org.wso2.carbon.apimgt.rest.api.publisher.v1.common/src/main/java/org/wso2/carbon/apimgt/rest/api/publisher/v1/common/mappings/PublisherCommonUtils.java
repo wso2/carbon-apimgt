@@ -3957,8 +3957,8 @@ public class PublisherCommonUtils {
             for (String version : apiVersions) {
                 if (version.equalsIgnoreCase(apiProductDTO.getVersion())) {
                     //If version already exists
-                    if (apiProvider.isDuplicateContextTemplateMatchingOrganizationAndGatewayVendor(context,
-                            organization, apiProductDTO.getGatewayVendor())) {
+                    if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context,
+                            organization)) {
                         throw new APIManagementException(
                                 "Error occurred while adding the API Product. A duplicate API context already exists "
                                         + "for " + context + " in the organization : " + organization,

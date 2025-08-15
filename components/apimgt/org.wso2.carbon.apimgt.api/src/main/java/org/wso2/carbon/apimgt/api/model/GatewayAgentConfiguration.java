@@ -28,11 +28,13 @@ import java.util.List;
 public interface GatewayAgentConfiguration {
 
     /**
-     * Get the implementation class of the external gateway deployer
-     *
+     * Initialize the external gateway deployer
      * @return String implementation class name
      */
-    String getGatewayDeployerImplementation();
+    default String getGatewayDeployerImplementation() {
+        // Backward-compat: fall back to the legacy method if implementers haven't overridden the scheme-aware API.
+        return getImplementation();
+    }
 
     /**
      * Get the implementation class of the external gateway deployer
@@ -44,11 +46,13 @@ public interface GatewayAgentConfiguration {
     String getImplementation();
 
     /**
-     * Get the implementation class of the external gateway discovery agent
+     * Get the implementation class of the external gateway discovery
      *
      * @return String implementation class name
      */
-    String getDiscoveryImplementation();
+    default String getDiscoveryImplementation() {
+        return null;
+    }
     /**
      * Get vendor type of the external gateway
      *
