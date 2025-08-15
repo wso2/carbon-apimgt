@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api.model;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -81,5 +82,7 @@ public interface GatewayAgentConfiguration {
      * This method returns the supported gateway modes for a given gateway type
      * @return List of supported gateway modes
      */
-    List<String> getSupportedModes();
+    default List<String> getSupportedModes() {
+        return new ArrayList<>();
+    }
 }
