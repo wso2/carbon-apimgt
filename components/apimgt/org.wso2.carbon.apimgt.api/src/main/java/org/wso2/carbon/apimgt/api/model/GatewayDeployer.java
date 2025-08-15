@@ -84,9 +84,12 @@ public interface GatewayDeployer {
      * @param externalReference reference artifact
      * @param httpScheme HTTP scheme to use for the URL
      * @return String api execution url
-     * @throws APIManagementException if error occurs when resolving the API execution URL
+     * @throws APIManagementException if an error occurs when resolving the API execution URL
      */
-    String getAPIExecutionURL(String externalReference, HttpScheme httpScheme) throws APIManagementException;
+    default String getAPIExecutionURL(String externalReference, HttpScheme httpScheme) throws APIManagementException {
+        // Backward-compat: fall back to the legacy method if implementers haven't overridden the scheme-aware API.
+        return getAPIExecutionURL(externalReference);
+    }
 
 
 

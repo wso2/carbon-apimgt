@@ -188,6 +188,8 @@ import java.util.stream.Collectors;
 
 import org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.SUPER_TENANT_DOMAIN;
+
 /**
  * This class represent the ApiMgtDAO.
  */
@@ -7887,7 +7889,8 @@ public class ApiMgtDAO {
                     uriTemplate.setSchemaDefinition(schemaDefinition);
                     String authType = rs.getString("AUTH_SCHEME");
                     String throttlingTier;
-                    if (rs.getString(APIConstants.THROTTLING_TIER).isEmpty()) {
+                    String tier = rs.getString(APIConstants.THROTTLING_TIER);
+                    if (tier == null || tier.isEmpty()) {
                         throttlingTier = APIConstants.UNLIMITED_TIER;
                     } else {
                         throttlingTier = rs.getString(APIConstants.THROTTLING_TIER);
@@ -15394,8 +15397,7 @@ public class ApiMgtDAO {
             String updateProviderQuery = SQLConstants.UPDATE_LLM_PROVIDER_SQL;
             String deleteProviderModels = SQLConstants.DELETE_LLM_PROVIDER_MODELS_SQL;
             try (PreparedStatement prepStmtUpdateProvider = connection.prepareStatement(updateProviderQuery);
-                 PreparedStatement prepStmtDeleteModels = connection.prepareStatement(deleteProviderModels);
-            ) {
+                 PreparedStatement prepStmtDeleteModels = connection.prepareStatement(deleteProviderModels)) {
 
                 // Update LLM provider
                 prepStmtUpdateProvider.setString(1, provider.getDescription());
@@ -15597,6 +15599,8 @@ public class ApiMgtDAO {
             prepStmt.setString(1, provider.getId());
             if (organization != null) {
                 prepStmt.setString(2, organization);
+            } else {
+                prepStmt.setString(2, SUPER_TENANT_DOMAIN);
             }
             try (ResultSet rs = prepStmt.executeQuery()) {
                 Map<String, LLMModel> models = new HashMap<>();
