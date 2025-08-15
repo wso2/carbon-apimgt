@@ -22716,7 +22716,6 @@ public class ApiMgtDAO {
         Map<String, String> metadataMap = new HashMap<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             metadataMap = getCurrentAPIMetadata(connection, apiId);
-            connection.commit();
         } catch (SQLException e) {
             handleException("Error reading API metadata for API: " + apiId, e);
         }
@@ -22762,7 +22761,6 @@ public class ApiMgtDAO {
         Map<String, String> metadataMap = new HashMap<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             metadataMap = getAPIMetadataRevision(connection, apiId, revisionId);
-            connection.commit();
         } catch (SQLException e) {
             handleException("Error reading API revision metadata for API: " + apiId + ", revision: " + revisionId, e);
         }
