@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.api.model;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -83,10 +83,10 @@ public interface GatewayAgentConfiguration {
      * @return List of supported gateway modes
      */
     default List<String> getSupportedModes() {
-        List<String> supportedModes = new ArrayList<>();
-        supportedModes.add(GatewayMode.WRITE_ONLY.getMode());
-        supportedModes.add(GatewayMode.READ_ONLY.getMode());
-        supportedModes.add(GatewayMode.READ_WRITE.getMode());
-        return supportedModes;
+        return Arrays.asList(
+                GatewayMode.WRITE_ONLY.getMode(),
+                GatewayMode.READ_ONLY.getMode(),
+                GatewayMode.READ_WRITE.getMode()
+        );
     }
 }
