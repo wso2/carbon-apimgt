@@ -30,6 +30,8 @@ public class APISearchResultDTO extends SearchResultDTO  {
     private String status = null;
     private String thumbnailUri = null;
     private Boolean advertiseOnly = null;
+    private String gatewayVendor = null;
+    private String gatewayType = null;
     private Boolean hasThumbnail = null;
     private Boolean monetizedInfo = null;
     private String businessOwner = null;
@@ -180,6 +182,42 @@ public class APISearchResultDTO extends SearchResultDTO  {
   }
 
   /**
+   * Vendor of the gateway where the API is deployed.
+   **/
+  public APISearchResultDTO gatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "wso2", value = "Vendor of the gateway where the API is deployed.")
+  @JsonProperty("gatewayVendor")
+  public String getGatewayVendor() {
+    return gatewayVendor;
+  }
+  public void setGatewayVendor(String gatewayVendor) {
+    this.gatewayVendor = gatewayVendor;
+  }
+
+  /**
+   * The type of the gateway.
+   **/
+  public APISearchResultDTO gatewayType(String gatewayType) {
+    this.gatewayType = gatewayType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "wso2/synapse", value = "The type of the gateway.")
+  @JsonProperty("gatewayType")
+  public String getGatewayType() {
+    return gatewayType;
+  }
+  public void setGatewayType(String gatewayType) {
+    this.gatewayType = gatewayType;
+  }
+
+  /**
    **/
   public APISearchResultDTO hasThumbnail(Boolean hasThumbnail) {
     this.hasThumbnail = hasThumbnail;
@@ -299,6 +337,8 @@ public class APISearchResultDTO extends SearchResultDTO  {
         Objects.equals(status, apISearchResult.status) &&
         Objects.equals(thumbnailUri, apISearchResult.thumbnailUri) &&
         Objects.equals(advertiseOnly, apISearchResult.advertiseOnly) &&
+        Objects.equals(gatewayVendor, apISearchResult.gatewayVendor) &&
+        Objects.equals(gatewayType, apISearchResult.gatewayType) &&
         Objects.equals(hasThumbnail, apISearchResult.hasThumbnail) &&
         Objects.equals(monetizedInfo, apISearchResult.monetizedInfo) &&
         Objects.equals(businessOwner, apISearchResult.businessOwner) &&
@@ -309,7 +349,7 @@ public class APISearchResultDTO extends SearchResultDTO  {
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, contextTemplate, version, provider, status, thumbnailUri, advertiseOnly, hasThumbnail, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
+    return Objects.hash(description, context, contextTemplate, version, provider, status, thumbnailUri, advertiseOnly, gatewayVendor, gatewayType, hasThumbnail, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
   }
 
   @Override
@@ -325,6 +365,8 @@ public class APISearchResultDTO extends SearchResultDTO  {
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
     sb.append("    advertiseOnly: ").append(toIndentedString(advertiseOnly)).append("\n");
+    sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
+    sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    monetizedInfo: ").append(toIndentedString(monetizedInfo)).append("\n");
     sb.append("    businessOwner: ").append(toIndentedString(businessOwner)).append("\n");

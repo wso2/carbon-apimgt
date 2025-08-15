@@ -88,6 +88,8 @@ public class RegistrySearchUtil {
     private static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
     private static final String VERSION_SEARCH_TYPE_PREFIX = "version";
     private static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
+    private static final String VENDOR_SEARCH_TYPE_PREFIX = "vendor";
+    private static final String GATEWAY_VENDOR_SEARCH_PREFIX = "gatewayVendor";
     private static final String CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX = "contextTemplate";
     public static final String API_DESCRIPTION = "Description";
     public static final String TYPE_SEARCH_TYPE_PREFIX = "type";
@@ -99,13 +101,13 @@ public class RegistrySearchUtil {
     public static final String NULL_USER_ROLE_LIST = "null";
     public static final String GET_API_PRODUCT_QUERY  = "type=APIProduct";
     public static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig";
-    public static final String[] API_SEARCH_PREFIXES = { ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX.toLowerCase(), DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
-            NAME_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
-            CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX.toLowerCase(), VERSION_SEARCH_TYPE_PREFIX,
+    public static final String[] API_SEARCH_PREFIXES = { ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX.toLowerCase(),
+            DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX, NAME_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX,
+            CONTEXT_SEARCH_TYPE_PREFIX, CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX.toLowerCase(), VERSION_SEARCH_TYPE_PREFIX,
             LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(), API_STATUS.toLowerCase(),
             CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX, CATEGORY_SEARCH_TYPE_PREFIX,
-            ENABLE_STORE.toLowerCase() , ADVERTISE_ONLY_SEARCH_TYPE_PREFIX.toLowerCase(), "sort", "group", "group.sort"
-            , "group.field", "group.ngroups", "group.format" };
+            ENABLE_STORE.toLowerCase(), VENDOR_SEARCH_TYPE_PREFIX, ADVERTISE_ONLY_SEARCH_TYPE_PREFIX.toLowerCase(),
+            "sort", "group", "group.sort", "group.field", "group.ngroups", "group.format" };
     
 
     private static final Log log = LogFactory.getLog(RegistryPersistenceImpl.class);
@@ -457,6 +459,8 @@ public class RegistrySearchUtil {
                         searchKeys[1] = searchKeys[1].replace("*", "");
                     } else if (searchKeys[0].equals(ADVERTISE_ONLY_SEARCH_TYPE_PREFIX)) {
                         searchKeys[0] = ADVERTISE_ONLY_ADVERTISED_PROPERTY;
+                    } else if (VENDOR_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKeys[0])) {
+                        searchKeys[0] = GATEWAY_VENDOR_SEARCH_PREFIX;
                     }
 
                     if (filteredQuery.length() == 0) {

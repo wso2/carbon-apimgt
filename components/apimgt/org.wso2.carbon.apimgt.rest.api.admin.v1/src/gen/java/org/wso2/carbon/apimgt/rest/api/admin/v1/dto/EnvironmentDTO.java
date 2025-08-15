@@ -66,7 +66,7 @@ public class EnvironmentDTO   {
 return null;
         }
     }
-    private ModeEnum mode = ModeEnum.READ_WRITE;
+    private ModeEnum mode = ModeEnum.WRITE_ONLY;
     private Integer apiDiscoveryScheduledWindow = 60;
     private List<VHostDTO> vhosts = new ArrayList<VHostDTO>();
     private List<GatewayEnvironmentProtocolURIDTO> endpointURIs = new ArrayList<GatewayEnvironmentProtocolURIDTO>();

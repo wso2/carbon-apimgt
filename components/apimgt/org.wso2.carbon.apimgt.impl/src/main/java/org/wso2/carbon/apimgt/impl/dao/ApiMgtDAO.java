@@ -70,6 +70,7 @@ import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayMode;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -15607,6 +15608,14 @@ public class ApiMgtDAO {
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
                     String gatewayType = rs.getString("GATEWAY_TYPE");
+                    String mode = rs.getString("MODE");
+                    if (StringUtils.isEmpty(mode)) {
+                        mode = GatewayMode.WRITE_ONLY.getMode();
+                    }
+                    int scheduledTime = rs.getInt("SCHEDULED_TIME");
+                    if (rs.wasNull()) {
+                        scheduledTime = 60;
+                    }
                     Map<String, String> additionalProperties = new HashMap();
                     try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
                         if (configuration != null) {
@@ -15626,6 +15635,8 @@ public class ApiMgtDAO {
                     env.setDescription(description);
                     env.setProvider(provider);
                     env.setGatewayType(gatewayType);
+                    env.setMode(mode);
+                    env.setApiDiscoveryScheduledWindow(scheduledTime);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                     env.setPermissions(getGatewayVisibilityPermissions(uuid));
                     env.setAdditionalProperties(additionalProperties);
@@ -15661,6 +15672,14 @@ public class ApiMgtDAO {
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
                     String gatewayType = rs.getString("GATEWAY_TYPE");
+                    String mode = rs.getString("MODE");
+                    if (StringUtils.isEmpty(mode)) {
+                        mode = GatewayMode.WRITE_ONLY.getMode();
+                    }
+                    int scheduledTime = rs.getInt("SCHEDULED_TIME");
+                    if (rs.wasNull()) {
+                        scheduledTime = 60;
+                    }
                     Map<String, String> additionalProperties = new HashMap();
                     try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
                         if (configuration != null) {
@@ -15679,6 +15698,8 @@ public class ApiMgtDAO {
                     env.setDescription(description);
                     env.setProvider(provider);
                     env.setGatewayType(gatewayType);
+                    env.setMode(mode);
+                    env.setApiDiscoveryScheduledWindow(scheduledTime);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                     env.setPermissions(getGatewayVisibilityPermissions(uuid));
                     env.setAdditionalProperties(additionalProperties);
@@ -15718,6 +15739,8 @@ public class ApiMgtDAO {
                 String configurationJson = new Gson().toJson(environment.getAdditionalProperties());
                 prepStmt.setBinaryStream(8, new ByteArrayInputStream(configurationJson.getBytes()));
                 prepStmt.setString(9, tenantDomain);
+                prepStmt.setString(10, (StringUtils.isEmpty(environment.getMode()) ? GatewayMode.WRITE_ONLY.getMode() : environment.getMode()));
+                prepStmt.setInt(11, environment.getApiDiscoveryScheduledWindow());
                 prepStmt.executeUpdate();
 
                 GatewayVisibilityPermissionConfigurationDTO permissionDTO = environment.getPermissions();
@@ -15913,7 +15936,8 @@ public class ApiMgtDAO {
                 prepStmt.setString(2, environment.getDescription());
                 String configurationJson = new Gson().toJson(environment.getAdditionalProperties());
                 prepStmt.setBinaryStream(3, new ByteArrayInputStream(configurationJson.getBytes()));
-                prepStmt.setString(4, environment.getUuid());
+                prepStmt.setInt(4, environment.getApiDiscoveryScheduledWindow());
+                prepStmt.setString(5, environment.getUuid());
                 prepStmt.executeUpdate();
                 deleteGatewayVhosts(connection, environment.getId());
                 addGatewayVhosts(connection, environment.getId(), environment.getVhosts());

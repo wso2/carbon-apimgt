@@ -22,6 +22,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -3524,6 +3528,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         String updatedDefinition = null;
         Map<String, String> hostsWithSchemes;
         String definition;
+        populateApiInfo(api, false);
         if (api.getSwaggerDefinition() != null) {
             definition = api.getSwaggerDefinition();
         } else {
@@ -3752,28 +3757,88 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
             boolean isExternalGateway = false;
             GatewayDeployer gatewayDeployer = null;
-            if (gatewayConfiguration != null && StringUtils.isNotEmpty(gatewayConfiguration
-                    .getGatewayDeployerImplementation())) {
-                gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain, environmentName);
-                isExternalGateway = true;
-            }
-
-            String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(),
-                    environment.getUuid());
-            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)
-                    && vhost.getHttpPort() != -1) {
-                String httpUrl = isExternalGateway ? gatewayDeployer.getAPIExecutionURL(externalReference) :
+            if (gatewayConfiguration != null && StringUtils.isNotEmpty(
+                    gatewayConfiguration.getDiscoveryImplementation()) && api.isInitiatedFromGateway()) {
+                Map<String, String> extractedURLs = extractEndpointUrlsForDiscoveredApi(api);
+                if (extractedURLs == null) {
+                    if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)) {
+                        hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, vhost.getHttpUrl());
+                    }
+                    if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)) {
+                        hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, vhost.getHttpsUrl());
+                    }
+                } else {
+                    hostsWithSchemes = extractedURLs;
+                }
+            } else {
+                if (gatewayConfiguration != null && StringUtils.isNotEmpty(
+                        gatewayConfiguration.getGatewayDeployerImplementation())) {
+                    gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain, environmentName);
+                    isExternalGateway = true;
+                }
+                String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(),
+                        environment.getUuid());
+                String httpUrl = isExternalGateway ?
+                        gatewayDeployer.getAPIExecutionURL(externalReference) :
                         vhost.getHttpUrl();
-                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, httpUrl);
-            }
-            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)
-                    && vhost.getHttpsPort() != -1) {
-                String httpsUrl = isExternalGateway ? gatewayDeployer.getAPIExecutionURL(externalReference) :
+                String httpsUrl = isExternalGateway ?
+                        gatewayDeployer.getAPIExecutionURL(externalReference) :
                         vhost.getHttpsUrl();
-                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, httpsUrl);
+                if (StringUtils.containsIgnoreCase(api.getTransports(),
+                        APIConstants.HTTP_PROTOCOL) && vhost.getHttpPort() != -1) {
+                    hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, httpUrl);
+                }
+                if (StringUtils.containsIgnoreCase(api.getTransports(),
+                        APIConstants.HTTPS_PROTOCOL) && vhost.getHttpsPort() != -1) {
+                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, httpsUrl);
+                }
             }
         }
         return hostsWithSchemes;
+    }
+
+    private static Map<String, String> extractEndpointUrlsForDiscoveredApi(API api) {
+        try {
+            if (StringUtils.isBlank(api.getSwaggerDefinition())) {
+                return null;
+            }
+            JsonElement configElement = JsonParser.parseString(api.getSwaggerDefinition());
+            if (!configElement.isJsonObject()) {
+                return null;
+            }
+            JsonObject configObject = configElement.getAsJsonObject();
+            JsonArray servers = configObject.getAsJsonArray("servers");
+            if (servers == null || servers.size() == 0) {
+                return null;
+            }
+            JsonObject server = servers.get(0).getAsJsonObject();
+            if (server == null || !server.has("url")) {
+                return null;
+            }
+            String resolvedUrl = server.get("url").getAsString();
+            JsonObject variables = server.getAsJsonObject("variables");
+            if (variables != null && variables.has("basePath")) {
+                JsonObject basePath = variables.getAsJsonObject("basePath");
+                if (basePath != null && basePath.has("default")) {
+                    String stageName = basePath.get("default").getAsString();
+                    resolvedUrl = resolvedUrl
+                            .replace("/{basePath}", "/" + stageName)
+                            .replace("{basePath}", stageName);
+                }
+            }
+            if (StringUtils.isBlank(resolvedUrl)) {
+                return null;
+            }
+            Map<String, String> hostsWithSchemes = new HashMap<>();
+            if (StringUtils.startsWithIgnoreCase(resolvedUrl, APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
+                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, resolvedUrl);
+            } else {
+                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, resolvedUrl);
+            }
+            return hostsWithSchemes;
+        } catch (RuntimeException e) {
+            return null;
+        }
     }
 
     private String getBasePath(String apiTenantDomain, String basePath) throws APIManagementException {
@@ -4929,6 +4994,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
         api.setEgress(apiInfo.isEgress());
         api.setSubtype(apiInfo.getApiSubtype());
+        api.setInitiatedFromGateway(apiInfo.isInitiatedFromGateway());
         if (setStatus) {
             api.setStatus(apiInfo.getStatus());
         }

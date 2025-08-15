@@ -5495,7 +5495,7 @@ components:
             - READ_WRITE
             - WRITE_ONLY
           example: READ_WRITE
-          default: READ_WRITE
+          default: WRITE_ONLY
           description: |
             The mode of the environment. This indicates whether the environment is in read-only or read-write mode.
             **READ_ONLY:** The environment is in read-only mode. API cannot be deployed, only discovery is possible.
@@ -6123,6 +6123,11 @@ components:
               displayName:
                 type: string
                 example: default
+              supportedModes:
+                type: array
+                items:
+                  type: string
+                  example: 'READ_WRITE'
               configurations:
                 type: array
                 items:
