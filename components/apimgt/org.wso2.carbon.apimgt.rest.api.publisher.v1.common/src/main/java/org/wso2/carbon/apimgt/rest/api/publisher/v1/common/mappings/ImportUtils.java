@@ -2127,8 +2127,8 @@ public class ImportUtils {
         if (subtypeConfigurationDTO != null) {
             String subtype = subtypeConfigurationDTO.getSubtype();
             if (!StringUtils.isBlank(subtype)) {
-                if (StringUtils.equals(subtype, APIConstants.API_SUBTYPE_DIRECT_BACKEND) || StringUtils.equals(subtype,
-                        APIConstants.API_SUBTYPE_SERVER_PROXY)) {
+                if (Arrays.asList(APIConstants.API_SUBTYPE_DIRECT_BACKEND, APIConstants.API_SUBTYPE_SERVER_PROXY).
+                        contains(subtype)) {
                     JsonObject backendAPI = retrievedBackendAPIDtoJson(pathToArchive);
                     JSONParser parser = new JSONParser();
                     JSONObject endpointConfig = (JSONObject) parser.parse(backendAPI.get("endpointConfig")
