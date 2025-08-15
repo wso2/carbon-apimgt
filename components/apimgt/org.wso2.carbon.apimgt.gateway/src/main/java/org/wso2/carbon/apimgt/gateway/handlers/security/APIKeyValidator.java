@@ -360,7 +360,8 @@ public class APIKeyValidator {
                             .orElse(null);
                     if (extendedOperation != null) {
                         BackendOperation backendOperation = null;
-                        if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_DIRECT_BACKEND)) {
+                        if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_DIRECT_BACKEND) ||
+                                StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_SERVER_PROXY)) {
                             BackendOperationMapping backendAPIOperationMapping = extendedOperation.getBackendOperationMapping();
                             backendOperation = backendAPIOperationMapping.getBackendOperation();
                         } else if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_EXISTING_API))  {

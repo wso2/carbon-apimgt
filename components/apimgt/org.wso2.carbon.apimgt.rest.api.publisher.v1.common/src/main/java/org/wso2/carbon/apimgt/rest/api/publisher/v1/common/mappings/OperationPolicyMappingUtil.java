@@ -463,6 +463,7 @@ public class OperationPolicyMappingUtil {
         apiOperationMapping.setApiUuid(apiOperationMappingDTO.getApiId());
         apiOperationMapping.setApiName(apiOperationMappingDTO.getApiName());
         apiOperationMapping.setApiVersion(apiOperationMappingDTO.getApiVersion());
+        apiOperationMapping.setApiContext(apiOperationMappingDTO.getApiContext());
 
         return apiOperationMapping;
     }

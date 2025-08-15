@@ -756,6 +756,21 @@ public class APIMappingUtil {
         } else {
             corsConfiguration = APIUtil.getDefaultCorsConfiguration();
         }
+
+        // Set Mandatory CORS Headers for MCP servers if they are not already present
+        List<String> updatedAllowHeaders = new ArrayList<>(corsConfiguration.getAccessControlAllowHeaders());
+        if (!updatedAllowHeaders.contains("mcp-protocol-version")) {
+            updatedAllowHeaders.add("mcp-protocol-version");
+        }
+
+        if (!updatedAllowHeaders.contains("mcp-session-id")) {
+            updatedAllowHeaders.add("mcp-session-id");
+        }
+        corsConfiguration.setAccessControlAllowHeaders(updatedAllowHeaders);
+
+        //temporarily set the CORS enabled to true for MCP servers
+        corsConfiguration.setCorsConfigurationEnabled(true);
+
         model.setCorsConfiguration(corsConfiguration);
         setMaxTpsFromMcpServerDTOToModel(dto, model);
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
@@ -3723,6 +3738,7 @@ public class APIMappingUtil {
         mappingDTO.setApiId(mapping.getApiUuid());
         mappingDTO.setApiName(mapping.getApiName());
         mappingDTO.setApiVersion(mapping.getApiVersion());
+        mappingDTO.setApiContext(mapping.getApiContext());
         mappingDTO.setBackendOperation(operationDTO);
         return mappingDTO;
     }

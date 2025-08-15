@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.util.Map;
 
 public class McpInitHandler extends AbstractHandler implements ManagedLifecycle {
     private static final Log log = LogFactory.getLog(McpInitHandler.class);
@@ -82,6 +83,10 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
 
     @Override
     public boolean handleResponse(MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        Map headers = (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        headers.put("Access-Control-Expose-Headers", "mcp-session-id");
         return true;
     }
 

@@ -85,13 +85,21 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
     public boolean mediate(MessageContext messageContext) {
         String path = (String) messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
         String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
+        API matchedAPI = GatewayUtils.getAPI(messageContext);
+        if (matchedAPI == null) {
+            log.error("No API matched for the request: " + path + " with method: " + httpMethod);
+            return false;
+        }
+        String subType = matchedAPI.getSubtype();
+        String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
 
         if ("IN".equals(mcpDirection)) {
-            API matchedAPI = GatewayUtils.getAPI(messageContext);
-            if (matchedAPI == null) {
-                log.error("No API found for the request: " +
-                        messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE));
-                return false;
+            if (StringUtils.equals(subType, APIConstants.API_SUBTYPE_SERVER_PROXY) &&
+                    !StringUtils.equals(APIConstants.MCP.METHOD_TOOL_LIST, mcpMethod)) {
+                // For server proxy APIs, we do not handle MCP requests
+                log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
+                        matchedAPI.getVersion());
+                return true;
             }
             if (path.startsWith(APIMgtGatewayConstants.MCP_RESOURCE) && httpMethod.equals(APIConstants.HTTP_POST)) {
                 handleMcpRequest(messageContext, matchedAPI);
@@ -99,6 +107,13 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                 return handleProtectedResourceMetadataResponse(messageContext, matchedAPI);
             }
         } else if ("OUT".equals(mcpDirection)) {
+            if (StringUtils.equals(subType, APIConstants.API_SUBTYPE_SERVER_PROXY)) {
+                // For server proxy APIs, we do not handle MCP requests
+                log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
+                        matchedAPI.getVersion());
+                return true;
+            }
+
             try {
                 handleMcpResponse(messageContext);
             } catch (McpException e) {
