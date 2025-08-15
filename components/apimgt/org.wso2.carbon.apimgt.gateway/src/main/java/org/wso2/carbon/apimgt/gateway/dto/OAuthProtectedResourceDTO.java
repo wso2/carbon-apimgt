@@ -4,15 +4,23 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Holds information related to OAuth protected resources.
+ * This DTO is used to store the authorization servers and resource scopes
+ * associated with a protected resource in the API Gateway.
+ */
 public class OAuthProtectedResourceDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @SerializedName("authorization_servers")
-    private List<String> authorizationServers = new java.util.ArrayList<>();
+    @SerializedName("resource")
+    private String resource;
 
-    @SerializedName("resource_scopes")
-    private final List<String> resourceScopes = new java.util.ArrayList<>();
+    @SerializedName("authorization_servers")
+    private final List<String> authorizationServers = new java.util.ArrayList<>();
+
+    @SerializedName("scopes_supported")
+    private final List<String> scopesSupported = new java.util.ArrayList<>();
 
     public List<String> getAuthorizationServers() {
         return authorizationServers;
@@ -24,13 +32,21 @@ public class OAuthProtectedResourceDTO implements Serializable {
         }
     }
 
-    public List<String> getResourceScopes() {
-        return resourceScopes;
+    public String getResource() {
+        return resource;
     }
 
-    public void addResourceScopes(List<String> resourceScopes) {
+    public void setResource(String resource) {
+        this.resource = resource;
+    }
+
+    public List<String> getScopesSupported() {
+        return scopesSupported;
+    }
+
+    public void addScopesSupported(List<String> resourceScopes) {
         if (resourceScopes != null) {
-            this.resourceScopes.addAll(resourceScopes);
+            this.scopesSupported.addAll(resourceScopes);
         }
     }
 
@@ -38,7 +54,7 @@ public class OAuthProtectedResourceDTO implements Serializable {
         authorizationServers.add(server);
     }
 
-    public void addResourceScope(String scope) {
-        resourceScopes.add(scope);
+    public void addScopeSupported(String scope) {
+        scopesSupported.add(scope);
     }
 }

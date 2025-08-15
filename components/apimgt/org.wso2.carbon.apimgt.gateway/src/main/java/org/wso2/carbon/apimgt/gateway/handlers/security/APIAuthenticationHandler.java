@@ -754,24 +754,20 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (headers != null) {
                 if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
-                    // Derive the outward facing host and port from host header
-                    String hostHeader = headers.get(APIMgtGatewayConstants.HOST);
-                    Pattern validHostHeaderPattern = Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
-
-                    if (StringUtils.isBlank(hostHeader) || !validHostHeaderPattern.matcher(hostHeader).matches()) {
-                        log.debug("Missing or malformed host header in request.Extracting host header form config.");
-                        hostHeader = APIUtil.getHostAddress();
-                    }
                     String contextPath = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
                     if (StringUtils.isEmpty(contextPath)) {
                         headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
                                 " error=\"invalid_token\"" +
                                 ", error_description=\"The provided token is invalid\"");
                     } else {
-                        String transportScheme = (String) messageContext.getProperty("TRANSPORT_IN_NAME");
-                        transportScheme = !StringUtils.isEmpty(transportScheme) ? transportScheme : "https";
-                        String resourceMetadata = transportScheme + APIConstants.URL_SCHEME_SEPARATOR +
-                                hostHeader + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
+                        // We need to adjust this to support vhost instead of constructing the URL here
+                        String hostAddress = APIUtil.getHostAddress();
+                        if ("localhost".equals(hostAddress)) {
+                            hostAddress += ":";
+                            hostAddress += (8243  + APIUtil.getPortOffset());
+                        }
+                        String resourceMetadata = APIConstants.HTTPS_PROTOCOL + APIConstants.URL_SCHEME_SEPARATOR +
+                                hostAddress + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
                         headers.put(HttpHeaders.WWW_AUTHENTICATE, "Bearer resource_metadata=" +
                                 "\"" + resourceMetadata + "\","
                                 + " error=\"invalid_token\","

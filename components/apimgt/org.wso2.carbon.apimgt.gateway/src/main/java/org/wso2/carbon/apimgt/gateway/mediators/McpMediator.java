@@ -31,6 +31,7 @@ import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
+import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -45,6 +46,7 @@ import org.wso2.carbon.apimgt.gateway.utils.MCPPayloadGenerator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
 import java.util.ArrayList;
@@ -159,24 +161,35 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
     private boolean handleProtectedResourceMetadataResponse(MessageContext messageContext, API matchedAPI) {
         OAuthProtectedResourceDTO oAuthProtectedResourceDTO = new OAuthProtectedResourceDTO();
         List<String> keyManagers = DataHolder.getInstance().getKeyManagersFromUUID(matchedAPI.getUuid());
+        boolean skipAuthServersAttribute = false;
         if (keyManagers.isEmpty()) {
             log.error("No Key Managers found for MCP Server: " + matchedAPI.getUuid());
-            return false;
+            skipAuthServersAttribute = true;
         }
         if (keyManagers.size() > 1) {
             log.error("Multiple Key Managers found for MCP Server: " + matchedAPI.getUuid() + ".");
-            return false;
+            skipAuthServersAttribute = true;
         }
+        // We need to adjust this to support vhost instead of constructing the URL here
+        String contextPath = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+        String hostAddress = APIUtil.getHostAddress();
+        String serverURL = APIConstants.HTTPS_PROTOCOL + APIConstants.URL_SCHEME_SEPARATOR + hostAddress;
+        if ("localhost".equals(hostAddress)) {
+            serverURL += ":";
+            serverURL += (8243  + APIUtil.getPortOffset());
+        }
+        String resourceURL = serverURL + contextPath + APIMgtGatewayConstants.MCP_RESOURCE;
+        oAuthProtectedResourceDTO.setResource(resourceURL);
 
         if (APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManagers.get(0))) {
             Map<String, KeyManagerDto> keyManagerMap =
                     KeyManagerHolder.getTenantKeyManagers(matchedAPI.getOrganization());
             if (keyManagerMap.size() > 1) {
                 log.error("Multiple Key Managers found for MCP Server: " + matchedAPI.getUuid() + ".");
-                return false;
+            } else {
+                oAuthProtectedResourceDTO.addAuthorizationServer(keyManagerMap.values().iterator().next().getIssuer());
             }
-            oAuthProtectedResourceDTO.addAuthorizationServer(keyManagerMap.values().iterator().next().getIssuer());
-        } else {
+        } else if (!skipAuthServersAttribute) {
             KeyManagerDto keyManager =
                     KeyManagerHolder.getKeyManagerByName(matchedAPI.getOrganization(), keyManagers.get(0));
             if (keyManager != null) {
@@ -184,11 +197,10 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             } else {
                 log.error("Key Manager: " + keyManagers.get(0) + " not found for MCP Server: " +
                         matchedAPI.getUuid() + ".");
-                return false;
             }
         }
 
-        oAuthProtectedResourceDTO.addResourceScopes(getAllScopes(matchedAPI));
+        oAuthProtectedResourceDTO.addScopesSupported(getAllScopes(matchedAPI));
 
         messageContext.setProperty(MCP_PROCESSED, "true");
         org.apache.axis2.context.MessageContext axis2MessageContext =
