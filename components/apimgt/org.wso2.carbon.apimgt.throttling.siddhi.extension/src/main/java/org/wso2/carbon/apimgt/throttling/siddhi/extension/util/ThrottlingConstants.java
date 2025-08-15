@@ -23,4 +23,5 @@ package org.wso2.carbon.apimgt.throttling.siddhi.extension.util;
 public class ThrottlingConstants {
     public static final String DEFAULT_HOST = "localhost";
     public static final int DEFAULT_PORT = 6379;
+    public static final String REDIS_TYPE = "redis";
 }

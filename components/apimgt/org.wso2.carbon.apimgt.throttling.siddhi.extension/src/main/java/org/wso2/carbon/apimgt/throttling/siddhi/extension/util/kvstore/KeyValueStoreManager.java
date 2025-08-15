@@ -20,7 +20,8 @@ package org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.dto.DistributedThrottleConfig;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.throttling.siddhi.extension.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.ThrottlingConstants;
 
 import java.lang.reflect.Constructor;
 
@@ -31,7 +32,6 @@ public class KeyValueStoreManager {
 
     private static final Log log = LogFactory.getLog(KeyValueStoreManager.class);
     public static String kvStoreType;
-    public static final String REDIS_TYPE = "redis";//move to constants
     private static volatile KeyValueStoreClient clientInstance;
 
     private KeyValueStoreManager() {
@@ -54,7 +54,7 @@ public class KeyValueStoreManager {
 
     private static KeyValueStoreClient createClient() throws KeyValueStoreException {
         kvStoreType = getKeyValueStore();
-        if (REDIS_TYPE.equals(kvStoreType)) {
+        if (ThrottlingConstants.REDIS_TYPE.equals(kvStoreType)) {
             return new JedisKeyValueStoreClient();
         }
         else {
@@ -104,7 +104,7 @@ public class KeyValueStoreManager {
             return dtConfig.getType();
         } catch (Exception e) {
             log.warn("Failed to load distributed throttle configuration from API Manager config. Using defaults.", e);
-            return REDIS_TYPE;
+            return ThrottlingConstants.REDIS_TYPE;
         }
     }
 }
