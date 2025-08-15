@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.dto.DistributedThrottleConfig;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
-import org.wso2.carbon.apimgt.throttling.siddhi.extension.Constants;
+import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.ThrottlingConstants;
 import org.wso2.carbon.apimgt.throttling.siddhi.extension.internal.ServiceReferenceHolder;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -41,8 +41,8 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
     private static volatile JedisPool jedisPool;
 
     //key-value store configs
-    private static String host = Constants.DEFAULT_HOST;
-    private static int port = Constants.DEFAULT_PORT;
+    private static String host = ThrottlingConstants.DEFAULT_HOST;
+    private static int port = ThrottlingConstants.DEFAULT_PORT;
     private static String user;
     private static char[] password;
     private static int connectionTimeout;

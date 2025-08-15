@@ -15,12 +15,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.throttling.siddhi.extension;
+package org.wso2.carbon.apimgt.throttling.siddhi.extension.util;
 
 /**
  * This class contains common constants for Siddhi Extension.
  */
-public class Constants {
+public class ThrottlingConstants {
     public static final String DEFAULT_HOST = "localhost";
     public static final int DEFAULT_PORT = 6379;
 }

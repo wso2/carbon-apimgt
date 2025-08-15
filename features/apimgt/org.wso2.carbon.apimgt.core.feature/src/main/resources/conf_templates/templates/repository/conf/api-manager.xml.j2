@@ -1429,18 +1429,15 @@
         <KeyLockRetrievalTimeout>50</KeyLockRetrievalTimeout>
         {% endif %}
         <Properties>
-        <!-- Pool Size Configurations -->
-            <MaxTotal>{{apim.redis_config.pool_options.max_total | default(3000)}}</MaxTotal>
-            <MaxIdle>{{apim.redis_config.pool_options.max_idle | default(3000)}}</MaxIdle>
-            <MinIdle>{{apim.redis_config.pool_options.min_idle | default(300)}}</MinIdle>
-            <BlockWhenExhausted>{{apim.redis_config.pool_options.block_when_exhausted | default('true')}}</BlockWhenExhausted>
-            
-            <!-- Additional pool configurations if needed -->
-            <TestOnBorrow>{{apim.redis_config.pool_options.test_on_borrow | default('false')}}</TestOnBorrow>
-            <TestOnReturn>{{apim.redis_config.pool_options.test_on_return | default('false')}}</TestOnReturn>
-            <TestWhileIdle>{{apim.redis_config.pool_options.test_while_idle | default('true')}}</TestWhileIdle>
-            <MinEvictableIdleTimeMillis>{{apim.redis_config.pool_options.min_evictable_idle_time_millis | default(60000)}}</MinEvictableIdleTimeMillis>
-            <TimeBetweenEvictionRunsMillis>{{apim.redis_config.pool_options.time_between_eviction_runs_millis | default(30000)}}</TimeBetweenEvictionRunsMillis>
+            <MaxTotal>{{apim.redis_config.pool_options.max_total}}</MaxTotal>
+            <MaxIdle>{{apim.redis_config.pool_options.max_idle}}</MaxIdle>
+            <MinIdle>{{apim.redis_config.pool_options.min_idle}}</MinIdle>
+            <BlockWhenExhausted>{{apim.redis_config.pool_options.block_when_exhausted}}</BlockWhenExhausted>
+            <TestOnBorrow>{{apim.redis_config.pool_options.test_on_borrow}}</TestOnBorrow>
+            <TestOnReturn>{{apim.redis_config.pool_options.test_on_return}}</TestOnReturn>
+            <TestWhileIdle>{{apim.redis_config.pool_options.test_while_idle}}</TestWhileIdle>
+            <MinEvictableIdleTimeMillis>{{apim.redis_config.pool_options.min_evictable_idle_time_millis}}</MinEvictableIdleTimeMillis>
+            <TimeBetweenEvictionRunsMillis>{{apim.redis_config.pool_options.time_between_eviction_runs_millis}}</TimeBetweenEvictionRunsMillis>
         
             {% if apim.redis_config.pool_options is defined %}
             {% for property_name,property_value in apim.redis_config.pool_options.items() %}
@@ -1851,23 +1848,15 @@
         <DistributedThrottleConfig>
             {% if apim.distributed_throttle_properties.enable is defined %}
             <Enabled>{{apim.distributed_throttle_properties.enable}}</Enabled>
-            {% else %}
-            <Enabled>false</Enabled>
             {% endif %}
             {% if apim.distributed_throttle_properties.type is defined %}
             <Type>{{apim.distributed_throttle_properties.type}}</Type>
-            {% else %}
-            <Type>redis</Type>
             {% endif %}
             {% if apim.distributed_throttle_properties.sync_interval is defined %}
             <SyncInterval>{{apim.distributed_throttle_properties.sync_interval}}</SyncInterval>
-            {% else %}
-            <SyncInterval>1</SyncInterval>
             {% endif %}
             {% if apim.distributed_throttle_properties.core_pool_size is defined %}
             <CorePoolSize>{{apim.distributed_throttle_properties.core_pool_size}}</CorePoolSize>
-            {% else %}
-            <CorePoolSize>200</CorePoolSize>
             {% endif %}
             {% if apim.distributed_throttle_properties.keyvalue_store_options is defined %}
             <KeyValueStoreOptions>
