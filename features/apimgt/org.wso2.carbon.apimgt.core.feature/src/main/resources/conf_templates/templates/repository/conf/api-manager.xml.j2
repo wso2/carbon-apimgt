@@ -1442,11 +1442,11 @@
             <MinEvictableIdleTimeMillis>{{apim.redis_config.pool_options.min_evictable_idle_time_millis | default(60000)}}</MinEvictableIdleTimeMillis>
             <TimeBetweenEvictionRunsMillis>{{apim.redis_config.pool_options.time_between_eviction_runs_millis | default(30000)}}</TimeBetweenEvictionRunsMillis>
         
-            {# {% if apim.redis_config.pool_options is defined %}
+            {% if apim.redis_config.pool_options is defined %}
             {% for property_name,property_value in apim.redis_config.pool_options.items() %}
              <{{property_name}}>{{property_value}}</{{property_name}}>
             {% endfor %}
-            {% endif %} #}
+            {% endif %}
         </Properties>
     </RedisConfig>
     {% endif %}

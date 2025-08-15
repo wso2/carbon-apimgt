@@ -24,7 +24,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.dto.DistributedThrottleConfig;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+
+import org.wso2.carbon.apimgt.throttling.siddhi.extension.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreClient;
 import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreException;
 import org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore.KeyValueStoreManager;
@@ -36,8 +37,7 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 
 public class DistributedCountAttributeAggregator extends AttributeAggregator {
 
-    private static final Log log = LogFactory.getLog(
-            DistributedCountAttributeAggregator.class);
+    private static final Log log = LogFactory.getLog(DistributedCountAttributeAggregator.class);
     private static Attribute.Type type = Attribute.Type.LONG;
     private KeyValueStoreClient kvStoreClient;
     private String key;
@@ -99,6 +99,10 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         }
     }
 
+    /**
+     * The method to initialize the local counter from the key-value store.
+     * Initialize the value in key value store if it is not set.
+     */
     private void initializeFromKVStore() {
         try {
             String kvStoreValue = kvStoreClient.get(key);
@@ -114,6 +118,10 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         }
     }
 
+    /**
+     * Synchronize the local counter with the key-value store.
+     * Update the key-value store with the unsynced counter value.
+     */
     private void syncWithKVStore() {
         if (kvStoreClient == null || key == null) {
             return;
@@ -139,6 +147,14 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         return type;
     }
 
+    /**
+     * Process an add event by incrementing the local counter.
+     * If distributed throttling is enabled, also increments the unsynced counter
+     * which will be synchronized with the distributed key-value store.
+     *
+     * @param data The event data to be added.
+     * @return The updated value of the local counter after increment.
+     */
     @Override
     public Object processAdd(Object data) {
         try {
@@ -158,6 +174,15 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         return processAdd((Object) data);
     }
 
+
+    /**
+     * Process a remove event by decrementing the local counter.
+     * If distributed throttling is enabled, also decrements the unsynced counter
+     * which will be synchronized with the distributed key-value store.
+     *
+     * @param data The event data to be removed.
+     * @return The updated value of the local counter after decrement.
+     */
     @Override
     public Object processRemove(Object data) {
         try {
@@ -178,6 +203,14 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         return processRemove((Object) data);
     }
 
+
+    /**
+     * Resets the local counter to zero.
+     * If distributed throttling is enabled, also resets the value in the distributed key-value store
+     * and clears any pending unsynced changes.
+     *
+     * @return 0L after reset.
+     */
     @Override
     public Object reset() {
         try {
@@ -199,6 +232,12 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         //Nothing to start
     }
 
+    /**
+     * Stops the aggregator instance and performs cleanup.
+     * Removes the aggregator from the active aggregator map, synchronizes any unsynced changes
+     * with the key-value store, and shuts down the scheduler if there are no more active aggregators.
+     * This method should be called when the aggregator is no longer needed.
+     */
     @Override
     public void stop() {
         try {
@@ -209,7 +248,7 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                     syncWithKVStore();
                 }
             }
-            // Shutdown scheduler if no active aggregators
+            // Shutdown scheduler if no active aggregators exist
             if (ACTIVE_AGGREGATORS.isEmpty()) {
                 shutdownScheduler();
                 schedulerStarted = false; // Reset for potential restart
@@ -249,7 +288,6 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
     }
 
     private static DistributedThrottleConfig getDistributedThrottleConfig() {
-        //check apimconfig is null or not
         try {
             return ServiceReferenceHolder.getInstance()
                     .getAPIManagerConfigurationService()
@@ -261,6 +299,13 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         }
     }
 
+    /**
+     * Starts the scheduler responsible for periodically synchronizing all active aggregators
+     * with the distributed key-value store. The scheduler runs at a fixed interval and submits
+     * sync tasks for each active aggregator instance. This ensures that local counter changes
+     * are propagated to the distributed store in a timely manner.
+     * The scheduler is shared among all aggregator instances and is only started once.
+     */
     private static void startScheduler() {
         if (!distributedThrottlingEnabled || schedulerStarted) {
             return;
@@ -300,6 +345,12 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
         }
     }
 
+    /**
+     * Shuts down the key-value store sync scheduler and the KeyValueStoreManager.
+     * This method is called when there are no active aggregators remaining.
+     * It ensures that all scheduled sync tasks are stopped and resources such as thread pools
+     * and key-value store connections are properly released.
+     */
     public static void shutdownScheduler() {
         synchronized (schedulerLock) {
             if (kvStoreSyncScheduler != null && !kvStoreSyncScheduler.isShutdown()) {

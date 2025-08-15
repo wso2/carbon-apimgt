@@ -22,8 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.dto.DistributedThrottleConfig;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
-//todo--get this from siddhi extension
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.throttling.siddhi.extension.Constants;
+import org.wso2.carbon.apimgt.throttling.siddhi.extension.internal.ServiceReferenceHolder;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -39,14 +39,10 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
 
     // Connection pool
     private static volatile JedisPool jedisPool;
-    //todo-make these constants
-    private static final String DEFAULT_HOST = "localhost";
-    private static final int DEFAULT_PORT = 6379;
 
-    //kvstore configs
-    //todo - add default values here
-    private static String host;
-    private static int port;
+    //key-value store configs
+    private static String host = Constants.DEFAULT_HOST;
+    private static int port = Constants.DEFAULT_PORT;
     private static String user;
     private static char[] password;
     private static int connectionTimeout;
@@ -55,61 +51,64 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
 
 
     private static void populateKeyValueStoreConfigs() {
-        DistributedThrottleConfig distributedConfig = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration()
-                .getDistributedThrottleConfig();
-        if (distributedConfig != null) {
-            host = distributedConfig.getHost();
-            port = distributedConfig.getPort();
-            user = distributedConfig.getUser();
-            password = distributedConfig.getPassword();
-            connectionTimeout = distributedConfig.getConnectionTimeout();
-            sslEnabled = distributedConfig.isSslEnabled();
-            poolConfig.setMaxTotal(distributedConfig.getMaxTotal());
-            poolConfig.setMaxIdle(distributedConfig.getMaxIdle());
-            poolConfig.setMinIdle(distributedConfig.getMinIdle());
-            poolConfig.setBlockWhenExhausted(distributedConfig.isBlockWhenExhausted());
-            poolConfig.setTestOnBorrow(distributedConfig.isTestOnBorrow());
-            poolConfig.setTestOnReturn(distributedConfig.isTestOnReturn());
-            poolConfig.setTestWhileIdle(distributedConfig.isTestWhileIdle());
-
-        } else {
-            RedisConfig redisConfig = ServiceReferenceHolder.getInstance()
+        try {
+            DistributedThrottleConfig distributedConfig = ServiceReferenceHolder.getInstance()
                     .getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration()
-                    .getRedisConfig();
-            if (redisConfig != null) {
-                host = redisConfig.getHost();
-                port = redisConfig.getPort();
-                user = redisConfig.getUser();
-                password = redisConfig.getPassword();
-                connectionTimeout = redisConfig.getConnectionTimeout();
-                sslEnabled = redisConfig.isSslEnabled();
-                poolConfig.setMaxTotal(redisConfig.getMaxTotal());
-                poolConfig.setMaxIdle(redisConfig.getMaxIdle());
-                poolConfig.setMinIdle(redisConfig.getMinIdle());
-                poolConfig.setBlockWhenExhausted(redisConfig.isBlockWhenExhausted());
-                poolConfig.setTestOnBorrow(redisConfig.isTestOnBorrow());
-                poolConfig.setTestOnReturn(redisConfig.isTestOnReturn());
-                poolConfig.setTestWhileIdle(redisConfig.isTestWhileIdle());
+                    .getDistributedThrottleConfig();
+            if (distributedConfig != null) {
+                host = distributedConfig.getHost();
+                port = distributedConfig.getPort();
+                user = distributedConfig.getUser();
+                password = distributedConfig.getPassword();
+                connectionTimeout = distributedConfig.getConnectionTimeout();
+                sslEnabled = distributedConfig.isSslEnabled();
+                poolConfig.setMaxTotal(distributedConfig.getMaxTotal());
+                poolConfig.setMaxIdle(distributedConfig.getMaxIdle());
+                poolConfig.setMinIdle(distributedConfig.getMinIdle());
+                poolConfig.setBlockWhenExhausted(distributedConfig.isBlockWhenExhausted());
+                poolConfig.setTestOnBorrow(distributedConfig.isTestOnBorrow());
+                poolConfig.setTestOnReturn(distributedConfig.isTestOnReturn());
+                poolConfig.setTestWhileIdle(distributedConfig.isTestWhileIdle());
+
+            } else {
+                RedisConfig redisConfig = ServiceReferenceHolder.getInstance()
+                        .getAPIManagerConfigurationService()
+                        .getAPIManagerConfiguration()
+                        .getRedisConfig();
+                if (redisConfig != null) {
+                    host = redisConfig.getHost();
+                    port = redisConfig.getPort();
+                    user = redisConfig.getUser();
+                    password = redisConfig.getPassword();
+                    connectionTimeout = redisConfig.getConnectionTimeout();
+                    sslEnabled = redisConfig.isSslEnabled();
+                    poolConfig.setMaxTotal(redisConfig.getMaxTotal());
+                    poolConfig.setMaxIdle(redisConfig.getMaxIdle());
+                    poolConfig.setMinIdle(redisConfig.getMinIdle());
+                    poolConfig.setBlockWhenExhausted(redisConfig.isBlockWhenExhausted());
+                    poolConfig.setTestOnBorrow(redisConfig.isTestOnBorrow());
+                    poolConfig.setTestOnReturn(redisConfig.isTestOnReturn());
+                    poolConfig.setTestWhileIdle(redisConfig.isTestWhileIdle());
+                }
+                else {
+                    // Set default values if config type is not recognized
+
+                    poolConfig.setMaxTotal(8);
+                    poolConfig.setMaxIdle(8);
+                    poolConfig.setMinIdle(0);
+                    poolConfig.setBlockWhenExhausted(true);
+                    poolConfig.setTestOnBorrow(false);
+                    poolConfig.setTestOnReturn(false);
+                    poolConfig.setTestWhileIdle(false);
+
+                    log.warn("Unknown config type provided to createPoolConfig. Using default JedisPoolConfig values.");
+                }
+
             }
-            else {
-                // Set default values if config type is not recognized
-
-                poolConfig.setMaxTotal(8);
-                poolConfig.setMaxIdle(8);
-                poolConfig.setMinIdle(0);
-                poolConfig.setBlockWhenExhausted(true);
-                poolConfig.setTestOnBorrow(false);
-                poolConfig.setTestOnReturn(false);
-                poolConfig.setTestWhileIdle(false);
-
-                log.warn("Unknown config type provided to createPoolConfig. Using default JedisPoolConfig values.");
-            }
-
+        } catch (Exception e) {
+            log.warn("Failed to load distributed throttle configuration from API Manager config. Using defaults.", e);
         }
-
     }
 
     private JedisPool getJedisPool() {
