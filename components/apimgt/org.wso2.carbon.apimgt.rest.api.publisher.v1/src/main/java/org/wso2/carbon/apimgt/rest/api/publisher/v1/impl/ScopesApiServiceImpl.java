@@ -64,17 +64,22 @@ public class ScopesApiServiceImpl implements ScopesApiService {
 
         boolean isScopeExist = false;
         String scopeName = new String(Base64.getUrlDecoder().decode(name));
-        if (!APIUtil.isAllowedScope(scopeName)) {
-            try {
-                APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-                String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                isScopeExist =
-                        apiProvider.isScopeKeyExist(scopeName, APIUtil.getTenantIdFromTenantDomain(tenantDomain));
-            } catch (APIManagementException e) {
-                RestApiUtil.handleInternalServerError("Error occurred while checking scope name", e, log);
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            if (!APIUtil.isAllowedScope(scopeName)) {
+                try {
+                    isScopeExist =
+                            apiProvider.isScopeKeyExist(scopeName, APIUtil.getTenantIdFromTenantDomain(tenantDomain));
+                } catch (APIManagementException e) {
+                    RestApiUtil.handleInternalServerError("Error occurred while checking scope name", e, log);
+                }
             }
+            // Check whether the scope is already registered in KeyManager even if it is allowed/not allowed scope.
+            isScopeExist = apiProvider.isScopeKeyExistInKeyManager(scopeName, tenantDomain);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error occurred while checking scope name", e, log);
         }
-
         if (isScopeExist) {
             return Response.status(Response.Status.OK).build();
         } else {
@@ -105,7 +110,8 @@ public class ScopesApiServiceImpl implements ScopesApiService {
                 throw new APIManagementException("Shared scope Display Name cannot be null or empty",
                         ExceptionCodes.SHARED_SCOPE_DISPLAY_NAME_NOT_SPECIFIED);
             }
-            if (apiProvider.isScopeKeyExist(scopeName, APIUtil.getTenantIdFromTenantDomain(tenantDomain))) {
+            if (apiProvider.isScopeKeyExist(scopeName, APIUtil.getTenantIdFromTenantDomain(tenantDomain)) ||
+                    apiProvider.isScopeKeyExistInKeyManager(scopeName, tenantDomain)) {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.SCOPE_ALREADY_REGISTERED,
                         scopeName));
             }
