@@ -52,7 +52,7 @@ public class Environment implements Serializable {
     private String displayName;
     private String description;
     private boolean isReadOnly;
-    private String  mode = GatewayMode.READ_WRITE.getMode();
+    private String mode = GatewayMode.WRITE_ONLY.getMode();
     private int apiDiscoveryScheduledWindow = 60;
     private List<VHost> vhosts = new ArrayList<>();
     private String provider;
@@ -83,6 +83,8 @@ public class Environment implements Serializable {
         this.vhosts = new ArrayList<>(environment.vhosts);
         this.provider = environment.provider;
         this.gatewayType = environment.gatewayType;
+        this.mode = environment.mode;
+        this.apiDiscoveryScheduledWindow = environment.apiDiscoveryScheduledWindow;
         this.additionalProperties = new HashMap<>(environment.additionalProperties);
         this.visibilityRoles = environment.visibilityRoles;
         this.visibility = environment.visibility;
@@ -341,11 +343,11 @@ public class Environment implements Serializable {
         return  31 * result + getName().hashCode();
     }
     public String getMode() {
-        return mode;
+        return StringUtils.defaultIfBlank(mode, GatewayMode.WRITE_ONLY.getMode());
     }
 
     public void setMode(String mode) {
-        this.mode = mode;
+        this.mode = StringUtils.defaultIfBlank(mode, GatewayMode.WRITE_ONLY.getMode());
     }
 
     public int getApiDiscoveryScheduledWindow() {

@@ -3293,12 +3293,6 @@ public class APIManagerConfiguration {
                 gatewayNotificationConfiguration.getGatewayCleanupConfiguration().setDataRetentionPeriodSeconds(
                         Integer.parseInt(retentionElem.getText()));
             }
-            org.apache.axiom.om.OMElement intervalElem = cleanupElem.getFirstChildWithName(
-                    new QName(APIConstants.GatewayNotification.CLEANUP_INTERVAL_SECONDS));
-            if (intervalElem != null) {
-                gatewayNotificationConfiguration.getGatewayCleanupConfiguration().setCleanupIntervalSeconds(
-                        Integer.parseInt(intervalElem.getText()));
-            }
         }
     }
 

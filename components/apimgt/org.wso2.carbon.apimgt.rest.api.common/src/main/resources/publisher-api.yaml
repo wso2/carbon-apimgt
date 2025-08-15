@@ -17214,6 +17214,16 @@ components:
             advertiseOnly:
               type: boolean
               example: true
+            gatewayVendor:
+              title: Field to identify gateway vendor
+              type: string
+              description: Vendor of the gateway where the API is deployed.
+              example: wso2
+            gatewayType:
+              title: Field to identify gateway type.
+              type: string
+              description: The type of the gateway.
+              example: wso2/synapse
             hasThumbnail:
               type: boolean
               example: true

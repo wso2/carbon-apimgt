@@ -288,6 +288,7 @@ public class APIMappingUtil {
         } else {
             dto.setGatewayVendor("wso2");
         }
+        dto.setInitiatedFromGateway(model.isInitiatedFromGateway());
 
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
@@ -458,6 +459,7 @@ public class APIMappingUtil {
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(false);
         dto.setAdvertiseInfo(advertiseInfoDTO);
+        dto.setInitiatedFromGateway(false);
         String apiTenant = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(model.getId()
                 .getProviderName()));
         String subscriptionAvailability = model.getSubscriptionAvailability();
@@ -550,6 +552,51 @@ public class APIMappingUtil {
         return endpointUrls;
     }
 
+    private static APIURLsDTO extractEndpointUrlsForDiscoveredApi(APIDTO apidto) {
+        try {
+            if (StringUtils.isBlank(apidto.getApiDefinition())) {
+                return null;
+            }
+            JsonElement configElement = JsonParser.parseString(apidto.getApiDefinition());
+            if (!configElement.isJsonObject()) {
+                return null;
+            }
+            JsonObject configObject = configElement.getAsJsonObject();
+            JsonArray servers = configObject.getAsJsonArray("servers");
+            if (servers == null || servers.size() == 0) {
+                return null;
+            }
+            JsonObject server = servers.get(0).getAsJsonObject();
+            if (server == null || !server.has("url")) {
+                return null;
+            }
+            String resolvedUrl = server.get("url").getAsString();
+            JsonObject variables = server.getAsJsonObject("variables");
+            if (variables != null && variables.has("basePath")) {
+                JsonObject basePath = variables.getAsJsonObject("basePath");
+                if (basePath != null && basePath.has("default")) {
+                    String stageName = basePath.get("default").getAsString();
+                    resolvedUrl = resolvedUrl
+                            .replace("/{basePath}", "/" + stageName)
+                            .replace("{basePath}", stageName);
+                }
+            }
+            if (StringUtils.isBlank(resolvedUrl)) {
+                return null;
+            }
+            APIURLsDTO urls = new APIURLsDTO();
+            if (StringUtils.startsWithIgnoreCase(resolvedUrl, APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
+                urls.setHttp(resolvedUrl);
+            } else {
+                urls.setHttps(resolvedUrl);
+            }
+            return urls;
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
+
     private static APIEndpointURLsDTO fromAPIRevisionToEndpoints(APIDTO apidto, Environment environment,
                                                                  String host, String customGatewayUrl,
                                                                  String tenantDomain) throws APIManagementException {
@@ -599,19 +646,34 @@ public class APIMappingUtil {
             GatewayDeployer gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain,
                     environment.getName());
             context = gatewayDeployer != null ? "" : context;
-
-            String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(apidto.getId(),
-                    environment.getUuid());
-            String httpUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(externalReference)
-                    : vHost.getHttpUrl();
-            String httpsUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(externalReference)
-                    : vHost.getHttpsUrl();
-
-            if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
-                apiurLsDTO.setHttp(httpUrl + context);
-            }
-            if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
-                apiurLsDTO.setHttps(httpsUrl + context);
+            if (apidto.isInitiatedFromGateway()) {
+                APIURLsDTO extractedURLs;
+                extractedURLs = extractEndpointUrlsForDiscoveredApi(apidto);
+                if (extractedURLs == null) {
+                    if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
+                        apiurLsDTO.setHttp(vHost.getHttpUrl() + context);
+                    }
+                    if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
+                        apiurLsDTO.setHttps(vHost.getHttpsUrl() + context);
+                    }
+                } else {
+                    apiurLsDTO = extractedURLs;
+                }
+            } else {
+                String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(apidto.getId(),
+                        environment.getUuid());
+                String httpUrl = gatewayDeployer != null ?
+                        gatewayDeployer.getAPIExecutionURL(externalReference) :
+                        vHost.getHttpUrl();
+                String httpsUrl = gatewayDeployer != null ?
+                        gatewayDeployer.getAPIExecutionURL(externalReference) :
+                        vHost.getHttpsUrl();
+                if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
+                    apiurLsDTO.setHttp(httpUrl + context);
+                }
+                if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
+                    apiurLsDTO.setHttps(httpsUrl + context);
+                }
             }
         }
         if (isWs || isGQLSubscription) {

@@ -22,10 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
-import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
-import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -171,6 +168,7 @@ public class SettingsMappingUtil {
             settingsFederatedGatewayConfigurationDTO.setType(gatewayConfiguration.getType());
             settingsFederatedGatewayConfigurationDTO.setDisplayName(gatewayConfiguration.getType());
             settingsFederatedGatewayConfigurationDTO.setDefaultHostnameTemplate(gatewayConfiguration.getDefaultHostnameTemplate());
+            settingsFederatedGatewayConfigurationDTO.setSupportedModes(getSupportedGatewayModes(gatewayConfiguration));
             List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
             if (connectionConfigurations != null) {
                 for (ConfigurationDto dto : connectionConfigurations) {
@@ -187,11 +185,41 @@ public class SettingsMappingUtil {
             SettingsGatewayConfigurationDTO gateway = new SettingsGatewayConfigurationDTO();
             gateway.setType(type);
             gateway.setDisplayName(type);
+            if (APIConstants.API_GATEWAY_TYPE_REGULAR.equals(type) || APIConstants.API_GATEWAY_TYPE_APK.equals(type)) {
+                List<String> supportedModes = new ArrayList<>();
+                supportedModes.add(GatewayMode.WRITE_ONLY.getMode());
+                if (APIConstants.API_GATEWAY_TYPE_APK.equals(type)) {
+                    supportedModes.add(GatewayMode.READ_ONLY.getMode());
+                }
+                gateway.setSupportedModes(supportedModes);
+            }
             if (list.stream().noneMatch(obj -> obj.getType().equals(type))) {
                 list.add(gateway);
             }
         }
         return list;
+    }
+
+    private static List<String> getSupportedGatewayModes(GatewayAgentConfiguration gatewayConfiguration) {
+        //Deriving the supported modes from the gateway connector
+        List<String> supportedModes = new ArrayList<>();
+        if (gatewayConfiguration.getGatewayDeployerImplementation() != null
+                && !gatewayConfiguration.getGatewayDeployerImplementation().trim().isEmpty()) {
+            supportedModes.add(GatewayMode.WRITE_ONLY.getMode());
+        }
+        if (gatewayConfiguration.getDiscoveryImplementation() != null
+                && !gatewayConfiguration.getDiscoveryImplementation().trim().isEmpty()) {
+            supportedModes.add(GatewayMode.READ_ONLY.getMode());
+        }
+        if (supportedModes.size() == 2) {
+            supportedModes.add(GatewayMode.READ_WRITE.getMode());
+        }
+        if (supportedModes.isEmpty()) {
+            log.warn(String.format(
+                    "No supported modes derived for gateway connector type '%s'.",
+                    gatewayConfiguration.getType()));
+        }
+        return supportedModes;
     }
 
     private static GatewayConfigurationDTO fromConfigurationToConfigurationDTO(ConfigurationDto configuration) {

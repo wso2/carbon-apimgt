@@ -5278,6 +5278,10 @@ components:
         isSubscriptionAvailable:
           type: boolean
           example: false
+        initiatedFromGateway:
+          type: boolean
+          description: Flag indicating this API was discovered/initiated via the gateway (federated discovery) rather than created in the Control Plane.
+          example: false
         categories:
           type: array
           description: |

@@ -80,6 +80,8 @@ public class SearchResultMappingUtil {
         apiResultDTO.setStatus(api.getStatus());
         apiResultDTO.setThumbnailUri(api.getThumbnailUrl());
         apiResultDTO.setAdvertiseOnly(api.isAdvertiseOnly());
+        apiResultDTO.setGatewayVendor(api.getGatewayVendor());
+        apiResultDTO.setGatewayType(api.getGatewayType());
         apiResultDTO.setHasThumbnail(!StringUtils.isBlank(api.getThumbnailUrl()));
         apiResultDTO.setBusinessOwner(api.getBusinessOwner());
         apiResultDTO.setBusinessOwnerEmail(api.getBusinessOwnerEmail());

@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.LLMProviderManager;
 import org.wso2.carbon.apimgt.gateway.TenancyLoader;
+import org.wso2.carbon.apimgt.gateway.notifiers.DeploymentStatusNotifier;
 import org.wso2.carbon.apimgt.gateway.notifiers.GatewayNotifier;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -101,6 +102,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             + "tenants" + File.separator;
     private String synapseDeploymentPath = "synapse-configs" + File.separator + "default";
     private GatewayNotifier gatewayNotifier;
+    private DeploymentStatusNotifier deploymentStatusNotifier;
 
     public GatewayStartupListener() {
 
@@ -108,6 +110,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
                         .getGatewayArtifactSynchronizerProperties();
         gatewayNotifier = GatewayNotifier.getInstance();
+        deploymentStatusNotifier = DeploymentStatusNotifier.getInstance();
         throttleProperties = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getThrottleProperties();
         ThrottleProperties.JMSConnectionProperties jmsConnectionProperties =
                 throttleProperties.getJmsConnectionProperties();
@@ -392,6 +395,10 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         if (gatewayNotifier != null) {
             gatewayNotifier.stopHeartbeat();
         }
+        if (deploymentStatusNotifier != null) {
+            deploymentStatusNotifier.shutdown();
+        }
+
     }
 
     public void deployAPIsInAsyncMode(String tenantDomain) {

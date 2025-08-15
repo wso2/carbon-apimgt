@@ -215,9 +215,8 @@ public class GatewayNotificationConfiguration {
 
     public static class GatewayCleanupConfiguration {
 
-        private int expireTimeSeconds = 30;
+        private int expireTimeSeconds = 120;
         private int dataRetentionPeriodSeconds = 2629800;
-        private int cleanupIntervalSeconds = 60;
 
         public int getExpireTimeSeconds() {
             return expireTimeSeconds;
@@ -233,14 +232,6 @@ public class GatewayNotificationConfiguration {
 
         public void setDataRetentionPeriodSeconds(int dataRetentionPeriodSeconds) {
             this.dataRetentionPeriodSeconds = dataRetentionPeriodSeconds;
-        }
-
-        public int getCleanupIntervalSeconds() {
-            return cleanupIntervalSeconds;
-        }
-
-        public void setCleanupIntervalSeconds(int cleanupIntervalSeconds) {
-            this.cleanupIntervalSeconds = cleanupIntervalSeconds;
         }
     }
 
