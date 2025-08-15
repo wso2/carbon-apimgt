@@ -758,13 +758,15 @@ public class APIMappingUtil {
         }
 
         // Set Mandatory CORS Headers for MCP servers if they are not already present
-        List<String> updatedAllowHeaders = new ArrayList<>(corsConfiguration.getAccessControlAllowHeaders());
-        if (!updatedAllowHeaders.contains("mcp-protocol-version")) {
-            updatedAllowHeaders.add("mcp-protocol-version");
+        List<String> existingAllowHeaders = corsConfiguration.getAccessControlAllowHeaders();
+        List<String> updatedAllowHeaders = new ArrayList<>(
+                existingAllowHeaders != null ? existingAllowHeaders : Collections.emptyList());
+        if (updatedAllowHeaders.stream().noneMatch(APIConstants.MCP.MCP_PROTOCOL_VERSION_HEADER::equalsIgnoreCase)) {
+            updatedAllowHeaders.add(APIConstants.MCP.MCP_PROTOCOL_VERSION_HEADER);
         }
 
-        if (!updatedAllowHeaders.contains("mcp-session-id")) {
-            updatedAllowHeaders.add("mcp-session-id");
+        if (updatedAllowHeaders.stream().noneMatch(APIConstants.MCP.HEADER_MCP_SESSION_ID::equalsIgnoreCase)) {
+            updatedAllowHeaders.add(APIConstants.MCP.HEADER_MCP_SESSION_ID);
         }
         corsConfiguration.setAccessControlAllowHeaders(updatedAllowHeaders);
 
