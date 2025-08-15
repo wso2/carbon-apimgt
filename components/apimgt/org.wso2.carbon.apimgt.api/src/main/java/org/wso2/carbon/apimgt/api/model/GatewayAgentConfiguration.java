@@ -76,4 +76,10 @@ public interface GatewayAgentConfiguration {
      * @return String default hostname template
      */
     String getDefaultHostnameTemplate();
+
+    /**
+     * This method returns the supported gateway modes for a given gateway type
+     * @return List of supported gateway modes
+     */
+    List<String> getSupportedModes();
 }

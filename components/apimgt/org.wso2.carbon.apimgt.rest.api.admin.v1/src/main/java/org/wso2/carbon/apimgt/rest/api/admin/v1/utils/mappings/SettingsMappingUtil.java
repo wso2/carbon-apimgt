@@ -168,7 +168,14 @@ public class SettingsMappingUtil {
             settingsFederatedGatewayConfigurationDTO.setType(gatewayConfiguration.getType());
             settingsFederatedGatewayConfigurationDTO.setDisplayName(gatewayConfiguration.getType());
             settingsFederatedGatewayConfigurationDTO.setDefaultHostnameTemplate(gatewayConfiguration.getDefaultHostnameTemplate());
-            settingsFederatedGatewayConfigurationDTO.setSupportedModes(getSupportedGatewayModes(gatewayConfiguration));
+            List<String> supportedModes = gatewayConfiguration.getSupportedModes();
+            if (supportedModes.isEmpty()) {
+                log.warn(String.format(
+                        "No supported modes derived for gateway type '%s'. Defaulting to '%s'",
+                        gatewayConfiguration.getType(), GatewayMode.WRITE_ONLY.getMode()));
+                supportedModes.add(GatewayMode.WRITE_ONLY.getMode());
+            }
+            settingsFederatedGatewayConfigurationDTO.setSupportedModes(gatewayConfiguration.getSupportedModes());
             List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
             if (connectionConfigurations != null) {
                 for (ConfigurationDto dto : connectionConfigurations) {
@@ -198,28 +205,6 @@ public class SettingsMappingUtil {
             }
         }
         return list;
-    }
-
-    private static List<String> getSupportedGatewayModes(GatewayAgentConfiguration gatewayConfiguration) {
-        //Deriving the supported modes from the gateway connector
-        List<String> supportedModes = new ArrayList<>();
-        if (gatewayConfiguration.getGatewayDeployerImplementation() != null
-                && !gatewayConfiguration.getGatewayDeployerImplementation().trim().isEmpty()) {
-            supportedModes.add(GatewayMode.WRITE_ONLY.getMode());
-        }
-        if (gatewayConfiguration.getDiscoveryImplementation() != null
-                && !gatewayConfiguration.getDiscoveryImplementation().trim().isEmpty()) {
-            supportedModes.add(GatewayMode.READ_ONLY.getMode());
-        }
-        if (supportedModes.size() == 2) {
-            supportedModes.add(GatewayMode.READ_WRITE.getMode());
-        }
-        if (supportedModes.isEmpty()) {
-            log.warn(String.format(
-                    "No supported modes derived for gateway connector type '%s'.",
-                    gatewayConfiguration.getType()));
-        }
-        return supportedModes;
     }
 
     private static GatewayConfigurationDTO fromConfigurationToConfigurationDTO(ConfigurationDto configuration) {
