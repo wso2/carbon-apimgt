@@ -3778,11 +3778,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 }
                 String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(),
                         environment.getUuid());
-                String httpUrl = isExternalGateway ?
-                        gatewayDeployer.getAPIExecutionURL(externalReference) :
+                String httpUrl = isExternalGateway && gatewayDeployer != null ?
+                        gatewayDeployer.getAPIExecutionURL(externalReference, GatewayDeployer.HttpScheme.HTTP) :
                         vhost.getHttpUrl();
-                String httpsUrl = isExternalGateway ?
-                        gatewayDeployer.getAPIExecutionURL(externalReference) :
+                String httpsUrl = isExternalGateway && gatewayDeployer != null?
+                        gatewayDeployer.getAPIExecutionURL(externalReference, GatewayDeployer.HttpScheme.HTTPS) :
                         vhost.getHttpsUrl();
                 if (StringUtils.containsIgnoreCase(api.getTransports(),
                         APIConstants.HTTP_PROTOCOL) && vhost.getHttpPort() != -1) {
