@@ -22,8 +22,6 @@ package org.wso2.carbon.apimgt.api.gateway;
 
 import org.wso2.carbon.apimgt.api.model.VHost;
 
-import org.wso2.carbon.apimgt.api.model.VHost;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
