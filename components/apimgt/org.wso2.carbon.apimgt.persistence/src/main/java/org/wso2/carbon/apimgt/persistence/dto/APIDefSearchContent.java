@@ -27,6 +27,7 @@ public class APIDefSearchContent implements SearchContent {
     String type = "DEFINITION";
     String name; // Definition file name
     String apiName;
+    String apiDisplayName;
     String apiContext;
     String apiVersion;
     String apiProvider;
@@ -69,6 +70,14 @@ public class APIDefSearchContent implements SearchContent {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getApiDisplayName() {
+        return apiDisplayName;
+    }
+
+    public void setApiDisplayName(String apiDisplayName) {
+        this.apiDisplayName = apiDisplayName;
     }
 
     public String getApiName() {

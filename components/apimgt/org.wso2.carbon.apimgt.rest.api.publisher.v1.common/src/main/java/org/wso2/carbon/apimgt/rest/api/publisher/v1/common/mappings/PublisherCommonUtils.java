@@ -909,6 +909,7 @@ public class PublisherCommonUtils {
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
         apiToUpdate.setGatewayType(apiDtoToUpdate.getGatewayType());
+        apiToUpdate.setDisplayName(apiDtoToUpdate.getDisplayName());
 
         //validate API categories
         List<APICategory> apiCategories = apiToUpdate.getApiCategories();
@@ -1107,6 +1108,7 @@ public class PublisherCommonUtils {
         SwaggerData swaggerData = new SwaggerData(apiToUpdate);
         String definitionToAdd = new OAS3Parser().generateAPIDefinition(swaggerData);
         apiToUpdate.setSwaggerDefinition(definitionToAdd);
+        apiToUpdate.setDisplayName(apiDtoToUpdate.getDisplayName());
 
         apiToUpdate.setOrganization(originalAPI.getOrganization());
         apiToUpdate.setSubtype(originalAPI.getSubtype());

@@ -99,6 +99,7 @@ public class APIMappingUtil {
         String providerName = model.getId().getProviderName();
         dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         dto.setId(model.getUUID());
+        dto.setDisplayName(model.getDisplayName());
         dto.setContext(model.getContext());
         dto.setDescription(model.getDescription());
         dto.setIsDefaultVersion(model.isPublishedDefaultVersion());
@@ -305,6 +306,7 @@ public class APIMappingUtil {
         String providerName = model.getId().getProviderName();
         dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         dto.setId(model.getUuid());
+        dto.setDisplayName(model.getDisplayName());
         dto.setContext(model.getContext());
         dto.setIsDefaultVersion(model.isPublishedDefaultVersion());
         dto.setDescription(model.getDescription());
@@ -937,6 +939,7 @@ public class APIMappingUtil {
                 subscriptionAllowedTenants));
         apiInfoDTO.setGatewayVendor(apiProduct.getGatewayVendor());
         apiInfoDTO.setEgress(apiProduct.isEgress() == 1);
+        apiInfoDTO.setDisplayName(apiProduct.getDisplayName());
 
         return apiInfoDTO;
     }
@@ -1006,6 +1009,7 @@ public class APIMappingUtil {
         apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         apiInfoDTO.setMonetizedInfo(api.isMonetizationEnabled());
         apiInfoDTO.setEgress(api.isEgress() == 1);
+        apiInfoDTO.setDisplayName(api.getDisplayName());
 
         return apiInfoDTO;
     }

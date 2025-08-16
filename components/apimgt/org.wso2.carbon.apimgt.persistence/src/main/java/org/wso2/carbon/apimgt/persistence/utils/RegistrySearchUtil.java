@@ -81,6 +81,8 @@ public class RegistrySearchUtil {
     public static final String SOAP_DEFINITION_WSDL_FILE_MEDIA_TYPE = "application/octet-stream";
 
     public static final String API_OVERVIEW_STATUS = "overview_status";
+    private static final String DISPLAY_NAME_SEARCH_TYPE_PREFIX = "display-name";
+    private static final String API_DISPLAY_NAME_SEARCH_PREFIX = "displayName";
     public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "api_meta.";
     public static final String API_RELATED_CUSTOM_PROPERTIES_DISPLAY_DEV = "__display";
     public static final String LABEL_SEARCH_TYPE_PREFIX = "label";
@@ -106,8 +108,9 @@ public class RegistrySearchUtil {
             CONTEXT_SEARCH_TYPE_PREFIX, CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX.toLowerCase(), VERSION_SEARCH_TYPE_PREFIX,
             LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(), API_STATUS.toLowerCase(),
             CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX, CATEGORY_SEARCH_TYPE_PREFIX,
-            ENABLE_STORE.toLowerCase(), VENDOR_SEARCH_TYPE_PREFIX, ADVERTISE_ONLY_SEARCH_TYPE_PREFIX.toLowerCase(),
-            "sort", "group", "group.sort", "group.field", "group.ngroups", "group.format" };
+            ENABLE_STORE.toLowerCase(), VENDOR_SEARCH_TYPE_PREFIX, DISPLAY_NAME_SEARCH_TYPE_PREFIX,
+            ADVERTISE_ONLY_SEARCH_TYPE_PREFIX.toLowerCase(), "sort", "group", "group.sort", "group.field",
+            "group.ngroups", "group.format" };
     
 
     private static final Log log = LogFactory.getLog(RegistryPersistenceImpl.class);
@@ -461,8 +464,9 @@ public class RegistrySearchUtil {
                         searchKeys[0] = ADVERTISE_ONLY_ADVERTISED_PROPERTY;
                     } else if (VENDOR_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKeys[0])) {
                         searchKeys[0] = GATEWAY_VENDOR_SEARCH_PREFIX;
+                    } else if (DISPLAY_NAME_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKeys[0])) {
+                        searchKeys[0] = API_DISPLAY_NAME_SEARCH_PREFIX;
                     }
-
                     if (filteredQuery.length() == 0) {
                         filteredQuery.append(searchKeys[0]).append("=").append(searchKeys[1]);
                     } else {

@@ -69,6 +69,7 @@ public class SearchResultMappingUtil {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
         apiResultDTO.setContext(context);
+        apiResultDTO.setDisplayName(api.getDisplayName());
         apiResultDTO.setContextTemplate(api.getContextTemplate());
         if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
             apiResultDTO.setType(SearchResultDTO.TypeEnum.MCP);
@@ -110,6 +111,7 @@ public class SearchResultMappingUtil {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
         apiProductResultDTO.setContext(context);
+        apiProductResultDTO.setDisplayName(apiProduct.getDisplayName());
         apiProductResultDTO.setType(SearchResultDTO.TypeEnum.APIPRODUCT);
         apiProductResultDTO.setDescription(apiProduct.getDescription());
         apiProductResultDTO.setStatus(apiProduct.getState());
@@ -144,6 +146,7 @@ public class SearchResultMappingUtil {
         docResultDTO.setOtherTypeName(document.getOtherTypeName());
         APIIdentifier apiId = api.getId();
         docResultDTO.setApiName(apiId.getApiName());
+        docResultDTO.setApiDisplayName(api.getDisplayName());
         docResultDTO.setApiVersion(apiId.getVersion());
         docResultDTO.setApiProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         docResultDTO.setApiUUID(api.getUUID());
@@ -165,6 +168,7 @@ public class SearchResultMappingUtil {
         docResultDTO.setOtherTypeName(document.getOtherTypeName());
         APIProductIdentifier apiId = apiProduct.getId();
         docResultDTO.setApiName(apiId.getName());
+        docResultDTO.setApiDisplayName(apiProduct.getDisplayName());
         docResultDTO.setApiVersion(apiId.getVersion());
         docResultDTO.setApiProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         docResultDTO.setApiUUID(apiProduct.getUuid());
@@ -257,6 +261,7 @@ public class SearchResultMappingUtil {
         apiDefSearchResultDTO.setType(SearchResultDTO.TypeEnum.DEFINITION);
         apiDefSearchResultDTO.setApiUUID(apiDefResult.getApiUuid());
         apiDefSearchResultDTO.setApiName(apiDefResult.getApiName());
+        apiDefSearchResultDTO.setApiDisplayName(apiDefResult.getApiDisplayName());
         apiDefSearchResultDTO.setApiContext(apiDefResult.getApiContext());
         apiDefSearchResultDTO.setApiVersion(apiDefResult.getApiVersion());
         apiDefSearchResultDTO.setApiProvider(apiDefResult.getApiProvider());

@@ -16523,6 +16523,7 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(15,
                     APIUtil.setSubscriptionValidationStatusBeforeInsert(apiProduct.getAvailableTiers()));
             prepStmtAddAPIProduct.setInt(16, apiProduct.isEgress());
+            prepStmtAddAPIProduct.setString(17, apiProduct.getDisplayName());
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
@@ -16946,10 +16947,11 @@ public class ApiMgtDAO {
             ps.setString(4, product.getGatewayVendor());
             ps.setString(5,
                     APIUtil.setSubscriptionValidationStatusBeforeInsert(product.getAvailableTiers()));
+            ps.setString(6, product.getDisplayName());
             APIProductIdentifier identifier = product.getId();
-            ps.setString(6, identifier.getName());
-            ps.setString(7, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            ps.setString(8, identifier.getVersion());
+            ps.setString(7, identifier.getName());
+            ps.setString(8, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            ps.setString(9, identifier.getVersion());
             ps.executeUpdate();
 
             int productId = getAPIID(product.getUuid(), conn);

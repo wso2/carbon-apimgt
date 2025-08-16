@@ -1129,6 +1129,7 @@ public class APIMappingUtil {
         apiInfoDTO.setEgress(api.isEgress() == 1); // true -1, false - 0
         apiInfoDTO.setSubtype(api.getSubtype());
         apiInfoDTO.setInitiatedFromGateway(api.isInitiatedFromGateway());
+        apiInfoDTO.setDisplayName(api.getDisplayName());
         return apiInfoDTO;
     }
 
@@ -2139,6 +2140,7 @@ public class APIMappingUtil {
         }
         MCPServerDTO dto = new MCPServerDTO();
         dto.setName(model.getId().getApiName());
+        dto.setDisplayName(model.getDisplayName() != null ? model.getDisplayName() : model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
         String providerName = model.getId().getProviderName();
         dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
@@ -3859,6 +3861,7 @@ public class APIMappingUtil {
             productDto.setTechnicalOwner(apiProduct.getTechnicalOwner());
             productDto.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
             productDto.setMonetizedInfo(apiProduct.isMonetizationEnabled());
+            productDto.setDisplayName(apiProduct.getDisplayName());
             productDto.setEgress(apiProduct.isEgress() == 1);
 
             list.add(productDto);
@@ -3897,6 +3900,8 @@ public class APIMappingUtil {
         APIProductDTO productDto = new APIProductDTO();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         productDto.setName(product.getId().getName());
+        productDto.setDisplayName(
+                product.getDisplayName() != null ? product.getDisplayName() : product.getId().getName());
         productDto.setProvider(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
         productDto.setId(product.getUuid());
         productDto.setVersion(product.getId().getVersion());
@@ -4162,6 +4167,7 @@ public class APIMappingUtil {
         product.setID(id);
         product.setUuid(dto.getId());
         product.setDescription(dto.getDescription());
+        product.setDisplayName(dto.getDisplayName());
 
         String context = dto.getContext();
         final String originalContext = context;

@@ -33,7 +33,13 @@ import java.util.Comparator;
 public class APINameComparator implements Comparator<API>, Serializable {
 
     public int compare(API api1, API api2) {
-        if (api1.getId().getApiName().equalsIgnoreCase(api2.getId().getApiName())) {
+        String displayNameAPI1 = (api1.getDisplayName() != null && !api1.getDisplayName().trim().isEmpty())
+                ? api1.getDisplayName()
+                : api1.getId().getApiName();
+        String displayNameAPI2 = (api2.getDisplayName() != null && !api2.getDisplayName().trim().isEmpty())
+                ? api2.getDisplayName()
+                : api2.getId().getApiName();
+        if (displayNameAPI1.equalsIgnoreCase(displayNameAPI2)) {
             if (api1.getId().getVersion().equals(api2.getId().getVersion())) {
                 //only compare provider name
                 return api1.getId().getProviderName().compareToIgnoreCase(api2.getId().getProviderName());
@@ -43,7 +49,7 @@ public class APINameComparator implements Comparator<API>, Serializable {
             }
         } else {
             //only compare API name
-            return api1.getId().getApiName().compareToIgnoreCase(api2.getId().getApiName());
+            return displayNameAPI1.compareToIgnoreCase(displayNameAPI2);
         }
     }
 }

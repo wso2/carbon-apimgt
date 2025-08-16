@@ -2879,7 +2879,8 @@ public class SQLConstants {
             "   UPDATED_BY=?," +
             "   UPDATED_TIME=?," +
             "   GATEWAY_VENDOR=?," +
-            "   SUB_VALIDATION=?" +
+            "   SUB_VALIDATION=?," +
+            "   API_DISPLAY_NAME=?" +
             " WHERE" +
             "   API_NAME=? AND API_PROVIDER=? AND API_VERSION=?";
 
@@ -2898,7 +2899,7 @@ public class SQLConstants {
 
     public static final String ADD_API_PRODUCT = "INSERT INTO " + "AM_API(API_PROVIDER, API_NAME, API_VERSION, " +
             "CONTEXT, CONTEXT_TEMPLATE, API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID, STATUS, " +
-            "ORGANIZATION, GATEWAY_VENDOR, VERSION_COMPARABLE, SUB_VALIDATION, IS_EGRESS) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            "ORGANIZATION, GATEWAY_VENDOR, VERSION_COMPARABLE, SUB_VALIDATION, IS_EGRESS, API_DISPLAY_NAME) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_RESOURCES_OF_PRODUCT =
             "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, " +

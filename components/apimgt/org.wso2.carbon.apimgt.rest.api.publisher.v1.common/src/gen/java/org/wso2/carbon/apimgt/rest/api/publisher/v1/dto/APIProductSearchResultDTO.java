@@ -22,6 +22,7 @@ import javax.validation.Valid;
 
 public class APIProductSearchResultDTO extends SearchResultDTO  {
   
+    private String displayName = null;
     private String description = null;
     private String context = null;
     private String version = null;
@@ -35,6 +36,24 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
     private String technicalOwner = null;
     private String technicalOwnerEmail = null;
     private Boolean egress = null;
+
+  /**
+   * Human-friendly name shown in UI. Length limited to DB column size.
+   **/
+  public APIProductSearchResultDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Pizza Shack API", value = "Human-friendly name shown in UI. Length limited to DB column size.")
+  @JsonProperty("displayName")
+ @Size(min=1)  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
 
   /**
    * A brief description about the API
@@ -273,7 +292,8 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
       return false;
     }
     APIProductSearchResultDTO apIProductSearchResult = (APIProductSearchResultDTO) o;
-    return Objects.equals(description, apIProductSearchResult.description) &&
+    return Objects.equals(displayName, apIProductSearchResult.displayName) &&
+        Objects.equals(description, apIProductSearchResult.description) &&
         Objects.equals(context, apIProductSearchResult.context) &&
         Objects.equals(version, apIProductSearchResult.version) &&
         Objects.equals(provider, apIProductSearchResult.provider) &&
@@ -290,7 +310,7 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, version, provider, status, thumbnailUri, hasThumbnail, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, egress);
+    return Objects.hash(displayName, description, context, version, provider, status, thumbnailUri, hasThumbnail, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, egress);
   }
 
   @Override
@@ -298,6 +318,7 @@ public class APIProductSearchResultDTO extends SearchResultDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIProductSearchResultDTO {\n");
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");

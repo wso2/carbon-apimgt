@@ -29,6 +29,7 @@ public final class APIConstants {
 
     // Those constance are used in API artifact.
     public static final String API_OVERVIEW_NAME = "overview_name";
+    public static final String API_OVERVIEW_DISPLAY_NAME = "overview_displayName";
     public static final String API_OVERVIEW_TYPE = "overview_type";
     public static final String API_OVERVIEW_VERSION = "overview_version";
     public static final String API_OVERVIEW_VERSION_TYPE = "overview_versionType";

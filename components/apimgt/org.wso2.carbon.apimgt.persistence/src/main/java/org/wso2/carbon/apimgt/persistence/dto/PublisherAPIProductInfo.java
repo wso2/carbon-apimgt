@@ -28,6 +28,7 @@ import java.util.Set;
 public class PublisherAPIProductInfo {
     private String id;
     private String apiProductName;
+    private String displayName;
     private String version;
     private String providerName;
     private String context;
@@ -95,6 +96,12 @@ public class PublisherAPIProductInfo {
     }
     public void setState(String state) {
         this.state = state;
+    }
+    public String getDisplayName() {
+        return displayName;
+    }
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
     public String getApiSecurity() {
         return apiSecurity;

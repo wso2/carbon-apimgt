@@ -35,6 +35,7 @@ public class APIProduct implements Serializable {
     // TODO add rest of the properties
     private APIProductIdentifier id;
     private String uuid;
+    private String displayName;
     private String type;
     private int productId;
     private String context;
@@ -183,6 +184,12 @@ public class APIProduct implements Serializable {
     }
     public void setSubscriptionAvailability(String subscriptionAvailability) {
         this.subscriptionAvailability = subscriptionAvailability;
+    }
+    public String getDisplayName() {
+        return displayName;
+    }
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
     public String getState() {
         return state;

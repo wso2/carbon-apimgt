@@ -31,6 +31,7 @@ public class DocumentSearchContent implements SearchContent {
     String otherTypeName;
     DocumentVisibility visibility;
     String apiName;
+    String apiDisplayName;
     String apiVersion;
     String apiProvider;
     String apiUUID;
@@ -52,6 +53,14 @@ public class DocumentSearchContent implements SearchContent {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getApiDisplayName() {
+        return apiDisplayName;
+    }
+
+    public void setApiDisplayName(String apiDisplayName) {
+        this.apiDisplayName = apiDisplayName;
     }
 
     public String getTransportType() {
