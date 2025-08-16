@@ -887,6 +887,7 @@ public final class APIUtil {
             api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
             api.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+            api.setDisplayName(artifact.getAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME));
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             try {
@@ -10297,6 +10298,7 @@ public final class APIUtil {
                     artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE)));
             api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
+            api.setDisplayName(APIConstants.API_OVERVIEW_DISPLAY_NAME);
 
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
 

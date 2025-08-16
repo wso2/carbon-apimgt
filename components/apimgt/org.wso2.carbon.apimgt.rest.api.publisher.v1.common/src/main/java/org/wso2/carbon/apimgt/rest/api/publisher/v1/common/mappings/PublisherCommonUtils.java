@@ -1108,6 +1108,7 @@ public class PublisherCommonUtils {
         SwaggerData swaggerData = new SwaggerData(apiToUpdate);
         String definitionToAdd = new OAS3Parser().generateAPIDefinition(swaggerData);
         apiToUpdate.setSwaggerDefinition(definitionToAdd);
+        apiToUpdate.setDisplayName(apiDtoToUpdate.getDisplayName());
 
         apiToUpdate.setOrganization(originalAPI.getOrganization());
         apiToUpdate.setSubtype(originalAPI.getSubtype());
