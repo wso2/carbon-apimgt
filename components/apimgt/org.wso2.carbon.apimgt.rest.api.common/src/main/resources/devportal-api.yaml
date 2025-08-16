@@ -4956,6 +4956,13 @@ components:
         name:
           type: string
           example: CalculatorAPI
+        displayName:
+          type: string
+          example: Calculator API
+          description: |
+            Display name of the API.
+            This is the name that will be displayed in the Publisher and DevPortal.
+            If not provided, the name will be used as the display name.
         description:
           type: string
           example: A calculator API that supports basic operations
@@ -5067,6 +5074,11 @@ components:
           type: string
           description: Name of the API
           example: CalculatorAPI
+        displayName:
+          description: Human-friendly name shown in UI. Length limited to DB column size.
+          minLength: 1
+          type: string
+          example: Pizza Shack API
         description:
           type: string
           description: A brief description about the API

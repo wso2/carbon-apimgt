@@ -5438,6 +5438,13 @@ components:
           type: string
           description: The name of the API.
           example: PizzaShackAPI
+        displayName:
+          type: string
+          example: PizzaShack API
+          description: |
+            Display name of the API.
+            This is the name that will be displayed in the Publisher and DevPortal.
+            If not provided, the name will be used as the display name.
         version:
           type: string
           description: The version of the API

@@ -30,6 +30,7 @@ import java.util.Set;
 public class PublisherAPIInfo {
     private String id;
     private String apiName;
+    private String displayName;
     private String version;
     private String providerName;
     private String context;
@@ -153,6 +154,14 @@ public class PublisherAPIInfo {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getGatewayVendor() {

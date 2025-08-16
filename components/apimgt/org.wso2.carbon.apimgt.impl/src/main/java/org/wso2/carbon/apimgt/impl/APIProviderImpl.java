@@ -6094,6 +6094,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.setStatus(apiInfo.getStatus());
         api.setSubtype(apiInfo.getApiSubtype());
         api.setInitiatedFromGateway(apiInfo.isInitiatedFromGateway());
+        api.setDisplayName(apiInfo.getDisplayName());
     }
 
     private void populateApiInfo(APIProduct apiProduct) throws APIManagementException {
@@ -6106,6 +6107,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiProduct.setEgress(apiInfo.isEgress());
             apiProduct.setState(apiInfo.getStatus());
         }
+        apiProduct.setDisplayName(apiInfo.getDisplayName());
     }
 
     public APIProduct getAPIProductbyUUID(String uuid, String organization) throws APIManagementException {

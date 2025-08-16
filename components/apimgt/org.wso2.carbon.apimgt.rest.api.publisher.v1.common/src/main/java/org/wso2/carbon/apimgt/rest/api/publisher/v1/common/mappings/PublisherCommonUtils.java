@@ -909,6 +909,7 @@ public class PublisherCommonUtils {
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
         apiToUpdate.setGatewayType(apiDtoToUpdate.getGatewayType());
+        apiToUpdate.setDisplayName(apiDtoToUpdate.getDisplayName());
 
         //validate API categories
         List<APICategory> apiCategories = apiToUpdate.getApiCategories();

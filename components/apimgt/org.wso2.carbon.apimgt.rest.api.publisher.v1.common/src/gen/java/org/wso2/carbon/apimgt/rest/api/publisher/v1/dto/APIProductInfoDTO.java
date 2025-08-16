@@ -24,6 +24,7 @@ public class APIProductInfoDTO   {
   
     private String id = null;
     private String name = null;
+    private String displayName = null;
     private String context = null;
     private String description = null;
     private String provider = null;
@@ -74,6 +75,24 @@ public class APIProductInfoDTO   {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   * Display name of the API Product. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. 
+   **/
+  public APIProductInfoDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Calculator Product API", value = "Display name of the API Product. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. ")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
@@ -349,6 +368,7 @@ public class APIProductInfoDTO   {
     APIProductInfoDTO apIProductInfo = (APIProductInfoDTO) o;
     return Objects.equals(id, apIProductInfo.id) &&
         Objects.equals(name, apIProductInfo.name) &&
+        Objects.equals(displayName, apIProductInfo.displayName) &&
         Objects.equals(context, apIProductInfo.context) &&
         Objects.equals(description, apIProductInfo.description) &&
         Objects.equals(provider, apIProductInfo.provider) &&
@@ -368,7 +388,7 @@ public class APIProductInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, version, hasThumbnail, state, securityScheme, gatewayVendor, audiences, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, egress);
+    return Objects.hash(id, name, displayName, context, description, provider, version, hasThumbnail, state, securityScheme, gatewayVendor, audiences, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, egress);
   }
 
   @Override
@@ -378,6 +398,7 @@ public class APIProductInfoDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
