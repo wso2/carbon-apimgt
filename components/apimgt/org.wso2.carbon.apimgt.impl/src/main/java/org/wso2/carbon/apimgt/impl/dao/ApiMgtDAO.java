@@ -179,6 +179,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -187,6 +188,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs;
+
+import static org.wso2.carbon.apimgt.impl.APIConstants.SUPER_TENANT_DOMAIN;
+import static org.wso2.carbon.apimgt.impl.APIConstants.WSO2_GATEWAY_ENVIRONMENT;
 
 /**
  * This class represent the ApiMgtDAO.
@@ -2602,7 +2606,7 @@ public class ApiMgtDAO {
      * @param providerName Name of the provider
      * @return UserApplicationAPIUsage of given provider
      * @throws APIManagementException if failed to get
-     *                                                           UserApplicationAPIUsage for given provider
+     *                                UserApplicationAPIUsage for given provider
      */
     public UserApplicationAPIUsage[] getAllAPIUsageByProvider(String providerName) throws APIManagementException {
 
@@ -2660,7 +2664,7 @@ public class ApiMgtDAO {
      * @param organization Organization of the API
      * @return UserApplicationAPIUsage of given provider
      * @throws APIManagementException if failed to get
-     *                                                           UserApplicationAPIUsage for given provider
+     *                                UserApplicationAPIUsage for given provider
      */
     public UserApplicationAPIUsage[] getAllAPIUsageByProviderAndApiId(String uuid, String organization)
             throws APIManagementException {
@@ -2719,7 +2723,7 @@ public class ApiMgtDAO {
      * @param providerName Name of the provider
      * @return UserApplicationAPIUsage of given provider
      * @throws APIManagementException if failed to get
-     *                                                           UserApplicationAPIUsage for given provider
+     *                                UserApplicationAPIUsage for given provider
      */
     public UserApplicationAPIUsage[] getAllAPIProductUsageByProvider(String providerName)
             throws APIManagementException {
@@ -5458,7 +5462,7 @@ public class ApiMgtDAO {
                         log.error(String.format("Subscription already exists for API/API Prouct %s in Application %s"
                                 , apiTypeWrapper.getName(), application.getName()));
                         throw new SubscriptionAlreadyExistingException(String.format("Subscription already exists for" +
-                                " API/API Prouct %s in Application %s", apiTypeWrapper.getName(),
+                                        " API/API Prouct %s in Application %s", apiTypeWrapper.getName(),
                                 application.getName()));
 
                     } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus) && APIConstants
@@ -5614,7 +5618,6 @@ public class ApiMgtDAO {
              PreparedStatement ps = connection
                      .prepareStatement(SQLConstants.GET_CONTEXT_TEMPLATE_COUNT_SQL_MATCHES_ORGANIZATION)) {
             boolean initialAutoCommit = connection.getAutoCommit();
-            connection.setAutoCommit(false);
             ps.setString(1, contextTemplate.toLowerCase());
             ps.setString(2, organization);
             try (ResultSet resultSet = ps.executeQuery()) {
@@ -5622,7 +5625,44 @@ public class ApiMgtDAO {
                     int count = resultSet.getInt("CTX_COUNT");
                     return count > 0;
                 }
-                connection.commit();
+            } catch (SQLException e) {
+                APIMgtDBUtil.rollbackConnection(connection,
+                        "Failed to rollback in getting count matches context and organization", e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to count contexts which match " + contextTemplate + " for the organization : "
+                    + organization, e);
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether a given API Context template already exists for the organization and gateway vendor.
+     *
+     * @param contextTemplate API context template to check
+     * @param gatewayVendor   Gateway vendor type
+     * @param organization    Identifier of the organization
+     * @return true if context template exists for the organization and gateway vendor, false otherwise
+     * @throws APIManagementException if failed to check context template existence
+     */
+    public boolean isDuplicateContextTemplateMatchesOrganizationAndGatewayVendor(String contextTemplate,
+                                                                                 String organization,
+                                                                                 String gatewayVendor)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SQLConstants
+                     .GET_CONTEXT_TEMPLATE_COUNT_SQL_MATCHES_ORGANIZATION_AND_GATEWAY_VENDOR)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
+            ps.setString(1, contextTemplate.toLowerCase());
+            ps.setString(2, organization);
+            ps.setString(3, Objects.requireNonNullElse(gatewayVendor, WSO2_GATEWAY_ENVIRONMENT));
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    int count = resultSet.getInt("CTX_COUNT");
+                    return count > 0;
+                }
             } catch (SQLException e) {
                 APIMgtDBUtil.rollbackConnection(connection,
                         "Failed to rollback in getting count matches context and organization", e);
@@ -7851,7 +7891,8 @@ public class ApiMgtDAO {
                     uriTemplate.setSchemaDefinition(schemaDefinition);
                     String authType = rs.getString("AUTH_SCHEME");
                     String throttlingTier;
-                    if(rs.getString(APIConstants.THROTTLING_TIER).isEmpty()) {
+                    String tier = rs.getString(APIConstants.THROTTLING_TIER);
+                    if (tier == null || tier.isEmpty()) {
                         throttlingTier = APIConstants.UNLIMITED_TIER;
                     } else {
                         throttlingTier = rs.getString(APIConstants.THROTTLING_TIER);
@@ -15358,8 +15399,7 @@ public class ApiMgtDAO {
             String updateProviderQuery = SQLConstants.UPDATE_LLM_PROVIDER_SQL;
             String deleteProviderModels = SQLConstants.DELETE_LLM_PROVIDER_MODELS_SQL;
             try (PreparedStatement prepStmtUpdateProvider = connection.prepareStatement(updateProviderQuery);
-                    PreparedStatement prepStmtDeleteModels = connection.prepareStatement(deleteProviderModels);
-            ) {
+                 PreparedStatement prepStmtDeleteModels = connection.prepareStatement(deleteProviderModels)) {
 
                 // Update LLM provider
                 prepStmtUpdateProvider.setString(1, provider.getDescription());
@@ -15539,7 +15579,7 @@ public class ApiMgtDAO {
             }
 
             // Get models registered under the LLM provider
-            setLLMProviderModels(organization,provider);
+            setLLMProviderModels(organization, provider);
 
             return provider;
         }
@@ -15549,21 +15589,23 @@ public class ApiMgtDAO {
      * Fetches an LLM providers' model list by provider ID and organization.
      *
      * @param organization the organization identifier
-     * @param provider the LLM provider
+     * @param provider     the LLM provider
      * @return the LLM provider model list
      * @throws APIManagementException if failed to get model list
      */
-    private void setLLMProviderModels(String organization,LLMProvider provider) throws APIManagementException {
+    private void setLLMProviderModels(String organization, LLMProvider provider) throws APIManagementException {
         List<LLMModel> modelList = new ArrayList<>();
         String getModelsQuery = SQLConstants.GET_LLM_PROVIDER_MODELS_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement prepStmt = connection.prepareStatement(getModelsQuery)) {
+             PreparedStatement prepStmt = connection.prepareStatement(getModelsQuery)) {
             prepStmt.setString(1, provider.getId());
             if (organization != null) {
                 prepStmt.setString(2, organization);
+            } else {
+                prepStmt.setString(2, SUPER_TENANT_DOMAIN);
             }
             try (ResultSet rs = prepStmt.executeQuery()) {
-                Map<String,LLMModel> models = new HashMap<>();
+                Map<String, LLMModel> models = new HashMap<>();
                 while (rs.next()) {
                     String model = rs.getString("MODEL_NAME");
                     String modelFamilyName = rs.getString("MODEL_FAMILY_NAME");
@@ -15575,8 +15617,8 @@ public class ApiMgtDAO {
                         llmModel.setValues(modelFamilyModels);
                         models.put(llmModel.getModelVendor(), llmModel);
                     }
-                        llmModel.getValues().add(model);
-                    }
+                    llmModel.getValues().add(model);
+                }
                 modelList = new ArrayList<>(models.values());
 
             }
@@ -16706,7 +16748,7 @@ public class ApiMgtDAO {
                                     throw new APIManagementException("Error processing operation policy parameters for policy ID: " +
                                             policy.getPolicyId() + " in URL Mapping ID: " + rs.getInt(1), e);
                                 }
-                            insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
+                                insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
                                 insertOperationPolicyMappingStatement.addBatch();
                             }
                         }
@@ -19185,6 +19227,7 @@ public class ApiMgtDAO {
 
     /**
      * Check if the API is a discovered API or Created API from WSO2 APIM
+     *
      * @param apiUUID
      * @return
      * @throws APIManagementException
@@ -20322,7 +20365,8 @@ public class ApiMgtDAO {
         }
     }
 
-    /** Update API revision Deployment mapping record for Discovered APIs
+    /**
+     * Update API revision Deployment mapping record for Discovered APIs
      *
      * @param apiRevisionUUID
      * @param status
@@ -20509,7 +20553,7 @@ public class ApiMgtDAO {
                             if (!urlMappingExisting.getScopes().contains(urlMapping.getScope())) {
                                 urlMappingExisting.setScopes(urlMapping.getScope());
                                 uriTemplateMap.put(urlMappingExisting.getUriTemplate()
-                                                + urlMappingExisting.getHTTPVerb(), urlMappingExisting);
+                                        + urlMappingExisting.getHTTPVerb(), urlMappingExisting);
                             }
                         } else {
                             urlMappingNew.setScopes(urlMapping.getScope());
@@ -22045,9 +22089,9 @@ public class ApiMgtDAO {
      * Adds multiple {@link Backend} records to the database for the specified API.
      * Manages database connection and transaction boundaries, handling errors appropriately.
      *
-     * @param apiUuid     the unique identifier of the API
+     * @param apiUuid  the unique identifier of the API
      * @param backends the list of {@link Backend} instances to be added; no action is taken if the
-     *                         list is empty
+     *                 list is empty
      * @throws APIManagementException if an error occurs while accessing the database
      */
     public void addBackends(String apiUuid, List<Backend> backends, String organization)
@@ -22074,9 +22118,9 @@ public class ApiMgtDAO {
     /**
      * Inserts multiple {@link Backend} records into the database for a given API.
      *
-     * @param connection       the JDBC {@link Connection} to the database
-     * @param apiUuid          the unique identifier of the API
-     * @param backends the list of {@link Backend} instances to be inserted
+     * @param connection the JDBC {@link Connection} to the database
+     * @param apiUuid    the unique identifier of the API
+     * @param backends   the list of {@link Backend} instances to be inserted
      * @throws SQLException if a database access error occurs
      */
     private void addBackends(Connection connection, String apiUuid, List<Backend> backends, String organization)
@@ -22110,7 +22154,7 @@ public class ApiMgtDAO {
      * Retrieves all {@link Backend} records for a given API from the database.
      * Manages database connection and transaction boundaries, handling errors appropriately.
      *
-     * @param apiUuid        the unique identifier of the API
+     * @param apiUuid      the unique identifier of the API
      * @param organization the organization name
      * @return a list of {@link Backend} objects; empty if no records are found
      * @throws APIManagementException if an error occurs while accessing the database
@@ -22137,7 +22181,7 @@ public class ApiMgtDAO {
     /**
      * Retrieves all {@link Backend} records for a given API using the provided database connection.
      *
-     * @param apiUuid        the unique identifier of the API
+     * @param apiUuid      the unique identifier of the API
      * @param connection   the JDBC {@link Connection} to use for the database operation
      * @param organization the organization name
      * @return a list of {@link Backend} objects; empty if no records are found
@@ -22289,8 +22333,8 @@ public class ApiMgtDAO {
     /**
      * Removes API operation mappings from the database for the given URI templates.
      *
-     * @param connection    Database connection
-     * @param uriTemplates  Set of URI templates to process
+     * @param connection   Database connection
+     * @param uriTemplates Set of URI templates to process
      * @throws SQLException If a database access error occurs
      */
     private void removeApiOperationMapping(Connection connection, Set<URITemplate> uriTemplates)
@@ -22312,7 +22356,7 @@ public class ApiMgtDAO {
      * Retrieves all {@link Backend} records for a specific API revision from the database.
      * Manages database connection and transaction boundaries, handling errors appropriately.
      *
-     * @param apiUuid        the unique identifier of the API
+     * @param apiUuid      the unique identifier of the API
      * @param revisionUuid the UUID of the API revision
      * @param organization the organization name
      * @return a list of {@link Backend} objects; empty if no records are found
@@ -22469,7 +22513,7 @@ public class ApiMgtDAO {
      * Updates the backend API in the database with a new definition and config.
      *
      * @param apiUuid      UUID of the API.
-     * @param backend   Backend API data to update.
+     * @param backend      Backend API data to update.
      * @param organization Organization owning the backend API.
      * @throws APIManagementException If a DB or update error occurs.
      */
@@ -22495,7 +22539,7 @@ public class ApiMgtDAO {
      *
      * @param connection   DB connection to use.
      * @param apiUuid      UUID of the related API.
-     * @param backend   Backend API data to update.
+     * @param backend      Backend API data to update.
      * @param organization Organization owning the backend API.
      * @throws SQLException If a database error occurs.
      */

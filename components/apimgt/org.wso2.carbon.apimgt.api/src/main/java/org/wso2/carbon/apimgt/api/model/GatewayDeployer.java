@@ -34,6 +34,14 @@ public interface GatewayDeployer {
     void init(Environment environment) throws APIManagementException;
 
     /**
+     * HTTP scheme to use for execution URL resolution.
+     */
+    enum HttpScheme {
+        HTTP,
+        HTTPS
+    }
+
+    /**
      * This method returns the type of Gateway
      * @return gateway type
      */
@@ -69,6 +77,21 @@ public interface GatewayDeployer {
      * @return String api execution url
      */
     String getAPIExecutionURL(String externalReference) throws APIManagementException;
+
+    /**
+     * This method returns the resolved API execution URL by replacing all placeholders appropriately
+     *
+     * @param externalReference reference artifact
+     * @param httpScheme HTTP scheme to use for the URL
+     * @return String api execution url
+     * @throws APIManagementException if an error occurs when resolving the API execution URL
+     */
+    default String getAPIExecutionURL(String externalReference, HttpScheme httpScheme) throws APIManagementException {
+        // Backward-compat: fall back to the legacy method if implementers haven't overridden the scheme-aware API.
+        return getAPIExecutionURL(externalReference);
+    }
+
+
 
     /**
      * This method returns refined API by manipulating the API object according to the external gateway requirements

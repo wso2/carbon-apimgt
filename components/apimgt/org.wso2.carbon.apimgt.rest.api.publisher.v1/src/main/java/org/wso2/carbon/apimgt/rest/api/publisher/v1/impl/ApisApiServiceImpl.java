@@ -3106,7 +3106,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                         break;
                     case "context":
                     default: // API version validation.
-                        isSearchArtifactExists = apiProvider.isContextExist(queryTokens[1], organization);
+                        //commenting this until GW environment is supported to
+//                        isSearchArtifactExists = apiProvider.isContextExist(queryTokens[1], organization);
                         break;
                 }
 

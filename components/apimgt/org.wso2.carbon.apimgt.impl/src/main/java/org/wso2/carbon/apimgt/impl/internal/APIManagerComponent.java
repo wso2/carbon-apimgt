@@ -821,6 +821,7 @@ public class APIManagerComponent {
             policy = ReferencePolicy.DYNAMIC,
             unbind = "removeExternalGatewayConnectorConfigurations")
     protected void addExternalGatewayConnectorConfiguration(GatewayAgentConfiguration gatewayConfiguration) {
+
         ServiceReferenceHolder.getInstance().addExternalGatewayConnectorConfiguration(gatewayConfiguration.getType(), gatewayConfiguration);
     }
 

@@ -663,10 +663,10 @@ public class APIMappingUtil {
                 String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(apidto.getId(),
                         environment.getUuid());
                 String httpUrl = gatewayDeployer != null ?
-                        gatewayDeployer.getAPIExecutionURL(externalReference) :
+                        gatewayDeployer.getAPIExecutionURL(externalReference, GatewayDeployer.HttpScheme.HTTP) :
                         vHost.getHttpUrl();
                 String httpsUrl = gatewayDeployer != null ?
-                        gatewayDeployer.getAPIExecutionURL(externalReference) :
+                        gatewayDeployer.getAPIExecutionURL(externalReference, GatewayDeployer.HttpScheme.HTTPS) :
                         vHost.getHttpsUrl();
                 if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
                     apiurLsDTO.setHttp(httpUrl + context);

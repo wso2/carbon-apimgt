@@ -449,6 +449,21 @@ public interface APIManager {
     boolean isDuplicateContextTemplateMatchingOrganization(String contextTemplate, String orgId) throws APIManagementException;
 
     /**
+     * Check if a given context template already exists in an organization and gateway type
+     *
+     * @param contextTemplate - The contextTemplate to be checked for
+     *                        <p>
+     *                        Ex: /foo/{version}/bar
+     *                        </p>
+     * @param orgId  identifier of the organization
+     * @param gatewayVendor type of the gateway (e.g. 'WSO2', 'AWS', etc.)
+     * @return boolean - true if the template exists, false otherwise.
+     * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
+     */
+    boolean isDuplicateContextTemplateMatchingOrganizationAndGatewayVendor(String contextTemplate, String orgId,
+                                                                           String gatewayVendor) throws APIManagementException;
+
+    /**
      * get a set of API names that matches given context template
      *
      * @param contextTemplate context in the payload

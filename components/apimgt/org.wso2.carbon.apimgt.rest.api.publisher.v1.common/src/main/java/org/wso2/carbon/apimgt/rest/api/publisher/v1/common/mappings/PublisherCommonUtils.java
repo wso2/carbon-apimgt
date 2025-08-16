@@ -2817,7 +2817,15 @@ public class PublisherCommonUtils {
         if (!apiVersions.isEmpty()) {
             for (String version : apiVersions) {
                 if (version.equalsIgnoreCase(apiDtoTypeWrapper.getVersion())) {
-                    if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context, organization)) {
+                    if (apiDtoTypeWrapper.getInitiatedFromGateway()) {
+                        throw new APIManagementException(
+                                "API with name " + apiDtoTypeWrapper.getName() + " and version " +
+                                        apiDtoTypeWrapper.getVersion() + " already exists.",
+                                ExceptionCodes.from(ExceptionCodes.API_NAME_ALREADY_EXISTS,
+                                        apiDtoTypeWrapper.getName()));
+                    }
+                    if (apiProvider.isDuplicateContextTemplateMatchingOrganizationAndGatewayVendor(context,
+                            organization, apiDtoTypeWrapper.getGatewayVendor())) {
                         throw new APIManagementException("Duplicate API context in organization",
                                 ExceptionCodes.API_ALREADY_EXISTS);
                     } else {
@@ -2826,7 +2834,9 @@ public class PublisherCommonUtils {
                     }
                 }
             }
-        } else if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context, organization)) {
+        } else if (!apiDtoTypeWrapper.getInitiatedFromGateway() &&
+                apiProvider.isDuplicateContextTemplateMatchingOrganizationAndGatewayVendor(context, organization,
+                        apiDtoTypeWrapper.getGatewayVendor())) {
             throw new APIManagementException("Duplicate API context already exists",
                     ExceptionCodes.from(ExceptionCodes.API_CONTEXT_ALREADY_EXISTS, context));
         }
@@ -3947,7 +3957,8 @@ public class PublisherCommonUtils {
             for (String version : apiVersions) {
                 if (version.equalsIgnoreCase(apiProductDTO.getVersion())) {
                     //If version already exists
-                    if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context, organization)) {
+                    if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context,
+                            organization)) {
                         throw new APIManagementException(
                                 "Error occurred while adding the API Product. A duplicate API context already exists "
                                         + "for " + context + " in the organization : " + organization,

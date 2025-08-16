@@ -940,6 +940,13 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isDuplicateContextTemplateMatchesOrganization(contextTemplate, organization);
     }
 
+    public boolean isDuplicateContextTemplateMatchingOrganizationAndGatewayVendor(String contextTemplate, String orgId,
+                                                                                  String gatewayVendor)
+            throws APIManagementException {
+        return apiMgtDAO.isDuplicateContextTemplateMatchesOrganizationAndGatewayVendor(contextTemplate, orgId,
+                gatewayVendor);
+    }
+
     @Override
     public List<String> getApiNamesMatchingContext(String contextTemplate) throws APIManagementException {
 
