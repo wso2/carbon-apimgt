@@ -1129,6 +1129,7 @@ public class APIMappingUtil {
         apiInfoDTO.setEgress(api.isEgress() == 1); // true -1, false - 0
         apiInfoDTO.setSubtype(api.getSubtype());
         apiInfoDTO.setInitiatedFromGateway(api.isInitiatedFromGateway());
+        apiInfoDTO.setDisplayName(api.getDisplayName());
         return apiInfoDTO;
     }
 
@@ -3860,6 +3861,7 @@ public class APIMappingUtil {
             productDto.setTechnicalOwner(apiProduct.getTechnicalOwner());
             productDto.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
             productDto.setMonetizedInfo(apiProduct.isMonetizationEnabled());
+            productDto.setDisplayName(apiProduct.getDisplayName());
             productDto.setEgress(apiProduct.isEgress() == 1);
 
             list.add(productDto);
