@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
+import org.wso2.carbon.apimgt.impl.dto.DistributedThrottleConfig;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
@@ -155,6 +156,7 @@ public class APIManagerConfiguration {
     private static Map<String, String> persistenceProperties = new HashMap<String, String>();
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
+    private DistributedThrottleConfig distributedThrottleConfig = new DistributedThrottleConfig();
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     private RedisConfig redisConfig = new RedisConfig();
     private OrgAccessControl orgAccessControl = new OrgAccessControl();
@@ -483,7 +485,7 @@ public class APIManagerConfiguration {
                             " configuration under [apim.redis_config] section in deployment.toml");
                 }
                 if (minGatewayCount != null) {
-                    redisConfig.setMinGatewayCount(Integer.parseInt(minGatewayCount.getText()));
+                    redisConfig.setMinGatewayCount(Long.parseLong(minGatewayCount.getText()));
                 }
                 if (keyLockRetrievalTimeout != null) {
                     redisConfig.setKeyLockRetrievalTimeout(Integer.parseInt(keyLockRetrievalTimeout.getText()));
@@ -528,6 +530,89 @@ public class APIManagerConfiguration {
                                 redisConfig.setTimeBetweenEvictionRunsMillis(Long.parseLong(propertyNode.getText()));
                             } else if (APIConstants.CONFIG_REDIS_NUM_TESTS_PER_EVICTION_RUNS.equals(propertyNode.getLocalName())) {
                                 redisConfig.setNumTestsPerEvictionRun(Integer.parseInt(propertyNode.getText()));
+                            }
+                        }
+                    }
+                }
+            } else if (APIConstants.DISTRIBUTED_THROTTLE_CONFIG.equals(localName)) {
+                OMElement enabledElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_ENABLED));
+                OMElement typeElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_TYPE));
+                OMElement syncIntervalElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_SYNC_INTERVAL));
+                OMElement corePoolSizeElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_CORE_POOL_SIZE));
+                OMElement propertiesElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PROPERTIES));
+
+                if (enabledElement != null) {
+                    distributedThrottleConfig.setEnabled(Boolean.parseBoolean(enabledElement.getText()));
+                }
+                if (typeElement != null) {
+                    distributedThrottleConfig.setType(typeElement.getText());
+                }
+                if (syncIntervalElement != null) {
+                    try {
+                        distributedThrottleConfig.setSyncInterval(Integer.parseInt(syncIntervalElement.getText()));
+                    } catch (NumberFormatException e) {
+                        log.warn("Invalid sync interval specified", e);
+                    }
+                }
+                if (corePoolSizeElement != null) {
+                    try {
+                        distributedThrottleConfig.setCorePoolSize(Integer.parseInt(corePoolSizeElement.getText()));
+                    } catch (NumberFormatException e) {
+                        log.warn("Invalid core pool size specified", e);
+                    }
+                }
+                if (propertiesElement != null) {
+                    OMElement host = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_HOST));
+                    OMElement port = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PORT));
+                    OMElement user = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_USER));
+                    OMElement password = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PASSWORD));
+
+                    if (host != null && StringUtils.isNotBlank(host.getText())) {
+                        distributedThrottleConfig.setHost(host.getText());
+                    } else {
+                        log.warn("DistributedThrottleConfig: KeyValueStoreOptions.Host is not specified");
+                    }
+                    if (port != null && StringUtils.isNotBlank(port.getText())) {
+                        try {
+                            distributedThrottleConfig.setPort(Integer.parseInt(port.getText()));
+                        } catch (NumberFormatException e) {
+                            log.warn("DistributedThrottleConfig: invalid Port value: " + port.getText(), e);
+                        }
+                    } else {
+                        log.warn("DistributedThrottleConfig: KeyValueStoreOptions.Port is not specified");
+                    }
+
+                    if (user != null) {
+                        distributedThrottleConfig.setUser(user.getText());
+                    }
+                    if (password != null) {
+                        distributedThrottleConfig.setPassword(MiscellaneousUtil.resolve(password, secretResolver).toCharArray());
+                    }
+
+                    Iterator<OMElement> properties = propertiesElement.getChildElements();
+                    if (properties != null) {
+                        while (properties.hasNext()) {
+                            OMElement propertyNode = properties.next();
+                            if (APIConstants.DISTRIBUTED_THROTTLE_MAX_TOTAL.equals(propertyNode.getLocalName())) {
+                                distributedThrottleConfig.setMaxTotal(Integer.parseInt(propertyNode.getText()));
+                            } else if (APIConstants.DISTRIBUTED_THROTTLE_MAX_IDLE.equals(propertyNode.getLocalName())) {
+                                distributedThrottleConfig.setMaxIdle(Integer.parseInt(propertyNode.getText()));
+                            } else if (APIConstants.DISTRIBUTED_THROTTLE_MIN_IDLE.equals(propertyNode.getLocalName())) {
+                                distributedThrottleConfig.setMinIdle(Integer.parseInt(propertyNode.getText()));
+                            } else if (APIConstants.DISTRIBUTED_THROTTLE_TEST_ON_BORROW.equals(propertyNode.getLocalName())) {
+                                distributedThrottleConfig.setTestOnBorrow(Boolean.parseBoolean(propertyNode.getText()));
+                            } else if (APIConstants.DISTRIBUTED_THROTTLE_TEST_ON_RETURN.equals(propertyNode.getLocalName())) {
+                                distributedThrottleConfig.setTestOnReturn(Boolean.parseBoolean(propertyNode.getText()));
+                            } else if (APIConstants.DISTRIBUTED_THROTTLE_TEST_WHILE_IDLE.equals(propertyNode.getLocalName())) {
+                                distributedThrottleConfig.setTestWhileIdle(Boolean.parseBoolean(propertyNode.getText()));
+                            } else if (APIConstants.DISTRIBUTED_THROTTLE_BLOCK_WHEN_EXHAUSTED.equals(propertyNode.getLocalName())) {
+                                distributedThrottleConfig.setBlockWhenExhausted(Boolean.parseBoolean(propertyNode.getText()));
+                            } else if (APIConstants.DISTRIBUTED_THROTTLE_MIN_EVICTABLE_IDLE_TIME_IN_MILLIS.equals(propertyNode.getLocalName())) {
+                                distributedThrottleConfig.setMinEvictableIdleTimeMillis(Long.parseLong(propertyNode.getText()));
+                            } else if (APIConstants.DISTRIBUTED_THROTTLE_TIME_BETWEEN_EVICTION_RUNS_IN_MILLIS.equals(propertyNode.getLocalName())) {
+                                distributedThrottleConfig.setTimeBetweenEvictionRunsMillis(Long.parseLong(propertyNode.getText()));
+                            } else if (APIConstants.DISTRIBUTED_THROTTLE_NUM_TESTS_PER_EVICTION_RUNS.equals(propertyNode.getLocalName())) {
+                                distributedThrottleConfig.setNumTestsPerEvictionRun(Integer.parseInt(propertyNode.getText()));
                             }
                         }
                     }
@@ -2111,6 +2196,11 @@ public class APIManagerConfiguration {
     public RedisConfig getRedisConfig() {
 
         return redisConfig;
+    }
+
+    public DistributedThrottleConfig getDistributedThrottleConfig() {
+
+        return distributedThrottleConfig;
     }
 
     /**

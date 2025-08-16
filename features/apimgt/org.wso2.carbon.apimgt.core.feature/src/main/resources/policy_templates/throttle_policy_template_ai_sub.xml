@@ -14,7 +14,11 @@
 		FROM EligibilityStream[isEligible==true]#throttler:timeBatch($quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit(), 0)
 		select throttleKey,
 		#if($quotaPolicy.getLimit().getRequestCount() != 0)
+		#if($isDistributed == true)
+		ifThenElse((throttler:distributedCount(messageID) >= $quotaPolicy.getLimit().getRequestCount()), true,
+		#else
 		ifThenElse((count(messageID) >= $quotaPolicy.getLimit().getRequestCount()), true,
+		#end
 		#end
 		#if($quotaPolicy.getAiApiQuota().getPromptTokenCount() != 0)
 		ifThenElse((sum(cast(map:get(propertiesMap,'PROMPT_TOKENS'),'long')) >= $quotaPolicy.getAiApiQuota().getPromptTokenCount()L), true,

@@ -14,7 +14,12 @@
         #if($quotaPolicy != "")
         FROM EligibilityStream[isEligible==true]#throttler:timeBatch($quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit(), 0)
         #if($quotaPolicy.getQuotaType() == $REQUEST_COUNT_TYPE)
-        select throttleKey, (throttler:count(messageID,cast(map:get(propertiesMap,'reset'),'bool')) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled, expiryTimeStamp group by throttleKey
+        select throttleKey,
+        #if($isDistributed == true)
+        (throttler:distributedCount(messageID,cast(map:get(propertiesMap,'reset'),'bool')) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled, expiryTimeStamp group by throttleKey
+        #else
+        (throttler:count(messageID,cast(map:get(propertiesMap,'reset'),'bool')) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled, expiryTimeStamp group by throttleKey
+        #end
         #else
         select throttleKey, (throttler:sum(cast(map:get(propertiesMap,'messageSize'),'long'),cast(map:get(propertiesMap,'reset'),'bool')) >= $quotaPolicy.getLimit().getStandardDataAmount()L) as isThrottled, expiryTimeStamp group by throttleKey
         #end

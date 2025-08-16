@@ -112,7 +112,7 @@ public class ServiceReferenceHolder {
         return throttleDataHolder;
     }
     private ArtifactRetriever artifactRetriever;
-    private int gatewayCount = 1;
+    private long gatewayCount = 1L;
 
     private WebSocketProcessor websocketprocessor = null;
 
@@ -461,11 +461,11 @@ public class ServiceReferenceHolder {
         this.synapseConfigurationService = synapseConfigurationService;
     }
 
-    public int getGatewayCount() {
+    public long getGatewayCount() {
         return gatewayCount;
     }
 
-    public void setGatewayCount(int gatewayCount) {
+    public void setGatewayCount(long gatewayCount) {
         this.gatewayCount = gatewayCount;
     }
 

@@ -1430,6 +1430,34 @@
         {% endif %}
         <Properties>
             {% if apim.redis_config.pool_options is defined %}
+                {% if apim.redis_config.pool_options.max_total is defined %}
+                <MaxTotal>{{apim.redis_config.pool_options.max_total}}</MaxTotal>
+                {% endif %}
+                {% if apim.redis_config.pool_options.max_idle is defined %}
+                <MaxIdle>{{apim.redis_config.pool_options.max_idle}}</MaxIdle>
+                {% endif %}
+                {% if apim.redis_config.pool_options.min_idle is defined %}
+                <MinIdle>{{apim.redis_config.pool_options.min_idle}}</MinIdle>
+                {% endif %}
+                {% if apim.redis_config.pool_options.block_when_exhausted is defined %}
+                <BlockWhenExhausted>{{apim.redis_config.pool_options.block_when_exhausted}}</BlockWhenExhausted>
+                {% endif %}
+                {% if apim.redis_config.pool_options.test_on_borrow is defined %}
+                <TestOnBorrow>{{apim.redis_config.pool_options.test_on_borrow}}</TestOnBorrow>
+                {% endif %}
+                {% if apim.redis_config.pool_options.test_on_return is defined %}
+                <TestOnReturn>{{apim.redis_config.pool_options.test_on_return}}</TestOnReturn>
+                {% endif %}
+                {% if apim.redis_config.pool_options.test_while_idle is defined %}
+                <TestWhileIdle>{{apim.redis_config.pool_options.test_while_idle}}</TestWhileIdle>
+                {% endif %}
+                {% if apim.redis_config.pool_options.min_evictable_idle_time_millis is defined %}
+                <MinEvictableIdleTimeMillis>{{apim.redis_config.pool_options.min_evictable_idle_time_millis}}</MinEvictableIdleTimeMillis>
+                {% endif %}
+                {% if apim.redis_config.pool_options.time_between_eviction_runs_millis is defined %}
+                <TimeBetweenEvictionRunsMillis>{{apim.redis_config.pool_options.time_between_eviction_runs_millis}}</TimeBetweenEvictionRunsMillis>
+                {% endif %}
+        
             {% for property_name,property_value in apim.redis_config.pool_options.items() %}
              <{{property_name}}>{{property_value}}</{{property_name}}>
             {% endfor %}
@@ -1833,6 +1861,60 @@
             </CustomProperties>
         </PropertyConfigurations>
       {% endif %}
+
+      {% if apim.distributed_throttling is defined %}
+        <DistributedThrottleConfig>
+            {% if apim.distributed_throttling.enable is defined %}
+            <Enabled>{{apim.distributed_throttling.enable}}</Enabled>
+            {% endif %}
+            {% if apim.distributed_throttling.type is defined %}
+            <Type>{{apim.distributed_throttling.type}}</Type>
+            {% endif %}
+            {% if apim.distributed_throttling.sync_interval is defined %}
+            <SyncInterval>{{apim.distributed_throttling.sync_interval}}</SyncInterval>
+            {% endif %}
+            {% if apim.distributed_throttling.core_pool_size is defined %}
+            <CorePoolSize>{{apim.distributed_throttling.core_pool_size}}</CorePoolSize>
+            {% endif %}
+            {% if apim.distributed_throttling.keyvalue_store is defined %}
+            <KeyValueStoreOptions>
+                {% if apim.distributed_throttling.keyvalue_store.host is defined %}
+                <Host>{{apim.distributed_throttling.keyvalue_store.host}}</Host>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.port is defined %}
+                <Port>{{apim.distributed_throttling.keyvalue_store.port}}</Port>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.user is defined %}
+                <User>{{apim.distributed_throttling.keyvalue_store.user}}</User>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.password is defined %}
+                <Password>{{apim.distributed_throttling.keyvalue_store.password}}</Password>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.max_total is defined %}
+                <MaxTotal>{{apim.distributed_throttling.keyvalue_store.max_total}}</MaxTotal>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.max_idle is defined %}
+                <MaxIdle>{{apim.distributed_throttling.keyvalue_store.max_idle}}</MaxIdle>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.min_idle is defined %}
+                <MinIdle>{{apim.distributed_throttling.keyvalue_store.min_idle}}</MinIdle>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.block_when_exhausted is defined %}
+                <BlockWhenExhausted>{{apim.distributed_throttling.keyvalue_store.block_when_exhausted}}</BlockWhenExhausted>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.test_while_idle is defined %}
+                <TestWhileIdle>{{apim.distributed_throttling.keyvalue_store.test_while_idle}}</TestWhileIdle>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.min_evictable_idle_time_millis is defined %}
+                <MinEvictableIdleTimeMillis>{{apim.distributed_throttling.keyvalue_store.min_evictable_idle_time_millis}}</MinEvictableIdleTimeMillis>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.time_between_eviction_runs_millis is defined %}
+                <TimeBetweenEvictionRunsMillis>{{apim.distributed_throttling.keyvalue_store.time_between_eviction_runs_millis}}</TimeBetweenEvictionRunsMillis>
+                {% endif %}
+            </KeyValueStoreOptions>
+            {% endif %}
+        </DistributedThrottleConfig>
+        {% endif %}
 
       <TenantSharingConfigs>
         {% for tenant_sharing_config in apim.tenant_sharing %}

@@ -216,7 +216,7 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
             }
             for (Map.Entry<String, String> entry : channelCountMap.entrySet()) {
                 String channel = entry.getKey();
-                int gatewayCount = Integer.parseInt(entry.getValue());
+                long gatewayCount = Long.parseLong(entry.getValue());
                 ServiceReferenceHolder.getInstance().setGatewayCount(gatewayCount);
                 if (log.isTraceEnabled()) {
                     log.trace("ChannelSubscriptionCounterTask : channel = " + channel + ". Set Gateway count to "
@@ -921,7 +921,7 @@ public class HybridThrottleProcessor implements DistributedThrottleProcessor {
      */
     public void setLocalQuota(CallerContext callerContext, CallerConfiguration configuration) {
         long maxRequests = configuration.getMaximumRequestPerUnitTime();
-        int gatewayCount = ServiceReferenceHolder.getInstance().getGatewayCount();
+        long gatewayCount = ServiceReferenceHolder.getInstance().getGatewayCount();
 
         RedisConfig redisConfig = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getRedisConfig();
