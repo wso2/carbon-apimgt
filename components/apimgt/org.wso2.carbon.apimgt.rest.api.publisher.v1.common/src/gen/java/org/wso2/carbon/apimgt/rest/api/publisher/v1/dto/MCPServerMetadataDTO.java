@@ -69,7 +69,7 @@ public class MCPServerMetadataDTO   {
   }
 
   
-  @ApiModelProperty(example = "Calculator MCP API", value = "Display name of the MCP API. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. ")
+  @ApiModelProperty(example = "PizzaShack API", value = "Display name of the MCP API. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. ")
   @JsonProperty("displayName")
   public String getDisplayName() {
     return displayName;
