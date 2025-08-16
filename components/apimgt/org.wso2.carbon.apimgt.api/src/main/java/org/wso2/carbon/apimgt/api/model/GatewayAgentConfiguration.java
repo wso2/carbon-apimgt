@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api.model;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -80,4 +81,16 @@ public interface GatewayAgentConfiguration {
      * @return String default hostname template
      */
     String getDefaultHostnameTemplate();
+
+    /**
+     * This method returns the supported gateway modes for a given gateway type
+     * @return List of supported gateway modes
+     */
+    default List<String> getSupportedModes() {
+        return Arrays.asList(
+                GatewayMode.WRITE_ONLY.getMode(),
+                GatewayMode.READ_ONLY.getMode(),
+                GatewayMode.READ_WRITE.getMode()
+        );
+    }
 }
