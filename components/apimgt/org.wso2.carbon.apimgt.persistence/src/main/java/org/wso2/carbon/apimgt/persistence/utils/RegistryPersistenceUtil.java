@@ -1593,6 +1593,7 @@ public class RegistryPersistenceUtil {
             api.setId(apiArtifact.getId());
             api.setStatus(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
             api.setApiName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
+            api.setDisplayName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME));
             api.setProviderName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
             api.setVersion(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
             api.setAdvertiseOnly(Boolean.parseBoolean(apiArtifact
@@ -1620,6 +1621,7 @@ public class RegistryPersistenceUtil {
             api.setId(apiArtifact.getId());
             api.setStatus(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
             api.setApiName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
+            api.setDisplayName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME));
             api.setProviderName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
             api.setVersion(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
             api.setBusinessOwner(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));

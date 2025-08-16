@@ -17202,6 +17202,11 @@ components:
         - $ref: '#/components/schemas/SearchResult'
         - type: object
           properties:
+            displayName:
+              description: Human-friendly name shown in UI. Length limited to DB column size.
+              minLength: 1
+              type: string
+              example: Pizza Shack API
             description:
               type: string
               description: A brief description about the API
@@ -17267,6 +17272,11 @@ components:
         - $ref: '#/components/schemas/SearchResult'
         - type: object
           properties:
+            displayName:
+              description: Human-friendly name shown in UI. Length limited to DB column size.
+              minLength: 1
+              type: string
+              example: Pizza Shack API
             description:
               type: string
               description: A brief description about the API
@@ -17374,6 +17384,11 @@ components:
               type: string
               description: The name of the associated API
               example: TestAPI
+            apiDisplayName:
+              description: Human-friendly name shown in UI for associated API. Length limited to DB column size.
+              minLength: 1
+              type: string
+              example: Pizza Shack API
             apiVersion:
               type: string
               description: The version of the associated API
@@ -17390,6 +17405,11 @@ components:
       allOf:
         - $ref: '#/components/schemas/SearchResult'
         - properties:
+            apiDisplayName:
+              description: Human-friendly name shown in UI for associated API. Length limited to DB column size.
+              minLength: 1
+              type: string
+              example: Pizza Shack API
             apiName:
               type: string
               description: The name of the associated API

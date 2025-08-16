@@ -130,6 +130,7 @@ return null;
     }
     private VisibilityEnum visibility = null;
     private String apiName = null;
+    private String apiDisplayName = null;
     private String apiVersion = null;
     private String apiProvider = null;
     private String apiUUID = null;
@@ -255,6 +256,24 @@ return null;
   }
 
   /**
+   * Human-friendly name shown in UI for associated API. Length limited to DB column size.
+   **/
+  public DocumentSearchResultDTO apiDisplayName(String apiDisplayName) {
+    this.apiDisplayName = apiDisplayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Pizza Shack API", value = "Human-friendly name shown in UI for associated API. Length limited to DB column size.")
+  @JsonProperty("apiDisplayName")
+ @Size(min=1)  public String getApiDisplayName() {
+    return apiDisplayName;
+  }
+  public void setApiDisplayName(String apiDisplayName) {
+    this.apiDisplayName = apiDisplayName;
+  }
+
+  /**
    * The version of the associated API
    **/
   public DocumentSearchResultDTO apiVersion(String apiVersion) {
@@ -323,6 +342,7 @@ return null;
         Objects.equals(otherTypeName, documentSearchResult.otherTypeName) &&
         Objects.equals(visibility, documentSearchResult.visibility) &&
         Objects.equals(apiName, documentSearchResult.apiName) &&
+        Objects.equals(apiDisplayName, documentSearchResult.apiDisplayName) &&
         Objects.equals(apiVersion, documentSearchResult.apiVersion) &&
         Objects.equals(apiProvider, documentSearchResult.apiProvider) &&
         Objects.equals(apiUUID, documentSearchResult.apiUUID);
@@ -330,7 +350,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(docType, summary, sourceType, sourceUrl, otherTypeName, visibility, apiName, apiVersion, apiProvider, apiUUID);
+    return Objects.hash(docType, summary, sourceType, sourceUrl, otherTypeName, visibility, apiName, apiDisplayName, apiVersion, apiProvider, apiUUID);
   }
 
   @Override
@@ -345,6 +365,7 @@ return null;
     sb.append("    otherTypeName: ").append(toIndentedString(otherTypeName)).append("\n");
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
+    sb.append("    apiDisplayName: ").append(toIndentedString(apiDisplayName)).append("\n");
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
     sb.append("    apiProvider: ").append(toIndentedString(apiProvider)).append("\n");
     sb.append("    apiUUID: ").append(toIndentedString(apiUUID)).append("\n");

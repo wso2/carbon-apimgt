@@ -22,6 +22,7 @@ import javax.validation.Valid;
 
 public class APISearchResultDTO extends SearchResultDTO  {
   
+    private String displayName = null;
     private String description = null;
     private String context = null;
     private String contextTemplate = null;
@@ -38,6 +39,24 @@ public class APISearchResultDTO extends SearchResultDTO  {
     private String businessOwnerEmail = null;
     private String technicalOwner = null;
     private String technicalOwnerEmail = null;
+
+  /**
+   * Human-friendly name shown in UI. Length limited to DB column size.
+   **/
+  public APISearchResultDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Pizza Shack API", value = "Human-friendly name shown in UI. Length limited to DB column size.")
+  @JsonProperty("displayName")
+ @Size(min=1)  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
 
   /**
    * A brief description about the API
@@ -329,7 +348,8 @@ public class APISearchResultDTO extends SearchResultDTO  {
       return false;
     }
     APISearchResultDTO apISearchResult = (APISearchResultDTO) o;
-    return Objects.equals(description, apISearchResult.description) &&
+    return Objects.equals(displayName, apISearchResult.displayName) &&
+        Objects.equals(description, apISearchResult.description) &&
         Objects.equals(context, apISearchResult.context) &&
         Objects.equals(contextTemplate, apISearchResult.contextTemplate) &&
         Objects.equals(version, apISearchResult.version) &&
@@ -349,7 +369,7 @@ public class APISearchResultDTO extends SearchResultDTO  {
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, contextTemplate, version, provider, status, thumbnailUri, advertiseOnly, gatewayVendor, gatewayType, hasThumbnail, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
+    return Objects.hash(displayName, description, context, contextTemplate, version, provider, status, thumbnailUri, advertiseOnly, gatewayVendor, gatewayType, hasThumbnail, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
   }
 
   @Override
@@ -357,6 +377,7 @@ public class APISearchResultDTO extends SearchResultDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APISearchResultDTO {\n");
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    contextTemplate: ").append(toIndentedString(contextTemplate)).append("\n");
