@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,9 @@ public class DistributedThrottleConfig {
 
     private boolean enabled = false;
     private String type = "redis";
+    // Sync frequency with the key-value store in milliseconds
     private int syncInterval = 10;
+    // Size for the thread pool for scheduled syncing
     private int corePoolSize = 200;
 
     private String host;

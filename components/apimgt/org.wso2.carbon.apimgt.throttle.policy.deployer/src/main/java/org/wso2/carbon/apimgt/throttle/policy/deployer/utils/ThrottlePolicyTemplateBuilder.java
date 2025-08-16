@@ -516,7 +516,7 @@ public class ThrottlePolicyTemplateBuilder {
         return policyTemplateLocation + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_AI_SUB + ".xml";
     }
 
-    private Boolean getDistributedStatus() {
+    private boolean getDistributedStatus() {
         try {
             DistributedThrottleConfig dtConfig =  ServiceReferenceHolder.getInstance()
                     .getAPIMConfiguration()

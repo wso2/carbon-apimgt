@@ -362,8 +362,6 @@ public class APIManagerConfiguration {
         }
     }
 
-
-
     private void readChildElements(OMElement serverConfig,
                                    Stack<String> nameStack) throws APIManagementException {
 

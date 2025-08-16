@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -138,20 +138,20 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             if (kvStoreClient == null || key == null) {
                 return;
             }
-            long delta = unsyncedCounter.getAndSet(0L);
-            if (delta == 0) {
+            long currentUnsyncedCount = unsyncedCounter.getAndSet(0L);
+            if (currentUnsyncedCount == 0) {
                 localCounter.set(Long.parseLong(kvStoreClient.get(key)));
                 return;
             }
             try {
-                if (delta > 0) {
-                    localCounter.set(kvStoreClient.incrementBy(key, delta));
+                if (currentUnsyncedCount > 0) {
+                    localCounter.set(kvStoreClient.incrementBy(key, currentUnsyncedCount));
                 } else {
-                    localCounter.set(kvStoreClient.decrementBy(key, Math.abs(delta)));
+                    localCounter.set(kvStoreClient.decrementBy(key, Math.abs(currentUnsyncedCount)));
                 }
             } catch (KeyValueStoreException e) {
                 log.error("Error syncing with key-value store for the key " + key, e);
-                unsyncedCounter.addAndGet(delta);
+                unsyncedCounter.addAndGet(currentUnsyncedCount);
             }
         }
     }
