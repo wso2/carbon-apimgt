@@ -45,6 +45,8 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class McpInitHandler extends AbstractHandler implements ManagedLifecycle {
     private static final Log log = LogFactory.getLog(McpInitHandler.class);
@@ -82,6 +84,23 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
 
     @Override
     public boolean handleResponse(MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        Map headers = (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        if (headers == null) {
+            headers = new HashMap<>();
+            axis2MessageContext.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+        }
+
+        Object exposeHeadersList = headers.get(APIConstants.CORSHeaders.ACCESS_CONTROL_EXPOSE_HEADERS);
+        String exposeHeaders = APIConstants.MCP.HEADER_MCP_SESSION_ID;
+        if (exposeHeadersList instanceof String) {
+            exposeHeaders = (String) exposeHeadersList;
+            if (!StringUtils.isEmpty(exposeHeaders) && !exposeHeaders.contains(APIConstants.MCP.HEADER_MCP_SESSION_ID)) {
+                exposeHeaders += "," + APIConstants.MCP.HEADER_MCP_SESSION_ID;
+            }
+        }
+        headers.put(APIConstants.CORSHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, exposeHeaders);
         return true;
     }
 

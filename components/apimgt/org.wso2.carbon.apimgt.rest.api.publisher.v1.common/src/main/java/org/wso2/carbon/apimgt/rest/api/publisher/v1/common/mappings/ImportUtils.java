@@ -100,6 +100,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationRespons
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubtypeConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
@@ -150,6 +151,8 @@ public class ImportUtils {
     public static final String OUT = "out";
     private static final Log log = LogFactory.getLog(ImportUtils.class);
     private static final String SOAPTOREST = "SoapToRest";
+    private static final List<String> backendAPIDefSupportedMCPSubtypes =
+            Arrays.asList(APIConstants.API_SUBTYPE_DIRECT_BACKEND, APIConstants.API_SUBTYPE_SERVER_PROXY);
 
     public static APIDTO getImportAPIDto(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
                                          String userName) throws APIManagementException {
@@ -817,9 +820,10 @@ public class ImportUtils {
                             Arrays.asList(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
                 }
 
-                final String subtype = importedApiDTO.getSubtypeConfiguration().getSubtype();
-                if (APIConstants.API_SUBTYPE_SERVER_PROXY.equals(subtype)
-                        || APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(subtype)) {
+                SubtypeConfigurationDTO subtypeConfigurationDTO = importedApiDTO.getSubtypeConfiguration();
+                final String subtype = (subtypeConfigurationDTO != null) ? subtypeConfigurationDTO.getSubtype() : null;
+                if (!StringUtils.isBlank(subtype) && (APIConstants.API_SUBTYPE_SERVER_PROXY.equals(subtype)
+                        || APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(subtype))) {
 
                     final List<Backend> backendList = getMCPServerBackends(extractedFolderPath);
                     if (backendList.isEmpty()) {
@@ -2039,13 +2043,13 @@ public class ImportUtils {
     }
 
     @NotNull
-    private static JsonObject retrievedBackendAPIDtoJson(String pathToArchive) throws IOException,
+    private static JsonObject retrieveBackendDtoJson(String pathToArchive) throws IOException,
             APIManagementException {
         // Get MCP Backend API Definition as JSON
         String jsonContent =
                 getFileContentAsJson(pathToArchive + ImportExportConstants.BACKENDS_FILE_LOCATION);
         if (jsonContent == null) {
-            throw new APIManagementException("Cannot find API definition. api.yaml or api.json should present",
+            throw new APIManagementException("Cannot find backend definition.",
                     ExceptionCodes.ERROR_FETCHING_DEFINITION_FILE);
         }
         return processRetrievedDefinition(jsonContent);
@@ -2122,12 +2126,24 @@ public class ImportUtils {
 
         JsonObject mcpServer = retrievedMCPDtoJson(pathToArchive);
         MCPServerDTO mcpServerDTO = new Gson().fromJson(mcpServer, MCPServerDTO.class);
-        if (StringUtils.equals(mcpServerDTO.getSubtypeConfiguration().getSubtype(),
-                APIConstants.API_SUBTYPE_DIRECT_BACKEND)) {
-            JsonObject backendAPI = retrievedBackendAPIDtoJson(pathToArchive);
-            JSONParser parser = new JSONParser();
-            JSONObject endpointConfig = (JSONObject) parser.parse(backendAPI.get("endpointConfig").getAsString());
-            mcpServerDTO.endpointConfig(endpointConfig);
+        SubtypeConfigurationDTO subtypeConfigurationDTO = mcpServerDTO.getSubtypeConfiguration();
+        if (subtypeConfigurationDTO != null) {
+            String subtype = subtypeConfigurationDTO.getSubtype();
+            if (!StringUtils.isBlank(subtype)) {
+                if (backendAPIDefSupportedMCPSubtypes.contains(subtype)) {
+                    JsonObject backends = retrieveBackendDtoJson(pathToArchive);
+                    JSONParser parser = new JSONParser();
+                    JsonElement endpointConfigElement = backends.get(ImportExportConstants.ENDPOINT_CONFIG);
+                    if (endpointConfigElement != null && !endpointConfigElement.isJsonNull()) {
+                        JSONObject endpointConfig = (JSONObject) parser.parse(endpointConfigElement.getAsString());
+                        mcpServerDTO.endpointConfig(endpointConfig);
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("No endpointConfig found in backend definition.");
+                        }
+                    }
+                }
+            }
         }
 
         return mcpServerDTO;

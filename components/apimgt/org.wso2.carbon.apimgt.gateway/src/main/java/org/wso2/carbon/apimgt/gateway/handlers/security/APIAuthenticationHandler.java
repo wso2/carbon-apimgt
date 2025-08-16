@@ -753,9 +753,31 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             Map<String, String> headers =
                     (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (headers != null) {
-                headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
-                        " error=\"invalid_token\"" +
-                        ", error_description=\"The provided token is invalid\"");
+                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
+                    String contextPath = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+                    if (StringUtils.isEmpty(contextPath)) {
+                        headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
+                                " error=\"invalid_token\"" +
+                                ", error_description=\"The provided token is invalid\"");
+                    } else {
+                        // We need to adjust this to support vhost instead of constructing the URL here
+                        String hostAddress = APIUtil.getHostAddress();
+                        if ("localhost".equals(hostAddress)) {
+                            hostAddress += ":";
+                            hostAddress += (8243  + APIUtil.getPortOffset());
+                        }
+                        String resourceMetadata = APIConstants.HTTPS_PROTOCOL + APIConstants.URL_SCHEME_SEPARATOR +
+                                hostAddress + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
+                        headers.put(HttpHeaders.WWW_AUTHENTICATE, "Bearer resource_metadata=" +
+                                "\"" + resourceMetadata + "\","
+                                + " error=\"invalid_token\","
+                                + " error_description=\"Access token is missing or expired\"");
+                    }
+                } else {
+                    headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
+                            " error=\"invalid_token\"" +
+                            ", error_description=\"The provided token is invalid\"");
+                }
                 axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
             }
         }

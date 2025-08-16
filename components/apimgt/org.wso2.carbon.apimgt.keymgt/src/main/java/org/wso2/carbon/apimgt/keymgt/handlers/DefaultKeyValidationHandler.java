@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
@@ -183,11 +184,15 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                     String httpMethodFromMapping = mapping.getHttpMethod();
                     if (StringUtils.equals(APIConstants.API_TYPE_MCP, api.getApiType())) {
                         BackendOperationMapping backendAPIOperationMapping = mapping.getBackendOperationMapping();
+                        APIOperationMapping apiOperationMapping = mapping.getApiOperationMapping();
+                        BackendOperation backendOperation = null;
                         if (backendAPIOperationMapping != null) {
-                            BackendOperation backendOperation = backendAPIOperationMapping.getBackendOperation();
-                            if (backendOperation != null) {
-                                httpMethodFromMapping = backendOperation.getVerb().toString();
-                            }
+                            backendOperation = backendAPIOperationMapping.getBackendOperation();
+                        } else if (apiOperationMapping != null) {
+                            backendOperation = apiOperationMapping.getBackendOperation();
+                        }
+                        if (backendOperation != null) {
+                            httpMethodFromMapping = backendOperation.getVerb().toString();
                         }
                     }
                     if (Objects.equals(httpMethodFromMapping, httpVerb) || "WS".equalsIgnoreCase(api.getApiType())) {
@@ -363,11 +368,15 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
 
         BackendOperationMapping backendAPIOperationMapping = urlMapping.getBackendOperationMapping();
+        APIOperationMapping apiOperationMapping = urlMapping.getApiOperationMapping();
+        BackendOperation backendOperation = null;
         if (backendAPIOperationMapping != null) {
-            BackendOperation backendOperation = backendAPIOperationMapping.getBackendOperation();
-            if (backendOperation != null) {
-                urlPattern = backendOperation.getTarget().trim();
-            }
+            backendOperation = backendAPIOperationMapping.getBackendOperation();
+        } else if (apiOperationMapping != null) {
+            backendOperation = apiOperationMapping.getBackendOperation();
+        }
+        if (backendOperation != null) {
+            urlPattern = backendOperation.getTarget().trim();
         }
 
         if (resource.equalsIgnoreCase(urlPattern)) {

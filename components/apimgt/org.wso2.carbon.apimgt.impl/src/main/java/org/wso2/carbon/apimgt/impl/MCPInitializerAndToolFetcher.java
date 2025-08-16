@@ -112,7 +112,7 @@ public class MCPInitializerAndToolFetcher {
         payload.put(APIConstants.MCP.RpcConstants.METHOD, APIConstants.MCP.METHOD_INITIALIZE);
 
         JSONObject params = new JSONObject();
-        params.put(APIConstants.MCP.PROTOCOL_VERSION_KEY, APIConstants.MCP.PROTOCOL_VERSION_2025_MARCH);
+        params.put(APIConstants.MCP.PROTOCOL_VERSION_KEY, APIConstants.MCP.PROTOCOL_VERSION_2025_JUNE);
 
         JSONObject capabilities = new JSONObject();
         JSONObject roots = new JSONObject().put(APIConstants.MCP.LIST_CHANGED_KEY, true);
