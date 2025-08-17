@@ -5076,7 +5076,6 @@ components:
           example: CalculatorAPI
         displayName:
           description: Human-friendly name shown in UI. Length limited to DB column size.
-          minLength: 1
           type: string
           example: Pizza Shack API
         description:
@@ -6422,7 +6421,6 @@ components:
           properties:
             displayName:
               description: Human-friendly name shown in UI. Length limited to DB column size.
-              minLength: 1
               type: string
               example: Pizza Shack API
             description:
@@ -6507,7 +6505,6 @@ components:
               example: TestAPI
             apiDisplayName:
               description: Human-friendly name shown in UI for associated API. Length limited to DB column size.
-              minLength: 1
               type: string
               example: Pizza Shack API
             apiVersion:
@@ -6530,7 +6527,6 @@ components:
               example: TestAPI
             apiDisplayName:
               description: Human-friendly name shown in UI for associated API. Length limited to DB column size.
-              minLength: 1
               type: string
               example: Pizza Shack API
             apiVersion:

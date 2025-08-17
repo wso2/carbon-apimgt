@@ -1129,7 +1129,7 @@ public class APIMappingUtil {
         apiInfoDTO.setEgress(api.isEgress() == 1); // true -1, false - 0
         apiInfoDTO.setSubtype(api.getSubtype());
         apiInfoDTO.setInitiatedFromGateway(api.isInitiatedFromGateway());
-        apiInfoDTO.setDisplayName(api.getDisplayName());
+        apiInfoDTO.setDisplayName(api.getDisplayName() != null ? api.getDisplayName() : api.getId().getApiName());
         return apiInfoDTO;
     }
 
@@ -2452,7 +2452,6 @@ public class APIMappingUtil {
         subtypeConfigurationDTO.setSubtype(model.getSubtype());
         dto.setSubtypeConfiguration(subtypeConfigurationDTO);
         dto.setInitiatedFromGateway(model.isInitiatedFromGateway());
-        dto.setDisplayName(model.getDisplayName());
         String protocolVersion = model.getMetadata() != null
                 ? model.getMetadata().get(APIConstants.MCP.PROTOCOL_VERSION_KEY) : null;
         if (protocolVersion != null) {
@@ -3861,7 +3860,8 @@ public class APIMappingUtil {
             productDto.setTechnicalOwner(apiProduct.getTechnicalOwner());
             productDto.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
             productDto.setMonetizedInfo(apiProduct.isMonetizationEnabled());
-            productDto.setDisplayName(apiProduct.getDisplayName());
+            productDto.setDisplayName(
+                    apiProduct.getDisplayName() != null ? apiProduct.getDisplayName() : apiProduct.getId().getName());
             productDto.setEgress(apiProduct.isEgress() == 1);
 
             list.add(productDto);
@@ -4167,7 +4167,7 @@ public class APIMappingUtil {
         product.setID(id);
         product.setUuid(dto.getId());
         product.setDescription(dto.getDescription());
-        product.setDisplayName(StringUtils.isNotEmpty(dto.getDisplayName()) ? dto.getDisplayName() : dto.getName());
+        product.setDisplayName(dto.getDisplayName() != null ? dto.getDisplayName() : dto.getName());
 
         String context = dto.getContext();
         final String originalContext = context;

@@ -51,7 +51,7 @@ public class APISearchResultDTO extends SearchResultDTO  {
   
   @ApiModelProperty(example = "Pizza Shack API", value = "Human-friendly name shown in UI. Length limited to DB column size.")
   @JsonProperty("displayName")
- @Size(min=1)  public String getDisplayName() {
+  public String getDisplayName() {
     return displayName;
   }
   public void setDisplayName(String displayName) {

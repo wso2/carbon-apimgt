@@ -265,7 +265,7 @@ return null;
   
   @ApiModelProperty(example = "Pizza Shack API", value = "Human-friendly name shown in UI for associated API. Length limited to DB column size.")
   @JsonProperty("apiDisplayName")
- @Size(min=1)  public String getApiDisplayName() {
+  public String getApiDisplayName() {
     return apiDisplayName;
   }
   public void setApiDisplayName(String apiDisplayName) {

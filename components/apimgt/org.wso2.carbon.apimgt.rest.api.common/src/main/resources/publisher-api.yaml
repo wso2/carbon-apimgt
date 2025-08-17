@@ -13466,7 +13466,6 @@ components:
           example: PizzaShackAPI
         displayName:
           description: Human-friendly name shown in UI. Length limited to DB column size.
-          minLength: 1
           type: string
           example: Pizza Shack API
         description:
@@ -14019,7 +14018,6 @@ components:
           example: ReadingList
         displayName:
           description: Human-friendly name shown in UI. Length limited to DB column size.
-          minLength: 1
           type: string
           example: Reading List
         description:
@@ -14626,7 +14624,6 @@ components:
           example: PizzaShackAPIProduct
         displayName:
           description: Human-friendly name shown in UI. Length limited to DB column size.
-          minLength: 1
           type: string
           example: Pizza Shack API Product
         context:
@@ -17204,7 +17201,6 @@ components:
           properties:
             displayName:
               description: Human-friendly name shown in UI. Length limited to DB column size.
-              minLength: 1
               type: string
               example: Pizza Shack API
             description:
@@ -17274,7 +17270,6 @@ components:
           properties:
             displayName:
               description: Human-friendly name shown in UI. Length limited to DB column size.
-              minLength: 1
               type: string
               example: Pizza Shack API
             description:
@@ -17386,7 +17381,6 @@ components:
               example: TestAPI
             apiDisplayName:
               description: Human-friendly name shown in UI for associated API. Length limited to DB column size.
-              minLength: 1
               type: string
               example: Pizza Shack API
             apiVersion:
@@ -17407,7 +17401,6 @@ components:
         - properties:
             apiDisplayName:
               description: Human-friendly name shown in UI for associated API. Length limited to DB column size.
-              minLength: 1
               type: string
               example: Pizza Shack API
             apiName:
