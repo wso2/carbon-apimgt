@@ -4167,7 +4167,7 @@ public class APIMappingUtil {
         product.setID(id);
         product.setUuid(dto.getId());
         product.setDescription(dto.getDescription());
-        product.setDisplayName(dto.getDisplayName());
+        product.setDisplayName(StringUtils.isNotEmpty(dto.getDisplayName()) ? dto.getDisplayName() : dto.getName());
 
         String context = dto.getContext();
         final String originalContext = context;
