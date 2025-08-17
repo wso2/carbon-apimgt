@@ -226,6 +226,7 @@ public class APIMappingUtil {
         context = updateContextWithVersion(dto.getVersion(), originalContext, context);
         model.setContext(context);
         model.setDescription(dto.getDescription());
+        model.setDisplayName(dto.getDisplayName());
 
         Object endpointConfig = dto.getEndpointConfig();
         if (endpointConfig != null) {
