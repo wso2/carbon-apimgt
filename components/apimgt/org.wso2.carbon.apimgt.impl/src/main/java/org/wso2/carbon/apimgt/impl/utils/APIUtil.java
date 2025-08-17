@@ -63,6 +63,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
@@ -277,6 +278,9 @@ import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -312,6 +316,8 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 import java.security.cert.X509Certificate;
 import java.text.Normalizer;
 
@@ -5976,7 +5982,73 @@ public final class APIUtil {
 
         HttpClientConfigurationDTO configuration = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration().getHttpClientConfiguration();
-        return CommonAPIUtil.getHttpClient(protocol, configuration);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Creating HTTP client with protocol: " + protocol + " port: " + port);
+        }
+
+        // Avoid unnecessary truststore work for plain HTTP
+        if (!APIConstants.HTTPS_PROTOCOL.equalsIgnoreCase(protocol)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Using default SSL context for non-HTTPS protocol");
+            }
+            return CommonAPIUtil.getHttpClient(protocol, configuration, SSLContexts.createDefault());
+        }
+
+        SSLContext sslContext;
+        String keyStorePath = CarbonUtils.getServerConfiguration().getFirstProperty(APIConstants.TRUST_STORE_LOCATION);
+        String keyStorePassword = CarbonUtils.getServerConfiguration().getFirstProperty(APIConstants.TRUST_STORE_PASSWORD);
+        String keyStoreType = CarbonUtils.getServerConfiguration().getFirstProperty(APIConstants.TRUST_STORE_TYPE);
+        if (StringUtils.isBlank(keyStoreType)) {
+            keyStoreType = KeyStore.getDefaultType();
+        }
+
+        // Basic validation and fast-fallback
+        if (StringUtils.isBlank(keyStorePath) || StringUtils.isBlank(keyStorePassword)) {
+            log.error("Trust store path or password is not configured. Falling back to default SSLContext.");
+            return CommonAPIUtil.getHttpClient(protocol, configuration, SSLContexts.createDefault());
+        }
+        Path path = Paths.get(keyStorePath);
+        if (!Files.exists(path)) {
+            log.warn("Trust store not found at path: " + keyStorePath + ". Falling back to default SSLContext.");
+            return CommonAPIUtil.getHttpClient(protocol, configuration, SSLContexts.createDefault());
+        }
+
+        // Create SSL context dynamically to pick up certificate changes at runtime
+        if (log.isDebugEnabled()) {
+            log.debug("Loading trust store for SSL context creation. KeyStore: " + keyStorePath);
+        }
+        try {
+            KeyStore trustStore = KeyStore.getInstance(keyStoreType);
+            char[] passwordChars = keyStorePassword.toCharArray();
+            try (InputStream keyStoreStream = Files.newInputStream(path)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Loading trust store from: " + keyStorePath);
+                }
+                trustStore.load(keyStoreStream, passwordChars);
+            }
+            sslContext = SSLContexts.custom().loadTrustMaterial(trustStore, null).build();
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully loaded SSL context with trust store");
+            }
+        } catch (KeyStoreException e) {
+            log.error("Failed to read from Key Store: " + e.getMessage());
+            sslContext = SSLContexts.createDefault();
+        } catch (IOException e) {
+            log.error("Key Store not found in " + keyStorePath + ": " + e.getMessage());
+            sslContext = SSLContexts.createDefault();
+        } catch (NoSuchAlgorithmException e) {
+            log.error("Failed to load Key Store from " + keyStorePath + ": " + e.getMessage());
+            sslContext = SSLContexts.createDefault();
+        } catch (CertificateException e) {
+            log.error("Failed to read Certificate: " + e.getMessage());
+            sslContext = SSLContexts.createDefault();
+        } catch (KeyManagementException e) {
+            log.error("Failed to initialize SSLContext from trust store: " + keyStorePath + ": " + e.getMessage());
+            sslContext = SSLContexts.createDefault();
+        }
+
+        return CommonAPIUtil.getHttpClient(protocol, configuration, sslContext);
     }
 
 
