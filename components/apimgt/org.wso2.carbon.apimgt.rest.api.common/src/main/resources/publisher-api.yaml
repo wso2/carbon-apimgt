@@ -14345,7 +14345,7 @@ components:
           type: string
           example: PizzaShack API
           description: |
-            Display name of the MCP API.
+            Display name of the MCP Server.
             This is the name that will be displayed in the Publisher and DevPortal.
             If not provided, the name will be used as the display name.
         version:
@@ -17398,7 +17398,8 @@ components:
       title: API Definition Search Result
       allOf:
         - $ref: '#/components/schemas/SearchResult'
-        - properties:
+        - type: object
+          properties:
             apiDisplayName:
               description: Human-friendly name shown in UI for associated API. Length limited to DB column size.
               type: string
