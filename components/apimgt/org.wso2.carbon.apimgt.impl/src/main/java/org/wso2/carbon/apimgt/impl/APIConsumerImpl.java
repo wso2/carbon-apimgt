@@ -3811,29 +3811,31 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             if (servers == null || servers.size() == 0) {
                 return null;
             }
-            JsonObject server = servers.get(0).getAsJsonObject();
-            if (server == null || !server.has("url")) {
-                return null;
-            }
-            String resolvedUrl = server.get("url").getAsString();
-            JsonObject variables = server.getAsJsonObject("variables");
-            if (variables != null && variables.has("basePath")) {
-                JsonObject basePath = variables.getAsJsonObject("basePath");
-                if (basePath != null && basePath.has("default")) {
-                    String stageName = basePath.get("default").getAsString();
-                    resolvedUrl = resolvedUrl
-                            .replace("/{basePath}", "/" + stageName)
-                            .replace("{basePath}", stageName);
-                }
-            }
-            if (StringUtils.isBlank(resolvedUrl)) {
-                return null;
-            }
             Map<String, String> hostsWithSchemes = new HashMap<>();
-            if (StringUtils.startsWithIgnoreCase(resolvedUrl, APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
-                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, resolvedUrl);
-            } else {
-                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, resolvedUrl);
+            for (JsonElement serverElement : servers) {
+                JsonObject server = serverElement.getAsJsonObject();
+                if (server == null || !server.has("url")) {
+                    continue;
+                }
+                String resolvedUrl = server.get("url").getAsString();
+                JsonObject variables = server.getAsJsonObject("variables");
+                if (variables != null && variables.has("basePath")) {
+                    JsonObject basePath = variables.getAsJsonObject("basePath");
+                    if (basePath != null && basePath.has("default")) {
+                        String stageName = basePath.get("default").getAsString();
+                        resolvedUrl = resolvedUrl
+                                .replace("/{basePath}", "/" + stageName)
+                                .replace("{basePath}", stageName);
+                    }
+                }
+                if (StringUtils.isBlank(resolvedUrl)) {
+                    continue;
+                }
+                if (StringUtils.startsWithIgnoreCase(resolvedUrl, APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
+                    hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, resolvedUrl);
+                } else {
+                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, resolvedUrl);
+                }
             }
             return hostsWithSchemes;
         } catch (RuntimeException e) {
