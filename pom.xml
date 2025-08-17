@@ -2059,7 +2059,7 @@
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
 
-        <carbon.analytics.common.version>5.3.23</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.3.25</carbon.analytics.common.version>
 
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.9.29-alpha</carbon.kernel.version>
