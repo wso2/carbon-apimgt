@@ -455,6 +455,7 @@
                             org.apache.axis2.engine; version="${axis2.osgi.version.range}",
                             org.apache.axis2.rpc.receivers; version="${axis2.osgi.version.range}",
                             org.apache.axis2.context; version="${axis2.osgi.version.range}",
+                            org.apache.commons.io.*;version="${import.package.version.commons.io}",
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
                             org.apache.synapse,
                             org.apache.synapse.config,
