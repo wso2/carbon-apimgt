@@ -63,6 +63,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
@@ -277,6 +278,8 @@ import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -312,6 +315,8 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 import java.security.cert.X509Certificate;
 import java.text.Normalizer;
 
@@ -5976,7 +5981,28 @@ public final class APIUtil {
 
         HttpClientConfigurationDTO configuration = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration().getHttpClientConfiguration();
-        return CommonAPIUtil.getHttpClient(protocol, configuration);
+
+        SSLContext sslContext = SSLContexts.createDefault();
+        String keyStorePath = CarbonUtils.getServerConfiguration().getFirstProperty(APIConstants.TRUST_STORE_LOCATION);
+        String keyStorePassword = CarbonUtils.getServerConfiguration().getFirstProperty(APIConstants.TRUST_STORE_PASSWORD);
+
+        // Create SSL context dynamically to pick up certificate changes at runtime
+        try {
+            KeyStore trustStore = KeyStore.getInstance("JKS");
+            trustStore.load(Files.newInputStream(Paths.get(keyStorePath)), keyStorePassword.toCharArray());
+            sslContext = SSLContexts.custom().loadTrustMaterial(trustStore, null).build();
+        } catch (KeyStoreException e) {
+            log.error("Failed to read from Key Store", e);
+        } catch (IOException e) {
+            log.error("Key Store not found in " + keyStorePath, e);
+        } catch (NoSuchAlgorithmException e) {
+            log.error("Failed to load Key Store from " + keyStorePath, e);
+        } catch (CertificateException e) {
+            log.error("Failed to read Certificate", e);
+        } catch (KeyManagementException e) {
+            log.error("Failed to load key from" + keyStorePath, e);
+        }
+        return CommonAPIUtil.getHttpClient(protocol, configuration, sslContext);
     }
 
 

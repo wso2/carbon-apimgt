@@ -1047,19 +1047,6 @@ public class APIManagerComponent {
                     nonProxyHosts);
         }
 
-        SSLContext sslContext = null;
-        try {
-            KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
-            sslContext = SSLContexts.custom().loadTrustMaterial(trustStore, null).build();
-        } catch ( KeyStoreException e) {
-            log.error("Failed to read from Key Store", e);
-        } catch (
-                NoSuchAlgorithmException e) {
-            log.error("Failed to load Key Store.", e);
-        } catch (
-                KeyManagementException e) {
-            log.error("Failed to load key from Key Store" , e);
-        }
         String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
         HostnameVerifier hostnameVerifier;
         switch(hostnameVerifierOption) {
@@ -1084,7 +1071,7 @@ public class APIManagerComponent {
         }
         configuration.setHttpClientConfiguration(builder
                 .withConnectionParams(maxTotal, defaultMaxPerRoute, connectionTimeout)
-                .withSSLContext(sslContext, hostnameVerifier).build());
+                .withHostnameVerifier(hostnameVerifier).build());
     }
 
     void initializeAPIDiscoveryTasks(String organization) {

@@ -57,10 +57,9 @@ public class CommonAPIUtil {
     private static final HostnameVerifier browserHostNameVerifier = new BrowserHostnameVerifier();
 
     private static PoolingHttpClientConnectionManager getPoolingHttpClientConnectionManager(
-            HttpClientConfigurationDTO clientConfiguration) {
+            SSLContext sslContext, HostnameVerifier hostnameVerifier) {
 
-        SSLConnectionSocketFactory socketFactory = createSocketFactory(clientConfiguration.getSslContext(),
-                clientConfiguration.getHostnameVerifier());
+        SSLConnectionSocketFactory socketFactory = createSocketFactory(sslContext, hostnameVerifier);
         Registry<ConnectionSocketFactory> socketFactoryRegistry =
                     RegistryBuilder.<ConnectionSocketFactory>create()
                             .register(HTTP_PROTOCOL, PlainConnectionSocketFactory.getSocketFactory())
@@ -78,9 +77,12 @@ public class CommonAPIUtil {
      * Return a http client instance
      *
      * @param protocol - service endpoint protocol http/https
+     * @param clientConfiguration HTTP client configuration for connection pooling, proxy, timeouts
+     * @param sslContext SSL context to be used for HTTPS connections
      * @return {@link HttpClient} with all proxy, TLS, ConnectionPooling related configurations
      */
-    public static HttpClient getHttpClient(String protocol, HttpClientConfigurationDTO clientConfiguration) {
+    public static HttpClient getHttpClient(String protocol, HttpClientConfigurationDTO clientConfiguration,
+                                          SSLContext sslContext) {
 
         int maxTotal = clientConfiguration.getConnectionLimit();
         int defaultMaxPerRoute = clientConfiguration.getMaximumConnectionsPerRoute();
@@ -98,7 +100,8 @@ public class CommonAPIUtil {
             protocol = proxyProtocol;
         }
 
-        PoolingHttpClientConnectionManager pool = getPoolingHttpClientConnectionManager(clientConfiguration);
+        PoolingHttpClientConnectionManager pool = getPoolingHttpClientConnectionManager(sslContext,
+                clientConfiguration.getHostnameVerifier());
 
         pool.setMaxTotal(maxTotal);
         pool.setDefaultMaxPerRoute(defaultMaxPerRoute);
