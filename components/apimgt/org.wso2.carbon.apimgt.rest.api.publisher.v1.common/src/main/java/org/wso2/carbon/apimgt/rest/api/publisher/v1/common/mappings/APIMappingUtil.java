@@ -226,6 +226,7 @@ public class APIMappingUtil {
         context = updateContextWithVersion(dto.getVersion(), originalContext, context);
         model.setContext(context);
         model.setDescription(dto.getDescription());
+        model.setDisplayName(dto.getDisplayName());
 
         Object endpointConfig = dto.getEndpointConfig();
         if (endpointConfig != null) {
@@ -1129,6 +1130,7 @@ public class APIMappingUtil {
         apiInfoDTO.setEgress(api.isEgress() == 1); // true -1, false - 0
         apiInfoDTO.setSubtype(api.getSubtype());
         apiInfoDTO.setInitiatedFromGateway(api.isInitiatedFromGateway());
+        apiInfoDTO.setDisplayName(api.getDisplayName() != null ? api.getDisplayName() : api.getId().getApiName());
         return apiInfoDTO;
     }
 
@@ -2139,6 +2141,7 @@ public class APIMappingUtil {
         }
         MCPServerDTO dto = new MCPServerDTO();
         dto.setName(model.getId().getApiName());
+        dto.setDisplayName(model.getDisplayName() != null ? model.getDisplayName() : model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
         String providerName = model.getId().getProviderName();
         dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
@@ -2450,7 +2453,6 @@ public class APIMappingUtil {
         subtypeConfigurationDTO.setSubtype(model.getSubtype());
         dto.setSubtypeConfiguration(subtypeConfigurationDTO);
         dto.setInitiatedFromGateway(model.isInitiatedFromGateway());
-        dto.setDisplayName(model.getDisplayName());
         String protocolVersion = model.getMetadata() != null
                 ? model.getMetadata().get(APIConstants.MCP.PROTOCOL_VERSION_KEY) : null;
         if (protocolVersion != null) {
@@ -3859,6 +3861,8 @@ public class APIMappingUtil {
             productDto.setTechnicalOwner(apiProduct.getTechnicalOwner());
             productDto.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
             productDto.setMonetizedInfo(apiProduct.isMonetizationEnabled());
+            productDto.setDisplayName(
+                    apiProduct.getDisplayName() != null ? apiProduct.getDisplayName() : apiProduct.getId().getName());
             productDto.setEgress(apiProduct.isEgress() == 1);
 
             list.add(productDto);
@@ -3897,6 +3901,8 @@ public class APIMappingUtil {
         APIProductDTO productDto = new APIProductDTO();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         productDto.setName(product.getId().getName());
+        productDto.setDisplayName(
+                product.getDisplayName() != null ? product.getDisplayName() : product.getId().getName());
         productDto.setProvider(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
         productDto.setId(product.getUuid());
         productDto.setVersion(product.getId().getVersion());
@@ -4162,6 +4168,7 @@ public class APIMappingUtil {
         product.setID(id);
         product.setUuid(dto.getId());
         product.setDescription(dto.getDescription());
+        product.setDisplayName(dto.getDisplayName() != null ? dto.getDisplayName() : dto.getName());
 
         String context = dto.getContext();
         final String originalContext = context;

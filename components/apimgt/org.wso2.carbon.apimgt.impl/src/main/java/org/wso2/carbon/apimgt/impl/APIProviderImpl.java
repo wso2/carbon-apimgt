@@ -6094,6 +6094,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.setStatus(apiInfo.getStatus());
         api.setSubtype(apiInfo.getApiSubtype());
         api.setInitiatedFromGateway(apiInfo.isInitiatedFromGateway());
+        api.setDisplayName(apiInfo.getDisplayName());
     }
 
     private void populateApiInfo(APIProduct apiProduct) throws APIManagementException {
@@ -6106,6 +6107,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiProduct.setEgress(apiInfo.isEgress());
             apiProduct.setState(apiInfo.getStatus());
         }
+        apiProduct.setDisplayName(apiInfo.getDisplayName());
     }
 
     public APIProduct getAPIProductbyUUID(String uuid, String organization) throws APIManagementException {
@@ -6366,6 +6368,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setContextTemplate(publiserAPI.getContext());
                         api.setStatus(publiserAPI.getStatus());
                         api.setDescription(publiserAPI.getDescription());
+                        api.setDisplayName(publiserAPI.getDisplayName());
                         api.setType(publiserAPI.getTransportType());
                         api.setThumbnailUrl(publiserAPI.getThumbnailUri());
                         api.setBusinessOwner(publiserAPI.getBusinessOwner());
@@ -6384,6 +6387,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setContextTemplate(publiserAPI.getContext());
                         api.setState(publiserAPI.getStatus());
                         api.setDescription(publiserAPI.getDescription());
+                        api.setDisplayName(publiserAPI.getDisplayName());
                         api.setThumbnailUrl(publiserAPI.getThumbnailUri());
                         api.setBusinessOwner(publiserAPI.getBusinessOwner());
                         api.setBusinessOwnerEmail(publiserAPI.getBusinessOwnerEmail());
@@ -6404,6 +6408,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             API api = new API(new APIIdentifier(docItem.getApiProvider(), docItem.getApiName(),
                                     docItem.getApiVersion()));
                             api.setUuid(docItem.getApiUUID());
+                            api.setDisplayName(docItem.getApiDisplayName());
                             docMap.put(doc, api);
                         } else if ("APIProduct".equals(docItem.getAssociatedType())) {
                             APIProduct api = new APIProduct(new APIProductIdentifier(docItem.getApiProvider(),
@@ -6422,6 +6427,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         apiDefSearchResult.setApiProvider(definitionItem.getApiProvider());
                         apiDefSearchResult.setApiVersion(definitionItem.getApiVersion());
                         apiDefSearchResult.setApiType(definitionItem.getApiType());
+                        apiDefSearchResult.setApiDisplayName(definitionItem.getApiDisplayName());
                         apiDefSearchResult.setAssociatedType(definitionItem.getAssociatedType()); //API or API product
                         defSearchList.add(apiDefSearchResult);
                     }

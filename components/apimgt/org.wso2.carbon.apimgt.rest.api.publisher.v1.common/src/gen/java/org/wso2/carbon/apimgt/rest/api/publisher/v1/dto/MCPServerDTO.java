@@ -256,7 +256,7 @@ return null;
   
   @ApiModelProperty(example = "Reading List", value = "Human-friendly name shown in UI. Length limited to DB column size.")
   @JsonProperty("displayName")
- @Size(min=1)  public String getDisplayName() {
+  public String getDisplayName() {
     return displayName;
   }
   public void setDisplayName(String displayName) {

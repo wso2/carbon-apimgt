@@ -62,6 +62,7 @@ public class SearchResultMappingUtil {
         apiResultDTO.setId(api.getUUID());
         APIIdentifier apiId = api.getId();
         apiResultDTO.setName(apiId.getApiName());
+        apiResultDTO.setDisplayName(api.getDisplayName() != null ? api.getDisplayName() : apiId.getApiName());
         apiResultDTO.setVersion(apiId.getVersion());
         apiResultDTO.setProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         String context = api.getContextTemplate();
@@ -98,6 +99,8 @@ public class SearchResultMappingUtil {
         apiResultDTO.setId(apiProduct.getUuid());
         APIProductIdentifier apiId = apiProduct.getId();
         apiResultDTO.setName(apiId.getName());
+        apiResultDTO.setDisplayName(
+                apiProduct.getDisplayName() != null ? apiProduct.getDisplayName() : apiId.getName());
         apiResultDTO.setVersion(apiId.getVersion());
         apiResultDTO.setProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         String context = apiProduct.getContextTemplate();
@@ -137,6 +140,7 @@ public class SearchResultMappingUtil {
         docResultDTO.setOtherTypeName(document.getOtherTypeName());
         APIIdentifier apiId = api.getId();
         docResultDTO.setApiName(apiId.getApiName());
+        docResultDTO.setApiDisplayName(api.getDisplayName() != null ? api.getDisplayName() : apiId.getApiName());
         docResultDTO.setApiVersion(apiId.getVersion());
         docResultDTO.setApiProvider(apiId.getProviderName());
         docResultDTO.setApiUUID(api.getUUID());
@@ -194,6 +198,9 @@ public class SearchResultMappingUtil {
         apiDefSearchResultDTO.setType(SearchResultDTO.TypeEnum.DEFINITION);
         apiDefSearchResultDTO.setApiUUID(apiDefResult.getApiUuid());
         apiDefSearchResultDTO.setApiName(apiDefResult.getApiName());
+        apiDefSearchResultDTO.setApiDisplayName(apiDefResult.getApiDisplayName() != null ?
+                apiDefResult.getApiDisplayName() :
+                apiDefResult.getApiName());
         apiDefSearchResultDTO.setApiContext(apiDefResult.getApiContext());
         apiDefSearchResultDTO.setApiVersion(apiDefResult.getApiVersion());
         apiDefSearchResultDTO.setApiProvider(apiDefResult.getApiProvider());

@@ -20,6 +20,7 @@ import javax.validation.Valid;
 
 public class APIProductSearchResultAllOfDTO   {
   
+    private String displayName = null;
     private String description = null;
     private String context = null;
     private String version = null;
@@ -33,6 +34,24 @@ public class APIProductSearchResultAllOfDTO   {
     private String technicalOwner = null;
     private String technicalOwnerEmail = null;
     private Boolean egress = null;
+
+  /**
+   * Human-friendly name shown in UI. Length limited to DB column size.
+   **/
+  public APIProductSearchResultAllOfDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Pizza Shack API", value = "Human-friendly name shown in UI. Length limited to DB column size.")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
 
   /**
    * A brief description about the API
@@ -271,7 +290,8 @@ public class APIProductSearchResultAllOfDTO   {
       return false;
     }
     APIProductSearchResultAllOfDTO apIProductSearchResultAllOf = (APIProductSearchResultAllOfDTO) o;
-    return Objects.equals(description, apIProductSearchResultAllOf.description) &&
+    return Objects.equals(displayName, apIProductSearchResultAllOf.displayName) &&
+        Objects.equals(description, apIProductSearchResultAllOf.description) &&
         Objects.equals(context, apIProductSearchResultAllOf.context) &&
         Objects.equals(version, apIProductSearchResultAllOf.version) &&
         Objects.equals(provider, apIProductSearchResultAllOf.provider) &&
@@ -288,7 +308,7 @@ public class APIProductSearchResultAllOfDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, version, provider, status, thumbnailUri, hasThumbnail, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, egress);
+    return Objects.hash(displayName, description, context, version, provider, status, thumbnailUri, hasThumbnail, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, egress);
   }
 
   @Override
@@ -296,6 +316,7 @@ public class APIProductSearchResultAllOfDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIProductSearchResultAllOfDTO {\n");
     
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");

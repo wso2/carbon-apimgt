@@ -22,6 +22,7 @@ public class MCPServerMetadataDTO   {
   
     private String id = null;
     private String name = null;
+    private String displayName = null;
     private String version = null;
     private String provider = null;
 
@@ -57,6 +58,24 @@ public class MCPServerMetadataDTO   {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   * Display name of the MCP Server. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. 
+   **/
+  public MCPServerMetadataDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "PizzaShack API", value = "Display name of the MCP Server. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. ")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
@@ -106,13 +125,14 @@ public class MCPServerMetadataDTO   {
     MCPServerMetadataDTO mcPServerMetadata = (MCPServerMetadataDTO) o;
     return Objects.equals(id, mcPServerMetadata.id) &&
         Objects.equals(name, mcPServerMetadata.name) &&
+        Objects.equals(displayName, mcPServerMetadata.displayName) &&
         Objects.equals(version, mcPServerMetadata.version) &&
         Objects.equals(provider, mcPServerMetadata.provider);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, version, provider);
+    return Objects.hash(id, name, displayName, version, provider);
   }
 
   @Override
@@ -122,6 +142,7 @@ public class MCPServerMetadataDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("}");

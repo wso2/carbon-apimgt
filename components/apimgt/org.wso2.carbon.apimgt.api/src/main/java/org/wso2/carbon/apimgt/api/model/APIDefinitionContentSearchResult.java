@@ -27,6 +27,7 @@ public class APIDefinitionContentSearchResult {
     private String name;
     private String apiUuid;
     private String apiName;
+    private String apiDisplayName;
     private String apiContext;
     private String apiVersion;
     private String apiProvider;
@@ -63,6 +64,14 @@ public class APIDefinitionContentSearchResult {
 
     public void setApiName(String apiName) {
         this.apiName = apiName;
+    }
+
+    public String getApiDisplayName() {
+        return apiDisplayName;
+    }
+
+    public void setApiDisplayName(String apiDisplayName) {
+        this.apiDisplayName = apiDisplayName;
     }
 
     public String getApiVersion() {

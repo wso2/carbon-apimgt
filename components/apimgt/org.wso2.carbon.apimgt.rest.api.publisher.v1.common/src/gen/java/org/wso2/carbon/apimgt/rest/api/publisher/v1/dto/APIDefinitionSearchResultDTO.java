@@ -22,6 +22,7 @@ import javax.validation.Valid;
 
 public class APIDefinitionSearchResultDTO extends SearchResultDTO  {
   
+    private String apiDisplayName = null;
     private String apiName = null;
     private String apiVersion = null;
     private String apiContext = null;
@@ -29,6 +30,24 @@ public class APIDefinitionSearchResultDTO extends SearchResultDTO  {
     private String apiProvider = null;
     private String apiType = null;
     private String associatedType = null;
+
+  /**
+   * Human-friendly name shown in UI for associated API. Length limited to DB column size.
+   **/
+  public APIDefinitionSearchResultDTO apiDisplayName(String apiDisplayName) {
+    this.apiDisplayName = apiDisplayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Pizza Shack API", value = "Human-friendly name shown in UI for associated API. Length limited to DB column size.")
+  @JsonProperty("apiDisplayName")
+  public String getApiDisplayName() {
+    return apiDisplayName;
+  }
+  public void setApiDisplayName(String apiDisplayName) {
+    this.apiDisplayName = apiDisplayName;
+  }
 
   /**
    * The name of the associated API
@@ -166,7 +185,8 @@ public class APIDefinitionSearchResultDTO extends SearchResultDTO  {
       return false;
     }
     APIDefinitionSearchResultDTO apIDefinitionSearchResult = (APIDefinitionSearchResultDTO) o;
-    return Objects.equals(apiName, apIDefinitionSearchResult.apiName) &&
+    return Objects.equals(apiDisplayName, apIDefinitionSearchResult.apiDisplayName) &&
+        Objects.equals(apiName, apIDefinitionSearchResult.apiName) &&
         Objects.equals(apiVersion, apIDefinitionSearchResult.apiVersion) &&
         Objects.equals(apiContext, apIDefinitionSearchResult.apiContext) &&
         Objects.equals(apiUUID, apIDefinitionSearchResult.apiUUID) &&
@@ -177,7 +197,7 @@ public class APIDefinitionSearchResultDTO extends SearchResultDTO  {
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiName, apiVersion, apiContext, apiUUID, apiProvider, apiType, associatedType);
+    return Objects.hash(apiDisplayName, apiName, apiVersion, apiContext, apiUUID, apiProvider, apiType, associatedType);
   }
 
   @Override
@@ -185,6 +205,7 @@ public class APIDefinitionSearchResultDTO extends SearchResultDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIDefinitionSearchResultDTO {\n");
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    sb.append("    apiDisplayName: ").append(toIndentedString(apiDisplayName)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
     sb.append("    apiContext: ").append(toIndentedString(apiContext)).append("\n");

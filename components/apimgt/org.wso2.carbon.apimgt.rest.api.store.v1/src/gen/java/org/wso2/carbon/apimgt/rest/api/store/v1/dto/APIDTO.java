@@ -32,6 +32,7 @@ public class APIDTO   {
   
     private String id = null;
     private String name = null;
+    private String displayName = null;
     private String description = null;
     private String context = null;
     private String version = null;
@@ -104,6 +105,24 @@ public class APIDTO   {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   * Human-friendly name shown in UI. Length limited to DB column size.
+   **/
+  public APIDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Pizza Shack API", value = "Human-friendly name shown in UI. Length limited to DB column size.")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
@@ -766,6 +785,7 @@ public class APIDTO   {
     APIDTO API = (APIDTO) o;
     return Objects.equals(id, API.id) &&
         Objects.equals(name, API.name) &&
+        Objects.equals(displayName, API.displayName) &&
         Objects.equals(description, API.description) &&
         Objects.equals(context, API.context) &&
         Objects.equals(version, API.version) &&
@@ -806,7 +826,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, apiKeyHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, subscriptions, advertiseInfo, isSubscriptionAvailable, initiatedFromGateway, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols, egress, subtype);
+    return Objects.hash(id, name, displayName, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, apiKeyHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, subscriptions, advertiseInfo, isSubscriptionAvailable, initiatedFromGateway, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols, egress, subtype);
   }
 
   @Override
@@ -816,6 +836,7 @@ public class APIDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");

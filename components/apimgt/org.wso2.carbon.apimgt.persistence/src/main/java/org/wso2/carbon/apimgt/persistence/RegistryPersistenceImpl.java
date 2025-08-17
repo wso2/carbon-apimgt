@@ -1141,6 +1141,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 apiInfo.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
                 apiInfo.setMonetizationStatus(Boolean.parseBoolean(artifact.
                         getAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS)));
+                apiInfo.setDisplayName(artifact.getAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME));
                 publisherAPIInfoList.add(apiInfo);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -1345,6 +1346,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         getAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS)));
                 apiInfo.setAdvertiseOnly(Boolean.parseBoolean(artifact
                         .getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+                apiInfo.setDisplayName(artifact.getAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME));
                 devPortalAPIInfoList.add(apiInfo);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -1569,6 +1571,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 apiInfo.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
                                 apiInfo.setId(artifact.getId());
                                 apiInfo.setApiName(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
+                                apiInfo.setDisplayName(artifact.getAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME));
                                 apiInfo.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
                                 apiInfo.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
                                 apiInfo.setProviderName(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
@@ -1717,6 +1720,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 }
                                 pubAPI = RegistryPersistenceUtil.getAPIForSearch(apiArtifact);
                                 docSearch.setApiName(pubAPI.getApiName());
+                                docSearch.setApiDisplayName(pubAPI.getDisplayName());
                                 docSearch.setApiProvider(pubAPI.getProviderName());
                                 docSearch.setApiVersion(pubAPI.getVersion());
                                 docSearch.setApiUUID(pubAPI.getId());
@@ -1760,6 +1764,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 content.setDescription(pubAPI.getDescription());
                                 content.setId(pubAPI.getId());
                                 content.setName(pubAPI.getApiName());
+                                content.setDisplayName(pubAPI.getDisplayName());
                                 content.setProvider(
                                         RegistryPersistenceUtil.replaceEmailDomainBack(pubAPI.getProviderName()));
                                 content.setType(type);
@@ -1881,6 +1886,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 devAPI = RegistryPersistenceUtil.getDevPortalAPIForSearch(apiArtifact);
                                 devAPI.setVisibility(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
                                 docSearch.setApiName(devAPI.getApiName());
+                                docSearch.setApiDisplayName(devAPI.getDisplayName());
                                 docSearch.setApiProvider(devAPI.getProviderName());
                                 docSearch.setApiVersion(devAPI.getVersion());
                                 docSearch.setApiUUID(devAPI.getId());
@@ -1919,6 +1925,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 content.setType(associatedType);
                                 content.setId(devAPI.getId());
                                 content.setName(devAPI.getApiName());
+                                content.setDisplayName(devAPI.getDisplayName());
                                 content.setProvider(
                                         RegistryPersistenceUtil.replaceEmailDomainBack(devAPI.getProviderName()));
                                 content.setVersion(devAPI.getVersion());
@@ -4330,6 +4337,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 content.setName(defResourceName);
                 content.setApiUUID(devAPI.getId());
                 content.setApiName(devAPI.getApiName());
+                content.setApiDisplayName(devAPI.getDisplayName());
                 content.setApiContext(devAPI.getContext());
                 content.setApiProvider(devAPI.getProviderName());
                 content.setApiVersion(devAPI.getVersion());
