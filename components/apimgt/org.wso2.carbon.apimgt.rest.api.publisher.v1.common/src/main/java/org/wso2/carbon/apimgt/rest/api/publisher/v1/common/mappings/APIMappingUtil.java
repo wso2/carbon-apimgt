@@ -4864,13 +4864,6 @@ public class APIMappingUtil {
                 deploymentStage.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY,
                         new String(cryptoUtil.base64DecodeAndDecrypt(awsSecretKeyValue)));
             }
-            String customParamsStr = (String) deploymentStage.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
-            if (StringUtils.isNotEmpty(customParamsStr) && !"{}".equals(customParamsStr)) {
-                JSONParser parser = new JSONParser();
-                JSONObject customParams = (JSONObject) parser.parse(customParamsStr);
-                decryptCustomOauthParameters(customParams, cryptoUtil);
-                deploymentStage.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParams);
-            }
             endpointSecurityElement.put(sectionKey, deploymentStage);
         }
     }
