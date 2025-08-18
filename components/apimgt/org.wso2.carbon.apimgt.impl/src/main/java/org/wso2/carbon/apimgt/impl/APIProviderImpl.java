@@ -1008,7 +1008,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         //Validate Transports
         validateAndSetTransports(api);
-        validateUriTemplateChangesForMcpUsage(api, existingAPI);
         validateAndSetAPISecurity(api);
         validateKeyManagers(api);
         String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
@@ -1112,29 +1111,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         return api;
-    }
-
-    /**
-     * Validates the URI template changes for MCP usage.
-     *
-     * @param api         API object
-     * @param existingAPI Existing API object
-     * @throws APIManagementException if the URI template changes are not allowed due to MCP usage
-     */
-    private void validateUriTemplateChangesForMcpUsage(API api, API existingAPI) throws APIManagementException {
-
-        List<API> mcpServers = getMCPServersUsedByAPI(api.getUuid(), organization);
-        if (mcpServers == null || mcpServers.isEmpty()) {
-            return;
-        }
-
-        Set<URITemplate> newSet = api.getUriTemplates() != null ? api.getUriTemplates() : Collections.emptySet();
-        Set<URITemplate> oldSet =
-                existingAPI.getUriTemplates() != null ? existingAPI.getUriTemplates() : Collections.emptySet();
-
-        if (!newSet.equals(oldSet)) {
-            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_MCP_USAGE));
-        }
     }
 
     /**
@@ -1317,10 +1293,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiMgtDAO.removeApiOperationMapping(oldURITemplates);
             }
         }
-        validateAndUpdateURITemplates(api, tenantId);
-        apiMgtDAO.updateURITemplates(api, tenantId);
-        if (log.isDebugEnabled()) {
-            log.debug("Successfully updated the URI templates of API: " + apiIdentifier + " in the database");
+        List<API> mcpServers = getMCPServersUsedByAPI(api.getUuid(), api.getOrganization());
+        if (mcpServers == null || mcpServers.isEmpty()) {
+            validateAndUpdateURITemplates(api, tenantId);
+            apiMgtDAO.updateURITemplates(api, tenantId);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated the URI templates of API: " + apiIdentifier + " in the database");
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping URI template update for API: " + apiIdentifier + " as it is used by MCP servers");
+            }
         }
         // Update the resource scopes of the API in KM.
         // Need to remove the old local scopes and register new local scopes and, update the resource scope mappings
