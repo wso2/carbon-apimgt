@@ -19470,7 +19470,12 @@ public class ApiMgtDAO {
                     insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
                     insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
                     insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
-                    insertURLMappingsStatement.setString(6, urlMapping.getDescription());
+                    if (urlMapping.getDescription() != null) {
+                        insertURLMappingsStatement.setBinaryStream(6,
+                                new ByteArrayInputStream(urlMapping.getDescription().getBytes()));
+                    } else {
+                        insertURLMappingsStatement.setBinaryStream(6, null);
+                    }
                     if (urlMapping.getSchemaDefinition() != null) {
                         insertURLMappingsStatement.setBinaryStream(7,
                                 new ByteArrayInputStream(urlMapping.getSchemaDefinition().getBytes()));
@@ -20982,7 +20987,12 @@ public class ApiMgtDAO {
                     insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
                     insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
                     insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
-                    insertURLMappingsStatement.setString(6, urlMapping.getDescription());
+                    if (urlMapping.getDescription() != null) {
+                        insertURLMappingsStatement.setBinaryStream(6,
+                                new ByteArrayInputStream(urlMapping.getDescription().getBytes()));
+                    } else {
+                        insertURLMappingsStatement.setBinaryStream(6, null);
+                    }
                     if (urlMapping.getSchemaDefinition() != null) {
                         insertURLMappingsStatement.setBinaryStream(7,
                                 new ByteArrayInputStream(urlMapping.getSchemaDefinition().getBytes()));
@@ -21251,7 +21261,12 @@ public class ApiMgtDAO {
                     insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
                     insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
                     insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
-                    insertURLMappingsStatement.setString(6, urlMapping.getDescription());
+                    if (urlMapping.getDescription() != null) {
+                        insertURLMappingsStatement.setBinaryStream(6,
+                                new ByteArrayInputStream(urlMapping.getDescription().getBytes()));
+                    } else {
+                        insertURLMappingsStatement.setBinaryStream(6, null);
+                    }
                     if (urlMapping.getSchemaDefinition() != null) {
                         insertURLMappingsStatement.setBinaryStream(7,
                                 new ByteArrayInputStream(urlMapping.getSchemaDefinition().getBytes()));
