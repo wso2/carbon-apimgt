@@ -1300,6 +1300,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (log.isDebugEnabled()) {
                 log.debug("Successfully updated the URI templates of API: " + apiIdentifier + " in the database");
             }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping URI template update for API: " + apiIdentifier + " as it is used by MCP servers");
+            }
         }
         // Update the resource scopes of the API in KM.
         // Need to remove the old local scopes and register new local scopes and, update the resource scope mappings
