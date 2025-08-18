@@ -1293,7 +1293,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiMgtDAO.removeApiOperationMapping(oldURITemplates);
             }
         }
-        List<API> mcpServers = getMCPServersUsedByAPI(api.getUuid(), organization);
+        List<API> mcpServers = getMCPServersUsedByAPI(api.getUuid(), api.getOrganization());
         if (mcpServers == null || mcpServers.isEmpty()) {
             validateAndUpdateURITemplates(api, tenantId);
             apiMgtDAO.updateURITemplates(api, tenantId);
