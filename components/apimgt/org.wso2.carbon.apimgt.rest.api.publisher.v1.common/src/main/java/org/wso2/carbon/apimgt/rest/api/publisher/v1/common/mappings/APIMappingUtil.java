@@ -18,7 +18,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.apicurio.datamodels.Library;
@@ -4845,6 +4844,9 @@ public class APIMappingUtil {
                                         CryptoUtil cryptoUtil) throws CryptoException, ParseException {
 
         Object sectionObj = endpointSecurityElement.get(sectionKey);
+
+        // In endpoint retrieval path, the sectionObj is a Map. In API/MCP retrieval path, it is a JSONObject.
+        // Using instanceof Map to handle both cases.
         if (sectionObj instanceof Map) {
             @SuppressWarnings("unchecked")
             JSONObject deploymentStage = new JSONObject((Map<String, Object>) sectionObj);
@@ -4864,6 +4866,21 @@ public class APIMappingUtil {
                 deploymentStage.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY,
                         new String(cryptoUtil.base64DecodeAndDecrypt(awsSecretKeyValue)));
             }
+
+            // In the API/MCP retrieval path, custom parameters are stored as a String.
+            // In the AI API endpoint retrieval path, custom parameters are received as a LinkedHashMap.
+            // No need to handle that case, since AI APIs do not currently support OAuth endpoint security.
+            if (deploymentStage.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String) {
+                String customParametersString = (String) deploymentStage.get(
+                        APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                if (StringUtils.isNotEmpty(customParametersString)) {
+                    JSONParser parser = new JSONParser();
+                    JSONObject customParameters = (JSONObject) parser.parse(customParametersString);
+                    decryptCustomOauthParameters(customParameters, cryptoUtil);
+                    deploymentStage.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParameters);
+                }
+            }
+
             endpointSecurityElement.put(sectionKey, deploymentStage);
         }
     }
@@ -5080,31 +5097,26 @@ public class APIMappingUtil {
         }
         dto.setId(endpoint.getId());
         dto.setName(endpoint.getName());
-        String endpointConfigJson = endpoint.getEndpointConfig();
-        if (endpointConfigJson != null && !endpointConfigJson.isEmpty()) {
+        String endpointConfigString = endpoint.getEndpointConfig();
+        if (endpointConfigString != null && !endpointConfigString.isEmpty()) {
             try {
-                ObjectMapper mapper = new ObjectMapper();
-                Map<String, Object> endpointConfigMap = mapper.readValue(
-                        endpointConfigJson, new TypeReference<Map<String, Object>>() {
-                        });
-                Object securityObj = endpointConfigMap.get(APIConstants.ENDPOINT_SECURITY);
-                if (securityObj != null) {
-                    Map<String, Object> securityMap = (Map<String, Object>) securityObj;
-                    if (securityMap instanceof Map) {
-                        JSONObject endpointSecurityJson = new JSONObject(securityMap);
-                        if (endpointSecurityJson != null && !endpointSecurityJson.isEmpty()) {
-                            endpointSecurityJson = handleEndpointSecurity(endpointSecurityJson,
-                                    organization, preserveCredentials);
-                            if (preserveCredentials) {
-                                endpointSecurityJson = handleEndpointSecurityDecrypt(endpointSecurityJson);
-                            }
-                            endpointConfigMap.put(APIConstants.ENDPOINT_SECURITY, endpointSecurityJson);
+                JSONParser parser = new JSONParser();
+                JSONObject endpointConfigJsonObj = (JSONObject) parser.parse(endpointConfigString);
+                Object securityObj = endpointConfigJsonObj.get(APIConstants.ENDPOINT_SECURITY);
+                if (securityObj instanceof JSONObject) {
+                    JSONObject endpointSecurityJson = (JSONObject) securityObj;
+                    if (!endpointSecurityJson.isEmpty()) {
+                        endpointSecurityJson = handleEndpointSecurity(endpointSecurityJson,
+                                organization, preserveCredentials);
+                        if (preserveCredentials) {
+                            endpointSecurityJson = handleEndpointSecurityDecrypt(endpointSecurityJson);
                         }
+                        endpointConfigJsonObj.put(APIConstants.ENDPOINT_SECURITY, endpointSecurityJson);
                     }
                 }
-                String updatedConfigJson = mapper.writeValueAsString(endpointConfigMap);
+                String updatedConfigJson = endpointConfigJsonObj.toJSONString();
                 dto.setEndpointConfig(updatedConfigJson);
-            } catch (JsonProcessingException e) {
+            } catch (ParseException e) {
                 String msg = "Error while processing endpoint configuration JSON.";
                 handleException(msg, e);
             }
