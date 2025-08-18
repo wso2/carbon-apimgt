@@ -260,20 +260,10 @@ public class InMemoryAPIDeployer {
                                     reDeployAPIs(gatewayAPIDTO, apiMap, assignedGatewayLabels, tenantDomain, apiGatewayAdmin);
                                 } else {
                                     deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
-
-                                    deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
-                                                                                    gatewayAPIDTO.getRevision(), true,
-                                                                                    APIConstants.AuditLogConstants.DEPLOY, null, null, tenantDomain);
                                     syncAPIPropertiesAcrossComponents(gatewayAPIDTO);
                                 }
                             }
                         } catch (AxisFault axisFault) {
-                            deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
-                                                                            gatewayAPIDTO.getRevision(), false,
-                                                                            APIConstants.AuditLogConstants.DEPLOY,
-                                                                            ExceptionCodes.INTERNAL_ERROR.getErrorCode(),
-                                                                            axisFault.getMessage(), tenantDomain);
-
                             log.error("Error in deploying " + gatewayAPIDTO.getName() + " to the Gateway ", axisFault);
                             errorCount++;
                         }
@@ -339,19 +329,13 @@ public class InMemoryAPIDeployer {
                                                     api.getContext());
                 unDeployAPI(deployAPIInGatewayEvent);
                 deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
-                deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
-                                                                gatewayAPIDTO.getRevision(),
-                                                                true, APIConstants.AuditLogConstants.DEPLOY, null, null,
-                                                                tenantDomain);
                 syncAPIPropertiesAcrossComponents(gatewayAPIDTO);
             } else if (DataHolder.getInstance().getGatewayRegistrationResponse()
                     != APIConstants.GatewayNotification.GatewayRegistrationResponse.ACKNOWLEDGED) {
                 // If the gateway is not registered yet or if it is registered during
                 // reconnect
-                deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
-                                                                gatewayAPIDTO.getRevision(),
-                                                                true, APIConstants.AuditLogConstants.DEPLOY, null, null,
-                                                                tenantDomain);
+                deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO,
+                                                                true, APIConstants.AuditLogConstants.DEPLOY, null, null);
             }
         } else {
             if (log.isDebugEnabled()) {
