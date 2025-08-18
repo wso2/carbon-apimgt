@@ -15650,7 +15650,7 @@ public class ApiMgtDAO {
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
                     String gatewayType = rs.getString("GATEWAY_TYPE");
-                    String mode = rs.getString("MODE");
+                    String mode = rs.getString("ENV_MODE");
                     if (StringUtils.isEmpty(mode)) {
                         mode = GatewayMode.WRITE_ONLY.getMode();
                     }
@@ -15714,7 +15714,7 @@ public class ApiMgtDAO {
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
                     String gatewayType = rs.getString("GATEWAY_TYPE");
-                    String mode = rs.getString("MODE");
+                    String mode = rs.getString("ENV_MODE");
                     if (StringUtils.isEmpty(mode)) {
                         mode = GatewayMode.WRITE_ONLY.getMode();
                     }
