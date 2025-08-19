@@ -137,6 +137,9 @@ public class ComplianceEvaluationScheduler {
                     String tenantAdminUsername = MultitenantUtils.getTenantAwareUsername(
                             RegistryPersistenceUtil.getTenantAdminUserName(organization));
                     carbonContext.setUsername(tenantAdminUsername);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Started tenant flow for organization: " + organization + " with username: " + tenantAdminUsername);
+                    }
                     processRequest(request);
                 } catch (Throwable e) {
                     log.error("Unhandled exception/error during request processing: " + request.getId(), e);
