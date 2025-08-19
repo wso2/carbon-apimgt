@@ -35,7 +35,9 @@ import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
 import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
+import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -132,6 +134,9 @@ public class ComplianceEvaluationScheduler {
                 try {
                     PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                     carbonContext.setTenantDomain(organization, true);
+                    String tenantAdminUsername = MultitenantUtils.getTenantAwareUsername(
+                            RegistryPersistenceUtil.getTenantAdminUserName(organization));
+                    carbonContext.setUsername(tenantAdminUsername);
                     processRequest(request);
                 } catch (Throwable e) {
                     log.error("Unhandled exception/error during request processing: " + request.getId(), e);
