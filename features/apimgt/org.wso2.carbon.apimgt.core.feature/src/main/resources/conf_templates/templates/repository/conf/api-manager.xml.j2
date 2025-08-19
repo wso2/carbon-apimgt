@@ -1226,6 +1226,60 @@
         <SkipRedeployingPolicies>RequestPreProcessorExecutionPlan{% for policy in apim.throttling.skip_redeploying_policies %}{{ "," if loop.first }}{{policy}}{{ "," if not loop.last }}{% endfor %}</SkipRedeployingPolicies>
         <EnablePolicyDeployment>{{apim.throttling.enable_policy_deployment}}</EnablePolicyDeployment>
         <EnablePolicyRecreationOnStartup>{{apim.throttling.enable_policy_recreation_on_startup}}</EnablePolicyRecreationOnStartup>
+
+        {% if apim.distributed_throttling is defined %}
+        <DistributedThrottleConfig>
+            {% if apim.distributed_throttling.enable is defined %}
+            <Enabled>{{apim.distributed_throttling.enable}}</Enabled>
+            {% endif %}
+            {% if apim.distributed_throttling.type is defined %}
+            <Type>{{apim.distributed_throttling.type}}</Type>
+            {% endif %}
+            {% if apim.distributed_throttling.sync_interval is defined %}
+            <SyncInterval>{{apim.distributed_throttling.sync_interval}}</SyncInterval>
+            {% endif %}
+            {% if apim.distributed_throttling.core_pool_size is defined %}
+            <CorePoolSize>{{apim.distributed_throttling.core_pool_size}}</CorePoolSize>
+            {% endif %}
+            {% if apim.distributed_throttling.keyvalue_store is defined %}
+            <KeyValueStoreOptions>
+                {% if apim.distributed_throttling.keyvalue_store.host is defined %}
+                <Host>{{apim.distributed_throttling.keyvalue_store.host}}</Host>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.port is defined %}
+                <Port>{{apim.distributed_throttling.keyvalue_store.port}}</Port>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.user is defined %}
+                <User>{{apim.distributed_throttling.keyvalue_store.user}}</User>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.password is defined %}
+                <Password>{{apim.distributed_throttling.keyvalue_store.password}}</Password>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.max_total is defined %}
+                <MaxTotal>{{apim.distributed_throttling.keyvalue_store.max_total}}</MaxTotal>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.max_idle is defined %}
+                <MaxIdle>{{apim.distributed_throttling.keyvalue_store.max_idle}}</MaxIdle>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.min_idle is defined %}
+                <MinIdle>{{apim.distributed_throttling.keyvalue_store.min_idle}}</MinIdle>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.block_when_exhausted is defined %}
+                <BlockWhenExhausted>{{apim.distributed_throttling.keyvalue_store.block_when_exhausted}}</BlockWhenExhausted>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.test_while_idle is defined %}
+                <TestWhileIdle>{{apim.distributed_throttling.keyvalue_store.test_while_idle}}</TestWhileIdle>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.min_evictable_idle_time_millis is defined %}
+                <MinEvictableIdleTimeMillis>{{apim.distributed_throttling.keyvalue_store.min_evictable_idle_time_millis}}</MinEvictableIdleTimeMillis>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.time_between_eviction_runs_millis is defined %}
+                <TimeBetweenEvictionRunsMillis>{{apim.distributed_throttling.keyvalue_store.time_between_eviction_runs_millis}}</TimeBetweenEvictionRunsMillis>
+                {% endif %}
+            </KeyValueStoreOptions>
+            {% endif %}
+        </DistributedThrottleConfig>
+        {% endif %}
     </ThrottlingConfigurations>
 
     <WorkflowConfigurations>
@@ -1860,61 +1914,7 @@
                 {% endfor %}
             </CustomProperties>
         </PropertyConfigurations>
-      {% endif %}
-
-      {% if apim.distributed_throttling is defined %}
-        <DistributedThrottleConfig>
-            {% if apim.distributed_throttling.enable is defined %}
-            <Enabled>{{apim.distributed_throttling.enable}}</Enabled>
-            {% endif %}
-            {% if apim.distributed_throttling.type is defined %}
-            <Type>{{apim.distributed_throttling.type}}</Type>
-            {% endif %}
-            {% if apim.distributed_throttling.sync_interval is defined %}
-            <SyncInterval>{{apim.distributed_throttling.sync_interval}}</SyncInterval>
-            {% endif %}
-            {% if apim.distributed_throttling.core_pool_size is defined %}
-            <CorePoolSize>{{apim.distributed_throttling.core_pool_size}}</CorePoolSize>
-            {% endif %}
-            {% if apim.distributed_throttling.keyvalue_store is defined %}
-            <KeyValueStoreOptions>
-                {% if apim.distributed_throttling.keyvalue_store.host is defined %}
-                <Host>{{apim.distributed_throttling.keyvalue_store.host}}</Host>
-                {% endif %}
-                {% if apim.distributed_throttling.keyvalue_store.port is defined %}
-                <Port>{{apim.distributed_throttling.keyvalue_store.port}}</Port>
-                {% endif %}
-                {% if apim.distributed_throttling.keyvalue_store.user is defined %}
-                <User>{{apim.distributed_throttling.keyvalue_store.user}}</User>
-                {% endif %}
-                {% if apim.distributed_throttling.keyvalue_store.password is defined %}
-                <Password>{{apim.distributed_throttling.keyvalue_store.password}}</Password>
-                {% endif %}
-                {% if apim.distributed_throttling.keyvalue_store.max_total is defined %}
-                <MaxTotal>{{apim.distributed_throttling.keyvalue_store.max_total}}</MaxTotal>
-                {% endif %}
-                {% if apim.distributed_throttling.keyvalue_store.max_idle is defined %}
-                <MaxIdle>{{apim.distributed_throttling.keyvalue_store.max_idle}}</MaxIdle>
-                {% endif %}
-                {% if apim.distributed_throttling.keyvalue_store.min_idle is defined %}
-                <MinIdle>{{apim.distributed_throttling.keyvalue_store.min_idle}}</MinIdle>
-                {% endif %}
-                {% if apim.distributed_throttling.keyvalue_store.block_when_exhausted is defined %}
-                <BlockWhenExhausted>{{apim.distributed_throttling.keyvalue_store.block_when_exhausted}}</BlockWhenExhausted>
-                {% endif %}
-                {% if apim.distributed_throttling.keyvalue_store.test_while_idle is defined %}
-                <TestWhileIdle>{{apim.distributed_throttling.keyvalue_store.test_while_idle}}</TestWhileIdle>
-                {% endif %}
-                {% if apim.distributed_throttling.keyvalue_store.min_evictable_idle_time_millis is defined %}
-                <MinEvictableIdleTimeMillis>{{apim.distributed_throttling.keyvalue_store.min_evictable_idle_time_millis}}</MinEvictableIdleTimeMillis>
-                {% endif %}
-                {% if apim.distributed_throttling.keyvalue_store.time_between_eviction_runs_millis is defined %}
-                <TimeBetweenEvictionRunsMillis>{{apim.distributed_throttling.keyvalue_store.time_between_eviction_runs_millis}}</TimeBetweenEvictionRunsMillis>
-                {% endif %}
-            </KeyValueStoreOptions>
-            {% endif %}
-        </DistributedThrottleConfig>
-        {% endif %}
+       {% endif %}
 
       <TenantSharingConfigs>
         {% for tenant_sharing_config in apim.tenant_sharing %}
