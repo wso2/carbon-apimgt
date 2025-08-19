@@ -1347,114 +1347,127 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (StringUtils.isNotEmpty(endpointConfig) && StringUtils.isNotEmpty(oldEndpointConfig)) {
                     JSONObject endpointConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
                     JSONObject oldEndpointConfigJson = (JSONObject) new JSONParser().parse(oldEndpointConfig);
-                    if ((endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null) &&
-                            (oldEndpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null)) {
-                        JSONObject endpointSecurityJson =
-                                (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY);
-                        JSONObject oldEndpointSecurityJson =
-                                (JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_SECURITY);
-                        if (endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
-                            if (oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
-                                EndpointSecurity endpointSecurity;
-                                try {
-                                    endpointSecurity = new ObjectMapper().convertValue(
-                                            endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION),
-                                            EndpointSecurity.class);
-                                } catch (IllegalArgumentException e) {
-                                    ErrorHandler errorHandler = ExceptionCodes.from(
-                                            ExceptionCodes.INVALID_ENDPOINT_SECURITY_CONFIG,
-                                            APIConstants.ENDPOINT_SECURITY_PRODUCTION);
-                                    throw new APIManagementException(
-                                            "Error while processing " + APIConstants.ENDPOINT_SECURITY_PRODUCTION +
-                                                    " endpoint security configuration related values provided for API " + api.getId()
-                                                    .toString(), errorHandler);
-                                }
-
-                                EndpointSecurity oldEndpointSecurity = new ObjectMapper().convertValue(
-                                        oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION),
-                                        EndpointSecurity.class);
-                                if (endpointSecurity.isEnabled() && oldEndpointSecurity.isEnabled() &&
-                                        StringUtils.isBlank(endpointSecurity.getPassword())) {
-                                    endpointSecurity.setPassword(oldEndpointSecurity.getPassword());
-                                    if (StringUtils.isBlank(endpointSecurity.getType())) {
-                                        ErrorHandler errorHandler = ExceptionCodes.from(
-                                                ExceptionCodes.ENDPOINT_SECURITY_TYPE_NOT_DEFINED,
-                                                APIConstants.ENDPOINT_SECURITY_PRODUCTION);
-                                        throw new APIManagementException(
-                                                "Endpoint security type is not defined " + "for the endpoint type " + APIConstants.ENDPOINT_SECURITY_PRODUCTION,
-                                                errorHandler);
-                                    }
-
-                                    if (endpointSecurity.getType().equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
-                                        endpointSecurity.setUniqueIdentifier(oldEndpointSecurity.getUniqueIdentifier());
-                                        endpointSecurity.setGrantType(oldEndpointSecurity.getGrantType());
-                                        endpointSecurity.setTokenUrl(oldEndpointSecurity.getTokenUrl());
-                                        endpointSecurity.setClientId(oldEndpointSecurity.getClientId());
-                                        endpointSecurity.setClientSecret(oldEndpointSecurity.getClientSecret());
-                                        endpointSecurity.setCustomParameters(oldEndpointSecurity.getCustomParameters());
-                                        endpointSecurity.setProxyConfigs(oldEndpointSecurity.getProxyConfigs());
-                                    }
-                                }
-                                endpointSecurityJson.replace(APIConstants.ENDPOINT_SECURITY_PRODUCTION,
-                                        new JSONParser().parse(
-                                                new ObjectMapper().writeValueAsString(endpointSecurity)));
-                            }
-                        }
-                        if (endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
-                            if (oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
-                                EndpointSecurity endpointSecurity;
-                                try {
-                                    endpointSecurity = new ObjectMapper().convertValue(
-                                            endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX),
-                                            EndpointSecurity.class);
-                                } catch (IllegalArgumentException e) {
-                                    ErrorHandler errorHandler = ExceptionCodes.from(
-                                            ExceptionCodes.INVALID_ENDPOINT_SECURITY_CONFIG,
-                                            APIConstants.ENDPOINT_SECURITY_SANDBOX);
-                                    throw new APIManagementException(
-                                            "Error while processing " + APIConstants.ENDPOINT_SECURITY_SANDBOX + " " +
-                                                    "endpoint security configuration related values provided for API " + api.getId()
-                                                    .toString(), errorHandler);
-                                }
-
-                                EndpointSecurity oldEndpointSecurity = new ObjectMapper()
-                                        .convertValue(oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX),
-                                                EndpointSecurity.class);
-                                if (endpointSecurity.isEnabled() && oldEndpointSecurity.isEnabled() &&
-                                        StringUtils.isBlank(endpointSecurity.getPassword())) {
-                                    endpointSecurity.setPassword(oldEndpointSecurity.getPassword());
-                                    if (StringUtils.isBlank(endpointSecurity.getType())) {
-                                        ErrorHandler errorHandler = ExceptionCodes.from(
-                                                ExceptionCodes.ENDPOINT_SECURITY_TYPE_NOT_DEFINED,
-                                                APIConstants.ENDPOINT_SECURITY_SANDBOX);
-                                        throw new APIManagementException(
-                                                "Endpoint security type is not defined " + "for the endpoint type " + APIConstants.ENDPOINT_SECURITY_SANDBOX,
-                                                errorHandler);
-                                    }
-
-                                    if (endpointSecurity.getType().equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
-                                        endpointSecurity.setUniqueIdentifier(oldEndpointSecurity.getUniqueIdentifier());
-                                        endpointSecurity.setGrantType(oldEndpointSecurity.getGrantType());
-                                        endpointSecurity.setTokenUrl(oldEndpointSecurity.getTokenUrl());
-                                        endpointSecurity.setClientId(oldEndpointSecurity.getClientId());
-                                        endpointSecurity.setClientSecret(oldEndpointSecurity.getClientSecret());
-                                        endpointSecurity.setCustomParameters(oldEndpointSecurity.getCustomParameters());
-                                        endpointSecurity.setProxyConfigs(oldEndpointSecurity.getProxyConfigs());
-                                    }
-                                }
-                                endpointSecurityJson.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX,
-                                        new JSONParser()
-                                                .parse(new ObjectMapper().writeValueAsString(endpointSecurity)));
-                            }
-                            endpointConfigJson.replace(APIConstants.ENDPOINT_SECURITY, endpointSecurityJson);
-                        }
-                    }
+                    updateEndpointSecurity(endpointConfigJson, oldEndpointConfigJson);
                     api.setEndpointConfig(endpointConfigJson.toJSONString());
                 }
             }
         } catch (ParseException | JsonProcessingException e) {
             throw new APIManagementException(
                     "Error while processing endpoint security for API " + api.getId().toString(), e);
+        }
+    }
+
+    /**
+     * Update endpoint security configurations.
+     *
+     * @param endpointConfigJson    Endpoint configuration JSON object
+     * @param oldEndpointConfigJson Old endpoint configuration JSON object
+     * @throws APIManagementException  If an error occurs while processing endpoint security configurations
+     * @throws JsonProcessingException If an error occurs while processing JSON
+     * @throws ParseException          If an error occurs while parsing JSON
+     */
+    private void updateEndpointSecurity(JSONObject endpointConfigJson, JSONObject oldEndpointConfigJson)
+            throws APIManagementException, JsonProcessingException, ParseException {
+        if ((endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null) &&
+                (oldEndpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null)) {
+            JSONObject endpointSecurityJson =
+                    (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY);
+            JSONObject oldEndpointSecurityJson =
+                    (JSONObject) oldEndpointConfigJson.get(APIConstants.ENDPOINT_SECURITY);
+            if (endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                if (oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                    EndpointSecurity endpointSecurity;
+                    try {
+                        endpointSecurity = new ObjectMapper().convertValue(
+                                endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION),
+                                EndpointSecurity.class);
+                    } catch (IllegalArgumentException e) {
+                        ErrorHandler errorHandler = ExceptionCodes.from(
+                                ExceptionCodes.INVALID_ENDPOINT_SECURITY_CONFIG,
+                                APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                        throw new APIManagementException(
+                                "Error while processing " + APIConstants.ENDPOINT_SECURITY_PRODUCTION +
+                                        " endpoint security configuration related values provided for API.",
+                                errorHandler);
+                    }
+
+                    EndpointSecurity oldEndpointSecurity = new ObjectMapper().convertValue(
+                            oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION),
+                            EndpointSecurity.class);
+                    if (endpointSecurity.isEnabled() && oldEndpointSecurity.isEnabled() &&
+                            StringUtils.isBlank(endpointSecurity.getPassword())) {
+                        endpointSecurity.setPassword(oldEndpointSecurity.getPassword());
+                        if (StringUtils.isBlank(endpointSecurity.getType())) {
+                            ErrorHandler errorHandler = ExceptionCodes.from(
+                                    ExceptionCodes.ENDPOINT_SECURITY_TYPE_NOT_DEFINED,
+                                    APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                            throw new APIManagementException(
+                                    "Endpoint security type is not defined " + "for the endpoint type "
+                                            + APIConstants.ENDPOINT_SECURITY_PRODUCTION, errorHandler);
+                        }
+
+                        if (endpointSecurity.getType().equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
+                            endpointSecurity.setUniqueIdentifier(oldEndpointSecurity.getUniqueIdentifier());
+                            endpointSecurity.setGrantType(oldEndpointSecurity.getGrantType());
+                            endpointSecurity.setTokenUrl(oldEndpointSecurity.getTokenUrl());
+                            endpointSecurity.setClientId(oldEndpointSecurity.getClientId());
+                            endpointSecurity.setClientSecret(oldEndpointSecurity.getClientSecret());
+                            endpointSecurity.setCustomParameters(oldEndpointSecurity.getCustomParameters());
+                            endpointSecurity.setProxyConfigs(oldEndpointSecurity.getProxyConfigs());
+                        }
+                    }
+                    endpointSecurityJson.replace(APIConstants.ENDPOINT_SECURITY_PRODUCTION,
+                            new JSONParser().parse(
+                                    new ObjectMapper().writeValueAsString(endpointSecurity)));
+                }
+            }
+            if (endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                if (oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                    EndpointSecurity endpointSecurity;
+                    try {
+                        endpointSecurity = new ObjectMapper().convertValue(
+                                endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX),
+                                EndpointSecurity.class);
+                    } catch (IllegalArgumentException e) {
+                        ErrorHandler errorHandler = ExceptionCodes.from(
+                                ExceptionCodes.INVALID_ENDPOINT_SECURITY_CONFIG,
+                                APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                        throw new APIManagementException(
+                                "Error while processing " + APIConstants.ENDPOINT_SECURITY_SANDBOX + " " +
+                                        "endpoint security configuration related values provided for API.", errorHandler);
+                    }
+
+                    EndpointSecurity oldEndpointSecurity = new ObjectMapper()
+                            .convertValue(oldEndpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX),
+                                    EndpointSecurity.class);
+                    if (endpointSecurity.isEnabled() && oldEndpointSecurity.isEnabled() &&
+                            StringUtils.isBlank(endpointSecurity.getPassword())) {
+                        endpointSecurity.setPassword(oldEndpointSecurity.getPassword());
+                        if (StringUtils.isBlank(endpointSecurity.getType())) {
+                            ErrorHandler errorHandler = ExceptionCodes.from(
+                                    ExceptionCodes.ENDPOINT_SECURITY_TYPE_NOT_DEFINED,
+                                    APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                            throw new APIManagementException(
+                                    "Endpoint security type is not defined " + "for the endpoint type " + APIConstants.ENDPOINT_SECURITY_SANDBOX,
+                                    errorHandler);
+                        }
+
+                        if (endpointSecurity.getType().equals(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
+                            endpointSecurity.setUniqueIdentifier(oldEndpointSecurity.getUniqueIdentifier());
+                            endpointSecurity.setGrantType(oldEndpointSecurity.getGrantType());
+                            endpointSecurity.setTokenUrl(oldEndpointSecurity.getTokenUrl());
+                            endpointSecurity.setClientId(oldEndpointSecurity.getClientId());
+                            endpointSecurity.setClientSecret(oldEndpointSecurity.getClientSecret());
+                            endpointSecurity.setCustomParameters(oldEndpointSecurity.getCustomParameters());
+                            endpointSecurity.setProxyConfigs(oldEndpointSecurity.getProxyConfigs());
+                        }
+                    }
+                    endpointSecurityJson.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX,
+                            new JSONParser()
+                                    .parse(new ObjectMapper().writeValueAsString(endpointSecurity)));
+                }
+                endpointConfigJson.replace(APIConstants.ENDPOINT_SECURITY, endpointSecurityJson);
+            }
         }
     }
 
@@ -8811,10 +8824,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void updateMCPServerBackend(String apiUuid, Backend backend, String organization)
+    public void updateMCPServerBackend(String mcpServerId, Backend oldBackend, Backend newBackend, String organization)
             throws APIManagementException {
 
-        apiMgtDAO.updateBackend(apiUuid, backend, organization);
+        try {
+            JSONObject endpointConfigJson = (JSONObject) new JSONParser().parse(oldBackend.getEndpointConfig());
+            JSONObject oldEndpointConfigJson = (JSONObject) new JSONParser().parse(newBackend.getEndpointConfig());
+            updateEndpointSecurity(endpointConfigJson, oldEndpointConfigJson);
+            newBackend.setEndpointConfig(endpointConfigJson.toJSONString());
+            apiMgtDAO.updateBackend(mcpServerId, newBackend, organization);
+        } catch (ParseException | JsonProcessingException e) {
+            throw new APIManagementException(
+                    "Error while processing endpoint security for Backend for MCP Server " + mcpServerId, e);
+        }
     }
 
     @Override

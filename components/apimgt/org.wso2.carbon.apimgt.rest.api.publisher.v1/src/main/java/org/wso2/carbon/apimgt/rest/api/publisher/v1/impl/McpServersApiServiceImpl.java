@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIComplianceException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -122,12 +123,14 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.validation.Valid;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_VERSION_ALREADY_EXISTS;
 import static org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.QUERY_API_TYPE_MCP;
+import static org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY_TYPE;
 
 /**
  * Implementation of the MCP Servers API service.
@@ -2083,16 +2086,14 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         CommonUtils.validateAPIExistence(mcpServerId);
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        Backend backend = apiProvider.getMCPServerBackend(mcpServerId, backendApiId, organization);
-
-        if (backend == null) {
+        Backend oldBackend = apiProvider.getMCPServerBackend(mcpServerId, backendApiId, organization);
+        if (oldBackend == null) {
             RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, log);
-        } else {
-            backend.setEndpointConfig(backendAPIDTO.getEndpointConfig().toString());
         }
-        apiProvider.updateMCPServerBackend(mcpServerId, backend, organization);
-        return Response.ok().entity(APIMappingUtil.fromBackendAPIToDTO(backend, organization,
-                false)).build();
+        Backend backend = new Backend(oldBackend);
+        backend.setEndpointConfig(backendAPIDTO.getEndpointConfig().toString());
+        PublisherCommonUtils.updateMCPServerBackend(mcpServerId, oldBackend, backend, organization, apiProvider);
+        return Response.ok().entity(APIMappingUtil.fromBackendAPIToDTO(backend, organization, false)).build();
     }
 
     /**

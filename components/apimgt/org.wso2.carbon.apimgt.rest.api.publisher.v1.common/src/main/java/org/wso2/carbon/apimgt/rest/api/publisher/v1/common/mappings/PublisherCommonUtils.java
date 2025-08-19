@@ -4996,4 +4996,119 @@ public class PublisherCommonUtils {
         }
         return operationList;
     }
+
+    /**
+     * Update the backend for an MCP server.
+     *
+     * @param mcpServerId  ID of the MCP server
+     * @param oldBackend   Old backend API to be replaced
+     * @param backend      New backend API to be updated
+     * @param organization Organization of the logged-in user
+     * @param apiProvider  API Provider instance
+     * @throws APIManagementException if there is an error in API management operations
+     */
+    public static void updateMCPServerBackend(String mcpServerId, Backend oldBackend, Backend backend,
+                                              String organization, APIProvider apiProvider)
+            throws APIManagementException {
+
+        try {
+            prepareForEndpointSecurity(backend, oldBackend);
+            apiProvider.updateMCPServerBackend(mcpServerId, oldBackend, backend, organization);
+        } catch (ParseException | CryptoException e) {
+            throw new APIManagementException(
+                    "Error while processing endpoint security for MCP Server " + mcpServerId, e);
+        }
+    }
+
+    /**
+     * Prepares the new backend API for endpoint security by encrypting OAuth and API key information.
+     *
+     * @param newBackend the new backend API to be prepared
+     * @param oldBackend the old backend API to retrieve existing security information
+     * @throws ParseException         if there is an error parsing the endpoint configuration
+     * @throws APIManagementException if there is an error in API management operations
+     * @throws CryptoException        if there is an error in cryptographic operations
+     */
+    private static void prepareForEndpointSecurity(Backend newBackend, Backend oldBackend)
+            throws ParseException, APIManagementException, CryptoException {
+
+        JSONParser parser = new JSONParser();
+        JSONObject oldEndpointConfig = null;
+        String oldEndpointConfigString = oldBackend.getEndpointConfig();
+        if (StringUtils.isNotBlank(oldEndpointConfigString)) {
+            oldEndpointConfig = (JSONObject) parser.parse(oldEndpointConfigString);
+        }
+        String oldProductionApiSecret = null;
+        String oldSandboxApiSecret = null;
+
+        String oldProductionApiKeyValue = null;
+        String oldSandboxApiKeyValue = null;
+        Object oldProductionCustomParams = null;
+        Object oldSandboxCustomParams = null;
+
+        if (oldEndpointConfig != null) {
+            if ((oldEndpointConfig.containsKey(APIConstants.ENDPOINT_SECURITY))) {
+                JSONObject oldEndpointSecurity = (JSONObject) oldEndpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                if (oldEndpointSecurity != null &&
+                        oldEndpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION)) {
+                    JSONObject oldEndpointSecurityProduction = (JSONObject) oldEndpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
+
+                    if (oldEndpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CLIENT_ID) != null
+                            && oldEndpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)
+                            != null) {
+                        oldProductionApiSecret = oldEndpointSecurityProduction
+                                .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                    } else if (oldEndpointSecurityProduction
+                            .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER) != null
+                            && oldEndpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null
+                            && oldEndpointSecurityProduction
+                            .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE) != null) {
+                        oldProductionApiKeyValue = oldEndpointSecurityProduction
+                                .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
+                    }
+                    if (oldEndpointSecurityProduction.containsKey(
+                            APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) && oldEndpointSecurityProduction.get(
+                            APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) != null) {
+                        oldProductionCustomParams = parser.parse(
+                                oldEndpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS)
+                                        .toString());
+                    }
+                }
+                if (oldEndpointSecurity != null &&
+                        oldEndpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX)) {
+                    JSONObject oldEndpointSecuritySandbox = (JSONObject) oldEndpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
+
+                    if (oldEndpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CLIENT_ID) != null
+                            && oldEndpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)
+                            != null) {
+                        oldSandboxApiSecret = oldEndpointSecuritySandbox
+                                .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                    } else if (oldEndpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER) != null
+                            && oldEndpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null
+                            && oldEndpointSecuritySandbox
+                            .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE) != null) {
+                        oldSandboxApiKeyValue = oldEndpointSecuritySandbox
+                                .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
+                    }
+                    if (oldEndpointSecuritySandbox.containsKey(
+                            APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) && oldEndpointSecuritySandbox.get(
+                            APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) != null) {
+                        oldSandboxCustomParams = parser.parse(
+                                oldEndpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS)
+                                        .toString());
+                    }
+                }
+            }
+        }
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+
+        PublisherCommonUtils.encryptEndpointSecurityOAuthInternal(newBackend.getEndpointConfigAsMap(), cryptoUtil,
+                oldProductionApiSecret, oldSandboxApiSecret, oldProductionCustomParams, oldSandboxCustomParams,
+                newBackend::setEndpointConfigFromMap);
+
+        PublisherCommonUtils.encryptApiKeyInternal(newBackend.getEndpointConfigAsMap(), cryptoUtil,
+                oldProductionApiKeyValue, oldSandboxApiKeyValue, newBackend::setEndpointConfigFromMap);
+    }
 }
