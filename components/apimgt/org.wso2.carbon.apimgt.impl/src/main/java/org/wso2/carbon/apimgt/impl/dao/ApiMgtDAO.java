@@ -16674,14 +16674,17 @@ public class ApiMgtDAO {
                     insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
                     insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
                     if (urlMapping.getDescription() != null) {
+                        byte[] descriptionBytes = urlMapping.getDescription().getBytes(StandardCharsets.UTF_8);
                         insertURLMappingsStatement.setBinaryStream(6,
-                                new ByteArrayInputStream(urlMapping.getDescription().getBytes()));
+                                new ByteArrayInputStream(descriptionBytes), descriptionBytes.length);
                     } else {
                         insertURLMappingsStatement.setBinaryStream(6, null);
                     }
                     if (urlMapping.getSchemaDefinition() != null) {
+                        byte[] schemaDefinitionBytes = urlMapping.getSchemaDefinition()
+                                .getBytes(StandardCharsets.UTF_8);
                         insertURLMappingsStatement.setBinaryStream(7,
-                                new ByteArrayInputStream(urlMapping.getSchemaDefinition().getBytes()));
+                                new ByteArrayInputStream(schemaDefinitionBytes), schemaDefinitionBytes.length);
                     } else {
                         insertURLMappingsStatement.setBinaryStream(7, null);
                     }
@@ -19470,10 +19473,18 @@ public class ApiMgtDAO {
                     insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
                     insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
                     insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
-                    insertURLMappingsStatement.setString(6, urlMapping.getDescription());
+                    if (urlMapping.getDescription() != null) {
+                        byte[] descriptionBytes = urlMapping.getDescription().getBytes(StandardCharsets.UTF_8);
+                        insertURLMappingsStatement.setBinaryStream(6,
+                                new ByteArrayInputStream(descriptionBytes), descriptionBytes.length);
+                    } else {
+                        insertURLMappingsStatement.setBinaryStream(6, null);
+                    }
                     if (urlMapping.getSchemaDefinition() != null) {
+                        byte[] schemaDefinitionBytes = urlMapping.getSchemaDefinition()
+                                .getBytes(StandardCharsets.UTF_8);
                         insertURLMappingsStatement.setBinaryStream(7,
-                                new ByteArrayInputStream(urlMapping.getSchemaDefinition().getBytes()));
+                                new ByteArrayInputStream(schemaDefinitionBytes), schemaDefinitionBytes.length);
                     } else {
                         insertURLMappingsStatement.setBinaryStream(7, null);
                     }
@@ -20578,14 +20589,17 @@ public class ApiMgtDAO {
                     insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
                     insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
                     if (urlMapping.getDescription() != null) {
+                        byte[] descriptionBytes = urlMapping.getDescription().getBytes(StandardCharsets.UTF_8);
                         insertURLMappingsStatement.setBinaryStream(6,
-                                new ByteArrayInputStream(urlMapping.getDescription().getBytes()));
+                                new ByteArrayInputStream(descriptionBytes), descriptionBytes.length);
                     } else {
                         insertURLMappingsStatement.setBinaryStream(6, null);
                     }
                     if (urlMapping.getSchemaDefinition() != null) {
+                        byte[] schemaDefinitionBytes = urlMapping.getSchemaDefinition()
+                                .getBytes(StandardCharsets.UTF_8);
                         insertURLMappingsStatement.setBinaryStream(7,
-                                new ByteArrayInputStream(urlMapping.getSchemaDefinition().getBytes()));
+                                new ByteArrayInputStream(schemaDefinitionBytes), schemaDefinitionBytes.length);
                     } else {
                         insertURLMappingsStatement.setBinaryStream(7, null);
                     }
@@ -20982,10 +20996,18 @@ public class ApiMgtDAO {
                     insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
                     insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
                     insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
-                    insertURLMappingsStatement.setString(6, urlMapping.getDescription());
+                    if (urlMapping.getDescription() != null) {
+                        byte[] descriptionBytes = urlMapping.getDescription().getBytes(StandardCharsets.UTF_8);
+                        insertURLMappingsStatement.setBinaryStream(6,
+                                new ByteArrayInputStream(descriptionBytes), descriptionBytes.length);
+                    } else {
+                        insertURLMappingsStatement.setBinaryStream(6, null);
+                    }
                     if (urlMapping.getSchemaDefinition() != null) {
+                        byte[] schemaDefinitionBytes = urlMapping.getSchemaDefinition()
+                                .getBytes(StandardCharsets.UTF_8);
                         insertURLMappingsStatement.setBinaryStream(7,
-                                new ByteArrayInputStream(urlMapping.getSchemaDefinition().getBytes()));
+                                new ByteArrayInputStream(schemaDefinitionBytes), schemaDefinitionBytes.length);
                     } else {
                         insertURLMappingsStatement.setBinaryStream(7, null);
                     }
@@ -21251,10 +21273,18 @@ public class ApiMgtDAO {
                     insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
                     insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
                     insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
-                    insertURLMappingsStatement.setString(6, urlMapping.getDescription());
+                    if (urlMapping.getDescription() != null) {
+                        byte[] descriptionBytes = urlMapping.getDescription().getBytes(StandardCharsets.UTF_8);
+                        insertURLMappingsStatement.setBinaryStream(6,
+                                new ByteArrayInputStream(descriptionBytes), descriptionBytes.length);
+                    } else {
+                        insertURLMappingsStatement.setBinaryStream(6, null);
+                    }
                     if (urlMapping.getSchemaDefinition() != null) {
+                        byte[] schemaDefinitionBytes = urlMapping.getSchemaDefinition()
+                                .getBytes(StandardCharsets.UTF_8);
                         insertURLMappingsStatement.setBinaryStream(7,
-                                new ByteArrayInputStream(urlMapping.getSchemaDefinition().getBytes()));
+                                new ByteArrayInputStream(schemaDefinitionBytes), schemaDefinitionBytes.length);
                     } else {
                         insertURLMappingsStatement.setBinaryStream(7, null);
                     }
