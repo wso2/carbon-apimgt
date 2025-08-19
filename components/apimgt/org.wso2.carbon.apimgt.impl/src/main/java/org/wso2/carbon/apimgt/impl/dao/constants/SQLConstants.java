@@ -4713,7 +4713,7 @@ public class SQLConstants {
             "SELECT BACKEND_ID, BACKEND_NAME, ENDPOINT_CONFIG, DEFINITION "
                     + "FROM AM_BACKEND "
                     + "WHERE REFERENCE_API_UUID = ? "
-                    + "AND REFERENCE_API_REVISION_UUID IS NULL "
+                    + "AND REFERENCE_API_REVISION_UUID = 'Current API' "
                     + "AND ORGANIZATION = ?";
 
     public static final String GET_AM_BACKENDS_REVISION_SQL =
@@ -4727,7 +4727,7 @@ public class SQLConstants {
             "SELECT BACKEND_ID, BACKEND_NAME, ENDPOINT_CONFIG, DEFINITION "
                     + "FROM AM_BACKEND "
                     + "WHERE REFERENCE_API_UUID = ? "
-                    + "AND REFERENCE_API_REVISION_UUID IS NULL "
+                    + "AND REFERENCE_API_REVISION_UUID = 'Current API' "
                     + "AND BACKEND_ID = ? "
                     + "AND ORGANIZATION = ?";
 
@@ -4743,7 +4743,7 @@ public class SQLConstants {
             "UPDATE AM_BACKEND "
                     + "SET ENDPOINT_CONFIG = ?, DEFINITION = ? "
                     + "WHERE REFERENCE_API_UUID = ? "
-                    + "AND REFERENCE_API_REVISION_UUID IS NULL "
+                    + "AND REFERENCE_API_REVISION_UUID = 'Current API' "
                     + "AND BACKEND_ID = ? "
                     + "AND ORGANIZATION = ?";
 
@@ -4759,7 +4759,7 @@ public class SQLConstants {
     public static final String REMOVE_AM_BACKEND_REVISION_OF_CURRENT_API_SQL =
             "DELETE FROM AM_BACKEND "
                     + "WHERE REFERENCE_API_UUID = ? "
-                    + "AND REFERENCE_API_REVISION_UUID IS NULL";
+                    + "AND REFERENCE_API_REVISION_UUID = 'Current API'";
 
     public static final String GET_MCP_SERVER_BY_REFERENCED_API_ID =
             "SELECT DISTINCT MCP.API_UUID, MCP.API_NAME, MCP.API_VERSION, MCP.API_PROVIDER " +
