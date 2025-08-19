@@ -2182,4 +2182,21 @@ public class APIUtilTest {
         fileName = "test1.pdf";
         Assert.assertFalse("PDF type should not be allowed", APIUtil.isSupportedFileType(fileName));
     }
+    
+    @Test
+    public void testIsValidTenantDomain_NullOrEdgeCases() {
+        assertFalse(APIUtil.isValidTenantDomain(null));
+        assertFalse(APIUtil.isValidTenantDomain(""));
+        assertFalse(APIUtil.isValidTenantDomain("a@b.c"));   // invalid
+        assertTrue(APIUtil.isValidTenantDomain("sub.domain.com"));
+        
+        // Add more test cases for valid and invalid tenant domains
+        assertTrue(APIUtil.isValidTenantDomain("example.com"));
+        assertTrue(APIUtil.isValidTenantDomain("sub1.sub2.example.com"));
+        assertFalse(APIUtil.isValidTenantDomain("sub_domain.com"));
+        assertFalse(APIUtil.isValidTenantDomain("sub.-domain.com"));
+        assertFalse(APIUtil.isValidTenantDomain("sub.domain-.com"));
+        assertFalse(APIUtil.isValidTenantDomain("sub..domain.com"));
+        assertFalse(APIUtil.isValidTenantDomain("sub.domain.com."));
+    }
 }
