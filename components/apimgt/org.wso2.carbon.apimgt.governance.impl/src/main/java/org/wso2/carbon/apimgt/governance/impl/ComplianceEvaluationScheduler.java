@@ -138,7 +138,8 @@ public class ComplianceEvaluationScheduler {
                             RegistryPersistenceUtil.getTenantAdminUserName(organization));
                     carbonContext.setUsername(tenantAdminUsername);
                     if (log.isDebugEnabled()) {
-                        log.debug("Started tenant flow for organization: " + organization + " with username: " + tenantAdminUsername);
+                        log.debug("Started tenant flow for organization: " + organization
+                                + " with username: " + tenantAdminUsername);
                     }
                     processRequest(request);
                 } catch (Throwable e) {
