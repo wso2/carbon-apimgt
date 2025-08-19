@@ -38,7 +38,6 @@ import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.notifiers.GatewayNotifier;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.notifiers.DeploymentStatusNotifier;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.TenantUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -78,7 +77,6 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
             .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
     ExecutorService executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "DeploymentThread"));
     private static GatewayNotifier gatewayNotifier = GatewayNotifier.getInstance();
-    private static DeploymentStatusNotifier deploymentStatusNotifier = DeploymentStatusNotifier.getInstance();
 
     public GatewayJMSMessageListener() {
     }
@@ -187,18 +185,7 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                                     startTenantFlow(tenantDomain);
                                     tenantFlowStarted = true;
                                     inMemoryApiDeployer.deployAPI(gatewayEvent);
-                                    String apiRevisionId = DataHolder.getInstance().getTenantAPIMap().get(
-                                                    gatewayEvent.getTenantDomain()).get(gatewayEvent.getContext())
-                                            .getRevisionId();
-                                    deploymentStatusNotifier.submitDeploymentStatus(gatewayEvent.getUuid(),
-                                                                                    apiRevisionId, true,
-                                                                                    APIConstants.AuditLogConstants.DEPLOY,
-                                                                                    null, null, tenantDomain);
                                 } catch (ArtifactSynchronizerException e) {
-                                    deploymentStatusNotifier.submitDeploymentStatus(gatewayEvent.getUuid(), null, false,
-                                                                                    APIConstants.AuditLogConstants.DEPLOY,
-                                                                                    e.getErrorHandler().getErrorCode(),
-                                                                                    e.getMessage(), tenantDomain);
                                     log.error("Error in deploying artifacts for " + gatewayEvent.getUuid() +
                                             "in the Gateway");
                                 } finally {
@@ -213,16 +200,7 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                                     startTenantFlow(tenantDomain);
                                     tenantFlowStarted = true;
                                     inMemoryApiDeployer.unDeployAPI(gatewayEvent);
-
-                                    deploymentStatusNotifier.submitDeploymentStatus(gatewayEvent.getUuid(), null, true,
-                                                                                    APIConstants.AuditLogConstants.UNDEPLOY,
-                                                                                    null, null, tenantDomain);
                                 } catch (ArtifactSynchronizerException e) {
-
-                                    deploymentStatusNotifier.submitDeploymentStatus(gatewayEvent.getUuid(), null, false,
-                                                                                    APIConstants.AuditLogConstants.UNDEPLOY,
-                                                                                    e.getErrorHandler().getErrorCode(),
-                                                                                    e.getMessage(), tenantDomain);
                                     log.error("Error in undeploying artifacts");
                                 } finally {
                                     if (tenantFlowStarted) {
