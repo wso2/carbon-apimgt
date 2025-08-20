@@ -27,6 +27,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.CorrelationConstants;
@@ -366,6 +367,12 @@ public class ExtensionListenerUtil {
             //break the handler flow and return back from the existing handler phase
             if (log.isDebugEnabled()) {
                 log.debug("Exiting the handler flow and returning response back. " + axis2MC.getLogIDString());
+            }
+            // Mediate fault sequence (this was originally added to address the behaviour of not engaging CORS
+            // headers in the response for RETURN_ERROR and RETURN_RESPONSE flows
+            Mediator extensionFaultSequence = messageContext.getSequence(APIConstants.EXTENSION_FAULT_SEQUENCE_NAME);
+            if (extensionFaultSequence != null) {
+                extensionFaultSequence.mediate(messageContext);
             }
             Utils.send(messageContext, extensionResponseDTO.getStatusCode());
             return false;
