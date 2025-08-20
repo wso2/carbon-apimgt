@@ -18065,6 +18065,7 @@ public class ApiMgtDAO {
                     String version = apiUsageResultSet.getString("API_VERSION");
                     APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, version);
                     API usedApi = new API(apiIdentifier);
+                    usedApi.setType(apiUsageResultSet.getString("API_TYPE").toUpperCase());
                     usedApi.setContext(apiUsageResultSet.getString("CONTEXT"));
 
                     //in case the record is for an API revision set isRevision to true
