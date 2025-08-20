@@ -13815,11 +13815,19 @@ components:
             name of Scope
           example: apim:api_view
         usedApiList:
+          deprecated: true
           type: array
           description: |
-            API list which have used the shared scope
+            API list which have used the shared scope. [DEPRECATED] Use `usages` instead. 
+            Retained only for backward compatibility.
           items:
             $ref: '#/components/schemas/SharedScopeUsedAPIInfo'
+        usages:
+          type: array
+          description: |
+            List of entities which have used the shared scope
+          items:
+            $ref: '#/components/schemas/SharedScopeUsageEntity'
     SharedScopeUsedAPIInfo:
       title: API object using shared scope
       required:
@@ -13842,6 +13850,9 @@ components:
           description: |
             If the provider value is not given user invoking the api will be used as the provider.
           example: admin
+        revisionID:
+          type: string
+          example: Revision 1
         usedResourceList:
           type: array
           description: |
@@ -13850,6 +13861,52 @@ components:
             $ref: '#/components/schemas/SharedScopeUsedAPIResourceInfo'
     SharedScopeUsedAPIResourceInfo:
       title: API resource object using shared scope
+      type: object
+      properties:
+        target:
+          type: string
+          example: /add
+        verb:
+          type: string
+          example: POST
+    SharedScopeUsageEntity:
+      title: Entity using shared scope
+      required:
+        - context
+        - name
+        - version
+      type: object
+      properties:
+        name:
+          type: string
+          example: CalculatorAPI
+        context:
+          type: string
+          example: CalculatorAPI
+        version:
+          type: string
+          example: 1.0.0
+        provider:
+          type: string
+          description: |
+            If the provider value is not given user invoking the api will be used as the provider.
+          example: admin
+        revisionId:
+          type: string
+          example: Revision 1
+        type:
+          type: string
+          description: |
+            Entity type.
+          example: MCP
+        usedResourceList:
+          type: array
+          description: |
+            Resource list which have used the shared scope.
+          items:
+            $ref: '#/components/schemas/SharedScopeUsedResourceInfo'
+    SharedScopeUsedResourceInfo:
+      title: Resource object using shared scope
       type: object
       properties:
         target:
