@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsageEntityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SharedScopeUsedAPIInfoDTO;
 import javax.validation.constraints.*;
 
@@ -26,6 +27,7 @@ public class SharedScopeUsageDTO   {
     private String id = null;
     private String name = null;
     private List<SharedScopeUsedAPIInfoDTO> usedApiList = new ArrayList<SharedScopeUsedAPIInfoDTO>();
+    private List<SharedScopeUsageEntityDTO> usages = new ArrayList<SharedScopeUsageEntityDTO>();
 
   /**
    * UUID of the Scope. Valid only for shared scopes. 
@@ -66,7 +68,7 @@ public class SharedScopeUsageDTO   {
   }
 
   /**
-   * API list which have used the shared scope 
+   * API list which have used the shared scope. [DEPRECATED] Use &#x60;usages&#x60; instead.  Retained only for backward compatibility. 
    **/
   public SharedScopeUsageDTO usedApiList(List<SharedScopeUsedAPIInfoDTO> usedApiList) {
     this.usedApiList = usedApiList;
@@ -74,7 +76,7 @@ public class SharedScopeUsageDTO   {
   }
 
   
-  @ApiModelProperty(value = "API list which have used the shared scope ")
+  @ApiModelProperty(value = "API list which have used the shared scope. [DEPRECATED] Use `usages` instead.  Retained only for backward compatibility. ")
       @Valid
   @JsonProperty("usedApiList")
   public List<SharedScopeUsedAPIInfoDTO> getUsedApiList() {
@@ -82,6 +84,25 @@ public class SharedScopeUsageDTO   {
   }
   public void setUsedApiList(List<SharedScopeUsedAPIInfoDTO> usedApiList) {
     this.usedApiList = usedApiList;
+  }
+
+  /**
+   * List of entities which have used the shared scope 
+   **/
+  public SharedScopeUsageDTO usages(List<SharedScopeUsageEntityDTO> usages) {
+    this.usages = usages;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "List of entities which have used the shared scope ")
+      @Valid
+  @JsonProperty("usages")
+  public List<SharedScopeUsageEntityDTO> getUsages() {
+    return usages;
+  }
+  public void setUsages(List<SharedScopeUsageEntityDTO> usages) {
+    this.usages = usages;
   }
 
 
@@ -96,12 +117,13 @@ public class SharedScopeUsageDTO   {
     SharedScopeUsageDTO sharedScopeUsage = (SharedScopeUsageDTO) o;
     return Objects.equals(id, sharedScopeUsage.id) &&
         Objects.equals(name, sharedScopeUsage.name) &&
-        Objects.equals(usedApiList, sharedScopeUsage.usedApiList);
+        Objects.equals(usedApiList, sharedScopeUsage.usedApiList) &&
+        Objects.equals(usages, sharedScopeUsage.usages);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, usedApiList);
+    return Objects.hash(id, name, usedApiList, usages);
   }
 
   @Override
@@ -112,6 +134,7 @@ public class SharedScopeUsageDTO   {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    usedApiList: ").append(toIndentedString(usedApiList)).append("\n");
+    sb.append("    usages: ").append(toIndentedString(usages)).append("\n");
     sb.append("}");
     return sb.toString();
   }
