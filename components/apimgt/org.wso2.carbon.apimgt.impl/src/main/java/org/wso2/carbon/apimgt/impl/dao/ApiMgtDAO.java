@@ -6337,14 +6337,16 @@ public class ApiMgtDAO {
                     uriMappingPrepStmt.setBinaryStream(6, is);
                 }
                 if (uriTemplate.getDescription() != null) {
+                    byte[] descriptionBytes = uriTemplate.getDescription().getBytes(StandardCharsets.UTF_8);
                     uriMappingPrepStmt.setBinaryStream(7,
-                            new ByteArrayInputStream(uriTemplate.getDescription().getBytes()));
+                            new ByteArrayInputStream(descriptionBytes), descriptionBytes.length);
                 } else {
                     uriMappingPrepStmt.setNull(7, Types.BLOB);
                 }
                 if (uriTemplate.getSchemaDefinition() != null) {
+                    byte[] schemaDefinitionBytes = uriTemplate.getSchemaDefinition().getBytes(StandardCharsets.UTF_8);
                     uriMappingPrepStmt.setBinaryStream(8,
-                            new ByteArrayInputStream(uriTemplate.getSchemaDefinition().getBytes()));
+                            new ByteArrayInputStream(schemaDefinitionBytes), schemaDefinitionBytes.length);
                 } else {
                     uriMappingPrepStmt.setNull(8, Types.BLOB);
                 }
