@@ -6340,13 +6340,13 @@ public class ApiMgtDAO {
                     uriMappingPrepStmt.setBinaryStream(7,
                             new ByteArrayInputStream(uriTemplate.getDescription().getBytes()));
                 } else {
-                    uriMappingPrepStmt.setBinaryStream(7, null);
+                    uriMappingPrepStmt.setNull(7, Types.BLOB);
                 }
                 if (uriTemplate.getSchemaDefinition() != null) {
                     uriMappingPrepStmt.setBinaryStream(8,
                             new ByteArrayInputStream(uriTemplate.getSchemaDefinition().getBytes()));
                 } else {
-                    uriMappingPrepStmt.setBinaryStream(8, null);
+                    uriMappingPrepStmt.setNull(8, Types.BLOB);
                 }
 
                 uriMappingPrepStmt.execute();
@@ -16678,7 +16678,7 @@ public class ApiMgtDAO {
                         insertURLMappingsStatement.setBinaryStream(6,
                                 new ByteArrayInputStream(descriptionBytes), descriptionBytes.length);
                     } else {
-                        insertURLMappingsStatement.setBinaryStream(6, null);
+                        insertURLMappingsStatement.setNull(6, Types.BLOB);
                     }
                     if (urlMapping.getSchemaDefinition() != null) {
                         byte[] schemaDefinitionBytes = urlMapping.getSchemaDefinition()
@@ -16686,7 +16686,7 @@ public class ApiMgtDAO {
                         insertURLMappingsStatement.setBinaryStream(7,
                                 new ByteArrayInputStream(schemaDefinitionBytes), schemaDefinitionBytes.length);
                     } else {
-                        insertURLMappingsStatement.setBinaryStream(7, null);
+                        insertURLMappingsStatement.setNull(7, Types.BLOB);
                     }
                     insertURLMappingsStatement.setString(8, String.valueOf(productId));
                     insertURLMappingsStatement.addBatch();
@@ -19478,7 +19478,7 @@ public class ApiMgtDAO {
                         insertURLMappingsStatement.setBinaryStream(6,
                                 new ByteArrayInputStream(descriptionBytes), descriptionBytes.length);
                     } else {
-                        insertURLMappingsStatement.setBinaryStream(6, null);
+                        insertURLMappingsStatement.setNull(6, Types.BLOB);
                     }
                     if (urlMapping.getSchemaDefinition() != null) {
                         byte[] schemaDefinitionBytes = urlMapping.getSchemaDefinition()
@@ -19486,7 +19486,7 @@ public class ApiMgtDAO {
                         insertURLMappingsStatement.setBinaryStream(7,
                                 new ByteArrayInputStream(schemaDefinitionBytes), schemaDefinitionBytes.length);
                     } else {
-                        insertURLMappingsStatement.setBinaryStream(7, null);
+                        insertURLMappingsStatement.setNull(7, Types.BLOB);
                     }
                     insertURLMappingsStatement.setString(8, apiRevision.getRevisionUUID());
                     insertURLMappingsStatement.addBatch();
@@ -20593,7 +20593,7 @@ public class ApiMgtDAO {
                         insertURLMappingsStatement.setBinaryStream(6,
                                 new ByteArrayInputStream(descriptionBytes), descriptionBytes.length);
                     } else {
-                        insertURLMappingsStatement.setBinaryStream(6, null);
+                        insertURLMappingsStatement.setNull(6, Types.BLOB);
                     }
                     if (urlMapping.getSchemaDefinition() != null) {
                         byte[] schemaDefinitionBytes = urlMapping.getSchemaDefinition()
@@ -20601,7 +20601,7 @@ public class ApiMgtDAO {
                         insertURLMappingsStatement.setBinaryStream(7,
                                 new ByteArrayInputStream(schemaDefinitionBytes), schemaDefinitionBytes.length);
                     } else {
-                        insertURLMappingsStatement.setBinaryStream(7, null);
+                        insertURLMappingsStatement.setNull(7, Types.BLOB);
                     }
                     insertURLMappingsStatement.addBatch();
                 }
@@ -21001,7 +21001,7 @@ public class ApiMgtDAO {
                         insertURLMappingsStatement.setBinaryStream(6,
                                 new ByteArrayInputStream(descriptionBytes), descriptionBytes.length);
                     } else {
-                        insertURLMappingsStatement.setBinaryStream(6, null);
+                        insertURLMappingsStatement.setNull(6, Types.BLOB);
                     }
                     if (urlMapping.getSchemaDefinition() != null) {
                         byte[] schemaDefinitionBytes = urlMapping.getSchemaDefinition()
@@ -21009,7 +21009,7 @@ public class ApiMgtDAO {
                         insertURLMappingsStatement.setBinaryStream(7,
                                 new ByteArrayInputStream(schemaDefinitionBytes), schemaDefinitionBytes.length);
                     } else {
-                        insertURLMappingsStatement.setBinaryStream(7, null);
+                        insertURLMappingsStatement.setNull(7, Types.BLOB);
                     }
                     insertURLMappingsStatement.setString(8, apiRevision.getRevisionUUID());
                     insertURLMappingsStatement.addBatch();
@@ -21278,7 +21278,7 @@ public class ApiMgtDAO {
                         insertURLMappingsStatement.setBinaryStream(6,
                                 new ByteArrayInputStream(descriptionBytes), descriptionBytes.length);
                     } else {
-                        insertURLMappingsStatement.setBinaryStream(6, null);
+                        insertURLMappingsStatement.setNull(6, Types.BLOB);
                     }
                     if (urlMapping.getSchemaDefinition() != null) {
                         byte[] schemaDefinitionBytes = urlMapping.getSchemaDefinition()
@@ -21286,7 +21286,7 @@ public class ApiMgtDAO {
                         insertURLMappingsStatement.setBinaryStream(7,
                                 new ByteArrayInputStream(schemaDefinitionBytes), schemaDefinitionBytes.length);
                     } else {
-                        insertURLMappingsStatement.setBinaryStream(7, null);
+                        insertURLMappingsStatement.setNull(7, Types.BLOB);
                     }
                     insertURLMappingsStatement.setString(8, Integer.toString(apiId));
                     insertURLMappingsStatement.addBatch();
@@ -22164,16 +22164,20 @@ public class ApiMgtDAO {
             for (Backend backend : backends) {
                 statement.setString(1, backend.getId());
                 statement.setString(2, backend.getName());
-                statement.setBinaryStream(3,
-                        new ByteArrayInputStream(
-                                backend.getEndpointConfig() != null ?
-                                        backend.getEndpointConfig().getBytes() : new byte[0]
-                        ));
-                statement.setBinaryStream(4,
-                        new ByteArrayInputStream(
-                                backend.getDefinition() != null ?
-                                        backend.getDefinition().getBytes() : new byte[0]
-                        ));
+                if (backend.getEndpointConfig() != null) {
+                    byte[] endpointConfigBytes = backend.getEndpointConfig().getBytes(StandardCharsets.UTF_8);
+                    statement.setBinaryStream(3,
+                            new ByteArrayInputStream(endpointConfigBytes), endpointConfigBytes.length);
+                } else {
+                    statement.setNull(3, Types.BLOB);
+                }
+                if (backend.getDefinition() != null) {
+                    byte[] definitionBytes = backend.getDefinition().getBytes(StandardCharsets.UTF_8);
+                    statement.setBinaryStream(4,
+                            new ByteArrayInputStream(definitionBytes), definitionBytes.length);
+                } else {
+                    statement.setNull(4, Types.BLOB);
+                }
                 statement.setString(5, apiUuid);
                 statement.setString(6, organization);
                 statement.addBatch();
@@ -22581,14 +22585,21 @@ public class ApiMgtDAO {
         String query = SQLConstants.UPDATE_AM_BACKEND_SQL;
 
         try (PreparedStatement getBackendPrepStmt = connection.prepareStatement(query)) {
-            getBackendPrepStmt.setBinaryStream(1,
-                    new ByteArrayInputStream(
-                            backend.getEndpointConfig() != null ? backend.getEndpointConfig().getBytes() : new byte[0]
-                    ));
-            getBackendPrepStmt.setBinaryStream(2,
-                    new ByteArrayInputStream(
-                            backend.getDefinition() != null ? backend.getDefinition().getBytes() : new byte[0]
-                    ));
+
+            if (backend.getEndpointConfig() != null) {
+                byte[] endpointConfigBytes = backend.getEndpointConfig().getBytes(StandardCharsets.UTF_8);
+                getBackendPrepStmt.setBinaryStream(1,
+                        new ByteArrayInputStream(endpointConfigBytes), endpointConfigBytes.length);
+            } else {
+                getBackendPrepStmt.setNull(1, Types.BLOB);
+            }
+            if (backend.getDefinition() != null) {
+                byte[] definitionBytes = backend.getDefinition().getBytes(StandardCharsets.UTF_8);
+                getBackendPrepStmt.setBinaryStream(2,
+                        new ByteArrayInputStream(definitionBytes), definitionBytes.length);
+            } else {
+                getBackendPrepStmt.setNull(2, Types.BLOB);
+            }
             getBackendPrepStmt.setString(3, apiUuid);
             getBackendPrepStmt.setString(4, backend.getId());
             getBackendPrepStmt.setString(5, organization);
