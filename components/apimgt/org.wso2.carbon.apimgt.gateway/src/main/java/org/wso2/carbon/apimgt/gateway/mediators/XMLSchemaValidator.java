@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators;
 
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMException;
+import org.apache.axiom.soap.SOAPBody;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -43,10 +47,11 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
 
 /**
  * This mediator would protect the backend resources from the XML threat vulnerabilities by validating the
@@ -63,19 +68,15 @@ public class XMLSchemaValidator extends AbstractMediator {
      * @return A boolean value.True if successful and false if not.
      */
     public boolean mediate(MessageContext messageContext) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("XML validation mediator is activated...");
-        }
         InputStream inputStreamSchema;
         InputStream inputStreamXml;
-        Map<String, InputStream> inputStreams = null;
         Boolean xmlValidationStatus;
         Boolean schemaValidationStatus;
         APIMThreatAnalyzer apimThreatAnalyzer = null;
         String apiContext;
         String requestMethod;
         String contentType;
-        boolean validRequest = true;
+        boolean isValid = true;
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
         requestMethod = axis2MC.getProperty(ThreatProtectorConstants.HTTP_REQUEST_METHOD).toString();
@@ -86,60 +87,57 @@ public class XMLSchemaValidator extends AbstractMediator {
             contentType = axis2MC.getProperty(ThreatProtectorConstants.SOAP_CONTENT_TYPE).toString();
         }
         apiContext = messageContext.getProperty(ThreatProtectorConstants.API_CONTEXT).toString();
+        if (logger.isDebugEnabled()) {
+            logger.debug("XML schema validation mediator is activated... API Context: "
+                    + apiContext + ", Request Method: " + requestMethod);
+        }
         if (!APIConstants.SupportedHTTPVerbs.GET.name().equalsIgnoreCase(requestMethod) &&
                 (ThreatProtectorConstants.APPLICATION_XML.equals(contentType) ||
                         ThreatProtectorConstants.TEXT_XML.equals(contentType))) {
             try {
-                inputStreams = GatewayUtils.cloneRequestMessage(messageContext);
-                if (inputStreams != null) {
-                    Object messageProperty = messageContext.getProperty(APIMgtGatewayConstants.XML_VALIDATION);
-                    if (messageProperty != null) {
-                        xmlValidationStatus = Boolean.valueOf(messageProperty.toString());
-                        if (xmlValidationStatus.equals(true)) {
-                            XMLConfig xmlConfig = configureSchemaProperties(messageContext);
-                            apimThreatAnalyzer = AnalyzerHolder.getAnalyzer(contentType);
-                            apimThreatAnalyzer.configure(xmlConfig);
-                            inputStreamXml = inputStreams.get(ThreatProtectorConstants.XML);
-                            apimThreatAnalyzer.analyze(inputStreamXml, apiContext);
-                        }
+                String payload = extractPayload(axis2MC);
+                Object messageProperty = messageContext.getProperty(APIMgtGatewayConstants.XML_VALIDATION);
+                if (messageProperty != null) {
+                    xmlValidationStatus = Boolean.valueOf(messageProperty.toString());
+                    if (xmlValidationStatus.equals(true)) {
+                        XMLConfig xmlConfig = configureSchemaProperties(messageContext);
+                        apimThreatAnalyzer = AnalyzerHolder.getAnalyzer(contentType);
+                        apimThreatAnalyzer.configure(xmlConfig);
+                        inputStreamXml = new ByteArrayInputStream(payload.getBytes(StandardCharsets.UTF_8));
+                        apimThreatAnalyzer.analyze(inputStreamXml, apiContext);
                     }
-                    messageProperty = messageContext.getProperty(APIMgtGatewayConstants.SCHEMA_VALIDATION);
-                    if (messageProperty != null) {
-                        schemaValidationStatus = Boolean.valueOf(messageProperty.toString());
-                        if (schemaValidationStatus.equals(true)) {
-                            inputStreamSchema = inputStreams.get(ThreatProtectorConstants.SCHEMA);
-                            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStreamSchema);
-                            validateSchema(messageContext, bufferedInputStream);
-                        }
+                }
+                messageProperty = messageContext.getProperty(APIMgtGatewayConstants.SCHEMA_VALIDATION);
+                if (messageProperty != null) {
+                    schemaValidationStatus = Boolean.valueOf(messageProperty.toString());
+                    if (schemaValidationStatus.equals(true)) {
+                        inputStreamSchema = new ByteArrayInputStream(payload.getBytes(StandardCharsets.UTF_8));
+                        BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStreamSchema);
+                        validateSchema(messageContext, bufferedInputStream);
                     }
                 }
             } catch (APIMThreatAnalyzerException e) {
-                validRequest = false;
-                logger.error(APIMgtGatewayConstants.BAD_REQUEST, e);
-                GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, e.getMessage());
+                logger.error("APIMThreatAnalyzerException occurred while analyzing the XML payload: "
+                        + APIMgtGatewayConstants.BAD_REQUEST, e);
+                isValid = GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, e.getMessage());
 
-            } catch (IOException e) {
-                logger.error(APIMgtGatewayConstants.BAD_REQUEST, e);
-                GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, e.getMessage());
-            }finally {
+            } catch (IOException | XMLStreamException e) {
+                logger.error("Error occurred while processing the XML payload: "
+                        + APIMgtGatewayConstants.BAD_REQUEST, e);
+                isValid = GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE, e.getMessage());
+
+            } finally {
                 //return analyzer to the pool
-                AnalyzerHolder.returnObject(apimThreatAnalyzer);
+                if (apimThreatAnalyzer != null) {
+                    AnalyzerHolder.returnObject(apimThreatAnalyzer);
+                }
             }
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("XML Schema Validator: " + APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
             }
         }
-        GatewayUtils.setOriginalInputStream(inputStreams, axis2MC);
-        if (validRequest) {
-            try {
-                RelayUtils.buildMessage(axis2MC);
-            } catch (IOException | XMLStreamException e) {
-                logger.error("Error occurred while parsing the payload.", e);
-                GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE, e.getMessage());
-            }
-        }
-        return true;
+        return isValid;
     }
 
     /**
@@ -286,5 +284,39 @@ public class XMLSchemaValidator extends AbstractMediator {
             throw new APIMThreatAnalyzerException("Error occurred while parsing XML payload : " + e);
         }
         return true;
+    }
+
+    /**
+     * Extracts the payload from the SOAP message body.
+     *
+     * @param axis2MC The Axis2 message context containing the SOAP message to extract payload from.
+     * @return The string representation of the first element in the SOAP body.
+     * @throws XMLStreamException Exception might be occurred while parsing the SOAP message or if the message format is
+     *                            invalid (missing envelope, body, or first element).
+     */
+    private String extractPayload(org.apache.axis2.context.MessageContext axis2MC)
+            throws XMLStreamException, IOException {
+        try {
+            RelayUtils.buildMessage(axis2MC);
+            SOAPEnvelope envelope = axis2MC.getEnvelope();
+            if (envelope == null) {
+                logger.debug("SOAP envelope is missing in the message");
+                throw new XMLStreamException(APIMgtGatewayConstants.INVALID_XML_FORMAT_MSG);
+            }
+            SOAPBody body = envelope.getBody();
+            if (body == null) {
+                logger.debug("SOAP body is missing in the message");
+                throw new XMLStreamException(APIMgtGatewayConstants.INVALID_XML_FORMAT_MSG);
+            }
+            OMElement firstElement = body.getFirstElement();
+            if (firstElement == null) {
+                logger.debug("First element is missing in the SOAP body");
+                throw new XMLStreamException(APIMgtGatewayConstants.INVALID_XML_FORMAT_MSG);
+            }
+            return firstElement.toString();
+
+        } catch (OMException e) {
+            throw new XMLStreamException(APIMgtGatewayConstants.INVALID_XML_FORMAT_MSG, e);
+        }
     }
 }

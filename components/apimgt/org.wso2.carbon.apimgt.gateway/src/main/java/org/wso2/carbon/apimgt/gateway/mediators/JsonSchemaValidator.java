@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.gateway.mediators;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
@@ -38,7 +39,6 @@ import javax.xml.stream.XMLStreamException;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 
 /**
  * This mediator would protect the backend resources from the JSON threat vulnerabilities by validating the
@@ -56,10 +56,6 @@ public class JsonSchemaValidator extends AbstractMediator {
      * @return a boolean true if the message content is passed the json schema criteria.
      */
     public boolean mediate(MessageContext messageContext) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("JSON schema validation mediator is activated...");
-        }
-        Map<String, InputStream> inputStreams = null;
         org.apache.axis2.context.MessageContext axis2MC;
         String apiContext;
         String requestMethod;
@@ -78,6 +74,10 @@ public class JsonSchemaValidator extends AbstractMediator {
         apiContext = messageContext.getProperty(ThreatProtectorConstants.API_CONTEXT).toString();
         requestMethod = axis2MC.getProperty(ThreatProtectorConstants.HTTP_REQUEST_METHOD).toString();
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("JSON schema validation mediator is activated... API Context: "
+                    + apiContext + ", Request Method: " + requestMethod);
+        }
         if (!APIConstants.SupportedHTTPVerbs.GET.name().equalsIgnoreCase(requestMethod) &&
                 (ThreatProtectorConstants.APPLICATION_JSON.equals(contentType) ||
                         ThreatProtectorConstants.TEXT_JSON.equals(contentType))) {
@@ -85,9 +85,9 @@ public class JsonSchemaValidator extends AbstractMediator {
             APIMThreatAnalyzer apimThreatAnalyzer = AnalyzerHolder.getAnalyzer(contentType);
             apimThreatAnalyzer.configure(jsonConfig);
             try {
-                inputStreams = GatewayUtils.cloneRequestMessage(messageContext);
-                if (inputStreams != null) {
-                    InputStream inputStreamJson = inputStreams.get(ThreatProtectorConstants.JSON);
+                RelayUtils.buildMessage(axis2MC);
+                InputStream inputStreamJson = JsonUtil.getJsonPayload(axis2MC);
+                if (inputStreamJson != null) {
                     BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStreamJson);
                     apimThreatAnalyzer.analyze(bufferedInputStream, apiContext);
                     isValid = true;
@@ -97,11 +97,11 @@ public class JsonSchemaValidator extends AbstractMediator {
                 logger.error(message, e);
                 isValid = GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE,
                         message + e.getMessage());
-            } catch (IOException e) {
+            } catch (IOException | XMLStreamException e) {
                 String message = "Error occurred while building the request: ";
                 logger.error(message, e);
-                isValid = GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE,
-                        message + e.getMessage());
+                isValid = GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
+                        e.getMessage());
             } finally {
                 // return analyzer to the pool
                 AnalyzerHolder.returnObject(apimThreatAnalyzer);
@@ -109,14 +109,6 @@ public class JsonSchemaValidator extends AbstractMediator {
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("JSON Schema Validator: " + APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
-            }
-        }
-        GatewayUtils.setOriginalInputStream(inputStreams, axis2MC);
-        if (isValid) {
-            try {
-                RelayUtils.buildMessage(axis2MC);
-            } catch (IOException | XMLStreamException e) {
-                isValid = GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE, e.getMessage());
             }
         }
         return isValid;
