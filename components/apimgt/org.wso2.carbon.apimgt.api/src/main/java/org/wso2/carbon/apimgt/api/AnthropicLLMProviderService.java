@@ -49,6 +49,7 @@ public class AnthropicLLMProviderService extends BuiltInLLMProviderService {
     public LLMProvider getLLMProvider()
             throws APIManagementException {
 
+        log.debug("Initializing Anthropic Claude LLM Provider");
         try {
             LLMProvider llmProvider = new LLMProvider();
             llmProvider.setName(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_NAME);
@@ -97,8 +98,10 @@ public class AnthropicLLMProviderService extends BuiltInLLMProviderService {
             llmProvider.setModelList(modelList);
 
             llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());
+            log.debug("Successfully configured Anthropic Claude LLM Provider");
             return llmProvider;
         } catch (Exception e) {
+            log.error("Error occurred when registering LLM Provider: " + this.getType());
             throw new APIManagementException("Error occurred when registering LLM Provider: " + this.getType(), e);
         }
     }

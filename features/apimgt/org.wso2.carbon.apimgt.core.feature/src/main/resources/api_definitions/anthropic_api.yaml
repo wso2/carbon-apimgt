@@ -43,6 +43,14 @@ components:
             - "interleaved-thinking-2025-05-14"
             - "files-api-2025-04-14"
 
+    AnthropicDangerousDirectBrowserAccessHeader:
+      in: header
+      name: anthropic-dangerous-direct-browser-access
+      description: This header must be set to "true" to enable direct client-side (browser) access to the API. This acknowledges the security risks of exposing your API key and is not recommended for production environments.
+      required: false
+      schema:
+        type: boolean
+
     BeforeId:
       name: before_id
       in: query
@@ -2112,6 +2120,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/AnthropicBetaHeader'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       requestBody:
         required: true
         content:
@@ -2194,6 +2203,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/AnthropicBetaHeader'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       requestBody:
         required: true
         content:
@@ -2267,6 +2277,7 @@ paths:
         - $ref: '#/components/parameters/BeforeId'
         - $ref: '#/components/parameters/AfterId'
         - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: Successfully retrieved models
@@ -2323,6 +2334,7 @@ paths:
         - ApiKeyAuth: []
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
         - name: model_id
           in: path
           required: true
@@ -2369,6 +2381,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/AnthropicBetaHeader'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       requestBody:
         required: true
         content:
@@ -2469,6 +2482,7 @@ paths:
         - $ref: '#/components/parameters/BeforeId'
         - $ref: '#/components/parameters/AfterId'
         - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: Successfully retrieved message batches
@@ -2530,6 +2544,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/BatchId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: Successfully retrieved message batch
@@ -2569,6 +2584,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/BatchId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: Successfully deleted message batch
@@ -2618,6 +2634,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/BatchId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: Successfully retrieved batch results
@@ -2672,6 +2689,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/BatchId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: Successfully initiated batch cancellation
@@ -2713,6 +2731,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/AnthropicBetaHeader'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       requestBody:
         required: true
         content:
@@ -2769,6 +2788,7 @@ paths:
         - $ref: '#/components/parameters/BeforeId'
         - $ref: '#/components/parameters/AfterId'
         - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: Files retrieved successfully
@@ -2824,6 +2844,7 @@ paths:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/AnthropicBetaHeader'
         - $ref: '#/components/parameters/FileId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: File retrieved successfully
@@ -2865,6 +2886,7 @@ paths:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/AnthropicBetaHeader'
         - $ref: '#/components/parameters/FileId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: File deleted successfully
@@ -2916,6 +2938,7 @@ paths:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/AnthropicBetaHeader'
         - $ref: '#/components/parameters/FileId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: File content retrieved successfully
@@ -2960,6 +2983,7 @@ paths:
         - $ref: '#/components/parameters/BeforeId'
         - $ref: '#/components/parameters/AfterId'
         - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
         - name: email
           in: query
           schema:
@@ -3022,6 +3046,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: User details retrieved successfully
@@ -3062,6 +3087,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       requestBody:
         required: true
         content:
@@ -3115,6 +3141,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: User successfully removed
@@ -3170,6 +3197,7 @@ paths:
         - $ref: '#/components/parameters/BeforeId'
         - $ref: '#/components/parameters/AfterId'
         - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: Invites retrieved successfully
@@ -3281,6 +3309,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/InviteId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: Invite details retrieved successfully
@@ -3321,6 +3350,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/InviteId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: Invite deleted successfully
@@ -3382,6 +3412,7 @@ paths:
         - $ref: '#/components/parameters/BeforeId'
         - $ref: '#/components/parameters/AfterId'
         - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: Workspaces retrieved successfully
@@ -3490,6 +3521,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: Workspace details retrieved successfully
@@ -3530,6 +3562,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       requestBody:
         required: true
         content:
@@ -3585,6 +3618,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: Workspace archived successfully
@@ -3629,6 +3663,7 @@ paths:
         - $ref: '#/components/parameters/BeforeId'
         - $ref: '#/components/parameters/AfterId'
         - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: Workspace members retrieved successfully
@@ -3685,6 +3720,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       requestBody:
         required: true
         content:
@@ -3744,6 +3780,7 @@ paths:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/WorkspaceId'
         - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: Workspace member details retrieved successfully
@@ -3785,6 +3822,7 @@ paths:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/WorkspaceId'
         - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       requestBody:
         required: true
         content:
@@ -3839,6 +3877,7 @@ paths:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/WorkspaceId'
         - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: Workspace member successfully removed
@@ -3898,6 +3937,7 @@ paths:
         - $ref: '#/components/parameters/BeforeId'
         - $ref: '#/components/parameters/AfterId'
         - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
         - name: status
           in: query
           schema:
@@ -3974,6 +4014,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/ApiKeyId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       responses:
         '200':
           description: API key details retrieved successfully
@@ -4014,6 +4055,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/AnthropicVersionHeader'
         - $ref: '#/components/parameters/ApiKeyId'
+        - $ref: '#/components/parameters/AnthropicDangerousDirectBrowserAccessHeader'
       requestBody:
         required: true
         content:
