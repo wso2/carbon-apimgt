@@ -61,6 +61,8 @@ import org.apache.cxf.rs.security.cors.CrossOriginResourceSharingFilter;
 import org.apache.cxf.service.invoker.Invoker;
 import org.apache.cxf.transport.http.DestinationRegistry;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 
 /**
@@ -92,6 +94,10 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
     private static final String DEFAULT_PARAMETER_SPLIT_CHAR = ",";
     private static final String SPACE_PARAMETER_SPLIT_CHAR = "space";
     private static final String JAXRS_APPLICATION_PARAM = "javax.ws.rs.Application";
+    private static final String MCP_RESOURCE_CLASS_PUBLISHER =
+            "org.wso2.carbon.apimgt.rest.api.publisher.v1.McpServersApi";
+    private static final String MCP_RESOURCE_CLASS_DEVPORTAL =
+            "org.wso2.carbon.apimgt.rest.api.store.v1.McpServersApi";
     private static final String CORS_SYSTEM_PROPERTIES_PREFIX = "{systemProperties['";
     private static final String CORS_SYSTEM_PROPERTIES_PATTERN = "^\\{systemProperties\\['|'\\]\\}$";
     private static Map<String, String> systemPropMap = new HashMap();
@@ -348,6 +354,11 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
                 String cName = var7[var9];
                 Map<String, List<String>> props = new HashMap();
                 String theName = this.getClassNameAndProperties(cName, props);
+                // ✨ Skip MCP resources when disabled
+                if (!isMcpEnabled() && (MCP_RESOURCE_CLASS_PUBLISHER.equals(theName)
+                        || MCP_RESOURCE_CLASS_DEVPORTAL.equals(theName))) {
+                    continue;
+                }
                 if (!theName.isEmpty()) {
                     Class<?> cls = this.loadClass(theName);
                     map.put(cls, props);
@@ -693,5 +704,18 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
         public Set<Object> getSingletons() {
             return this.applicationSingletons;
         }
+    }
+
+    private static boolean isMcpEnabled() {
+        APIManagerConfiguration config = getApiManagerConfiguration();
+        return config != null && config.isMCPSupportEnabled();
+    }
+
+    private static APIManagerConfiguration getApiManagerConfiguration() {
+        ServiceReferenceHolder holder = ServiceReferenceHolder.getInstance();
+        if (holder == null || holder.getAPIManagerConfigurationService() == null) {
+            return null;
+        }
+        return holder.getAPIManagerConfigurationService().getAPIManagerConfiguration();
     }
 }
