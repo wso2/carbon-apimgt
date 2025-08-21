@@ -127,7 +127,7 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_VERSION = "1.0.0";
         public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_CONNECTOR = "anthropic_1.0.0";
         public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_KEY = "x-api-key";
-        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_API_DEFINITION_FILE_NAME = "claude_api.yaml";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_API_DEFINITION_FILE_NAME = "anthropic_api.yaml";
         public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_DESCRIPTION = "Anthropic Claude LLM Service";
         public static final String LLM_PROVIDER_SERVICE_METADATA_REQUEST_MODEL = "requestModel";
         public static final String LLM_PROVIDER_SERVICE_METADATA_RESPONSE_MODEL = "responseModel";

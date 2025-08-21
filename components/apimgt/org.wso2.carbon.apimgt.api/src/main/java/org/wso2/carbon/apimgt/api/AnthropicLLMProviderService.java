@@ -37,7 +37,7 @@ import java.util.Map;
         immediate = true,
         service = LLMProviderService.class
 )
-public class AnthropicClaudeLLMProviderService extends BuiltInLLMProviderService {
+public class AnthropicLLMProviderService extends BuiltInLLMProviderService {
 
     @Override
     public String getType() {
@@ -99,7 +99,7 @@ public class AnthropicClaudeLLMProviderService extends BuiltInLLMProviderService
             llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());
             return llmProvider;
         } catch (Exception e) {
-            throw new APIManagementException("Error occurred when registering LLM Provider: " + this.getType());
+            throw new APIManagementException("Error occurred when registering LLM Provider: " + this.getType(), e);
         }
     }
 
