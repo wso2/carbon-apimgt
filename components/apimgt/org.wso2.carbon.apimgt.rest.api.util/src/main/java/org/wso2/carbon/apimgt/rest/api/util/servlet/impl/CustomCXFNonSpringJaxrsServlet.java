@@ -357,6 +357,7 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
                 // ✨ Skip MCP resources when disabled
                 if (!isMcpEnabled() && (MCP_RESOURCE_CLASS_PUBLISHER.equals(theName)
                         || MCP_RESOURCE_CLASS_DEVPORTAL.equals(theName))) {
+                    LOG.info("Skipping MCP resource class: " + theName + " as MCP is disabled");
                     continue;
                 }
                 if (!theName.isEmpty()) {
@@ -707,11 +708,13 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
     }
 
     private static boolean isMcpEnabled() {
+
         APIManagerConfiguration config = getApiManagerConfiguration();
         return config != null && config.isMCPSupportEnabled();
     }
 
     private static APIManagerConfiguration getApiManagerConfiguration() {
+
         ServiceReferenceHolder holder = ServiceReferenceHolder.getInstance();
         if (holder == null || holder.getAPIManagerConfigurationService() == null) {
             return null;
