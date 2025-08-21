@@ -77,7 +77,7 @@ public class AnthropicClaudeLLMProviderService extends BuiltInLLMProviderService
             llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());
             return llmProvider;
         } catch (Exception e) {
-            throw new APIManagementException("Error occurred when registering LLM Provider:" + this.getType());
+            throw new APIManagementException("Error occurred when registering LLM Provider: " + this.getType());
         }
     }
 
