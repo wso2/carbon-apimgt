@@ -23,6 +23,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Type;
 
@@ -33,6 +35,7 @@ import java.lang.reflect.Type;
  */
 
 public class MCPRequestDeserializer implements com.google.gson.JsonDeserializer<McpRequest> {
+    private static final Log log = LogFactory.getLog(MCPRequestDeserializer.class);
 
     /**
      * Deserialize a JSON element into a McpRequest object.
@@ -47,6 +50,10 @@ public class MCPRequestDeserializer implements com.google.gson.JsonDeserializer<
     @Override
     public McpRequest deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
             throws JsonParseException {
+        if (log.isDebugEnabled()) {
+            log.debug("Starting deserialization of McpRequest");
+        }
+
         JsonObject obj = json.getAsJsonObject();
         McpRequest mcpRequest = new McpRequest(null);
 
@@ -56,15 +63,29 @@ public class MCPRequestDeserializer implements com.google.gson.JsonDeserializer<
             JsonPrimitive prim = idElement.getAsJsonPrimitive();
             if (prim.isString()) {
                 mcpRequest.setId(prim.getAsString());
+                if (log.isDebugEnabled()) {
+                    log.debug("Set string ID: " + prim.getAsString());
+                }
             } else if (prim.isNumber()) {
-                int val = prim.getAsInt();
+                long val = prim.getAsLong();
                 mcpRequest.setId(val);
+                if (log.isDebugEnabled()) {
+                    log.debug("Set integer ID: " + val);
+                }
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("ID element is missing in McpRequest");
             }
         }
 
-        // Let Gson handle the rest (name, etc.)
+        // Let Gson handle the rest
         mcpRequest.setMethod(context.deserialize(obj.get("method"), String.class));
         mcpRequest.setParams(context.deserialize(obj.get("params"), Params.class));
+
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully deserialized McpRequest with method: " + mcpRequest.getMethod());
+        }
 
         return mcpRequest;
     }

@@ -76,7 +76,7 @@ public class MCPUtils {
         }
         if (!APIConstants.MCP.ALLOWED_METHODS.contains(method)) {
             throw new McpException(APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_CODE,
-                    APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_MESSAGE, method + " Method not found");
+                    APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_MESSAGE, "Method " + method + " not found");
         }
 
         Object id = request.getId();

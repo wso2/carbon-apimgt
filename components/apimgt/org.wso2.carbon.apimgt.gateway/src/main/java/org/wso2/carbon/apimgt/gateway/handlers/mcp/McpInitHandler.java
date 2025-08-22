@@ -90,7 +90,7 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST, isNoAuthMCPRequest);
             }
         } catch (McpException e) {
-            log.error(e.getData().toString(), e);
+            log.error("MCP init failed: " + String.valueOf(e.getData()), e);
             MCPUtils.handleMCPFailure(messageContext, new McpResponseDto(e.getErrorMessage(), e.getErrorCode(), null));
             return false;
         }
