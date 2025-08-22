@@ -300,24 +300,6 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     }
 
     @GET
-    @Path("/{mcpServerId}/sdks/{language}")
-    
-    @Produces({ "application/zip", "application/json" })
-    @ApiOperation(value = "Generate a SDK for a MCP Server ", notes = "This operation can be used to generate SDKs (System Development Kits), for the MCP Servers available in the API  Developer Portal, for a requested development language. ", response = byte[].class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
-        })
-    }, tags={ "SDKs",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. SDK generated successfully. ", response = byte[].class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response getMCPServerSDK(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId, @ApiParam(value = "Programming language of the SDK that is required.  Languages supported by default are **Java**, **Javascript**, **Android** and **JMeter**. ",required=true) @PathParam("language") String language,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
-        return delegate.getMCPServerSDK(mcpServerId, language, xWSO2Tenant, securityContext);
-    }
-
-    @GET
     @Path("/{mcpServerId}/subscription-policies")
     
     @Produces({ "application/json" })
@@ -333,24 +315,6 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
     public Response getMCPServerSubscriptionPolicies(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.getMCPServerSubscriptionPolicies(mcpServerId, xWSO2Tenant, ifNoneMatch, securityContext);
-    }
-
-    @GET
-    @Path("/{mcpServerId}/swagger")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get Swagger Definition of a MCP Server ", notes = "You can use this operation to retrieve the swagger definition of a MCP server.   `X-WSO2-Tenant` header can be used to retrieve the swagger definition a MCP Server of a different tenant  domain. If  not specified super tenant will be used. If Authorization header is present in the request, the  user's tenant associated with the access token will be used.  **NOTE:** * This operation does not require an Authorization header by default. But in order to see a restricted MCP  Server's swagger definition, you need to provide Authorization header. ", response = String.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            
-        })
-    }, tags={ "MCP Servers",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Requested swagger document of the API is returned ", response = String.class),
-        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response getMCPServerSwagger(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId,  @ApiParam(value = "Name of the API gateway environment. ")  @QueryParam("environmentName") String environmentName,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. ")  @QueryParam("X-WSO2-Tenant-Q") String xWSO2TenantQ,  @ApiParam(value = "**Key Manager Specific Swagger Generation**. To retrieve an OpenAPI Specification (OAS) definition for a specific Key Manager, please specify the Key Manager's ID in your request.   For example, by passing the query parameter `kmId=65e30b46-85e4-4788-85b7-b1c3de06b2e0`, you will receive the OAS definition containing all relevant information for the Key Manager associated with that ID.  **Important:** If you're using a client that does not automatically handle URL encoding (such as `curl`), please ensure that you encode the URL properly. ")  @QueryParam("query") String query) throws APIManagementException{
-        return delegate.getMCPServerSwagger(mcpServerId, environmentName, ifNoneMatch, xWSO2Tenant, xWSO2TenantQ, query, securityContext);
     }
 
     @GET
