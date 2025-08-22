@@ -950,6 +950,9 @@ public final class APIConstants {
         public static final String CONFIGURE_GOVERNANCE = "/permission/admin/configure/governance";
         public static final String RESOURCE_GOVERN = "/permission/admin/manage/resources/govern";
 
+        public static final String TENANT_MANAGE = "/permission/protected/manage";
+        public static final String TENANT_MANAGE_MODIFY = "/permission/protected/manage/modify";
+
         private Permissions() {
 
         }

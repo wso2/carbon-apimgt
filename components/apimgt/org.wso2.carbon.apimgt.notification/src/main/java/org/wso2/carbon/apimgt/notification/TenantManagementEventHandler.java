@@ -25,11 +25,15 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.clients.TenantManagementClient;
 import org.wso2.carbon.apimgt.impl.handlers.EventHandler;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.notification.event.TenantManagementEvent;
 import org.wso2.carbon.apimgt.notification.event.TenantManagementEvent.EventDetail;
 import org.wso2.carbon.apimgt.notification.event.TenantManagementEvent.Owner;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,9 +45,15 @@ public class TenantManagementEventHandler implements EventHandler {
     private static final Log log = LogFactory.getLog(TenantManagementEventHandler.class);
     private TenantManagementClient client;
 
+    private static final String AUTH_HEADER_PREFIX = "Authorization";
+    private static final String BASIC_SCHEME_PREFIX = "basic ";
+
     @Override
     public boolean handleEvent(String event, Map<String, List<String>> headers) throws APIManagementException {
         try {
+            if (!isAuthorized(headers.get(AUTH_HEADER_PREFIX))) {
+                throw new APIManagementException("User is not authorized to perform this operation.");
+            }
             if (client == null) {
                 client = new TenantManagementClient();
             }
@@ -103,7 +113,7 @@ public class TenantManagementEventHandler implements EventHandler {
             }
 
         } catch (APIManagementException e) {
-            throw new APIManagementException("Error while creating tenant management client", e);
+            throw new APIManagementException("Error while executing tenant management service", e);
         }
         return true;
     }
@@ -182,4 +192,57 @@ public class TenantManagementEventHandler implements EventHandler {
         return APIConstants.TenantManagementEvent.TENANT_MANAGEMENT_TYPE;
     }
 
+    private boolean isAuthorized(List<String> headers) {
+
+        // Return null immediately if the list is null or empty to avoid errors.
+        if (headers == null || headers.isEmpty()) {
+            return false;
+        }
+
+        // Loop through each header in the provided list.
+        for (String header : headers) {
+            if (header == null) {
+                continue; // Skip null headers
+            }
+
+            String lowercasedHeader = header.toLowerCase(Locale.ROOT);
+
+            // Check if the header content is an "Basic ".
+            if (lowercasedHeader.startsWith(BASIC_SCHEME_PREFIX)) {
+
+                // Extract the Base64 encoded credentials string.
+                String base64Credentials = header.substring(BASIC_SCHEME_PREFIX.length()).trim();
+
+                try {
+                    // Decode the Base64 string to bytes.
+                    byte[] decodedBytes = Base64.getDecoder().decode(base64Credentials);
+                    String decodedCredentials = new String(decodedBytes, StandardCharsets.UTF_8);
+
+                    // The decoded string should be in the format "username:password".
+                    // We use split with a limit of 2 to handle passwords that might contain a colon.
+                    final String[] credentialsArray = decodedCredentials.split(":", 2);
+
+                    // Validate that we got both a username and a password.
+                    if (credentialsArray.length == 2) {
+                        String username = credentialsArray[0];
+                        if (APIUtil.hasPermission(username, APIConstants.Permissions.TENANT_MANAGE) ||
+                                APIUtil.hasPermission(username, APIConstants.Permissions.TENANT_MANAGE_MODIFY)) {
+                            return true;
+                        }
+                    }
+                } catch (IllegalArgumentException e) {
+                    // This catches errors if the string is not valid Base64.
+                    log.error("Error decoding Base64 credentials: " + e.getMessage());
+                    return false;
+                } catch (APIManagementException e) {
+                    log.error("Error while checking permission: " + e.getMessage());
+                    return false;
+                }
+
+                // If an "Authorization" header was found but it wasn't "Basic",
+                return false;
+            }
+        }
+        return false;
+    }
 }
