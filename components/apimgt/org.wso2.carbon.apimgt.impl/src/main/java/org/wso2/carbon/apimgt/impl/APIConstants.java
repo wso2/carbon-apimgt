@@ -465,6 +465,7 @@ public final class APIConstants {
     public static final String JWT_DECODING = "JWTDecoding";
     public static final String ENABLE_USER_CLAIMS = "EnableUserClaims";
     public static final String BINDING_FEDERATED_USER_CLAIMS = "EnableBindingFederatedUserClaims";
+    public static final String BINDING_FEDERATED_USER_CLAIMS_FOR_OPAQUE = "EnableBindingFederatedUserClaimsForOpaque";
     public static final String TOKEN_GENERATOR_IMPL = "JWTGeneratorImpl";
     public static final String ENABLE_JWT_GENERATION = "EnableJWTGeneration";
     public static final String Enable_JWKS_API = "EnableJWKSApi";
@@ -3051,7 +3052,6 @@ public final class APIConstants {
         public static final String AUTH_CODE = "authCode";
         public static final String CLAIM_DIALECT = "dialect";
         public static final String BINDING_FEDERATED_USER_CLAIMS = "bindFederatedUserClaims";
-        public static final String BINDING_FEDERATED_USER_CLAIMS_FOR_OPAQUE = "bindFederatedUserClaims.opaqueToken.enable";
         public static final String DEFAULT_KEY_MANAGER_OPENID_CONNECT_DISCOVERY_ENDPOINT = "/oauth2/token/.well-known/openid-configuration";
         public static final String DEFAULT_JWKS_ENDPOINT = "/oauth2/jwks";
         public static final String PRODUCTION_TOKEN_ENDPOINT = "production_token_endpoint";

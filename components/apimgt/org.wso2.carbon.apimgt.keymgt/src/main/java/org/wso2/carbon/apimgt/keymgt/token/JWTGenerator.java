@@ -55,9 +55,6 @@ public class JWTGenerator extends AbstractJWTGenerator {
 
     private static final Log log = LogFactory.getLog(JWTGenerator.class);
     private static final String OIDC_DIALECT_URI = "http://wso2.org/oidc/claim";
-    private static final boolean BINDING_FEDERATED_USER_CLAIMS_FOR_OPAQUE =
-            Boolean.parseBoolean(System.getProperty(APIConstants.KeyManager.BINDING_FEDERATED_USER_CLAIMS_FOR_OPAQUE,
-                    "false"));
 
     @Override
     public Map<String, String> populateStandardClaims(TokenValidationContext validationContext)
@@ -160,7 +157,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
         ExtendedJWTConfigurationDto jwtConfigurationDto = apiManagerConfiguration.getJwtConfigurationDto();
-        boolean isBindFederatedUserClaims = jwtConfigurationDto.isBindFederatedUserClaims();
+        boolean isBindFederatedUserClaims = jwtConfigurationDto.isBindFederatedUserClaimsForOpaque();
         if (apiManagerConfiguration.isJWTClaimCacheEnabled()) {
             String cacheKey = username.concat("_").concat(String.valueOf(tenantId));
             Object claims = CacheProvider.getJWTClaimCache().get(cacheKey);
@@ -196,13 +193,11 @@ public class JWTGenerator extends AbstractJWTGenerator {
      * with the specified user.
      *
      * @param username                   The username of the user whose claims are to be retrieved.
-     * @param accessToken                The access token associated with the user (can be {@code null}).
+     * @param accessToken                The access token associated with the user.
      * @param tenantId                   The tenant ID corresponding to the user.
      * @param dialectURI                 The claim dialect URI used to format the claims.
      * @param keyManager                 The name of the configured Key Manager.
      * @param isBindFederatedUserClaims  A flag indicating whether federated user claims should be bound.
-     *                                   This is used in combination with the system-level
-     *                                   {@code BINDING_FEDERATED_USER_CLAIMS_FOR_OPAQUE} flag.
      *
      * @return A map of user claims if successfully retrieved from the Key Manager;
      *         {@code null} if no claims are available or retrieval fails.
@@ -220,9 +215,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
         }
         if (!StringUtils.isEmpty(dialectURI)) {
             properties.put(APIConstants.KeyManager.CLAIM_DIALECT, dialectURI);
-            if (isBindFederatedUserClaims && BINDING_FEDERATED_USER_CLAIMS_FOR_OPAQUE) {
-                properties.put(APIConstants.KeyManager.BINDING_FEDERATED_USER_CLAIMS, true);
-            }
+            properties.put(APIConstants.KeyManager.BINDING_FEDERATED_USER_CLAIMS, isBindFederatedUserClaims);
             KeyManager keymanager = KeyManagerHolder
                     .getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId), keyManager);
             if (keymanager != null) {

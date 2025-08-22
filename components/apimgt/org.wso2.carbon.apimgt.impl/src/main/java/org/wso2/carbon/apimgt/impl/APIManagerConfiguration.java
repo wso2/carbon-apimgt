@@ -2167,6 +2167,14 @@ public class APIManagerConfiguration {
                         } else {
                             jwtConfigurationDto.setBindFederatedUserClaims(true);
                         }
+                        OMElement isBindFederatedUserClaimsForOpaque =
+                                omElement.getFirstChildWithName(new QName(APIConstants.BINDING_FEDERATED_USER_CLAIMS_FOR_OPAQUE));
+                        if (isBindFederatedUserClaimsForOpaque != null) {
+                            jwtConfigurationDto.setBindFederatedUserClaimsForOpaque(
+                                    Boolean.parseBoolean(isBindFederatedUserClaimsForOpaque.getText()));
+                        } else {
+                            jwtConfigurationDto.setBindFederatedUserClaimsForOpaque(false);
+                        }
                     }
                 }
                 OMElement enableBase64PaddingElement = gatewayJWTConfigurationElement.getFirstChildWithName(

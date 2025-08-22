@@ -50,6 +50,9 @@
         {% if apim.jwt.binding_federated_user_claims is defined %}
         <EnableBindingFederatedUserClaims>{{apim.jwt.binding_federated_user_claims}}</EnableBindingFederatedUserClaims>
         {% endif %}
+        {% if apim.jwt.binding_federated_user_claims_for_opaque is defined %}
+        <EnableBindingFederatedUserClaimsForOpaque>{{apim.jwt.binding_federated_user_claims_for_opaque}}</EnableBindingFederatedUserClaimsForOpaque>
+        {% endif %}
         {% if apim.jwt.enable_user_claims %}
         <ClaimsRetrieverImplClass>{{apim.jwt.claims_extractor_impl}}</ClaimsRetrieverImplClass>
         {% else %}
