@@ -3682,6 +3682,7 @@ public final class APIConstants {
         public static final String HEADER_ACCEPT = "Accept";
         public static final String HEADER_MCP_SESSION_ID = "Mcp-Session-Id";
         public static final String ACCEPT_JSON_AND_SSE = "application/json, text/event-stream";
+        public static final String MCP_FAILURE_HANDLER = "_mcp_failure_handler";
 
         // JSON keys used in payloads
         public static final String CAPABILITIES_KEY = "capabilities";

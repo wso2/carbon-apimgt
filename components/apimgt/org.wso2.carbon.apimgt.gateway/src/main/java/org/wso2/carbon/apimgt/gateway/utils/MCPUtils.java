@@ -28,7 +28,10 @@ import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
@@ -38,6 +41,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.exception.McpException;
 import org.wso2.carbon.apimgt.gateway.exception.McpExceptionWithId;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.mcp.Param;
 import org.wso2.carbon.apimgt.gateway.mcp.SchemaMapping;
 import org.wso2.carbon.apimgt.gateway.mcp.request.McpRequest;
@@ -72,7 +76,7 @@ public class MCPUtils {
         }
         if (!APIConstants.MCP.ALLOWED_METHODS.contains(method)) {
             throw new McpException(APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_CODE,
-                    APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_MESSAGE, "Method not found");
+                    APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_MESSAGE, method + " Method not found");
         }
 
         Object id = request.getId();
@@ -243,7 +247,7 @@ public class MCPUtils {
                 processRequestBody(messageContext, schemaMapping, mcpRequest);
 
                 //set received id to msg context
-                messageContext.setProperty("RECEIVED_MCP_ID", id.toString());
+                messageContext.setProperty("RECEIVED_MCP_ID", id);
             }
         } else {
             throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE,
@@ -456,6 +460,23 @@ public class MCPUtils {
     private static void throwMissingMethodError() throws McpException {
         throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
                 APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing method field");
+    }
+
+    /**
+     * This method handles failures
+     *
+     * @param messageContext    message context of the request
+     * @param responseDto      payload of the error
+     */
+    public static void handleMCPFailure(MessageContext messageContext, McpResponseDto responseDto) {
+        messageContext.setProperty("MCP_ID", null);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, responseDto.getResponse());
+        messageContext.setProperty("MCP_ERROR_CODE", responseDto.getStatusCode());
+        Mediator sequence = messageContext.getSequence(APIConstants.MCP.MCP_FAILURE_HANDLER);
+        if (sequence != null && !sequence.mediate(messageContext)) {
+            return;
+        }
+        Utils.sendFault(messageContext, HttpStatus.SC_OK);
     }
 
 }
