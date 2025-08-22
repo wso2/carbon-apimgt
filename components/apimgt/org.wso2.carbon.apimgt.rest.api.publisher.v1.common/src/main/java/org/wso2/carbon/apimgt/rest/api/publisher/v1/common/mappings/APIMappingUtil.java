@@ -193,6 +193,7 @@ public class APIMappingUtil {
     private static final String EMPTY_STRING = "";
 
     private static String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
+    private static String caseSensitiveCheckEnabled = System.getProperty(APIConstants.CASE_SENSITIVE_CHECK_PATH);
 
     public static API fromDTOtoAPI(APIDTO dto, String provider) throws APIManagementException {
 
@@ -395,7 +396,12 @@ public class APIMappingUtil {
             model.setAccessControl(APIConstants.NO_ACCESS_CONTROL);
             model.setAccessControlRoles("null");
         } else {
-            model.setAccessControlRoles(StringUtils.join(accessControlRoles, ',').toLowerCase());
+            String roles = StringUtils.join(accessControlRoles, ',');
+            if (Boolean.parseBoolean(caseSensitiveCheckEnabled)) {
+                model.setAccessControlRoles(roles);
+            } else {
+                model.setAccessControlRoles(roles.toLowerCase());
+            }
             model.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY);
         }
 
