@@ -3540,26 +3540,36 @@ public final class APIUtil {
             apiData.put(key, new ArrayList<>());
         }
 
-        for (int i = 0; i < synapseApiTypes.size(); i++) {
-            String apiType = synapseApiTypes.get(i).getAsString();
-            if (apiData.containsKey(apiType)) {
-                apiData.get(apiType).add(APIConstants.WSO2_SYNAPSE_GATEWAY);
-            }
-        }
-
-        for (int i = 0; i < apkApiTypes.size(); i++) {
-            String apiType = apkApiTypes.get(i).getAsString();
-            if (apiData.containsKey(apiType)) {
-                apiData.get(apiType).add(APIConstants.WSO2_APK_GATEWAY);
-            }
-        }
-
         Map<String, GatewayAgentConfiguration> externalGatewayConnectorConfigurationMap =
                 ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
 
-        externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
-            processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, gatewayConfiguration);
-        });
+        // Get the gateway types from the deployment.toml and process each external gateway type in the same order as
+        // they are defined in the deployment.toml.
+        List<String> gatewayTypes = APIUtil.getGatewayTypes();
+        for (String gatewayType : gatewayTypes) {
+            if (APIConstants.API_GATEWAY_TYPE_REGULAR.equals(gatewayType)) {
+                for (JsonElement element : synapseApiTypes) {
+                    String apiType = element.getAsString();
+                    if (apiData.containsKey(apiType)) {
+                        apiData.get(apiType).add(APIConstants.WSO2_SYNAPSE_GATEWAY);
+                    }
+                }
+            } else if (APIConstants.API_GATEWAY_TYPE_APK.equals(gatewayType)) {
+                for (JsonElement element : apkApiTypes) {
+                    String apiType = element.getAsString();
+                    if (apiData.containsKey(apiType)) {
+                        apiData.get(apiType).add(APIConstants.WSO2_APK_GATEWAY);
+                    }
+                }
+            } else {
+                GatewayAgentConfiguration gatewayConfiguration = externalGatewayConnectorConfigurationMap.get(gatewayType);
+                if (gatewayConfiguration != null) {
+                    processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, gatewayConfiguration);
+                } else {
+                    log.warn("No configuration found for external gateway type: " + gatewayType);
+                }
+            }
+        }
 
         GatewayFeatureCatalog gatewayFeatureCatalog = new GatewayFeatureCatalog();
         gatewayFeatureCatalog.setApiTypes(apiData);
