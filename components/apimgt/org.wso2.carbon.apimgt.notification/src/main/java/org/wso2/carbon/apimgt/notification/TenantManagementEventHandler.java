@@ -225,8 +225,7 @@ public class TenantManagementEventHandler implements EventHandler {
                     // Validate that we got both a username and a password.
                     if (credentialsArray.length == 2) {
                         String username = credentialsArray[0];
-                        if (APIUtil.hasPermission(username, APIConstants.Permissions.TENANT_MANAGE) ||
-                                APIUtil.hasPermission(username, APIConstants.Permissions.TENANT_MANAGE_MODIFY)) {
+                        if (APIUtil.hasPermission(username, APIConstants.Permissions.TENANT_MANAGE_MODIFY)) {
                             return true;
                         }
                     }
