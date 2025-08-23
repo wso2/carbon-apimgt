@@ -2833,12 +2833,16 @@ public class ImportUtils {
                             apiTypeWrapper.getApi().getUuid() :
                             apiTypeWrapper.getApiProduct().getUuid();
                     if (docContentExists) {
+                        String inlineContent = null;
                         try (FileInputStream inputStream = new FileInputStream(
                                 individualDocumentFilePath + File.separator + folderName)) {
-                            String inlineContent = IOUtils.toString(inputStream, ImportExportConstants.CHARSET);
-                            PublisherCommonUtils.addDocumentationContent(documentation, apiProvider, apiOrApiProductId,
-                                    documentation.getId(), organization, inlineContent);
+                            inlineContent = IOUtils.toString(inputStream, ImportExportConstants.CHARSET);
+                        } catch (FileNotFoundException e) {
+                            // For inline & Markdown docs, if the content file is not found, content will be a space.
+                            inlineContent = " ";
                         }
+                        PublisherCommonUtils.addDocumentationContent(documentation, apiProvider, apiOrApiProductId,
+                                documentation.getId(), organization, inlineContent);
                     } else if (ImportExportConstants.FILE_DOC_TYPE.equalsIgnoreCase(docSourceType)) {
                         String filePath = documentation.getFilePath();
                         try (FileInputStream inputStream = new FileInputStream(

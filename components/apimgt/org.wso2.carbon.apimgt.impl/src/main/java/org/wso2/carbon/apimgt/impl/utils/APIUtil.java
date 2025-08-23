@@ -11676,8 +11676,13 @@ public final class APIUtil {
      * @throws NullPointerException if the input URL is null
      */
     public static String trimTrailingSlashes(String url) {
-        while (url.endsWith("/")) {
-            url = url.substring(0, url.length() - 1);
+        if (log.isDebugEnabled()) {
+            log.debug("Trimming trailing slashes from URL: " + url);
+        }
+        if (url.length() > 1) {
+            while (url.endsWith("/")) {
+                url = url.substring(0, url.length() - 1);
+            }
         }
         return url;
     }
