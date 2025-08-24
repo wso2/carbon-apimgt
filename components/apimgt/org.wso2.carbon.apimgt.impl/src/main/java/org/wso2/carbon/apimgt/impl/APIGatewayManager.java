@@ -93,14 +93,16 @@ public class APIGatewayManager {
         }
     }
 
-    private void sendUnDeploymentEvent(API api, String tenantDomain, Set<String> removedGateways) {
+    private void sendUnDeploymentEvent(API api, String tenantDomain, Set<String> removedGateways,
+                                       boolean onDeleteOrRetire) {
         APIIdentifier apiIdentifier = api.getId();
 
         DeployAPIInGatewayEvent
                 deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(),
                 api.getOrganization(), api.getId().getId(), api.getUuid(), removedGateways, apiIdentifier.getName(),
-                apiIdentifier.getVersion(), apiIdentifier.getProviderName(), api.getType(), api.getContext());
+                apiIdentifier.getVersion(), apiIdentifier.getProviderName(), api.getType(), api.getContext(),
+                onDeleteOrRetire);
         APIUtil.sendNotification(deployAPIInGatewayEvent,
                 APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
 
@@ -168,12 +170,13 @@ public class APIGatewayManager {
         sendDeploymentEvent(api, tenantDomain, gatewaysToPublish);
     }
 
-    public void unDeployFromGateway(API api, String tenantDomain, Set<String> gatewaysToRemove) {
+    public void unDeployFromGateway(API api, String tenantDomain, Set<String> gatewaysToRemove,
+                                    boolean onDeleteOrRetire) {
 
         if (debugEnabled) {
             log.debug("Status of " + api.getId() + " has been updated to DB");
         }
-        sendUnDeploymentEvent(api, tenantDomain, gatewaysToRemove);
+        sendUnDeploymentEvent(api, tenantDomain, gatewaysToRemove, onDeleteOrRetire);
     }
 
     public void unDeployFromGateway(APIProduct apiProduct, String tenantDomain, Set<API> associatedAPIs,
@@ -219,5 +222,8 @@ public class APIGatewayManager {
             apiEvents.add(apiEvent);
         }
         return apiEvents;
+    }
+
+    public void unDeployFromGateway(APIProduct apiProduct, String tenantDomain, Set<API> associatedAPIs, Set<String> environmentsToRemove, boolean onDeleteOrRetire) {
     }
 }

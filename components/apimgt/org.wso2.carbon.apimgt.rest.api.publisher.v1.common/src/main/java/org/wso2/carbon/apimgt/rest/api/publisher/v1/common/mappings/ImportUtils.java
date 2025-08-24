@@ -578,7 +578,7 @@ public class ImportUtils {
                         //before deleting
                         apiProvider
                                 .undeployAPIRevisionDeployment(importedAPIUuid, earliestRevisionUuid, deploymentsList,
-                                        organization);
+                                        organization, false);
                         apiProvider.deleteAPIRevision(importedAPIUuid, earliestRevisionUuid, tenantDomain);
                         revisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
                         if (log.isDebugEnabled()) {
@@ -929,7 +929,7 @@ public class ImportUtils {
                                 apiProvider.getAPIRevisionDeploymentList(earliestRevisionUuid);
 
                         apiProvider.undeployAPIRevisionDeployment(
-                                importedAPIUuid, earliestRevisionUuid, deploymentsList, organization);
+                                importedAPIUuid, earliestRevisionUuid, deploymentsList, organization, false);
                         apiProvider.deleteAPIRevision(importedAPIUuid, earliestRevisionUuid, tenantDomain);
                         revisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
 

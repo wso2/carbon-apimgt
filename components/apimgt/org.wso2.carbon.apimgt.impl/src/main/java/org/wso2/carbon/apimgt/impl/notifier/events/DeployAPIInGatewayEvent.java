@@ -14,6 +14,7 @@ public class DeployAPIInGatewayEvent extends Event {
     private Set<String> gatewayLabels;
     private Set<APIEvent> associatedApis;
     private String context;
+    private boolean deleted;
 
     public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenantDomain, int apiId,
                                    String uuid, Set<String> gatewayLabels, String name, String version, String provider,
@@ -68,6 +69,13 @@ public class DeployAPIInGatewayEvent extends Event {
         this.apiType = apiType;
         this.context = context;
         this.associatedApis = new HashSet<>();
+    }
+
+    public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenantDomain, int apiId,
+                                   String uuid, Set<String> gatewayLabels, String name, String version, String provider,
+                                   String apiType, String context,boolean deleted) {
+        this(eventId,timestamp,type,tenantDomain,apiId,uuid,gatewayLabels,name,version,provider,apiType,context);
+        this.deleted = deleted;
     }
 
     public Set<String> getGatewayLabels() {
@@ -154,5 +162,13 @@ public class DeployAPIInGatewayEvent extends Event {
     public void setUuid(String uuid) {
 
         this.uuid = uuid;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

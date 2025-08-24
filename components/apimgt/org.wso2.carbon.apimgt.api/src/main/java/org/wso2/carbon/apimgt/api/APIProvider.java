@@ -1444,9 +1444,28 @@ public interface APIProvider extends APIManager {
      * @param apiRevisionId          API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
      * @param organization           identifier of the organization
+     * @param onDeleteOrRetire    true if the deployment is initiated from API delete or retire, false otherwise
      * @throws APIManagementException if failed to add APIRevision
      */
-    void undeployAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments, String organization) throws APIManagementException;
+    void undeployAPIRevisionDeployment(String apiId, String apiRevisionId,
+                                       List<APIRevisionDeployment> apiRevisionDeployments, String organization,
+                                       boolean onDeleteOrRetire) throws APIManagementException;
+
+
+    /**
+     * Adds a new APIRevisionDeployment to an existing API
+     * @deprecated use {@link #undeployAPIRevisionDeployment(String, String, List, String, boolean)}
+     * @param apiId                  API UUID
+     * @param apiRevisionId          API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization           identifier of the organization
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    default void undeployAPIRevisionDeployment(String apiId, String apiRevisionId,
+                                               List<APIRevisionDeployment> apiRevisionDeployments, String organization)
+            throws APIManagementException {
+        undeployAPIRevisionDeployment(apiId, apiRevisionId, apiRevisionDeployments, organization, false);
+    }
 
     /**
      * Restore a provided API Revision as the working copy of the API
@@ -1467,6 +1486,16 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to delete APIRevision
      */
     void deleteAPIRevision(String apiId, String apiRevisionId, String organization) throws APIManagementException;
+
+
+    /**
+     * Delete all API Revisions when the API is deleted or retired
+     * @param apiUUID
+     * @param organization
+     * @throws APIManagementException
+     */
+    void deleteAPIRevisionsOnDeleteOrRetire(String apiUUID, String organization) throws APIManagementException;
+
 
     /**
      * Delete all API Revision

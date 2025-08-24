@@ -80,7 +80,7 @@ public class FederatedGatewayUtil {
         try {
             APIProvider provider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
-            provider.deleteAPIRevisions(apiUUID, organization);
+            provider.deleteAPIRevisionsOnDeleteOrRetire(apiUUID, organization);
             log.debug("Deleted Revision for: " + apiUUID + " organization: " + organization + " from environment: "
                     + environment.getName());
         } catch (APIManagementException e) {
