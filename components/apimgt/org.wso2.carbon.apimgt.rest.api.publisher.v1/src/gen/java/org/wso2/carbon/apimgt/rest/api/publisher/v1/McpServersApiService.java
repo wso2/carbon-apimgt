@@ -57,11 +57,14 @@ public interface McpServersApiService {
       public Response deleteCommentOfMCPServer(String commentId, String mcpServerId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deleteMCPServer(String mcpServerId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deleteMCPServerDocument(String mcpServerId, String documentId, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response deleteMCPServerLifecycleStatePendingTasks(String mcpServerId, MessageContext messageContext) throws APIManagementException;
       public Response deleteMCPServerRevision(String mcpServerId, String revisionId, MessageContext messageContext) throws APIManagementException;
+      public Response deleteMCPServerRevisionDeploymentPendingTask(String mcpServerId, String revisionId, String envName, MessageContext messageContext) throws APIManagementException;
       public Response deployMCPServerRevision(String mcpServerId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response editCommentOfMCPServer(String commentId, String mcpServerId, CommentRequestDTO commentRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response exportMCPServer(String mcpServerId, String name, String version, String revisionNumber, String providerName, String format, Boolean preserveStatus, Boolean latestRevision, String gatewayEnvironment, Boolean preserveCredentials, MessageContext messageContext) throws APIManagementException;
       public Response generateInternalAPIKeyMCPServer(String mcpServerId, MessageContext messageContext) throws APIManagementException;
+      public Response getAllCommentsOfMCPServer(String mcpServerId, String xWSO2Tenant, Integer limit, Integer offset, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException;
       public Response getAllMCPServers(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, String accept, MessageContext messageContext) throws APIManagementException;
       public Response getCommentOfMCPServer(String commentId, String mcpServerId, String xWSO2Tenant, String ifNoneMatch, Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset, MessageContext messageContext) throws APIManagementException;
       public Response getMCPServer(String mcpServerId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
@@ -85,6 +88,7 @@ public interface McpServersApiService {
       public Response updateMCPServerDeployment(String mcpServerId, String deploymentId, APIRevisionDeploymentDTO apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateMCPServerDocument(String mcpServerId, String documentId, DocumentDTO documentDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response validateMCPServer(String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response validateMCPServerDocument(String mcpServerId, String name, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response validateMCPServerEndpoint(String endpointUrl, String apiId, MessageContext messageContext) throws APIManagementException;
       public Response validateOpenAPIDefinitionOfMCPServer(Boolean returnContent, String url, InputStream fileInputStream, Attachment fileDetail, String inlineAPIDefinition, MessageContext messageContext) throws APIManagementException;
       public Response validateThirdPartyMCPServer(MCPServerValidationRequestDTO mcPServerValidationRequestDTO, MessageContext messageContext) throws APIManagementException;
