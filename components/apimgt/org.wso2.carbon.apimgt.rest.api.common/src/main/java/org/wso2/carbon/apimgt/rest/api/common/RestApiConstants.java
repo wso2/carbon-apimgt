@@ -366,4 +366,10 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_GATEWAY_POLICIES = "gateway-policies";
 
     public static final String AUTH_TOKEN_INFO = "AUTH_TOKEN_INFO";
+    public static final String QUERY_API_TYPE_MCP = "type:MCP";
+    public static final String QUERY_API_TYPE_APIS_PUBLISHER =
+            "type:HTTP type:WS type:SOAPTOREST type:GRAPHQL type:SOAP type:SSE type:WEBSUB type:WEBHOOK type:ASYNC";
+    public static final String QUERY_API_TYPE_APIS_DEVPORTAL =
+            "type:HTTP type:WS type:SOAPTOREST type:GRAPHQL type:SOAP type:SSE type:WEBSUB type:WEBHOOK type:ASYNC " +
+                    "type:APIProduct";
 }

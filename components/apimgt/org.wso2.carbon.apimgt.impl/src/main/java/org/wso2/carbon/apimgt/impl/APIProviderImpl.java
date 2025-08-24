@@ -6335,7 +6335,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String[] roles = APIUtil.getFilteredUserRoles(userame);
         UserContext ctx = new UserContext(userame, org, properties, roles);
 
-
         try {
             PublisherContentSearchResult results = apiPersistenceInstance.searchContentForPublisher(org, searchQuery,
                     start, end, ctx);
@@ -6361,6 +6360,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setMonetizationEnabled(publiserAPI.getMonetizationStatus());
                         api.setAdvertiseOnly(publiserAPI.getAdvertiseOnly());
                         apiSet.add(api);
+                    } else if (APIConstants.API_TYPE_MCP.equals(item.getType())) {
+                        PublisherSearchContent publisherAPI = (PublisherSearchContent) item;
+                        if (log.isDebugEnabled()) {
+                            log.debug("Processing MCP Server type with ID: " + publisherAPI.getId());
+                        }
+                        API api = new API(new APIIdentifier(publisherAPI.getProvider(), publisherAPI.getName(),
+                                publisherAPI.getVersion()));
+                        api.setUuid(publisherAPI.getId());
+                        api.setContext(publisherAPI.getContext());
+                        api.setContextTemplate(publisherAPI.getContext());
+                        api.setStatus(publisherAPI.getStatus());
+                        api.setDescription(publisherAPI.getDescription());
+                        api.setDisplayName(publisherAPI.getDisplayName());
+                        api.setType(publisherAPI.getType());
+                        api.setThumbnailUrl(publisherAPI.getThumbnailUri());
+                        api.setBusinessOwner(publisherAPI.getBusinessOwner());
+                        api.setBusinessOwnerEmail(publisherAPI.getBusinessOwnerEmail());
+                        api.setTechnicalOwner(publisherAPI.getTechnicalOwner());
+                        api.setTechnicalOwnerEmail(publisherAPI.getTechnicalOwnerEmail());
+                        api.setMonetizationEnabled(publisherAPI.getMonetizationStatus());
+                        api.setAdvertiseOnly(publisherAPI.getAdvertiseOnly());
+                        apiSet.add(api);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Added MCP Server to search results: " + api.getId().getApiName() + " - " +
+                                    api.getId().getVersion());
+                        }
                     } else if ("APIProduct".equals(item.getType())) {
 
                         PublisherSearchContent publiserAPI = (PublisherSearchContent) item;
@@ -6386,13 +6411,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         doc.setSourceType(DocumentSourceType.valueOf(docItem.getSourceType().toString()));
                         doc.setVisibility(DocumentVisibility.valueOf(docItem.getVisibility().toString()));
                         doc.setId(docItem.getId());
-                        if ("API".equals(docItem.getAssociatedType())) {
-
+                        if ("API".equals(docItem.getAssociatedType())
+                                || APIConstants.API_TYPE_MCP.equals(docItem.getAssociatedType())) {
                             API api = new API(new APIIdentifier(docItem.getApiProvider(), docItem.getApiName(),
                                     docItem.getApiVersion()));
                             api.setUuid(docItem.getApiUUID());
                             api.setDisplayName(docItem.getApiDisplayName());
+                            api.setType(docItem.getAssociatedType());
                             docMap.put(doc, api);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Added document to search results for API/MCP Server type: "
+                                        + docItem.getAssociatedType() + ", Artifact: " + api.getId().getApiName());
+                            }
                         } else if ("APIProduct".equals(docItem.getAssociatedType())) {
                             APIProduct api = new APIProduct(new APIProductIdentifier(docItem.getApiProvider(),
                                     docItem.getApiName(), docItem.getApiVersion()));

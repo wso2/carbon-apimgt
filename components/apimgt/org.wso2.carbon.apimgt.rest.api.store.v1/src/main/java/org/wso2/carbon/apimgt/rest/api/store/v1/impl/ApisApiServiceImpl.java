@@ -92,7 +92,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             MessageContext messageContext) {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        query = query == null ? "" : query;
+        if (query == null || query.isEmpty()) {
+            query = RestApiConstants.QUERY_API_TYPE_APIS_DEVPORTAL;
+        } else if (!query.contains(APIConstants.TYPE)) {
+            query = query + " " + RestApiConstants.QUERY_API_TYPE_APIS_DEVPORTAL;
+        }
         APIListDTO apiListDTO = new APIListDTO();
         try {
             String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
