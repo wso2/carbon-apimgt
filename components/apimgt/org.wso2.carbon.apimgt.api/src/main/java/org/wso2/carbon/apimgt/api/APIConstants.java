@@ -181,4 +181,12 @@ public class APIConstants {
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_DEEPSEEK = "DeepSeek";
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_META = "Meta";
     }
+
+    public static class UnifiedSearchConstants {
+        public static final String QUERY_API_TYPE_APIS_PUBLISHER = "type:HTTP type:WS type:SOAPTOREST type:GRAPHQL " +
+                "type:SOAP type:SSE type:WEBSUB type:WEBHOOK type:ASYNC";
+        public static final String QUERY_API_TYPE_APIS_DEVPORTAL = "type:HTTP type:WS type:SOAPTOREST type:GRAPHQL " +
+                "type:SOAP type:SSE type:WEBSUB type:WEBHOOK type:ASYNC type:APIProduct";
+        public static final String QUERY_API_TYPE_MCP = "type:MCP";
+    }
 }

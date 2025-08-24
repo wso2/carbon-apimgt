@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIConstants.UnifiedSearchConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -428,9 +429,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         if (query == null || query.isEmpty()) {
-            query = RestApiConstants.QUERY_API_TYPE_MCP;
+            query = UnifiedSearchConstants.QUERY_API_TYPE_MCP;
         } else {
-            query = query + " " + RestApiConstants.QUERY_API_TYPE_MCP;
+            query = query + " " + UnifiedSearchConstants.QUERY_API_TYPE_MCP;
         }
         APIListDTO apiListDTO = new APIListDTO();
         try {

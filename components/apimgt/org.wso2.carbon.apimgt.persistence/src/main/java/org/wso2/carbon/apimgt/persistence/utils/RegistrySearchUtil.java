@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
+import org.wso2.carbon.apimgt.api.APIConstants.UnifiedSearchConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.RegistryPersistenceImpl;
@@ -637,7 +638,9 @@ public class RegistrySearchUtil {
                 statusList = new String[] { APIConstants.PUBLISHED, APIConstants.PROTOTYPED,
                         APIConstants.DEPRECATED };
             }
-            if (StringUtils.isEmpty(searchQuery)) { // normal listing
+            // Normal Listing
+            if (StringUtils.isEmpty(searchQuery)
+                    || UnifiedSearchConstants.QUERY_API_TYPE_APIS_DEVPORTAL.equals(searchQuery)) {
                 String enableStoreCriteria = APIConstants.ENABLE_STORE_SEARCH_TYPE_KEY;
                 if (isAllowDisplayMultipleVersions) {
                     modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
