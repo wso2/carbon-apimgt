@@ -2332,14 +2332,16 @@ public interface APIProvider extends APIManager {
     List<Backend> getMCPServerBackends(String apiUuid, String organization) throws APIManagementException;
 
     /**
-     * Updates the MCP server backend with the provided details.
+     * Updates the MCP server oldBackend with the provided details.
      *
      * @param apiId        the UUID of the API or API revision
-     * @param backend      the {@link Backend} object containing updated details
+     * @param oldBackend   the {@link Backend} object containing updated details
+     * @param newBackend   the {@link Backend} object containing new details to be updated
      * @param organization the organization name
-     * @throws APIManagementException if an error occurs while updating the backend API
+     * @throws APIManagementException if an error occurs while updating the oldBackend API
      */
-    void updateMCPServerBackend(String apiId, Backend backend, String organization) throws APIManagementException;
+    void updateMCPServerBackend(String apiId, Backend oldBackend, Backend newBackend, String organization)
+            throws APIManagementException;
 
     /**
      * Retrieves the list of MCP servers used by a specific API.
