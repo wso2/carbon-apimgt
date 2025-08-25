@@ -89,6 +89,12 @@ public class Backend implements Serializable {
         this.name = name;
     }
 
+    /**
+     * Returns the endpoint configuration as a Map.
+     *
+     * @return A Map representing the endpoint configuration, or null if the configuration is empty or null.
+     * @throws ParseException If there is an error parsing the JSON string.
+     */
     public Map<String, Object> getEndpointConfigAsMap() throws ParseException {
 
         if (endpointConfig == null || endpointConfig.isEmpty()) return null;
@@ -96,8 +102,18 @@ public class Backend implements Serializable {
         return new LinkedHashMap<>(obj);
     }
 
+    /**
+     * Sets the endpoint configuration from a Map.
+     *
+     * @param map A Map representing the endpoint configuration. If null, the endpoint configuration will be set to
+     *            null.
+     */
     public void setEndpointConfigFromMap(Map<String, Object> map) {
 
+        if (map == null) {
+            this.endpointConfig = null;
+            return;
+        }
         this.endpointConfig = JSONObject.toJSONString(map);
     }
 }

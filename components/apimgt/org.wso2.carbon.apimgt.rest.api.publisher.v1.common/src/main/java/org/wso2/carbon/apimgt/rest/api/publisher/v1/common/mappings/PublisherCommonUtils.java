@@ -5012,6 +5012,9 @@ public class PublisherCommonUtils {
             throws APIManagementException {
 
         try {
+            if (log.isDebugEnabled()) {
+                log.info("Updating MCP Server backend for MCP Server with ID: " + mcpServerId);
+            }
             prepareForEndpointSecurity(backend, oldBackend);
             apiProvider.updateMCPServerBackend(mcpServerId, oldBackend, backend, organization);
         } catch (ParseException | CryptoException e) {
@@ -5032,6 +5035,9 @@ public class PublisherCommonUtils {
     private static void prepareForEndpointSecurity(Backend newBackend, Backend oldBackend)
             throws ParseException, APIManagementException, CryptoException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Preparing endpoint security for backend with ID: " + oldBackend.getId());
+        }
         JSONParser parser = new JSONParser();
         JSONObject oldEndpointConfig = null;
         String oldEndpointConfigString = oldBackend.getEndpointConfig();

@@ -1368,6 +1368,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void updateEndpointSecurity(JSONObject endpointConfigJson, JSONObject oldEndpointConfigJson)
             throws APIManagementException, JsonProcessingException, ParseException {
+        log.debug("Updating endpoint security configurations");
         if ((endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null) &&
                 (oldEndpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null)) {
             JSONObject endpointSecurityJson =
@@ -1382,6 +1383,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION),
                                 EndpointSecurity.class);
                     } catch (IllegalArgumentException e) {
+                        log.error("Invalid endpoint security configuration for production endpoint", e);
                         ErrorHandler errorHandler = ExceptionCodes.from(
                                 ExceptionCodes.INVALID_ENDPOINT_SECURITY_CONFIG,
                                 APIConstants.ENDPOINT_SECURITY_PRODUCTION);
@@ -1429,6 +1431,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX),
                                 EndpointSecurity.class);
                     } catch (IllegalArgumentException e) {
+                        log.error("Invalid endpoint security configuration for sandbox endpoint", e);
                         ErrorHandler errorHandler = ExceptionCodes.from(
                                 ExceptionCodes.INVALID_ENDPOINT_SECURITY_CONFIG,
                                 APIConstants.ENDPOINT_SECURITY_SANDBOX);
@@ -8828,11 +8831,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         try {
-            JSONObject endpointConfigJson = (JSONObject) new JSONParser().parse(oldBackend.getEndpointConfig());
-            JSONObject oldEndpointConfigJson = (JSONObject) new JSONParser().parse(newBackend.getEndpointConfig());
+            if (log.isDebugEnabled()) {
+                log.debug("Updating MCP server backend for MCP Server with ID: " + mcpServerId +
+                        " in organization: " + organization);
+            }
+            JSONObject endpointConfigJson = (JSONObject) new JSONParser().parse(newBackend.getEndpointConfig());
+            JSONObject oldEndpointConfigJson = (JSONObject) new JSONParser().parse(oldBackend.getEndpointConfig());
             updateEndpointSecurity(endpointConfigJson, oldEndpointConfigJson);
             newBackend.setEndpointConfig(endpointConfigJson.toJSONString());
             apiMgtDAO.updateBackend(mcpServerId, newBackend, organization);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated MCP Server backend for MCP Server with ID: " + mcpServerId +
+                        " in organization: " + organization);
+            }
         } catch (ParseException | JsonProcessingException e) {
             throw new APIManagementException(
                     "Error while processing endpoint security for Backend for MCP Server " + mcpServerId, e);
