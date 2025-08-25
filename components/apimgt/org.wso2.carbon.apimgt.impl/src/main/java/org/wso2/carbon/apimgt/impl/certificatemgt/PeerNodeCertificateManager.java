@@ -58,18 +58,35 @@ public class PeerNodeCertificateManager {
      */
     public void addCertificateToPeerNode(String alias, String endpoint, int tenantId) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Adding certificate to peer node trust store. Alias: " + alias + ", Endpoint: " + endpoint +
+                    ", TenantId: " + tenantId);
+        }
         try {
             CertificateMetadataDTO certificateMetadataDTO = CertificateMgtDAO.getInstance().getCertificate(alias,
                     endpoint, tenantId);
             ResponseCode responseCode = CertificateMgtUtils.getInstance().addCertificateToTrustStore(certificateMetadataDTO.
                     getCertificate(), certificateMetadataDTO.getAlias());
-            if (responseCode == ResponseCode.INTERNAL_SERVER_ERROR) {
-                log.error("Error adding the certificate to Publisher trust store.");
-            } else if (responseCode == ResponseCode.SUCCESS) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Certificate is successfully added to the Publisher client Trust Store with Alias '"
-                            + alias + "'");
-                }
+            switch (responseCode) {
+                case SUCCESS:
+                    if (log.isDebugEnabled()) {
+                        log.debug("Certificate added to trust store. alias='" + alias + "', endpoint='" + endpoint + 
+                                "', tenantId=" + tenantId);
+                    }
+                    break;
+                case ALIAS_EXISTS_IN_TRUST_STORE:
+                    if (log.isDebugEnabled()) {
+                        log.debug("Certificate already exists in trust store. alias='" + alias + "', endpoint='" + 
+                                endpoint + "', tenantId=" + tenantId);
+                    }
+                    break;
+                case CERTIFICATE_EXPIRED:
+                    log.warn("Certificate expired; skipping add. alias='" + alias + "', endpoint='" + endpoint + 
+                            "', tenantId=" + tenantId);
+                    break;
+                default:
+                    log.error("Failed to add certificate to trust store. alias='" + alias + "', endpoint='" + 
+                            endpoint + "', tenantId=" + tenantId + ", responseCode=" + responseCode);
             }
         } catch (CertificateManagementException e) {
             log.error("Error when fetching certificate metadata for alias " + alias + " from database.", e);
@@ -89,14 +106,23 @@ public class PeerNodeCertificateManager {
      */
     public void deleteCertificateFromPeerNode(String alias) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Removing certificate from peer node trust store. Alias: " + alias);
+        }
         ResponseCode responseCode = CertificateMgtUtils.getInstance().removeCertificateFromTrustStore(alias);
-        if (responseCode == ResponseCode.INTERNAL_SERVER_ERROR) {
-            log.error("Error removing the Certificate from the trust store.");
-        } else if (responseCode == ResponseCode.SUCCESS) {
-            if (log.isDebugEnabled()) {
-                log.debug("Certificate is successfully removed from the Publisher Trust Store with Alias '"
-                        + alias + "'");
-            }
+        switch (responseCode) {
+            case SUCCESS:
+                if (log.isDebugEnabled()) {
+                    log.debug("Certificate removed from trust store. alias='" + alias + "'.");
+                }
+                break;
+            case CERTIFICATE_NOT_FOUND:
+                if (log.isDebugEnabled()) {
+                    log.debug("Certificate not found in trust store. Treating as no-op. alias='" + alias + "'.");
+                }
+                break;
+            default:
+                log.error("Failed to remove certificate from trust store. alias='" + alias + "', responseCode=" + responseCode);
         }
     }
 }

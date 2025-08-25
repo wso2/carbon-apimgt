@@ -68,6 +68,7 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
         if (apimConfiguration != null) {
             if (Boolean.parseBoolean(apimConfiguration.getFirstProperty(APIConstants.
                     ENABLE_CERTIFICATE_MANAGEMENT_EVENT_LISTENING))) {
+                log.info("Certificate management event listening is enabled. Subscribing to notification topic.");
                 jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION,
                         new CertificateManagerJMSMessageListener());
             }

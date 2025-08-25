@@ -43,6 +43,7 @@ import java.nio.charset.StandardCharsets;
 public class CertificateManagerJMSMessageListener implements MessageListener {
 
     private static final Log log = LogFactory.getLog(CertificateManagerJMSMessageListener.class);
+    private static final Gson gson = new Gson();
 
     /**
      * Handles incoming JMS messages and processes them based on their content and type. This method is triggered
@@ -58,7 +59,12 @@ public class CertificateManagerJMSMessageListener implements MessageListener {
                 if (log.isDebugEnabled()) {
                     log.debug("Event received in JMS Event Receiver - " + message);
                 }
-                Topic jmsDestination = (Topic) message.getJMSDestination();
+                javax.jms.Destination destination = message.getJMSDestination();
+                if (!(destination instanceof Topic)) {
+                    log.warn("Skipping message from non-topic destination: " + destination);
+                    return;
+                }
+                Topic jmsDestination = (Topic) destination;
                 if (message instanceof TextMessage) {
                     String textMessage = ((TextMessage) message).getText();
                     JsonNode payloadData = new ObjectMapper().readTree(textMessage).path(APIConstants.EVENT_PAYLOAD).
@@ -97,11 +103,18 @@ public class CertificateManagerJMSMessageListener implements MessageListener {
         String eventJson = new String(eventDecoded, StandardCharsets.UTF_8);
 
         if (APIConstants.EventType.ENDPOINT_CERTIFICATE_ADD.toString().equals(eventType)) {
-            CertificateEvent certificateEvent = new Gson().fromJson(eventJson, CertificateEvent.class);
+            CertificateEvent certificateEvent = gson.fromJson(eventJson, CertificateEvent.class);
+            if (log.isDebugEnabled()) {
+                log.debug("Adding certificate to peer node. Alias: " + certificateEvent.getAlias() + ", Endpoint: "
+                        + certificateEvent.getEndpoint() + ", TenantId: " + certificateEvent.getTenantId());
+            }
             PeerNodeCertificateManager.getInstance().addCertificateToPeerNode(certificateEvent.getAlias(),
                     certificateEvent.getEndpoint(), certificateEvent.getTenantId());
         } else if (APIConstants.EventType.ENDPOINT_CERTIFICATE_REMOVE.toString().equals(eventType)) {
-            CertificateEvent certificateEvent = new Gson().fromJson(eventJson, CertificateEvent.class);
+            CertificateEvent certificateEvent = gson.fromJson(eventJson, CertificateEvent.class);
+            if (log.isDebugEnabled()) {
+                log.debug("Removing certificate from peer node. Alias: " + certificateEvent.getAlias());
+            }
             PeerNodeCertificateManager.getInstance().deleteCertificateFromPeerNode(certificateEvent.getAlias());
         }
     }

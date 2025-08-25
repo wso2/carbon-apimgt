@@ -4468,6 +4468,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     tenantDomain, alias, endpoint);
             certificateEvent.setTenantId(tenantId);
             APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
+            if (log.isDebugEnabled()) {
+                log.debug("Certificate event sent for alias: " + alias + " in tenant: " + tenantDomain);
+            }
         } catch (UserStoreException e) {
             handleException("Error while reading tenant information", e);
         }
