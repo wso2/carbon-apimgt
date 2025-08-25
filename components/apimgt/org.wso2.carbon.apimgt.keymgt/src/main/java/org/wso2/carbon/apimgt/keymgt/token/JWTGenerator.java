@@ -159,6 +159,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
         ExtendedJWTConfigurationDto jwtConfigurationDto = apiManagerConfiguration.getJwtConfigurationDto();
         boolean isBindFederatedUserClaims = jwtConfigurationDto.isBindFederatedUserClaimsForOpaque();
         if (apiManagerConfiguration.isJWTClaimCacheEnabled()) {
+            log.debug("JWT claim cache is enabled. Looking up claims in cache");
             String cacheKey = username.concat("_").concat(String.valueOf(tenantId));
             Object claims = CacheProvider.getJWTClaimCache().get(cacheKey);
             if (claims instanceof Map) {
@@ -170,18 +171,24 @@ public class JWTGenerator extends AbstractJWTGenerator {
                     if (claims instanceof Map) {
                         return (Map<String, String>) claims;
                     }
+                    log.debug("Claims not found in cache. Retrieving from key manager");
                     Map<String, String> claimsFromKeyManager = getClaimsFromKeyManager(username, accessToken,
                             tenantId, dialectURI, keyManager, isBindFederatedUserClaims);
                     if (claimsFromKeyManager != null) {
+                        log.debug("Successfully retrieved claims from key manager. Caching the claims");
                         CacheProvider.getJWTClaimCache().put(cacheKey, claimsFromKeyManager);
                         return claimsFromKeyManager;
                     }
                 }
             }
         } else {
+            log.debug("JWT claim cache is disabled. Retrieving claims directly from key manager");
             Map<String, String> tempClaims = getClaimsFromKeyManager(username, accessToken, tenantId, dialectURI,
                     keyManager, isBindFederatedUserClaims);
-            if (tempClaims != null) return tempClaims;
+            if (tempClaims != null) {
+                log.debug("Successfully retrieved claims from key manager");
+                return tempClaims;
+            }
         }
         return new HashMap<>();
     }
