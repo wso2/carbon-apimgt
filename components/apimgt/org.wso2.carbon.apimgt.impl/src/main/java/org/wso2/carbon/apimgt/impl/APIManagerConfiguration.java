@@ -2119,6 +2119,14 @@ public class APIManagerConfiguration {
                     omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));
             if (jwtUserClaimsElement != null) {
                 jwtConfigurationDto.setEnableUserClaims(Boolean.parseBoolean(jwtUserClaimsElement.getText()));
+                OMElement isBindFederatedUserClaimsForOpaque =
+                        omElement.getFirstChildWithName(new QName(APIConstants.BINDING_FEDERATED_USER_CLAIMS_FOR_OPAQUE));
+                if (isBindFederatedUserClaimsForOpaque != null) {
+                    jwtConfigurationDto.setBindFederatedUserClaimsForOpaque(
+                            Boolean.parseBoolean(isBindFederatedUserClaimsForOpaque.getText()));
+                } else {
+                    jwtConfigurationDto.setBindFederatedUserClaimsForOpaque(false);
+                }
             }
             OMElement enableTenantBaseSigningElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_TENANT_BASE_SIGNING));
@@ -2157,7 +2165,7 @@ public class APIManagerConfiguration {
                     }
                     OMElement claimRetrievalElement =
                             configurationElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS_RETRIEVAL_FROM_KEY_MANAGER));
-                    if (claimRetrievalElement != null || jwtUserClaimsElement != null) {
+                    if (claimRetrievalElement != null) {
                         jwtConfigurationDto.setEnableUserClaimRetrievalFromUserStore(Boolean.parseBoolean(claimRetrievalElement.getText()));
                         OMElement isBindFederatedUserClaims =
                                 omElement.getFirstChildWithName(new QName(APIConstants.BINDING_FEDERATED_USER_CLAIMS));
@@ -2166,14 +2174,6 @@ public class APIManagerConfiguration {
                                     Boolean.parseBoolean(isBindFederatedUserClaims.getText()));
                         } else {
                             jwtConfigurationDto.setBindFederatedUserClaims(true);
-                        }
-                        OMElement isBindFederatedUserClaimsForOpaque =
-                                omElement.getFirstChildWithName(new QName(APIConstants.BINDING_FEDERATED_USER_CLAIMS_FOR_OPAQUE));
-                        if (isBindFederatedUserClaimsForOpaque != null) {
-                            jwtConfigurationDto.setBindFederatedUserClaimsForOpaque(
-                                    Boolean.parseBoolean(isBindFederatedUserClaimsForOpaque.getText()));
-                        } else {
-                            jwtConfigurationDto.setBindFederatedUserClaimsForOpaque(false);
                         }
                     }
                 }
