@@ -166,7 +166,6 @@ public class APIConstants {
         public static final String ENDPOINT_SEQUENCE = "_EndpointsSeq";
         public static final String REQUEST_TIMEOUT = "REQUEST_TIMEOUT";
         public static final String HTTP_PROTOCOL_TYPE = "HTTP";
-        public static final String QUERY_API_TYPE_MCP = "type:MCP";
         public static final String LLM_PROVIDER_SERVICE_AWSBEDROCK_OPENAI_API_DEFINITION_FILE_NAME =
                 "aws_bedrock_api.yaml";
         public static final String INPUT_SOURCE_PATH = "pathParams";
@@ -181,5 +180,13 @@ public class APIConstants {
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_ANTHROPIC = "Anthropic";
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_DEEPSEEK = "DeepSeek";
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_META = "Meta";
+    }
+
+    public static class UnifiedSearchConstants {
+        public static final String QUERY_API_TYPE_APIS_PUBLISHER = "type:HTTP type:WS type:SOAPTOREST type:GRAPHQL " +
+                "type:SOAP type:SSE type:WEBSUB type:WEBHOOK type:ASYNC";
+        public static final String QUERY_API_TYPE_APIS_DEVPORTAL = "type:HTTP type:WS type:SOAPTOREST type:GRAPHQL " +
+                "type:SOAP type:SSE type:WEBSUB type:WEBHOOK type:ASYNC type:APIProduct";
+        public static final String QUERY_API_TYPE_MCP = "type:MCP";
     }
 }
