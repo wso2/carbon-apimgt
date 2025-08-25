@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
 import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -57,6 +58,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -73,99 +76,204 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
     private static final Log log = LogFactory.getLog(SynapseArtifactGenerator.class);
     private static final String GATEWAY_EXT_SEQUENCE_PREFIX = "WSO2AMGW--Ext";
 
+    private static class ProcessingResult {
+        String apiId;
+        String name;
+        String content;
+        boolean success = false;
+        String errorMessage;
+        Exception exception;
+    }
+
     @Override
     public RuntimeArtifactDto generateGatewayArtifact(List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList)
             throws APIManagementException {
 
         RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
         List<String> synapseArtifacts = new ArrayList<>();
-        for (APIRuntimeArtifactDto runTimeArtifact : apiRuntimeArtifactDtoList) {
-            if (runTimeArtifact.isFile()) {
-                String tenantDomain = runTimeArtifact.getTenantDomain();
-                String label = runTimeArtifact.getLabel();
-                Environment environment = APIUtil.getEnvironments(tenantDomain).get(label);
-                GatewayAPIDTO gatewayAPIDTO = null;
-                if (environment != null) {
-                    try (InputStream artifact = (InputStream) runTimeArtifact.getArtifact()) {
-                        File baseDirectory = CommonUtil.createTempDirectory(null);
-                        try {
-                            String extractedFolderPath =
-                                    ImportUtils.getArchivePathOfExtractedDirectory(baseDirectory.getAbsolutePath(),
-                                            artifact);
-                            if (APIConstants.API_PRODUCT.equals(runTimeArtifact.getType())) {
-                                APIProductDTO apiProductDTO = ImportUtils.retrieveAPIProductDto(extractedFolderPath);
-                                apiProductDTO.setId(runTimeArtifact.getApiId());
-                                APIProduct apiProduct = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO,
-                                        apiProductDTO.getProvider());
-                                String openApiDefinition = ImportUtils.loadSwaggerFile(extractedFolderPath);
-                                apiProduct.setDefinition(openApiDefinition);
-                                gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(apiProduct, environment,
-                                        tenantDomain, extractedFolderPath, openApiDefinition);
-                            } else if (APIConstants.API_TYPE_MCP.equals(runTimeArtifact.getType())) {
-                                MCPServerDTO mcpServerDTO = ImportUtils.retrievedMCPDto(extractedFolderPath);
-                                API api = APIMappingUtil.fromMCPServerDTOtoAPI(mcpServerDTO,
-                                        mcpServerDTO.getProvider());
-                                String openApiDefinition = ImportUtils.loadSwaggerFile(extractedFolderPath);
-                                api.setSwaggerDefinition(openApiDefinition);
-                                APIDTO apidto = APIMappingUtil.fromAPItoDTO(api);
-                                gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,
-                                        tenantDomain, apidto, extractedFolderPath, openApiDefinition);
-                            } else {
-                                APIDTO apidto = ImportUtils.retrievedAPIDto(extractedFolderPath);
-                                API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
-                                api.setUUID(apidto.getId());
-                                if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
-                                    APIDefinition parser = new OAS3Parser();
-                                    SwaggerData swaggerData = new SwaggerData(api);
-                                    String apiDefinition = parser.generateAPIDefinition(swaggerData);
-                                    api.setSwaggerDefinition(apiDefinition);
-                                    GraphqlComplexityInfo graphqlComplexityInfo = APIUtil.getComplexityDetails(api);
-                                    String graphqlSchema = ImportUtils.loadGraphqlSDLFile(extractedFolderPath);
-                                    api.setGraphQLSchema(graphqlSchema);
-                                    GraphQLSchemaDefinition graphQLSchemaDefinition = new GraphQLSchemaDefinition();
-                                    graphqlSchema = graphQLSchemaDefinition.buildSchemaWithAdditionalInfo(api,
-                                            graphqlComplexityInfo);
-                                    api.setGraphQLSchema(graphqlSchema);
-                                    gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,
-                                            tenantDomain, apidto, extractedFolderPath);
-                                } else if (api.getType() != null
-                                        && (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
-                                        || APIConstants.API_TYPE_SOAP.equals(api.getType())
-                                        || APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())
-                                        || APIConstants.APITransportType.WEBHOOK.toString().equals(api.getType())
-                                        || APIConstants.API_TYPE_MCP.equals(api.getType()))) {
-                                    String openApiDefinition = ImportUtils.loadSwaggerFile(extractedFolderPath);
-                                    api.setSwaggerDefinition(openApiDefinition);
-                                    gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,
-                                            tenantDomain, apidto, extractedFolderPath, openApiDefinition);
-                                } else if (api.getType() != null &&
-                                        (APIConstants.APITransportType.WS.toString().equals(api.getType()) ||
-                                                APIConstants.APITransportType.SSE.toString().equals(api.getType()) ||
-                                                APIConstants.APITransportType.WEBSUB.toString()
-                                                        .equals(api.getType()))) {
-                                    String asyncApiDefinition =
-                                            ImportUtils.loadAsyncApiDefinitionFromFile(extractedFolderPath);
-                                    api.setAsyncApiDefinition(asyncApiDefinition);
-                                    gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDtoForStreamingAPI(api,
-                                            environment, tenantDomain, apidto, extractedFolderPath);
-                                }
-                            }
-                            if (gatewayAPIDTO != null) {
-                                gatewayAPIDTO.setRevision(runTimeArtifact.getRevision());
-                                String content = new Gson().toJson(gatewayAPIDTO);
-                                synapseArtifacts.add(content);
-                            }
-                        } finally {
-                            FileUtils.deleteQuietly(baseDirectory);
-                        }
-                    } catch (Exception e) {
-                        // only do error since we need to continue for other apis
+        List<String> failedApis = new ArrayList<>();
 
-                        log.error("Error while creating Synapse configurations", e);
+        // Capture the tenant context
+        String currentTenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String currentUsername = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        int currentTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        List<CompletableFuture<ProcessingResult>> futures = apiRuntimeArtifactDtoList.stream()
+            .map(runTimeArtifact ->  CompletableFuture.supplyAsync(() -> {
+                    // Set the Carbon context in the async thread
+                    PrivilegedCarbonContext.startTenantFlow();
+                    try {
+                        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                        carbonContext.setTenantDomain(currentTenantDomain);
+                        carbonContext.setUsername(currentUsername);
+                        carbonContext.setTenantId(currentTenantId);
+
+                        ProcessingResult result = new ProcessingResult();
+                        result.apiId = runTimeArtifact.getApiId();
+                        result.name = runTimeArtifact.getName();
+
+                        if (runTimeArtifact.isFile()) {
+                            String tenantDomain = runTimeArtifact.getTenantDomain();
+                            String label = runTimeArtifact.getLabel();
+                            Environment environment = null;
+                            try {
+                                environment = APIUtil.getEnvironments(tenantDomain).get(label);
+                            } catch (APIManagementException e) {
+                                result.success = false;
+                                result.errorMessage = "Failed to get environment for tenant: " + tenantDomain +
+                                        ", error: " + e.getMessage();
+                                result.exception = e;
+                                log.error("Error getting environment for API: " + result.name +
+                                        " (" + result.apiId + ") in tenant: " + tenantDomain, e);
+                                return result;
+                            }
+                            GatewayAPIDTO gatewayAPIDTO = null;
+                            if (environment != null) {
+                                try (InputStream artifact = (InputStream) runTimeArtifact.getArtifact()) {
+                                    File baseDirectory = CommonUtil.createTempDirectory(null);
+                                    try {
+                                        String extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(
+                                                baseDirectory.getAbsolutePath(), artifact);
+                                        if (APIConstants.API_PRODUCT.equals(runTimeArtifact.getType())) {
+                                            APIProductDTO apiProductDTO = ImportUtils.retrieveAPIProductDto(
+                                                    extractedFolderPath);
+                                            apiProductDTO.setId(runTimeArtifact.getApiId());
+                                            APIProduct apiProduct = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO,
+                                                    apiProductDTO.getProvider());
+                                            String openApiDefinition = ImportUtils.loadSwaggerFile(extractedFolderPath);
+                                            apiProduct.setDefinition(openApiDefinition);
+                                            gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(apiProduct,
+                                                    environment, tenantDomain, extractedFolderPath, openApiDefinition);
+                                        } else if (APIConstants.API_TYPE_MCP.equals(runTimeArtifact.getType())) {
+                                            MCPServerDTO mcpServerDTO = ImportUtils.retrievedMCPDto(
+                                                    extractedFolderPath);
+                                            API api = APIMappingUtil.fromMCPServerDTOtoAPI(mcpServerDTO,
+                                                    mcpServerDTO.getProvider());
+                                            String openApiDefinition = ImportUtils.loadSwaggerFile(extractedFolderPath);
+                                            api.setSwaggerDefinition(openApiDefinition);
+                                            APIDTO apidto = APIMappingUtil.fromAPItoDTO(api);
+                                            gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,
+                                                    tenantDomain, apidto, extractedFolderPath, openApiDefinition);
+                                        } else {
+                                            APIDTO apidto = ImportUtils.retrievedAPIDto(extractedFolderPath);
+                                            API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
+                                            api.setUUID(apidto.getId());
+                                            if (APIConstants.APITransportType.GRAPHQL.toString()
+                                                    .equals(api.getType())) {
+                                                APIDefinition parser = new OAS3Parser();
+                                                SwaggerData swaggerData = new SwaggerData(api);
+                                                String apiDefinition = parser.generateAPIDefinition(swaggerData);
+                                                api.setSwaggerDefinition(apiDefinition);
+                                                GraphqlComplexityInfo graphqlComplexityInfo = APIUtil
+                                                        .getComplexityDetails(api);
+                                                String graphqlSchema = ImportUtils.loadGraphqlSDLFile(
+                                                        extractedFolderPath);
+                                                api.setGraphQLSchema(graphqlSchema);
+                                                GraphQLSchemaDefinition graphQLSchemaDefinition = new
+                                                        GraphQLSchemaDefinition();
+                                                graphqlSchema = graphQLSchemaDefinition.buildSchemaWithAdditionalInfo(
+                                                        api, graphqlComplexityInfo);
+                                                api.setGraphQLSchema(graphqlSchema);
+                                                gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api,
+                                                        environment, tenantDomain, apidto, extractedFolderPath);
+                                            } else if (api.getType() != null && (APIConstants.APITransportType.HTTP
+                                                    .toString().equals(api.getType()) || APIConstants.API_TYPE_SOAP
+                                                    .equals(api.getType()) || APIConstants.API_TYPE_SOAPTOREST
+                                                    .equals(api.getType()) || APIConstants.APITransportType.WEBHOOK
+                                                    .toString().equals(api.getType()) || APIConstants.API_TYPE_MCP
+                                                    .equals(api.getType()))) {
+                                                String openApiDefinition = ImportUtils.loadSwaggerFile(
+                                                        extractedFolderPath);
+                                                api.setSwaggerDefinition(openApiDefinition);
+                                                gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api,
+                                                        environment, tenantDomain, apidto, extractedFolderPath,
+                                                        openApiDefinition);
+                                            } else if (api.getType() != null
+                                                    && (APIConstants.APITransportType.WS.toString().equals(
+                                                            api.getType())
+                                                    || APIConstants.APITransportType.SSE.toString().equals(
+                                                            api.getType())
+                                                    || APIConstants.APITransportType.WEBSUB.toString().equals(
+                                                            api.getType()))) {
+                                                String asyncApiDefinition = ImportUtils.loadAsyncApiDefinitionFromFile(
+                                                        extractedFolderPath);
+                                                api.setAsyncApiDefinition(asyncApiDefinition);
+                                                gatewayAPIDTO = TemplateBuilderUtil
+                                                        .retrieveGatewayAPIDtoForStreamingAPI(api, environment,
+                                                                tenantDomain, apidto, extractedFolderPath);
+                                            }
+                                        }
+                                        if (gatewayAPIDTO != null) {
+                                            gatewayAPIDTO.setRevision(runTimeArtifact.getRevision());
+                                            result.content = new Gson().toJson(gatewayAPIDTO);
+                                            result.success = true;
+                                        } else {
+                                            result.success = false;
+                                            result.errorMessage = "GatewayAPIDTO is null";
+                                        }
+                                    } finally {
+                                        FileUtils.deleteQuietly(baseDirectory);
+                                    }
+                                } catch (Exception e) {
+                                    // only do error since we need to continue for other apis
+                                    result.success = false;
+                                    result.errorMessage = "Error while creating Synapse configurations: " +
+                                            e.getMessage();
+                                    result.exception = e;
+                                    log.error("Error while creating Synapse configurations for API: " +
+                                            result.name + " (" + result.apiId + ")", e);
+                                }
+                            } else {
+                                result.success = false;
+                                result.errorMessage = "Environment not found for tenant: " + tenantDomain +
+                                        ", label: " + label;
+                            }
+                        } else {
+                            result.success = false;
+                            result.errorMessage = "Runtime artifact is not a file";
+                        }
+                        return result;
+                    } finally {
+                        PrivilegedCarbonContext.endTenantFlow();
                     }
+                })).collect(Collectors.toList());
+
+        // Wait for all tasks to complete
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(
+                futures.toArray(new CompletableFuture[0]));
+
+        try {
+            // Collect results after all tasks complete
+            allFutures.get();
+            for (int i = 0; i < futures.size(); i++) {
+                try {
+                    ProcessingResult result = futures.get(i).get();
+                    if (result.success && result.content != null) {
+                        synapseArtifacts.add(result.content);
+                    } else {
+                        failedApis.add(result.name + " (" + result.apiId + "): " + result.errorMessage);
+                        log.warn("Failed to process API " + result.name +
+                                " (" + result.apiId + "): " + result.errorMessage);
+                    }
+                } catch (Exception ex) {
+                    APIRuntimeArtifactDto originalArtifact = apiRuntimeArtifactDtoList.get(i);
+                    failedApis.add(originalArtifact.getName() + " (" + originalArtifact.getApiId() + "): "
+                            + ex.getMessage());
+                    log.error("Error collecting result for API: " + originalArtifact.getName() +
+                            " (" + originalArtifact.getApiId() + ") ", ex);
                 }
             }
+
+        } catch (Exception e) {
+            log.error("Unexpected error while waiting for artifact generation", e);
+            throw new APIManagementException("Failed to process runtime artifacts", e);
         }
+
+        if (!failedApis.isEmpty()) {
+            log.warn("Error while creating Synapse configurations for APIs " +
+                    String.join(", ", failedApis));
+        }
+
         runtimeArtifactDto.setFile(false);
         runtimeArtifactDto.setArtifact(synapseArtifacts);
         return runtimeArtifactDto;
