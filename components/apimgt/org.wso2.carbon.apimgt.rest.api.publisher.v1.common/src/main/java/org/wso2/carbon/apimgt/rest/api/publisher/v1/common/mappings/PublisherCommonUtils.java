@@ -1469,8 +1469,15 @@ public class PublisherCommonUtils {
                     // Change default value of customParameters JSONObject to String
                     if (endpointSecurityProduction
                             .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof Map) {
-                        LinkedHashMap<String, Object> customParametersHashMap = (LinkedHashMap<String, Object>)
+                        Object customParamsObj =
                                 endpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+
+                        LinkedHashMap<String, Object> customParametersHashMap = null;
+                        if (customParamsObj instanceof JSONObject) {
+                            customParametersHashMap = new LinkedHashMap<>((JSONObject) customParamsObj);
+                        } else {
+                            customParametersHashMap = new LinkedHashMap<>((Map<String, Object>) customParamsObj);
+                        }
 
                         // Process secret custom parameters
                         encryptSecretCustomParameters(cryptoUtil, oldProductionCustomParams, customParametersHashMap);
@@ -1526,9 +1533,15 @@ public class PublisherCommonUtils {
                     // Change default value of customParameters JSONObject to String
                     if (endpointSecuritySandbox
                             .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof Map) {
-                        LinkedHashMap<String, Object> customParametersHashMap =
-                                (LinkedHashMap<String, Object>) endpointSecuritySandbox
-                                        .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                        Object customParamsObj =
+                                endpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+
+                        LinkedHashMap<String, Object> customParametersHashMap = null;
+                        if (customParamsObj instanceof JSONObject) {
+                            customParametersHashMap = new LinkedHashMap<>((JSONObject) customParamsObj);
+                        } else {
+                            customParametersHashMap = new LinkedHashMap<>((Map<String, Object>) customParamsObj);
+                        }
 
                         // Process secret custom parameters
                         encryptSecretCustomParameters(cryptoUtil, oldSandboxCustomParams, customParametersHashMap);

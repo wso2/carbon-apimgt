@@ -2091,7 +2091,17 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, log);
         }
         Backend backend = new Backend(oldBackend);
-        backend.setEndpointConfig(backendAPIDTO.getEndpointConfig().toString());
+        Object endpointConfigObj = backendAPIDTO.getEndpointConfig();
+        if (endpointConfigObj == null) {
+            RestApiUtil.handleBadRequest("Endpoint config cannot be null", log);
+        }
+        if (endpointConfigObj instanceof Map) {
+            backend.setEndpointConfigFromMap((Map<String, Object>) endpointConfigObj);
+        } else if (endpointConfigObj instanceof String) {
+            backend.setEndpointConfig((String) endpointConfigObj);
+        } else {
+            RestApiUtil.handleBadRequest("Endpoint config is not in correct format", log);
+        }
         PublisherCommonUtils.updateMCPServerBackend(mcpServerId, oldBackend, backend, organization, apiProvider);
         return Response.ok().entity(APIMappingUtil.fromBackendAPIToDTO(backend, organization, false)).build();
     }
