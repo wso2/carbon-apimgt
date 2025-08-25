@@ -1800,6 +1800,7 @@ public final class APIConstants {
     public static final String KEYMANAGER_SERVERURL = API_KEY_VALIDATOR + "ServerURL";
     public static final String CARBON_LOCALIP = "carbon.local.ip";
     public static final String HTTPS_TRANSPORT_PORT = "https.transport.port";
+    public static final String ENABLE_MCP_SUPPORT = "enableMCPSupport";
 
     public static final String APIPROVIDER_HOSTCACHE = "apiProvideHostObjectCache";
     public static final String TENANTCOUNT_CACHEKEY = "apiProviderCacheKey";
