@@ -196,6 +196,7 @@ public class TenantManagementEventHandler implements EventHandler {
 
         // Return null immediately if the list is null or empty to avoid errors.
         if (headers == null || headers.isEmpty()) {
+            log.debug("Authorization headers are missing or empty");
             return false;
         }
 
@@ -226,6 +227,9 @@ public class TenantManagementEventHandler implements EventHandler {
                     if (credentialsArray.length == 2) {
                         String username = credentialsArray[0];
                         if (APIUtil.hasPermission(username, APIConstants.Permissions.TENANT_MANAGE_MODIFY)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("User " + username + " authorized for tenant management operations");
+                            }
                             return true;
                         }
                     }
