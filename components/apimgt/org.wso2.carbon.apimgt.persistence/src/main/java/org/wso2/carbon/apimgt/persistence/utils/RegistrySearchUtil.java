@@ -640,7 +640,8 @@ public class RegistrySearchUtil {
             }
             // Normal Listing
             if (StringUtils.isEmpty(searchQuery)
-                    || UnifiedSearchConstants.QUERY_API_TYPE_APIS_DEVPORTAL.equals(searchQuery)) {
+                    || UnifiedSearchConstants.QUERY_API_TYPE_APIS_DEVPORTAL.equals(searchQuery)
+                    || UnifiedSearchConstants.QUERY_API_TYPE_MCP.equals(searchQuery)) {
                 String enableStoreCriteria = APIConstants.ENABLE_STORE_SEARCH_TYPE_KEY;
                 if (isAllowDisplayMultipleVersions) {
                     modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
