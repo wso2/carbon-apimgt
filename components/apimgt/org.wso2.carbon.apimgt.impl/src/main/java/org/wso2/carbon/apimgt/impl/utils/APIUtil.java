@@ -3546,15 +3546,32 @@ public final class APIUtil {
         // Get the gateway types from the deployment.toml and process each external gateway type in the same order as
         // they are defined in the deployment.toml.
         List<String> gatewayTypes = APIUtil.getGatewayTypes();
-        for (String gatewayType : gatewayTypes) {
-            if (APIConstants.API_GATEWAY_TYPE_REGULAR.equals(gatewayType)) {
+
+        // trim and deduplicate while preserving order
+        LinkedHashSet<String> orderedGatewayTypes = new LinkedHashSet<>();
+        if (gatewayTypes != null) {
+            for (String t : gatewayTypes) {
+                if (StringUtils.isNotBlank(t)) {
+                    orderedGatewayTypes.add(t.trim());
+                }
+            }
+        }
+
+        // Backward-compat fallback: preserve original behavior if not configured
+        if (orderedGatewayTypes.isEmpty()) {
+            orderedGatewayTypes.add(APIConstants.API_GATEWAY_TYPE_REGULAR);
+            orderedGatewayTypes.add(APIConstants.API_GATEWAY_TYPE_APK);
+        }
+
+        for (String gatewayType : orderedGatewayTypes) {
+            if (APIConstants.API_GATEWAY_TYPE_REGULAR.equalsIgnoreCase(gatewayType)) {
                 for (JsonElement element : synapseApiTypes) {
                     String apiType = element.getAsString();
                     if (apiData.containsKey(apiType)) {
                         apiData.get(apiType).add(APIConstants.WSO2_SYNAPSE_GATEWAY);
                     }
                 }
-            } else if (APIConstants.API_GATEWAY_TYPE_APK.equals(gatewayType)) {
+            } else if (APIConstants.API_GATEWAY_TYPE_APK.equalsIgnoreCase(gatewayType)) {
                 for (JsonElement element : apkApiTypes) {
                     String apiType = element.getAsString();
                     if (apiData.containsKey(apiType)) {
@@ -3562,11 +3579,23 @@ public final class APIUtil {
                     }
                 }
             } else {
-                GatewayAgentConfiguration gatewayConfiguration = externalGatewayConnectorConfigurationMap.get(gatewayType);
-                if (gatewayConfiguration != null) {
-                    processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, gatewayConfiguration);
+                GatewayAgentConfiguration externalGatewayConfiguration = externalGatewayConnectorConfigurationMap.get(gatewayType);
+                // Case-insensitive fallback lookup for external gateway keys
+                if (externalGatewayConfiguration == null) {
+                    for (Map.Entry<String, GatewayAgentConfiguration> e
+                            : externalGatewayConnectorConfigurationMap.entrySet()) {
+                        if (e.getKey().equalsIgnoreCase(gatewayType)) {
+                            externalGatewayConfiguration = e.getValue();
+                            break;
+                        }
+                    }
+                }
+                
+                if (externalGatewayConfiguration != null) {
+                    processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, externalGatewayConfiguration);
                 } else {
-                    log.warn("No configuration found for external gateway type: " + gatewayType);
+                    log.warn("No configuration found for external gateway type: " +
+                            StringEscapeUtils.escapeJava(gatewayType));
                 }
             }
         }
@@ -3579,7 +3608,7 @@ public final class APIUtil {
     }
 
     private static void processExternalGatewayFeatureCatalogs(Map<String, Object> gatewayConfigsMap,
-                                                              Map<String, List<String>> apiData, GatewayAgentConfiguration gatewayConfiguration) {
+        Map<String, List<String>> apiData, GatewayAgentConfiguration gatewayConfiguration) {
 
         GatewayPortalConfiguration config = null;
         try {
