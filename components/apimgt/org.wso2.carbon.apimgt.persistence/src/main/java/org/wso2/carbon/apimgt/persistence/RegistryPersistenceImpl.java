@@ -1228,7 +1228,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
         String modifiedQuery = "q=* TO *&" + filterQuery;
 
         try {
-            PaginationContext.init(start, offset, "ASC", APIConstants.API_OVERVIEW_NAME, getMaxPaginationLimit());
             UserRegistry systemUserRegistry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME, tenantId);
             ContentBasedSearchService contentBasedSearchService = new ContentBasedSearchService();
@@ -1793,6 +1792,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         } catch (RegistryException | IndexerException | DocumentationPersistenceException | APIManagementException e) {
             throw new APIPersistenceException("Error while searching for content ", e);
         } finally {
+            PaginationContext.destroy();
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
@@ -1954,6 +1954,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         } catch (RegistryException | IndexerException | DocumentationPersistenceException e) {
             throw new APIPersistenceException("Error while searching for content ", e);
         } finally {
+            PaginationContext.destroy();
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
@@ -4202,6 +4203,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         } catch (RegistryException | IndexerException | APIManagementException e) {
             throw new APIPersistenceException("Error while searching for content ", e);
         } finally {
+            PaginationContext.destroy();
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
