@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIDTOTypeWrapper;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExportUtils;
@@ -339,9 +340,8 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
     @Override
     public String getOwner(String apiId, String organization) throws APIMGovernanceException {
         try {
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             APIProvider apiProvider = APIManagerFactory.getInstance()
-                    .getAPIProvider(apiIdentifier.getProviderName());
+                    .getAPIProvider(RestApiCommonUtil.getLoggedInUsername());
             API api = apiProvider.getAPIbyUUID(apiId, organization);
             String techOwner = api.getTechnicalOwnerEmail();
             String apiOwner = api.getApiOwner();
@@ -408,9 +408,10 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
             throws APIMGovernanceException {
         synchronized (apiId.intern()) {
             try {
+                String tenantAdminUsername = RestApiCommonUtil.getLoggedInUsername();
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
                 String userName = apiIdentifier.getProviderName();
-                APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userName);
+                APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(tenantAdminUsername);
                 if (revisionId != null) {
                     apiId = revisionId;
                 }
