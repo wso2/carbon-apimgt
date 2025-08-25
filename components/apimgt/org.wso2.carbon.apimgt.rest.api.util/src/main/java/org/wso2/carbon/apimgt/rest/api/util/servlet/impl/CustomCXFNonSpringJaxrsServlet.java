@@ -61,8 +61,7 @@ import org.apache.cxf.rs.security.cors.CrossOriginResourceSharingFilter;
 import org.apache.cxf.service.invoker.Invoker;
 import org.apache.cxf.transport.http.DestinationRegistry;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 
 /**
@@ -98,6 +97,7 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
             "org.wso2.carbon.apimgt.rest.api.publisher.v1.McpServersApi";
     private static final String MCP_RESOURCE_CLASS_DEVPORTAL =
             "org.wso2.carbon.apimgt.rest.api.store.v1.McpServersApi";
+    private static Boolean enableMcpSupport;
     private static final String CORS_SYSTEM_PROPERTIES_PREFIX = "{systemProperties['";
     private static final String CORS_SYSTEM_PROPERTIES_PATTERN = "^\\{systemProperties\\['|'\\]\\}$";
     private static Map<String, String> systemPropMap = new HashMap();
@@ -354,7 +354,7 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
                 String cName = var7[var9];
                 Map<String, List<String>> props = new HashMap();
                 String theName = this.getClassNameAndProperties(cName, props);
-                // ✨ Skip MCP resources when disabled
+                // Skip MCP resources when disabled
                 if (!isMcpEnabled() && (MCP_RESOURCE_CLASS_PUBLISHER.equals(theName)
                         || MCP_RESOURCE_CLASS_DEVPORTAL.equals(theName))) {
                     LOG.info("Skipping MCP resource class: " + theName + " as MCP is disabled");
@@ -709,16 +709,9 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
 
     private static boolean isMcpEnabled() {
 
-        APIManagerConfiguration config = getApiManagerConfiguration();
-        return config != null && config.isMCPSupportEnabled();
-    }
-
-    private static APIManagerConfiguration getApiManagerConfiguration() {
-
-        ServiceReferenceHolder holder = ServiceReferenceHolder.getInstance();
-        if (holder == null || holder.getAPIManagerConfigurationService() == null) {
-            return null;
+        if (enableMcpSupport == null) {
+            enableMcpSupport = Boolean.parseBoolean(System.getProperty(APIConstants.ENABLE_MCP_SUPPORT));
         }
-        return holder.getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        return enableMcpSupport;
     }
 }
