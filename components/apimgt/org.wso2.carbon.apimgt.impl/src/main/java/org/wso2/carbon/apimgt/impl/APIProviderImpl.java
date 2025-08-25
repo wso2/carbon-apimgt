@@ -7336,7 +7336,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (WorkflowException ex) {
             log.warn("Unable to delete Revision Deployment Workflow", ex);
         }
-        removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet());
+        if (!api.isInitiatedFromGateway()) {
+            removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet());
+        }
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevisionId, environmentsToRemove);
     }
