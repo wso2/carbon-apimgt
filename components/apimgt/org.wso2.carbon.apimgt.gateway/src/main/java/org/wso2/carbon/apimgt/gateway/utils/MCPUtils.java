@@ -476,7 +476,20 @@ public class MCPUtils {
         if (sequence != null && !sequence.mediate(messageContext)) {
             return;
         }
-        Utils.sendFault(messageContext, HttpStatus.SC_OK);
+
+        // Fallback in case failure sequence is not defined
+        org.apache.axis2.context.MessageContext axis2MC =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        try {
+            JsonUtil.removeJsonPayload(axis2MC);
+            JsonUtil.getNewJsonPayload(axis2MC, MCPPayloadGenerator.getErrorResponse(null,
+                    responseDto.getStatusCode(), "MCP Failure", responseDto.getResponse()), true, true);
+            axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            axis2MC.setProperty(Constants.Configuration.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+        } catch (AxisFault e) {
+            log.warn("Failed to set MCP error JSON payload", e);
+        }
+        Utils.sendFault(messageContext, responseDto.getStatusCode());
     }
 
 }
