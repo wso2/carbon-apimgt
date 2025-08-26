@@ -43,7 +43,7 @@ import java.util.TreeMap;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({OpenAPIUtils.class, BasicAuthAuthenticator.class, BasicAuthCredentialValidator.class,
-        ServiceReferenceHolder.class, APIUtil.class})
+        ServiceReferenceHolder.class, BasicAuthClientPool.class, APIUtil.class})
 public class BasicAuthAuthenticatorTest {
     private MessageContext messageContext;
     private org.apache.axis2.context.MessageContext axis2MsgCntxt;
@@ -65,6 +65,28 @@ public class BasicAuthAuthenticatorTest {
         messageContext.setProperty(APIMgtGatewayConstants.OPEN_API_OBJECT, Mockito.mock(OpenAPI.class));
         messageContext.setProperty(BasicAuthAuthenticator.PUBLISHER_TENANT_DOMAIN, "carbon.super");
 
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE))
+                .thenReturn("true");
+
+        // Mock configuration properties for BasicAuthClientPool
+        Mockito.when(apiManagerConfiguration.getFirstProperty("BasicAuthValidator.ConnectionPool.MaxIdle"))
+                .thenReturn("100");
+        Mockito.when(apiManagerConfiguration.getFirstProperty("BasicAuthValidator.ConnectionPool.InitIdleCapacity"))
+                .thenReturn("50");
+
+        // Mock BasicAuthClientPool
+        PowerMockito.mockStatic(BasicAuthClientPool.class);
+        BasicAuthClientPool mockClientPool = Mockito.mock(BasicAuthClientPool.class);
+        PowerMockito.when(BasicAuthClientPool.getInstance()).thenReturn(mockClientPool);
+        
+        // Mock BasicAuthClient
+        BasicAuthClient mockBasicAuthClient = Mockito.mock(BasicAuthClient.class);
+        Mockito.when(mockClientPool.get()).thenReturn(mockBasicAuthClient);
         basicAuthAuthenticator = new BasicAuthAuthenticator(CUSTOM_AUTH_HEADER, true, UNLIMITED_THROTTLE_POLICY);
         BasicAuthCredentialValidator basicAuthCredentialValidator = Mockito.mock(BasicAuthCredentialValidator.class);
         BasicAuthValidationInfoDTO basicAuthValidationInfoDTO = new BasicAuthValidationInfoDTO();
@@ -102,14 +124,6 @@ public class BasicAuthAuthenticatorTest {
             return false;
         });
         PowerMockito.whenNew(BasicAuthCredentialValidator.class).withNoArguments().thenReturn(basicAuthCredentialValidator);
-
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE))
-                .thenReturn("true");
     }
 
     @Test
