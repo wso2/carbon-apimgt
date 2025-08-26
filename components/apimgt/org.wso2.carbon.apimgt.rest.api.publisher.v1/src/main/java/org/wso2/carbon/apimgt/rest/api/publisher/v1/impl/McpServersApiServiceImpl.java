@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIConstants.UnifiedSearchConstants;
 import org.wso2.carbon.apimgt.api.APIComplianceException;
@@ -123,6 +124,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.validation.Valid;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -2087,16 +2089,24 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         CommonUtils.validateAPIExistence(mcpServerId);
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        Backend backend = apiProvider.getMCPServerBackend(mcpServerId, backendApiId, organization);
-
-        if (backend == null) {
+        Backend oldBackend = apiProvider.getMCPServerBackend(mcpServerId, backendApiId, organization);
+        if (oldBackend == null) {
             RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, log);
-        } else {
-            backend.setEndpointConfig(backendAPIDTO.getEndpointConfig().toString());
         }
-        apiProvider.updateMCPServerBackend(mcpServerId, backend, organization);
-        return Response.ok().entity(APIMappingUtil.fromBackendAPIToDTO(backend, organization,
-                false)).build();
+        Backend backend = new Backend(oldBackend);
+        Object endpointConfigObj = backendAPIDTO.getEndpointConfig();
+        if (endpointConfigObj == null) {
+            RestApiUtil.handleBadRequest("Endpoint config cannot be null", log);
+        }
+        if (endpointConfigObj instanceof Map) {
+            backend.setEndpointConfigFromMap((Map<String, Object>) endpointConfigObj);
+        } else if (endpointConfigObj instanceof String) {
+            backend.setEndpointConfig((String) endpointConfigObj);
+        } else {
+            RestApiUtil.handleBadRequest("Endpoint config is not in correct format", log);
+        }
+        PublisherCommonUtils.updateMCPServerBackend(mcpServerId, oldBackend, backend, organization, apiProvider);
+        return Response.ok().entity(APIMappingUtil.fromBackendAPIToDTO(backend, organization, false)).build();
     }
 
     /**
