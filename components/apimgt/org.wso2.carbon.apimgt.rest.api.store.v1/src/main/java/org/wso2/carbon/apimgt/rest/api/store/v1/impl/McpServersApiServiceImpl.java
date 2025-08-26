@@ -105,7 +105,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization,
+                    APIConstants.API_TYPE_MCP);
             Comment comment = new Comment();
             comment.setText(postRequestBodyDTO.getContent());
             comment.setCategory(postRequestBodyDTO.getCategory());
@@ -231,7 +232,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization,
+                    APIConstants.API_TYPE_MCP);
             Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
             if (comment != null) {
                 String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
@@ -324,7 +326,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization,
+                    APIConstants.API_TYPE_MCP);
             Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
             if (comment != null) {
                 if (comment.getUser().equals(username)) {
@@ -387,7 +390,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization,
+                    APIConstants.API_TYPE_MCP);
             String parentCommentID = null;
             CommentList comments = apiConsumer.getComments(apiTypeWrapper, parentCommentID, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
@@ -511,7 +515,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization,
+                    APIConstants.API_TYPE_MCP);
             Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
 
             if (comment != null) {
@@ -1020,7 +1025,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization,
+                    APIConstants.API_TYPE_MCP);
             CommentList comments = apiConsumer.getComments(apiTypeWrapper, commentId, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
@@ -1108,7 +1114,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization);
+            ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization,
+                    APIConstants.API_TYPE_MCP);
             String status = api.getStatus();
             String userOrg = userOrgInfo.getOrganizationId();
 

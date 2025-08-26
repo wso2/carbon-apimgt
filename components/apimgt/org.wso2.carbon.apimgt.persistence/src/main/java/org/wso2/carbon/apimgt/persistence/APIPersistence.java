@@ -137,6 +137,17 @@ public interface APIPersistence {
     PublisherAPI getPublisherAPI(Organization org, String apiId) throws APIPersistenceException;
 
     /**
+     * Get the API information stored in persistence layer, that is used for publisher operations
+     *
+     * @param org     Organization the API is owned by
+     * @param apiId   API ID
+     * @param apiType API Type
+     * @return API information
+     * @throws APIPersistenceException
+     */
+    PublisherAPI getPublisherAPI(Organization org, String apiId, String apiType) throws APIPersistenceException;
+
+    /**
      * Get the API information stored in persistence layer, that is used for DevPortal operations
      *
      * @param org   Organization the API is owned by
@@ -145,6 +156,17 @@ public interface APIPersistence {
      * @throws APIPersistenceException
      */
     DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException;
+
+    /**
+     * Get the API information stored in persistence layer, that is used for DevPortal operations
+     *
+     * @param org     Organization the API is owned by
+     * @param apiId   API ID
+     * @param apiType API Type
+     * @throws APIPersistenceException
+     */
+    DevPortalAPI getDevPortalAPI(Organization org, String apiId, String apiType) throws APIPersistenceException;
+
 
     /**
      * Delete API

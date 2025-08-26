@@ -215,6 +215,10 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getAPIInfoByUUID(id);
     }
 
+    public APIInfo getAPIInfoByUUID(String id, String apiType) throws APIManagementException {
+        return apiMgtDAO.getAPIInfoByUUID(id, apiType);
+    }
+
 
     protected TenantManager getTenantManager() {
 
@@ -1586,7 +1590,8 @@ public abstract class AbstractAPIManager implements APIManager {
             String resourceAPIUUID = resource.getApiIdentifier().getUUID();
             resource.setApiId(resourceAPIUUID);
             try {
-                PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, resourceAPIUUID);
+                PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, resourceAPIUUID,
+                        APIConstants.API_IDENTIFIER_TYPE);
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
                 if (api.isAdvertiseOnly()) {
                     resource.setEndpointConfig(APIUtil.generateEndpointConfigForAdvertiseOnlyApi(api));
