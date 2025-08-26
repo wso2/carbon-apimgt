@@ -4771,12 +4771,16 @@ public class APIMappingUtil {
                 }
                 Object customParamsObj =
                         sandboxEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
-                if (customParamsObj instanceof String) {
-                    JSONParser parser = new JSONParser();
-                    customParamsObj = parser.parse(customParamsObj.toString());
+                if (customParamsObj != null) {
+                    if (customParamsObj instanceof String) {
+                        customParamsObj = new JSONParser().parse(customParamsObj.toString());
+                    } else if (customParamsObj instanceof Map) {
+                        customParamsObj = new JSONObject((Map) customParamsObj);
+                    }
+                    maskSecretCustomParameters((JSONObject) customParamsObj);
+                    sandboxEndpointSecurity.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS,
+                            customParamsObj);
                 }
-                maskSecretCustomParameters((JSONObject) customParamsObj);
-                sandboxEndpointSecurity.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParamsObj);
                 endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, sandboxEndpointSecurity);
             }
             if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
@@ -4797,12 +4801,16 @@ public class APIMappingUtil {
                 }
                 Object customParamsObj =
                         productionEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
-                if (customParamsObj instanceof String) {
-                    JSONParser parser = new JSONParser();
-                    customParamsObj = parser.parse(customParamsObj.toString());
+                if (customParamsObj != null) {
+                    if (customParamsObj instanceof String) {
+                        customParamsObj = new JSONParser().parse(customParamsObj.toString());
+                    } else if (customParamsObj instanceof Map) {
+                        customParamsObj = new JSONObject((Map) customParamsObj);
+                    }
+                    maskSecretCustomParameters((JSONObject) customParamsObj);
+                    productionEndpointSecurity.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS,
+                            customParamsObj);
                 }
-                maskSecretCustomParameters((JSONObject) customParamsObj);
-                productionEndpointSecurity.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParamsObj);
                 endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
             }
             return endpointSecurityElement;
