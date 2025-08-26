@@ -500,6 +500,12 @@
       <SkipCreateResidentKeyManager>{{apim.key_manager.skip_create_resident_key_manager}}</SkipCreateResidentKeyManager>
     </APIKeyValidator>
 
+    <BasicAuthValidator>
+        <ConnectionPool>
+            <MaxIdle>{{apim.basic_authenticator.max_idle}}</MaxIdle>
+            <InitIdleCapacity>{{apim.basic_authenticator.init_idle_capacity}}</InitIdleCapacity>
+        </ConnectionPool>
+    </BasicAuthValidator>
 
     <OAuthConfigurations>
         <!-- Remove OAuth headers from outgoing message. -->
