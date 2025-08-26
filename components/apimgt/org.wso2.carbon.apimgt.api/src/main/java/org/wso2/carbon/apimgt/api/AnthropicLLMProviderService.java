@@ -64,8 +64,6 @@ public class AnthropicLLMProviderService extends BuiltInLLMProviderService {
 
             LLMProviderConfiguration llmProviderConfiguration = new LLMProviderConfiguration();
             llmProviderConfiguration.setAuthenticationConfiguration(getLlmProviderAuthenticationConfiguration());
-            llmProviderConfiguration.setAuthHeader(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_KEY);
-            llmProviderConfiguration.setAuthQueryParam(null);
             llmProviderConfiguration.setConnectorType(this.getType());
 
             List<LLMProviderMetadata> llmProviderMetadata = new ArrayList<>();
