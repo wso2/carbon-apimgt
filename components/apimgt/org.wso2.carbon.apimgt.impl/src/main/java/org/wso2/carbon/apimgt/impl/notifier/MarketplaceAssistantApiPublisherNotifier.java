@@ -160,6 +160,9 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
         public void run() {
             try {
                 String api_type = api.getType();
+                if (APIConstants.API_TYPE_MCP.equals(api_type)) {
+                    return;
+                }
                 JSONObject payload = new JSONObject();
 
                 payload.put(APIConstants.API_SPEC_TYPE, api_type);
