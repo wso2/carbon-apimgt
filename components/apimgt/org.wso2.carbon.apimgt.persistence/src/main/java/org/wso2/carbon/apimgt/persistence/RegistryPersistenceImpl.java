@@ -3645,6 +3645,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             for (GovernanceArtifact artifact : governanceArtifacts) {
 
                 PublisherAPIProductInfo info = new PublisherAPIProductInfo();
+                String artifactPath = GovernanceUtils.getArtifactPath(sysRegistry, artifact.getId());
+                Resource apiProductResource = sysRegistry.get(artifactPath);
                 info.setProviderName(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
                 info.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
                 info.setId(artifact.getId());
@@ -3664,7 +3666,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 info.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
                 info.setMonetizationStatus(Boolean.parseBoolean(artifact.
                         getAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS)));
-
+                info.setCreatedTime(String.valueOf(apiProductResource.getCreatedTime().getTime()));
+                info.setUpdatedTime(String.valueOf(apiProductResource.getLastModified().getTime()));
                 publisherAPIProductInfoList.add(info);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -3679,7 +3682,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             result.setReturnedAPIsCount(publisherAPIProductInfoList.size());
             result.setTotalAPIsCount(totalLength);
 
-        } catch (GovernanceException | APIManagementException e) {
+        } catch (RegistryException | APIManagementException e) {
             throw new APIPersistenceException("Error while searching API products ", e);
         } finally {
             PaginationContext.destroy();

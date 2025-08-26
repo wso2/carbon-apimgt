@@ -12227,6 +12227,13 @@ components:
           type: string
           description: Name of the API Product
           example: PizzaShackAPIProduct
+        displayName:
+          type: string
+          example: Calculator Product API
+          description: |
+            Display name of the API Product.
+            This is the name that will be displayed in the Publisher and DevPortal.
+            If not provided, the name will be used as the display name.
         context:
           type: string
           example: pizzaproduct
@@ -12239,20 +12246,16 @@ components:
           description: |
             If the provider value is not given, the user invoking the API will be used as the provider.
           example: admin
+        version:
+          type: string
+          example: 1.0.0
         hasThumbnail:
           type: boolean
           example: true
         state:
           type: string
           description: |
-            State of the API product. Only published api products are visible on the Developer Portal
-          enum:
-            - CREATED
-            - PUBLISHED
-            - DEPRECATED
-            - RETIRED
-            - BLOCKED
-            - PROTOTYPED
+            State of the API product. Only published API products are visible on the Developer Portal
         securityScheme:
           type: array
           description: |
@@ -12262,9 +12265,41 @@ components:
             - oauth2
           items:
             type: string
+        createdTime:
+          type: string
+          example: 1756199448644
+        updatedTime:
+          type: string
+          example: 1756199448644
         gatewayVendor:
           type: string
           example: wso2
+        audiences:
+          type: array
+          description: The audiences of the API product for jwt validation. Accepted values are any String values
+          items:
+            type: string
+            example: [ "aud1","aud2","aud3" ]
+        monetizedInfo:
+          type: boolean
+          example: true
+        businessOwner:
+          type: string
+          example: Business Owner
+        businessOwnerEmail:
+          type: string
+          example: businessowner@abc.com
+        TechnicalOwner:
+          type: string
+          example: Technical Owner
+        TechnicalOwnerEmail:
+          type: string
+          example: technicalowner@abc.com
+        egress:
+          type: boolean
+          description: Whether the APIProduct is EGRESS or not
+          default: false
+          example: true
     APIProduct:
       title: API Product object
       required:

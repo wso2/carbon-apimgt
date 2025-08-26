@@ -14575,6 +14575,12 @@ components:
             - oauth2
           items:
             type: string
+        createdTime:
+          type: string
+          example: 1756199448644
+        updatedTime:
+          type: string
+          example: 1756199448644
         gatewayVendor:
           type: string
           example: wso2

@@ -233,6 +233,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -6606,6 +6607,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     mappedAPI.setTechnicalOwnerEmail(publisherAPIInfo.getTechnicalOwnerEmail());
                     mappedAPI.setMonetizationEnabled(publisherAPIInfo.getMonetizationStatus());
                     mappedAPI.setContextTemplate(publisherAPIInfo.getContext());
+                    mappedAPI.setCreatedTime(new Date(Long.parseLong(publisherAPIInfo.getCreatedTime())));
+                    mappedAPI.setLastUpdated(new Date(Long.parseLong(publisherAPIInfo.getUpdatedTime())));
                     populateDefaultVersion(mappedAPI);
                     populateApiInfo(mappedAPI);
                     productList.add(mappedAPI);
