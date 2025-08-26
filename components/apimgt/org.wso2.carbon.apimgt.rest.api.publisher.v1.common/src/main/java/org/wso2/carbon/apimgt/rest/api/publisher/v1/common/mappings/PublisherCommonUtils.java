@@ -5069,7 +5069,8 @@ public class PublisherCommonUtils {
             if ((oldEndpointConfig.containsKey(APIConstants.ENDPOINT_SECURITY))) {
                 JSONObject oldEndpointSecurity = (JSONObject) oldEndpointConfig.get(APIConstants.ENDPOINT_SECURITY);
                 if (oldEndpointSecurity != null &&
-                        oldEndpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION)) {
+                        oldEndpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION)
+                        && oldEndpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
                     JSONObject oldEndpointSecurityProduction = (JSONObject) oldEndpointSecurity
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
 
@@ -5095,7 +5096,8 @@ public class PublisherCommonUtils {
                     }
                 }
                 if (oldEndpointSecurity != null &&
-                        oldEndpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX)) {
+                        oldEndpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX)
+                        && oldEndpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
                     JSONObject oldEndpointSecuritySandbox = (JSONObject) oldEndpointSecurity
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
 
