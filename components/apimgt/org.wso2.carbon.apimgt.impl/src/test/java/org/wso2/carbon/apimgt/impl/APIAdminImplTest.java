@@ -56,11 +56,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.fail;
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class, CarbonContext.class})
 public class APIAdminImplTest {
+
+    private static final String azureADKeyManagerType = "AzureAD";
+    private static final String azureADKeyManagerName = "Azure AD Key Manager";
+    private static final String directKeyManagerTokenType = "DIRECT";
+    private static final String azureADDefaultTokenVersion = "v1.0";
+    private static final String azureADAlternateTokenVersion = "v2.0";
 
     ServiceReferenceHolder serviceReferenceHolder;
     APIMConfigService apimConfigService;
@@ -98,7 +102,7 @@ public class APIAdminImplTest {
         Mockito.when(apimConfigService.getTenantConfig("abc.com")).thenThrow(APIManagementException.class);
         try {
             apiAdmin.getTenantConfig("abc.com");
-            fail("Method successfully invoked");
+            Assert.fail("Method successfully invoked");
         } catch (APIManagementException e) {
             Assert.assertTrue(true);
         }
@@ -133,7 +137,7 @@ public class APIAdminImplTest {
         Mockito.doNothing().when(apimConfigService).updateTenantConfig("abc.com", tenantConf);
         try {
             apiAdmin.updateTenantConfig("abc.com", tenantConf);
-            fail("Method successfully invoked");
+            Assert.fail("Method successfully invoked");
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "tenant-config validation failure");
             Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.INTERNAL_ERROR);
@@ -153,7 +157,7 @@ public class APIAdminImplTest {
         Mockito.doNothing().when(apimConfigService).updateTenantConfig("abc.com", tenantConf);
         try {
             apiAdmin.updateTenantConfig("abc.com", tenantConf);
-            fail("Method successfully invoked");
+            Assert.fail("Method successfully invoked");
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "tenant-config validation failure");
         }
@@ -172,7 +176,7 @@ public class APIAdminImplTest {
         Mockito.doNothing().when(apimConfigService).updateTenantConfig("abc.com", tenantConf);
         try {
             apiAdmin.updateTenantConfig("abc.com", tenantConf);
-            fail("Method successfully invoked");
+            Assert.fail("Method successfully invoked");
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "tenant-config validation failure");
         }
@@ -204,7 +208,7 @@ public class APIAdminImplTest {
             Policy policy = apiAdmin.getPolicyByNameAndType(ArgumentMatchers.anyInt(), "api", ArgumentMatchers.anyString());
             Assert.assertNotNull(policy);
         } catch (APIManagementException ex) {
-            fail(ex.getMessage());
+            Assert.fail(ex.getMessage());
         }
     }
 
@@ -272,19 +276,16 @@ public class APIAdminImplTest {
     @Test
     public void testKeyManagerConnectorConfigurationUpdateDisabled() throws APIManagementException {
         // Setup test data
-        String keyManagerType = "AzureAD";
-        String defaultTokenVersion = "v1.0";
-        String alternateTokenVersion = "v2.0";
         String configKey = "azure_ad_requested_access_token_version";
 
         // Prepare the ConfigurationDto list
         Map<String, Integer> map = new HashMap<>();
-        map.put(defaultTokenVersion, 1);
-        map.put(alternateTokenVersion, 2);
+        map.put(azureADDefaultTokenVersion, 1);
+        map.put(azureADAlternateTokenVersion, 2);
         List<ConfigurationDto> configurationDtoList = new ArrayList<>();
         configurationDtoList.add(new ConfigurationDto(configKey,
                 "Requested Access Token Version", "options",
-                "Select the requested access token version", defaultTokenVersion,
+                "Select the requested access token version", azureADDefaultTokenVersion,
                 false, false,
                 new ArrayList<>(Collections.unmodifiableMap(map).keySet()),
                 false, true));
@@ -292,7 +293,7 @@ public class APIAdminImplTest {
         // Mock the chain: serviceReferenceHolder.getKeyManagerConnectorConfiguration(...)
         KeyManagerConnectorConfiguration keyManagerConnectorConfiguration =
                 Mockito.mock(KeyManagerConnectorConfiguration.class);
-        Mockito.when(serviceReferenceHolder.getKeyManagerConnectorConfiguration(keyManagerType))
+        Mockito.when(serviceReferenceHolder.getKeyManagerConnectorConfiguration(azureADKeyManagerType))
                 .thenReturn(keyManagerConnectorConfiguration);
         Mockito.when(keyManagerConnectorConfiguration.getConnectionConfigurations())
                 .thenReturn(configurationDtoList);
@@ -309,35 +310,35 @@ public class APIAdminImplTest {
             );
             apiAdmin.validateKeyManagerConfiguration(
                 // Both have the default version
-                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(defaultTokenVersion),
-                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(defaultTokenVersion)
+                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(azureADDefaultTokenVersion),
+                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(azureADDefaultTokenVersion)
             );
             apiAdmin.validateKeyManagerConfiguration(
                 // Both have the alternative version
-                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(alternateTokenVersion),
-                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(alternateTokenVersion)
+                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(azureADAlternateTokenVersion),
+                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(azureADAlternateTokenVersion)
             );
         } catch (APIManagementException e) {
-            fail("Validation should succeed when configuration is unchanged");
+            Assert.fail("Validation should succeed when configuration is unchanged");
         }
 
         // Test scenario 2: Attempt to modify a non-modifiable field
         try {
             apiAdmin.validateKeyManagerConfiguration(
-                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(defaultTokenVersion),
-                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(alternateTokenVersion)
+                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(azureADDefaultTokenVersion),
+                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(azureADAlternateTokenVersion)
             );
-            fail("Expected APIManagementException for changing configuration");
+            Assert.fail("Expected APIManagementException for changing configuration");
         } catch (APIManagementException e) {
             assertUpdateDisabledKeyManagerConfigurationModification(e);
         }
 
         try {
             apiAdmin.validateKeyManagerConfiguration(
-                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(alternateTokenVersion),
-                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(defaultTokenVersion)
+                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(azureADAlternateTokenVersion),
+                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(azureADDefaultTokenVersion)
             );
-            fail("Expected APIManagementException for changing configuration");
+            Assert.fail("Expected APIManagementException for changing configuration");
         } catch (APIManagementException e) {
             assertUpdateDisabledKeyManagerConfigurationModification(e);
         }
@@ -347,7 +348,7 @@ public class APIAdminImplTest {
                 createAzureADKeyManagerConfigWithRequestedAccessTokenVersion("v3.0"),
                 createAzureADKeyManagerConfigWithRequestedAccessTokenVersion("v4.0")
             );
-            fail("Expected APIManagementException for changing configuration");
+            Assert.fail("Expected APIManagementException for changing configuration");
         } catch (APIManagementException e) {
             assertUpdateDisabledKeyManagerConfigurationModification(e);
         }
@@ -355,20 +356,20 @@ public class APIAdminImplTest {
         // Test scenario 3: Original is null, new is default value (should be allowed)
         try {
             apiAdmin.validateKeyManagerConfiguration(
-                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion("v1.0"),
+                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(azureADDefaultTokenVersion),
                 createAzureADKeyManagerConfigWithRequestedAccessTokenVersion()
             );
         } catch (APIManagementException e) {
-            fail("Validation should succeed when setting to default value");
+            Assert.fail("Validation should succeed when setting to default value");
         }
 
         // Test scenario 4: Original is null, new is non-default value (should be rejected)
         try {
             apiAdmin.validateKeyManagerConfiguration(
-                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion("v2.0"),
+                createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(azureADAlternateTokenVersion),
                 createAzureADKeyManagerConfigWithRequestedAccessTokenVersion()
             );
-            fail("Expected APIManagementException for setting non-default value");
+            Assert.fail("Expected APIManagementException for setting non-default value");
         } catch (APIManagementException e) {
             assertUpdateDisabledKeyManagerConfigurationModification(e);
         }
@@ -380,13 +381,13 @@ public class APIAdminImplTest {
     private KeyManagerConfigurationDTO createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(String tokenVersion)
     {
         KeyManagerConfigurationDTO config = new KeyManagerConfigurationDTO();
-        config.setName("AzureAD");
-        config.setDisplayName("Azure AD Key Manager");
+        config.setName(azureADKeyManagerType);
+        config.setDisplayName(azureADKeyManagerName);
         config.setDescription("");
         config.setOrganization("carbon.super");
-        config.setType("AzureAD");
+        config.setType(azureADKeyManagerType);
         config.setEnabled(true);
-        config.setTokenType("DIRECT");
+        config.setTokenType(directKeyManagerTokenType);
         config.setAlias("");
 
         Map<String, Object> additionalProps = new HashMap<>();
@@ -404,13 +405,13 @@ public class APIAdminImplTest {
     private KeyManagerConfigurationDTO createAzureADKeyManagerConfigWithRequestedAccessTokenVersion()
     {
         KeyManagerConfigurationDTO config = new KeyManagerConfigurationDTO();
-        config.setName("AzureAD");
-        config.setDisplayName("Azure AD Key Manager");
+        config.setName(azureADKeyManagerType);
+        config.setDisplayName(azureADKeyManagerName);
         config.setDescription("");
         config.setOrganization("carbon.super");
-        config.setType("AzureAD");
+        config.setType(azureADKeyManagerType);
         config.setEnabled(true);
-        config.setTokenType("DIRECT");
+        config.setTokenType(directKeyManagerTokenType);
         config.setAlias("");
 
         Map<String, Object> additionalProps = new HashMap<>();
