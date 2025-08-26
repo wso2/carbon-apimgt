@@ -18,19 +18,33 @@
 
 package org.wso2.carbon.apimgt.gateway.mcp.request;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.wso2.carbon.apimgt.gateway.mcp.response.McpResponseDto;
 import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
 public class McpRequestProcessor {
+    private static final Log log = LogFactory.getLog(McpRequestProcessor.class);
 
     public static McpResponseDto processRequest(MessageContext messageContext, API matchedMcpApi,
                                                 McpRequest requestBody) {
 
-        // Todo: check subtype, implement MCP Server option
+        if (log.isDebugEnabled()) {
+            log.debug("Processing MCP request: " + requestBody.getMethod() + " for API: " +
+                    matchedMcpApi.getName() + "-" + matchedMcpApi.getVersion());
+        }
+
         String method = requestBody.getMethod();
-        return MCPUtils.processInternalRequest(messageContext, matchedMcpApi, requestBody, method);
+        McpResponseDto dto = MCPUtils.processInternalRequest(messageContext, matchedMcpApi, requestBody, method);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully processed MCP request: " + requestBody.getMethod() + " for API: " +
+                    matchedMcpApi.getName() + "-" + matchedMcpApi.getVersion());
+        }
+
+        return dto;
     }
 
 }

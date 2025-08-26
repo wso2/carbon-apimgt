@@ -1800,6 +1800,7 @@ public final class APIConstants {
     public static final String KEYMANAGER_SERVERURL = API_KEY_VALIDATOR + "ServerURL";
     public static final String CARBON_LOCALIP = "carbon.local.ip";
     public static final String HTTPS_TRANSPORT_PORT = "https.transport.port";
+    public static final String ENABLE_MCP_SUPPORT = "enableMCPSupport";
 
     public static final String APIPROVIDER_HOSTCACHE = "apiProvideHostObjectCache";
     public static final String TENANTCOUNT_CACHEKEY = "apiProviderCacheKey";
@@ -3682,6 +3683,7 @@ public final class APIConstants {
         public static final String HEADER_ACCEPT = "Accept";
         public static final String HEADER_MCP_SESSION_ID = "Mcp-Session-Id";
         public static final String ACCEPT_JSON_AND_SSE = "application/json, text/event-stream";
+        public static final String MCP_FAILURE_HANDLER = "_mcp_failure_handler_";
 
         // JSON keys used in payloads
         public static final String CAPABILITIES_KEY = "capabilities";

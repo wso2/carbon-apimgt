@@ -323,10 +323,7 @@ public final class APIConstants {
     public static final String TYPE_SEARCH_TYPE_KEY = "type=";
 
     public static final String[] API_SUPPORTED_TYPE_LIST =
-            {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB", "WEBHOOK", "ASYNC"};
-
-    public static final String[] API_SUPPORTED_TYPE_LIST_DEVPORTAL =
-            {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB", "WEBHOOK", "ASYNC", "APIProduct"};
+            {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB", "WEBHOOK", "ASYNC", "MCP"};
 
     public static class AuditLogConstants {
         public static final String API_PRODUCT = "APIProduct";
@@ -385,6 +382,7 @@ public final class APIConstants {
     public static final String USER_CTX_PROPERTY_SKIP_ROLES = "skipRoles";
     public static final String USER_CTX_PROPERTY_ORGS_AVAILABLE = "organizationsAvailable";
     public static final String API = "API";
+    public static final String MCP = "MCP";
 
     public static final String API_CUSTOM_SEQUENCE_TYPE_IN = "in";
     public static final String API_CUSTOM_SEQUENCE_TYPE_OUT = "out";

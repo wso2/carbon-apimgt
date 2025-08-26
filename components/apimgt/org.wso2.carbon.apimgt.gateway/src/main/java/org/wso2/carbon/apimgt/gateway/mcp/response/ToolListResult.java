@@ -27,23 +27,12 @@ public class ToolListResult {
     @SerializedName("tools")
     public List<ToolInfo> tools;
 
-    @SerializedName("nextCursor")
-    public String nextCursor;
-
     public List<ToolInfo> getTools() {
         return tools;
     }
 
     public void setTools(List<ToolInfo> tools) {
         this.tools = tools;
-    }
-
-    public String getNextCursor() {
-        return nextCursor;
-    }
-
-    public void setNextCursor(String nextCursor) {
-        this.nextCursor = nextCursor;
     }
 
     public static class ToolInfo {
