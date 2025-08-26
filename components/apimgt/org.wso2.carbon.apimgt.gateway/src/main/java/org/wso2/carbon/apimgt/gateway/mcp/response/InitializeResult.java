@@ -34,60 +34,9 @@ public class InitializeResult {
     public ServerInfo serverInfo;
 
     public static class Capabilities {
-        @SerializedName("logging")
-        public Map<String, Object> logging;
-
-        @SerializedName("prompts")
-        public Prompts prompts;
-
-        @SerializedName("resources")
-        public Resources resources;
 
         @SerializedName("tools")
         public Tools tools;
-
-        @SerializedName("completions")
-        public Map<String, Object> completions;
-
-        @SerializedName("experimental")
-        public Map<String, Object> experimental;
-
-        public static class Prompts {
-            @SerializedName("listChanged")
-            public Boolean listChanged;
-
-            public Boolean getListChanged() {
-                return listChanged;
-            }
-
-            public void setListChanged(Boolean listChanged) {
-                this.listChanged = listChanged;
-            }
-        }
-
-        public static class Resources {
-            @SerializedName("subscribe")
-            public Boolean subscribe;
-
-            @SerializedName("listChanged")
-            public Boolean listChanged;
-
-            public Boolean getSubscribe() {
-                return subscribe;
-            }
-
-            public void setSubscribe(Boolean subscribe) {
-                this.subscribe = subscribe;
-            }
-
-            public Boolean getListChanged() {
-                return listChanged;
-            }
-
-            public void setListChanged(Boolean listChanged) {
-                this.listChanged = listChanged;
-            }
-        }
 
         public static class Tools {
             @SerializedName("listChanged")
@@ -102,52 +51,12 @@ public class InitializeResult {
             }
         }
 
-        public Map<String, Object> getLogging() {
-            return logging;
-        }
-
-        public void setLogging(Map<String, Object> logging) {
-            this.logging = logging;
-        }
-
-        public Prompts getPrompts() {
-            return prompts;
-        }
-
-        public void setPrompts(Prompts prompts) {
-            this.prompts = prompts;
-        }
-
-        public Resources getResources() {
-            return resources;
-        }
-
-        public void setResources(Resources resources) {
-            this.resources = resources;
-        }
-
         public Tools getTools() {
             return tools;
         }
 
         public void setTools(Tools tools) {
             this.tools = tools;
-        }
-
-        public Map<String, Object> getCompletions() {
-            return completions;
-        }
-
-        public void setCompletions(Map<String, Object> completions) {
-            this.completions = completions;
-        }
-
-        public Map<String, Object> getExperimental() {
-            return experimental;
-        }
-
-        public void setExperimental(Map<String, Object> experimental) {
-            this.experimental = experimental;
         }
     }
 

@@ -79,19 +79,6 @@ public class MCPPayloadGenerator {
         InitializeResult.Capabilities.Tools tools = new InitializeResult.Capabilities.Tools();
         tools.setListChanged(toolListChangeNotified);
         capabilities.setTools(tools);
-        capabilities.setLogging(new HashMap<>());
-
-        InitializeResult.Capabilities.Resources resources = new InitializeResult.Capabilities.Resources();
-        resources.setSubscribe(false); // Resources are not supported at the moment
-        resources.setListChanged(false); // Resources are not supported at the moment
-        capabilities.setResources(resources);
-
-        InitializeResult.Capabilities.Prompts prompts = new InitializeResult.Capabilities.Prompts();
-        prompts.setListChanged(false); // Prompts are not supported at the moment
-        capabilities.setPrompts(prompts);
-
-        capabilities.setCompletions(new HashMap<>());
-        capabilities.setExperimental(new HashMap<>());
         return capabilities;
     }
 
@@ -136,7 +123,6 @@ public class MCPPayloadGenerator {
             toolInfoList.add(tool);
         }
         toolListResult.setTools(toolInfoList);
-        toolListResult.setNextCursor(""); // No pagination support in this implementation
         toolListResponse.setResult(toolListResult);
         return gson.toJson(toolListResponse);
     }

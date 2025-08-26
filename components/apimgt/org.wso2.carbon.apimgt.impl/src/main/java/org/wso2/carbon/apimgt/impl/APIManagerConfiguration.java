@@ -73,7 +73,6 @@ import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.MonetizationConfigurationDto;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -3046,8 +3045,8 @@ public class APIManagerConfiguration {
                 omElement.getFirstChildWithName(new QName(APIConstants.AI.MCP_SUPPORT_ENABLED));
         if (mcpServerConfigElement != null
                 && StringUtils.isNotEmpty(mcpServerConfigElement.getText())) {
-
             isMCPSupportEnabled = Boolean.parseBoolean(mcpServerConfigElement.getText().trim());
+            System.setProperty(APIConstants.ENABLE_MCP_SUPPORT, Boolean.toString(isMCPSupportEnabled));
         }
     }
 

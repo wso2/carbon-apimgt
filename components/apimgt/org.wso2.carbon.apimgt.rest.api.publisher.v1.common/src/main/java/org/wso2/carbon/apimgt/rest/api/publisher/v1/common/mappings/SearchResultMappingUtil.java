@@ -73,10 +73,11 @@ public class SearchResultMappingUtil {
         apiResultDTO.setContextTemplate(api.getContextTemplate());
         if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
             apiResultDTO.setType(SearchResultDTO.TypeEnum.MCP);
+            apiResultDTO.setTransportType(APIConstants.API_TYPE_HTTP);
         } else {
-            apiResultDTO.setType(SearchResultDTO.TypeEnum.API); // To maintain backward compatibility
+            apiResultDTO.setType(SearchResultDTO.TypeEnum.API);
+            apiResultDTO.setTransportType(api.getType());
         }
-        apiResultDTO.setTransportType(api.getType());
         apiResultDTO.setDescription(api.getDescription());
         apiResultDTO.setStatus(api.getStatus());
         apiResultDTO.setThumbnailUri(api.getThumbnailUrl());
@@ -140,7 +141,7 @@ public class SearchResultMappingUtil {
         docResultDTO.setDocType(DocumentSearchResultDTO.DocTypeEnum.valueOf(document.getType().toString()));
         docResultDTO.setType(SearchResultDTO.TypeEnum.DOC);
         docResultDTO.setSummary(document.getSummary());
-        docResultDTO.associatedType(APIConstants.AuditLogConstants.API);
+        docResultDTO.associatedType(api.getType());
         docResultDTO.setVisibility(mapVisibilityFromDocumentToDTO(document.getVisibility()));
         docResultDTO.setSourceType(mapSourceTypeFromDocumentToDTO(document.getSourceType()));
         docResultDTO.setOtherTypeName(document.getOtherTypeName());

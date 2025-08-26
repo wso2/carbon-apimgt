@@ -19,12 +19,19 @@
 package org.wso2.carbon.apimgt.gateway.handlers.mcp;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
+import org.apache.axis2.Constants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
 import org.apache.synapse.ManagedLifecycle;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -34,11 +41,17 @@ import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.exception.McpException;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.mcp.request.MCPRequestDeserializer;
 import org.wso2.carbon.apimgt.gateway.mcp.request.Params;
 import org.wso2.carbon.apimgt.gateway.mcp.request.McpRequest;
+import org.wso2.carbon.apimgt.gateway.mcp.response.McpResponse;
+import org.wso2.carbon.apimgt.gateway.mcp.response.McpResponseDto;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.gateway.utils.MCPPayloadGenerator;
 import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
@@ -77,7 +90,9 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST, isNoAuthMCPRequest);
             }
         } catch (McpException e) {
-            log.error("Error in MCP handleRequest flow", e);
+            log.error("MCP init failed: " + String.valueOf(e.getData()), e);
+            MCPUtils.handleMCPFailure(messageContext, new McpResponseDto(e.getErrorMessage(), e.getErrorCode(), null));
+            return false;
         }
         return true;
     }
@@ -123,7 +138,8 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
             if (JsonUtil.hasAJsonPayload(axis2MC)) {
                 messageBody = JsonUtil.jsonPayloadToString(axis2MC);
 
-                Gson gson = new Gson();
+                Gson gson = new GsonBuilder().registerTypeAdapter(McpRequest.class, new MCPRequestDeserializer())
+                        .create();
                 McpRequest request = gson.fromJson(messageBody, McpRequest.class);
                 if (!MCPUtils.validateRequest(request)) {
                     throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
@@ -178,13 +194,13 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
             case APIConstants.MCP.METHOD_INITIALIZE:
             case APIConstants.MCP.METHOD_PING:
             case APIConstants.MCP.METHOD_NOTIFICATION_INITIALIZED:
+            case APIConstants.MCP.METHOD_RESOURCES_LIST:
+            case APIConstants.MCP.METHOD_RESOURCE_TEMPLATE_LIST:
+            case APIConstants.MCP.METHOD_PROMPTS_LIST:
                 return true;
 
             case APIConstants.MCP.METHOD_TOOL_LIST:
             case APIConstants.MCP.METHOD_TOOL_CALL:
-            case APIConstants.MCP.METHOD_RESOURCES_LIST:
-            case APIConstants.MCP.METHOD_RESOURCE_TEMPLATE_LIST:
-            case APIConstants.MCP.METHOD_PROMPTS_LIST:
                 return false;
 
             default:

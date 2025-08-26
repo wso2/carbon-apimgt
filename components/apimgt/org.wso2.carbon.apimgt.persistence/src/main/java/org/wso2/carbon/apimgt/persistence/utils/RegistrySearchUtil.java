@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
+import org.wso2.carbon.apimgt.api.APIConstants.UnifiedSearchConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.RegistryPersistenceImpl;
@@ -630,13 +631,6 @@ public class RegistrySearchUtil {
     public static String getDevPortalSearchQuery(String searchQuery, UserContext ctx, boolean displayMultipleStatus,
                             boolean isAllowDisplayMultipleVersions) throws APIPersistenceException {
         String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
-
-        if (!modifiedQuery.contains(APIConstants.TYPE)) {
-            String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY
-                    + getORBasedSearchCriteria(APIConstants.API_SUPPORTED_TYPE_LIST_DEVPORTAL);
-            modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
-        }
-
         if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(modifiedQuery)) {
             
             String[] statusList = { APIConstants.PUBLISHED, APIConstants.PROTOTYPED };
@@ -644,7 +638,10 @@ public class RegistrySearchUtil {
                 statusList = new String[] { APIConstants.PUBLISHED, APIConstants.PROTOTYPED,
                         APIConstants.DEPRECATED };
             }
-            if (StringUtils.isEmpty(searchQuery)) { // normal listing
+            // Normal Listing
+            if (StringUtils.isEmpty(searchQuery)
+                    || UnifiedSearchConstants.QUERY_API_TYPE_APIS_DEVPORTAL.equals(searchQuery)
+                    || UnifiedSearchConstants.QUERY_API_TYPE_MCP.equals(searchQuery)) {
                 String enableStoreCriteria = APIConstants.ENABLE_STORE_SEARCH_TYPE_KEY;
                 if (isAllowDisplayMultipleVersions) {
                     modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
