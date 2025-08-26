@@ -2018,6 +2018,9 @@ public class PublisherCommonUtils {
                 String roleString = String.join(",", inputRoles);
                 if (userRoleList != null) {
                     for (String inputRole : inputRoles) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Checking role: " + inputRole + " against user roles");
+                        }
                         if (!isMatched && APIUtil.compareRoleList(userRoleList, inputRole)) {
                             isMatched = true;
                         }

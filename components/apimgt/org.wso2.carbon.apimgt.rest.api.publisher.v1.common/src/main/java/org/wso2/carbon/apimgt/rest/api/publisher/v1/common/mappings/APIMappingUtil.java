@@ -397,6 +397,9 @@ public class APIMappingUtil {
             model.setAccessControlRoles("null");
         } else {
             String roles = StringUtils.join(accessControlRoles, ',');
+            if (log.isDebugEnabled()) {
+                log.debug("Setting access control roles for API: " + apiId);
+            }
             if (Boolean.parseBoolean(caseSensitiveCheckEnabled)) {
                 model.setAccessControlRoles(roles);
             } else {
