@@ -6089,7 +6089,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         APIInfo apiInfo;
         String apiProductId = apiProduct.isRevision() ? apiProduct.getRevisionedApiProductId() : apiProduct.getUuid();
-        apiInfo = apiMgtDAO.getAPIInfoByUUID(apiProductId, APIConstants.API_IDENTIFIER_TYPE);
+        apiInfo = apiMgtDAO.getAPIInfoByUUID(apiProductId, null);
 
         if (apiInfo != null) {
             apiProduct.setEgress(apiInfo.isEgress());

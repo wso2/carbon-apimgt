@@ -858,7 +858,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 }
                 return pubApi;
             } else {
-                String msg = "Failed to get Artifact. Artifact corresponding to ID " + apiId + " does not exist";
+                String msg = "Failed to get API. API artifact corresponding to artifactId " + apiId + " does not exist";
                 throw new APIMgtResourceNotFoundException(msg);
             }
         } catch (RegistryException e) {
@@ -920,7 +920,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
                 if (tenantDomain == null || !tenantDomain.equals(apiTenantDomain)) {
                     throw new APIPersistenceException(
-                            "User does not have permission to view Artifact : " + api.getId().getApiName());
+                            "User does not have permission to view API : " + api.getId().getApiName());
                 }
 
                 return APIMapper.INSTANCE.toDevPortalApi(api);
