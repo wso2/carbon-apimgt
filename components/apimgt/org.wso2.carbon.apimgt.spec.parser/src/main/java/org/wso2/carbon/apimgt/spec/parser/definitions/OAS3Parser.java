@@ -2456,6 +2456,9 @@ public class OAS3Parser extends APIDefinition {
         CORSConfiguration corsConfiguration = OASParserUtil.getCorsConfigFromSwagger(extensions);
         if (corsConfiguration != null && !corsConfiguration.isEmpty()) {
             api.setCorsConfiguration(corsConfiguration);
+            if (log.isDebugEnabled()) {
+                log.debug("Adding CORS Configuration to the API");
+            }
         }
         //Setup Response cache enabling
         boolean responseCacheEnable = OASParserUtil.getResponseCacheFromSwagger(extensions);
