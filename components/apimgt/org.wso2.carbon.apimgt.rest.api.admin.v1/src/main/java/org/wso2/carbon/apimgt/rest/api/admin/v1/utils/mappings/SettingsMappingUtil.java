@@ -122,6 +122,7 @@ public class SettingsMappingUtil {
                 keyManagerConfigurationDTO.setTooltip(configurationDto.getTooltip());
                 keyManagerConfigurationDTO.setDefault(configurationDto.getDefaultValue());
                 keyManagerConfigurationDTO.setValues(configurationDto.getValues());
+                keyManagerConfigurationDTO.setUpdateDisabled(configurationDto.isUpdateDisabled());
                 settingsKeyManagerConfigurationDTO.getConfigurations().add(keyManagerConfigurationDTO);
             }
         }

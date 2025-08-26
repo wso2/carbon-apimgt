@@ -6471,6 +6471,11 @@ components:
           items:
             type: object
             properties: { }
+        updateDisabled:
+          type: boolean
+          description: Indicates that this configuration field cannot be modified once the Key Manager is created.
+          default: false
+          example: true
     GatewayConfiguration:
       title: Gateway Configuration
       type: object
