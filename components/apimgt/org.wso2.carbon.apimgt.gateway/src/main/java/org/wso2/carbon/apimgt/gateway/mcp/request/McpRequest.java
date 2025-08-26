@@ -23,7 +23,7 @@ import com.google.gson.annotations.SerializedName;
 import org.wso2.carbon.apimgt.impl.APIConstants.MCP;
 
 /**
- * This class is used to represent the response for the MCP.
+ * This class is used to represent the MCP request.
  */
 public class McpRequest {
     @SerializedName("jsonrpc")

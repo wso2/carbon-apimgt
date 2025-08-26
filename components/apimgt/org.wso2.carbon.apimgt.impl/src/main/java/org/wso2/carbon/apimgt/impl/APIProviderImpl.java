@@ -61,6 +61,7 @@ import org.wso2.carbon.apimgt.api.model.APIDefinitionContentSearchResult;
 import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
@@ -7710,11 +7711,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with ID: "
                     + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
         }
+        List<SubscribedApiDTO> subscribedApiDTOList = new ArrayList<>();
         SubscribedApiDTO subscribedApiInfo = new SubscribedApiDTO();
         subscribedApiInfo.setName(apiInfo.getName());
         subscribedApiInfo.setContext(apiInfo.getContext());
         subscribedApiInfo.setPublisher(apiInfo.getProvider());
         subscribedApiInfo.setVersion(apiInfo.getVersion());
+        subscribedApiDTOList.add(subscribedApiInfo);
+
+        if (StringUtils.equals(apiInfo.getApiType(), APIConstants.API_TYPE_MCP) &&
+                StringUtils.equals(apiInfo.getApiSubtype(), APIConstants.API_SUBTYPE_EXISTING_API) ) {
+            API mcpAPI = getAPIbyUUID(apiId, organization);
+            Set<URITemplate> uriTemplates = mcpAPI.getUriTemplates();
+            if (uriTemplates != null && !uriTemplates.isEmpty()) {
+                //fetch any uri template to get the underlying API details
+                URITemplate template = uriTemplates.iterator().next();
+                APIOperationMapping apiOperationMapping = template.getAPIOperationMapping();
+
+                SubscribedApiDTO backendApiInfo = new SubscribedApiDTO();
+                backendApiInfo.setName(apiOperationMapping.getApiName());
+                backendApiInfo.setContext(apiOperationMapping.getApiContext());
+                backendApiInfo.setVersion(apiOperationMapping.getApiVersion());
+                subscribedApiDTOList.add(backendApiInfo);
+            }
+        }
+
         JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
         jwtTokenInfoDTO.setEndUserName(username);
         jwtTokenInfoDTO.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
@@ -7735,7 +7756,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         }
-        jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(subscribedApiInfo));
+        jwtTokenInfoDTO.setSubscribedApiDTOList(subscribedApiDTOList);
         jwtTokenInfoDTO.setExpirationTime(60000l);
         jwtTokenInfoDTO.setAudience(Arrays.asList(apiId));
         ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
