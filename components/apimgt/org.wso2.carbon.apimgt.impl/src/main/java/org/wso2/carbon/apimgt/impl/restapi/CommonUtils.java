@@ -82,9 +82,8 @@ public class CommonUtils {
         APIProvider apiProvider = getLoggedInUserProvider();
         APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId, APIConstants.API_TYPE_MCP);
         if (apiInfo == null) {
-            throw new APIManagementException("Couldn't retrieve existing API with API UUID: "
-                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
-                    apiId));
+            throw new APIManagementException("Couldn't retrieve existing API with API UUID: " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
         }
         return apiInfo;
     }

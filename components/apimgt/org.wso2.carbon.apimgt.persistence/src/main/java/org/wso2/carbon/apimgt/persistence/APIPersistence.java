@@ -163,6 +163,7 @@ public interface APIPersistence {
      * @param org     Organization the API is owned by
      * @param apiId   API ID
      * @param apiType API Type
+     * @return API information
      * @throws APIPersistenceException
      */
     DevPortalAPI getDevPortalAPI(Organization org, String apiId, String apiType) throws APIPersistenceException;
