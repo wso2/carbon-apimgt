@@ -79,4 +79,11 @@ public class CORSConfiguration {
     public void setAccessControlAllowMethods(List<String> accessControlAllowMethods) {
         this.accessControlAllowMethods = accessControlAllowMethods;
     }
+    public boolean isEmpty() {
+        return (accessControlAllowOrigins == null || accessControlAllowOrigins.isEmpty()) &&
+                (accessControlAllowHeaders == null || accessControlAllowHeaders.isEmpty()) &&
+                (accessControlAllowMethods == null || accessControlAllowMethods.isEmpty()) &&
+                !accessControlAllowCredentials &&
+                !corsConfigurationEnabled;
+    }
 }
