@@ -792,8 +792,16 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
     }
 
+
     @Override
     public PublisherAPI getPublisherAPI(Organization org, String apiId) throws APIPersistenceException {
+
+        return getPublisherAPI(org, apiId, null);
+    }
+
+    @Override
+    public PublisherAPI getPublisherAPI(Organization org, String apiId, String apiType)
+            throws APIPersistenceException {
 
         boolean tenantFlowStarted = false;
         try {
@@ -803,8 +811,16 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             GenericArtifact apiArtifact = getAPIArtifact(apiId, registry);
             if (apiArtifact != null) {
-
                 API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
+                if (apiType != null) {
+                    if (APIConstants.API_IDENTIFIER_TYPE.equalsIgnoreCase(apiType)) {
+                        if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(api.getType())) {
+                            return null;
+                        }
+                    } else if (!apiType.equalsIgnoreCase(api.getType())) {
+                        return null;
+                    }
+                }
                 String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
                 int prependIndex = apiPath.lastIndexOf("/api");
                 String apiSourcePath = apiPath.substring(0, prependIndex);
@@ -860,6 +876,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException {
+        return getDevPortalAPI(org, apiId, null);
+    }
+
+    @Override
+    public DevPortalAPI getDevPortalAPI(Organization org, String apiId, String apiType) throws APIPersistenceException {
         boolean tenantFlowStarted = false;
         try {
             String tenantDomain = org.getName();
@@ -869,8 +890,16 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             GenericArtifact apiArtifact = getAPIArtifact(apiId, registry);
             if (apiArtifact != null) {
-
                 API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
+                if (apiType != null) {
+                    if (APIConstants.API_IDENTIFIER_TYPE.equalsIgnoreCase(apiType)) {
+                        if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(api.getType())) {
+                            return null;
+                        }
+                    } else if (!apiType.equalsIgnoreCase(api.getType())) {
+                        return null;
+                    }
+                }
                 String definitionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
                         + RegistryPersistenceUtil.replaceEmailDomain(api.getId().getProviderName())
                         + RegistryConstants.PATH_SEPARATOR + api.getId().getName() + RegistryConstants.PATH_SEPARATOR

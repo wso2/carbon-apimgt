@@ -1550,6 +1550,17 @@ public interface APIProvider extends APIManager {
 
     String generateApiKey(String apiId, String organization) throws APIManagementException;
 
+    /**
+     * Generate API Key for the given API with MCP (Multi Channel Publishing) type
+     *
+     * @param apiId        API UUID
+     * @param organization Organization
+     * @param apiType      API Type
+     * @return Generated API Key
+     * @throws APIManagementException if failed to generate API Key
+     */
+    String generateApiKey(String apiId, String organization, String apiType) throws APIManagementException;
+
     List<APIRevisionDeployment> getAPIRevisionsDeploymentList(String apiId) throws APIManagementException;
 
     void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid,
@@ -1960,6 +1971,17 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed get API from APIIdentifier
      */
     API getAPIbyUUID(String uuid, String organization) throws APIManagementException;
+
+    /**
+     * Returns details of an API
+     *
+     * @param uuid         UUID of the API's registry artifact
+     * @param organization Identifier of an organization
+     * @param apiType      API Type
+     * @return An API object related to the given artifact id or null
+     * @throws APIManagementException if failed get API from APIIdentifier
+     */
+    API getAPIbyUUID(String uuid, String organization, String apiType) throws APIManagementException;
 
     /**
      * Get API UUID by the API Identifier.

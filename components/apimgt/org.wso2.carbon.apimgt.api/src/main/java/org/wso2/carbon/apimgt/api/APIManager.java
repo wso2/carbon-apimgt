@@ -71,6 +71,18 @@ public interface APIManager {
     APIInfo getAPIInfoByUUID(String id) throws APIManagementException;
 
     /**
+     * Returns the minimalistic information about the API given the UUID. This will only query from AM database AM_API
+     * table.
+     *
+     * @param id      UUID of the API
+     * @param apiType API Type
+     * @return basic information about the API
+     * @throws APIManagementException error while getting the API information from AM_API
+     */
+    APIInfo getAPIInfoByUUID(String id, String apiType) throws APIManagementException;
+
+
+    /**
      * Get API or APIProduct by registry artifact id
      *
      * @param uuid   Registry artifact id
@@ -79,6 +91,19 @@ public interface APIManager {
      * @throws APIManagementException
      */
     ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException;
+
+    /**
+     * Get API or APIProduct by registry artifact id
+     *
+     * @param uuid         Registry artifact id
+     * @param organization Organization
+     * @param apiType      API Type
+     * @return ApiTypeWrapper wrapping the API or APIProduct of the provided artifact id
+     * @throws APIManagementException
+     */
+    ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization, String apiType)
+            throws APIManagementException;
+
 
     /**
      * Get minimal details of API by registry artifact id

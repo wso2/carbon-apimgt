@@ -136,6 +136,13 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization, String apiType)
+            throws APIManagementException {
+        ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, organization, apiType);
+        return apiTypeWrapper;
+    }
+
+    @Override
     public API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException {
         API api = super.getLightweightAPI(identifier, orgId);
         checkVisibilityPermission(userNameWithoutChange, api.getVisibility(),
