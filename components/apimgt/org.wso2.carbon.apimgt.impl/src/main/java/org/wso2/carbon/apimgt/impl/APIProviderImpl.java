@@ -6449,6 +6449,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     } else if (item instanceof APIDefSearchContent) {
                         APIDefSearchContent definitionItem = (APIDefSearchContent) item;
                         if (!APIConstants.API_TYPE_MCP.equals(definitionItem.getAssociatedType())) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Processing API definition search result for API: " +
+                                        definitionItem.getApiName() + " - " + definitionItem.getApiVersion());
+                            }
                             APIDefinitionContentSearchResult apiDefSearchResult =
                                     new APIDefinitionContentSearchResult();
                             apiDefSearchResult.setId(definitionItem.getId());
