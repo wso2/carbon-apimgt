@@ -4818,6 +4818,10 @@ public class APIMappingUtil {
             String errorMsg = "Error while parsing custom OAuth parameters in endpoint security configuration.";
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e);
+        } catch (ClassCastException e) {
+            String errorMsg = "Error while handling custom OAuth parameters; expected a JSON object.";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e);
         }
     }
 
