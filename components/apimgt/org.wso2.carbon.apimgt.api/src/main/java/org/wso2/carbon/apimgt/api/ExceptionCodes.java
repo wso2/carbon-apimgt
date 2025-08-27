@@ -828,6 +828,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Server URL is required and cannot be null or empty."),
     MCP_BACKENDS_NOT_FOUND(900805, "No backends found for MCP Server subtype", 400,
             "No backends are defined in backends.yaml or backends.json for the specified MCP Server subtype."),
+    INVALID_REFERENCE_API(900806, "Invalid reference API", 400,
+            "Referenced API is not supported for MCP Server."),
 
     // gateway notification related codes
     GATEWAY_NOTIFICATION_BAD_REQUEST(902052, "Invalid request for gateway notification", 400,
