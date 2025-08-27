@@ -5039,7 +5039,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     private void populateApiInfo(APIProduct apiProduct) throws APIManagementException {
 
         String apiId = apiProduct.isRevision() ? apiProduct.getRevisionedApiProductId() : apiProduct.getUuid();
-        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId, null);
+        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId);
         if (apiInfo != null) {
             apiProduct.setEgress(apiInfo.isEgress());
             apiProduct.setState(apiInfo.getStatus());

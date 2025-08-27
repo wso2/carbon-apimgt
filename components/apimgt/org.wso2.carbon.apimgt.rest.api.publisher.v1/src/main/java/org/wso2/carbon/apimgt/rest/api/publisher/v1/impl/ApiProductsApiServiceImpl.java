@@ -852,7 +852,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      */
     private void validateAPIProduct(String apiProductId) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiProductId, null);
+        APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiProductId);
         if (apiInfo != null && !APIConstants.API_PRODUCT.equalsIgnoreCase(apiInfo.getApiType())) {
             String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + apiProductId
                     + " does not exist";
