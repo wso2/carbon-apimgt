@@ -100,7 +100,8 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     federatedAPIDiscovery.init(environment, organization);
                     ScheduledFuture<?> scheduledFuture = scheduledDiscoveryTasks
                             .get(environment.getName() + ":" + organization);
-                    if (environment.getMode().equals(GatewayMode.WRITE_ONLY.getMode())) {
+                    int scheduleWindow = environment.getApiDiscoveryScheduledWindow();
+                    if (environment.getMode().equals(GatewayMode.WRITE_ONLY.getMode()) || scheduleWindow <= 0) {
                         log.info("Federated API discovery is disabled for environment: " + environment.getName());
 
                         if (scheduledFuture != null) {
