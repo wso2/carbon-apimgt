@@ -2089,24 +2089,32 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         CommonUtils.validateAPIExistence(mcpServerId);
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        Backend oldBackend = apiProvider.getMCPServerBackend(mcpServerId, backendApiId, organization);
-        if (oldBackend == null) {
-            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, log);
+
+        try {
+            Backend oldBackend = apiProvider.getMCPServerBackend(mcpServerId, backendApiId, organization);
+            if (oldBackend == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, log);
+            }
+            Backend backend = new Backend(oldBackend);
+            Object endpointConfigObj = backendAPIDTO.getEndpointConfig();
+            if (endpointConfigObj == null) {
+                RestApiUtil.handleBadRequest("Endpoint config cannot be null", log);
+            }
+            if (endpointConfigObj instanceof Map) {
+                backend.setEndpointConfigFromMap((Map<String, Object>) endpointConfigObj);
+            } else if (endpointConfigObj instanceof String) {
+                JSONParser parser = new JSONParser();
+                Object parsedEndpointConfig = parser.parse(endpointConfigObj.toString());
+                backend.setEndpointConfigFromMap((Map<String, Object>) parsedEndpointConfig);
+            } else {
+                RestApiUtil.handleBadRequest("Endpoint config is not in correct format", log);
+            }
+            PublisherCommonUtils.updateMCPServerBackend(mcpServerId, oldBackend, backend, organization, apiProvider);
+            return Response.ok().entity(APIMappingUtil.fromBackendAPIToDTO(backend, organization, false)).build();
+        } catch (ParseException e) {
+            RestApiUtil.handleBadRequest("Endpoint config is not in correct format", e, log);
         }
-        Backend backend = new Backend(oldBackend);
-        Object endpointConfigObj = backendAPIDTO.getEndpointConfig();
-        if (endpointConfigObj == null) {
-            RestApiUtil.handleBadRequest("Endpoint config cannot be null", log);
-        }
-        if (endpointConfigObj instanceof Map) {
-            backend.setEndpointConfigFromMap((Map<String, Object>) endpointConfigObj);
-        } else if (endpointConfigObj instanceof String) {
-            backend.setEndpointConfig((String) endpointConfigObj);
-        } else {
-            RestApiUtil.handleBadRequest("Endpoint config is not in correct format", log);
-        }
-        PublisherCommonUtils.updateMCPServerBackend(mcpServerId, oldBackend, backend, organization, apiProvider);
-        return Response.ok().entity(APIMappingUtil.fromBackendAPIToDTO(backend, organization, false)).build();
+        return null;
     }
 
     /**
