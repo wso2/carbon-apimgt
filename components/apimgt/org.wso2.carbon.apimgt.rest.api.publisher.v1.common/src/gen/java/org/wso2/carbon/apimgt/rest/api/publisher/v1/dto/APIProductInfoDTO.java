@@ -221,6 +221,7 @@ public class APIProductInfoDTO   {
   }
 
   /**
+   * Created time as unix timestamp in milliseconds.
    **/
   public APIProductInfoDTO createdTime(String createdTime) {
     this.createdTime = createdTime;
@@ -228,7 +229,7 @@ public class APIProductInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "1756199448644", value = "")
+  @ApiModelProperty(example = "1756199448644", value = "Created time as unix timestamp in milliseconds.")
   @JsonProperty("createdTime")
   public String getCreatedTime() {
     return createdTime;
@@ -238,6 +239,7 @@ public class APIProductInfoDTO   {
   }
 
   /**
+   * Update time as unix timestamp in milliseconds.
    **/
   public APIProductInfoDTO updatedTime(String updatedTime) {
     this.updatedTime = updatedTime;
@@ -245,7 +247,7 @@ public class APIProductInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "1756199448644", value = "")
+  @ApiModelProperty(example = "1756199448644", value = "Update time as unix timestamp in milliseconds.")
   @JsonProperty("updatedTime")
   public String getUpdatedTime() {
     return updatedTime;
