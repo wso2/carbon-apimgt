@@ -22,6 +22,8 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -39,6 +41,7 @@ import java.rmi.RemoteException;
  */
 public class BasicAuthClient {
 
+    private static final Log log = LogFactory.getLog(BasicAuthClient.class);
     private APIKeyMgtRemoteUserStoreMgtServiceStub apiKeyMgtRemoteUserStoreMgtServiceStub;
 
     /**
@@ -71,11 +74,15 @@ public class BasicAuthClient {
         String url = eventHubConfigurationDto.getServiceUrl();
 
         if (url == null) {
+            log.error("API key manager URL is not configured");
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "API key manager URL unspecified");
         }
 
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Initializing APIKeyMgtRemoteUserStoreMgtServiceStub with URL: " + url);
+            }
             apiKeyMgtRemoteUserStoreMgtServiceStub = new APIKeyMgtRemoteUserStoreMgtServiceStub(configurationContext,
                     url + "/services/APIKeyMgtRemoteUserStoreMgtService");
 
@@ -92,6 +99,7 @@ public class BasicAuthClient {
 
             CarbonUtils.setBasicAccessSecurityHeaders(username, new String(passwordCharArray), client);
         } catch (AxisFault axisFault) {
+            log.error("Failed to initialize APIKeyMgtRemoteUserStoreMgtService stub: " + axisFault.getMessage());
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     axisFault.getMessage(), axisFault);
         }
@@ -113,6 +121,7 @@ public class BasicAuthClient {
                     apiKeyMgtRemoteUserStoreMgtServiceStub.getUserAuthenticationInfo(username, password);
             return convertToDTO(generatedInfoDTO);
         } catch (APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException | RemoteException e) {
+            log.error("Failed to authenticate user " + username + ": " + e.getMessage());
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
         }
     }
@@ -127,6 +136,9 @@ public class BasicAuthClient {
             org.wso2.carbon.apimgt.impl.dto.xsd.BasicAuthValidationInfoDTO generatedDto) {
 
         BasicAuthValidationInfoDTO dto = new BasicAuthValidationInfoDTO();
+        if (generatedDto == null) {
+            return new BasicAuthValidationInfoDTO(); // authenticated=false by default
+        }
         dto.setAuthenticated(generatedDto.getAuthenticated());
         dto.setHashedPassword(generatedDto.getHashedPassword());
         dto.setDomainQualifiedUsername(generatedDto.getDomainQualifiedUsername());

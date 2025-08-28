@@ -37,7 +37,9 @@ public class BasicAuthClientPool {
 
     private static final Log log = LogFactory.getLog(BasicAuthClientPool.class);
 
-    private static final BasicAuthClientPool instance = new BasicAuthClientPool();
+    private static class Holder {
+        private static final BasicAuthClientPool INSTANCE = new BasicAuthClientPool();
+    }
 
     private final GenericObjectPool<BasicAuthClient> basicAuthClientPool;
     private static int maxIdle;
@@ -131,7 +133,7 @@ public class BasicAuthClientPool {
      */
     public static BasicAuthClientPool getInstance() {
 
-        return instance;
+        return Holder.INSTANCE;
     }
 
     /**
@@ -171,6 +173,7 @@ public class BasicAuthClientPool {
 
         try {
             basicAuthClientPool.close();
+            log.info("BasicAuthClientPool cleaned up successfully");
         } catch (Exception e) {
             log.warn("Error while cleaning up the BasicAuth client pool", e);
         }
