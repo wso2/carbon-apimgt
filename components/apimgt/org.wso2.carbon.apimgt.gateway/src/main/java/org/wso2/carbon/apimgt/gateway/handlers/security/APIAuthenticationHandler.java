@@ -36,6 +36,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
@@ -47,12 +48,15 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MutualSSLA
 import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.InternalAPIKeyAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -72,6 +76,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -110,6 +115,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private String securityContextHeader;
     protected APIKeyValidator keyValidator;
     protected boolean isOauthParamsInitialized = false;
+    private static final Pattern validHostHeaderPattern = Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
 
     public String getApiUUID() {
         return apiUUID;
@@ -760,14 +766,20 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                                 " error=\"invalid_token\"" +
                                 ", error_description=\"The provided token is invalid\"");
                     } else {
-                        // We need to adjust this to support vhost instead of constructing the URL here
-                        String hostAddress = APIUtil.getHostAddress();
-                        if ("localhost".equals(hostAddress)) {
-                            hostAddress += ":";
-                            hostAddress += (8243  + APIUtil.getPortOffset());
+                        // Derive the outward facing host and port from host header
+                        String hostHeader = headers.get(APIMgtGatewayConstants.HOST);
+                        if (!StringUtils.isEmpty(hostHeader)) {
+                            if (StringUtils.isBlank(hostHeader) || !validHostHeaderPattern.matcher(hostHeader).matches()) {
+                                log.debug("Missing or malformed host header in request.Extracting host header form config.");
+                                hostHeader = APIUtil.getHostAddress();
+                            }
                         }
-                        String resourceMetadata = APIConstants.HTTPS_PROTOCOL + APIConstants.URL_SCHEME_SEPARATOR +
-                                hostAddress + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
+
+
+                        String gwURL = MCPUtils.getGatewayServerURL(hostHeader, contextPath);
+
+
+                        String resourceMetadata = gwURL + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
                         headers.put(HttpHeaders.WWW_AUTHENTICATE, "Bearer resource_metadata=" +
                                 "\"" + resourceMetadata + "\","
                                 + " error=\"invalid_token\","

@@ -112,6 +112,7 @@ public class InMemoryAPIDeployer {
                 DataHolder.getInstance().addKeyManagerToAPIMapping(apiId, gatewayAPIDTO.getKeyManagers());
                 DataHolder.getInstance().addAPIMetaData(gatewayEvent);
                 DataHolder.getInstance().markAPIAsDeployed(gatewayAPIDTO);
+                DataHolder.getInstance().populateVhosts(gatewayAPIDTO);
                 syncAPIPropertiesAcrossComponents(gatewayAPIDTO);
                 if (log.isDebugEnabled()) {
                     log.debug("API with " + apiId + " is deployed in gateway with the labels " + String.join(",",
@@ -149,6 +150,7 @@ public class InMemoryAPIDeployer {
                 addDeployedGraphqlQLToAPI(gatewayAPIDTO);
                 DataHolder.getInstance().addKeyManagerToAPIMapping(apiId, gatewayAPIDTO.getKeyManagers());
                 DataHolder.getInstance().markAPIAsDeployed(gatewayAPIDTO);
+                DataHolder.getInstance().populateVhosts(gatewayAPIDTO);
                 syncAPIPropertiesAcrossComponents(gatewayAPIDTO);
                 if (log.isDebugEnabled()) {
                     log.debug("API with " + apiId + " is deployed in gateway with the labels " + String.join(",",
@@ -353,6 +355,7 @@ public class InMemoryAPIDeployer {
         DataHolder.getInstance().addKeyManagerToAPIMapping(gatewayAPIDTO.getApiId(),
                 gatewayAPIDTO.getKeyManagers());
         DataHolder.getInstance().markAPIAsDeployed(gatewayAPIDTO);
+        DataHolder.getInstance().populateVhosts(gatewayAPIDTO);
     }
 
 

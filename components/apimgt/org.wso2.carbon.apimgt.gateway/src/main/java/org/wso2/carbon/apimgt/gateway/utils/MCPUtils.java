@@ -37,11 +37,13 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.exception.McpException;
 import org.wso2.carbon.apimgt.gateway.exception.McpExceptionWithId;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.mcp.Param;
 import org.wso2.carbon.apimgt.gateway.mcp.SchemaMapping;
 import org.wso2.carbon.apimgt.gateway.mcp.request.McpRequest;
@@ -490,6 +492,42 @@ public class MCPUtils {
             log.warn("Failed to set MCP error JSON payload", e);
         }
         Utils.sendFault(messageContext, responseDto.getStatusCode());
+    }
+
+    /**
+     * Get the Gateway server URL from the supported vhosts of the API, prioritizing the value passed in
+     * host header of the request
+     *
+     * @param hostHeader  Host header of the request
+     * @param contextPath Context path of the matched API
+     * @return Gateway server URL
+     */
+    public static String getGatewayServerURL(String hostHeader, String contextPath) {
+        String serverURL = null;
+        String tenantDomain = GatewayUtils.getTenantDomain();
+        Map<String, Map<String, API>> tenantAPIMap = DataHolder.getInstance().getTenantAPIMap();
+        Map<String, API> contextApiMap = tenantAPIMap.get(tenantDomain);
+        if (contextApiMap != null) {
+            API api = contextApiMap.get(contextPath);
+            List<VHost> gwVhosts = api.getVhosts();
+
+            if (!StringUtils.isEmpty(hostHeader)) {
+                for (VHost vHost: gwVhosts) {
+                    if (vHost.getHost().equals(hostHeader)) {
+                        serverURL = vHost.getHttpsUrl();
+                        break;
+                    }
+                }
+            }
+
+            // If server URL is resolved using host header, pick the first vhost as the resource endpoint
+            if (StringUtils.isEmpty(serverURL)) {
+                if (gwVhosts != null && !gwVhosts.isEmpty()) {
+                    serverURL = gwVhosts.get(0).getHttpsUrl();
+                }
+            }
+        }
+        return serverURL;
     }
 
 }
