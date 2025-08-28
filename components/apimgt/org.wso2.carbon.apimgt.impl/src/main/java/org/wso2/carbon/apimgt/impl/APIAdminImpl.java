@@ -114,6 +114,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
@@ -739,7 +740,7 @@ public class APIAdminImpl implements APIAdmin {
         if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
                 .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
             sanitizeKeyManagerConfiguration(keyManagerConfigurationDTO);
-            validateKeyManagerConfiguration(keyManagerConfigurationDTO);
+            validateKeyManagerConfiguration(keyManagerConfigurationDTO, null);
             validateKeyManagerEndpointConfiguration(keyManagerConfigurationDTO);
         }
         if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
@@ -997,15 +998,25 @@ public class APIAdminImpl implements APIAdmin {
     public KeyManagerConfigurationDTO updateKeyManagerConfiguration(
             KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
-        if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
-                .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
-            sanitizeKeyManagerConfiguration(keyManagerConfigurationDTO);
-            validateKeyManagerConfiguration(keyManagerConfigurationDTO);
-            validateKeyManagerEndpointConfiguration(keyManagerConfigurationDTO);
-        }
         KeyManagerConfigurationDTO oldKeyManagerConfiguration =
                 apiMgtDAO.getKeyManagerConfigurationByID(keyManagerConfigurationDTO.getOrganization(),
                         keyManagerConfigurationDTO.getUuid());
+        if (oldKeyManagerConfiguration == null) {
+            String errorMsg = String.format(
+                    "Key Manager configuration not found for id '%s' in organization '%s'",
+                    keyManagerConfigurationDTO.getUuid(),
+                    keyManagerConfigurationDTO.getOrganization());
+            throw new APIMgtResourceNotFoundException(
+                    errorMsg,
+                    ExceptionCodes.from(ExceptionCodes.KEY_MANAGER_NOT_FOUND,
+                            keyManagerConfigurationDTO.getUuid()));
+        }
+        if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
+                .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
+            sanitizeKeyManagerConfiguration(keyManagerConfigurationDTO);
+            validateKeyManagerConfiguration(keyManagerConfigurationDTO, oldKeyManagerConfiguration);
+            validateKeyManagerEndpointConfiguration(keyManagerConfigurationDTO);
+        }
         if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
                 keyManagerConfigurationDTO.getTokenType()) ||
                 StringUtils.equals(KeyManagerConfiguration.TokenType.BOTH.toString(),
@@ -1522,7 +1533,8 @@ public class APIAdminImpl implements APIAdmin {
         }
     }
 
-    private void validateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+    protected void validateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO,
+                                                 KeyManagerConfigurationDTO oldKeyManagerConfiguration)
             throws APIManagementException {
 
         if (StringUtils.isEmpty(keyManagerConfigurationDTO.getName())) {
@@ -1546,6 +1558,37 @@ public class APIAdminImpl implements APIAdmin {
                                         configurationDto.getDefaultValue());
                             }
                             missingRequiredConfigurations.add(configurationDto.getName());
+                        }
+                    }
+
+                    // Check if invoked by update flow and if the configuration is disabled for update
+                    boolean hasExistingConfig = oldKeyManagerConfiguration != null;
+                    boolean isUpdateDisabled = configurationDto.isUpdateDisabled();
+
+                    if (hasExistingConfig && isUpdateDisabled) {
+                        String configName = configurationDto.getName();
+                        Object newValue = keyManagerConfigurationDTO.getAdditionalProperties().get(configName);
+                        Object defaultValue = configurationDto.getDefaultValue();
+                        boolean oldConfigContainsKey = oldKeyManagerConfiguration.getAdditionalProperties()
+                                .containsKey(configName);
+                        Object oldValue = oldKeyManagerConfiguration.getAdditionalProperties().get(configName);
+
+                        if (newValue == null && oldConfigContainsKey) {
+                            newValue = oldValue;
+                        } else if (newValue == null) {
+                            newValue = defaultValue;
+                        }
+                        keyManagerConfigurationDTO.getAdditionalProperties().put(configName, newValue);
+
+                        boolean valueChangedFromOld = oldConfigContainsKey && !Objects.equals(newValue, oldValue);
+                        boolean valueChangedFromDefault = !Objects.equals(newValue, defaultValue);
+                        boolean valueChanged = valueChangedFromOld
+                                || (!oldConfigContainsKey && valueChangedFromDefault);
+                        if (valueChanged) {
+                            throw new APIManagementException(
+                                    "Modification of the Key Manager configuration " + configurationDto.getName() +
+                                            " is not permitted",
+                                    ExceptionCodes.KEY_MANAGER_UPDATE_VIOLATION);
                         }
                     }
                 }
