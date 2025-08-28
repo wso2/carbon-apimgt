@@ -43,6 +43,7 @@ public class BasicAuthClientPool {
     private static int maxIdle;
 
     private BasicAuthClientPool() {
+
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         String maxIdleClients = config.getFirstProperty(
                 APIMgtGatewayConstants.BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_IDLE);
@@ -99,6 +100,7 @@ public class BasicAuthClientPool {
         basicAuthClientPool = new GenericObjectPool<>(new BasePooledObjectFactory<BasicAuthClient>() {
             @Override
             public BasicAuthClient create() throws Exception {
+
                 if (log.isDebugEnabled()) {
                     log.debug("Initializing new BasicAuthClient instance");
                 }
@@ -107,13 +109,18 @@ public class BasicAuthClientPool {
 
             @Override
             public PooledObject<BasicAuthClient> wrap(BasicAuthClient obj) {
+
                 return new DefaultPooledObject<>(obj);
             }
         }, poolConfig);
 
         // Pre-fill idle objects to honor initIdleCapacity
         for (int i = 0; i < initIdleCapSize; i++) {
-            try { basicAuthClientPool.addObject(); } catch (Exception ignore) { break; }
+            try {
+                basicAuthClientPool.addObject();
+            } catch (Exception ignore) {
+                break;
+            }
         }
     }
 
@@ -123,6 +130,7 @@ public class BasicAuthClientPool {
      * @return BasicAuthClientPool instance
      */
     public static BasicAuthClientPool getInstance() {
+
         return instance;
     }
 
@@ -133,6 +141,7 @@ public class BasicAuthClientPool {
      * @throws Exception if unable to get client from pool
      */
     public BasicAuthClient get() throws Exception {
+
         if (log.isTraceEnabled()) {
             int active = basicAuthClientPool.getNumActive();
             if (active >= maxIdle) {
@@ -149,6 +158,7 @@ public class BasicAuthClientPool {
      * @throws Exception if unable to return client to pool
      */
     public void release(BasicAuthClient client) throws Exception {
+
         if (client != null) {
             basicAuthClientPool.returnObject(client);
         }
@@ -158,6 +168,7 @@ public class BasicAuthClientPool {
      * Cleanup the pool and release all resources.
      */
     public void cleanup() {
+
         try {
             basicAuthClientPool.close();
         } catch (Exception e) {

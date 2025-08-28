@@ -48,6 +48,7 @@ public class BasicAuthClient {
      * @throws APISecurityException If initialization fails
      */
     public BasicAuthClient() throws APISecurityException {
+
         ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance()
                 .getAxis2ConfigurationContext();
         EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
@@ -58,12 +59,13 @@ public class BasicAuthClient {
     /**
      * Initialize the APIKeyMgtRemoteUserStoreMgtServiceStub with proper configuration.
      *
-     * @param configurationContext The configuration context
+     * @param configurationContext     The configuration context
      * @param eventHubConfigurationDto Event hub configuration containing service details
      * @throws APISecurityException If initialization fails
      */
     private void initializeServiceStub(ConfigurationContext configurationContext,
                                        EventHubConfigurationDto eventHubConfigurationDto) throws APISecurityException {
+
         String username = eventHubConfigurationDto.getUsername();
         char[] passwordCharArray = eventHubConfigurationDto.getPassword().toCharArray();
         String url = eventHubConfigurationDto.getServiceUrl();
@@ -105,6 +107,7 @@ public class BasicAuthClient {
      */
     public BasicAuthValidationInfoDTO getUserAuthenticationInfo(String username, String password)
             throws APISecurityException {
+
         try {
             org.wso2.carbon.apimgt.impl.dto.xsd.BasicAuthValidationInfoDTO generatedInfoDTO =
                     apiKeyMgtRemoteUserStoreMgtServiceStub.getUserAuthenticationInfo(username, password);
@@ -122,6 +125,7 @@ public class BasicAuthClient {
      */
     private BasicAuthValidationInfoDTO convertToDTO(
             org.wso2.carbon.apimgt.impl.dto.xsd.BasicAuthValidationInfoDTO generatedDto) {
+
         BasicAuthValidationInfoDTO dto = new BasicAuthValidationInfoDTO();
         dto.setAuthenticated(generatedDto.getAuthenticated());
         dto.setHashedPassword(generatedDto.getHashedPassword());
