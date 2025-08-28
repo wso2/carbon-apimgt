@@ -287,6 +287,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -11869,6 +11870,23 @@ public final class APIUtil {
         } catch (APIManagementException e) {
             log.error("Error while validating and scheduling federated gateway API discovery for environment: "
                     + environment.getName() + " in organization: " + organization, e);
+        }
+    }
+
+    /**
+     * Converts an epoch time string to a Date object.
+     *
+     * @param epochMillis The epoch time in milliseconds as a string.
+     * @return The corresponding Date object, or null if the input is blank or invalid.
+     */
+    public static Date convertEpochStringToDate(String epochMillis) {
+        if (StringUtils.isBlank(epochMillis)) return null;
+        try {
+            return new Date(Long.parseLong(epochMillis));
+        }
+        catch (NumberFormatException e) {
+            log.warn("Provided epoch time string: " + epochMillis + " is not valid.", e);
+            return null;
         }
     }
 }
