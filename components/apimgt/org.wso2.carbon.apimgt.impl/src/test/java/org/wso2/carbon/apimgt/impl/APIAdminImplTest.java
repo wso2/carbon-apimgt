@@ -373,6 +373,28 @@ public class APIAdminImplTest {
         } catch (APIManagementException e) {
             assertUpdateDisabledKeyManagerConfigurationModification(e);
         }
+
+        // Test scenario 5: Original is not default, new is non value (should be allowed)
+        try {
+            apiAdmin.validateKeyManagerConfiguration(
+                    createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(),
+                    createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(azureADAlternateTokenVersion)
+            );
+        } catch (APIManagementException e) {
+            Assert.fail("Validation should succeed when original is non-default and new is not defined");
+        }
+
+        // Test scenario 6: Changing a modifiable field (should be allowed)
+        try {
+            KeyManagerConfigurationDTO updated = createAzureADKeyManagerConfigWithRequestedAccessTokenVersion();
+            updated.getAdditionalProperties().put("azure_ad_client_id", "new-client-id");
+            apiAdmin.validateKeyManagerConfiguration(
+                    createAzureADKeyManagerConfigWithRequestedAccessTokenVersion(),
+                    updated
+            );
+        } catch (APIManagementException e) {
+            Assert.fail("Validation should succeed when modifiable field is updated");
+        }
     }
 
     /**

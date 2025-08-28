@@ -1569,16 +1569,16 @@ public class APIAdminImpl implements APIAdmin {
                         String configName = configurationDto.getName();
                         Object newValue = keyManagerConfigurationDTO.getAdditionalProperties().get(configName);
                         Object defaultValue = configurationDto.getDefaultValue();
+                        boolean oldConfigContainsKey = oldKeyManagerConfiguration.getAdditionalProperties()
+                                .containsKey(configName);
+                        Object oldValue = oldKeyManagerConfiguration.getAdditionalProperties().get(configName);
 
-                        if (newValue == null) {
+                        if (newValue == null && oldConfigContainsKey) {
+                            newValue = oldValue;
+                        } else if (newValue == null) {
                             newValue = defaultValue;
                         }
                         keyManagerConfigurationDTO.getAdditionalProperties().put(configName, newValue);
-
-                        boolean oldConfigContainsKey = oldKeyManagerConfiguration.getAdditionalProperties()
-                                .containsKey(configName);
-
-                        Object oldValue = oldKeyManagerConfiguration.getAdditionalProperties().get(configName);
 
                         boolean valueChangedFromOld = oldConfigContainsKey && !Objects.equals(newValue, oldValue);
                         boolean valueChangedFromDefault = !Objects.equals(newValue, defaultValue);
