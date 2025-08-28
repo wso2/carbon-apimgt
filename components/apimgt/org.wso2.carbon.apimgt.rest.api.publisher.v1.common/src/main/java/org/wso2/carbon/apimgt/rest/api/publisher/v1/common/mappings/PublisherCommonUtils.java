@@ -2444,9 +2444,22 @@ public class PublisherCommonUtils {
                 ? apiProvider.getAPIbyUUID(backendApiUuid, organization)
                 : null;
         if (refApi == null) {
-            throw new APIManagementException(
-                    String.format("Referenced API not found: %s", backendApiUuid),
-                    ExceptionCodes.API_NOT_FOUND);
+            String error = "Referenced API not found. UUID: " + backendApiUuid;
+            log.error(error);
+            throw new APIManagementException(error, ExceptionCodes.API_NOT_FOUND);
+        }
+        if (!APIConstants.API_TYPE_HTTP.equalsIgnoreCase(refApi.getType())
+                || APIConstants.API_SUBTYPE_AI_API.equalsIgnoreCase(refApi.getSubtype())) {
+            String error = "Referenced API with UUID: " + backendApiUuid + " is not supported for MCP. " +
+                    "Invalid API type. Found API type: " + refApi.getType() + ", subtype: " + refApi.getSubtype();
+            log.error(error);
+            throw new APIManagementException(error, ExceptionCodes.INVALID_REFERENCE_API);
+        }
+        if (!APIConstants.WSO2_SYNAPSE_GATEWAY.equals(refApi.getGatewayType())) {
+            String error = "Referenced API with UUID: " + backendApiUuid + " is not supported for MCP. " +
+                    "Invalid Gateway type. Found gateway type: " + refApi.getGatewayType();
+            log.error(error);
+            throw new APIManagementException(error, ExceptionCodes.INVALID_REFERENCE_API);
         }
         return generateMCPFeatures(apiToAdd.getSubtype(), refApi.getSwaggerDefinition(),
                 apiToAdd.getUriTemplates(), refApi.getId(), oasParser);
