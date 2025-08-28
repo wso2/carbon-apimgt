@@ -5982,25 +5982,33 @@ public final class APIUtil {
         HttpClientConfigurationDTO configuration = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration().getHttpClientConfiguration();
 
-        SSLContext sslContext = SSLContexts.createDefault();
+        SSLContext sslContext = null;
         String keyStorePath = CarbonUtils.getServerConfiguration().getFirstProperty(APIConstants.TRUST_STORE_LOCATION);
         String keyStorePassword = CarbonUtils.getServerConfiguration().getFirstProperty(APIConstants.TRUST_STORE_PASSWORD);
 
         // Create SSL context dynamically to pick up certificate changes at runtime
         try {
             KeyStore trustStore = KeyStore.getInstance("JKS");
-            trustStore.load(Files.newInputStream(Paths.get(keyStorePath)), keyStorePassword.toCharArray());
+            char[] passwordChars = keyStorePassword != null ? keyStorePassword.toCharArray() : new char[0];
+            try (InputStream keyStoreStream = Files.newInputStream(Paths.get(keyStorePath))) {
+                trustStore.load(keyStoreStream, passwordChars);
+            }
             sslContext = SSLContexts.custom().loadTrustMaterial(trustStore, null).build();
         } catch (KeyStoreException e) {
             log.error("Failed to read from Key Store", e);
+            sslContext = SSLContexts.createDefault();
         } catch (IOException e) {
             log.error("Key Store not found in " + keyStorePath, e);
+            sslContext = SSLContexts.createDefault();
         } catch (NoSuchAlgorithmException e) {
             log.error("Failed to load Key Store from " + keyStorePath, e);
+            sslContext = SSLContexts.createDefault();
         } catch (CertificateException e) {
             log.error("Failed to read Certificate", e);
+            sslContext = SSLContexts.createDefault();
         } catch (KeyManagementException e) {
-            log.error("Failed to load key from" + keyStorePath, e);
+            log.error("Failed to load key from " + keyStorePath, e);
+            sslContext = SSLContexts.createDefault();
         }
         return CommonAPIUtil.getHttpClient(protocol, configuration, sslContext);
     }
