@@ -7708,13 +7708,15 @@ public final class APIUtil {
     public static boolean compareRoleList(String[] userRoleList, String accessControlRole) {
         if (userRoleList != null) {
             for (String userRole : userRoleList) {
-                if (Boolean.parseBoolean(caseSensitiveCheckEnabled)) {
-                    if (userRole.equals(accessControlRole)) {
-                        return true;
-                    }
-                } else {
-                    if (userRole.equalsIgnoreCase(accessControlRole)) {
-                        return true;
+                if (userRole != null) {
+                    if (Boolean.parseBoolean(caseSensitiveCheckEnabled)) {
+                        if (userRole.equals(accessControlRole)) {
+                            return true;
+                        }
+                    } else {
+                        if (userRole.equalsIgnoreCase(accessControlRole)) {
+                            return true;
+                        }
                     }
                 }
             }
