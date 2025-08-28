@@ -4,7 +4,7 @@ info:
   version: '1'
 
 servers:
-  - url: https://api.anthropic.com/v1
+  - url: https://api.anthropic.com
 
 components:
   securitySchemes:
@@ -2109,7 +2109,7 @@ components:
             $ref: '#/components/schemas/Error'
 
 paths:
-  /messages:
+  /v1/messages:
     post:
       tags:
         - Messages
@@ -2193,7 +2193,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /messages/count_tokens:
+  /v1/messages/count_tokens:
     post:
       tags:
         - Messages
@@ -2264,7 +2264,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /models:
+  /v1/models:
     get:
       tags:
         - Models
@@ -2324,7 +2324,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /models/{model_id}:
+  /v1/models/{model_id}:
     get:
       tags:
         - Models
@@ -2371,7 +2371,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /messages/batches:
+  /v1/messages/batches:
     post:
       tags:
         - Message Batches
@@ -2534,7 +2534,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /messages/batches/{message_batch_id}:
+  /v1/messages/batches/{message_batch_id}:
     get:
       tags:
         - Message Batches
@@ -2624,7 +2624,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /messages/batches/{message_batch_id}/results:
+  /v1/messages/batches/{message_batch_id}/results:
     get:
       tags:
         - Message Batches
@@ -2678,7 +2678,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /messages/batches/{message_batch_id}/cancel:
+  /v1/messages/batches/{message_batch_id}/cancel:
     post:
       tags:
         - Message Batches
@@ -2720,7 +2720,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /files:       # Currently in beta, Beta headers will be removed in the future
+  /v1/files:       # Currently in beta, Beta headers will be removed in the future
     post:
       tags:
         - Files
@@ -2832,7 +2832,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /files/{file_id}:
+  /v1/files/{file_id}:
     get:
       tags:
         - Files
@@ -2926,7 +2926,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /files/{file_id}/content:
+  /v1/files/{file_id}/content:
     get:
       tags:
         - Files
@@ -2970,7 +2970,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /organizations/users:
+  /v1/organizations/users:
     get:
       tags:
         - Admin - Organization Member Management
@@ -3035,7 +3035,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /organizations/users/{user_id}:
+  /v1/organizations/users/{user_id}:
     get:
       tags:
         - Admin - Organization Member Management
@@ -3184,7 +3184,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /organizations/invites:
+  /v1/organizations/invites:
     get:
       tags:
         - Admin - Organization Invites
@@ -3298,7 +3298,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /organizations/invites/{invite_id}:
+  /v1/organizations/invites/{invite_id}:
     get:
       tags:
         - Admin - Organization Invites
@@ -3393,7 +3393,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /organizations/workspaces:
+  /v1/organizations/workspaces:
     get:
       tags:
         - Admin - Workspace Management
@@ -3510,7 +3510,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /organizations/workspaces/{workspace_id}:
+  /v1/organizations/workspaces/{workspace_id}:
     get:
       tags:
         - Admin - Workspace Management
@@ -3607,7 +3607,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /organizations/workspaces/{workspace_id}/archive:
+  /v1/organizations/workspaces/{workspace_id}/archive:
     post:
       tags:
         - Admin - Workspace Management
@@ -3649,7 +3649,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /organizations/workspaces/{workspace_id}/members:
+  /v1/organizations/workspaces/{workspace_id}/members:
     get:
       tags:
         - Admin - Workspace Member Management
@@ -3768,7 +3768,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /organizations/workspaces/{workspace_id}/members/{user_id}:
+  /v1/organizations/workspaces/{workspace_id}/members/{user_id}:
     get:
       tags:
         - Admin - Workspace Member Management
@@ -3924,7 +3924,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /organizations/api_keys:
+  /v1/organizations/api_keys:
     get:
       tags:
         - Admin - API Keys
@@ -4003,7 +4003,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /organizations/api_keys/{api_key_id}:
+  /v1/organizations/api_keys/{api_key_id}:
     get:
       tags:
         - Admin - API Keys
@@ -4103,7 +4103,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /experimental/generate_prompt:
+  /v1/experimental/generate_prompt:
     post:
       tags:
         - Experimental - Prompt Tools
@@ -4213,7 +4213,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /experimental/improve_prompt:
+  /v1/experimental/improve_prompt:
     post:
       tags:
         - Experimental - Prompt Tools
@@ -4331,7 +4331,7 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
-  /experimental/templatize_prompt:
+  /v1/experimental/templatize_prompt:
     post:
       tags:
         - Experimental - Prompt Tools
