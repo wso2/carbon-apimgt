@@ -1714,6 +1714,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                         equals(APIConstants.AuditLogConstants.API_PRODUCT)) {
                                     //associatedAPIProduct = APIUtil.getAPIProduct(apiArtifact, registry);
                                     accociatedType = APIConstants.API_PRODUCT;
+                                } else if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
+                                        .equals(APIConstants.MCP)){
+                                    accociatedType = APIConstants.MCP;
                                 } else {
                                     //associatedAPI = APIUtil.getAPI(apiArtifact, registry);
                                     accociatedType = APIConstants.API;
@@ -1753,6 +1756,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                     //apiProduct = APIUtil.getAPIProduct(apiArtifact, registry);
                                     //apiProductSet.add(apiProduct);
                                     type = APIConstants.API_PRODUCT;
+                                } else if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
+                                        .equals(APIConstants.MCP)){
+                                    type = APIConstants.MCP;
                                 } else {
                                     //api = APIUtil.getAPI(apiArtifact, registry);
                                     //apiSet.add(api);
@@ -1918,6 +1924,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
                                         .equals(APIConstants.AuditLogConstants.API_PRODUCT)) {
                                     associatedType = APIConstants.API_PRODUCT;
+                                } else if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
+                                        .equals(APIConstants.MCP)){
+                                    associatedType = APIConstants.MCP;
                                 } else {
                                     associatedType = APIConstants.API;
                                 }
@@ -4168,6 +4177,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).
                                     equals(APIConstants.API_PRODUCT)) {
                                 type = APIConstants.API_PRODUCT;
+                            } else if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
+                                    .equals(APIConstants.MCP)){
+                                type = APIConstants.MCP;
                             } else {
                                 type = APIConstants.API;
                             }
@@ -4332,22 +4344,24 @@ public class RegistryPersistenceImpl implements APIPersistence {
         if (apiArtifactId != null) {
             if (!ignoreDuplicateSwaggerContent) {
                 GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
-                devAPI = RegistryPersistenceUtil.getDevPortalAPIForSearch(apiArtifact);
-                content.setId(defResourceId);
-                content.setName(defResourceName);
-                content.setApiUUID(devAPI.getId());
-                content.setApiName(devAPI.getApiName());
-                content.setApiDisplayName(devAPI.getDisplayName());
-                content.setApiContext(devAPI.getContext());
-                content.setApiProvider(devAPI.getProviderName());
-                content.setApiVersion(devAPI.getVersion());
-                if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
-                        .equals(APIConstants.AuditLogConstants.API_PRODUCT)) {
-                    content.setAssociatedType(APIConstants.API_PRODUCT);
-                } else {
-                    content.setAssociatedType(APIConstants.API);
+                if (!apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).equals(APIConstants.MCP)) {
+                    devAPI = RegistryPersistenceUtil.getDevPortalAPIForSearch(apiArtifact);
+                    content.setId(defResourceId);
+                    content.setName(defResourceName);
+                    content.setApiUUID(devAPI.getId());
+                    content.setApiName(devAPI.getApiName());
+                    content.setApiDisplayName(devAPI.getDisplayName());
+                    content.setApiContext(devAPI.getContext());
+                    content.setApiProvider(devAPI.getProviderName());
+                    content.setApiVersion(devAPI.getVersion());
+                    if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
+                            .equals(APIConstants.AuditLogConstants.API_PRODUCT)) {
+                        content.setAssociatedType(APIConstants.API_PRODUCT);
+                    } else {
+                        content.setAssociatedType(APIConstants.API);
+                    }
+                    contentData.add(content);
                 }
-                contentData.add(content);
             }
 
         } else {

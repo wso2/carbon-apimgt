@@ -6408,6 +6408,7 @@ components:
             - API
             - APIProduct
             - DEFINITION
+            - MCP
         transportType:
           type: string
           description: Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL

@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefinitionSearchResultDTO;
@@ -77,8 +78,13 @@ public class SearchResultMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwner(api.getTechnicalOwner());
         apiBusinessInformationDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
         apiResultDTO.setBusinessInformation(apiBusinessInformationDTO);
-        apiResultDTO.setType(SearchResultDTO.TypeEnum.API);
-        apiResultDTO.setTransportType(api.getType());
+        if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
+            apiResultDTO.setType(SearchResultDTO.TypeEnum.MCP);
+            apiResultDTO.setTransportType(APIConstants.API_TYPE_HTTP);
+        } else {
+            apiResultDTO.setType(SearchResultDTO.TypeEnum.API);
+            apiResultDTO.setTransportType(api.getType());
+        }
         apiResultDTO.setDescription(api.getDescription());
         apiResultDTO.setStatus(api.getStatus());
         apiResultDTO.setThumbnailUri(api.getThumbnailUrl());

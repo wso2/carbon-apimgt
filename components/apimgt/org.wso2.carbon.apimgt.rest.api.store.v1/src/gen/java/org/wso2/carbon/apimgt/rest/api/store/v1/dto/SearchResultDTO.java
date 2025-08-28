@@ -31,7 +31,8 @@ public class SearchResultDTO   {
         DOC("DOC"),
         API("API"),
         APIPRODUCT("APIProduct"),
-        DEFINITION("DEFINITION");
+        DEFINITION("DEFINITION"),
+        MCP("MCP");
         private String value;
 
         TypeEnum (String v) {
