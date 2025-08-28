@@ -121,7 +121,7 @@ public class BasicAuthClient {
                     apiKeyMgtRemoteUserStoreMgtServiceStub.getUserAuthenticationInfo(username, password);
             return convertToDTO(generatedInfoDTO);
         } catch (APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException | RemoteException e) {
-            log.error("Failed to authenticate user " + username + ": " + e.getMessage());
+            log.error("Failed to authenticate user", e);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
         }
     }
