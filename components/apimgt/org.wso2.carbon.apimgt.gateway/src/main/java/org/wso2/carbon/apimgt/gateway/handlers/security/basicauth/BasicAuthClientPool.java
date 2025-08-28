@@ -21,9 +21,12 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.basicauth;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.pool.BasePoolableObjectFactory;
-import org.apache.commons.pool.ObjectPool;
-import org.apache.commons.pool.impl.StackObjectPool;
+import org.apache.commons.pool2.BasePooledObjectFactory;
+import org.apache.commons.pool2.PooledObject;
+import org.apache.commons.pool2.impl.DefaultPooledObject;
+import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
@@ -36,13 +39,15 @@ public class BasicAuthClientPool {
 
     private static final BasicAuthClientPool instance = new BasicAuthClientPool();
 
-    private final ObjectPool basicAuthClientPool;
+    private final GenericObjectPool<BasicAuthClient> basicAuthClientPool;
     private static int maxIdle;
 
     private BasicAuthClientPool() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-        String maxIdleClients = config.getFirstProperty("BasicAuthValidator.ConnectionPool.MaxIdle");
-        String initIdleCapacity = config.getFirstProperty("BasicAuthValidator.ConnectionPool.InitIdleCapacity");
+        String maxIdleClients = config.getFirstProperty(
+                APIMgtGatewayConstants.BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_IDLE);
+        String initIdleCapacity = config.getFirstProperty(
+                APIMgtGatewayConstants.BASIC_AUTH_VALIDATOR_CONNECTION_POOL_INIT_IDLE_CAPACITY);
         int initIdleCapSize;
 
         if (StringUtils.isNotEmpty(maxIdleClients)) {
@@ -50,6 +55,24 @@ public class BasicAuthClientPool {
         } else {
             maxIdle = 100;
         }
+        // Derive or read maxActive (a true concurrency cap)
+        String maxActiveProp = config.getFirstProperty(
+                APIMgtGatewayConstants.BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_ACTIVE);
+        int maxActive;
+        if (StringUtils.isNotEmpty(maxActiveProp)) {
+            try {
+                maxActive = Integer.parseInt(maxActiveProp);
+            } catch (NumberFormatException nfe) {
+                log.warn("Invalid value for maxActive (\"" + maxActiveProp
+                        + "\"). Falling back to maxIdle: " + maxIdle);
+                maxActive = maxIdle;
+            }
+        } else {
+            maxActive = maxIdle; // sensible default to cap concurrency
+        }
+        String maxWaitProp = config.getFirstProperty(
+                APIMgtGatewayConstants.BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_WAIT_MILLIS);
+        long maxWaitMillis = StringUtils.isNotEmpty(maxWaitProp) ? Long.parseLong(maxWaitProp) : 30000L;
 
         if (StringUtils.isNotEmpty(initIdleCapacity)) {
             initIdleCapSize = Integer.parseInt(initIdleCapacity);
@@ -62,15 +85,36 @@ public class BasicAuthClientPool {
                     ", initIdleCapacity: " + initIdleCapSize);
         }
 
-        basicAuthClientPool = new StackObjectPool(new BasePoolableObjectFactory() {
+        // Create GenericObjectPool with Commons Pool 2 configuration
+        GenericObjectPoolConfig<BasicAuthClient> poolConfig = new GenericObjectPoolConfig<>();
+        poolConfig.setMaxTotal(maxActive);
+        poolConfig.setBlockWhenExhausted(true);
+        poolConfig.setMaxWaitMillis(maxWaitMillis);
+        poolConfig.setMaxIdle(maxIdle);
+        poolConfig.setMinIdle(0);
+        poolConfig.setTestOnBorrow(true);
+        poolConfig.setTestOnReturn(false);
+        poolConfig.setTestWhileIdle(false);
+
+        basicAuthClientPool = new GenericObjectPool<>(new BasePooledObjectFactory<BasicAuthClient>() {
             @Override
-            public Object makeObject() throws Exception {
+            public BasicAuthClient create() throws Exception {
                 if (log.isDebugEnabled()) {
                     log.debug("Initializing new BasicAuthClient instance");
                 }
                 return new BasicAuthClient();
             }
-        }, maxIdle, initIdleCapSize);
+
+            @Override
+            public PooledObject<BasicAuthClient> wrap(BasicAuthClient obj) {
+                return new DefaultPooledObject<>(obj);
+            }
+        }, poolConfig);
+
+        // Pre-fill idle objects to honor initIdleCapacity
+        for (int i = 0; i < initIdleCapSize; i++) {
+            try { basicAuthClientPool.addObject(); } catch (Exception ignore) { break; }
+        }
     }
 
     /**
@@ -95,7 +139,7 @@ public class BasicAuthClientPool {
                 log.trace("BasicAuth validation pool size is: " + active);
             }
         }
-        return (BasicAuthClient) basicAuthClientPool.borrowObject();
+        return basicAuthClientPool.borrowObject();
     }
 
     /**

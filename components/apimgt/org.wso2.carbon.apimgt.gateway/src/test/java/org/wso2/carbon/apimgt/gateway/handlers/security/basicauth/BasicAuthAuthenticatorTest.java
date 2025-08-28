@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -44,6 +45,7 @@ import java.util.TreeMap;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({OpenAPIUtils.class, BasicAuthAuthenticator.class, BasicAuthCredentialValidator.class,
         ServiceReferenceHolder.class, BasicAuthClientPool.class, APIUtil.class})
+@PowerMockIgnore("javax.management.*")
 public class BasicAuthAuthenticatorTest {
     private MessageContext messageContext;
     private org.apache.axis2.context.MessageContext axis2MsgCntxt;
@@ -74,16 +76,20 @@ public class BasicAuthAuthenticatorTest {
                 .thenReturn("true");
 
         // Mock configuration properties for BasicAuthClientPool
-        Mockito.when(apiManagerConfiguration.getFirstProperty("BasicAuthValidator.ConnectionPool.MaxIdle"))
-                .thenReturn("100");
-        Mockito.when(apiManagerConfiguration.getFirstProperty("BasicAuthValidator.ConnectionPool.InitIdleCapacity"))
-                .thenReturn("50");
+        Mockito.when(apiManagerConfiguration.getFirstProperty(
+                APIMgtGatewayConstants.BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_IDLE)).thenReturn("100");
+        Mockito.when(apiManagerConfiguration.getFirstProperty(
+                APIMgtGatewayConstants.BASIC_AUTH_VALIDATOR_CONNECTION_POOL_INIT_IDLE_CAPACITY)).thenReturn("50");
+        Mockito.when(apiManagerConfiguration.getFirstProperty(
+                APIMgtGatewayConstants.BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_ACTIVE)).thenReturn("100");
+        Mockito.when(apiManagerConfiguration.getFirstProperty(
+                APIMgtGatewayConstants.BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_WAIT_MILLIS)).thenReturn("30000");
 
         // Mock BasicAuthClientPool
         PowerMockito.mockStatic(BasicAuthClientPool.class);
         BasicAuthClientPool mockClientPool = Mockito.mock(BasicAuthClientPool.class);
         PowerMockito.when(BasicAuthClientPool.getInstance()).thenReturn(mockClientPool);
-        
+
         // Mock BasicAuthClient
         BasicAuthClient mockBasicAuthClient = Mockito.mock(BasicAuthClient.class);
         Mockito.when(mockClientPool.get()).thenReturn(mockBasicAuthClient);
