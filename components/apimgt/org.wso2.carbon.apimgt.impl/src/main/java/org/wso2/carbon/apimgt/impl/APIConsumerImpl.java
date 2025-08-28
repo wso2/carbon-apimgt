@@ -4569,7 +4569,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         api.setAdvertiseOnly(publisherAPI.getAdvertiseOnly());
                         api.setRating(APIUtil.getAverageRating(publisherAPI.getId()));
                         api.setDescription(publisherAPI.getDescription());
-                        api.setType(publisherAPI.getTransportType());
+                        api.setType(publisherAPI.getType());
                         apiSet.add(api);
                         if (log.isDebugEnabled()) {
                             log.debug("Added MCP Server to search results: " + api.getId().getApiName() + " - " +
