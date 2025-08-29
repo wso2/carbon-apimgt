@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants.GatewayNotification.GatewayRegistrationResponse;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
@@ -260,7 +261,8 @@ public class DataHolder {
         if (apiMap != null) {
             API api = apiMap.get(gatewayAPIDTO.getApiContext());
             if (api != null) {
-                api.setVhosts(gatewayAPIDTO.getVhosts());
+                List<VHost> vhosts = gatewayAPIDTO.getVhosts();
+                api.setVhosts(vhosts != null ? vhosts : new ArrayList<>());
                 if (log.isDebugEnabled()) {
                     log.debug("Populated vhosts info for API : " + api.getApiName());
                 }

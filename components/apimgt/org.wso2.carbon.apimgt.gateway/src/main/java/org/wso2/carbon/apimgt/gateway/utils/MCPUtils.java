@@ -509,6 +509,13 @@ public class MCPUtils {
         Map<String, API> contextApiMap = tenantAPIMap.get(tenantDomain);
         if (contextApiMap != null) {
             API api = contextApiMap.get(contextPath);
+            if (api == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No matching API found for context: " + contextPath + " in tenant: " + tenantDomain);
+                }
+                return null;
+            }
+
             List<VHost> gwVhosts = api.getVhosts();
 
             if (!StringUtils.isEmpty(hostHeader)) {
@@ -520,7 +527,7 @@ public class MCPUtils {
                 }
             }
 
-            // If server URL is resolved using host header, pick the first vhost as the resource endpoint
+            // If server URL is not resolved using host header, pick the first vhost as the resource endpoint
             if (StringUtils.isEmpty(serverURL)) {
                 if (gwVhosts != null && !gwVhosts.isEmpty()) {
                     serverURL = gwVhosts.get(0).getHttpsUrl();
