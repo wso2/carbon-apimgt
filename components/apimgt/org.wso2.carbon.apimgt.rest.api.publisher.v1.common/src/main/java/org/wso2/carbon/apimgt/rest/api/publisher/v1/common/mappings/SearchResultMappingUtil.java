@@ -90,6 +90,9 @@ public class SearchResultMappingUtil {
         apiResultDTO.setTechnicalOwner(api.getTechnicalOwner());
         apiResultDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
         apiResultDTO.setMonetizedInfo(api.isMonetizationEnabled());
+        apiResultDTO.setCreatedTime(api.getCreatedTime());
+        apiResultDTO.setUpdatedTime(
+                api.getLastUpdated() != null ? String.valueOf(api.getLastUpdated().getTime()) : api.getCreatedTime());
         return apiResultDTO;
     }
 
@@ -123,6 +126,11 @@ public class SearchResultMappingUtil {
         apiProductResultDTO.setTechnicalOwner(apiProduct.getTechnicalOwner());
         apiProductResultDTO.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
         apiProductResultDTO.setMonetizedInfo(apiProduct.isMonetizationEnabled());
+        apiProductResultDTO.setCreatedTime(
+                apiProduct.getCreatedTime() != null ? String.valueOf(apiProduct.getCreatedTime().getTime()) : null);
+        apiProductResultDTO.setUpdatedTime(apiProduct.getLastUpdated() != null ?
+                String.valueOf(apiProduct.getLastUpdated().getTime()) :
+                (apiProduct.getCreatedTime() != null ? String.valueOf(apiProduct.getCreatedTime().getTime()) : null));
         return apiProductResultDTO;
     }
 
@@ -151,6 +159,11 @@ public class SearchResultMappingUtil {
         docResultDTO.setApiVersion(apiId.getVersion());
         docResultDTO.setApiProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         docResultDTO.setApiUUID(api.getUUID());
+        docResultDTO.setCreatedTime(
+                document.getCreatedDate() != null ? String.valueOf(document.getCreatedDate().getTime()) : null);
+        docResultDTO.setUpdatedTime(document.getLastUpdated() != null ?
+                String.valueOf(document.getLastUpdated().getTime()) :
+                (document.getCreatedDate() != null ? String.valueOf(document.getCreatedDate().getTime()) : null));
         return docResultDTO;
     }
 
@@ -173,6 +186,11 @@ public class SearchResultMappingUtil {
         docResultDTO.setApiVersion(apiId.getVersion());
         docResultDTO.setApiProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         docResultDTO.setApiUUID(apiProduct.getUuid());
+        docResultDTO.setCreatedTime(
+                document.getCreatedDate() != null ? String.valueOf(document.getCreatedDate().getTime()) : null);
+        docResultDTO.setUpdatedTime(document.getLastUpdated() != null ?
+                String.valueOf(document.getLastUpdated().getTime()) :
+                (document.getCreatedDate() != null ? String.valueOf(document.getCreatedDate().getTime()) : null));
         return docResultDTO;
     }
 
@@ -268,6 +286,8 @@ public class SearchResultMappingUtil {
         apiDefSearchResultDTO.setApiProvider(apiDefResult.getApiProvider());
         apiDefSearchResultDTO.setApiType(apiDefResult.getApiType());
         apiDefSearchResultDTO.setAssociatedType(apiDefResult.getAssociatedType());
+        apiDefSearchResultDTO.setCreatedTime(String.valueOf(apiDefResult.getCreatedTime()));
+        apiDefSearchResultDTO.setUpdatedTime(String.valueOf(apiDefResult.getUpdatedTime()));
         if (apiDefResult.getName().contains("swagger")) {
             apiDefSearchResultDTO.setName(apiDefResult.getApiName() + " REST API Definition");
         } else if (apiDefResult.getName().contains("graphql")) {
