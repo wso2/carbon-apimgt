@@ -112,7 +112,7 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
                 }
             }
         } catch (APIManagementException e) {
-            throw new NotifierException(e.getMessage());
+            throw new NotifierException(e.getMessage(), e);
         }
     }
 
