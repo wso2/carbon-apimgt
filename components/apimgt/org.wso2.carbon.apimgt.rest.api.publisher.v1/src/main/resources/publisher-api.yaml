@@ -14607,12 +14607,6 @@ components:
         TechnicalOwnerEmail:
           type: string
           example: technicalowner@abc.com
-        createdTime:
-          type: string
-          example: 2021-02-11 09:57:25
-        updatedTime:
-          type: string
-          example: 2021-02-11 09:57:25
         egress:
           type: boolean
           description: Whether the APIProduct is EGRESS or not
