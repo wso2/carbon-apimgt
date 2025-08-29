@@ -91,7 +91,8 @@ public class SearchResultMappingUtil {
         apiResultDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
         apiResultDTO.setMonetizedInfo(api.isMonetizationEnabled());
         apiResultDTO.setCreatedTime(api.getCreatedTime());
-        apiResultDTO.setUpdatedTime(String.valueOf(api.getLastUpdated().getTime()));
+        apiResultDTO.setUpdatedTime(
+                api.getLastUpdated() != null ? String.valueOf(api.getLastUpdated().getTime()) : api.getCreatedTime());
         return apiResultDTO;
     }
 
@@ -125,8 +126,11 @@ public class SearchResultMappingUtil {
         apiProductResultDTO.setTechnicalOwner(apiProduct.getTechnicalOwner());
         apiProductResultDTO.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
         apiProductResultDTO.setMonetizedInfo(apiProduct.isMonetizationEnabled());
-        apiProductResultDTO.setCreatedTime(String.valueOf(apiProduct.getCreatedTime().getTime()));
-        apiProductResultDTO.setUpdatedTime(String.valueOf(apiProduct.getLastUpdated().getTime()));
+        apiProductResultDTO.setCreatedTime(
+                apiProduct.getCreatedTime() != null ? String.valueOf(apiProduct.getCreatedTime().getTime()) : null);
+        apiProductResultDTO.setUpdatedTime(apiProduct.getLastUpdated() != null ?
+                String.valueOf(apiProduct.getLastUpdated().getTime()) :
+                (apiProduct.getCreatedTime() != null ? String.valueOf(apiProduct.getCreatedTime().getTime()) : null));
         return apiProductResultDTO;
     }
 
@@ -155,8 +159,11 @@ public class SearchResultMappingUtil {
         docResultDTO.setApiVersion(apiId.getVersion());
         docResultDTO.setApiProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         docResultDTO.setApiUUID(api.getUUID());
-        docResultDTO.setCreatedTime(String.valueOf(document.getCreatedDate().getTime()));
-        docResultDTO.setUpdatedTime(String.valueOf(document.getLastUpdated().getTime()));
+        docResultDTO.setCreatedTime(
+                document.getCreatedDate() != null ? String.valueOf(document.getCreatedDate().getTime()) : null);
+        docResultDTO.setUpdatedTime(document.getLastUpdated() != null ?
+                String.valueOf(document.getLastUpdated().getTime()) :
+                (document.getCreatedDate() != null ? String.valueOf(document.getCreatedDate().getTime()) : null));
         return docResultDTO;
     }
 
@@ -179,8 +186,11 @@ public class SearchResultMappingUtil {
         docResultDTO.setApiVersion(apiId.getVersion());
         docResultDTO.setApiProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         docResultDTO.setApiUUID(apiProduct.getUuid());
-        docResultDTO.setCreatedTime(String.valueOf(document.getCreatedDate().getTime()));
-        docResultDTO.setUpdatedTime(String.valueOf(document.getLastUpdated().getTime()));
+        docResultDTO.setCreatedTime(
+                document.getCreatedDate() != null ? String.valueOf(document.getCreatedDate().getTime()) : null);
+        docResultDTO.setUpdatedTime(document.getLastUpdated() != null ?
+                String.valueOf(document.getLastUpdated().getTime()) :
+                (document.getCreatedDate() != null ? String.valueOf(document.getCreatedDate().getTime()) : null));
         return docResultDTO;
     }
 

@@ -6378,7 +6378,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setAdvertiseOnly(publiserAPI.getAdvertiseOnly());
                         api.setCreatedTime(publiserAPI.getCreatedTime());
                         api.setLastUpdated(APIUtil.convertEpochStringToDate(publiserAPI.getUpdatedTime()));
-                        api.setGatewayVendor(publiserAPI.getGatewayVendor());
                         populateGatewayVendor(api);
                         apiSet.add(api);
                     } else if (APIConstants.API_TYPE_MCP.equals(item.getType())) {
