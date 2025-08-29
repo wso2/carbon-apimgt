@@ -97,9 +97,9 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     federatedAPIDiscovery = (FederatedAPIDiscovery)
                             Class.forName(gatewayConfiguration.getDiscoveryImplementation())
                                     .getDeclaredConstructor().newInstance();
-                    federatedAPIDiscovery.init(environment, organization);
                     log.info("Initializing federated API discovery for environment: " + environment.getName()
-                                    + " and organization: " + organization);
+                            + " and organization: " + organization);
+                    federatedAPIDiscovery.init(environment, organization);
                     String taskKey = environment.getName() + DELEM_COLON + organization;
                     ScheduledFuture<?> scheduledFuture = scheduledDiscoveryTasks.get(taskKey);
                     // Cancel existing task if one exists
