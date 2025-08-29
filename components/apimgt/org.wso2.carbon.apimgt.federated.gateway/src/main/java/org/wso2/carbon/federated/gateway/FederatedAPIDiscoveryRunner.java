@@ -98,18 +98,20 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             Class.forName(gatewayConfiguration.getDiscoveryImplementation())
                                     .getDeclaredConstructor().newInstance();
                     federatedAPIDiscovery.init(environment, organization);
-                    ScheduledFuture<?> scheduledFuture = scheduledDiscoveryTasks
-                            .get(environment.getName() + ":" + organization);
+                    String taskKey = environment.getName() + DELEM_COLON + organization;
+                    ScheduledFuture<?> scheduledFuture = scheduledDiscoveryTasks.get(taskKey);
                     int scheduleWindow = environment.getApiDiscoveryScheduledWindow();
-                    if (environment.getMode().equals(GatewayMode.WRITE_ONLY.getMode()) || scheduleWindow <= 0) {
+                    if (GatewayMode.WRITE_ONLY.getMode().equals(environment.getMode()) || scheduleWindow <= 0) {
                         log.info("Federated API discovery is disabled for environment: " + environment.getName());
 
                         if (scheduledFuture != null) {
                             scheduledFuture.cancel(true);
+                            scheduledDiscoveryTasks.remove(taskKey);
                         }
                     } else {
                         if (scheduledFuture != null) {
                             scheduledFuture.cancel(true);
+                            scheduledDiscoveryTasks.remove(taskKey);
                         }
                         ScheduledFuture<?> newTask = executor.scheduleAtFixedRate(() -> {
                             try {
@@ -125,13 +127,13 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                                 log.error("Error during federated API discovery for environment: "
                                         + environment.getName(), e);
                             }
-                        }, 0, environment.getApiDiscoveryScheduledWindow(), TimeUnit.MINUTES);
-                        scheduledDiscoveryTasks.put(environment.getName() + ":" + organization, newTask);
+                        }, 0, scheduleWindow, TimeUnit.MINUTES);
+                        scheduledDiscoveryTasks.put(taskKey, newTask);
                     }
                     if (log.isDebugEnabled()) {
                         log.debug("Successfully scheduled federated API discovery for environment: "
                                 + environment.getName() + " in organization: " + organization + " with interval: " +
-                                environment.getApiDiscoveryScheduledWindow() + " minutes");
+                                scheduleWindow + " minutes");
                     }
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException |
                          NoSuchMethodException | InvocationTargetException | APIManagementException e) {
