@@ -2118,6 +2118,20 @@ public class APIManagerConfiguration {
                     omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));
             if (jwtUserClaimsElement != null) {
                 jwtConfigurationDto.setEnableUserClaims(Boolean.parseBoolean(jwtUserClaimsElement.getText()));
+                OMElement isBindFederatedUserClaimsForOpaque =
+                        omElement.getFirstChildWithName(new QName(APIConstants.BINDING_FEDERATED_USER_CLAIMS_FOR_OPAQUE));
+                if (isBindFederatedUserClaimsForOpaque != null) {
+                    boolean bindValue = Boolean.parseBoolean(isBindFederatedUserClaimsForOpaque.getText());
+                    jwtConfigurationDto.setBindFederatedUserClaimsForOpaque(bindValue);
+                    if (log.isDebugEnabled()) {
+                        log.debug("BindFederatedUserClaimsForOpaque configuration element found. Value = " +
+                                bindValue);
+                    }
+                } else {
+                    jwtConfigurationDto.setBindFederatedUserClaimsForOpaque(false);
+                    log.debug("BindFederatedUserClaimsForOpaque configuration element not found. " +
+                            "Defaulting to false.");
+                }
             }
             OMElement enableTenantBaseSigningElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_TENANT_BASE_SIGNING));
