@@ -1731,7 +1731,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 docSearch.setVisibility(doc.getVisibility());
                                 docSearch.setName(doc.getName());
                                 docSearch.setCreatedTime(String.valueOf(docResource.getCreatedTime().getTime()));
-                                docSearch.setUpdatedTime(String.valueOf(docResource.getLastModified().getTime()));
+                                docSearch.setUpdatedTime(String.valueOf((docResource.getLastModified() != null ?
+                                        docResource.getLastModified() :
+                                        docResource.getCreatedTime()).getTime()));
                                 contentData.add(docSearch);
                             } else {
                                 throw new GovernanceException("artifact id is null of " + apiPath);
@@ -1780,7 +1782,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 content.setTechnicalOwnerEmail(pubAPI.getTechnicalOwnerEmail());
                                 content.setMonetizationStatus(pubAPI.getMonetizationStatus());
                                 content.setCreatedTime(String.valueOf(resource.getCreatedTime().getTime()));
-                                content.setUpdatedTime(String.valueOf(resource.getLastModified().getTime()));
+                                content.setUpdatedTime(String.valueOf((resource.getLastModified() != null ?
+                                        resource.getLastModified() :
+                                        resource.getCreatedTime()).getTime()));
                                 content.setGatewayVendor(pubAPI.getGatewayVendor());
                                 content.setTransportType(pubAPI.getType());
                                 contentData.add(content);
@@ -4351,7 +4355,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 content.setApiProvider(devAPI.getProviderName());
                 content.setApiVersion(devAPI.getVersion());
                 content.setCreatedTime(String.valueOf(defResource.getCreatedTime().getTime()));
-                content.setUpdatedTime(String.valueOf(defResource.getLastModified().getTime()));
+                content.setUpdatedTime(String.valueOf((defResource.getLastModified() != null ?
+                        defResource.getLastModified() :
+                        defResource.getCreatedTime()).getTime()));
                 if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
                         .equals(APIConstants.AuditLogConstants.API_PRODUCT)) {
                     content.setAssociatedType(APIConstants.API_PRODUCT);
