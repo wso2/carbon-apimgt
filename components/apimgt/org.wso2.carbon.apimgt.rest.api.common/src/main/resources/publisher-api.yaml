@@ -14607,6 +14607,12 @@ components:
         TechnicalOwnerEmail:
           type: string
           example: technicalowner@abc.com
+        createdTime:
+          type: string
+          example: 2021-02-11 09:57:25
+        updatedTime:
+          type: string
+          example: 2021-02-11 09:57:25
         egress:
           type: boolean
           description: Whether the APIProduct is EGRESS or not
@@ -17324,6 +17330,14 @@ components:
             TechnicalOwnerEmail:
               type: string
               example: technicalowner@abc.com
+            createdTime:
+              type: string
+              description: Created time as unix timestamp in milliseconds.
+              example: 1756199448644
+            updatedTime:
+              type: string
+              description: Update time as unix timestamp in milliseconds.
+              example: 1756199448644
     APIProductSearchResult:
       title: API Result
       allOf:
@@ -17381,6 +17395,14 @@ components:
               type: boolean
               description: Whether the API is Egress or not
               example: false
+            createdTime:
+              type: string
+              description: Created time as unix timestamp in milliseconds.
+              example: 1756199448644
+            updatedTime:
+              type: string
+              description: Update time as unix timestamp in milliseconds.
+              example: 1756199448644
     APIMonetizationInfo:
       title: API monetization object
       required:
@@ -17456,6 +17478,14 @@ components:
               type: string
             associatedType:
               type: string
+            createdTime:
+              type: string
+              description: Created time as unix timestamp in milliseconds.
+              example: 1756199448644
+            updatedTime:
+              type: string
+              description: Update time as unix timestamp in milliseconds.
+              example: 1756199448644
     APIDefinitionSearchResult:
       title: API Definition Search Result
       allOf:
@@ -17493,6 +17523,14 @@ components:
               type: string
               description: API or APIProduct
               example: API
+            createdTime:
+              type: string
+              description: Created time as unix timestamp in milliseconds.
+              example: 1756199448644
+            updatedTime:
+              type: string
+              description: Update time as unix timestamp in milliseconds.
+              example: 1756199448644
     MockResponsePayloadList:
       title: Mock Response Payload list
       type: object
