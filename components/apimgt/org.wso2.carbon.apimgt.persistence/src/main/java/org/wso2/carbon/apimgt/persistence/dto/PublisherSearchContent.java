@@ -34,6 +34,9 @@ public class PublisherSearchContent implements SearchContent {
     String technicalOwner;
     String technicalOwnerEmail;
     Boolean isMonetizationEnabled;
+    String createdTime;
+    String updatedTime;
+    String gatewayVendor;
 
     @Override
     public String getId() {
@@ -59,6 +62,30 @@ public class PublisherSearchContent implements SearchContent {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public String getUpdatedTime() {
+        return updatedTime;
+    }
+
+    public String getGatewayVendor() {
+        return gatewayVendor;
+    }
+
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
+    }
+
+    public void setUpdatedTime(String updatedTime) {
+        this.updatedTime = updatedTime;
+    }
+
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
     }
 
     public String getTransportType() {

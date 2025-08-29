@@ -30,6 +30,8 @@ public class APIDefinitionSearchResultDTO extends SearchResultDTO  {
     private String apiProvider = null;
     private String apiType = null;
     private String associatedType = null;
+    private String createdTime = null;
+    private String updatedTime = null;
 
   /**
    * Human-friendly name shown in UI for associated API. Length limited to DB column size.
@@ -175,6 +177,42 @@ public class APIDefinitionSearchResultDTO extends SearchResultDTO  {
     this.associatedType = associatedType;
   }
 
+  /**
+   * Created time as unix timestamp in milliseconds.
+   **/
+  public APIDefinitionSearchResultDTO createdTime(String createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1756199448644", value = "Created time as unix timestamp in milliseconds.")
+  @JsonProperty("createdTime")
+  public String getCreatedTime() {
+    return createdTime;
+  }
+  public void setCreatedTime(String createdTime) {
+    this.createdTime = createdTime;
+  }
+
+  /**
+   * Update time as unix timestamp in milliseconds.
+   **/
+  public APIDefinitionSearchResultDTO updatedTime(String updatedTime) {
+    this.updatedTime = updatedTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1756199448644", value = "Update time as unix timestamp in milliseconds.")
+  @JsonProperty("updatedTime")
+  public String getUpdatedTime() {
+    return updatedTime;
+  }
+  public void setUpdatedTime(String updatedTime) {
+    this.updatedTime = updatedTime;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -192,12 +230,14 @@ public class APIDefinitionSearchResultDTO extends SearchResultDTO  {
         Objects.equals(apiUUID, apIDefinitionSearchResult.apiUUID) &&
         Objects.equals(apiProvider, apIDefinitionSearchResult.apiProvider) &&
         Objects.equals(apiType, apIDefinitionSearchResult.apiType) &&
-        Objects.equals(associatedType, apIDefinitionSearchResult.associatedType);
+        Objects.equals(associatedType, apIDefinitionSearchResult.associatedType) &&
+        Objects.equals(createdTime, apIDefinitionSearchResult.createdTime) &&
+        Objects.equals(updatedTime, apIDefinitionSearchResult.updatedTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiDisplayName, apiName, apiVersion, apiContext, apiUUID, apiProvider, apiType, associatedType);
+    return Objects.hash(apiDisplayName, apiName, apiVersion, apiContext, apiUUID, apiProvider, apiType, associatedType, createdTime, updatedTime);
   }
 
   @Override
@@ -213,6 +253,8 @@ public class APIDefinitionSearchResultDTO extends SearchResultDTO  {
     sb.append("    apiProvider: ").append(toIndentedString(apiProvider)).append("\n");
     sb.append("    apiType: ").append(toIndentedString(apiType)).append("\n");
     sb.append("    associatedType: ").append(toIndentedString(associatedType)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
     sb.append("}");
     return sb.toString();
   }

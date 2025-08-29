@@ -36,6 +36,8 @@ public class DocumentSearchContent implements SearchContent {
     String apiProvider;
     String apiUUID;
     String associatedType = "API";
+    String createdTime;
+    String updatedTime;
     
     @Override
     public String getId() {
@@ -61,6 +63,22 @@ public class DocumentSearchContent implements SearchContent {
 
     public void setApiDisplayName(String apiDisplayName) {
         this.apiDisplayName = apiDisplayName;
+    }
+
+    public String getUpdatedTime() {
+        return updatedTime;
+    }
+
+    public void setUpdatedTime(String updatedTime) {
+        this.updatedTime = updatedTime;
+    }
+
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
     }
 
     public String getTransportType() {

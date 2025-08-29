@@ -1605,6 +1605,8 @@ public class RegistryPersistenceUtil {
             api.setTechnicalOwnerEmail(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
             api.setMonetizationStatus(Boolean.parseBoolean(apiArtifact.
                     getAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS)));
+            api.setGatewayVendor(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_GATEWAY_VENDOR));
+            api.setType(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
 
         } catch (GovernanceException e) {
             throw new APIPersistenceException("Error while extracting api attributes ", e);
