@@ -3864,6 +3864,12 @@ public class APIMappingUtil {
             if (apiProduct.getApiSecurity() != null) {
                 productDto.setSecurityScheme(Arrays.asList(apiProduct.getApiSecurity().split(",")));
             }
+            if (apiProduct.getCreatedTime() != null) {
+                productDto.setCreatedTime(String.valueOf(apiProduct.getCreatedTime().getTime()));
+            }
+            if (apiProduct.getLastUpdated() != null) {
+                productDto.setUpdatedTime(String.valueOf(apiProduct.getLastUpdated().getTime()));
+            }
             if (apiProduct.getAudiences() != null) {
                 productDto.setAudiences(new ArrayList<>(apiProduct.getAudiences()));
             }
