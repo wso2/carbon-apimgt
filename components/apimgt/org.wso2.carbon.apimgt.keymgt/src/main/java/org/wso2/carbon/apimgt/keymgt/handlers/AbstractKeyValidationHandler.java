@@ -96,6 +96,8 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
 
         state = validateSubscriptionDetails(validationContext.getContext(), validationContext.getVersion(),
                 dto.getConsumerKey(), dto.getKeyManager(), dto);
+        validationContext.getValidationInfoDTO().setApplicationId(dto.getApplicationId());
+        validationContext.getValidationInfoDTO().setApplicationTier(dto.getApplicationTier());
 
         if (log.isDebugEnabled()) {
             log.debug("After validating subscriptions : " + dto);
