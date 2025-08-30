@@ -5988,6 +5988,9 @@ public final class APIUtil {
 
         // Avoid unnecessary truststore work for plain HTTP
         if (!APIConstants.HTTPS_PROTOCOL.equalsIgnoreCase(protocol)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Using default SSL context for non-HTTPS protocol");
+            }
             return CommonAPIUtil.getHttpClient(protocol, configuration, SSLContexts.createDefault());
         }
 
@@ -6020,6 +6023,9 @@ public final class APIUtil {
             KeyStore trustStore = KeyStore.getInstance(keyStoreType);
             char[] passwordChars = keyStorePassword.toCharArray();
             try (InputStream keyStoreStream = Files.newInputStream(Paths.get(keyStorePath))) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Loading trust store from: " + keyStorePath);
+                }
                 trustStore.load(keyStoreStream, passwordChars);
             }
             sslContext = SSLContexts.custom().loadTrustMaterial(trustStore, null).build();
@@ -6027,19 +6033,19 @@ public final class APIUtil {
                 log.debug("Successfully loaded SSL context with trust store");
             }
         } catch (KeyStoreException e) {
-            log.error("Failed to read from Key Store", e);
+            log.error("Failed to read from Key Store: " + e.getMessage());
             sslContext = SSLContexts.createDefault();
         } catch (IOException e) {
-            log.error("Key Store not found in " + keyStorePath, e);
+            log.error("Key Store not found in " + keyStorePath + ": " + e.getMessage());
             sslContext = SSLContexts.createDefault();
         } catch (NoSuchAlgorithmException e) {
-            log.error("Failed to load Key Store from " + keyStorePath, e);
+            log.error("Failed to load Key Store from " + keyStorePath + ": " + e.getMessage());
             sslContext = SSLContexts.createDefault();
         } catch (CertificateException e) {
-            log.error("Failed to read Certificate", e);
+            log.error("Failed to read Certificate: " + e.getMessage());
             sslContext = SSLContexts.createDefault();
         } catch (KeyManagementException e) {
-            log.error("Failed to initialize SSLContext from trust store: " + keyStorePath, e);
+            log.error("Failed to initialize SSLContext from trust store: " + keyStorePath + ": " + e.getMessage());
             sslContext = SSLContexts.createDefault();
         }
 
