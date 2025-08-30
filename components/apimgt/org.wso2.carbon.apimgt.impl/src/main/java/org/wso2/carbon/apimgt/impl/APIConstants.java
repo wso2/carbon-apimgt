@@ -2862,6 +2862,7 @@ public final class APIConstants {
      */
     public static final String TRUST_STORE_PASSWORD = "Security.TrustStore.Password";
     public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
+    public static final String TRUST_STORE_TYPE = "Security.TrustStore.Type";
     public static final String INTERNAL_WEB_APP_EP = "/internal/data/v1";
     public static final String API_KEY_REVOKE_PATH = "/key/revoke";
 

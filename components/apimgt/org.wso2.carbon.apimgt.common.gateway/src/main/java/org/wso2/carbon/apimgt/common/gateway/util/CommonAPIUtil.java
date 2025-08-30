@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.common.gateway.util;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -46,6 +48,7 @@ import javax.net.ssl.SSLContext;
  * Utility Functions for Common gateway component.
  */
 public class CommonAPIUtil {
+    private static final Log log = LogFactory.getLog(CommonAPIUtil.class);
     public static final String STRICT = "Strict";
     public static final String ALLOW_ALL = "AllowAll";
     public static final String DEFAULT_AND_LOCALHOST = "DefaultAndLocalhost";
@@ -84,6 +87,9 @@ public class CommonAPIUtil {
     public static HttpClient getHttpClient(String protocol, HttpClientConfigurationDTO clientConfiguration,
                                           SSLContext sslContext) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Creating HTTP client with protocol: " + protocol);
+        }
         int maxTotal = clientConfiguration.getConnectionLimit();
         int defaultMaxPerRoute = clientConfiguration.getMaximumConnectionsPerRoute();
         int connectionTimeout = clientConfiguration.getConnectionTimeout();

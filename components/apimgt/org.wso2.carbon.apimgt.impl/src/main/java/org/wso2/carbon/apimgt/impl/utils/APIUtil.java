@@ -5982,18 +5982,50 @@ public final class APIUtil {
         HttpClientConfigurationDTO configuration = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration().getHttpClientConfiguration();
 
-        SSLContext sslContext = null;
+        if (log.isDebugEnabled()) {
+            log.debug("Creating HTTP client with protocol: " + protocol + " port: " + port);
+        }
+
+        // Avoid unnecessary truststore work for plain HTTP
+        if (!APIConstants.HTTPS_PROTOCOL.equalsIgnoreCase(protocol)) {
+            return CommonAPIUtil.getHttpClient(protocol, configuration, SSLContexts.createDefault());
+        }
+
+        SSLContext sslContext;
         String keyStorePath = CarbonUtils.getServerConfiguration().getFirstProperty(APIConstants.TRUST_STORE_LOCATION);
         String keyStorePassword = CarbonUtils.getServerConfiguration().getFirstProperty(APIConstants.TRUST_STORE_PASSWORD);
+        String keyStoreType = CarbonUtils.getServerConfiguration().getFirstProperty(APIConstants.TRUST_STORE_TYPE);
+        if (StringUtils.isBlank(keyStoreType)) {
+            keyStoreType = KeyStore.getDefaultType();
+        }
+
+        // Basic validation and fast-fallback
+        if (StringUtils.isBlank(keyStorePath) || StringUtils.isBlank(keyStorePassword)) {
+            log.warn("Trust store path or password is not configured. Falling back to default SSLContext.");
+            return CommonAPIUtil.getHttpClient(protocol, configuration, SSLContexts.createDefault());
+        }
+        if (!Files.exists(Paths.get(keyStorePath))) {
+            log.warn("Trust store not found at path: " + keyStorePath + ". Falling back to default SSLContext.");
+            return CommonAPIUtil.getHttpClient(protocol, configuration, SSLContexts.createDefault());
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Loading trust store for SSL context creation. KeyStore: " + keyStorePath);
+        }
 
         // Create SSL context dynamically to pick up certificate changes at runtime
         try {
-            KeyStore trustStore = KeyStore.getInstance("JKS");
-            char[] passwordChars = keyStorePassword != null ? keyStorePassword.toCharArray() : new char[0];
+            if (log.isDebugEnabled()) {
+                log.debug("Loading trust store for SSL context creation");
+            }
+            KeyStore trustStore = KeyStore.getInstance(keyStoreType);
+            char[] passwordChars = keyStorePassword.toCharArray();
             try (InputStream keyStoreStream = Files.newInputStream(Paths.get(keyStorePath))) {
                 trustStore.load(keyStoreStream, passwordChars);
             }
             sslContext = SSLContexts.custom().loadTrustMaterial(trustStore, null).build();
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully loaded SSL context with trust store");
+            }
         } catch (KeyStoreException e) {
             log.error("Failed to read from Key Store", e);
             sslContext = SSLContexts.createDefault();
@@ -6007,9 +6039,10 @@ public final class APIUtil {
             log.error("Failed to read Certificate", e);
             sslContext = SSLContexts.createDefault();
         } catch (KeyManagementException e) {
-            log.error("Failed to load key from " + keyStorePath, e);
+            log.error("Failed to initialize SSLContext from trust store: " + keyStorePath, e);
             sslContext = SSLContexts.createDefault();
         }
+
         return CommonAPIUtil.getHttpClient(protocol, configuration, sslContext);
     }
 
