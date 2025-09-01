@@ -3557,12 +3557,6 @@ public final class APIUtil {
             }
         }
 
-        // Backward-compat fallback: preserve original behavior if not configured
-        if (orderedGatewayTypes.isEmpty()) {
-            orderedGatewayTypes.add(APIConstants.API_GATEWAY_TYPE_REGULAR);
-            orderedGatewayTypes.add(APIConstants.API_GATEWAY_TYPE_APK);
-        }
-
         for (String gatewayType : orderedGatewayTypes) {
             if (APIConstants.API_GATEWAY_TYPE_REGULAR.equalsIgnoreCase(gatewayType)) {
                 for (JsonElement element : synapseApiTypes) {
