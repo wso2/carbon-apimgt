@@ -1992,11 +1992,10 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             URI uri = new URI(uriString);
             return Response.ok().contentLocation(uri).entity(commentDTO).build();
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving comments content location for MCP Server " + mcpServerId;
+            String errorMessage = "Error while retrieving comments for MCP Server " + mcpServerId;
             log.error(errorMessage);
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException(errorMessage, e, ExceptionCodes.INTERNAL_ERROR);
         }
-        return null;
     }
 
     /**
@@ -2316,9 +2315,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         } catch (APIManagementException e) {
             String errorMessage = "Error while checking the document existence for MCP Server: " + mcpServerId;
             log.error(errorMessage);
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException(errorMessage, e, ExceptionCodes.INTERNAL_ERROR);
         }
-        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     /**
