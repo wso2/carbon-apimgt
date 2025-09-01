@@ -44,6 +44,7 @@ public class JwtTokenInfoDTO implements Serializable {
     private Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<String, SubscriptionPolicyDTO>();
     private String permittedIP;
     private String permittedReferer;
+    private Map<String, String> customClaims = new HashMap<>();
 
     public String getPermittedIP() {
         return permittedIP;
@@ -155,6 +156,14 @@ public class JwtTokenInfoDTO implements Serializable {
 
     public void setConsumerKey(String consumerKey) {
         this.consumerKey = consumerKey;
+    }
+
+    public Map<String, String> getCustomClaims() {
+        return customClaims;
+    }
+
+    public void setCustomClaims(Map<String, String> customClaims) {
+        this.customClaims = customClaims;
     }
 
 }

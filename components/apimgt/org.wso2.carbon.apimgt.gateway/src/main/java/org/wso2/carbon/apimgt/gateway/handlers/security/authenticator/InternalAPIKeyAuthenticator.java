@@ -39,10 +39,12 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
@@ -63,6 +65,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
     private static final Log log = LogFactory.getLog(InternalAPIKeyAuthenticator.class);
 
     private String securityParam;
+    private boolean jwtGenerationEnabled;
 
     public InternalAPIKeyAuthenticator(String securityParam) {
         this.securityParam = securityParam;
@@ -70,7 +73,9 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
 
     @Override
     public void init(SynapseEnvironment env) {
-        // Nothing to do in init phase.
+        ExtendedJWTConfigurationDto jwtConfigurationDto =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
+        jwtGenerationEnabled = jwtConfigurationDto.isEnabled();
     }
 
     @Override
@@ -235,12 +240,22 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                         jwtTokenPayloadInfo.setAccessToken(internalKey);
                         getGatewayInternalKeyDataCache().put(cacheKey, jwtTokenPayloadInfo);
                     }
-                    JSONObject api = GatewayUtils.validateAPISubscription(apiContext, apiVersion,
-                            payload, splitToken, false);
+                    String mcpAuthClaim = payload.getStringClaim(APIMgtGatewayConstants.MCP_AUTHENTICATED);
+                    JSONObject api = null;
+                    if (StringUtils.isBlank(mcpAuthClaim) || !Boolean.parseBoolean(mcpAuthClaim)) {
+                        // If the MCP authenticated claim is not present or false, we can proceed with the subscription
+                        // validation. This is to skip subscription validation since the MCP Server have done so already
+                        api = GatewayUtils.validateAPISubscription(apiContext, apiVersion,
+                                payload, splitToken, false);
+                    }
                     if (log.isDebugEnabled()) {
                         log.debug("Internal Key authentication successful.");
                     }
 
+                    if (jwtGenerationEnabled) {
+                        log.info("Generating JWT for Internal Key authentication.");
+                        // TODO: Implement JWT generation for Internal Key authentication
+                    }
 
                     AuthenticationContext authenticationContext = GatewayUtils
                             .generateAuthenticationContext(tokenIdentifier, payload, api, retrievedApi.getApiTier());

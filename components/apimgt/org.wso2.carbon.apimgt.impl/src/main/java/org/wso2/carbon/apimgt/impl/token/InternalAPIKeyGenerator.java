@@ -65,8 +65,10 @@ public class InternalAPIKeyGenerator implements ApiKeyGenerator {
         if (expireIn != -1) {
             jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.EXPIRY_TIME, expireIn);
         }
-        jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS,
-                jwtTokenInfoDTO.getSubscribedApiDTOList());
+        if (!jwtTokenInfoDTO.getSubscribedApiDTOList().isEmpty()) {
+            jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS,
+                    jwtTokenInfoDTO.getSubscribedApiDTOList());
+        }
         jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.KEY_TYPE, jwtTokenInfoDTO.getKeyType());
         jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.TOKEN_TYPE,
                 APIConstants.JwtTokenConstants.INTERNAL_KEY_TOKEN_TYPE);
