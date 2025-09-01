@@ -1666,6 +1666,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     public Response deleteMCPServerLifecycleStatePendingTasks(String mcpServerId, MessageContext messageContext)
             throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting lifecycle state pending tasks for MCP Server: " + mcpServerId);
+        }
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(mcpServerId);
         if (apiIdentifierFromTable == null) {
@@ -1707,39 +1710,33 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                                                                  MessageContext messageContext)
             throws APIManagementException {
 
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(mcpServerId);
-            if (apiIdentifierFromTable == null) {
-                throw new APIMgtResourceNotFoundException(
-                        "Couldn't retrieve existing MCP Server with UUID: " + mcpServerId,
-                        ExceptionCodes.from(ExceptionCodes.MCP_SERVER_NOT_FOUND, mcpServerId));
-            }
-            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-
-            List<WorkflowDTO> workflowDTOList = apiMgtDAO.retrieveAllWorkflowFromInternalReference(revisionId,
-                    WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
-            String externalRef = null;
-            for (WorkflowDTO workflowDTO : workflowDTOList) {
-                Object environment = workflowDTO.getMetadata(WorkflowConstants.ENVIRONMENT);
-                if (StringUtils.equals(envName, environment != null ? environment.toString() : null)) {
-                    externalRef = workflowDTO.getExternalWorkflowReference();
-                    break;
-                }
-            }
-
-            if (externalRef == null) {
-                throw new APIMgtResourceNotFoundException(
-                        "Couldn't retrieve existing MCP Server Revision with Revision Id: " + revisionId,
-                        ExceptionCodes.from(ExceptionCodes.MCP_SERVER_REVISION_NOT_FOUND, revisionId));
-            }
-            apiProvider.cleanupAPIRevisionDeploymentWorkflows(mcpServerId, externalRef);
-            return Response.ok().build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while deleting task ";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(mcpServerId);
+        if (apiIdentifierFromTable == null) {
+            throw new APIMgtResourceNotFoundException(
+                    "Couldn't retrieve existing MCP Server with UUID: " + mcpServerId,
+                    ExceptionCodes.from(ExceptionCodes.MCP_SERVER_NOT_FOUND, mcpServerId));
         }
-        return null;
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+
+        List<WorkflowDTO> workflowDTOList = apiMgtDAO.retrieveAllWorkflowFromInternalReference(revisionId,
+                WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
+        String externalRef = null;
+        for (WorkflowDTO workflowDTO : workflowDTOList) {
+            Object environment = workflowDTO.getMetadata(WorkflowConstants.ENVIRONMENT);
+            if (StringUtils.equals(envName, environment != null ? environment.toString() : null)) {
+                externalRef = workflowDTO.getExternalWorkflowReference();
+                break;
+            }
+        }
+
+        if (externalRef == null) {
+            throw new APIMgtResourceNotFoundException(
+                    "Couldn't retrieve existing MCP Server Revision with Revision Id: " + revisionId,
+                    ExceptionCodes.from(ExceptionCodes.MCP_SERVER_REVISION_NOT_FOUND, revisionId));
+        }
+        apiProvider.cleanupAPIRevisionDeploymentWorkflows(mcpServerId, externalRef);
+        return Response.ok().build();
     }
 
     /**
@@ -1967,6 +1964,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                                               Boolean includeCommenterInfo, MessageContext messageContext)
             throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving all comments for MCP Server: " + mcpServerId);
+        }
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -1989,6 +1989,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             return Response.ok().contentLocation(uri).entity(commentDTO).build();
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving comments content location for MCP Server " + mcpServerId;
+            log.error(errorMessage);
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -2292,6 +2293,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     public Response validateMCPServerDocument(String mcpServerId, String name, String ifMatch,
                                               MessageContext messageContext) throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Validating MCP Server document name: " + name + " for MCP Server: " + mcpServerId);
+        }
         if (StringUtils.isEmpty(name) || StringUtils.isEmpty(mcpServerId)) {
             RestApiUtil.handleBadRequest("MCP Server Id and/or document name should not be empty", log);
         }
@@ -2306,7 +2310,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             return apiProvider.isDocumentationExist(mcpServerId, name, organization) ?
                     Response.status(Response.Status.OK).build() : Response.status(Response.Status.NOT_FOUND).build();
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while checking the api existence", e, log);
+            String errorMessage = "Error while checking the document existence for MCP Server: " + mcpServerId;
+            log.error(errorMessage);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return Response.status(Response.Status.NOT_FOUND).build();
     }
