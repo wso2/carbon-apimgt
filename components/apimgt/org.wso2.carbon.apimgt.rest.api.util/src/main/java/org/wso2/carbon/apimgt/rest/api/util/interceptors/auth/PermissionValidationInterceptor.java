@@ -87,7 +87,7 @@ public class PermissionValidationInterceptor extends AbstractPhaseInterceptor {
                 if (!hasPermission) {
                     throw new AuthenticationException("Unauthenticated request");
                 }
-            } catch (APIManagementException e) {;
+            } catch (APIManagementException e) {
                 log.error("Error while checking the user permission", e);
                 throw new AuthenticationException("Unauthenticated request");
             }
