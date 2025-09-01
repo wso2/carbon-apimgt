@@ -61,34 +61,36 @@ public class PermissionValidationInterceptor extends AbstractPhaseInterceptor {
     @Override
     public void handleMessage(Message message) throws Fault {
         AuthorizationPolicy policy = message.get(AuthorizationPolicy.class);
-        String username = policy.getUserName();
-        if (excludePathsList != null) {
-            String path = (String) message.get(Message.PATH_INFO);
-            if (excludePathsList.contains(path)) {
+        if (policy != null) {
+            String username = policy.getUserName();
+            if (excludePathsList != null) {
+                String path = (String) message.get(Message.PATH_INFO);
+                if (excludePathsList.contains(path)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Path " + path + " is excluded");
+                    }
+                    return;
+                }
+            }
+            try {
                 if (log.isDebugEnabled()) {
-                    log.debug("Path " + path + " is excluded");
+                    log.debug("Attempting to validate permission " + permissions + " for user: " + username);
                 }
-                return;
-            }
-        }
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("Attempting to validate permission " + permissions + " for user: " + username);
-            }
-            boolean hasPermission = false;
-            for (String permission : permissions) {
-                if (APIUtil.hasPermission(username, permission)) {
-                    log.debug("Permission is granted");
-                    hasPermission = true;
-                    break;
+                boolean hasPermission = false;
+                for (String permission : permissions) {
+                    if (APIUtil.hasPermission(username, permission)) {
+                        log.debug("Permission is granted");
+                        hasPermission = true;
+                        break;
+                    }
                 }
-            }
-            if (!hasPermission) {
+                if (!hasPermission) {
+                    throw new AuthenticationException("Unauthenticated request");
+                }
+            } catch (APIManagementException e) {;
+                log.error("Error while checking the user permission", e);
                 throw new AuthenticationException("Unauthenticated request");
             }
-        } catch (APIManagementException e) {;
-            log.error("Error while checking the user permission", e);
-            throw new AuthenticationException("Unauthenticated request");
         }
     }
 
