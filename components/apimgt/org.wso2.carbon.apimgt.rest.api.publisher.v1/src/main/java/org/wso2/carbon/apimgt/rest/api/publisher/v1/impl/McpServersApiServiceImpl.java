@@ -1710,6 +1710,10 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                                                                  MessageContext messageContext)
             throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting revision deployment pending task for MCP Server: " + mcpServerId + ", revision: "
+                    + revisionId);
+        }
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(mcpServerId);
         if (apiIdentifierFromTable == null) {
