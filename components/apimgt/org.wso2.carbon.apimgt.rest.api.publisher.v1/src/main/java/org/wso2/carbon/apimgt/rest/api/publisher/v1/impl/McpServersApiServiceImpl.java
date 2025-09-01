@@ -1662,21 +1662,15 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     public Response deleteMCPServerLifecycleStatePendingTasks(String mcpServerId, MessageContext messageContext)
             throws APIManagementException {
 
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(mcpServerId);
-            if (apiIdentifierFromTable == null) {
-                throw new APIMgtResourceNotFoundException(
-                        "Couldn't retrieve existing MCP Server with API UUID: " + mcpServerId,
-                        ExceptionCodes.from(ExceptionCodes.MCP_SERVER_NOT_FOUND, mcpServerId));
-            }
-            apiProvider.deleteWorkflowTask(apiIdentifierFromTable);
-            return Response.ok().build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while deleting task ";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(mcpServerId);
+        if (apiIdentifierFromTable == null) {
+            throw new APIMgtResourceNotFoundException(
+                    "Couldn't retrieve existing MCP Server with API UUID: " + mcpServerId,
+                    ExceptionCodes.from(ExceptionCodes.MCP_SERVER_NOT_FOUND, mcpServerId));
         }
-        return null;
+        apiProvider.deleteWorkflowTask(apiIdentifierFromTable);
+        return Response.ok().build();
     }
 
     /**
@@ -1989,12 +1983,6 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                     RestApiConstants.RESOURCE_PATH_COMMENTS;
             URI uri = new URI(uriString);
             return Response.ok().contentLocation(uri).entity(commentDTO).build();
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Failed to get comments of MCP Server " + mcpServerId, e, log);
-            }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving comments content location for MCP Server " + mcpServerId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
