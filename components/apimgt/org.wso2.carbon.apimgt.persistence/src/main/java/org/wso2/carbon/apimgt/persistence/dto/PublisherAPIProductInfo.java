@@ -42,6 +42,8 @@ public class PublisherAPIProductInfo {
     private String technicalOwnerEmail;
     private Boolean isMonetizationEnabled;
     private Set<String> audiences;
+    private String createdTime;
+    private String updatedTime;
 
     public Set<String> getAudiences() {
         return audiences;
@@ -139,5 +141,17 @@ public class PublisherAPIProductInfo {
     }
     public void setMonetizationStatus(Boolean isMonetizationEnabled) {
         this.isMonetizationEnabled = isMonetizationEnabled;
+    }
+    public String getCreatedTime() {
+        return createdTime;
+    }
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
+    }
+    public String getUpdatedTime() {
+        return updatedTime;
+    }
+    public void setUpdatedTime(String updatedTime) {
+        this.updatedTime = updatedTime;
     }
 }

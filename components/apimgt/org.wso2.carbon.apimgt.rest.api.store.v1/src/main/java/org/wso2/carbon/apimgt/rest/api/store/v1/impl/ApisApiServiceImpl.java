@@ -25,6 +25,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIConstants.UnifiedSearchConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -92,7 +93,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             MessageContext messageContext) {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        query = query == null ? "" : query;
+        if (query == null || query.isEmpty()) {
+            query = UnifiedSearchConstants.QUERY_API_TYPE_APIS_DEVPORTAL;
+        } else if (!query.contains(APIConstants.TYPE)) {
+            query = query + " " + UnifiedSearchConstants.QUERY_API_TYPE_APIS_DEVPORTAL;
+        }
         APIListDTO apiListDTO = new APIListDTO();
         try {
             String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);

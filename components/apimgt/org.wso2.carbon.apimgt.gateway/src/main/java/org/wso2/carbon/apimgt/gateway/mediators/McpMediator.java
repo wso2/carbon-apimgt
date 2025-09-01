@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.gateway.mcp.request.McpRequestProcessor;
 import org.wso2.carbon.apimgt.gateway.mcp.response.McpResponseDto;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.MCPPayloadGenerator;
+import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -122,6 +123,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                 handleMcpResponse(messageContext);
             } catch (McpException e) {
                 log.error("Error while handling MCP response", e);
+                MCPUtils.handleMCPFailure(messageContext, new McpResponseDto(e.getErrorMessage(), e.getErrorCode(), null));
                 return false;
             }
         }
@@ -136,7 +138,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
 
         McpResponseDto mcpResponse = McpRequestProcessor.processRequest(messageContext, matchedAPI, requestBody);
         if (APIConstants.MCP.METHOD_INITIALIZE.equals(mcpMethod) || APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod)
-            || APIConstants.MCP.METHOD_PING.equals(mcpMethod)) {
+            || APIConstants.MCP.METHOD_PING.equals(mcpMethod) || APIConstants.MCP.METHOD_PROMPTS_LIST.equals(mcpMethod)) {
             messageContext.setProperty(MCP_PROCESSED, "true");
             if (mcpResponse != null) {
                 try {

@@ -25,7 +25,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIConstants.UnifiedSearchConstants;
 import org.wso2.carbon.apimgt.api.APIComplianceException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
@@ -128,8 +130,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import static org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.QUERY_API_TYPE_MCP;
-
 /**
  * Implementation of the MCP Servers API service.
  * This class provides methods to manage and retrieve information about MCP servers,
@@ -163,7 +163,11 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        query = query == null ? QUERY_API_TYPE_MCP : QUERY_API_TYPE_MCP + " " + query;
+        if (query == null || query.isEmpty()) {
+            query = UnifiedSearchConstants.QUERY_API_TYPE_MCP;
+        } else {
+            query = query + " " + UnifiedSearchConstants.QUERY_API_TYPE_MCP;
+        }
         try {
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":")) {
                 query = query.replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":",
@@ -2172,16 +2176,32 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         CommonUtils.validateAPIExistence(mcpServerId);
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        Backend backend = apiProvider.getMCPServerBackend(mcpServerId, backendApiId, organization);
 
-        if (backend == null) {
-            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, log);
-        } else {
-            backend.setEndpointConfig(backendAPIDTO.getEndpointConfig().toString());
+        try {
+            Backend oldBackend = apiProvider.getMCPServerBackend(mcpServerId, backendApiId, organization);
+            if (oldBackend == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, log);
+            }
+            Backend backend = new Backend(oldBackend);
+            Object endpointConfigObj = backendAPIDTO.getEndpointConfig();
+            if (endpointConfigObj == null) {
+                RestApiUtil.handleBadRequest("Endpoint config cannot be null", log);
+            }
+            if (endpointConfigObj instanceof Map) {
+                backend.setEndpointConfigFromMap((Map<String, Object>) endpointConfigObj);
+            } else if (endpointConfigObj instanceof String) {
+                JSONParser parser = new JSONParser();
+                Object parsedEndpointConfig = parser.parse(endpointConfigObj.toString());
+                backend.setEndpointConfigFromMap((Map<String, Object>) parsedEndpointConfig);
+            } else {
+                RestApiUtil.handleBadRequest("Endpoint config is not in correct format", log);
+            }
+            PublisherCommonUtils.updateMCPServerBackend(mcpServerId, oldBackend, backend, organization, apiProvider);
+            return Response.ok().entity(APIMappingUtil.fromBackendAPIToDTO(backend, organization, false)).build();
+        } catch (ParseException e) {
+            RestApiUtil.handleBadRequest("Endpoint config is not in correct format", e, log);
         }
-        apiProvider.updateMCPServerBackend(mcpServerId, backend, organization);
-        return Response.ok().entity(APIMappingUtil.fromBackendAPIToDTO(backend, organization,
-                false)).build();
+        return null;
     }
 
     /**

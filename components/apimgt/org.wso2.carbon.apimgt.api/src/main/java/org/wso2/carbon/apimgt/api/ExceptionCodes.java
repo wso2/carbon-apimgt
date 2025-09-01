@@ -443,6 +443,9 @@ public enum ExceptionCodes implements ErrorHandler {
     KEY_MANAGER_NOT_FOUND(901411, "Key Manager not Found", 404, "Key Manager not found"),
     KEY_MANAGER_NAME_EMPTY(901404,
             "Key Manager name cannot be empty", 400,"Key Manager name cannot be empty"),
+    KEY_MANAGER_UPDATE_VIOLATION(901412,
+            "Key Manager Update restricted. Certain additional fields in the Key Manager configuration cannot be modified",
+            400,"Key Manager Update restricted. Certain additional fields in the Key Manager configuration cannot be modified"),
     KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION(901405, "Key Manager doesn't support generating OAuth applications", 400,
             "Key Manager doesn't support generating OAuth applications"),
     KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION(901405, "Key Manager doesn't support token generation", 400,
@@ -843,6 +846,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Updating the MCP Server is restricted as as it is %s."),
     INVALID_MCP_SERVER_ID(904011, "Invalid MCP Server ID", 404,
             "The provided MCP SERVER ID is not found %s", false),
+    INVALID_REFERENCE_API(900806, "Invalid reference API", 400,
+            "Referenced API is not supported for MCP Server."),
 
     // gateway notification related codes
     GATEWAY_NOTIFICATION_BAD_REQUEST(902052, "Invalid request for gateway notification", 400,

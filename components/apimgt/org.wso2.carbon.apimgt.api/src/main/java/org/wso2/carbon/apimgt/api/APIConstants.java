@@ -123,6 +123,12 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_KEY = "Authorization";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_API_DEFINITION_FILE_NAME = "mistral_api.yaml";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_DESCRIPTION = "Mistral AI service";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_NAME = "Anthropic";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_VERSION = "1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_CONNECTOR = "anthropic_1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_KEY = "x-api-key";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_API_DEFINITION_FILE_NAME = "anthropic_api.yaml";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_DESCRIPTION = "Anthropic Claude LLM Service";
         public static final String LLM_PROVIDER_SERVICE_METADATA_REQUEST_MODEL = "requestModel";
         public static final String LLM_PROVIDER_SERVICE_METADATA_RESPONSE_MODEL = "responseModel";
         public static final String LLM_PROVIDER_SERVICE_METADATA_MODEL = "model";
@@ -133,6 +139,11 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_MODEL = "$.model";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_PROMPT_TOKEN_COUNT = "$.usage" +
                 ".prompt_tokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_INPUT_TOKEN = "$.usage" +
+                ".input_tokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_OUTPUT_TOKEN = "$.usage" +
+                ".output_tokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_ANTHROPIC_REMAINING_TOKEN_COUNT = "anthropic-ratelimit-tokens-remaining";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_COMPLETION_TOKEN_COUNT = "$.usage" +
                 ".completion_tokens";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_TOTAL_TOKEN_COUNT = "$.usage.total_tokens";
@@ -166,7 +177,6 @@ public class APIConstants {
         public static final String ENDPOINT_SEQUENCE = "_EndpointsSeq";
         public static final String REQUEST_TIMEOUT = "REQUEST_TIMEOUT";
         public static final String HTTP_PROTOCOL_TYPE = "HTTP";
-        public static final String QUERY_API_TYPE_MCP = "type:MCP";
         public static final String LLM_PROVIDER_SERVICE_AWSBEDROCK_OPENAI_API_DEFINITION_FILE_NAME =
                 "aws_bedrock_api.yaml";
         public static final String INPUT_SOURCE_PATH = "pathParams";
@@ -181,5 +191,13 @@ public class APIConstants {
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_ANTHROPIC = "Anthropic";
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_DEEPSEEK = "DeepSeek";
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_META = "Meta";
+    }
+
+    public static class UnifiedSearchConstants {
+        public static final String QUERY_API_TYPE_APIS_PUBLISHER = "type:HTTP type:WS type:SOAPTOREST type:GRAPHQL " +
+                "type:SOAP type:SSE type:WEBSUB type:WEBHOOK type:ASYNC";
+        public static final String QUERY_API_TYPE_APIS_DEVPORTAL = "type:HTTP type:WS type:SOAPTOREST type:GRAPHQL " +
+                "type:SOAP type:SSE type:WEBSUB type:WEBHOOK type:ASYNC type:APIProduct";
+        public static final String QUERY_API_TYPE_MCP = "type:MCP";
     }
 }
