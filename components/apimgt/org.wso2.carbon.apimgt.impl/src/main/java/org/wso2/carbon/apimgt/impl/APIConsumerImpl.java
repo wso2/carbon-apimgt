@@ -4510,18 +4510,26 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         docMap.put(doc, api);
                     } else if (item instanceof APIDefSearchContent) {
                         APIDefSearchContent definitionItem = (APIDefSearchContent) item;
-                        APIDefinitionContentSearchResult apiDefSearchResult = new APIDefinitionContentSearchResult();
-                        apiDefSearchResult.setId(definitionItem.getId());
-                        apiDefSearchResult.setName(definitionItem.getName());
-                        apiDefSearchResult.setApiUuid(definitionItem.getApiUUID());
-                        apiDefSearchResult.setApiName(definitionItem.getApiName());
-                        apiDefSearchResult.setApiDisplayName(definitionItem.getApiDisplayName());
-                        apiDefSearchResult.setApiContext(definitionItem.getApiContext());
-                        apiDefSearchResult.setApiProvider(definitionItem.getApiProvider());
-                        apiDefSearchResult.setApiVersion(definitionItem.getApiVersion());
-                        apiDefSearchResult.setApiType(definitionItem.getApiType());
-                        apiDefSearchResult.setAssociatedType(definitionItem.getAssociatedType()); //API or API product
-                        defSearchList.add(apiDefSearchResult);
+                        if (!APIConstants.API_TYPE_MCP.equals(definitionItem.getAssociatedType())) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Processing API definition search result for API: " +
+                                        definitionItem.getApiName() + " - " + definitionItem.getApiVersion());
+                            }
+                            APIDefinitionContentSearchResult apiDefSearchResult =
+                                    new APIDefinitionContentSearchResult();
+                            apiDefSearchResult.setId(definitionItem.getId());
+                            apiDefSearchResult.setName(definitionItem.getName());
+                            apiDefSearchResult.setApiUuid(definitionItem.getApiUUID());
+                            apiDefSearchResult.setApiName(definitionItem.getApiName());
+                            apiDefSearchResult.setApiDisplayName(definitionItem.getApiDisplayName());
+                            apiDefSearchResult.setApiContext(definitionItem.getApiContext());
+                            apiDefSearchResult.setApiProvider(definitionItem.getApiProvider());
+                            apiDefSearchResult.setApiVersion(definitionItem.getApiVersion());
+                            apiDefSearchResult.setApiType(definitionItem.getApiType());
+                            apiDefSearchResult.setAssociatedType(
+                                    definitionItem.getAssociatedType()); //API or API product
+                            defSearchList.add(apiDefSearchResult);
+                        }
                     } else if ("API".equals(item.getType())) {
                         DevPortalSearchContent publisherAPI = (DevPortalSearchContent) item;
                         API api = new API(new APIIdentifier(publisherAPI.getProvider(), publisherAPI.getName(),
@@ -4561,7 +4569,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         api.setAdvertiseOnly(publisherAPI.getAdvertiseOnly());
                         api.setRating(APIUtil.getAverageRating(publisherAPI.getId()));
                         api.setDescription(publisherAPI.getDescription());
-                        api.setType(publisherAPI.getTransportType());
+                        api.setType(publisherAPI.getType());
                         apiSet.add(api);
                         if (log.isDebugEnabled()) {
                             log.debug("Added MCP Server to search results: " + api.getId().getApiName() + " - " +

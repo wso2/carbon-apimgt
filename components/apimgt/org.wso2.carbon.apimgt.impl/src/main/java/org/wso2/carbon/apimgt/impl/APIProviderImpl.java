@@ -6448,18 +6448,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                     } else if (item instanceof APIDefSearchContent) {
                         APIDefSearchContent definitionItem = (APIDefSearchContent) item;
-                        APIDefinitionContentSearchResult apiDefSearchResult = new APIDefinitionContentSearchResult();
-                        apiDefSearchResult.setId(definitionItem.getId());
-                        apiDefSearchResult.setName(definitionItem.getName());
-                        apiDefSearchResult.setApiUuid(definitionItem.getApiUUID());
-                        apiDefSearchResult.setApiName(definitionItem.getApiName());
-                        apiDefSearchResult.setApiContext(definitionItem.getApiContext());
-                        apiDefSearchResult.setApiProvider(definitionItem.getApiProvider());
-                        apiDefSearchResult.setApiVersion(definitionItem.getApiVersion());
-                        apiDefSearchResult.setApiType(definitionItem.getApiType());
-                        apiDefSearchResult.setApiDisplayName(definitionItem.getApiDisplayName());
-                        apiDefSearchResult.setAssociatedType(definitionItem.getAssociatedType()); //API or API product
-                        defSearchList.add(apiDefSearchResult);
+                        if (!APIConstants.API_TYPE_MCP.equals(definitionItem.getAssociatedType())) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Processing API definition search result for API: " +
+                                        definitionItem.getApiName() + " - " + definitionItem.getApiVersion());
+                            }
+                            APIDefinitionContentSearchResult apiDefSearchResult =
+                                    new APIDefinitionContentSearchResult();
+                            apiDefSearchResult.setId(definitionItem.getId());
+                            apiDefSearchResult.setName(definitionItem.getName());
+                            apiDefSearchResult.setApiUuid(definitionItem.getApiUUID());
+                            apiDefSearchResult.setApiName(definitionItem.getApiName());
+                            apiDefSearchResult.setApiContext(definitionItem.getApiContext());
+                            apiDefSearchResult.setApiProvider(definitionItem.getApiProvider());
+                            apiDefSearchResult.setApiVersion(definitionItem.getApiVersion());
+                            apiDefSearchResult.setApiType(definitionItem.getApiType());
+                            apiDefSearchResult.setApiDisplayName(definitionItem.getApiDisplayName());
+                            apiDefSearchResult.setAssociatedType(
+                                    definitionItem.getAssociatedType()); //API or API product
+                            defSearchList.add(apiDefSearchResult);
+                        }
                     }
                 }
                 compoundResult.addAll(apiSet);
