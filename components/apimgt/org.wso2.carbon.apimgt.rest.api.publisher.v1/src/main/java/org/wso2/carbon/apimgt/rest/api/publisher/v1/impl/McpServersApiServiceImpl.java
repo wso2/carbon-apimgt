@@ -1122,7 +1122,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             Documentation documentation =
                     PublisherCommonUtils.addDocumentationToAPI(documentDTO, mcpServerId, organization);
             DocumentDTO newDocumentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
-            String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID
+            String uriString = RestApiConstants.RESOURCE_PATH_MCP_SERVER_DOCUMENTS_DOCUMENT_ID
                     .replace(RestApiConstants.MCP_SERVER_ID_PARAM, mcpServerId)
                     .replace(RestApiConstants.DOCUMENTID_PARAM, documentation.getId());
             URI uri = new URI(uriString);
@@ -1215,7 +1215,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //retrieving the updated doc and the URI
             Documentation updatedDoc = apiProvider.getDocumentation(mcpServerId, documentId, organization);
             DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(updatedDoc);
-            String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENT_CONTENT
+            String uriString = RestApiConstants.RESOURCE_PATH_MCP_SERVER_DOCUMENT_CONTENT
                     .replace(RestApiConstants.MCP_SERVER_ID_PARAM, mcpServerId)
                     .replace(RestApiConstants.DOCUMENTID_PARAM, documentId);
             URI uri = new URI(uriString);
