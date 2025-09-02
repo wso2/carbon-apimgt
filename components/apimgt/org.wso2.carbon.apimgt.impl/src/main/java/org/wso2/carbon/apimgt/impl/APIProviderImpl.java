@@ -6376,6 +6376,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setTechnicalOwnerEmail(publiserAPI.getTechnicalOwnerEmail());
                         api.setMonetizationEnabled(publiserAPI.getMonetizationStatus());
                         api.setAdvertiseOnly(publiserAPI.getAdvertiseOnly());
+                        api.setCreatedTime(publiserAPI.getCreatedTime());
+                        api.setLastUpdated(APIUtil.convertEpochStringToDate(publiserAPI.getUpdatedTime()));
+                        populateGatewayVendor(api);
                         apiSet.add(api);
                     } else if (APIConstants.API_TYPE_MCP.equals(item.getType())) {
                         PublisherSearchContent publisherAPI = (PublisherSearchContent) item;
@@ -6398,6 +6401,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setTechnicalOwnerEmail(publisherAPI.getTechnicalOwnerEmail());
                         api.setMonetizationEnabled(publisherAPI.getMonetizationStatus());
                         api.setAdvertiseOnly(publisherAPI.getAdvertiseOnly());
+                        api.setCreatedTime(publisherAPI.getCreatedTime());
+                        api.setLastUpdated(APIUtil.convertEpochStringToDate(publisherAPI.getUpdatedTime()));
+                        api.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+                        api.setGatewayType(APIConstants.WSO2_SYNAPSE_GATEWAY);
                         apiSet.add(api);
                         if (log.isDebugEnabled()) {
                             log.debug("Added MCP Server to search results: " + api.getId().getApiName() + " - " +
@@ -6419,6 +6426,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.setTechnicalOwner(publiserAPI.getTechnicalOwner());
                         api.setTechnicalOwnerEmail(publiserAPI.getTechnicalOwnerEmail());
                         api.setMonetizationEnabled(publiserAPI.getMonetizationStatus());
+                        api.setCreatedTime(APIUtil.convertEpochStringToDate(publiserAPI.getCreatedTime()));
+                        api.setLastUpdated(APIUtil.convertEpochStringToDate(publiserAPI.getUpdatedTime()));
+                        api.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
                         apiProductSet.add(api);
                     } else if (item instanceof DocumentSearchContent) {
                         // doc item
@@ -6428,6 +6438,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         doc.setSourceType(DocumentSourceType.valueOf(docItem.getSourceType().toString()));
                         doc.setVisibility(DocumentVisibility.valueOf(docItem.getVisibility().toString()));
                         doc.setId(docItem.getId());
+                        doc.setCreatedDate(APIUtil.convertEpochStringToDate(docItem.getCreatedTime()));
+                        doc.setLastUpdated(APIUtil.convertEpochStringToDate(docItem.getUpdatedTime()));
                         if ("API".equals(docItem.getAssociatedType())
                                 || APIConstants.API_TYPE_MCP.equals(docItem.getAssociatedType())) {
                             API api = new API(new APIIdentifier(docItem.getApiProvider(), docItem.getApiName(),
@@ -6450,8 +6462,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         APIDefSearchContent definitionItem = (APIDefSearchContent) item;
                         if (!APIConstants.API_TYPE_MCP.equals(definitionItem.getAssociatedType())) {
                             if (log.isDebugEnabled()) {
-                                log.debug("Processing API definition search result for API: " +
-                                        definitionItem.getApiName() + " - " + definitionItem.getApiVersion());
+                                log.debug(
+                                        "Processing API definition search result for API: "
+                                                + definitionItem.getApiName() + " - " + definitionItem.getApiVersion());
                             }
                             APIDefinitionContentSearchResult apiDefSearchResult =
                                     new APIDefinitionContentSearchResult();
@@ -6466,6 +6479,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             apiDefSearchResult.setApiDisplayName(definitionItem.getApiDisplayName());
                             apiDefSearchResult.setAssociatedType(
                                     definitionItem.getAssociatedType()); //API or API product
+                            apiDefSearchResult.setCreatedTime(definitionItem.getCreatedTime());
+                            apiDefSearchResult.setUpdatedTime(definitionItem.getUpdatedTime());
                             defSearchList.add(apiDefSearchResult);
                         }
                     }
