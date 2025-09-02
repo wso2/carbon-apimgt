@@ -3707,6 +3707,8 @@ public final class APIConstants {
         // SSE parsing
         public static final String SSE_DATA_PREFIX = "data:";
 
+        public static final String MCP_AUTH_CLAIM = "MCP_AUTHENTICATED";
+
         /**
          * This class contains constants used for RPC processing
          */

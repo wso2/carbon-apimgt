@@ -26,10 +26,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
@@ -55,7 +54,6 @@ import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
-import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
@@ -69,7 +67,15 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
 import java.security.cert.Certificate;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.cache.Cache;
 
 /**
@@ -342,27 +348,47 @@ public class JWTValidator {
                 if (APIConstants.API_TYPE_MCP.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
                     API matchedAPI = GatewayUtils.getAPI(synCtx);
                     if (matchedAPI != null) {
-                        String mcpSubType = matchedAPI.getSubtype();
-                        if ("EXISTING_API".equals(mcpSubType)) {
+                        if (APIConstants.API_SUBTYPE_EXISTING_API.equals(matchedAPI.getSubtype())) {
                             if (jwtInfoDto == null) {
-                                jwtInfoDto = GatewayUtils
-                                        .generateJWTInfoDto(null, jwtValidationInfo,
-                                                apiKeyValidationInfoDTO, synCtx);
+                                jwtInfoDto = GatewayUtils.generateJWTInfoDto(null, jwtValidationInfo,
+                                        apiKeyValidationInfoDTO, synCtx);
                             }
-                            try {
-                                JwtTokenInfoDTO jwtTokenInfoDTO =
-                                        getJwtTokenInfoDTO(signedJWTInfo, jwtInfoDto, matchedAPI);
-                                InternalAPIKeyGenerator internalAPIKeyGenerator = new InternalAPIKeyGenerator();
-                                String generatedToken = internalAPIKeyGenerator.generateToken(jwtTokenInfoDTO);
-                                authenticationContext.setMcpUpstreamToken(generatedToken);
-                            } catch (APIManagementException e) {
-                                log.error("Error while Generating MCP Upstream JWT", e);
-                                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+
+                            final String jwtTokenCacheKey = jwtInfoDto.getApiContext() + ":" + jwtInfoDto.getVersion()
+                                    + ":" + jwtTokenIdentifier + ":" + APIConstants.API_TYPE_MCP;
+
+                            String internalToken = null;
+                            if (isGatewayTokenCacheEnabled) {
+                                Object cachedTokenObj = getGatewayJWTTokenCache().get(jwtTokenCacheKey);
+                                if (cachedTokenObj instanceof String) {
+                                    String cachedToken = (String) cachedTokenObj;
+                                    long tsSkewMs = getTimeStampSkewInSeconds() * 1000;
+                                    if (JWTUtil.isJWTValid(cachedToken, jwtConfigurationDto.getJwtDecoding(),
+                                            tsSkewMs)) {
+                                        internalToken = cachedToken;
+                                    } else {
+                                        getGatewayJWTTokenCache().remove(jwtTokenCacheKey);
+                                    }
+                                }
                             }
+                            if (StringUtils.isEmpty(internalToken)) {
+                                try {
+                                    JwtTokenInfoDTO jwtTokenInfoDTO =
+                                            getJwtTokenInfoDTO(signedJWTInfo, jwtInfoDto, matchedAPI);
+                                    internalToken = new InternalAPIKeyGenerator().generateToken(jwtTokenInfoDTO);
+                                    if (isGatewayTokenCacheEnabled) {
+                                        getGatewayJWTTokenCache().put(jwtTokenCacheKey, internalToken);
+                                    }
+                                } catch (APIManagementException e) {
+                                    log.error("Error while generating MCP upstream token", e);
+                                    throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                                            APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+                                }
+                            }
+                            authenticationContext.setMcpUpstreamToken(internalToken);
                         }
                     } else {
-                        log.warn("MCP API is not found for the request. " + GatewayUtils.getMaskedToken(jwtHeader));
+                        log.warn("MCP server not found for the request. " + GatewayUtils.getMaskedToken(jwtHeader));
                     }
                 }
                 return authenticationContext;
@@ -386,33 +412,50 @@ public class JWTValidator {
         }
     }
 
+    /**
+     * Creates a {@link JwtTokenInfoDTO} from the given JWT and API. Excludes standard claims and adds custom/user
+     * claims plus referenced API UUIDs as the audience.
+     *
+     * @param signedJWTInfo JWT details with claims
+     * @param jwtInfoDto    validation context and user info
+     * @param matchedAPI    API used to extract referenced APIs
+     * @return populated {@link JwtTokenInfoDTO}
+     */
     private JwtTokenInfoDTO getJwtTokenInfoDTO(SignedJWTInfo signedJWTInfo, JWTInfoDto jwtInfoDto, API matchedAPI) {
 
         JwtTokenInfoDTO localJWTTokenInfoDTO = new JwtTokenInfoDTO();
         Map<String, String> customClaims = new HashMap<>();
         localJWTTokenInfoDTO.setEndUserName(jwtInfoDto.getEndUser());
         localJWTTokenInfoDTO.setKeyType(jwtInfoDto.getKeyType());
-        localJWTTokenInfoDTO.setExpirationTime(60000L);
+        localJWTTokenInfoDTO.setExpirationTime(6000L);
 
         customClaims.putAll(getUserClaimsFromKeyManager(jwtInfoDto));
-        customClaims.put(APIMgtGatewayConstants.MCP_AUTHENTICATED, "true");
-        //Add rest of the claims from the original JWT token that are not part of the standard JWT claims
+        customClaims.put(APIMgtGatewayConstants.MCP_AUTH_CLAIM, Boolean.toString(Boolean.TRUE));
+        Set<String> excludedClaims = new HashSet<>(Arrays.asList("sub","iss","aud","exp","iat","jti","azp", "nbf",
+                "scope","aut"));
+
         for (String claimKey : signedJWTInfo.getJwtClaimsSet().getClaims().keySet()) {
-            if (!claimKey.equalsIgnoreCase("sub") && !claimKey.equalsIgnoreCase("iss") &&
-                    !claimKey.equalsIgnoreCase("aud") && !claimKey.equalsIgnoreCase("exp") &&
-                    !claimKey.equalsIgnoreCase("iat") && !claimKey.equalsIgnoreCase("jti") &&
-                    !claimKey.equalsIgnoreCase("azp")) {
-                customClaims.putIfAbsent(claimKey,
-                        signedJWTInfo.getJwtClaimsSet().getClaim(claimKey).toString());
+            if (!excludedClaims.contains(claimKey.toLowerCase())) {
+                Object claimValue = signedJWTInfo.getJwtClaimsSet().getClaim(claimKey);
+                if (claimValue != null) {
+                    customClaims.putIfAbsent(claimKey, claimValue.toString());
+                }
             }
         }
+
         localJWTTokenInfoDTO.setCustomClaims(customClaims);
-
-        //Currently getting the apiId from the first URL mapping of the matched API. Later once Multiple APIs are
-        // supported in a single MCP API, this logic should be updated to handle multiple API IDs.
-        String apiId = matchedAPI.getUrlMappings().get(0).getApiOperationMapping().getApiUuid();
-        localJWTTokenInfoDTO.setAudience(Collections.singletonList(apiId));
-
+        Set<String> referencedApiIds = new LinkedHashSet<>();
+        if (matchedAPI.getUrlMappings() != null) {
+            for (URLMapping mapping : matchedAPI.getUrlMappings()) {
+                if (mapping != null && mapping.getApiOperationMapping() != null) {
+                    String referencedApiId = mapping.getApiOperationMapping().getApiUuid();
+                    if (StringUtils.isNotEmpty(referencedApiId)) {
+                        referencedApiIds.add(referencedApiId);
+                    }
+                }
+            }
+        }
+        localJWTTokenInfoDTO.setAudience(new ArrayList<>(referencedApiIds));
         return localJWTTokenInfoDTO;
     }
 

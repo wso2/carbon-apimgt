@@ -19,11 +19,10 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 import org.apache.commons.lang.StringUtils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Map;
-
-import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.INTERNAL_KEY;
 
 public class APISecurityUtils {
 
@@ -59,7 +58,7 @@ public class APISecurityUtils {
                 transportHeaders.put(contextHeader, authContext.getCallerToken());
             }
             if (isSetMcpUpstreamToken) {
-                transportHeaders.put(INTERNAL_KEY, authContext.getMcpUpstreamToken());
+                transportHeaders.put(APIMgtGatewayConstants.INTERNAL_KEY, authContext.getMcpUpstreamToken());
             }
         }
     }

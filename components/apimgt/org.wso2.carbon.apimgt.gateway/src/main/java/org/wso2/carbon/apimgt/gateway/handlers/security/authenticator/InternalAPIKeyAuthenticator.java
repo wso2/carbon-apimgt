@@ -31,6 +31,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.JWTTokenPayloadInfo;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
@@ -43,6 +44,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
@@ -240,27 +242,30 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                         jwtTokenPayloadInfo.setAccessToken(internalKey);
                         getGatewayInternalKeyDataCache().put(cacheKey, jwtTokenPayloadInfo);
                     }
-                    String mcpAuthClaim = payload.getStringClaim(APIMgtGatewayConstants.MCP_AUTHENTICATED);
+                    String mcpAuthClaim = payload.getStringClaim(APIMgtGatewayConstants.MCP_AUTH_CLAIM);
                     JSONObject api = null;
                     if (StringUtils.isBlank(mcpAuthClaim) || !Boolean.parseBoolean(mcpAuthClaim)) {
                         // If the MCP authenticated claim is not present or false, we can proceed with the subscription
                         // validation. This is to skip subscription validation since the MCP Server have done so already
-                        api = GatewayUtils.validateAPISubscription(apiContext, apiVersion,
-                                payload, splitToken, false);
+                        api = GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload, splitToken, false);
                     }
                     if (log.isDebugEnabled()) {
                         log.debug("Internal Key authentication successful.");
                     }
 
-                    if (jwtGenerationEnabled) {
-                        log.info("Generating JWT for Internal Key authentication.");
-                        // TODO: Implement JWT generation for Internal Key authentication
-                    }
-
                     AuthenticationContext authenticationContext = GatewayUtils
                             .generateAuthenticationContext(tokenIdentifier, payload, api, retrievedApi.getApiTier());
+                    if (jwtGenerationEnabled) {
+                        String callerToken =
+                                (String) ((Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().getProperty(
+                                        APIMgtGatewayConstants.TRANSPORT_HEADERS)).get(getContextHeader());
+                        if (StringUtils.isNotEmpty(callerToken)) {
+                            authenticationContext.setCallerToken(callerToken);
+                        }
+                    }
+                    APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext,
+                            jwtGenerationEnabled ? getContextHeader() : null);
                     synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, authenticationContext.getUsername());
-                    APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext);
                     if (log.isDebugEnabled()) {
                         log.debug("User is authorized to access the resource using Internal Key.");
                     }
@@ -348,5 +353,17 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
     public int getPriority() {
 
         return -10;
+    }
+
+    /**
+     * Get the context header defined in the config file
+     *
+     * @return context header
+     */
+    private String getContextHeader() {
+
+        APIManagerConfiguration apimConf = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        JWTConfigurationDto jwtConfigDto = apimConf.getJwtConfigurationDto();
+        return jwtConfigDto.getJwtHeader();
     }
 }
