@@ -295,6 +295,24 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     }
 
     @DELETE
+    @Path("/{mcpServerId}/lifecycle-state/pending-tasks")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete Pending Lifecycle State Change Tasks", notes = "This operation can be used to remove pending lifecycle state change requests that are in pending state ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+        })
+    }, tags={ "MCP Server Lifecycle",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Lifecycle state change pending task removed successfully. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response deleteMCPServerLifecycleStatePendingTasks(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId) throws APIManagementException{
+        return delegate.deleteMCPServerLifecycleStatePendingTasks(mcpServerId, securityContext);
+    }
+
+    @DELETE
     @Path("/{mcpServerId}/revisions/{revisionId}")
     
     @Produces({ "application/json" })
@@ -312,6 +330,25 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response deleteMCPServerRevision(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId, @ApiParam(value = "Revision ID of an API ",required=true) @PathParam("revisionId") String revisionId) throws APIManagementException{
         return delegate.deleteMCPServerRevision(mcpServerId, revisionId, securityContext);
+    }
+
+    @DELETE
+    @Path("/{mcpServerId}/cancel-revision-workflow/{revisionId}/{envName}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete Pending Revision Deployment Workflow Tasks", notes = "This operation can be used to remove pending revision deployment requests that are in pending state ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server")
+        })
+    }, tags={ "MCP Server Revisions",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Revision deployment pending task removed successfully. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response deleteMCPServerRevisionDeploymentPendingTask(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId, @ApiParam(value = "Revision ID of an API ",required=true) @PathParam("revisionId") String revisionId, @ApiParam(value = "Environment name of an Revision ",required=true) @PathParam("envName") String envName) throws APIManagementException{
+        return delegate.deleteMCPServerRevisionDeploymentPendingTask(mcpServerId, revisionId, envName, securityContext);
     }
 
     @POST
@@ -392,6 +429,25 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response generateInternalAPIKeyMCPServer(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId) throws APIManagementException{
         return delegate.generateInternalAPIKeyMCPServer(mcpServerId, securityContext);
+    }
+
+    @GET
+    @Path("/{mcpServerId}/comments")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve MCP Server Comments", notes = "Get a list of Comments that are already added to MCP Server ", response = CommentListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
+            @AuthorizationScope(scope = "apim:comment_view", description = "Read permission to comments"),
+            @AuthorizationScope(scope = "apim:comment_manage", description = "Read and Write comments")
+        })
+    }, tags={ "Comments",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Comments list is returned. ", response = CommentListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getAllCommentsOfMCPServer(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Whether we need to display commentor details. ", defaultValue="false") @DefaultValue("false") @QueryParam("includeCommenterInfo") Boolean includeCommenterInfo) throws APIManagementException{
+        return delegate.getAllCommentsOfMCPServer(mcpServerId, xWSO2Tenant, limit, offset, includeCommenterInfo, securityContext);
     }
 
     @GET
@@ -852,6 +908,26 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response validateMCPServer( @NotNull @ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"<attribute>:\"** modifier.  Eg. \"name:wso2\" will match an MCP server if the provider of the API is exactly \"wso2\".  Supported attribute modifiers are [** version, context, name **]  If no advanced attribute modifier has been specified, search will match the given query string against MCP server Name. ",required=true)  @QueryParam("query") String query,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.validateMCPServer(query, ifNoneMatch, securityContext);
+    }
+
+    @POST
+    @Path("/{mcpServerId}/documents/validate")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Check Whether a Document with the Provided Name Exist", notes = "This operation can be used to verify the document name exists or not. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents"),
+            @AuthorizationScope(scope = "apim:document_create", description = "Create API documents")
+        })
+    }, tags={ "MCP Server Documents",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response if the document name exists. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist. ", response = Void.class) })
+    public Response validateMCPServerDocument(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId,  @NotNull @ApiParam(value = "The name of the document which needs to be checked for the existence. ",required=true)  @QueryParam("name") String name,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.validateMCPServerDocument(mcpServerId, name, ifMatch, securityContext);
     }
 
     @POST
