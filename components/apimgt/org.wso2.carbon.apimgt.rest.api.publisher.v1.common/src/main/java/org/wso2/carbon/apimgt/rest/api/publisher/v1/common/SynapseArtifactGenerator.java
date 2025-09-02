@@ -117,12 +117,12 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                 new ThreadPoolExecutor.CallerRunsPolicy() { // Handle rejection gracefully
                     @Override
                     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                        log.warn("Thread pool queue full, executing task in caller thread");
+                        log.warn("Thread pool queue full, executing task in caller thread. Active threads: " +
+                                executor.getActiveCount() + ", Queue size: " + executor.getQueue().size());
                         super.rejectedExecution(r, executor);
                     }
                 }
         );
-
         log.info("SynapseArtifactGenerator thread pool initialized: core=" + CORE_POOL_SIZE +
                 ", max=" + MAX_POOL_SIZE + ", queue=" + QUEUE_CAPACITY);
     }
@@ -133,27 +133,26 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         log.info("Deactivating SynapseArtifactGenerator component");
-
         if (artifactThreadPoolExecutor != null) {
             log.info("Shutting down SynapseArtifactGenerator thread pool...");
-
             // Shutdown the executor service
             artifactThreadPoolExecutor.shutdown();
-
             try {
                 // Wait for existing tasks to complete within a timeout
-                if (!artifactThreadPoolExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
-                    log.warn("Thread pool did not terminate gracefully within the timeout, forcing shutdown");
+                if (artifactThreadPoolExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+                    log.info("SynapseArtifactGenerator thread pool shutdown completed gracefully.");
+                } else {
+                    log.warn("Thread pool did not terminate gracefully, forcing shutdown...");
                     artifactThreadPoolExecutor.shutdownNow();
-
-                    // Wait for tasks to respond to being cancelled
-                    if (!artifactThreadPoolExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
-                        log.error("Thread pool did not terminate after forced shutdown");
+                    // Wait again for tasks to respond to cancellation
+                    if (artifactThreadPoolExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
+                        log.info("SynapseArtifactGenerator thread pool shutdown completed after forcing.");
+                    } else {
+                        log.error("Thread pool did not terminate even after forced shutdown.");
                     }
                 }
-                log.info("SynapseArtifactGenerator thread pool shutdown completed");
             } catch (InterruptedException ie) {
-                log.error("Thread pool shutdown was interrupted", ie);
+                log.error("Thread pool shutdown was interrupted, forcing immediate shutdown.", ie);
                 artifactThreadPoolExecutor.shutdownNow();
                 Thread.currentThread().interrupt();
             }
@@ -183,7 +182,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
         int currentTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
         List<CompletableFuture<ProcessingResult>> futures = apiRuntimeArtifactDtoList.stream()
-            .map(runTimeArtifact ->  CompletableFuture.supplyAsync(() -> {
+            .map(runTimeArtifact -> CompletableFuture.supplyAsync(() -> {
                 // Set the Carbon context in the async thread
                 PrivilegedCarbonContext.startTenantFlow();
                 try {
@@ -200,7 +199,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                         String tenantDomain = runTimeArtifact.getTenantDomain();
                         String label = runTimeArtifact.getLabel();
                         Environment environment = null;
-                        // TODO prevent environment not found scenarios
+                        // TODO Environment not found scenarios should be handled before invoking this method.
                         try {
                             environment = APIUtil.getEnvironments(tenantDomain).get(label);
                         } catch (APIManagementException e) {
@@ -209,7 +208,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                     ", error: " + e.getMessage();
                             result.exception = e;
                             log.error("Error getting environment for API: " + result.name +
-                                    " (" + result.apiId + ") in tenant: " + tenantDomain, e);
+                                    " (" + result.apiId + ") in tenant: " + tenantDomain , e);
                             return result;
                         }
                         GatewayAPIDTO gatewayAPIDTO = null;
@@ -321,7 +320,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                 } finally {
                     PrivilegedCarbonContext.endTenantFlow();
                 }
-                }, artifactThreadPoolExecutor)).collect(Collectors.toList());
+            }, artifactThreadPoolExecutor)).collect(Collectors.toList());
 
         // Wait for all tasks to complete
         CompletableFuture<Void> allFutures = CompletableFuture.allOf(
@@ -330,6 +329,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
         try {
             // Collect results of all completed tasks
             allFutures.get();
+            log.info("Completed processing " + futures.size() + " runtime artifacts");
             for (int i = 0; i < futures.size(); i++) {
                 try {
                     ProcessingResult result = futures.get(i).get();
