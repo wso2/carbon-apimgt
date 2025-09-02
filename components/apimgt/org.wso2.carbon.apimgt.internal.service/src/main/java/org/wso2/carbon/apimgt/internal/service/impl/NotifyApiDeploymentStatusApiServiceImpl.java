@@ -67,7 +67,7 @@ public class NotifyApiDeploymentStatusApiServiceImpl implements NotifyApiDeploym
                 String apiId = acknowledgment.getApiId();
                 String tenantDomain = acknowledgment.getTenantDomain();
                 String status = acknowledgment.getDeploymentStatus().toString();
-                java.sql.Timestamp timeStamp = new java.sql.Timestamp(acknowledgment.getTimeStamp());
+                long timeStamp = acknowledgment.getTimeStamp();
                 String action = acknowledgment.getAction().toString();
                 String revisionUuid = acknowledgment.getRevisionId();
 
