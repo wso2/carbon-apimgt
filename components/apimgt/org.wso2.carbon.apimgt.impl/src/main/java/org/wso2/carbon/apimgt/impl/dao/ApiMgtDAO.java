@@ -19578,6 +19578,7 @@ public class ApiMgtDAO {
                     if (resultSet.next()) {
                         addPrimaryMapping.setString(1, apiRevision.getApiUUID());
                         addPrimaryMapping.setString(2, resultSet.getString("ENDPOINT_UUID"));
+                        addPrimaryMapping.setString(3, apiRevision.getRevisionUUID());
                         addPrimaryMapping.addBatch();
                     }
                 }
@@ -19588,6 +19589,7 @@ public class ApiMgtDAO {
                     if (resultSet.next()) {
                         addPrimaryMapping.setString(1, apiRevision.getApiUUID());
                         addPrimaryMapping.setString(2, resultSet.getString("ENDPOINT_UUID"));
+                        addPrimaryMapping.setString(3, apiRevision.getRevisionUUID());
                         addPrimaryMapping.addBatch();
                     }
                 }
@@ -21381,6 +21383,7 @@ public class ApiMgtDAO {
                     if (resultSet.next()) {
                         addPrimaryMapping.setString(1, apiRevision.getApiUUID());
                         addPrimaryMapping.setString(2, resultSet.getString("ENDPOINT_UUID"));
+                        addPrimaryMapping.setString(3, apiRevision.getRevisionUUID());
                         addPrimaryMapping.addBatch();
                     }
                 }
@@ -21392,6 +21395,7 @@ public class ApiMgtDAO {
                     if (resultSet.next()) {
                         addPrimaryMapping.setString(1, apiRevision.getApiUUID());
                         addPrimaryMapping.setString(2, resultSet.getString("ENDPOINT_UUID"));
+                        addPrimaryMapping.setString(3, apiRevision.getRevisionUUID());
                         addPrimaryMapping.addBatch();
                     }
                 }
@@ -26249,6 +26253,7 @@ public class ApiMgtDAO {
                     while (resultSet.next()) {
                         addPrimaryMapping.setString(1, newApiUUID);
                         addPrimaryMapping.setString(2, resultSet.getString("ENDPOINT_UUID"));
+                        addPrimaryMapping.setString(3, "Current API");
                         addPrimaryMapping.addBatch();
                     }
                     addPrimaryMapping.executeBatch();
@@ -26454,22 +26459,20 @@ public class ApiMgtDAO {
      * @throws SQLException           if an SQL error occurs while deleting primary endpoint mappings
      * @throws APIManagementException if error occurs while deleting existing primary endpoint mappings
      */
-    private boolean deleteExistingAPIPrimaryEndpointsMapping(Connection connection, String apiUUID)
+    private void deleteExistingAPIPrimaryEndpointsMapping(Connection connection, String apiUUID)
             throws SQLException, APIManagementException {
         String deleteOldPrimaryMappingsQuery = SQLConstants.APIEndpointsSQLConstants.DELETE_PRIMARY_ENDPOINT_MAPPING;
         try (PreparedStatement preparedStatement = connection.prepareStatement(deleteOldPrimaryMappingsQuery)) {
             preparedStatement.setString(1, apiUUID);
             preparedStatement.executeUpdate();
             connection.commit();
-            return true;
         } catch (SQLException e) {
             connection.rollback();
             handleException("Error while deleting primary endpoint mappings for API : " + apiUUID, e);
         }
-        return false;
     }
 
-    private boolean addPrimaryEndpointMapping(Connection connection, String apiUUID, API api)
+    private void addPrimaryEndpointMapping(Connection connection, String apiUUID, API api)
             throws SQLException, APIManagementException {
 
         String addPrimaryEndpointMappingQuery = SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING;
@@ -26477,23 +26480,23 @@ public class ApiMgtDAO {
             if (api.getPrimaryProductionEndpointId() != null) {
                 addPrimaryMapping.setString(1, apiUUID);
                 addPrimaryMapping.setString(2, api.getPrimaryProductionEndpointId());
+                addPrimaryMapping.setString(3, "Current API");
                 addPrimaryMapping.addBatch();
             }
             if (api.getPrimarySandboxEndpointId() != null) {
                 addPrimaryMapping.setString(1, apiUUID);
                 addPrimaryMapping.setString(2, api.getPrimarySandboxEndpointId());
+                addPrimaryMapping.setString(3, "Current API");
                 addPrimaryMapping.addBatch();
             }
             if (api.getPrimaryProductionEndpointId() != null || api.getPrimarySandboxEndpointId() != null) {
                 addPrimaryMapping.executeBatch();
                 connection.commit();
-                return true;
             }
         } catch (SQLException e) {
             connection.rollback();
             handleException("Error while adding primary endpoint mappings for API : " + apiUUID, e);
         }
-        return false;
     }
 
     /**
@@ -26510,6 +26513,7 @@ public class ApiMgtDAO {
             try (PreparedStatement addPrimaryMapping = connection.prepareStatement(addPrimaryEndpointMappingQuery)) {
                 addPrimaryMapping.setString(1, apiUUID);
                 addPrimaryMapping.setString(2, endpointUUID);
+                addPrimaryMapping.setString(3, "Current API");
                 addPrimaryMapping.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
@@ -26545,6 +26549,7 @@ public class ApiMgtDAO {
                     // add primary production endpoint mapping
                     addPrimaryMapping.setString(1, apiUUID);
                     addPrimaryMapping.setString(2, APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID);
+                    addPrimaryMapping.setString(3, "Current API");
                     addPrimaryMapping.addBatch();
                 }
 
@@ -26552,6 +26557,7 @@ public class ApiMgtDAO {
                     // add primary sandbox endpoint mapping
                     addPrimaryMapping.setString(1, apiUUID);
                     addPrimaryMapping.setString(2, APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID);
+                    addPrimaryMapping.setString(3, "Current API");
                     addPrimaryMapping.addBatch();
                 }
 
@@ -26568,11 +26574,14 @@ public class ApiMgtDAO {
         }
     }
 
-    public List<String> getPrimaryEndpointUUIDByAPIId(String apiUUID) throws APIManagementException {
+    public List<String> getPrimaryEndpointUUIDByAPIId(String apiUUID, String revisionUUID)
+            throws APIManagementException {
         List<String> endpointIds = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.APIEndpointsSQLConstants.GET_PRIMARY_ENDPOINT_MAPPINGS)) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    SQLConstants.APIEndpointsSQLConstants.GET_PRIMARY_ENDPOINT_MAPPINGS)) {
                 preparedStatement.setString(1, apiUUID);
+                preparedStatement.setString(2, Objects.requireNonNullElse(revisionUUID, "Current API"));
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         endpointIds.add(resultSet.getString("ENDPOINT_UUID"));
