@@ -90,8 +90,6 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
         }
 
         try {
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
             List<APIRevisionDeployment> test = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
 
             for (APIRevisionDeployment deployment : test) {

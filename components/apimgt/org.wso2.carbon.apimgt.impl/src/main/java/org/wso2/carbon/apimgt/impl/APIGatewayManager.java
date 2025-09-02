@@ -96,7 +96,11 @@ public class APIGatewayManager {
     private void sendUnDeploymentEvent(API api, String tenantDomain, Set<String> removedGateways,
                                        boolean onDeleteOrRetire) {
         APIIdentifier apiIdentifier = api.getId();
-
+        if (debugEnabled) {
+            log.debug("Sending undeployment event for API: " + apiIdentifier.getName() + " version: " +
+                    apiIdentifier.getVersion() + " from gateways: " + removedGateways + " onDeleteOrRetire: " +
+                    onDeleteOrRetire);
+        }
         DeployAPIInGatewayEvent
                 deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(),
@@ -105,7 +109,6 @@ public class APIGatewayManager {
                 onDeleteOrRetire);
         APIUtil.sendNotification(deployAPIInGatewayEvent,
                 APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
-
     }
 
     private void sendUnDeploymentEvent(APIProduct apiProduct, String tenantDomain, Set<String> removedGateways,
@@ -224,6 +227,4 @@ public class APIGatewayManager {
         return apiEvents;
     }
 
-    public void unDeployFromGateway(APIProduct apiProduct, String tenantDomain, Set<API> associatedAPIs, Set<String> environmentsToRemove, boolean onDeleteOrRetire) {
-    }
 }

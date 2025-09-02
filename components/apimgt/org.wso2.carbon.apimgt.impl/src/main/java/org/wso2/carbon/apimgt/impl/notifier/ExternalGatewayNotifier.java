@@ -146,6 +146,11 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
                             throw new APIManagementException("API is not mapped with an External API");
                         }
                         deleted = deployer.undeploy(referenceArtifact, deployAPIInGatewayEvent.isDeleted());
+                        if (log.isDebugEnabled()) {
+                            log.debug(
+                                    "Undeploying API with reference artifact: " + referenceArtifact + ", isDeleted: " +
+                                            deployAPIInGatewayEvent.isDeleted());
+                        }
                         if (!deleted) {
                             throw new NotifierException("Error while deleting externally deployed API");
                         }
