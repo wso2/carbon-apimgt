@@ -4969,10 +4969,11 @@ public class SQLConstants {
                 "DELETE FROM AM_API_PRIMARY_EP_MAPPING WHERE API_UUID = ?";
 
         public static final String ADD_PRIMARY_ENDPOINT_MAPPING =
-                "INSERT INTO AM_API_PRIMARY_EP_MAPPING (API_UUID, ENDPOINT_UUID) VALUES(?,?)";
+                "INSERT INTO AM_API_PRIMARY_EP_MAPPING (API_UUID, ENDPOINT_UUID, REVISION_UUID) VALUES(?,?,?)";
 
         public static final String GET_PRIMARY_ENDPOINT_MAPPINGS =
-                "SELECT ENDPOINT_UUID FROM AM_API_PRIMARY_EP_MAPPING WHERE API_UUID = ?";
+                "SELECT ENDPOINT_UUID " +
+                        "FROM AM_API_PRIMARY_EP_MAPPING WHERE API_UUID = ? AND REVISION_UUID = ?";;
 
         public static final String GET_API_PRIMARY_ENDPOINT_UUIDS_BY_API_UUID =
                 "SELECT AME.ENDPOINT_UUID " +

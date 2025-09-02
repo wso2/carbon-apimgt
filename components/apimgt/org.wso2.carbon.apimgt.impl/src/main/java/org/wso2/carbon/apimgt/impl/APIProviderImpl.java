@@ -9099,7 +9099,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // Handle scenario where default primary endpoints were set on AI API creation. Hence, these endpoint UUIDs
         // will not be available under the AM_API_ENDPOINTS table.
-        List<String> endpointIds = apiMgtDAO.getPrimaryEndpointUUIDByAPIId(currentApiUuid);
+        List<String> endpointIds = apiMgtDAO.getPrimaryEndpointUUIDByAPIId(currentApiUuid, revisionUuid);
         if (endpointIds != null && !endpointIds.isEmpty()) {
             for (String endpointId : endpointIds) {
                 if (APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID.equals(endpointId)) {
