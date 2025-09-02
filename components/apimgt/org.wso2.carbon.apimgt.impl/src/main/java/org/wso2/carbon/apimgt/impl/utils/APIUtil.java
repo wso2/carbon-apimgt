@@ -3574,16 +3574,6 @@ public final class APIUtil {
                 }
             } else {
                 GatewayAgentConfiguration externalGatewayConfiguration = externalGatewayConnectorConfigurationMap.get(gatewayType);
-                // Case-insensitive fallback lookup for external gateway keys
-                if (externalGatewayConfiguration == null) {
-                    for (Map.Entry<String, GatewayAgentConfiguration> e
-                            : externalGatewayConnectorConfigurationMap.entrySet()) {
-                        if (e.getKey().equalsIgnoreCase(gatewayType)) {
-                            externalGatewayConfiguration = e.getValue();
-                            break;
-                        }
-                    }
-                }
                 
                 if (externalGatewayConfiguration != null) {
                     processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, externalGatewayConfiguration);
