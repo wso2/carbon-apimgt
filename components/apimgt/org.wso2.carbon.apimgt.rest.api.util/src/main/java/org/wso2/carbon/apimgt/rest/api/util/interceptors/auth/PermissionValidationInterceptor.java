@@ -1,11 +1,10 @@
 /*
+ * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com).
  *
- *  Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
- *
- *  WSO2 LLC. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  n compliance with the License.
- *  You may obtain a copy of the License at
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -15,7 +14,6 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *
  */
 
 package org.wso2.carbon.apimgt.rest.api.util.interceptors.auth;
@@ -39,11 +37,10 @@ import java.util.List;
 /**
  * This interceptor checks user permission
  */
-public class PermissionValidationInterceptor extends AbstractPhaseInterceptor {
+public class PermissionValidationInterceptor extends AbstractPhaseInterceptor<Message> {
 
     private List<String> permissions = Collections.emptyList();
     private List<String> excludePathsList;
-    private AuthorizationPolicy authorizationPolicy;
     private static final Log log = LogFactory.getLog(PermissionValidationInterceptor.class);
     private static final String EXCLUDE_PATHS_SYS_PROP = "exclude.paths";
 
@@ -53,8 +50,8 @@ public class PermissionValidationInterceptor extends AbstractPhaseInterceptor {
         super(Phase.PRE_INVOKE);
         String excludePaths = System.getProperty(EXCLUDE_PATHS_SYS_PROP);
         if (excludePaths != null) {
-            String[] exludePathsArr = excludePaths.split(",");
-            excludePathsList = new ArrayList<>(Arrays.asList(exludePathsArr));
+            String[] excludePathsArr = excludePaths.split(",");
+            excludePathsList = new ArrayList<>(Arrays.asList(excludePathsArr));
         }
     }
 
