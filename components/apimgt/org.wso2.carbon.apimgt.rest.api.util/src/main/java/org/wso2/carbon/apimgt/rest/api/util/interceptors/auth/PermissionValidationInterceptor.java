@@ -82,6 +82,7 @@ public class PermissionValidationInterceptor extends AbstractPhaseInterceptor<Me
                     }
                 }
                 if (!hasPermission) {
+                    log.error("User does not have required permissions");
                     throw new AuthenticationException("Unauthenticated request");
                 }
             } catch (APIManagementException e) {
