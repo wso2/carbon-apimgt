@@ -84,12 +84,13 @@ public class KeyManagerConfigurationDataRetriever extends TimerTask {
                                     } else {
                                         try {
                                             ServiceReferenceHolder.getInstance().getKeyManagerConfigurationService()
-                                                    .updateDisabledKeyManagers(keyManagerConfiguration.getName());
+                                                    .updateDisabledKeyManagers(
+                                                            keyManagerConfiguration.getName(),
+                                                            tenantDomain);
                                         } catch (APIManagementException e) {
-                                            log.error(
-                                                    "Error while configuring disabled Key Managers " + 
-                                                            keyManagerConfiguration.getName() + " in tenant " + tenantDomain,
-                                                    e);
+                                            log.error("Error while configuring disabled Key Manager " +
+                                                    keyManagerConfiguration.getName() +
+                                                    " in tenant " + tenantDomain, e);
                                         }
                                     }
                                 }

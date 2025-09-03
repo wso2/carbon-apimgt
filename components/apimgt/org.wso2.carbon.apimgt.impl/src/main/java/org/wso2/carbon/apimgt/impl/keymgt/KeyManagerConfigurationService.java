@@ -33,5 +33,5 @@ public interface KeyManagerConfigurationService {
 
     void removeKeyManagerConfiguration(String tenantDomain, String name) throws APIManagementException;
     
-    void updateDisabledKeyManagers(String name) throws APIManagementException;
+    void updateDisabledKeyManagers(String name, String organization) throws APIManagementException;
 }

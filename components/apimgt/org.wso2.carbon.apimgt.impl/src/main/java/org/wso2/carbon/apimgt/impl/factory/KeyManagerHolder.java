@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.HashSet;
+import java.util.Set;
 import java.security.cert.X509Certificate;
 
 /**
@@ -60,7 +61,7 @@ public class KeyManagerHolder {
     private static final Map<String, OrganizationKeyManagerDto> organizationWiseMap = new HashMap<>();
     private static final Map<String, KeyManagerDto> globalJWTValidatorMap = new HashMap<>();
     private static OrganizationKeyManagerDto globalKMMap = new OrganizationKeyManagerDto();
-    private static HashSet<String> disabledKeyManagers = new HashSet<>();
+    private static final Map<String, Set<String>> disabledOrganizationWiseMap = new HashMap<>();
 
     public static void addKeyManagerConfiguration(String organization, String name, String type,
                                                   KeyManagerConfiguration keyManagerConfiguration)
@@ -81,13 +82,13 @@ public class KeyManagerHolder {
         }
 
         if (!keyManagerConfiguration.isEnabled()) {
-            disabledKeyManagers.add(name);
+            addDisabledKeyManager(name, organization);
             return;
         }
 
         if (keyManagerConfiguration.isEnabled() && !KeyManagerConfiguration.TokenType.EXCHANGED
                 .equals(keyManagerConfiguration.getTokenType())) {
-            disabledKeyManagers.remove(name);
+            removeDisabledKeyManager(name, organization);
             KeyManager keyManager = null;
             JWTValidator jwtValidator = null;
             APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
@@ -165,9 +166,9 @@ public class KeyManagerHolder {
         removeKeyManagerConfiguration(organization, name);
         if (keyManagerConfiguration.isEnabled()) {
             addKeyManagerConfiguration(organization, name, type, keyManagerConfiguration);
-            disabledKeyManagers.remove(name);
+            removeDisabledKeyManager(name, organization);
         } else {
-            disabledKeyManagers.add(name);
+            addDisabledKeyManager(name, organization);
         }
     }
 
@@ -341,11 +342,30 @@ public class KeyManagerHolder {
         return keyManagerMap;
     }
 
-    public static HashSet<String> getDisabledKeyManagers() {
-        return disabledKeyManagers;
+    public static Set<String> getDisabledTenantKeyManagerNames(String tenantDomain) {
+        if (!disabledOrganizationWiseMap.containsKey(tenantDomain)) {
+            return new HashSet<>();
+        }
+        return Collections.unmodifiableSet(disabledOrganizationWiseMap.get(tenantDomain));
     }
 
-    public static void addDisabledKeyManager(String name) {
-        disabledKeyManagers.add(name);
+    public static void addDisabledKeyManager(String name, String organization) {
+        Set<String> disabledKeyManagerNames = getDisabledTenantKeyManagerNames(organization);
+        if (disabledKeyManagerNames == null) {
+            disabledKeyManagerNames = new HashSet<>();
+        } else {
+            disabledKeyManagerNames = new HashSet<>(disabledKeyManagerNames);
+        }
+        disabledKeyManagerNames.add(name);
+        disabledOrganizationWiseMap.put(organization, disabledKeyManagerNames);
+    }
+
+    public static void removeDisabledKeyManager(String name, String organization) {
+        Set<String> disabledKeyManagerNames = getDisabledTenantKeyManagerNames(organization);
+        if (disabledKeyManagerNames != null && disabledKeyManagerNames.contains(name)) {
+            disabledKeyManagerNames = new HashSet<>(disabledKeyManagerNames);
+            disabledKeyManagerNames.remove(name);
+        }
+        disabledOrganizationWiseMap.put(organization, disabledKeyManagerNames);
     }
 }
