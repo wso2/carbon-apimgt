@@ -357,11 +357,13 @@ public class KeyManagerHolder {
     }
 
     public static void removeDisabledKeyManager(String name, String organization) {
-        Set<String> disabledKeyManagerNames = getDisabledTenantKeyManagerNames(organization);
-        if (disabledKeyManagerNames.contains(name)) {
-            disabledKeyManagerNames = new HashSet<>(disabledKeyManagerNames);
-            disabledKeyManagerNames.remove(name);
-        }
-        disabledOrganizationWiseMap.put(organization, disabledKeyManagerNames);
+        disabledOrganizationWiseMap.compute(organization, (org, currentSet) -> {
+            if (currentSet == null || !currentSet.contains(name)) {
+                return currentSet;
+            }
+            Set<String> newSet = new HashSet<>(currentSet);
+            newSet.remove(name);
+            return newSet.isEmpty() ? null : newSet;
+        });
     }
 }
