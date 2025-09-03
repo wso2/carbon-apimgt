@@ -351,18 +351,14 @@ public class KeyManagerHolder {
 
     public static void addDisabledKeyManager(String name, String organization) {
         Set<String> disabledKeyManagerNames = getDisabledTenantKeyManagerNames(organization);
-        if (disabledKeyManagerNames == null) {
-            disabledKeyManagerNames = new HashSet<>();
-        } else {
-            disabledKeyManagerNames = new HashSet<>(disabledKeyManagerNames);
-        }
+        disabledKeyManagerNames = new HashSet<>(disabledKeyManagerNames);
         disabledKeyManagerNames.add(name);
         disabledOrganizationWiseMap.put(organization, disabledKeyManagerNames);
     }
 
     public static void removeDisabledKeyManager(String name, String organization) {
         Set<String> disabledKeyManagerNames = getDisabledTenantKeyManagerNames(organization);
-        if (disabledKeyManagerNames != null && disabledKeyManagerNames.contains(name)) {
+        if (disabledKeyManagerNames.contains(name)) {
             disabledKeyManagerNames = new HashSet<>(disabledKeyManagerNames);
             disabledKeyManagerNames.remove(name);
         }
