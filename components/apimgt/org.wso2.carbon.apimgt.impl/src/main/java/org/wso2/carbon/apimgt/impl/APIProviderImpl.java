@@ -1218,8 +1218,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void updateAPIPrimaryEndpointsMapping(API api) throws APIManagementException {
         if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
-            // Delete any existing primary endpoint mappings
-            deleteAPIPrimaryEndpointMappings(api.getUuid());
+            String apiUUID = api.getUuid();
+            String revisionUUID = "Current API";
+            APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(apiUUID);
+            if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                apiUUID = apiRevision.getApiUUID();
+                revisionUUID = apiRevision.getRevisionUUID();
+            }
+
+            // Delete existing primary endpoint mappings
+            deleteAPIPrimaryEndpointMappings(apiUUID, revisionUUID);
 
             // Handle primary endpoint mapping addition if the API is an AI API
             String primaryProductionEndpointId = api.getPrimaryProductionEndpointId();
@@ -8797,7 +8805,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void removeAPIEndpoints(String apiUUID) throws APIManagementException {
         try {
-            deleteAPIPrimaryEndpointMappings(apiUUID);
+            deleteAPIPrimaryEndpointMappings(apiUUID, null);
             deleteAPIEndpointsByApiUUID(apiUUID);
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while removing endpoints for API " + apiUUID, e);
@@ -8949,8 +8957,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void deleteAPIPrimaryEndpointMappings(String apiId) throws APIManagementException {
-        apiMgtDAO.deleteAPIPrimaryEndpointMappings(apiId);
+    public void deleteAPIPrimaryEndpointMappings(String apiId, String revisionUUID) throws APIManagementException {
+        apiMgtDAO.deleteAPIPrimaryEndpointMappings(apiId, revisionUUID);
     }
 
     @Override
@@ -8996,6 +9004,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Handle scenario where default primary endpoints were set on AI API creation. Hence, these endpoint UUIDs
         // will not be available under the AM_API_ENDPOINTS table.
         List<String> endpointIds = apiMgtDAO.getPrimaryEndpointUUIDByAPIId(currentApiUuid, revisionUuid);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieved " + (endpointIds != null ?
+                    endpointIds.size() :
+                    0) + " primary endpoint IDs for API: " + currentApiUuid + ", revision: " + revisionUuid);
+        }
+
         if (endpointIds != null && !endpointIds.isEmpty()) {
             for (String endpointId : endpointIds) {
                 if (APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID.equals(endpointId)) {
