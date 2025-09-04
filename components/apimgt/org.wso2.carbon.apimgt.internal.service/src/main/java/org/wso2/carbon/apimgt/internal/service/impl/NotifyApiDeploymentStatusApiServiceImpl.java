@@ -81,11 +81,16 @@ public class NotifyApiDeploymentStatusApiServiceImpl implements NotifyApiDeploym
                         if (dao.isDeploymentTimestampInorder(gatewayId, apiId, timeStamp)) {
                             dao.updateDeployment(gatewayId, apiId, tenantDomain, status, action, revisionUuid,
                                                  timeStamp);
+                        } else if (log.isDebugEnabled()) {
+                            log.debug("Acknowledgment ignored: Older timestamp for acknowledgment: " + acknowledgment);
                         }
                     } else {
                         dao.insertDeployment(gatewayId, apiId, tenantDomain, status, action, revisionUuid, timeStamp);
                     }
+                } else if (log.isDebugEnabled()) {
+                    log.debug("API ID does not exist for acknowledgment: " + acknowledgment);
                 }
+
             }
             DeploymentAcknowledgmentResponseDTO response = new DeploymentAcknowledgmentResponseDTO();
             response.setStatus(DeploymentAcknowledgmentResponseDTO.StatusEnum.RECEIVED);
