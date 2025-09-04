@@ -1939,11 +1939,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 DevPortalSearchContent content = new DevPortalSearchContent();
                                 content.setContext(devAPI.getContext());
                                 String associatedType;
-                                if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
-                                        .equals(APIConstants.AuditLogConstants.API_PRODUCT)) {
+                                String artifactType = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
+                                if (artifactType.equals(APIConstants.API_PRODUCT)) {
                                     associatedType = APIConstants.API_PRODUCT;
-                                } else if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
-                                        .equals(APIConstants.MCP)){
+                                } else if (artifactType.equals(APIConstants.MCP)){
                                     associatedType = APIConstants.MCP;
                                 } else {
                                     associatedType = APIConstants.API;
