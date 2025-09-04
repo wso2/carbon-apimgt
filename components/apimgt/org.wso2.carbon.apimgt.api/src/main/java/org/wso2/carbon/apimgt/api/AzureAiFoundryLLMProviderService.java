@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Azure OpenAI LLM Provider Service.
+ * Azure AI Foundry AI Provider Service.
  */
 @Component(
         name = "azureAiFoundry.llm.provider.service",
@@ -110,7 +110,7 @@ public class AzureAiFoundryLLMProviderService extends BuiltInLLMProviderService 
             llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());
             return llmProvider;
         } catch (Exception e) {
-            throw new APIManagementException("Error occurred when registering LLM Provider:" + this.getType());
+            throw new APIManagementException("Error occurred when registering AI Service Provider:" + this.getType());
         }
     }
 
