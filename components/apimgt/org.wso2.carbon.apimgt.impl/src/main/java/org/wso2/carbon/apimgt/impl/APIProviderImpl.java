@@ -1256,12 +1256,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 } else if (isProductionEndpointFromAPIEndpointConfig) {
                     addDefaultPrimaryEndpoints(api, true, false);
                     if (primarySandboxEndpointId != null) {
-                        apiMgtDAO.addPrimaryEndpointMapping(api.getUuid(), primarySandboxEndpointId);
+                        apiMgtDAO.addPrimaryEndpointMapping(api.getUuid(), primarySandboxEndpointId,
+                                APIConstants.API_REVISION_CURRENT_API);
                     }
                 } else if (isSandboxEndpointFromAPIEndpointConfig) {
                     addDefaultPrimaryEndpoints(api, false, true);
                     if (primaryProductionEndpointId != null) {
-                        apiMgtDAO.addPrimaryEndpointMapping(api.getUuid(), primaryProductionEndpointId);
+                        apiMgtDAO.addPrimaryEndpointMapping(api.getUuid(), primaryProductionEndpointId,
+                                APIConstants.API_REVISION_CURRENT_API);
                     }
                 } else {
                     apiMgtDAO.addAPIPrimaryEndpointMappings(api);
