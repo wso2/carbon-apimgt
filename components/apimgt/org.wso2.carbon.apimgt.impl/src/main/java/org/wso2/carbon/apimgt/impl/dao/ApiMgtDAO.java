@@ -19567,21 +19567,22 @@ public class ApiMgtDAO {
 
                 // Add Primary Production endpoint mapping
                 String apiUUID = apiRevision.getApiUUID();
-                PreparedStatement addPrimaryMapping = connection
+                try (PreparedStatement addPrimaryMapping = connection
                         .prepareStatement(SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING);
-                PreparedStatement getPrimaryEpMappingsStmt = connection.prepareStatement(
-                        SQLConstants.APIEndpointsSQLConstants.GET_PRIMARY_ENDPOINT_MAPPINGS);
-                getPrimaryEpMappingsStmt.setString(1, apiUUID);
-                getPrimaryEpMappingsStmt.setString(2, APIConstants.API_REVISION_CURRENT_API);
-                try (ResultSet resultSet = getPrimaryEpMappingsStmt.executeQuery()) {
-                    while (resultSet.next()) {
-                        addPrimaryMapping.setString(1, apiRevision.getApiUUID());
-                        addPrimaryMapping.setString(2, resultSet.getString("ENDPOINT_UUID"));
-                        addPrimaryMapping.setString(3, apiRevision.getRevisionUUID());
-                        addPrimaryMapping.addBatch();
+                        PreparedStatement getPrimaryEpMappingsStmt = connection.prepareStatement(
+                                SQLConstants.APIEndpointsSQLConstants.GET_PRIMARY_ENDPOINT_MAPPINGS)) {
+                    getPrimaryEpMappingsStmt.setString(1, apiUUID);
+                    getPrimaryEpMappingsStmt.setString(2, APIConstants.API_REVISION_CURRENT_API);
+                    try (ResultSet resultSet = getPrimaryEpMappingsStmt.executeQuery()) {
+                        while (resultSet.next()) {
+                            addPrimaryMapping.setString(1, apiRevision.getApiUUID());
+                            addPrimaryMapping.setString(2, resultSet.getString("ENDPOINT_UUID"));
+                            addPrimaryMapping.setString(3, apiRevision.getRevisionUUID());
+                            addPrimaryMapping.addBatch();
+                        }
                     }
+                    addPrimaryMapping.executeBatch();
                 }
-                addPrimaryMapping.executeBatch();
 
                 // Adding to AM_API_CLIENT_CERTIFICATE
                 String getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE;
@@ -20445,11 +20446,12 @@ public class ApiMgtDAO {
                 removeAPIEndpointsStatement.executeUpdate();
 
                 // Removing current API primary endpoint mappings from AM_API_PRIMARY_EP_MAPPING table
-                PreparedStatement removePrimaryEndpointMappingsStmt = connection.prepareStatement(
-                        SQLConstants.APIEndpointsSQLConstants.DELETE_PRIMARY_ENDPOINT_MAPPING_BY_API_UUID_AND_REVISION_UUID);
-                removePrimaryEndpointMappingsStmt.setString(1, apiRevision.getApiUUID());
-                removePrimaryEndpointMappingsStmt.setString(2, APIConstants.API_REVISION_CURRENT_API);
-                removePrimaryEndpointMappingsStmt.executeUpdate();
+                try (PreparedStatement removePrimaryEndpointMappingsStmt = connection.prepareStatement(
+                        SQLConstants.APIEndpointsSQLConstants.DELETE_PRIMARY_ENDPOINT_MAPPING_BY_API_UUID_AND_REVISION_UUID)) {
+                    removePrimaryEndpointMappingsStmt.setString(1, apiRevision.getApiUUID());
+                    removePrimaryEndpointMappingsStmt.setString(2, APIConstants.API_REVISION_CURRENT_API);
+                    removePrimaryEndpointMappingsStmt.executeUpdate();
+                }
 
                 List<Backend> backends = getBackendRevisions(connection, apiRevision.getApiUUID(),
                         apiRevision.getRevisionUUID(), organization);
@@ -20475,7 +20477,7 @@ public class ApiMgtDAO {
                 for (APIEndpointInfo apiEndpointInfo : apiEndpointInfoList) {
                     insertAPIEndpointStatement.setString(1, apiRevision.getApiUUID());
                     insertAPIEndpointStatement.setString(2, apiEndpointInfo.getId());
-                    insertAPIEndpointStatement.setString(3, "Current API");
+                    insertAPIEndpointStatement.setString(3, APIConstants.API_REVISION_CURRENT_API);
                     insertAPIEndpointStatement.setString(4, apiEndpointInfo.getName());
                     insertAPIEndpointStatement.setString(5, apiEndpointInfo.getDeploymentStage());
                     insertAPIEndpointStatement.setBinaryStream(6,
@@ -20486,25 +20488,26 @@ public class ApiMgtDAO {
                 insertAPIEndpointStatement.executeBatch();
 
                 // Restoring to AM_API_PRIMARY_EP_MAPPING
-                PreparedStatement getPrimaryEndpoints = connection.prepareStatement(SQLConstants
-                        .APIEndpointsSQLConstants.GET_PRIMARY_ENDPOINT_MAPPINGS);
-                getPrimaryEndpoints.setString(1, apiRevision.getApiUUID());
-                getPrimaryEndpoints.setString(2, apiRevision.getRevisionUUID());
-                List<String> primaryEndpoints = new ArrayList<>();
-                try (ResultSet rs = getPrimaryEndpoints.executeQuery()) {
-                    while (rs.next()) {
-                        primaryEndpoints.add(rs.getString("ENDPOINT_UUID"));
+                try (PreparedStatement getPrimaryEndpoints = connection.prepareStatement(
+                        SQLConstants.APIEndpointsSQLConstants.GET_PRIMARY_ENDPOINT_MAPPINGS);
+                        PreparedStatement insertPrimaryEndpointMappingsStatement = connection.prepareStatement(
+                                SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING)) {
+                    getPrimaryEndpoints.setString(1, apiRevision.getApiUUID());
+                    getPrimaryEndpoints.setString(2, apiRevision.getRevisionUUID());
+                    List<String> primaryEndpoints = new ArrayList<>();
+                    try (ResultSet rs = getPrimaryEndpoints.executeQuery()) {
+                        while (rs.next()) {
+                            primaryEndpoints.add(rs.getString("ENDPOINT_UUID"));
+                        }
                     }
+                    for (String primaryEndpointUUID : primaryEndpoints) {
+                        insertPrimaryEndpointMappingsStatement.setString(1, apiRevision.getApiUUID());
+                        insertPrimaryEndpointMappingsStatement.setString(2, primaryEndpointUUID);
+                        insertPrimaryEndpointMappingsStatement.setString(3, APIConstants.API_REVISION_CURRENT_API);
+                        insertPrimaryEndpointMappingsStatement.addBatch();
+                    }
+                    insertPrimaryEndpointMappingsStatement.executeBatch();
                 }
-                PreparedStatement insertPrimaryEndpointMappingsStatement = connection
-                    .prepareStatement(SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING);
-                for (String primaryEndpointUUID : primaryEndpoints) {
-                    insertPrimaryEndpointMappingsStatement.setString(1, apiRevision.getApiUUID());
-                    insertPrimaryEndpointMappingsStatement.setString(2, primaryEndpointUUID);
-                    insertPrimaryEndpointMappingsStatement.setString(3, APIConstants.API_REVISION_CURRENT_API);
-                    insertPrimaryEndpointMappingsStatement.addBatch();
-                }
-                insertPrimaryEndpointMappingsStatement.executeBatch();
 
                 // Restoring to AM_API_URL_MAPPING table
                 PreparedStatement getURLMappingsStatement = connection.prepareStatement(SQLConstants
@@ -26381,7 +26384,7 @@ public class ApiMgtDAO {
         try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, apiUUID);
             statement.setString(2, apiEndpoint.getId());
-            statement.setString(3, "Current API");
+            statement.setString(3, APIConstants.API_REVISION_CURRENT_API);
             statement.setString(4, apiEndpoint.getName());
             statement.setString(5, apiEndpoint.getDeploymentStage());
             statement.setBinaryStream(6,
@@ -26416,7 +26419,7 @@ public class ApiMgtDAO {
                     for (APIEndpointInfo apiEndpoint : apiEndpointList) {
                         statement.setString(1, apiUUID);
                         statement.setString(2, apiEndpoint.getId());
-                        statement.setString(3, "Current API");
+                        statement.setString(3, APIConstants.API_REVISION_CURRENT_API);
                         statement.setString(4, apiEndpoint.getName());
                         statement.setString(5, apiEndpoint.getDeploymentStage());
                         statement.setBinaryStream(6,
@@ -26524,21 +26527,22 @@ public class ApiMgtDAO {
      *
      * @param apiUUID      API identifier
      * @param endpointUUID Endpoint identifier
+     * @param revisionUUID Revision identifier
      * @throws APIManagementException if an error occurs while adding the primary endpoint mapping
      */
-    public void addPrimaryEndpointMapping(String apiUUID, String endpointUUID) throws APIManagementException {
+    public void addPrimaryEndpointMapping(String apiUUID, String endpointUUID, String revisionUUID)
+            throws APIManagementException {
         String query = SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING;
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement stmt = connection.prepareStatement(query)) {
-
             stmt.setString(1, apiUUID);
             stmt.setString(2, endpointUUID);
-            stmt.setString(3, APIConstants.API_REVISION_CURRENT_API);
+            stmt.setString(3, revisionUUID);
             stmt.executeUpdate();
-
         } catch (SQLException e) {
-            handleException("Error while adding primary endpoint mapping for API: "
-                    + apiUUID + ", endpointUUID: " + endpointUUID, e);
+            handleException(
+                    "Error while adding primary endpoint mapping for API: " + apiUUID + ", endpointUUID: " + endpointUUID,
+                    e);
         }
     }
 
