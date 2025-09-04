@@ -1672,7 +1672,6 @@ public interface APIProvider extends APIManager {
     APIEndpointInfo updateAPIEndpoint(String apiId, APIEndpointInfo apiEndpoint, String organization)
             throws APIManagementException;
 
-
     /**
      * Delete API primary endpoint mappings by providing the API UUID
      *
