@@ -1161,7 +1161,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getGlobalAndTenantKeyManagers(tenantDomain);
         Set<String> disabledKeyManagers = KeyManagerHolder.getDisabledTenantKeyManagerNames(tenantDomain);
-        log.debug("Validating key managers for API: " + api.getId().getApiName());
+        if (log.isDebugEnabled()) {
+            log.debug("Validating key managers for API: " + api.getId().getApiName());
+        }
         List<String> configuredMissingKeyManagers = new ArrayList<>();
         for (String keyManager : api.getKeyManagers()) {
             if (!APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManager)) {
