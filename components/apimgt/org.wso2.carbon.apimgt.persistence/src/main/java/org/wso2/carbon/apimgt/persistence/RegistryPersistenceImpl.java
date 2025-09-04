@@ -1956,6 +1956,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 content.setTechnicalOwnerEmail(devAPI.getTechnicalOwnerEmail());
                                 content.setMonetizationStatus(devAPI.getMonetizationStatus());
                                 content.setAdvertiseOnly(devAPI.isAdvertiseOnly());
+                                content.setTransportType(devAPI.getType());
 
                                 contentData.add(content);
                             } else {
