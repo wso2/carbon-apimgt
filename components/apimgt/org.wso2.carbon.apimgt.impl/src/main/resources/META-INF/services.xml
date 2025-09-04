@@ -17,6 +17,7 @@
  -->
 <serviceGroup>
     <service name="TierCacheService" scope="transportsession">
+        <AuthenticationEnabled>true</AuthenticationEnabled>
         <transports><transport>https</transport></transports>
         <description>Exposes the Tier Cache as a service</description>
         <parameter name="ServiceClass">org.wso2.carbon.apimgt.impl.service.TierCacheService</parameter>
@@ -24,6 +25,7 @@
         <parameter name="AuthorizationAction" locked="true">/permission/admin/manage</parameter>
     </service>
     <service name="RegistryCacheInvalidationService" scope="transportsession">
+        <AuthenticationEnabled>true</AuthenticationEnabled>
         <transports><transport>https</transport></transports>
         <description>Exposes the registry cache invalidation as a service</description>
         <parameter name="ServiceClass">org.wso2.carbon.apimgt.impl.service.RegistryCacheInvalidationService</parameter>
@@ -31,6 +33,7 @@
         <parameter name="AuthorizationAction" locked="true">/permission/admin/manage</parameter>
     </service>
     <service name="APIKeyMgtRemoteUserStoreMgtService" scope="transportsession">
+        <AuthenticationEnabled>true</AuthenticationEnabled>
         <transports><transport>https</transport></transports>
         <schema schemaNamespace="http://org.apache.axis2/xsd" elementFormDefaultQualified="true" />
         <description>API Key Mgt functionality related to user management.</description>
