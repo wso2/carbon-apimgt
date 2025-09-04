@@ -102,18 +102,18 @@ public class APIConstants {
         public static final String LLM_CONFIGS_ENDPOINT = "/llm-providers";
         public static final String CONFIGURATIONS = "configurations";
         public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_NAME = "AzureOpenAI";
-        public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_VERSION = "1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_VERSION = "2.0.0";
         public static final String LLM_PROVIDER_SERVICE_AWS_BEDROCK_VERSION = "1.0.0";
-        public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_CONNECTOR = "azureOpenAi_1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_CONNECTOR = "azureOpenAi_2.0.0";
         public static final String LLM_PROVIDER_SERVICE_AWS_BEDROCK_CONNECTOR = "awsBedrock_1.0.0";
         public static final String LLM_PROVIDER_SERVICE_AWS_BEDROCK_NAME = "AWSBedrock";
         public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_KEY = "api-key";
-        public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_API_DEFINITION_FILE_NAME = "azure_api.yaml";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_API_DEFINITION_FILE_NAME = "azure_openai_api.yaml";
         public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_DESCRIPTION = "Azure OpenAI service";
         public static final String LLM_PROVIDER_SERVICE_AWS_BEDROCK_DESCRIPTION = "AWS Bedrock service";
         public static final String LLM_PROVIDER_SERVICE_OPENAI_NAME = "OpenAI";
-        public static final String LLM_PROVIDER_SERVICE_OPENAI_VERSION = "1.0.0";
-        public static final String LLM_PROVIDER_SERVICE_OPENAI_CONNECTOR = "openAi_1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_OPENAI_VERSION = "2.0.0";
+        public static final String LLM_PROVIDER_SERVICE_OPENAI_CONNECTOR = "openAi_2.0.0";
         public static final String LLM_PROVIDER_SERVICE_OPENAI_KEY = "Authorization";
         public static final String LLM_PROVIDER_SERVICE_OPENAI_API_DEFINITION_FILE_NAME = "openai_api.yaml";
         public static final String LLM_PROVIDER_SERVICE_OPENAI_DESCRIPTION = "OpenAI service";
@@ -129,6 +129,11 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_KEY = "x-api-key";
         public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_API_DEFINITION_FILE_NAME = "anthropic_api.yaml";
         public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_DESCRIPTION = "Anthropic Claude LLM Service";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_NAME = "AzureAIFoundry";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_VERSION = "1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_CONNECTOR = "azureAiFoundry_1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_DESCRIPTION = "Azure AI Foundry service";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_API_DEFINITION_FILE_NAME = "azure_ai_foundry_api.yaml";
         public static final String LLM_PROVIDER_SERVICE_METADATA_REQUEST_MODEL = "requestModel";
         public static final String LLM_PROVIDER_SERVICE_METADATA_RESPONSE_MODEL = "responseModel";
         public static final String LLM_PROVIDER_SERVICE_METADATA_MODEL = "model";
@@ -191,6 +196,9 @@ public class APIConstants {
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_ANTHROPIC = "Anthropic";
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_DEEPSEEK = "DeepSeek";
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_META = "Meta";
+        public static final String LLM_MODEL_PROVIDER_AZURE_FOUNDRY_OPENAI = "OpenAI";
+        public static final String LLM_MODEL_PROVIDER_AZURE_FOUNDRY_COHERE = "Cohere";
+        public static final String LLM_MODEL_PROVIDER_AZURE_FOUNDRY_XAI = "xAI";
     }
 
     public static class UnifiedSearchConstants {
