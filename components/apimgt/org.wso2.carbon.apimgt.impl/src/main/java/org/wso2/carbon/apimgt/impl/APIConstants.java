@@ -536,7 +536,6 @@ public final class APIConstants {
 
     public static final String API_REVISION_CURRENT_API = "Current API";
 
-
     public static class AWSConstants{
         // AWS S4 Constants
         public static final String AMZ_DATE_FORMAT = "yyyyMMdd'T'HHmmss'Z'";

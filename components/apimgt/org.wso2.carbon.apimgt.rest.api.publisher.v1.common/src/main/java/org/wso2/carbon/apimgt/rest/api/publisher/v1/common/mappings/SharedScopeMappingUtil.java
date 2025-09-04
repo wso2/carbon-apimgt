@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
@@ -80,7 +81,9 @@ public class SharedScopeMappingUtil {
             usedAPIInfoDTO.setProvider(apiIdentifier.getProviderName());
             usedAPIInfoDTO.setContext(api.getContext());
 
-            String revisionName = api.getRevisionId() != 0 ? "Revision " + api.getRevisionId() : "Current API";
+            String revisionName = api.getRevisionId() != 0 ?
+                    "Revision " + api.getRevisionId() :
+                    APIConstants.API_REVISION_CURRENT_API;
             usedAPIInfoDTO.setRevisionID(revisionName);
 
             List<SharedScopeUsedAPIResourceInfoDTO> usedAPIResourceInfoDTOList = new ArrayList<>();

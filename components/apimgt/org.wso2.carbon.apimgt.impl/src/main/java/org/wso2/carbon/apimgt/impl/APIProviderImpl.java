@@ -1230,7 +1230,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void updateAPIPrimaryEndpointsMapping(API api) throws APIManagementException {
         if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
             String apiUUID = api.getUuid();
-            String revisionUUID = "Current API";
+            String revisionUUID = APIConstants.API_REVISION_CURRENT_API;
             APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(apiUUID);
             if (apiRevision != null && apiRevision.getApiUUID() != null) {
                 apiUUID = apiRevision.getApiUUID();

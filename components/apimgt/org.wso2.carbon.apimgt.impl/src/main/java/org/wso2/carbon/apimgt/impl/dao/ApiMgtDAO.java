@@ -16730,7 +16730,7 @@ public class ApiMgtDAO {
                         while (rs.next()) {
                             insertProductResourceMappingStatement.setInt(1, productId);
                             insertProductResourceMappingStatement.setInt(2, rs.getInt(1));
-                            insertProductResourceMappingStatement.setString(3, "Current API");
+                            insertProductResourceMappingStatement.setString(3, APIConstants.API_REVISION_CURRENT_API);
                             insertProductResourceMappingStatement.addBatch();
                         }
                     }
@@ -20748,7 +20748,7 @@ public class ApiMgtDAO {
                         insertClientCertificateStatement.setBoolean(5, false);
                         insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
                         insertClientCertificateStatement.setString(7, keyType);
-                        insertClientCertificateStatement.setString(8, "Current API");
+                        insertClientCertificateStatement.setString(8, APIConstants.API_REVISION_CURRENT_API);
                         insertClientCertificateStatement.addBatch();
                     }
                     insertClientCertificateStatement.executeBatch();
@@ -21431,7 +21431,7 @@ public class ApiMgtDAO {
                     while (rs.next()) {
                         insertProductResourceMappingStatement.setInt(1, apiId);
                         insertProductResourceMappingStatement.setInt(2, rs.getInt("URL_MAPPING_ID"));
-                        insertProductResourceMappingStatement.setString(3, "Current API");
+                        insertProductResourceMappingStatement.setString(3, APIConstants.API_REVISION_CURRENT_API);
                         insertProductResourceMappingStatement.addBatch();
                     }
                     insertProductResourceMappingStatement.executeBatch();
@@ -21472,7 +21472,7 @@ public class ApiMgtDAO {
                         insertClientCertificateStatement.setBoolean(5, false);
                         insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
                         insertClientCertificateStatement.setString(7, keyType);
-                        insertClientCertificateStatement.setString(8, "Current API");
+                        insertClientCertificateStatement.setString(8, APIConstants.API_REVISION_CURRENT_API);
                         insertClientCertificateStatement.addBatch();
                     }
                     insertClientCertificateStatement.executeBatch();
@@ -26591,6 +26591,15 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Retrieve the list of primary endpoint UUIDs for the given API and revision. If the revision UUID is null, the
+     * 'Current API' revision is used.
+     *
+     * @param apiUUID      API UUID
+     * @param revisionUUID Revision UUID
+     * @return A list of primary endpoint UUIDs. Returns an empty list if none are found
+     * @throws APIManagementException If an error occurs while retrieving the data
+     */
     public List<String> getPrimaryEndpointUUIDByAPIId(String apiUUID, String revisionUUID)
             throws APIManagementException {
 
