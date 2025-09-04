@@ -4981,7 +4981,7 @@ public class SQLConstants {
         public static final String GET_API_PRIMARY_ENDPOINT_UUIDS_BY_API_UUID =
                 "SELECT AME.ENDPOINT_UUID " +
                         "FROM AM_API_ENDPOINTS AME INNER JOIN AM_API_PRIMARY_EP_MAPPING AMPM " +
-                        "ON (AMPM.ENDPOINT_UUID = AME.ENDPOINT_UUID AND AMPM.API_UUID = AME.API_UUID" +
+                        "ON (AMPM.ENDPOINT_UUID = AME.ENDPOINT_UUID AND AMPM.API_UUID = AME.API_UUID " +
                         "AND AMPM.REVISION_UUID = AME.REVISION_UUID) " +
                         "WHERE " +
                         "AME.API_UUID = ? " +

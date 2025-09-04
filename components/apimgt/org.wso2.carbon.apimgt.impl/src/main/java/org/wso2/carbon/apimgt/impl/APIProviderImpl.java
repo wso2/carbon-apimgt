@@ -7583,6 +7583,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiMgtDAO.deleteAPIRevision(apiRevision);
         apiMgtDAO.deleteAllAPIMetadataRevision(apiId, apiRevisionId);
+        apiMgtDAO.deleteAPIPrimaryEndpointMappings(apiId, apiRevisionId);
         apiMgtDAO.deleteAIConfigurationRevision(apiRevision.getRevisionUUID());
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {
@@ -9058,6 +9059,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public APIEndpointInfo updateAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint, String organization)
             throws APIManagementException {
         return apiMgtDAO.updateAPIEndpoint(apiUUID, apiEndpoint, organization);
+    }
+
+    @Override
+    @Deprecated
+    public void deleteAPIPrimaryEndpointMappings(String apiId) throws APIManagementException {
+        apiMgtDAO.deleteAPIPrimaryEndpointMappings(apiId, null);
     }
 
     @Override
