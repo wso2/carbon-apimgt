@@ -77,9 +77,7 @@ public class InternalAPIKeyGenerator implements ApiKeyGenerator {
         for (Map.Entry<String, String> entry : jwtTokenInfoDTO.getCustomClaims().entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            if (APIConstants.MCP.MCP_AUTH_CLAIM.equals(key)) {
-                jwtClaimsSetBuilder.claim(key, value);
-            }
+            jwtClaimsSetBuilder.claim(key, value);
         }
         return jwtClaimsSetBuilder.build();
     }

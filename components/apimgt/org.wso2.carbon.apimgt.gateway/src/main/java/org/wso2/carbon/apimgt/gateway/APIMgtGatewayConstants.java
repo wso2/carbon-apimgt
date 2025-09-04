@@ -19,6 +19,11 @@
 
 package org.wso2.carbon.apimgt.gateway;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 public class APIMgtGatewayConstants {
 
     public static final String CONSUMER_KEY = "api.ut.consumerKey";
@@ -214,5 +219,22 @@ public class APIMgtGatewayConstants {
     public static final String MCP_RESOURCE= "/mcp";
     public static final String MCP_WELL_KNOWN_RESOURCE = "/.well-known/oauth-protected-resource";
     public static final String MCP_AUTH_CLAIM = "MCP_AUTHENTICATED";
+
+    /**
+     * JWT Claim related Constants
+     */
+    public static final Set<String> STANDARD_JWT_CLAIMS = Collections.unmodifiableSet(new HashSet<>(
+            Arrays.asList("sub", "iss", "aud", "exp", "iat", "jti", "azp", "nbf", "scope", "scp", "aut")));
+    public static final String SUBSCRIBER_CLAIM = "subscriber";
+    public static final String APPLICATION_ID_CLAIM = "applicationid";
+    public static final String APPLICATION_NAME_CLAIM = "applicationname";
+    public static final String APPLICATION_TIER_CLAIM = "applicationtier";
+    public static final String TIER_CLAIM = "tier";
+    public static final String APPLICATION_UUID_CLAIM = "applicationUUId";
+    public static final String KEY_TYPE_CLAIM = "keytype";
+    public static final String END_USER_CLAIM = "enduser";
+    public static final String END_USER_TENANT_ID_CLAIM = "enduserTenantId";
+    public static final String TOKEN_TYPE_CLAIM = "token_type";
+
 }
 
