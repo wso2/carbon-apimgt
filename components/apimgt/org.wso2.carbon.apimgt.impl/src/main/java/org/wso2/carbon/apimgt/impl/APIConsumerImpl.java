@@ -4507,6 +4507,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                 docItem.getApiVersion()));
                         api.setUuid(docItem.getApiUUID());
                         api.setDisplayName(docItem.getApiDisplayName());
+                        api.setType(docItem.getAssociatedType());
                         docMap.put(doc, api);
                     } else if (item instanceof APIDefSearchContent) {
                         APIDefSearchContent definitionItem = (APIDefSearchContent) item;
