@@ -402,6 +402,8 @@ public final class APIConstants {
     public static final String API_TYPE_WS = "WS";
     public static final String API_TYPE_GRAPHQL = "GRAPHQL";
     public static final String API_TYPE_SOAP = "SOAP";
+    public static final String API_TYPE_MCP = "MCP";
+    public static final String API_IDENTIFIER_TYPE = "API";
 
     // API Subtype constants
     public static final String API_SUBTYPE_DEFAULT = "DEFAULT";
