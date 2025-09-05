@@ -18,6 +18,8 @@ package org.wso2.carbon.apimgt.gateway.mediators;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
+
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -386,25 +388,50 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
     }
 
     private void modifyRequestPath(String model, LLMProviderMetadata targetModelMetadata,
-                                   MessageContext messageContext) {
+                                   MessageContext messageContext) throws UnsupportedEncodingException {
         org.apache.axis2.context.MessageContext axis2Ctx =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         String requestPath = (String) axis2Ctx.getProperty(NhttpConstants.REST_URL_POSTFIX);
         if (StringUtils.isNotEmpty(requestPath)) {
             requestPath = URLDecoder.decode(requestPath, Charset.defaultCharset());
             String updatedPath = requestPath.replaceAll(targetModelMetadata.getAttributeIdentifier(), model);
-            String encodedPath = Arrays.stream(updatedPath.split("/"))
-                    .map(segment -> {
+            URI uri = URI.create(updatedPath);
+            String path = uri.getPath();
+            String query = uri.getQuery();
+            String fragment = uri.getFragment();
+
+            String encodedPath = Arrays.stream(path.split("/"))
+                .map(segment -> {
+                    // Do not encode reserved characters like ':'
+                    if (segment.contains(":")) {
+                        return segment;
+                    }
+                    try {
+                        return URLEncoder.encode(segment, StandardCharsets.UTF_8.toString());
+                    } catch (Exception e) {
+                        return segment;
+                    }
+                })
+                .collect(Collectors.joining("/"));
+
+            StringBuilder finalPath = new StringBuilder(encodedPath);
+            if (query != null) {
+                finalPath.append("?").append(Arrays.stream(query.split("&"))
+                    .map(param -> {
+                        String[] kv = param.split("=", 2);
                         try {
-                            // Encode each segment individually
-                            return URLEncoder.encode(segment, StandardCharsets.UTF_8.toString());
+                            return URLEncoder.encode(kv[0], StandardCharsets.UTF_8.toString()) +
+                                (kv.length > 1 ? "=" + URLEncoder.encode(kv[1], StandardCharsets.UTF_8.toString()) : "");
                         } catch (Exception e) {
-                            // In Java 10+, this exception is no longer thrown for UTF-8
-                            return segment;
+                            return param;
                         }
                     })
-                    .collect(Collectors.joining("/"));
-            axis2Ctx.setProperty(NhttpConstants.REST_URL_POSTFIX, encodedPath);
+                    .collect(Collectors.joining("&")));
+            }
+            if (fragment != null) {
+                finalPath.append("#").append(URLEncoder.encode(fragment, StandardCharsets.UTF_8.toString()));
+            }
+            axis2Ctx.setProperty(NhttpConstants.REST_URL_POSTFIX, finalPath.toString());
         }
     }
 
