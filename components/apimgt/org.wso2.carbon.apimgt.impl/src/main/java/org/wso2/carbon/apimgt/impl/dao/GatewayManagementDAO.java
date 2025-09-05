@@ -189,7 +189,7 @@ public class GatewayManagementDAO {
      * @throws APIManagementException if database operation fails
      */
     public void insertDeployment(String gatewayId, String apiId, String organization, String status, String action,
-                                 String revisionUuid, Timestamp lastUpdated) throws APIManagementException {
+                                 String revisionUuid, long lastUpdated) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement ps = connection.prepareStatement(
@@ -199,7 +199,7 @@ public class GatewayManagementDAO {
                 ps.setString(3, status);
                 ps.setString(4, action);
                 ps.setString(5, revisionUuid);
-                ps.setTimestamp(6, lastUpdated);
+                ps.setLong(6, lastUpdated);
                 ps.setString(7, gatewayId);
                 ps.setString(8, organization);
                 ps.executeUpdate();
@@ -225,7 +225,7 @@ public class GatewayManagementDAO {
      * @throws APIManagementException if database operation fails
      */
     public void updateDeployment(String gatewayId, String apiId, String organization, String status, String action,
-                                 String revisionUuid, Timestamp lastUpdated) throws APIManagementException {
+                                 String revisionUuid, long lastUpdated) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement ps = connection.prepareStatement(
@@ -233,7 +233,7 @@ public class GatewayManagementDAO {
                 ps.setString(1, status);
                 ps.setString(2, action);
                 ps.setString(3, revisionUuid);
-                ps.setTimestamp(4, lastUpdated);
+                ps.setLong(4, lastUpdated);
                 ps.setString(5, organization);
                 ps.setString(6, gatewayId);
                 ps.setString(7, organization);
@@ -399,7 +399,7 @@ public class GatewayManagementDAO {
      * @return true if the existing deployment has an older timestamp, false if newer or deployment doesn't exist
      * @throws APIManagementException if database operation fails
      */
-    public boolean isDeploymentTimestampInorder(String gatewayId, String apiId, Timestamp compareTimestamp)
+    public boolean isDeploymentTimestampInorder(String gatewayId, String apiId, long compareTimestamp)
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection(); PreparedStatement ps = connection.prepareStatement(
                 SQLConstants.GatewayManagementSQLConstants.SELECT_DEPLOYMENT_TIMESTAMP_SQL)) {
@@ -407,9 +407,9 @@ public class GatewayManagementDAO {
             ps.setString(2, apiId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    Timestamp existingTimestamp = rs.getTimestamp(
+                    long existingTimestamp = rs.getLong(
                             APIConstants.GatewayNotification.DB_COLUMN_LAST_UPDATED);
-                    return existingTimestamp != null && existingTimestamp.before(compareTimestamp);
+                    return existingTimestamp < compareTimestamp;
                 }
                 return false; // Deployment doesn't exist
             }
@@ -447,8 +447,8 @@ public class GatewayManagementDAO {
      * @param apiUuid               the UUID of the API
      * @throws APIManagementException if database operation fails
      */
-    public void calculateGatewayDeploymentStats(APIRevisionDeployment apiRevisionDeployment, String revisionUuid,
-                                                 String environmentName, String apiUuid) throws APIManagementException {
+    public void setGatewayDeploymentStats(APIRevisionDeployment apiRevisionDeployment, String revisionUuid,
+                                          String environmentName, String apiUuid) throws APIManagementException {
         GatewayNotificationConfiguration config = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getGatewayNotificationConfiguration();
         long currentTime = System.currentTimeMillis();
@@ -465,13 +465,14 @@ public class GatewayManagementDAO {
                     if (resultSet.next()) {
                         int deployedCount = resultSet.getInt(APIConstants.GatewayNotification.DEPLOYED_COUNT);
                         int failedCount = resultSet.getInt(APIConstants.GatewayNotification.FAILED_COUNT);
-                        Timestamp latestSuccessTime = resultSet.getTimestamp(APIConstants.GatewayNotification.LATEST_SUCCESS_TIME);
+                        long latestSuccessTime = resultSet.getLong(APIConstants.GatewayNotification.LATEST_SUCCESS_TIME);
 
                         apiRevisionDeployment.setDeployedGatewayCount(deployedCount);
                         apiRevisionDeployment.setFailedGatewayCount(failedCount);
 
-                        if (latestSuccessTime != null) {
-                            apiRevisionDeployment.setSuccessDeployedTime(latestSuccessTime.toString());
+                        if (latestSuccessTime > 0) {
+                            Timestamp successTimestamp = new Timestamp(latestSuccessTime);
+                            apiRevisionDeployment.setSuccessDeployedTime(successTimestamp.toString());
                         }
                     }
                 }

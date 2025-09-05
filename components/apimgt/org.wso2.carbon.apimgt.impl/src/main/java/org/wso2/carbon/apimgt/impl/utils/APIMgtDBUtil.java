@@ -291,8 +291,8 @@ public final class APIMgtDBUtil {
                 apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
 
                 GatewayManagementDAO gatewayManagementDAO = getGatewayManagementDAO();
-                gatewayManagementDAO.calculateGatewayDeploymentStats(apiRevisionDeployment, revisionUuid,
-                                                                     environmentName, apiUuid);
+                gatewayManagementDAO.setGatewayDeploymentStats(apiRevisionDeployment, revisionUuid,
+                                                               environmentName, apiUuid);
 
                 apiRevisionDeploymentList.add(apiRevisionDeployment);
                 uniqueSet.put(uniqueKey, apiRevisionDeployment);

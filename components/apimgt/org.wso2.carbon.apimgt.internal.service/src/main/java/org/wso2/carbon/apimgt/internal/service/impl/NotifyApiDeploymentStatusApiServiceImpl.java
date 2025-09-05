@@ -67,7 +67,7 @@ public class NotifyApiDeploymentStatusApiServiceImpl implements NotifyApiDeploym
                 String apiId = acknowledgment.getApiId();
                 String tenantDomain = acknowledgment.getTenantDomain();
                 String status = acknowledgment.getDeploymentStatus().toString();
-                java.sql.Timestamp timeStamp = new java.sql.Timestamp(acknowledgment.getTimeStamp());
+                long timeStamp = acknowledgment.getTimeStamp();
                 String action = acknowledgment.getAction().toString();
                 String revisionUuid = acknowledgment.getRevisionId();
 
@@ -81,11 +81,16 @@ public class NotifyApiDeploymentStatusApiServiceImpl implements NotifyApiDeploym
                         if (dao.isDeploymentTimestampInorder(gatewayId, apiId, timeStamp)) {
                             dao.updateDeployment(gatewayId, apiId, tenantDomain, status, action, revisionUuid,
                                                  timeStamp);
+                        } else if (log.isDebugEnabled()) {
+                            log.debug("Acknowledgment ignored: Older timestamp for acknowledgment: " + acknowledgment);
                         }
                     } else {
                         dao.insertDeployment(gatewayId, apiId, tenantDomain, status, action, revisionUuid, timeStamp);
                     }
+                } else if (log.isDebugEnabled()) {
+                    log.debug("API ID does not exist for acknowledgment: " + acknowledgment);
                 }
+
             }
             DeploymentAcknowledgmentResponseDTO response = new DeploymentAcknowledgmentResponseDTO();
             response.setStatus(DeploymentAcknowledgmentResponseDTO.StatusEnum.RECEIVED);
