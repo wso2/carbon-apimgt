@@ -21,14 +21,14 @@
         <description>Admin service to manage API publisher and store related functionality at the API Gateway</description>
         <parameter name="ServiceClass">org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin</parameter>
         <parameter name="DoAuthentication" locked="true">true</parameter>
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage</parameter>
     </service>
     <service name="APILocalEntryAdmin" scope="transportsession">
         <transports><transport>https</transport></transports>
         <description>Admin service to manage LocalEntry related functionality at the API Gateway</description>
         <parameter name="ServiceClass">org.wso2.carbon.apimgt.gateway.service.APILocalEntryAdmin</parameter>
         <parameter name="DoAuthentication" locked="true">true</parameter>
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
+        <parameter name="AuthorizationAction" locked="true">/permission/admin/manage</parameter>
     </service>
     <parameter name="adminService" locked="true">true</parameter>
     <parameter name="hiddenService" locked="true">true</parameter>
