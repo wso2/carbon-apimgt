@@ -5776,6 +5776,8 @@ components:
               example: admin
             apiUUID:
               type: string
+            associatedType:
+              type: string
     CommenterInfo:
       type: object
       properties:
