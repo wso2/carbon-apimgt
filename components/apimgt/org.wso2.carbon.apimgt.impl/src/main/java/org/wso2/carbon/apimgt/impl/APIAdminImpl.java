@@ -890,25 +890,47 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     private void encryptGatewayConfigurationValues(Environment retrievedGatewayConfigurationDTO,
-                                                   Environment updatedGatewayConfigurationDto)
-            throws APIManagementException {
+            Environment updatedGatewayConfigurationDto) throws APIManagementException {
 
         GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
                 .getExternalGatewayConnectorConfiguration(updatedGatewayConfigurationDto.getGatewayType());
         if (gatewayConfiguration != null) {
             Map<String, String> additionalProperties = updatedGatewayConfigurationDto.getAdditionalProperties();
-            for (ConfigurationDto configurationDto : gatewayConfiguration.getConnectionConfigurations()) {
-                if (configurationDto.isMask()) {
-                    String value = additionalProperties.get(configurationDto.getName());
-                    if (APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD.equals(value)) {
-                        if (retrievedGatewayConfigurationDTO != null) {
-                            String unModifiedValue = retrievedGatewayConfigurationDTO.getAdditionalProperties()
-                                    .get(configurationDto.getName());
-                            additionalProperties.replace(configurationDto.getName(), unModifiedValue);
-                        }
-                    } else if (StringUtils.isNotEmpty(value)) {
-                        additionalProperties.replace(configurationDto.getName(), String.valueOf(encryptValues(value)));
+            List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
+            if (connectionConfigurations != null && !connectionConfigurations.isEmpty()) {
+                for (ConfigurationDto configurationDto : connectionConfigurations) {
+                    applyGatewayConfigMaskingAndEncryption(configurationDto, additionalProperties,
+                            retrievedGatewayConfigurationDTO);
+                }
+            }
+        }
+    }
+
+    private void applyGatewayConfigMaskingAndEncryption(ConfigurationDto configurationDto,
+            Map<String, String> additionalProperties, Environment retrievedGatewayConfigurationDTO)
+            throws APIManagementException {
+
+        if (configurationDto.isMask()) {
+            String value = additionalProperties.get(configurationDto.getName());
+            if (APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD.equals(value)) {
+                if (retrievedGatewayConfigurationDTO != null) {
+                    String unModifiedValue = retrievedGatewayConfigurationDTO.getAdditionalProperties()
+                            .get(configurationDto.getName());
+                    if (unModifiedValue != null) {
+                        additionalProperties.replace(configurationDto.getName(), unModifiedValue);
                     }
+                }
+            } else if (StringUtils.isNotEmpty(value)) {
+                additionalProperties.replace(configurationDto.getName(), String.valueOf(encryptValues(value)));
+            }
+        }
+
+        List<Object> nestedConfigurationValues = configurationDto.getValues();
+        if (nestedConfigurationValues != null && !nestedConfigurationValues.isEmpty()) {
+            for (Object nestedConfiguration : nestedConfigurationValues) {
+                if (nestedConfiguration instanceof ConfigurationDto) {
+                    applyGatewayConfigMaskingAndEncryption((ConfigurationDto) nestedConfiguration, additionalProperties,
+                            retrievedGatewayConfigurationDTO);
                 }
             }
         }
@@ -1699,16 +1721,36 @@ public class APIAdminImpl implements APIAdmin {
         }
     }
 
+    private void applyMaskToNestedGatewayFields(List<Object> connectorConfigurations,
+            Map<String, String> additionalProperties) {
+        if (connectorConfigurations == null || connectorConfigurations.isEmpty()) {
+            return;
+        }
+        for (Object connectorConfiguration : connectorConfigurations) {
+            if (connectorConfiguration instanceof ConfigurationDto) {
+                ConfigurationDto connectorConfigurationDto = (ConfigurationDto) connectorConfiguration;
+                if (connectorConfigurationDto.isMask()) {
+                    additionalProperties.replace(connectorConfigurationDto.getName(),
+                            APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+                }
+                applyMaskToNestedGatewayFields(connectorConfigurationDto.getValues(), additionalProperties);
+            }
+        }
+    }
+
     private void maskValues(Environment environment) {
         GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
                 .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
         if (gatewayConfiguration != null) {
             Map<String, String> additionalProperties = environment.getAdditionalProperties();
             List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
-            for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
-                if (connectionConfiguration.isMask()) {
-                    additionalProperties.replace(connectionConfiguration.getName(),
-                            APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+            if (connectionConfigurations != null && !connectionConfigurations.isEmpty()) {
+                for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
+                    if (connectionConfiguration.isMask()) {
+                        additionalProperties.replace(connectionConfiguration.getName(),
+                                APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+                    }
+                    applyMaskToNestedGatewayFields(connectionConfiguration.getValues(), additionalProperties);
                 }
             }
         }
