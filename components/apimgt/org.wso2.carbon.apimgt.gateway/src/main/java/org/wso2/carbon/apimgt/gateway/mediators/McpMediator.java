@@ -33,6 +33,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.OAuthProtectedResourceDTO;
@@ -53,6 +54,7 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Mediator for handling MCP (Model Context Protocol) requests and responses in the API Gateway.
@@ -65,6 +67,8 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
     private static final String MCP_PROCESSED = "MCP_PROCESSED";
     private static final String IN_FLOW = "IN";
     private static final String OUT_FLOW = "OUT";
+    private static final Pattern validHostHeaderPattern =
+            Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
 
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
@@ -174,14 +178,22 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             log.error("Multiple Key Managers found for MCP Server: " + matchedAPI.getUuid() + ".");
             skipAuthServersAttribute = true;
         }
-        // We need to adjust this to support vhost instead of constructing the URL here
-        String contextPath = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
-        String hostAddress = APIUtil.getHostAddress();
-        String serverURL = APIConstants.HTTPS_PROTOCOL + APIConstants.URL_SCHEME_SEPARATOR + hostAddress;
-        if ("localhost".equals(hostAddress)) {
-            serverURL += ":";
-            serverURL += (8243  + APIUtil.getPortOffset());
+
+        // Derive the outward facing host and port from host header
+        org.apache.axis2.context.MessageContext axis2MC =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        String hostHeader = (String) headers.get(APIMgtGatewayConstants.HOST);
+        if (!StringUtils.isEmpty(hostHeader)) {
+            if (StringUtils.isBlank(hostHeader) || !validHostHeaderPattern.matcher(hostHeader).matches()) {
+                log.debug("Missing or malformed host header in request.Extracting host header from config.");
+                hostHeader = APIUtil.getHostAddress();
+            }
         }
+
+        String contextPath = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+        String serverURL = MCPUtils.getGatewayServerURL(hostHeader, contextPath);
+
         String resourceURL = serverURL + contextPath + APIMgtGatewayConstants.MCP_RESOURCE;
         oAuthProtectedResourceDTO.setResource(resourceURL);
 
