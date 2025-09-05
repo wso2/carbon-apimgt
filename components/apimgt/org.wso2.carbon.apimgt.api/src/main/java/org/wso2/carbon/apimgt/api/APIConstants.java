@@ -134,6 +134,12 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_CONNECTOR = "azureAiFoundry_1.0.0";
         public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_DESCRIPTION = "Azure AI Foundry service";
         public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_API_DEFINITION_FILE_NAME = "azure_ai_foundry_api.yaml";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_NAME = "Gemini";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_VERSION = "1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_CONNECTOR = "gemini_1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_DESCRIPTION = "Gemini service";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_API_DEFINITION_FILE_NAME = "gemini_api.yaml";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_KEY = "X-goog-api-key";
         public static final String LLM_PROVIDER_SERVICE_METADATA_REQUEST_MODEL = "requestModel";
         public static final String LLM_PROVIDER_SERVICE_METADATA_RESPONSE_MODEL = "responseModel";
         public static final String LLM_PROVIDER_SERVICE_METADATA_MODEL = "model";
@@ -153,6 +159,16 @@ public class APIConstants {
                 ".completion_tokens";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_TOTAL_TOKEN_COUNT = "$.usage.total_tokens";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_REMAINING_TOKEN_COUNT = "x-ratelimit-remaining-tokens";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_REQUEST_METADATA_IDENTIFIER_MODEL =
+                "(?<=models/)[a-zA-Z0-9.\\-]+";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_PROMPT_TOKEN_COUNT =
+                "$.usageMetadata.promptTokenCount";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_CANDIDATES_TOKEN_COUNT =
+                "$.usageMetadata.candidatesTokenCount";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_TOTAL_TOKEN_COUNT =
+                "$.usageMetadata.totalTokenCount";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_RESPONSE_METADATA_IDENTIFIER_MODEL =
+                "$.modelVersion";
         public static final String LLM_PROVIDER_SERVICE_DEFAULT = "default";
         public static final String NULL = "null";
         public static final String LLM_PROVIDER = "LLM_PROVIDER";

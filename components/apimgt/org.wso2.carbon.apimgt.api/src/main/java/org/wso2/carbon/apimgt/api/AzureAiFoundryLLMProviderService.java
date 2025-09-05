@@ -18,16 +18,15 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.model.LLMModel;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Azure AI Foundry AI Provider Service.
@@ -49,6 +48,7 @@ public class AzureAiFoundryLLMProviderService extends BuiltInLLMProviderService 
     public LLMProvider getLLMProvider()
             throws APIManagementException {
 
+        log.debug("Initializing Azure AI Foundry LLM Provider Service");
         try {
             LLMProvider llmProvider = new LLMProvider();
             llmProvider.setName(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_NAME);
@@ -108,9 +108,11 @@ public class AzureAiFoundryLLMProviderService extends BuiltInLLMProviderService 
             llmProvider.setModelList(modelList);
 
             llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());
+            log.debug("Successfully configured Azure AI Foundry LLM Provider Service");
             return llmProvider;
         } catch (Exception e) {
-            throw new APIManagementException("Error occurred when registering AI Service Provider:" + this.getType());
+            log.error("Error occurred when registering LLM Provider: " + this.getType());
+            throw new APIManagementException("Error occurred when registering AI Service Provider:" + this.getType(), e);
         }
     }
 
