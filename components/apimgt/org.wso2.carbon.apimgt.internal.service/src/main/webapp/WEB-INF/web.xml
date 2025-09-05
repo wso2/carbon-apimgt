@@ -82,6 +82,7 @@
             <param-value>
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor,
+                org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.PermissionValidationInterceptor(permissions=/permission/admin/ permissions=/permission/protected/),
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor
             </param-value>
