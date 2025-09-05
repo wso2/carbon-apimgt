@@ -35,6 +35,11 @@ public class KeyManagerConfigurationServiceImpl implements KeyManagerConfigurati
         }
 
     }
+    
+    @Override
+    public void updateDisabledKeyManagers(String name, String organization) throws APIManagementException {
+        KeyManagerHolder.addDisabledKeyManager(name, organization);
+    }
 
     @Override
     public void updateKeyManagerConfiguration(String organization, String name, String type,
