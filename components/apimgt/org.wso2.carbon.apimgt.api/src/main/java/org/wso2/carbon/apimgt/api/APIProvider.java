@@ -1490,16 +1490,21 @@ public interface APIProvider extends APIManager {
 
     /**
      * Delete all API Revisions when the API is deleted or retired
-     * @param apiUUID
-     * @param organization
+     *
+     * @param apiUUID       API UUID
+     * @param organization Identifier of an organization
+     * @param onDeleteOrRetire true when invoked during API delete or retire flows; false otherwise
      * @throws APIManagementException
      */
-    void deleteAPIRevisionsOnDeleteOrRetire(String apiUUID, String organization) throws APIManagementException;
+    default void deleteAPIRevisions(String apiUUID, String organization, boolean onDeleteOrRetire) throws APIManagementException{
+        // Fallback for older implementations that only implement the 2-arg method
+        deleteAPIRevisions(apiUUID, organization);
+    }
 
 
     /**
      * Delete all API Revision
-     *
+     * @deprecated use {@link #deleteAPIRevisions(String, String, boolean)}
      * @param apiId        API UUID
      * @param organization Identifier of an organization
      * @throws APIManagementException if failed to delete APIRevision

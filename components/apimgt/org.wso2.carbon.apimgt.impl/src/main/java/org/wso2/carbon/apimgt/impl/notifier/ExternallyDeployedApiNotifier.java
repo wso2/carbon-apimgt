@@ -103,6 +103,10 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                             if (referenceArtifact == null) {
                                 throw new DeployerException("API is not mapped with an External API");
                             }
+                            if (log.isDebugEnabled()){
+                                log.debug("Undeploy API from external gateway: " + referenceArtifact +
+                                        " in environment: " + deploymentEnv);
+                            }
                             deleted = deployer.undeploy(referenceArtifact, true);
                             if (!deleted) {
                                 throw new NotifierException("Error while deleting externally deployed API");
@@ -144,6 +148,10 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                                     gatewayEnvironments.get(deploymentEnv).getUuid());
                             if (referenceArtifact == null) {
                                 throw new APIManagementException("API is not mapped with an External API");
+                            }
+                            if (log.isDebugEnabled()){
+                                log.debug("Undeploy API from external gateway: " + referenceArtifact +
+                                        " in environment: " + deploymentEnv);
                             }
                             deleted = deployer.undeploy(referenceArtifact, true);
                             if (!deleted) {
