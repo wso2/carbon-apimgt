@@ -58,7 +58,7 @@ public class CustomAPIIndexer extends RXTIndexer {
     private static final int FIVE_MINUTES_TO_MILLI_SECONDS = 300000;
 
     public IndexDocument getIndexedDocument(AsyncIndexer.File2Index fileData) throws SolrException, RegistryException {
-        Registry registry = GovernanceUtils
+      Registry registry = GovernanceUtils
                 .getGovernanceSystemRegistry(IndexingManager.getInstance().getRegistry(fileData.tenantId));
         String resourcePath = fileData.path.substring(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH.length());
         Resource resource = null;
