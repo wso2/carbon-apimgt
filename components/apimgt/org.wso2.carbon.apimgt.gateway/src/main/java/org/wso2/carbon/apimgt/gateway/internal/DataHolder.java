@@ -316,11 +316,9 @@ public class DataHolder {
     private void initializeTenantDeploymentStatusMap() {
         try {
             Set<String> tenants = GatewayUtils.getTenantsToBeDeployed();
-            Map<String, Boolean> map = new HashMap<>();
             for (String str : tenants) {
-                map.putIfAbsent(str, false);
+                tenantDeployStatus.putIfAbsent(str, false);
             }
-            tenantDeployStatus = map;
         } catch (APIManagementException e) {
             log.error("Error while initializing tenant deployment status map", e);
         }
