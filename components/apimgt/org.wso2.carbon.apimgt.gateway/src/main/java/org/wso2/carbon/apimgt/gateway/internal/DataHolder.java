@@ -179,7 +179,12 @@ public class DataHolder {
     }
 
     public boolean isAllApisDeployed() {
-        return tenantDeployStatus.values().stream().allMatch(Boolean::booleanValue);
+        for (Boolean b : tenantDeployStatus.values()) {
+            if (!b.booleanValue()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public Map<String, Boolean> getTenantDeployStatus() {
@@ -311,7 +316,11 @@ public class DataHolder {
     private void initializeTenantDeploymentStatusMap() {
         try {
             Set<String> tenants = GatewayUtils.getTenantsToBeDeployed();
-            tenantDeployStatus = tenants.stream().collect(Collectors.toMap(str -> str, str -> false));
+            Map<String, Boolean> map = new HashMap<>();
+            for (String str : tenants) {
+                map.putIfAbsent(str, false);
+            }
+            tenantDeployStatus = map;
         } catch (APIManagementException e) {
             log.error("Error while initializing tenant deployment status map", e);
         }
