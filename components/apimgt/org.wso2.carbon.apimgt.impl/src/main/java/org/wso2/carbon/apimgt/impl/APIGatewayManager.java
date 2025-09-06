@@ -177,7 +177,8 @@ public class APIGatewayManager {
                                     boolean onDeleteOrRetire) {
 
         if (debugEnabled) {
-            log.debug("Status of " + api.getId() + " has been updated to DB");
+            log.debug("Undeploying API: " + api.getId().getName() + " version: " + api.getId().getVersion() +
+                    " from gateways");
         }
         sendUnDeploymentEvent(api, tenantDomain, gatewaysToRemove, onDeleteOrRetire);
     }

@@ -4409,6 +4409,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiRevisionDeployments.add(apiRevisionDeployment);
             }
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Undeploy API revision. API ID: " + apiId + ", Revision ID: " + revisionId +
+                    ", Deployments count: " + apiRevisionDeployments.size());
+        }
         apiProvider.undeployAPIRevisionDeployment(apiId, revisionId, apiRevisionDeployments, organization, false);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();

@@ -2889,7 +2889,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 // Remove Custom Backend entries of the API
                 deleteCustomBackendByAPIID(apiUuid);
-                deleteAPIRevisionsOnDeleteOrRetire(apiUuid, organization);
+                deleteAPIRevisions(apiUuid, organization, true);
                 deleteAPIFromDB(api);
                 if (log.isDebugEnabled()) {
                     String logMessage =
@@ -3069,7 +3069,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("API : " + apiIdentifier + " is successfully deleted from the database and Key Manager.");
         }
     }
-    public void deleteAPIRevisionsOnDeleteOrRetire(String apiUUID, String organization) throws APIManagementException {
+
+    public void deleteAPIRevisions(String apiUUID, String organization, boolean onDeleteOrRetire)
+            throws APIManagementException {
         boolean isAPIInitiatedFromGateway = apiMgtDAO.getIsAPIInitiatedFromGateway(apiUUID);
         if (log.isDebugEnabled()) {
             log.debug("Deleting API revisions for API: " + apiUUID + " in organization: " + organization);
@@ -3082,15 +3084,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (APIRevision apiRevision : apiRevisionList) {
             if (!apiRevision.getApiRevisionDeploymentList().isEmpty()) {
                 if (!isAPIInitiatedFromGateway) {
-                    if (log.isDebugEnabled()){
+                    if (log.isDebugEnabled()) {
                         log.debug("Undeploy API revision: " + apiRevision.getRevisionUUID() +
                                 " from gateways on delete/retire");
                     }
                     undeployAPIRevisionDeployment(apiUUID, apiRevision.getRevisionUUID(),
-                            apiRevision.getApiRevisionDeploymentList(), organization, true);
+                            apiRevision.getApiRevisionDeploymentList(), organization, onDeleteOrRetire);
                 } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("API initiated from gateway. Removing revision deployment: " +
+                                apiRevision.getRevisionUUID() + " from DB only");
+                    }
                     apiMgtDAO.removeAPIRevisionDeployment(apiRevision.getRevisionUUID(),
                             apiRevision.getApiRevisionDeploymentList());
+                    // Also drop published label mappings for these environments to avoid stale state
+                    Set<String> envsToRemove = apiRevision.getApiRevisionDeploymentList().stream()
+                            .map(org.wso2.carbon.apimgt.api.model.APIRevisionDeployment::getDeployment)
+                            .collect(java.util.stream.Collectors.toSet());
+                    if (!envsToRemove.isEmpty()) {
+                        GatewayArtifactsMgtDAO.getInstance()
+                                .removePublishedGatewayLabels(apiUUID, apiRevision.getRevisionUUID(), envsToRemove);
+                    }
                 }
             }
             wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(apiRevision.getRevisionUUID(),
@@ -3099,18 +3113,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 try {
                     apiRevisionDeploymentWFExecutor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
                 } catch (WorkflowException e) {
-                    log.error("Failed to delete workflow entry", e);
+                    log.error("Failed to delete workflow entry for revision: " + apiRevision.getRevisionUUID(), e);
                 }
             }
             deleteAPIRevision(apiUUID, apiRevision.getRevisionUUID(), organization);
             if (log.isDebugEnabled()) {
-                log.debug("Successfully deleted all API revisions for API: " + apiUUID);
+                log.debug("Deleted API revision: " + apiRevision.getRevisionUUID() + " for API: " + apiUUID);
             }
-
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully deleted all API revisions for API: " + apiUUID);
         }
     }
 
     public void deleteAPIRevisions(String apiUUID, String organization) throws APIManagementException {
+        if (log.isDebugEnabled()){
+            log.debug("Deleting API revisions for API: " + apiUUID + " in organization: " + organization);
+        }
         boolean isAPIInitiatedFromGateway = apiMgtDAO.getIsAPIInitiatedFromGateway(apiUUID);
         List<APIRevision> apiRevisionList = apiMgtDAO.getRevisionsListByAPIUUID(apiUUID);
         WorkflowExecutor apiRevisionDeploymentWFExecutor = getWorkflowExecutor(
@@ -7406,6 +7425,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiMgtDAO.getAPIRevisionDeploymentByRevisionUUID(revisionUUID);
     }
 
+    /**
+     * Remove a new APIRevisionDeployment to an existing API
+     *
+     * @param apiId                  API UUID
+     * @param apiRevisionId          API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization           organization
+     * @param onDeleteOrRetire    flag to indicate if the undeploy is happening due to API delete or retire action
+     * @throws APIManagementException if failed to add APIRevision
+     */
     @Override
     public void undeployAPIRevisionDeployment(String apiId, String apiRevisionId,
                                               List<APIRevisionDeployment> apiRevisionDeployments, String organization,
@@ -7435,7 +7464,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 revisionDeploymentWFExecutor.cleanUpPendingTask(revisionDeploymentWFRef);
             }
         } catch (WorkflowException ex) {
-            log.warn("Unable to delete Revision Deployment Workflow", ex);
+            log.warn("Unable to delete Revision Deployment Workflow for revision: " + apiRevisionId, ex);
         }
         if (log.isDebugEnabled()) {
             log.debug("Undeploying API revision: " + apiRevision.getRevisionUUID() + " from gateways on delete/retire");

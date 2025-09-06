@@ -91,7 +91,7 @@ public class LifeCycleUtils {
                 api.setOrganization(orgId);
                 cleanUpPendingSubscriptionCreationProcessesByAPI(api.getUuid());
                 apiMgtDAO.removeAllSubscriptions(api.getUuid());
-                apiProvider.deleteAPIRevisionsOnDeleteOrRetire(api.getUuid(), orgId);
+                apiProvider.deleteAPIRevisions(api.getUuid(), orgId, true);
             }
         }
         if (log.isDebugEnabled()) {
