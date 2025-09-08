@@ -18,14 +18,8 @@ package org.wso2.carbon.apimgt.gateway.mediators;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
-
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.lang3.StringUtils;
@@ -388,51 +382,55 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
     }
 
     private void modifyRequestPath(String model, LLMProviderMetadata targetModelMetadata,
-                                   MessageContext messageContext) throws UnsupportedEncodingException {
+                                   MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2Ctx =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         String requestPath = (String) axis2Ctx.getProperty(NhttpConstants.REST_URL_POSTFIX);
         if (StringUtils.isNotEmpty(requestPath)) {
-            requestPath = URLDecoder.decode(requestPath, Charset.defaultCharset());
-            String updatedPath = requestPath.replaceAll(targetModelMetadata.getAttributeIdentifier(), model);
-            URI uri = URI.create(updatedPath);
-            String path = uri.getPath();
-            String query = uri.getQuery();
-            String fragment = uri.getFragment();
+            URI uri = URI.create(requestPath);
+            String rawPath = uri.getRawPath();
+            String rawQuery = uri.getRawQuery();
 
-            String encodedPath = Arrays.stream(path.split("/"))
-                .map(segment -> {
-                    // Do not encode reserved characters like ':'
-                    if (segment.contains(":")) {
-                        return segment;
-                    }
-                    try {
-                        return URLEncoder.encode(segment, StandardCharsets.UTF_8.toString());
-                    } catch (Exception e) {
-                        return segment;
-                    }
-                })
-                .collect(Collectors.joining("/"));
+            // Encode only the substituted model as a path-segment-safe value and quote replacement
+            String encodedModel = encodePathSegmentRFC3986(model);
+            String updatedRawPath = rawPath.replaceAll(
+                    targetModelMetadata.getAttributeIdentifier(),
+                    java.util.regex.Matcher.quoteReplacement(encodedModel));
 
-            StringBuilder finalPath = new StringBuilder(encodedPath);
-            if (query != null) {
-                finalPath.append("?").append(Arrays.stream(query.split("&"))
-                    .map(param -> {
-                        String[] kv = param.split("=", 2);
-                        try {
-                            return URLEncoder.encode(kv[0], StandardCharsets.UTF_8.toString()) +
-                                (kv.length > 1 ? "=" + URLEncoder.encode(kv[1], StandardCharsets.UTF_8.toString()) : "");
-                        } catch (Exception e) {
-                            return param;
-                        }
-                    })
-                    .collect(Collectors.joining("&")));
-            }
-            if (fragment != null) {
-                finalPath.append("#").append(URLEncoder.encode(fragment, StandardCharsets.UTF_8.toString()));
+            StringBuilder finalPath = new StringBuilder(updatedRawPath);
+            if (rawQuery != null) {
+                // Preserve original query as-is to avoid changing semantics
+                finalPath.append("?").append(rawQuery);
             }
             axis2Ctx.setProperty(NhttpConstants.REST_URL_POSTFIX, finalPath.toString());
         }
+    }
+
+    private static String encodePathSegmentRFC3986(String segment) {
+        StringBuilder out = new StringBuilder();
+        byte[] bytes = segment.getBytes(StandardCharsets.UTF_8);
+        for (byte b : bytes) {
+            char c = (char) (b & 0xFF);
+            if (isUnreserved(c) || isSubDelim(c) || c == ':' || c == '@') {
+                out.append((char) (b & 0xFF));
+            } else {
+                out.append('%');
+                String hx = Integer.toHexString(b & 0xFF).toUpperCase();
+                if (hx.length() == 1) out.append('0');
+                out.append(hx);
+            }
+        }
+        return out.toString();
+    }
+
+    private static boolean isUnreserved(char c) {
+        return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')
+                || c == '-' || c == '.' || c == '_' || c == '~';
+    }
+
+    private static boolean isSubDelim(char c) {
+        return c == '!' || c == '$' || c == '&' || c == '\'' || c == '(' || c == ')' ||
+                c == '*' || c == '+' || c == ',' || c == ';' || c == '=';
     }
 
     /**
