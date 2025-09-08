@@ -460,6 +460,9 @@ public class APIKeyValidationService {
                         && !validationContext.isCacheHit()) {
                     keyValidationHandler.generateConsumerToken(validationContext);
                     info.setEndUserToken(validationContext.getValidationInfoDTO().getEndUserToken());
+                    if (log.isDebugEnabled()) {
+                        log.debug("JWT generation completed for websocket handshake");
+                    }
                 }
             }
             return validationContext.getValidationInfoDTO();
