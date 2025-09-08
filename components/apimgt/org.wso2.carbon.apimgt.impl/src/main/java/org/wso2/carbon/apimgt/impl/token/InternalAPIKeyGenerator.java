@@ -66,7 +66,8 @@ public class InternalAPIKeyGenerator implements ApiKeyGenerator {
         if (expireIn != -1) {
             jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.EXPIRY_TIME, expireIn);
         }
-        if (!jwtTokenInfoDTO.getSubscribedApiDTOList().isEmpty()) {
+        if (jwtTokenInfoDTO.getSubscribedApiDTOList() != null &&
+                !jwtTokenInfoDTO.getSubscribedApiDTOList().isEmpty()) {
             jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS,
                     jwtTokenInfoDTO.getSubscribedApiDTOList());
         }
@@ -74,10 +75,15 @@ public class InternalAPIKeyGenerator implements ApiKeyGenerator {
         jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.TOKEN_TYPE,
                 APIConstants.JwtTokenConstants.INTERNAL_KEY_TOKEN_TYPE);
 
-        for (Map.Entry<String, String> entry : jwtTokenInfoDTO.getCustomClaims().entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            jwtClaimsSetBuilder.claim(key, value);
+        Map<String, String> custom = jwtTokenInfoDTO.getCustomClaims();
+        if (custom != null) {
+            for (Map.Entry<String, String> entry : custom.entrySet()) {
+                String key = entry.getKey();
+                if (APIConstants.JwtTokenConstants.RESERVED_CLAIMS.contains(key)) {
+                    continue;
+                }
+                jwtClaimsSetBuilder.claim(key, entry.getValue());
+            }
         }
         return jwtClaimsSetBuilder.build();
     }

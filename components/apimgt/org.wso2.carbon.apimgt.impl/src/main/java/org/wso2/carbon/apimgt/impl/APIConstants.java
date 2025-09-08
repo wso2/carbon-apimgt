@@ -2575,6 +2575,9 @@ public final class APIConstants {
         public static final String DECODING_ALGORITHM_BASE64URL = "base64url";
         public static final String APP_DOMAIN = "app_td";
         public static final String USER_DOMAIN = "user_td";
+        public static final Set<String> RESERVED_CLAIMS = Set.of(
+                "sub","iss","aud","exp","iat","jti","azp","nbf","scope","scp","aut"
+        );
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";

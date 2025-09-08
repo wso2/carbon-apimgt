@@ -343,6 +343,10 @@ public class JWTValidator {
                 final boolean isMcp = APIConstants.API_TYPE_MCP.equals(synCtx.getProperty(APIConstants.API_TYPE));
                 if (isMcp) {
                     matchedAPI = GatewayUtils.getAPI(synCtx);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Processing MCP request with context: " + matchedAPI.getContext()
+                                + " and version" + matchedAPI.getVersion());
+                    }
                     skipEndUserJWT = matchedAPI != null
                             && APIConstants.API_SUBTYPE_EXISTING_API.equals(matchedAPI.getSubtype());
                 }
@@ -368,18 +372,30 @@ public class JWTValidator {
                                 String cachedToken = (String) cachedTokenObj;
                                 long tsSkewMs = getTimeStampSkewInSeconds() * 1000;
                                 if (JWTUtil.isJWTValid(cachedToken, jwtConfigurationDto.getJwtDecoding(), tsSkewMs)) {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Using cached MCP upstream token for key: " + jwtTokenCacheKey);
+                                    }
                                     internalToken = cachedToken;
                                 } else {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Cached MCP upstream token for key: " + jwtTokenCacheKey
+                                                + " expired, removing from cache");
+                                    }
                                     getGatewayJWTTokenCache().remove(jwtTokenCacheKey);
                                 }
                             }
                         }
                         if (StringUtils.isEmpty(internalToken)) {
                             try {
+                                log.debug("Generating new MCP upstream token for existing API subtype");
                                 JwtTokenInfoDTO jwtTokenInfoDTO =
                                         getJwtTokenInfoDTO(signedJWTInfo, jwtInfoDto, matchedAPI);
                                 internalToken = new InternalAPIKeyGenerator().generateToken(jwtTokenInfoDTO);
                                 if (isGatewayTokenCacheEnabled) {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Caching generated MCP upstream token with key: "
+                                                + jwtTokenCacheKey);
+                                    }
                                     getGatewayJWTTokenCache().put(jwtTokenCacheKey, internalToken);
                                 }
                             } catch (APIManagementException e) {
@@ -430,10 +446,14 @@ public class JWTValidator {
      */
     private JwtTokenInfoDTO getJwtTokenInfoDTO(SignedJWTInfo signedJWTInfo, JWTInfoDto jwtInfoDto, API matchedAPI) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Creating MCP upstream token for API with context: " + jwtInfoDto.getApiContext()
+                    + " and version: " + jwtInfoDto.getVersion());
+        }
         JwtTokenInfoDTO dto = new JwtTokenInfoDTO();
         dto.setEndUserName(jwtInfoDto.getEndUser());
         dto.setKeyType(jwtInfoDto.getKeyType());
-        dto.setExpirationTime(6000L);
+        dto.setExpirationTime(APIMgtGatewayConstants.MCP_AUTH_TOKEN_EXPIRATION_TIME);
 
         Map<String, String> custom = new HashMap<>();
         custom.putAll(getUserClaimsFromKeyManager(jwtInfoDto));

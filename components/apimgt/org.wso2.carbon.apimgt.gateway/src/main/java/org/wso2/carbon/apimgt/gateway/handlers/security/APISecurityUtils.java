@@ -48,7 +48,8 @@ public class APISecurityUtils {
         if (authContext.getIssuer() != null) {
             synCtx.setProperty(APIConstants.KeyManager.ISSUER, authContext.getIssuer());
         }
-        boolean isSetCallerToken = contextHeader != null && authContext.getCallerToken() != null;
+        boolean isSetCallerToken = StringUtils.isNotBlank(contextHeader)
+                && StringUtils.isNotBlank(authContext.getCallerToken());
         boolean isSetMcpUpstreamToken = StringUtils.isNotBlank(authContext.getMcpUpstreamToken());
 
         if (isSetCallerToken || isSetMcpUpstreamToken) {

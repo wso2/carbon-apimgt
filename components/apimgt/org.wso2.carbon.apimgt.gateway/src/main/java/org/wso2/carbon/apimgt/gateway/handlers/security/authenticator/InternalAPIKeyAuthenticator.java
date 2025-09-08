@@ -31,9 +31,11 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.JWTTokenPayloadInfo;
@@ -261,9 +263,14 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                     }
                     String mcpAuthClaim = payload.getStringClaim(APIMgtGatewayConstants.MCP_AUTH_CLAIM);
                     JSONObject api = null;
-                    if (StringUtils.isBlank(mcpAuthClaim) || !Boolean.parseBoolean(mcpAuthClaim)) {
+                    boolean isMCPAuthenticated = Boolean.parseBoolean(mcpAuthClaim);
+                    if (StringUtils.isBlank(mcpAuthClaim) || !isMCPAuthenticated) {
                         // If the MCP authenticated claim is not present or false, we can proceed with the subscription
                         // validation. This is to skip subscription validation since the MCP Server have done so already
+                        if (log.isDebugEnabled()) {
+                            log.debug("MCP auth claim not present or false, proceeding with subscription " +
+                                    "validation for API with context: " + apiContext + " and version: " + apiVersion);
+                        }
                         api = GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload, splitToken, false);
                     }
                     if (log.isDebugEnabled()) {
@@ -271,8 +278,11 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                     }
 
                     String endUserToken = null;
-                    if (jwtGenerationEnabled && StringUtils.isNotBlank(mcpAuthClaim)
-                            && Boolean.parseBoolean(mcpAuthClaim)) {
+                    if (jwtGenerationEnabled && StringUtils.isNotBlank(mcpAuthClaim) && isMCPAuthenticated) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Generating JWT token for MCP authenticated request for API with context: "
+                                    + apiContext + " and version: " + apiVersion);
+                        }
                         ensureJwtGeneratorInitialized();
                         JWTInfoDto jwtInfoDto = buildJWTInfoForInternalKey(payload, retrievedApi, synCtx);
                         endUserToken = generateAndRetrieveJWTToken(tokenIdentifier, jwtInfoDto);
@@ -314,7 +324,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
     }
 
-    private void ensureJwtGeneratorInitialized() {
+    private void ensureJwtGeneratorInitialized() throws APISecurityException {
 
         if (apiMgtGatewayJWTGenerator != null && jwtConfigurationDto.getPublicCert() != null) {
             return;
@@ -322,10 +332,16 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
         String tenantDomain = GatewayUtils.getTenantDomain();
         try {
             if (jwtConfigurationDto.isTenantBasedSigningEnabled()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Tenant based signing enabled, loading certificates for tenant: " + tenantDomain);
+                }
                 int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
                 jwtConfigurationDto.setPublicCert(SigningUtil.getPublicCertificate(tenantId));
                 jwtConfigurationDto.setPrivateKey(SigningUtil.getSigningKey(tenantId));
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Using default certificates for JWT signing");
+                }
                 jwtConfigurationDto.setPublicCert(ServiceReferenceHolder.getInstance().getPublicCert());
                 jwtConfigurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
             }
@@ -335,14 +351,20 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                     ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
                             .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
             apiMgtGatewayJWTGenerator.setJWTConfigurationDto(jwtConfigurationDto);
-        } catch (Exception e) {
-            log.error("Failed initializing gateway JWT generator for InternalKey flow", e);
+        } catch (APIManagementException e) {
+            log.error("Error occured while initiation of JWT generator", e);
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
     }
 
     private JWTInfoDto buildJWTInfoForInternalKey(JWTClaimsSet payload, API matchedAPI, MessageContext synCtx) {
-        JWTInfoDto dto = new JWTInfoDto();
 
+        if (log.isDebugEnabled()) {
+            log.debug("Building JWT info for internal key for API with context" + matchedAPI.getContext()
+                    + " and version " + matchedAPI.getVersion());
+        }
+        JWTInfoDto dto = new JWTInfoDto();
         // API meta
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
@@ -438,18 +460,26 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
         return dto;
     }
 
-    private String generateAndRetrieveJWTToken(String tokenSignature, JWTInfoDto jwtInfoDto) {
+    private String generateAndRetrieveJWTToken(String tokenSignature, JWTInfoDto jwtInfoDto)
+            throws APISecurityException {
+
         String jwt = null;
         boolean valid = false;
         String cacheKey = jwtInfoDto.getApiContext() + ":" + jwtInfoDto.getVersion() + ":" + tokenSignature;
 
         if (isGatewayTokenCacheEnabled) {
+            if (log.isDebugEnabled()) {
+                log.debug("Checking gateway JWT token cache for key: " + cacheKey);
+            }
             Object cached = CacheProvider.getGatewayJWTTokenCache().get(cacheKey);
             if (cached instanceof String) {
                 jwt = (String) cached;
                 long skewMs = getTimeStampSkewInSeconds() * 1000L;
                 valid = JWTUtil.isJWTValid(jwt, jwtConfigurationDto.getJwtDecoding(), skewMs);
                 if (!valid) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Cached JWT token is invalid for key: " + cacheKey + ", removing from cache");
+                    }
                     CacheProvider.getGatewayJWTTokenCache().remove(cacheKey);
                     jwt = null;
                 }
@@ -457,13 +487,16 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
         }
         if (jwt == null) {
             try {
+                if (log.isDebugEnabled()) {
+                    log.debug("Generating new JWT token for internal key with signature: " + tokenSignature);
+                }
                 jwt = apiMgtGatewayJWTGenerator.generateToken(jwtInfoDto);
                 if (isGatewayTokenCacheEnabled) {
                     CacheProvider.getGatewayJWTTokenCache().put(cacheKey, jwt);
                 }
-            } catch (Exception e) {
-                log.error("Error generating backend JWT for InternalKey (MCP)", e);
-                return null;
+            } catch (JWTGeneratorException e) {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
             }
         }
         return jwt;

@@ -163,7 +163,8 @@ public class JwtTokenInfoDTO implements Serializable {
     }
 
     public void setCustomClaims(Map<String, String> customClaims) {
-        this.customClaims = customClaims;
+
+        this.customClaims = (customClaims != null) ? new HashMap<>(customClaims) : new HashMap<>();
     }
 
 }
