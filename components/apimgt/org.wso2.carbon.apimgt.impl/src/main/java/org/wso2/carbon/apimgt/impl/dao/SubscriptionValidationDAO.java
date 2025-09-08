@@ -1396,6 +1396,7 @@ public class SubscriptionValidationDAO {
                     if (resultSet.next()) {
 
                         APIOperationMapping apiOperationMapping = new APIOperationMapping();
+                        apiOperationMapping.setApiUuid(resultSet.getString("API_UUID"));
                         apiOperationMapping.setApiName(resultSet.getString("API_NAME"));
                         apiOperationMapping.setApiVersion(resultSet.getString("API_VERSION"));
                         apiOperationMapping.setApiContext(resultSet.getString("CONTEXT"));

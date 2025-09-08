@@ -459,39 +459,41 @@ public class JWTValidator {
         custom.putAll(getUserClaimsFromKeyManager(jwtInfoDto));
         custom.put(APIMgtGatewayConstants.MCP_AUTH_CLAIM, Boolean.TRUE.toString());
 
-        String dialect = jwtConfigurationDto.getConsumerDialectUri();
-        if (dialect == null || dialect.isEmpty() || "/".equals(dialect)) {
-            dialect = APIConstants.DEFAULT_CARBON_DIALECT + "/";
-        } else if (!dialect.endsWith("/")) {
-            dialect = dialect + "/";
-        }
-        if (StringUtils.isNotEmpty(jwtInfoDto.getSubscriber())) {
-            custom.put(dialect + APIMgtGatewayConstants.SUBSCRIBER_CLAIM, jwtInfoDto.getSubscriber());
-        }
-        if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationId())) {
-            custom.put(dialect + APIMgtGatewayConstants.APPLICATION_ID_CLAIM, jwtInfoDto.getApplicationId());
-        }
-        if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationName())) {
-            custom.put(dialect + APIMgtGatewayConstants.APPLICATION_NAME_CLAIM, jwtInfoDto.getApplicationName());
-        }
-        if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationTier())) {
-            custom.put(dialect + APIMgtGatewayConstants.APPLICATION_TIER_CLAIM, jwtInfoDto.getApplicationTier());
-        }
-        if (StringUtils.isNotEmpty(jwtInfoDto.getSubscriptionTier())) {
-            custom.put(dialect + APIMgtGatewayConstants.TIER_CLAIM, jwtInfoDto.getSubscriptionTier());
-        }
-        if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationUUId())) {
-            custom.put(dialect + APIMgtGatewayConstants.APPLICATION_UUID_CLAIM, jwtInfoDto.getApplicationUUId());
-        }
-        if (StringUtils.isNotEmpty(jwtInfoDto.getKeyType())) {
-            custom.put(dialect + APIMgtGatewayConstants.KEY_TYPE_CLAIM, jwtInfoDto.getKeyType());
-        }
-        if (StringUtils.isNotEmpty(jwtInfoDto.getEndUser())) {
-            custom.put(dialect + APIMgtGatewayConstants.END_USER_CLAIM, jwtInfoDto.getEndUser());
-        }
-        if (jwtInfoDto.getEndUserTenantId() != MultitenantConstants.INVALID_TENANT_ID) {
-            custom.put(dialect + APIMgtGatewayConstants.END_USER_TENANT_ID_CLAIM,
-                    String.valueOf(jwtInfoDto.getEndUserTenantId()));
+        if (jwtGenerationEnabled) {
+            String dialect = jwtConfigurationDto.getConsumerDialectUri();
+            if (dialect == null || dialect.isEmpty() || "/".equals(dialect)) {
+                dialect = APIConstants.DEFAULT_CARBON_DIALECT + "/";
+            } else if (!dialect.endsWith("/")) {
+                dialect = dialect + "/";
+            }
+            if (StringUtils.isNotEmpty(jwtInfoDto.getSubscriber())) {
+                custom.put(dialect + APIMgtGatewayConstants.SUBSCRIBER_CLAIM, jwtInfoDto.getSubscriber());
+            }
+            if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationId())) {
+                custom.put(dialect + APIMgtGatewayConstants.APPLICATION_ID_CLAIM, jwtInfoDto.getApplicationId());
+            }
+            if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationName())) {
+                custom.put(dialect + APIMgtGatewayConstants.APPLICATION_NAME_CLAIM, jwtInfoDto.getApplicationName());
+            }
+            if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationTier())) {
+                custom.put(dialect + APIMgtGatewayConstants.APPLICATION_TIER_CLAIM, jwtInfoDto.getApplicationTier());
+            }
+            if (StringUtils.isNotEmpty(jwtInfoDto.getSubscriptionTier())) {
+                custom.put(dialect + APIMgtGatewayConstants.TIER_CLAIM, jwtInfoDto.getSubscriptionTier());
+            }
+            if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationUUId())) {
+                custom.put(dialect + APIMgtGatewayConstants.APPLICATION_UUID_CLAIM, jwtInfoDto.getApplicationUUId());
+            }
+            if (StringUtils.isNotEmpty(jwtInfoDto.getKeyType())) {
+                custom.put(dialect + APIMgtGatewayConstants.KEY_TYPE_CLAIM, jwtInfoDto.getKeyType());
+            }
+            if (StringUtils.isNotEmpty(jwtInfoDto.getEndUser())) {
+                custom.put(dialect + APIMgtGatewayConstants.END_USER_CLAIM, jwtInfoDto.getEndUser());
+            }
+            if (jwtInfoDto.getEndUserTenantId() != MultitenantConstants.INVALID_TENANT_ID) {
+                custom.put(dialect + APIMgtGatewayConstants.END_USER_TENANT_ID_CLAIM,
+                        String.valueOf(jwtInfoDto.getEndUserTenantId()));
+            }
         }
         Set<String> excluded = new HashSet<>(APIMgtGatewayConstants.STANDARD_JWT_CLAIMS);
         for (Map.Entry<String, Object> entry : signedJWTInfo.getJwtClaimsSet().getClaims().entrySet()) {
@@ -505,9 +507,9 @@ public class JWTValidator {
 
         LinkedHashSet<String> refs = new LinkedHashSet<>();
         if (matchedAPI != null && matchedAPI.getUrlMappings() != null) {
-            for (URLMapping m : matchedAPI.getUrlMappings()) {
-                if (m != null && m.getApiOperationMapping() != null) {
-                    String id = m.getApiOperationMapping().getApiUuid();
+            for (URLMapping mapping : matchedAPI.getUrlMappings()) {
+                if (mapping != null && mapping.getApiOperationMapping() != null) {
+                    String id = mapping.getApiOperationMapping().getApiUuid();
                     if (StringUtils.isNotEmpty(id)) refs.add(id);
                 }
             }

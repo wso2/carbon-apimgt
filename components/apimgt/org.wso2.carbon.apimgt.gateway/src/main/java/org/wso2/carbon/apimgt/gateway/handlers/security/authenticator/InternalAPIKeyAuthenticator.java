@@ -324,6 +324,13 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
     }
 
+    /**
+     * Lazily initializes the gateway JWT generator and signing material.
+     * Loads tenant-scoped or default certificates/keys based on configuration,
+     * sets the token TTL, and wires the generator instance if not already initialized.
+     *
+     * @throws APISecurityException if signing material or generator initialization fails
+     */
     private void ensureJwtGeneratorInitialized() throws APISecurityException {
 
         if (apiMgtGatewayJWTGenerator != null && jwtConfigurationDto.getPublicCert() != null) {
@@ -358,6 +365,17 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
         }
     }
 
+    /**
+     * Builds a {@link JWTInfoDto} for Internal Key generation from the incoming JWT and API context.
+     * Extracts API metadata (context, version, name), reads dialect-scoped claims for
+     * subscriber/app/user fields, filters out standard claims, and embeds remaining claims
+     * into a {@link JWTValidationInfo} with proper expiry.
+     *
+     * @param payload    validated JWT claims of the caller
+     * @param matchedAPI API associated with the request (may be null)
+     * @param synCtx     Synapse message context providing API context/version
+     * @return populated {@link JWTInfoDto} ready for token generation
+     */
     private JWTInfoDto buildJWTInfoForInternalKey(JWTClaimsSet payload, API matchedAPI, MessageContext synCtx) {
 
         if (log.isDebugEnabled()) {
@@ -460,6 +478,15 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
         return dto;
     }
 
+    /**
+     * Returns a backend JWT for the given signature and {@link JWTInfoDto}, using cache when valid.
+     * Validates a cached token (if any) with timestamp skew; otherwise generates a new token and caches it.
+     *
+     * @param tokenSignature unique signature/key for the caller token (e.g., JWT ID/fingerprint)
+     * @param jwtInfoDto     metadata and claims used for token generation
+     * @return a signed JWT suitable for backend propagation
+     * @throws APISecurityException if token generation fails
+     */
     private String generateAndRetrieveJWTToken(String tokenSignature, JWTInfoDto jwtInfoDto)
             throws APISecurityException {
 
@@ -502,7 +529,15 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
         return jwt;
     }
 
+    /**
+     * Resolves and memoizes the JWT TTL (seconds) for gateway-issued tokens.
+     * Reads from APIM configuration, preferring token cache expiry when cache is enabled,
+     * otherwise falling back to the configured JWT expiry; defaults to 900s.
+     *
+     * @return TTL in seconds
+     */
     private long getTtl() {
+
         if (ttl != -1) {
             return ttl;
         }
