@@ -144,6 +144,9 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                         .registerTypeAdapter(Params.class, new ParamsDeserializer())
                         .create();
                 McpRequest request = gson.fromJson(messageBody, McpRequest.class);
+                if (log.isDebugEnabled()) {
+                    log.debug("Deserialized MCP request: " + request);
+                }
                 if (!MCPUtils.validateRequest(request)) {
                     throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
                             APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Invalid Request");

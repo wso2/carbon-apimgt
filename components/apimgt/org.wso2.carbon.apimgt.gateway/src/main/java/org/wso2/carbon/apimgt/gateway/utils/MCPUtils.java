@@ -232,6 +232,11 @@ public class MCPUtils {
             if (backendOperation != null) {
                 //process schema
                 String schemaDefinition = extendedOperation.getSchemaDefinition();
+                if (StringUtils.isEmpty(schemaDefinition)) {
+                    throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE,
+                            APIConstants.MCP.RpcConstants.INTERNAL_ERROR_MESSAGE,
+                            "No schema defined for the requested tool: " + extendedOperation.getUrlPattern());
+                }
 
                 PrefixBasedSchemaMappingParser parser = new PrefixBasedSchemaMappingParser();
                 RequestResolver requestResolver = new RequestResolver(parser);
@@ -307,9 +312,9 @@ public class MCPUtils {
         Map<String, Object> pathParams = resolvedRequest.getPathParams();
         String resourcePathString = resourcePath.toString();
 
-        if (pathParams != null && !queryParams.isEmpty()) {
-            for (Object key : queryParams.keySet()) {
-                Object paramValueObj = queryParams.get(key);
+        if (pathParams != null && !pathParams.isEmpty()) {
+            for (Object key : pathParams.keySet()) {
+                Object paramValueObj = pathParams.get(key);
                 if (paramValueObj == null) {
                     //param value obj cannot be null at this point
                     throw new McpException(APIConstants.MCP.RpcConstants.INVALID_PARAMS_CODE,
@@ -448,6 +453,9 @@ public class MCPUtils {
             }
 
             List<VHost> gwVhosts = api.getVhosts();
+            if (gwVhosts == null || gwVhosts.isEmpty()) {
+                    return null;
+            }
 
             if (!StringUtils.isEmpty(hostHeader)) {
                 for (VHost vHost: gwVhosts) {

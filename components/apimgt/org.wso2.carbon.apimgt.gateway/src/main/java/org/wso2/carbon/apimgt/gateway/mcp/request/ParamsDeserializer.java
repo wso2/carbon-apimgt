@@ -51,8 +51,8 @@ public class ParamsDeserializer implements JsonDeserializer<Params>  {
                         // For complex types, store the JsonElement itself
                         arguments.put(key, value);
                     }
-                    params.setArguments(arguments);
                 }
+                params.setArguments(arguments);
             }
 
             // Let Gson handle the rest

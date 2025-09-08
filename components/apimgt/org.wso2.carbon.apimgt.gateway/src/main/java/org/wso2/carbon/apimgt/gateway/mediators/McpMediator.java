@@ -184,13 +184,14 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         org.apache.axis2.context.MessageContext axis2MC =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        String hostHeader = (String) headers.get(APIMgtGatewayConstants.HOST);
-        if (!StringUtils.isEmpty(hostHeader)) {
-            if (StringUtils.isBlank(hostHeader) || !validHostHeaderPattern.matcher(hostHeader).matches()) {
+        String hostHeader = headers != null ? (String) headers.get(APIMgtGatewayConstants.HOST) : null;
+        if (StringUtils.isBlank(hostHeader) || !validHostHeaderPattern.matcher(hostHeader).matches()) {
+            if (log.isDebugEnabled()) {
                 log.debug("Missing or malformed host header in request.Extracting host header from config.");
-                hostHeader = APIUtil.getHostAddress();
             }
+            hostHeader = APIUtil.getHostAddress();
         }
+
 
         String contextPath = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
         String serverURL = MCPUtils.getGatewayServerURL(hostHeader, contextPath);

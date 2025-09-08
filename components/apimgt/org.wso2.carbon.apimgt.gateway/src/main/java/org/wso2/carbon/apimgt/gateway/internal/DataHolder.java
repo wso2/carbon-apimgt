@@ -275,6 +275,11 @@ public class DataHolder {
                 if (log.isDebugEnabled()) {
                     log.debug("Populated vhosts info for API : " + api.getApiName());
                 }
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("API not found for context " + gatewayAPIDTO.getApiContext() + " in tenant domain "
+                            + gatewayAPIDTO.getTenantDomain());
+                }
             }
         }
     }

@@ -769,14 +769,20 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     } else {
                         // Derive the outward facing host and port from host header
                         String hostHeader = headers.get(APIMgtGatewayConstants.HOST);
-                        if (!StringUtils.isEmpty(hostHeader)) {
-                            if (StringUtils.isBlank(hostHeader) || !validHostHeaderPattern.matcher(hostHeader).matches()) {
-                                log.debug("Missing or malformed host header in request.Extracting host header from config.");
-                                hostHeader = APIUtil.getHostAddress();
+
+                        if (StringUtils.isBlank(hostHeader) || !validHostHeaderPattern.matcher(hostHeader).matches()) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Missing or malformed host header in request.Extracting host header " +
+                                        "from config.");
                             }
+                            hostHeader = APIUtil.getHostAddress();
                         }
 
                         String gwURL = MCPUtils.getGatewayServerURL(hostHeader, contextPath);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Constructed gateway URL for resource metadata: " + gwURL);
+                        }
+
                         String resourceMetadata = gwURL + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
                         headers.put(HttpHeaders.WWW_AUTHENTICATE, "Bearer resource_metadata=" +
                                 "\"" + resourceMetadata + "\","
