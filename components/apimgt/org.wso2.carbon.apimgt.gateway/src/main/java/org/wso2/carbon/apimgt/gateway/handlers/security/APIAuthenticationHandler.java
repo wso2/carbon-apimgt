@@ -115,7 +115,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private String securityContextHeader;
     protected APIKeyValidator keyValidator;
     protected boolean isOauthParamsInitialized = false;
-    private static final Pattern validHostHeaderPattern = Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
+    private static final Pattern validHostHeaderPattern =
+            Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
 
     public String getApiUUID() {
         return apiUUID;
@@ -770,15 +771,12 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                         String hostHeader = headers.get(APIMgtGatewayConstants.HOST);
                         if (!StringUtils.isEmpty(hostHeader)) {
                             if (StringUtils.isBlank(hostHeader) || !validHostHeaderPattern.matcher(hostHeader).matches()) {
-                                log.debug("Missing or malformed host header in request.Extracting host header form config.");
+                                log.debug("Missing or malformed host header in request.Extracting host header from config.");
                                 hostHeader = APIUtil.getHostAddress();
                             }
                         }
 
-
                         String gwURL = MCPUtils.getGatewayServerURL(hostHeader, contextPath);
-
-
                         String resourceMetadata = gwURL + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
                         headers.put(HttpHeaders.WWW_AUTHENTICATE, "Bearer resource_metadata=" +
                                 "\"" + resourceMetadata + "\","
