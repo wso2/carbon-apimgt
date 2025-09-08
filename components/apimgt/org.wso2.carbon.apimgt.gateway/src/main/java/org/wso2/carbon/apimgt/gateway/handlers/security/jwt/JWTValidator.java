@@ -345,7 +345,7 @@ public class JWTValidator {
                     matchedAPI = GatewayUtils.getAPI(synCtx);
                     if (log.isDebugEnabled()) {
                         log.debug("Processing MCP request with context: " + matchedAPI.getContext()
-                                + " and version" + matchedAPI.getVersion());
+                                + " and version: " + matchedAPI.getVersion());
                     }
                     skipEndUserJWT = matchedAPI != null
                             && APIConstants.API_SUBTYPE_EXISTING_API.equals(matchedAPI.getSubtype());

@@ -86,6 +86,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
     private ExtendedJWTConfigurationDto jwtConfigurationDto;
     private AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator;
     private static volatile long ttl = -1L;
+    private volatile String signingTenantDomain;
 
     public InternalAPIKeyAuthenticator(String securityParam) {
         this.securityParam = securityParam;
@@ -333,10 +334,15 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
      */
     private void ensureJwtGeneratorInitialized() throws APISecurityException {
 
-        if (apiMgtGatewayJWTGenerator != null && jwtConfigurationDto.getPublicCert() != null) {
+        String tenantDomain = GatewayUtils.getTenantDomain();
+        if (jwtConfigurationDto.isTenantBasedSigningEnabled()) {
+            if (apiMgtGatewayJWTGenerator != null && jwtConfigurationDto.getPublicCert() != null
+                    && tenantDomain.equals(signingTenantDomain)) {
+                return;
+            }
+        } else if (apiMgtGatewayJWTGenerator != null && jwtConfigurationDto.getPublicCert() != null) {
             return;
         }
-        String tenantDomain = GatewayUtils.getTenantDomain();
         try {
             if (jwtConfigurationDto.isTenantBasedSigningEnabled()) {
                 if (log.isDebugEnabled()) {
@@ -353,13 +359,20 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 jwtConfigurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
             }
             jwtConfigurationDto.setTtl(getTtl());
-
-            apiMgtGatewayJWTGenerator =
-                    ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
-                            .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
+            apiMgtGatewayJWTGenerator = ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
+                    .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
+            if (apiMgtGatewayJWTGenerator == null) {
+                log.error("Gateway JWT generator implementation is not available: "
+                        + jwtConfigurationDto.getGatewayJWTGeneratorImpl());
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+            }
             apiMgtGatewayJWTGenerator.setJWTConfigurationDto(jwtConfigurationDto);
+            if (jwtConfigurationDto.isTenantBasedSigningEnabled()) {
+                signingTenantDomain = tenantDomain;
+            }
         } catch (APIManagementException e) {
-            log.error("Error occured while initiation of JWT generator", e);
+            log.error("Error occurred during initialization of JWT generator", e);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
@@ -379,8 +392,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
     private JWTInfoDto buildJWTInfoForInternalKey(JWTClaimsSet payload, API matchedAPI, MessageContext synCtx) {
 
         if (log.isDebugEnabled()) {
-            log.debug("Building JWT info for internal key for API with context" + matchedAPI.getContext()
-                    + " and version " + matchedAPI.getVersion());
+            log.debug("Building JWT info for internal key for API with context: " + matchedAPI.getContext()
+                    + " and version: " + matchedAPI.getVersion());
         }
         JWTInfoDto dto = new JWTInfoDto();
         // API meta
