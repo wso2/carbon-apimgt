@@ -815,9 +815,16 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 if (apiType != null) {
                     if (APIConstants.API_IDENTIFIER_TYPE.equalsIgnoreCase(apiType)) {
                         if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(api.getType())) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("API type is MCP, returning null for API ID: " + apiId);
+                            }
                             return null;
                         }
                     } else if (!apiType.equalsIgnoreCase(api.getType())) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("API type mismatch. Expected: " + apiType + ", Actual: " + api.getType()
+                                    + " for API ID: " + apiId);
+                        }
                         return null;
                     }
                 }
@@ -894,9 +901,16 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 if (apiType != null) {
                     if (APIConstants.API_IDENTIFIER_TYPE.equalsIgnoreCase(apiType)) {
                         if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(api.getType())) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("API type is MCP, returning null for API ID: " + apiId);
+                            }
                             return null;
                         }
                     } else if (!apiType.equalsIgnoreCase(api.getType())) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("API type mismatch. Expected: " + apiType + ", Actual: " + api.getType()
+                                    + " for API ID: " + apiId);
+                        }
                         return null;
                     }
                 }
