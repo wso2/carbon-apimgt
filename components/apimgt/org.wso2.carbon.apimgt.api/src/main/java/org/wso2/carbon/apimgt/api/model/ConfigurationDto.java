@@ -14,6 +14,7 @@ public class ConfigurationDto {
     private boolean mask;
     private List values = new ArrayList<>();
     private boolean multiple;
+    private boolean updateDisabled = false;
 
     public String getName() {
 
@@ -110,23 +111,43 @@ public class ConfigurationDto {
         this.values.add(value);
     }
 
+    public boolean isUpdateDisabled() {
+
+        return updateDisabled;
+    }
+
+    public void setUpdateDisabled(boolean updateDisabled) {
+
+        this.updateDisabled = updateDisabled;
+    }
+
+    /**
+     * @deprecated Use {@link #ConfigurationDto(String, String, String, String, Object, boolean, boolean, List,
+     * boolean, boolean)} instead.
+     */
+    @Deprecated
     public ConfigurationDto(String name, String label, String type, String tooltip, Object defaultValue,
                             boolean required,
                             boolean mask, List values, boolean multiple) {
 
-        this.name = name;
-        this.label = label;
-        this.type = type;
-        this.tooltip = tooltip;
-        this.defaultValue = defaultValue;
-        this.required = required;
-        this.mask = mask;
-        this.values = values;
-        this.multiple = multiple;
+        this(name, label, type, tooltip, defaultValue, required, mask, values, multiple, false);
     }
+
+    /**
+     * @deprecated Use {@link #ConfigurationDto(String, String, String, String, Object, boolean, boolean,
+     * List, boolean, boolean)} instead.
+     */
+    @Deprecated
     public ConfigurationDto(String name, String label, String type, String tooltip, String defaultValue,
                             boolean required,
                             boolean mask, List values, boolean multiple) {
+
+        this(name, label, type, tooltip, defaultValue, required, mask, values, multiple, false);
+    }
+
+    public ConfigurationDto(String name, String label, String type, String tooltip, Object defaultValue,
+                            boolean required,
+                            boolean mask, List values, boolean multiple, boolean updateDisabled) {
 
         this.name = name;
         this.label = label;
@@ -137,5 +158,6 @@ public class ConfigurationDto {
         this.mask = mask;
         this.values = values;
         this.multiple = multiple;
+        this.updateDisabled = updateDisabled;
     }
 }

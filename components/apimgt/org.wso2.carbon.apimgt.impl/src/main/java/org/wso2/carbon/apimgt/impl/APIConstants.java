@@ -465,6 +465,7 @@ public final class APIConstants {
     public static final String JWT_DECODING = "JWTDecoding";
     public static final String ENABLE_USER_CLAIMS = "EnableUserClaims";
     public static final String BINDING_FEDERATED_USER_CLAIMS = "EnableBindingFederatedUserClaims";
+    public static final String BINDING_FEDERATED_USER_CLAIMS_FOR_OPAQUE = "EnableBindingFederatedUserClaimsForOpaque";
     public static final String TOKEN_GENERATOR_IMPL = "JWTGeneratorImpl";
     public static final String ENABLE_JWT_GENERATION = "EnableJWTGeneration";
     public static final String Enable_JWKS_API = "EnableJWKSApi";
@@ -3215,7 +3216,7 @@ public final class APIConstants {
         public static final String GATEWAY_INSTRUCTION_REMOVE = "Remove";
         public static final String GATEWAY_INSTRUCTION_ANY = "ANY";
         public static final String SYNAPSE_ATTRIBUTES = "/synapse-attributes";
-        public static final String GATEAY_SYNAPSE_ARTIFACTS = "/runtime-artifacts";
+        public static final String GATEWAY_SYNAPSE_ARTIFACTS = "/runtime-artifacts";
         public static final String GATEWAY_POLICY_SYNAPSE_ARTIFACTS = "/gateway-policy-artifacts";
         public static final String DATA_SOURCE_NAME = "DataSourceName";
         public static final String DATA_RETRIEVAL_MODE = "DataRetrievalMode";

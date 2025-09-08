@@ -121,6 +121,7 @@ public class WorkflowConstants {
     
     public static final String WORKFLOW_OAUTH_APP_NAME = "workflow_app";
     public static final String WORKFLOW_OAUTH_APP_GRANT_TYPES = "client_credentials password refresh_token";
+    public static final String ENVIRONMENT = "environment";
     
     public static class PayloadConstants {
         public static final String PROCESS_DEF_KEY = "processDefinitionKey";

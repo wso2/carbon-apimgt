@@ -3501,6 +3501,35 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state"'
       operationId: getMCPServerLifecycleState
 
+  /mcp-servers/{mcpServerId}/lifecycle-state/pending-tasks:
+    delete:
+      tags:
+        - MCP Server Lifecycle
+      summary: Delete Pending Lifecycle State Change Tasks
+      description: |
+        This operation can be used to remove pending lifecycle state change requests that are in pending state
+      parameters:
+        - $ref: '#/components/parameters/mcpServerId'
+      responses:
+        200:
+          description: |
+            OK.
+            Lifecycle state change pending task removed successfully.
+          content: { }
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:mcp_server_publish
+            - apim:mcp_server_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
+      operationId: deleteMCPServerLifecycleStatePendingTasks
+
   /mcp-servers/{mcpServerId}/documents:
     get:
       tags:
@@ -3920,6 +3949,46 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: multipart/form-data" -F file=@sample.pdf "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3/content"'
       operationId: addMCPServerDocumentContent
+
+  /mcp-servers/{mcpServerId}/documents/validate:
+    post:
+      tags:
+        - MCP Server Documents
+      summary: Check Whether a Document with the Provided Name Exist
+      description: |
+        This operation can be used to verify the document name exists or not.
+      parameters:
+        - $ref: '#/components/parameters/mcpServerId'
+        - name: name
+          in: query
+          description: |
+            The name of the document which needs to be checked for the existence.
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/If-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response if the document name exists.
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          description: |
+            Not Found.
+            The specified resource does not exist.
+      security:
+        - OAuth2Security:
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+            - apim:document_manage
+            - apim:document_create
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/validate?name=CalculatorDoc"'
+      operationId: validateMCPServerDocument
 
   /mcp-servers/import:
     post:
@@ -4369,6 +4438,42 @@ paths:
       operationId: generateInternalAPIKeyMCPServer
 
   /mcp-servers/{mcpServerId}/comments:
+    get:
+      tags:
+        - Comments
+      summary: Retrieve MCP Server Comments
+      description: |
+        Get a list of Comments that are already added to MCP Server
+      parameters:
+        - $ref: '#/components/parameters/mcpServerId'
+        - $ref: '#/components/parameters/requestedTenant'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/includeCommenterInfo'
+      responses:
+        200:
+          description: |
+            OK.
+            Comments list is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentList'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:mcp_server_view
+            - apim:comment_view
+            - apim:comment_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://localhost:9443/api/am/publisher/v4/mcp-servers/e93fb282-b456-48fc-8981-003fb89086ae/comments"'
+      operationId: getAllCommentsOfMCPServer
+
     post:
       tags:
         - Comments
@@ -4637,6 +4742,38 @@ paths:
           source: 'curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://localhost:9443/api/am/publisher/v4/mcp-servers/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"'
       operationId: getRepliesOfCommentOfMCPServer
+
+  /mcp-servers/{mcpServerId}/cancel-revision-workflow/{revisionId}/{envName}:
+    delete:
+      tags:
+        - MCP Server Revisions
+      summary: Delete Pending Revision Deployment Workflow Tasks
+      description: |
+        This operation can be used to remove pending revision deployment requests that are in pending state
+      parameters:
+        - $ref: '#/components/parameters/mcpServerId'
+        - $ref: '#/components/parameters/revisionId'
+        - $ref: '#/components/parameters/envName'
+      responses:
+        200:
+          description: |
+            OK.
+            Revision deployment pending task removed successfully.
+          content: { }
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:mcp_server_publish
+            - apim:mcp_server_manage
+            - apim:mcp_server_create
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/cancel-revision-workflow/e0824883-3e86-403a-aec1-22bbc454eb7c/Default"'
+      operationId: deleteMCPServerRevisionDeploymentPendingTask
 
   /apis/import-openapi:
     post:
@@ -12227,6 +12364,13 @@ components:
           type: string
           description: Name of the API Product
           example: PizzaShackAPIProduct
+        displayName:
+          type: string
+          example: Calculator Product API
+          description: |
+            Display name of the API Product.
+            This is the name that will be displayed in the Publisher and DevPortal.
+            If not provided, the name will be used as the display name.
         context:
           type: string
           example: pizzaproduct
@@ -12239,20 +12383,16 @@ components:
           description: |
             If the provider value is not given, the user invoking the API will be used as the provider.
           example: admin
+        version:
+          type: string
+          example: 1.0.0
         hasThumbnail:
           type: boolean
           example: true
         state:
           type: string
           description: |
-            State of the API product. Only published api products are visible on the Developer Portal
-          enum:
-            - CREATED
-            - PUBLISHED
-            - DEPRECATED
-            - RETIRED
-            - BLOCKED
-            - PROTOTYPED
+            State of the API product. Only published API products are visible on the Developer Portal
         securityScheme:
           type: array
           description: |
@@ -12262,9 +12402,43 @@ components:
             - oauth2
           items:
             type: string
+        createdTime:
+          type: string
+          description: Created time as unix timestamp in milliseconds.
+          example: 1756199448644
+        updatedTime:
+          type: string
+          description: Update time as unix timestamp in milliseconds.
+          example: 1756199448644
         gatewayVendor:
           type: string
           example: wso2
+        audiences:
+          type: array
+          description: The audiences of the API product for jwt validation. Accepted values are any String values
+          items:
+            type: string
+            example: [ "aud1","aud2","aud3" ]
+        monetizedInfo:
+          type: boolean
+          example: true
+        businessOwner:
+          type: string
+          example: Business Owner
+        businessOwnerEmail:
+          type: string
+          example: businessowner@abc.com
+        TechnicalOwner:
+          type: string
+          example: Technical Owner
+        TechnicalOwnerEmail:
+          type: string
+          example: technicalowner@abc.com
+        egress:
+          type: boolean
+          description: Whether the APIProduct is EGRESS or not
+          default: false
+          example: true
     APIProduct:
       title: API Product object
       required:

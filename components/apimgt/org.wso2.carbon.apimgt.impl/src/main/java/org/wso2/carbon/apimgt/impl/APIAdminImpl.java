@@ -114,6 +114,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
@@ -739,7 +740,7 @@ public class APIAdminImpl implements APIAdmin {
         if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
                 .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
             sanitizeKeyManagerConfiguration(keyManagerConfigurationDTO);
-            validateKeyManagerConfiguration(keyManagerConfigurationDTO);
+            validateKeyManagerConfiguration(keyManagerConfigurationDTO, null);
             validateKeyManagerEndpointConfiguration(keyManagerConfigurationDTO);
         }
         if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
@@ -889,25 +890,47 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     private void encryptGatewayConfigurationValues(Environment retrievedGatewayConfigurationDTO,
-                                                   Environment updatedGatewayConfigurationDto)
-            throws APIManagementException {
+            Environment updatedGatewayConfigurationDto) throws APIManagementException {
 
         GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
                 .getExternalGatewayConnectorConfiguration(updatedGatewayConfigurationDto.getGatewayType());
         if (gatewayConfiguration != null) {
             Map<String, String> additionalProperties = updatedGatewayConfigurationDto.getAdditionalProperties();
-            for (ConfigurationDto configurationDto : gatewayConfiguration.getConnectionConfigurations()) {
-                if (configurationDto.isMask()) {
-                    String value = additionalProperties.get(configurationDto.getName());
-                    if (APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD.equals(value)) {
-                        if (retrievedGatewayConfigurationDTO != null) {
-                            String unModifiedValue = retrievedGatewayConfigurationDTO.getAdditionalProperties()
-                                    .get(configurationDto.getName());
-                            additionalProperties.replace(configurationDto.getName(), unModifiedValue);
-                        }
-                    } else if (StringUtils.isNotEmpty(value)) {
-                        additionalProperties.replace(configurationDto.getName(), String.valueOf(encryptValues(value)));
+            List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
+            if (connectionConfigurations != null && !connectionConfigurations.isEmpty()) {
+                for (ConfigurationDto configurationDto : connectionConfigurations) {
+                    applyGatewayConfigMaskingAndEncryption(configurationDto, additionalProperties,
+                            retrievedGatewayConfigurationDTO);
+                }
+            }
+        }
+    }
+
+    private void applyGatewayConfigMaskingAndEncryption(ConfigurationDto configurationDto,
+            Map<String, String> additionalProperties, Environment retrievedGatewayConfigurationDTO)
+            throws APIManagementException {
+
+        if (configurationDto.isMask()) {
+            String value = additionalProperties.get(configurationDto.getName());
+            if (APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD.equals(value)) {
+                if (retrievedGatewayConfigurationDTO != null) {
+                    String unModifiedValue = retrievedGatewayConfigurationDTO.getAdditionalProperties()
+                            .get(configurationDto.getName());
+                    if (unModifiedValue != null) {
+                        additionalProperties.replace(configurationDto.getName(), unModifiedValue);
                     }
+                }
+            } else if (StringUtils.isNotEmpty(value)) {
+                additionalProperties.replace(configurationDto.getName(), String.valueOf(encryptValues(value)));
+            }
+        }
+
+        List<Object> nestedConfigurationValues = configurationDto.getValues();
+        if (nestedConfigurationValues != null && !nestedConfigurationValues.isEmpty()) {
+            for (Object nestedConfiguration : nestedConfigurationValues) {
+                if (nestedConfiguration instanceof ConfigurationDto) {
+                    applyGatewayConfigMaskingAndEncryption((ConfigurationDto) nestedConfiguration, additionalProperties,
+                            retrievedGatewayConfigurationDTO);
                 }
             }
         }
@@ -997,15 +1020,25 @@ public class APIAdminImpl implements APIAdmin {
     public KeyManagerConfigurationDTO updateKeyManagerConfiguration(
             KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
-        if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
-                .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
-            sanitizeKeyManagerConfiguration(keyManagerConfigurationDTO);
-            validateKeyManagerConfiguration(keyManagerConfigurationDTO);
-            validateKeyManagerEndpointConfiguration(keyManagerConfigurationDTO);
-        }
         KeyManagerConfigurationDTO oldKeyManagerConfiguration =
                 apiMgtDAO.getKeyManagerConfigurationByID(keyManagerConfigurationDTO.getOrganization(),
                         keyManagerConfigurationDTO.getUuid());
+        if (oldKeyManagerConfiguration == null) {
+            String errorMsg = String.format(
+                    "Key Manager configuration not found for id '%s' in organization '%s'",
+                    keyManagerConfigurationDTO.getUuid(),
+                    keyManagerConfigurationDTO.getOrganization());
+            throw new APIMgtResourceNotFoundException(
+                    errorMsg,
+                    ExceptionCodes.from(ExceptionCodes.KEY_MANAGER_NOT_FOUND,
+                            keyManagerConfigurationDTO.getUuid()));
+        }
+        if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
+                .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
+            sanitizeKeyManagerConfiguration(keyManagerConfigurationDTO);
+            validateKeyManagerConfiguration(keyManagerConfigurationDTO, oldKeyManagerConfiguration);
+            validateKeyManagerEndpointConfiguration(keyManagerConfigurationDTO);
+        }
         if (StringUtils.equals(KeyManagerConfiguration.TokenType.EXCHANGED.toString(),
                 keyManagerConfigurationDTO.getTokenType()) ||
                 StringUtils.equals(KeyManagerConfiguration.TokenType.BOTH.toString(),
@@ -1522,7 +1555,8 @@ public class APIAdminImpl implements APIAdmin {
         }
     }
 
-    private void validateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+    protected void validateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO,
+                                                 KeyManagerConfigurationDTO oldKeyManagerConfiguration)
             throws APIManagementException {
 
         if (StringUtils.isEmpty(keyManagerConfigurationDTO.getName())) {
@@ -1546,6 +1580,37 @@ public class APIAdminImpl implements APIAdmin {
                                         configurationDto.getDefaultValue());
                             }
                             missingRequiredConfigurations.add(configurationDto.getName());
+                        }
+                    }
+
+                    // Check if invoked by update flow and if the configuration is disabled for update
+                    boolean hasExistingConfig = oldKeyManagerConfiguration != null;
+                    boolean isUpdateDisabled = configurationDto.isUpdateDisabled();
+
+                    if (hasExistingConfig && isUpdateDisabled) {
+                        String configName = configurationDto.getName();
+                        Object newValue = keyManagerConfigurationDTO.getAdditionalProperties().get(configName);
+                        Object defaultValue = configurationDto.getDefaultValue();
+                        boolean oldConfigContainsKey = oldKeyManagerConfiguration.getAdditionalProperties()
+                                .containsKey(configName);
+                        Object oldValue = oldKeyManagerConfiguration.getAdditionalProperties().get(configName);
+
+                        if (newValue == null && oldConfigContainsKey) {
+                            newValue = oldValue;
+                        } else if (newValue == null) {
+                            newValue = defaultValue;
+                        }
+                        keyManagerConfigurationDTO.getAdditionalProperties().put(configName, newValue);
+
+                        boolean valueChangedFromOld = oldConfigContainsKey && !Objects.equals(newValue, oldValue);
+                        boolean valueChangedFromDefault = !Objects.equals(newValue, defaultValue);
+                        boolean valueChanged = valueChangedFromOld
+                                || (!oldConfigContainsKey && valueChangedFromDefault);
+                        if (valueChanged) {
+                            throw new APIManagementException(
+                                    "Modification of the Key Manager configuration " + configurationDto.getName() +
+                                            " is not permitted",
+                                    ExceptionCodes.KEY_MANAGER_UPDATE_VIOLATION);
                         }
                     }
                 }
@@ -1656,16 +1721,36 @@ public class APIAdminImpl implements APIAdmin {
         }
     }
 
+    private void applyMaskToNestedGatewayFields(List<Object> connectorConfigurations,
+            Map<String, String> additionalProperties) {
+        if (connectorConfigurations == null || connectorConfigurations.isEmpty()) {
+            return;
+        }
+        for (Object connectorConfiguration : connectorConfigurations) {
+            if (connectorConfiguration instanceof ConfigurationDto) {
+                ConfigurationDto connectorConfigurationDto = (ConfigurationDto) connectorConfiguration;
+                if (connectorConfigurationDto.isMask()) {
+                    additionalProperties.replace(connectorConfigurationDto.getName(),
+                            APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+                }
+                applyMaskToNestedGatewayFields(connectorConfigurationDto.getValues(), additionalProperties);
+            }
+        }
+    }
+
     private void maskValues(Environment environment) {
         GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
                 .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
         if (gatewayConfiguration != null) {
             Map<String, String> additionalProperties = environment.getAdditionalProperties();
             List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
-            for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
-                if (connectionConfiguration.isMask()) {
-                    additionalProperties.replace(connectionConfiguration.getName(),
-                            APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+            if (connectionConfigurations != null && !connectionConfigurations.isEmpty()) {
+                for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
+                    if (connectionConfiguration.isMask()) {
+                        additionalProperties.replace(connectionConfiguration.getName(),
+                                APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+                    }
+                    applyMaskToNestedGatewayFields(connectionConfiguration.getValues(), additionalProperties);
                 }
             }
         }

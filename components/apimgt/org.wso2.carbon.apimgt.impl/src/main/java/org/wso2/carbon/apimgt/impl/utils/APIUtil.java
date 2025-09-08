@@ -287,6 +287,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -337,6 +338,8 @@ public final class APIUtil {
     private static final Log audit = CarbonConstants.AUDIT_LOG;
 
     private static boolean isContextCacheInitialized = false;
+
+    private static final String caseSensitiveCheckEnabled = System.getProperty(APIConstants.CASE_SENSITIVE_CHECK_PATH);
 
     public static final String DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION = "disableRoleValidationAtScopeCreation";
 
@@ -3540,26 +3543,49 @@ public final class APIUtil {
             apiData.put(key, new ArrayList<>());
         }
 
-        for (int i = 0; i < synapseApiTypes.size(); i++) {
-            String apiType = synapseApiTypes.get(i).getAsString();
-            if (apiData.containsKey(apiType)) {
-                apiData.get(apiType).add(APIConstants.WSO2_SYNAPSE_GATEWAY);
-            }
-        }
-
-        for (int i = 0; i < apkApiTypes.size(); i++) {
-            String apiType = apkApiTypes.get(i).getAsString();
-            if (apiData.containsKey(apiType)) {
-                apiData.get(apiType).add(APIConstants.WSO2_APK_GATEWAY);
-            }
-        }
-
         Map<String, GatewayAgentConfiguration> externalGatewayConnectorConfigurationMap =
                 ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
 
-        externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
-            processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, gatewayConfiguration);
-        });
+        // Get the gateway types from the deployment.toml and process each external gateway type in the same order as
+        // they are defined in the deployment.toml.
+        List<String> gatewayTypes = APIUtil.getGatewayTypes();
+
+        // trim and deduplicate while preserving order
+        LinkedHashSet<String> orderedGatewayTypes = new LinkedHashSet<>();
+        if (gatewayTypes != null) {
+            for (String t : gatewayTypes) {
+                if (StringUtils.isNotBlank(t)) {
+                    orderedGatewayTypes.add(t.trim());
+                }
+            }
+        }
+
+        for (String gatewayType : orderedGatewayTypes) {
+            if (APIConstants.API_GATEWAY_TYPE_REGULAR.equalsIgnoreCase(gatewayType)) {
+                for (JsonElement element : synapseApiTypes) {
+                    String apiType = element.getAsString();
+                    if (apiData.containsKey(apiType)) {
+                        apiData.get(apiType).add(APIConstants.WSO2_SYNAPSE_GATEWAY);
+                    }
+                }
+            } else if (APIConstants.API_GATEWAY_TYPE_APK.equalsIgnoreCase(gatewayType)) {
+                for (JsonElement element : apkApiTypes) {
+                    String apiType = element.getAsString();
+                    if (apiData.containsKey(apiType)) {
+                        apiData.get(apiType).add(APIConstants.WSO2_APK_GATEWAY);
+                    }
+                }
+            } else {
+                GatewayAgentConfiguration externalGatewayConfiguration = externalGatewayConnectorConfigurationMap.get(gatewayType);
+                
+                if (externalGatewayConfiguration != null) {
+                    processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, externalGatewayConfiguration);
+                } else {
+                    log.warn("No configuration found for external gateway type: " +
+                            StringEscapeUtils.escapeJava(gatewayType));
+                }
+            }
+        }
 
         GatewayFeatureCatalog gatewayFeatureCatalog = new GatewayFeatureCatalog();
         gatewayFeatureCatalog.setApiTypes(apiData);
@@ -3569,7 +3595,7 @@ public final class APIUtil {
     }
 
     private static void processExternalGatewayFeatureCatalogs(Map<String, Object> gatewayConfigsMap,
-                                                              Map<String, List<String>> apiData, GatewayAgentConfiguration gatewayConfiguration) {
+        Map<String, List<String>> apiData, GatewayAgentConfiguration gatewayConfiguration) {
 
         GatewayPortalConfiguration config = null;
         try {
@@ -7704,11 +7730,18 @@ public final class APIUtil {
      * @return true if the Array contains the role specified.
      */
     public static boolean compareRoleList(String[] userRoleList, String accessControlRole) {
-
         if (userRoleList != null) {
             for (String userRole : userRoleList) {
-                if (userRole.equalsIgnoreCase(accessControlRole)) {
-                    return true;
+                if (userRole != null) {
+                    if (Boolean.parseBoolean(caseSensitiveCheckEnabled)) {
+                        if (userRole.equals(accessControlRole)) {
+                            return true;
+                        }
+                    } else {
+                        if (userRole.equalsIgnoreCase(accessControlRole)) {
+                            return true;
+                        }
+                    }
                 }
             }
         }
@@ -11869,6 +11902,23 @@ public final class APIUtil {
         } catch (APIManagementException e) {
             log.error("Error while validating and scheduling federated gateway API discovery for environment: "
                     + environment.getName() + " in organization: " + organization, e);
+        }
+    }
+
+    /**
+     * Converts an epoch time string to a Date object.
+     *
+     * @param epochMillis The epoch time in milliseconds as a string.
+     * @return The corresponding Date object, or null if the input is blank or invalid.
+     */
+    public static Date convertEpochStringToDate(String epochMillis) {
+        if (StringUtils.isBlank(epochMillis)) return null;
+        try {
+            return new Date(Long.parseLong(epochMillis));
+        }
+        catch (NumberFormatException e) {
+            log.warn("Provided epoch time string: " + epochMillis + " is not valid.", e);
+            return null;
         }
     }
 }
