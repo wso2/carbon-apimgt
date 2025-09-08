@@ -187,6 +187,10 @@
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.mcp.transformer</groupId>
+            <artifactId>mcp-transformer-java</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -313,6 +317,7 @@
                                 <bundleDef>io.github.openfeign:feign-httpclient:${openfeign.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.nimbusds:nimbus-jose-jwt:${com.nimbusds.wso2.version}</bundleDef>
                                 <bundleDef>commons-validator:commons-validator:${commons-validator.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.mcp.transformer:mcp-transformer-java:${mcp.transformer.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>

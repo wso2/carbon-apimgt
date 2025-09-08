@@ -31,7 +31,7 @@ public class McpResponse <T> {
     @SerializedName("id")
     private Object id;
     @SerializedName("result")
-    private T Result;
+    private T result;
 
     public McpResponse(Object id) {
         this.id = id;
@@ -50,10 +50,10 @@ public class McpResponse <T> {
     }
 
     public T getResult() {
-        return Result;
+        return result;
     }
 
     public void setResult(T result) {
-        Result = result;
+        this.result = result;
     }
 }

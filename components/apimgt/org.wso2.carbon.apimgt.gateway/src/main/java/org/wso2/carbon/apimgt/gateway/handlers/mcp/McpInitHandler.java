@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.mcp.request.MCPRequestDeserializer;
 import org.wso2.carbon.apimgt.gateway.mcp.request.Params;
 import org.wso2.carbon.apimgt.gateway.mcp.request.McpRequest;
+import org.wso2.carbon.apimgt.gateway.mcp.request.ParamsDeserializer;
 import org.wso2.carbon.apimgt.gateway.mcp.response.McpResponse;
 import org.wso2.carbon.apimgt.gateway.mcp.response.McpResponseDto;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -138,7 +139,9 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
             if (JsonUtil.hasAJsonPayload(axis2MC)) {
                 messageBody = JsonUtil.jsonPayloadToString(axis2MC);
 
-                Gson gson = new GsonBuilder().registerTypeAdapter(McpRequest.class, new MCPRequestDeserializer())
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(McpRequest.class, new MCPRequestDeserializer())
+                        .registerTypeAdapter(Params.class, new ParamsDeserializer())
                         .create();
                 McpRequest request = gson.fromJson(messageBody, McpRequest.class);
                 if (!MCPUtils.validateRequest(request)) {
