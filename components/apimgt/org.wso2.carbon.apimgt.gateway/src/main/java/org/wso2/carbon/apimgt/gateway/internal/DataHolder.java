@@ -264,6 +264,19 @@ public class DataHolder {
         }
     }
 
+    public void populateVhosts(GatewayAPIDTO gatewayAPIDTO) {
+        Map<String, API> apiMap = tenantAPIMap.get(gatewayAPIDTO.getTenantDomain());
+        if (apiMap != null) {
+            API api = apiMap.get(gatewayAPIDTO.getApiContext());
+            if (api != null) {
+                api.setVhosts(gatewayAPIDTO.getVhosts());
+                if (log.isDebugEnabled()) {
+                    log.debug("Populated vhosts info for API : " + api.getApiName());
+                }
+            }
+        }
+    }
+
     public Map<String, Map<String, API>> getTenantAPIMap() {
         return tenantAPIMap;
     }

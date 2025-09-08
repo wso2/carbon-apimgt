@@ -33,6 +33,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.OAuthProtectedResourceDTO;
@@ -174,14 +175,9 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             log.error("Multiple Key Managers found for MCP Server: " + matchedAPI.getUuid() + ".");
             skipAuthServersAttribute = true;
         }
-        // We need to adjust this to support vhost instead of constructing the URL here
         String contextPath = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
-        String hostAddress = APIUtil.getHostAddress();
-        String serverURL = APIConstants.HTTPS_PROTOCOL + APIConstants.URL_SCHEME_SEPARATOR + hostAddress;
-        if ("localhost".equals(hostAddress)) {
-            serverURL += ":";
-            serverURL += (8243  + APIUtil.getPortOffset());
-        }
+        String serverURL = MCPUtils.getGatewayServerURL(null, contextPath);
+
         String resourceURL = serverURL + contextPath + APIMgtGatewayConstants.MCP_RESOURCE;
         oAuthProtectedResourceDTO.setResource(resourceURL);
 

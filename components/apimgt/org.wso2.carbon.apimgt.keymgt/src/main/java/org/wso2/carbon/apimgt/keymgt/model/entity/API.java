@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.keymgt.model.entity;
 
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 
@@ -51,6 +52,7 @@ public class API implements CacheableEntity<String> {
     private boolean isSubscriptionValidationDisabled = false;
     private Boolean isEgress = null;
     private String subtype = null;
+    private List<VHost> vhosts = new ArrayList<>();
 
     public API() {
     }
@@ -374,5 +376,13 @@ public class API implements CacheableEntity<String> {
 
     public void setApiProperties(Map<String, String> apiProperties) {
         this.apiProperties = apiProperties;
+    }
+
+    public List<VHost> getVhosts() {
+        return vhosts;
+    }
+
+    public void setVhosts(List<VHost> vhosts) {
+        this.vhosts = vhosts;
     }
 }
