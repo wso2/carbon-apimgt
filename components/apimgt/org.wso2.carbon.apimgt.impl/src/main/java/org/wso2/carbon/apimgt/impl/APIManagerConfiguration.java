@@ -177,7 +177,7 @@ public class APIManagerConfiguration {
     private boolean isTransactionCounterEnabled;
     private static boolean isMCPSupportEnabled = true;
     private static String devportalMode = APIConstants.DEVPORTAL_MODE_HYBRID;
-    private static boolean isRuntimeReadOnly = false;
+    private static volatile boolean isRuntimeReadOnly = false;
 
     public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
