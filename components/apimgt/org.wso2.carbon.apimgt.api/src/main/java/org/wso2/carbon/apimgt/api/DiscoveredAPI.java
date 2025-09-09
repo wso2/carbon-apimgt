@@ -33,14 +33,20 @@ public class DiscoveredAPI {
         this.api = api;
         this.referenceArtifact = referenceArtifact;
     }
+
     public API getApi() {
         return api;
     }
+
     public void setApi(API api) {
         this.api = api;
     }
+
     public String getReferenceArtifact() {
         return referenceArtifact;
     }
-    public void setReferenceArtifact(Object referenceArtifact) {}
+
+    public void setReferenceArtifact(String referenceArtifact) {
+        this.referenceArtifact = referenceArtifact;
+    }
 }

@@ -79,12 +79,11 @@ import static org.wso2.carbon.federated.gateway.util.FederatedGatewayConstants.P
 public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService {
     private static final ScheduledExecutorService executor = Executors.newScheduledThreadPool(5, r ->
             new Thread(r, "FederatedAPIDiscoveryExecutor"));
-    ScheduledExecutorService ttlUpdateExecutor = Executors.newSingleThreadScheduledExecutor(r ->
+    private static final ScheduledExecutorService ttlUpdateExecutor = Executors.newSingleThreadScheduledExecutor(r ->
             new Thread(r, "FederatedAPIDiscoveryExecutor - TTL Update"));
     private static final Map<String, ScheduledFuture<?>> scheduledDiscoveryTasks = new ConcurrentHashMap<>();
     private static final Map<String, ScheduledFuture<?>> scheduledHeartBeatTasks = new ConcurrentHashMap<>();
     private static Log log = LogFactory.getLog(FederatedAPIDiscoveryRunner.class);
-    FederatedAPIDiscovery federatedAPIDiscovery;
 
     private static final String nodeId = UUID.randomUUID().toString();
 
@@ -104,7 +103,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
         if (gatewayConfiguration != null && gatewayConfiguration.getDiscoveryImplementation() != null) {
             if (StringUtils.isNotEmpty(gatewayConfiguration.getDiscoveryImplementation())) {
                 try {
-                    federatedAPIDiscovery = (FederatedAPIDiscovery)
+                    FederatedAPIDiscovery federatedAPIDiscovery = (FederatedAPIDiscovery)
                             Class.forName(gatewayConfiguration.getDiscoveryImplementation())
                                     .getDeclaredConstructor().newInstance();
                     log.info("Initializing federated API discovery for environment: " + environment.getName()
@@ -126,10 +125,12 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                         log.info("Federated API discovery is disabled for environment: " + environment.getName());
                     } else {
                         long scheduledTime = System.currentTimeMillis();
-                        long ttl = TimeUnit.MINUTES.toSeconds(scheduleWindow)/2;
+                        long ttl = TimeUnit.MINUTES.toMillis(scheduleWindow) / 2;
                         ScheduledFuture<?> newTask = executor.scheduleAtFixedRate(() -> {
+                            boolean acquired = false;
                             try {
-                                if (acquireLockToExecuteDiscovery(scheduledTime, taskKey, ttl)) {
+                                acquired = acquireLockToExecuteDiscovery(scheduledTime, taskKey, ttl);
+                                if (acquired) {
                                     try {
                                         List<DiscoveredAPI> discoveredAPIs = federatedAPIDiscovery.discoverAPI();
                                         if (discoveredAPIs != null && !discoveredAPIs.isEmpty()) {
@@ -138,7 +139,8 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                                                         " APIs for environment: " + environment.getName() +
                                                         " and organization: " + organization);
                                             }
-                                            processDiscoveredAPIs(discoveredAPIs, environment, organization);
+                                            processDiscoveredAPIs(discoveredAPIs, environment, organization,
+                                                    federatedAPIDiscovery);
                                         } else {
                                             if (log.isDebugEnabled()) {
                                                 log.debug("No APIs discovered in environment: "
@@ -151,7 +153,9 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                                     }
                                 }
                             } finally {
-                                releaseAcquiredLock(taskKey);
+                                if (acquired) {
+                                    releaseAcquiredLock(taskKey);
+                                }
                             }
                         }, 0, scheduleWindow, TimeUnit.MINUTES);
                         scheduledDiscoveryTasks.put(taskKey, newTask);
@@ -181,7 +185,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
      * @param organization             The organization context for the deployment.
      */
     private void processDiscoveredAPIs(List<DiscoveredAPI> apisToDeployInGatewayEnv, Environment environment,
-                                       String organization) {
+                                       String organization, FederatedAPIDiscovery discovery) {
         boolean debugLogEnabled = log.isDebugEnabled();
         if (debugLogEnabled) {
             log.debug("Processing discovered APIs for environment: " + environment.getName()
@@ -229,8 +233,8 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                                     return new String[]{name, version};
                                 })
                                 .filter(Objects::nonNull)
-                                .filter(parts -> parts[0].equals(apidto.getName())
-                                        || parts[0].equals(envPathName)
+                                .filter(parts -> (parts[0].equals(apidto.getName())
+                                        || parts[0].equals(envPathName))
                                         && !parts[1].equals(apidto.getVersion()))
                                 .map(parts -> parts[0] + DELEM_COLON + parts[1])
                                 .findFirst();
@@ -238,7 +242,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                         existingAPI = existingApiOpt.orElse(null);
                     }
 
-                    if ((update && alreadyExistsWithEnvScope && !federatedAPIDiscovery.isAPIUpdated(discoveredAPI, apidto))
+                    if ((update && alreadyExistsWithEnvScope && !discovery.isAPIUpdated(discoveredAPI, apidto))
                             || isPublishedAPIFromCP) {
                         continue;
                     }
@@ -334,13 +338,20 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     public static void shutdown() {
         scheduledDiscoveryTasks.values().forEach(f -> f.cancel(false));
         executor.shutdown();
+        scheduledHeartBeatTasks.values().forEach(f -> f.cancel(false));
+        ttlUpdateExecutor.shutdown();
         try {
             if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
                 executor.shutdownNow();
                 log.warn("Forced shutdown of federated API discovery executor after timeout");
             }
+            if (!ttlUpdateExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+                ttlUpdateExecutor.shutdownNow();
+                log.warn("Forced shutdown of TTL update executor after timeout");
+            }
         } catch (InterruptedException e) {
             executor.shutdownNow();
+            ttlUpdateExecutor.shutdownNow();
             Thread.currentThread().interrupt();
             log.error("Interrupted during federated API discovery shutdown", e);
         }
@@ -349,33 +360,40 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     /**
      * Attempts to acquire a lock for a discovery task.
      * If the lock is acquired, the task is scheduled for execution.
+     *
      * @param scheduledTimeMs The scheduled time for the task in milliseconds.
-     * @param taskKey The unique key for the task.
-     * @param ttlSeconds The time-to-live for the lock in seconds.
+     * @param taskKey         The unique key for the task.
+     * @param ttlMilliseconds The time-to-live for the lock in seconds.
      * @return true if the lock was acquired and the task can proceed, false otherwise.
      */
-    private boolean acquireLockToExecuteDiscovery(long scheduledTimeMs, String taskKey, long ttlSeconds) {
+    private boolean acquireLockToExecuteDiscovery(long scheduledTimeMs, String taskKey, long ttlMilliseconds) {
         final ApiMgtDAO dao = ApiMgtDAO.getInstance();
         final long now = System.currentTimeMillis();
 
         try {
             // 1) First attempt: create a new executor task (happy path)
             if (dao.addExecutorTask(scheduledTimeMs, taskKey, FederatedAPIDiscoveryRunner.nodeId)) {
-                scheduledHeartBeatTasks.put(taskKey, scheduleHeartbeat(taskKey, ttlSeconds));
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully acquired lock for discovery task " + taskKey);
+                }
+                scheduledHeartBeatTasks.put(taskKey, scheduleHeartbeat(taskKey, ttlMilliseconds));
                 return true;
             }
 
             // 2) Someone already holds it. Check if it's expired.
             long holderScheduledTimeMs = dao.getScheduledTimeFromExecutorTask(taskKey);
-            long expiryMs = holderScheduledTimeMs + ttlSeconds;
+            long expiryMs = holderScheduledTimeMs + ttlMilliseconds;
             if (now <= expiryMs) {
                 // Still valid; don't steal it.
                 return false;
             }
             // 3) Expired; try to take over
             dao.updateExecutorTask(scheduledTimeMs, taskKey, FederatedAPIDiscoveryRunner.nodeId);
-
-            scheduledHeartBeatTasks.put(taskKey, scheduleHeartbeat(taskKey, ttlSeconds));
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully acquired lock for discovery task " + taskKey + " after stealing from "
+                        + holderScheduledTimeMs);
+            }
+            scheduledHeartBeatTasks.put(taskKey, scheduleHeartbeat(taskKey, ttlMilliseconds));
             return true;
         } catch (APIManagementException e) {
             log.warn("Failed to acquire lock for discovery task " + taskKey, e);
@@ -383,22 +401,29 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
         }
     }
 
-    /**.
+    /**
+     * .
      * The heartbeat task periodically updates the ScheduledTime of the task to prevent it from expiring.
-     * @param taskKey The unique key for the task.
-     * @param ttlSeconds The time-to-live for the lock in seconds.
+     *
+     * @param taskKey         The unique key for the task.
+     * @param ttlMilliseconds The time-to-live for the lock in seconds.
      * @return A ScheduledFuture representing the heartbeat task.
      */
-    private ScheduledFuture<?> scheduleHeartbeat(String taskKey, long ttlSeconds) {
-
+    private ScheduledFuture<?> scheduleHeartbeat(String taskKey, long ttlMilliseconds) {
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully scheduled heartbeat for discovery task " + taskKey);
+        }
         return ttlUpdateExecutor.scheduleAtFixedRate(() -> {
-            long newExpiryMs = System.currentTimeMillis() + ttlSeconds;
+            long newExpiryMs = System.currentTimeMillis() + ttlMilliseconds;
             try {
                 ApiMgtDAO.getInstance().updateScheduledTimeOfExecutorTask(newExpiryMs, taskKey);
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully updated heartbeat for discovery task " + taskKey + " to " + newExpiryMs);
+                }
             } catch (Exception e) {
                 log.warn("Failed to extend TTL for task " + taskKey, e);
             }
-        }, ttlSeconds / 2, ttlSeconds / 2, TimeUnit.SECONDS);
+        }, ttlMilliseconds / 2, ttlMilliseconds / 2, TimeUnit.SECONDS);
     }
 
     /**

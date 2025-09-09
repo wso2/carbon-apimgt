@@ -17189,10 +17189,11 @@ public class ApiMgtDAO {
      * Adds an executor task to the database lock table with the provided scheduled time, task ID, and node ID.
      *
      * @param scheduledTime the scheduled time of the task in milliseconds since epoch
-     * @param taskId the unique identifier of the task
-     * @param nodeId the identifier of the node where
+     * @param taskId        the unique identifier of the task
+     * @param nodeId        the identifier of the node where
      * @return true if the lock is successfully acquired
-     * */
+     *
+     */
     public boolean addExecutorTask(Long scheduledTime, String taskId, String nodeId)
             throws APIManagementException {
         String query = SQLConstants.ADD_EXECUTOR_TASK_TO_LOCK_TABLE;
@@ -17200,7 +17201,7 @@ public class ApiMgtDAO {
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(query)) {
-                ps.setLong( 1, scheduledTime);
+                ps.setLong(1, scheduledTime);
                 ps.setString(2, taskId);
                 ps.setString(3, nodeId);
                 ps.execute();
@@ -17220,6 +17221,7 @@ public class ApiMgtDAO {
 
     /**
      * Removes the executor task from the database lock table.
+     *
      * @param taskId the unique identifier of the task
      * @throws APIManagementException
      */
@@ -17239,8 +17241,9 @@ public class ApiMgtDAO {
 
     /**
      * Update acquired lock time of the executor task.
+     *
      * @param updatedScheduledTime the updated scheduled time of the task in milliseconds since epoch
-     * @param taskId the unique identifier of the task
+     * @param taskId               the unique identifier of the task
      */
     public void updateScheduledTimeOfExecutorTask(long updatedScheduledTime, String taskId) throws APIManagementException {
         String query = SQLConstants.UPDATE_SCHEDULED_TIME_FROM_LOCK_TABLE;
@@ -17262,7 +17265,7 @@ public class ApiMgtDAO {
      *
      * @param taskId The unique identifier of the executor task for which the scheduled time is to be retrieved.
      * @return The scheduled time of the specified executor task as a long value.
-     *         If the task is not found or an error occurs, returns 0.
+     * If the task is not found or an error occurs, returns 0.
      **/
     public long getScheduledTimeFromExecutorTask(String taskId) throws APIManagementException {
         String query = SQLConstants.GET_SCHEDULED_TIME_OF_EXECUTOR_TASK_SQL;
@@ -17285,23 +17288,27 @@ public class ApiMgtDAO {
      * Updates the executor task in the database with the given scheduled time, task ID,
      * and node ID. This method locks the task for the specified executor node.
      *
-     * @param ScheduledTime The scheduled time to set for the task in milliseconds.
-     * @param taskId The unique identifier of the task to update.
-     * @param nodeId The ID of the executor node that locks the task.
+     * @param scheduledTime The scheduled time to set for the task in milliseconds.
+     * @param taskId        The unique identifier of the task to update.
+     * @param nodeId        The ID of the executor node that locks the task.
      * @return true if the executor task was updated successfully
      **/
-    public boolean updateExecutorTask(Long ScheduledTime, String taskId, String nodeId)
+    public boolean updateExecutorTask(Long scheduledTime, String taskId, String nodeId)
             throws APIManagementException {
         String query = SQLConstants.UPDATE_EXECUTOR_TASK_TO_LOCK_TABLE;
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(query)) {
-                ps.setLong( 1, ScheduledTime);
+                ps.setLong(1, scheduledTime);
                 ps.setString(2, nodeId);
                 ps.setString(3, taskId);
-                ps.executeUpdate();
-                conn.commit();
-                return true;
+                int rows = ps.executeUpdate();
+                if (rows == 1) {
+                    conn.commit();
+                    return true;
+                }
+                conn.rollback();
+                return false;
             }
         } catch (SQLException e) {
             handleException("Error while updating executor task: ", e);
