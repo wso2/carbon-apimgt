@@ -129,6 +129,7 @@ public class BasicAuthClientPool {
             try {
                 basicAuthClientPool.addObject();
             } catch (Exception ignore) {
+                log.warn("Failed to pre-fill BasicAuthClient pool at index: " + i);
                 break;
             }
         }
