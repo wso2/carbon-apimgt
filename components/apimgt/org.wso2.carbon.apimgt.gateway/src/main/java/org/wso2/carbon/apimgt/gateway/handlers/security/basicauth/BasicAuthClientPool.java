@@ -171,6 +171,9 @@ public class BasicAuthClientPool {
     public void release(BasicAuthClient client) throws Exception {
 
         if (client != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Returning BasicAuthClient to pool");
+            }
             basicAuthClientPool.returnObject(client);
         }
     }
