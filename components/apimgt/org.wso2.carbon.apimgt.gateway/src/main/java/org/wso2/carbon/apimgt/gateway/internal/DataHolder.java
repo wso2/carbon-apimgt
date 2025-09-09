@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants.GatewayNotification.GatewayRegistrationResponse;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
@@ -38,6 +39,7 @@ import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -52,6 +54,8 @@ public class DataHolder {
     private Map<String, Boolean> tenantDeployStatus = new HashMap<>();
     private Map<String, LLMProviderInfo> llmProviderMap = new HashMap<>();
     private final Map<String, Cache<String, Long>> apiSuspendedEndpoints = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, AbstractAPIMgtGatewayJWTGenerator> jwtGeneratorTenantMap =
+            new ConcurrentHashMap<>();
 
     private boolean isAllGatewayPoliciesDeployed = false;
     private boolean tenantsProvisioned = false;
@@ -441,5 +445,16 @@ public class DataHolder {
                 }
             }
         }
+    }
+
+    /**
+     * Returns the map of JWT generators per tenant domain.
+     *
+     * @return ConcurrentMap where the key is the tenant domain and the value is the corresponding
+     * AbstractAPIMgtGatewayJWTGenerator instance.
+     */
+    public ConcurrentMap<String, AbstractAPIMgtGatewayJWTGenerator> getJwtGeneratorTenantMap() {
+
+        return jwtGeneratorTenantMap;
     }
 }

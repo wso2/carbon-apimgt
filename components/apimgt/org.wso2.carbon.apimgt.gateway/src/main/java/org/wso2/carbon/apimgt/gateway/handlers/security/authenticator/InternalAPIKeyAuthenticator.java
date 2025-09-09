@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
@@ -61,7 +62,7 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
-import java.nio.charset.StandardCharsets;
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,7 +71,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import javax.cache.Cache;
 
 /**
@@ -84,9 +84,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
     private boolean jwtGenerationEnabled;
     private boolean isGatewayTokenCacheEnabled;
     private ExtendedJWTConfigurationDto jwtConfigurationDto;
-    private AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator;
     private static volatile long ttl = -1L;
-    private final Object lock = new Object();
 
     public InternalAPIKeyAuthenticator(String securityParam) {
         this.securityParam = securityParam;
@@ -284,9 +282,11 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                             log.debug("Generating JWT token for MCP authenticated request for API with context: "
                                     + apiContext + " and version: " + apiVersion);
                         }
-                        ensureJwtGeneratorInitialized();
+
+                        AbstractAPIMgtGatewayJWTGenerator jwtGenerator =
+                                resolveGenerator(GatewayUtils.getTenantDomain());
                         JWTInfoDto jwtInfoDto = buildJWTInfoForInternalKey(payload, retrievedApi, synCtx);
-                        endUserToken = generateAndRetrieveJWTToken(tokenIdentifier, jwtInfoDto);
+                        endUserToken = generateAndRetrieveJWTToken(jwtGenerator, tokenIdentifier, jwtInfoDto);
                     }
 
                     AuthenticationContext authenticationContext = GatewayUtils
@@ -325,54 +325,59 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
     }
 
-    /**
-     * Lazily initializes the gateway JWT generator and signing material.
-     * Loads tenant-scoped or default certificates/keys based on configuration,
-     * sets the token TTL, and wires the generator instance if not already initialized.
-     *
-     * @throws APISecurityException if signing material or generator initialization fails
-     */
-    private void ensureJwtGeneratorInitialized() throws APISecurityException {
+    private AbstractAPIMgtGatewayJWTGenerator resolveGenerator(String tenantDomain) throws APISecurityException {
 
-        if (apiMgtGatewayJWTGenerator != null && jwtConfigurationDto.getPublicCert() != null) {
-            return;
-        }
-        synchronized (lock) {
-            if (apiMgtGatewayJWTGenerator != null && jwtConfigurationDto.getPublicCert() != null) {
-                return;
-            }
-            try {
-                if (jwtConfigurationDto.isTenantBasedSigningEnabled()) {
-                    String tenantDomain = GatewayUtils.getTenantDomain();
-                    if (log.isDebugEnabled()) {
-                        log.debug("Tenant based signing enabled, loading certificates for tenant: " + tenantDomain);
+        final String key = jwtConfigurationDto.isTenantBasedSigningEnabled() ? tenantDomain
+                : MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        try {
+            return DataHolder.getInstance().getJwtGeneratorTenantMap().computeIfAbsent(key, k -> {
+                ExtendedJWTConfigurationDto configurationDto = copyBase(jwtConfigurationDto);
+                try {
+                    if (configurationDto.isTenantBasedSigningEnabled()) {
+                        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+                        configurationDto.setPublicCert(SigningUtil.getPublicCertificate(tenantId));
+                        configurationDto.setPrivateKey(SigningUtil.getSigningKey(tenantId));
+                    } else {
+                        configurationDto.setPublicCert(ServiceReferenceHolder.getInstance().getPublicCert());
+                        configurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
                     }
-                    int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-                    jwtConfigurationDto.setPublicCert(SigningUtil.getPublicCertificate(tenantId));
-                    jwtConfigurationDto.setPrivateKey(SigningUtil.getSigningKey(tenantId));
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Using default certificates for JWT signing");
+                    configurationDto.setTtl(getTtl());
+
+                    String impl = configurationDto.getGatewayJWTGeneratorImpl();
+                    ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                    if (cl == null) {
+                        cl = InternalAPIKeyAuthenticator.class.getClassLoader();
                     }
-                    jwtConfigurationDto.setPublicCert(ServiceReferenceHolder.getInstance().getPublicCert());
-                    jwtConfigurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
+                    AbstractAPIMgtGatewayJWTGenerator jwtGenerator =
+                            (AbstractAPIMgtGatewayJWTGenerator) cl.loadClass(impl)
+                                    .getDeclaredConstructor()
+                                    .newInstance();
+                    jwtGenerator.setJWTConfigurationDto(configurationDto);
+                    return jwtGenerator;
+                } catch (APIManagementException | NoSuchMethodException | IllegalAccessException |
+                         InstantiationException | InvocationTargetException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
                 }
-                jwtConfigurationDto.setTtl(getTtl());
-                apiMgtGatewayJWTGenerator = ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
-                        .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
-                if (apiMgtGatewayJWTGenerator == null) {
-                    log.error("Gateway JWT generator implementation is not available: "
-                            + jwtConfigurationDto.getGatewayJWTGeneratorImpl());
-                    throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                            APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
-                }
-                apiMgtGatewayJWTGenerator.setJWTConfigurationDto(jwtConfigurationDto);
-            } catch (APIManagementException e) {
-                log.error("Error occurred during initialization of JWT generator", e);
-                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
-            }
+            });
+        } catch (RuntimeException e) {
+            log.error("Error initializing JWT generator for tenant: " + tenantDomain, e);
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
+    }
+
+    private ExtendedJWTConfigurationDto copyBase(ExtendedJWTConfigurationDto sourceConfigurationDto) {
+
+        ExtendedJWTConfigurationDto configurationDto = new ExtendedJWTConfigurationDto();
+        configurationDto.setEnabled(sourceConfigurationDto.isEnabled());
+        configurationDto.setGatewayJWTGeneratorImpl(sourceConfigurationDto.getGatewayJWTGeneratorImpl());
+        configurationDto.setJwtHeader(sourceConfigurationDto.getJwtHeader());
+        configurationDto.setConsumerDialectUri(sourceConfigurationDto.getConsumerDialectUri());
+        configurationDto.setJwtDecoding(sourceConfigurationDto.getJwtDecoding());
+        configurationDto.setTenantBasedSigningEnabled(sourceConfigurationDto.isTenantBasedSigningEnabled());
+        configurationDto.setSignatureAlgorithm(sourceConfigurationDto.getSignatureAlgorithm());
+        configurationDto.setUseKid(sourceConfigurationDto.useKid());
+        return configurationDto;
     }
 
     /**
@@ -497,12 +502,13 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
      * @return a signed JWT suitable for backend propagation
      * @throws APISecurityException if token generation fails
      */
-    private String generateAndRetrieveJWTToken(String tokenSignature, JWTInfoDto jwtInfoDto)
-            throws APISecurityException {
+    private String generateAndRetrieveJWTToken(AbstractAPIMgtGatewayJWTGenerator jwtGenerator, String tokenSignature,
+                                               JWTInfoDto jwtInfoDto) throws APISecurityException {
 
         String jwt = null;
-        boolean valid = false;
-        String cacheKey = jwtInfoDto.getApiContext() + ":" + jwtInfoDto.getVersion() + ":" + tokenSignature;
+        String tenant = GatewayUtils.getTenantDomain();
+        String cacheKey =
+                tenant + ":" + jwtInfoDto.getApiContext() + ":" + jwtInfoDto.getVersion() + ":" + tokenSignature;
 
         if (isGatewayTokenCacheEnabled) {
             if (log.isDebugEnabled()) {
@@ -512,7 +518,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
             if (cached instanceof String) {
                 jwt = (String) cached;
                 long skewMs = getTimeStampSkewInSeconds() * 1000L;
-                valid = JWTUtil.isJWTValid(jwt, jwtConfigurationDto.getJwtDecoding(), skewMs);
+                boolean valid = JWTUtil.isJWTValid(jwt, jwtConfigurationDto.getJwtDecoding(), skewMs);
                 if (!valid) {
                     if (log.isDebugEnabled()) {
                         log.debug("Cached JWT token is invalid for key: " + cacheKey + ", removing from cache");
@@ -527,7 +533,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 if (log.isDebugEnabled()) {
                     log.debug("Generating new JWT token for internal key with signature: " + tokenSignature);
                 }
-                jwt = apiMgtGatewayJWTGenerator.generateToken(jwtInfoDto);
+                jwt = jwtGenerator.generateToken(jwtInfoDto);
                 if (isGatewayTokenCacheEnabled) {
                     CacheProvider.getGatewayJWTTokenCache().put(cacheKey, jwt);
                 }
