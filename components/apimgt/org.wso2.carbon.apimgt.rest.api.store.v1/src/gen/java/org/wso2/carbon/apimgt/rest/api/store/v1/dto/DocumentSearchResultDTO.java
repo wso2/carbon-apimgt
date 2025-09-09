@@ -134,6 +134,7 @@ return null;
     private String apiVersion = null;
     private String apiProvider = null;
     private String apiUUID = null;
+    private String associatedType = null;
 
   /**
    **/
@@ -325,6 +326,23 @@ return null;
     this.apiUUID = apiUUID;
   }
 
+  /**
+   **/
+  public DocumentSearchResultDTO associatedType(String associatedType) {
+    this.associatedType = associatedType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("associatedType")
+  public String getAssociatedType() {
+    return associatedType;
+  }
+  public void setAssociatedType(String associatedType) {
+    this.associatedType = associatedType;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -345,12 +363,13 @@ return null;
         Objects.equals(apiDisplayName, documentSearchResult.apiDisplayName) &&
         Objects.equals(apiVersion, documentSearchResult.apiVersion) &&
         Objects.equals(apiProvider, documentSearchResult.apiProvider) &&
-        Objects.equals(apiUUID, documentSearchResult.apiUUID);
+        Objects.equals(apiUUID, documentSearchResult.apiUUID) &&
+        Objects.equals(associatedType, documentSearchResult.associatedType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(docType, summary, sourceType, sourceUrl, otherTypeName, visibility, apiName, apiDisplayName, apiVersion, apiProvider, apiUUID);
+    return Objects.hash(docType, summary, sourceType, sourceUrl, otherTypeName, visibility, apiName, apiDisplayName, apiVersion, apiProvider, apiUUID, associatedType);
   }
 
   @Override
@@ -369,6 +388,7 @@ return null;
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
     sb.append("    apiProvider: ").append(toIndentedString(apiProvider)).append("\n");
     sb.append("    apiUUID: ").append(toIndentedString(apiUUID)).append("\n");
+    sb.append("    associatedType: ").append(toIndentedString(associatedType)).append("\n");
     sb.append("}");
     return sb.toString();
   }

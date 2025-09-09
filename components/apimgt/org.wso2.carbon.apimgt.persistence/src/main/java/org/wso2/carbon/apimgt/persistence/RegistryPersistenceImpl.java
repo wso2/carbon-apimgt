@@ -1751,17 +1751,17 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             PublisherAPI pubAPI;
                             if (apiArtifactId != null) {
                                 GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
-                                String accociatedType;
+                                String associatedType;
                                 if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).
                                         equals(APIConstants.AuditLogConstants.API_PRODUCT)) {
                                     //associatedAPIProduct = APIUtil.getAPIProduct(apiArtifact, registry);
-                                    accociatedType = APIConstants.API_PRODUCT;
+                                    associatedType = APIConstants.API_PRODUCT;
                                 } else if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
                                         .equals(APIConstants.MCP)){
-                                    accociatedType = APIConstants.MCP;
+                                    associatedType = APIConstants.MCP;
                                 } else {
                                     //associatedAPI = APIUtil.getAPI(apiArtifact, registry);
-                                    accociatedType = APIConstants.API;
+                                    associatedType = APIConstants.API;
                                 }
                                 pubAPI = RegistryPersistenceUtil.getAPIForSearch(apiArtifact);
                                 docSearch.setApiName(pubAPI.getApiName());
@@ -1769,7 +1769,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 docSearch.setApiProvider(pubAPI.getProviderName());
                                 docSearch.setApiVersion(pubAPI.getVersion());
                                 docSearch.setApiUUID(pubAPI.getId());
-                                docSearch.setAssociatedType(accociatedType);
+                                docSearch.setAssociatedType(associatedType);
                                 docSearch.setDocType(doc.getType());
                                 docSearch.setId(doc.getId());
                                 docSearch.setSourceType(doc.getSourceType());
@@ -1941,7 +1941,15 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             String apiArtifactId = apiResource.getUUID();
                             DevPortalAPI devAPI;
                             if (apiArtifactId != null) {
+                                log.debug("Processing artifact for document search: " + apiArtifactId);
                                 GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
+                                String associatedType;
+                                if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
+                                        .equals(APIConstants.MCP)){
+                                    associatedType = APIConstants.MCP;
+                                } else {
+                                    associatedType = APIConstants.API;
+                                }
                                 devAPI = RegistryPersistenceUtil.getDevPortalAPIForSearch(apiArtifact);
                                 devAPI.setVisibility(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
                                 docSearch.setApiName(devAPI.getApiName());
@@ -1949,6 +1957,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 docSearch.setApiProvider(devAPI.getProviderName());
                                 docSearch.setApiVersion(devAPI.getVersion());
                                 docSearch.setApiUUID(devAPI.getId());
+                                docSearch.setAssociatedType(associatedType);
                                 docSearch.setDocType(doc.getType());
                                 docSearch.setId(doc.getId());
                                 docSearch.setSourceType(doc.getSourceType());
@@ -1974,11 +1983,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 DevPortalSearchContent content = new DevPortalSearchContent();
                                 content.setContext(devAPI.getContext());
                                 String associatedType;
-                                if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
-                                        .equals(APIConstants.AuditLogConstants.API_PRODUCT)) {
+                                String artifactType = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
+                                if (artifactType.equals(APIConstants.API_PRODUCT)) {
                                     associatedType = APIConstants.API_PRODUCT;
-                                } else if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE)
-                                        .equals(APIConstants.MCP)){
+                                } else if (artifactType.equals(APIConstants.MCP)){
                                     associatedType = APIConstants.MCP;
                                 } else {
                                     associatedType = APIConstants.API;
@@ -1999,6 +2007,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 content.setTechnicalOwnerEmail(devAPI.getTechnicalOwnerEmail());
                                 content.setMonetizationStatus(devAPI.getMonetizationStatus());
                                 content.setAdvertiseOnly(devAPI.isAdvertiseOnly());
+                                content.setTransportType(devAPI.getType());
 
                                 contentData.add(content);
                             } else {

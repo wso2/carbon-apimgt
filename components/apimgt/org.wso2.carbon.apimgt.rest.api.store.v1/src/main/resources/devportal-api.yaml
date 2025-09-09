@@ -6386,6 +6386,8 @@ components:
               example: admin
             apiUUID:
               type: string
+            associatedType:
+              type: string
     APIDefinitionSearchResult:
       title: API Definition Search Result
       allOf:
