@@ -193,6 +193,7 @@ public class APIManagerConfiguration {
     }
 
     public void setRuntimeReadOnly(boolean runtimeReadOnly) {
+        this.isRuntimeReadOnly = runtimeReadOnly;
     }
 
     private Map<String, ExtensionListener> extensionListenerMap = new HashMap<>();
