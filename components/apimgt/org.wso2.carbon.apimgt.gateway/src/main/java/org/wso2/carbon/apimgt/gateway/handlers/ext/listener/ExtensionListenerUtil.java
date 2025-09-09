@@ -409,8 +409,7 @@ public class ExtensionListenerUtil {
         Map<String, Boolean> doMediateExtensionFaultSequenceMap = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getDoMediateExtensionFaultSequenceMap();
-        return doMediateExtensionFaultSequenceMap.containsKey(type) ?
-                doMediateExtensionFaultSequenceMap.get(type) : false;
+        return Boolean.TRUE.equals(doMediateExtensionFaultSequenceMap.get(type));
     }
 
     @SuppressWarnings("unchecked")

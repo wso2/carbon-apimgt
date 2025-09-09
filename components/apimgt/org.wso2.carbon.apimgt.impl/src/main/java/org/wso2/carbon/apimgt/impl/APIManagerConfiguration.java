@@ -2888,22 +2888,22 @@ public class APIManagerConfiguration {
                     listenerElement
                             .getFirstChildWithName(new QName(
                                     APIConstants.ExtensionListenerConstants.EXTENSION_LISTENER_CLASS_NAME));
-            OMElement listenerDoMediateExtensionFaultSequenceElement =
+            OMElement enableExtensionFaultSequenceMediationElement =
                     listenerElement
                             .getFirstChildWithName(new QName(APIConstants
                                     .ExtensionListenerConstants.EXTENSION_LISTENER_DO_MEDIATE_EXTENSION_FAULT_SEQUENCE));
             if (listenerTypeElement != null && listenerClassElement != null) {
                 String listenerClass = listenerClassElement.getText();
-                boolean doMediateFaultSequence = false;
-                if (listenerDoMediateExtensionFaultSequenceElement != null) {
-                    doMediateFaultSequence =
-                            Boolean.parseBoolean(listenerDoMediateExtensionFaultSequenceElement.getText());
+                boolean enableExtensionFaultSequenceMediation = false;
+                if (enableExtensionFaultSequenceMediationElement != null) {
+                    enableExtensionFaultSequenceMediation =
+                            Boolean.parseBoolean(enableExtensionFaultSequenceMediationElement.getText());
                 }
                 try {
                     ExtensionListener extensionListener = (ExtensionListener) APIUtil.getClassInstance(listenerClass);
                     extensionListenerMap.put(listenerTypeElement.getText().toUpperCase(), extensionListener);
                     doMediateExtensionFaultSequenceMap.put(listenerTypeElement.getText().toUpperCase(),
-                            doMediateFaultSequence);
+                            enableExtensionFaultSequenceMediation);
                 } catch (InstantiationException e) {
                     log.error("Error while instantiating class " + listenerClass, e);
                 } catch (IllegalAccessException e) {
