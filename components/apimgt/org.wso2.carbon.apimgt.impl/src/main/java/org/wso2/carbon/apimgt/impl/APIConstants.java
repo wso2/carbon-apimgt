@@ -3442,6 +3442,8 @@ public final class APIConstants {
         public static final String EXTENSION_LISTENER = "ExtensionListener";
         public static final String EXTENSION_TYPE = "Type";
         public static final String EXTENSION_LISTENER_CLASS_NAME = "ClassName";
+        public static final String EXTENSION_LISTENER_DO_MEDIATE_EXTENSION_FAULT_SEQUENCE =
+                "MediateExtensionFaultSequence";
         public static final int API_EXTENSION_LISTENER_ERROR = 900300;
         public static final String API_EXTENSION_LISTENER_ERROR_MESSAGE = "API Extension Listener Error";
     }

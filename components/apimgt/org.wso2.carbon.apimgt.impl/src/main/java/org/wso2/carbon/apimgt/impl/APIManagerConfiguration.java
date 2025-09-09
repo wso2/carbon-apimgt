@@ -200,6 +200,13 @@ public class APIManagerConfiguration {
 
     private Map<String, ExtensionListener> extensionListenerMap = new HashMap<>();
 
+    public Map<String, Boolean> getDoMediateExtensionFaultSequenceMap() {
+
+        return doMediateExtensionFaultSequenceMap;
+    }
+
+    private Map<String, Boolean> doMediateExtensionFaultSequenceMap = new HashMap<>();
+
     public static Properties getRealtimeTokenRevocationNotifierProperties() {
 
         return realtimeNotifierProperties;
@@ -2881,11 +2888,22 @@ public class APIManagerConfiguration {
                     listenerElement
                             .getFirstChildWithName(new QName(
                                     APIConstants.ExtensionListenerConstants.EXTENSION_LISTENER_CLASS_NAME));
+            OMElement listenerDoMediateExtensionFaultSequenceElement =
+                    listenerElement
+                            .getFirstChildWithName(new QName(APIConstants
+                                    .ExtensionListenerConstants.EXTENSION_LISTENER_DO_MEDIATE_EXTENSION_FAULT_SEQUENCE));
             if (listenerTypeElement != null && listenerClassElement != null) {
                 String listenerClass = listenerClassElement.getText();
+                boolean doMediateFaultSequence = false;
+                if (listenerDoMediateExtensionFaultSequenceElement != null) {
+                    doMediateFaultSequence =
+                            Boolean.parseBoolean(listenerDoMediateExtensionFaultSequenceElement.getText());
+                }
                 try {
                     ExtensionListener extensionListener = (ExtensionListener) APIUtil.getClassInstance(listenerClass);
                     extensionListenerMap.put(listenerTypeElement.getText().toUpperCase(), extensionListener);
+                    doMediateExtensionFaultSequenceMap.put(listenerTypeElement.getText().toUpperCase(),
+                            doMediateFaultSequence);
                 } catch (InstantiationException e) {
                     log.error("Error while instantiating class " + listenerClass, e);
                 } catch (IllegalAccessException e) {
