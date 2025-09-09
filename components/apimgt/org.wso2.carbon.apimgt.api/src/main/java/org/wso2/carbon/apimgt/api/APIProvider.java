@@ -1720,12 +1720,8 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId API UUID
      * @throws APIManagementException if an error occurs while deleting the primary endpoint mappings
-     * @deprecated Use {@link #deleteAPIPrimaryEndpointMappings(String, String)} and pass null for the revision.
      */
-    @Deprecated
-    default void deleteAPIPrimaryEndpointMappings(String apiId) throws APIManagementException {
-        deleteAPIPrimaryEndpointMappings(apiId, null);
-    }
+    void deleteAPIPrimaryEndpointMappings(String apiId) throws APIManagementException;
 
     /**
      * Delete API endpoints by providing the API UUID

@@ -1269,7 +1269,7 @@ public class ImportUtils {
      * @throws APIManagementException If an error occurs while dropping the API endpoints
      */
     private static void dropAPIEndpoints(API api, APIProvider provider) throws APIManagementException {
-        provider.deleteAPIPrimaryEndpointMappings(api.getUuid(), null);
+        provider.deleteAPIPrimaryEndpointMappings(api.getUuid());
         provider.deleteAPIEndpointsByApiUUID(api.getUuid());
     }
 

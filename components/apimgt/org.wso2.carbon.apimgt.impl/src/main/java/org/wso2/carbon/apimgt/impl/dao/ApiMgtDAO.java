@@ -26486,13 +26486,42 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Delete primary endpoint mappings related to provided API UUID and revision UUID from AM_API_PRIMARY_EP_MAPPING
+     * Delete primary endpoint mappings related to provided API UUID from AM_API_PRIMARY_EP_MAPPING
      *
      * @param apiUUID API UUID
+     * @throws APIManagementException if error occurs while deleting primary endpoint mappings
+     */
+    public void deleteAllAPIPrimaryEndpointMappingsByUUID(String apiUUID) throws APIManagementException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting primary endpoint mappings for API: " + apiUUID);
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            String deleteQuery;
+            deleteQuery = SQLConstants.APIEndpointsSQLConstants.DELETE_PRIMARY_ENDPOINT_MAPPING_BY_API_UUID;
+            try (PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
+                preparedStatement.setString(1, apiUUID);
+                preparedStatement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error while deleting primary endpoint mappings for API: " + apiUUID, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error while deleting primary endpoint mappings of API: " + apiUUID, e);
+        }
+    }
+
+    /**
+     * Delete primary endpoint mappings related to provided API UUID and revision UUID from AM_API_PRIMARY_EP_MAPPING
+     *
+     * @param apiUUID      API UUID
      * @param revisionUUID Revision UUID
      * @throws APIManagementException if error occurs while deleting primary endpoint mappings
      */
-    public void deleteAPIPrimaryEndpointMappings(String apiUUID, String revisionUUID) throws APIManagementException {
+    public void deleteAPIPrimaryEndpointMappingsByRevision(String apiUUID, String revisionUUID)
+            throws APIManagementException {
 
         if (log.isDebugEnabled()) {
             log.debug(
@@ -26501,26 +26530,23 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             String deleteQuery;
-            if (revisionUUID == null) {
-                deleteQuery = SQLConstants.APIEndpointsSQLConstants.DELETE_PRIMARY_ENDPOINT_MAPPING_BY_API_UUID;
-            } else {
-                deleteQuery = SQLConstants.APIEndpointsSQLConstants
-                        .DELETE_PRIMARY_ENDPOINT_MAPPING_BY_API_UUID_AND_REVISION_UUID;
-            }
+            deleteQuery = SQLConstants.APIEndpointsSQLConstants.DELETE_PRIMARY_ENDPOINT_MAPPING_BY_API_UUID_AND_REVISION_UUID;
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
                 preparedStatement.setString(1, apiUUID);
-                if (revisionUUID != null) {
-                    preparedStatement.setString(2, revisionUUID);
-                }
+                preparedStatement.setString(2, revisionUUID);
                 preparedStatement.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Error while deleting primary endpoint mappings for API : " + apiUUID, e);
+                handleException(
+                        "Error while deleting primary endpoint mappings for API: " + apiUUID + ", revision UUID: " + revisionUUID,
+                        e);
             }
         } catch (SQLException e) {
-            handleException("Error while deleting primary endpoint mappings of API : " + apiUUID, e);
+            handleException(
+                    "Error while deleting primary endpoint mappings of API: " + apiUUID + ", revision UUID: " + revisionUUID,
+                    e);
         }
     }
 

@@ -7586,7 +7586,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiMgtDAO.deleteAPIRevision(apiRevision);
         apiMgtDAO.deleteAllAPIMetadataRevision(apiId, apiRevisionId);
-        apiMgtDAO.deleteAPIPrimaryEndpointMappings(apiId, apiRevisionId);
+        apiMgtDAO.deleteAPIPrimaryEndpointMappingsByRevision(apiId, apiRevisionId);
         apiMgtDAO.deleteAIConfigurationRevision(apiRevision.getRevisionUUID());
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {
@@ -8916,7 +8916,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (log.isDebugEnabled()) {
                 log.debug("Removing endpoints for API: " + apiUUID);
             }
-            deleteAPIPrimaryEndpointMappings(apiUUID, null);
+            deleteAPIPrimaryEndpointMappings(apiUUID);
             deleteAPIEndpointsByApiUUID(apiUUID);
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while removing endpoints for API " + apiUUID, e);
@@ -9068,8 +9068,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public void deleteAPIPrimaryEndpointMappings(String apiId) throws APIManagementException {
+        apiMgtDAO.deleteAllAPIPrimaryEndpointMappingsByUUID(apiId);
+    }
+
+    @Override
     public void deleteAPIPrimaryEndpointMappings(String apiId, String revisionUUID) throws APIManagementException {
-        apiMgtDAO.deleteAPIPrimaryEndpointMappings(apiId, revisionUUID);
+        apiMgtDAO.deleteAPIPrimaryEndpointMappingsByRevision(apiId, revisionUUID);
     }
 
     @Override
