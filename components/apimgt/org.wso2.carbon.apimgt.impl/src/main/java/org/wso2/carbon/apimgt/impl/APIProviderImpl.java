@@ -8913,6 +8913,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void removeAPIEndpoints(String apiUUID) throws APIManagementException {
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Removing endpoints for API: " + apiUUID);
+            }
             deleteAPIPrimaryEndpointMappings(apiUUID, null);
             deleteAPIEndpointsByApiUUID(apiUUID);
         } catch (APIManagementException e) {

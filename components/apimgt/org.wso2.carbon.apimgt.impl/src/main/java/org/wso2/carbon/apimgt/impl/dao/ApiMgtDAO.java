@@ -20440,10 +20440,11 @@ public class ApiMgtDAO {
                 deleteCurrentAPIMetadata(connection, apiRevision.getApiUUID());
 
                 // Removing related Current API Endpoint from AM_API_ENDPOINTS table
-                PreparedStatement removeAPIEndpointsStatement = connection.prepareStatement(SQLConstants
-                        .APIEndpointsSQLConstants.DELETE_CURRENT_API_ENDPOINTS);
-                removeAPIEndpointsStatement.setString(1, apiRevision.getApiUUID());
-                removeAPIEndpointsStatement.executeUpdate();
+                try (PreparedStatement removeAPIEndpointsStatement = connection.prepareStatement(SQLConstants
+                        .APIEndpointsSQLConstants.DELETE_CURRENT_API_ENDPOINTS)) {
+                    removeAPIEndpointsStatement.setString(1, apiRevision.getApiUUID());
+                    removeAPIEndpointsStatement.executeUpdate();
+                }
 
                 // Removing current API primary endpoint mappings from AM_API_PRIMARY_EP_MAPPING table
                 try (PreparedStatement removePrimaryEndpointMappingsStmt = connection.prepareStatement(
