@@ -53,9 +53,10 @@ public class BasicAuthClientPool {
                 APIMgtGatewayConstants.BASIC_AUTH_VALIDATOR_CONNECTION_POOL_INIT_IDLE_CAPACITY);
         int initIdleCapSize;
 
-        if (StringUtils.isNotEmpty(maxIdleClients)) {
-            maxIdle = Integer.parseInt(maxIdleClients);
-        } else {
+        try {
+            maxIdle = StringUtils.isNotEmpty(maxIdleClients) ? Integer.parseInt(maxIdleClients) : 100;
+        } catch (NumberFormatException nfe) {
+            log.warn("Invalid MaxIdle '" + maxIdleClients + "'. Falling back to 100");
             maxIdle = 100;
         }
         // Derive or read maxActive (a true concurrency cap)
@@ -75,11 +76,18 @@ public class BasicAuthClientPool {
         }
         String maxWaitProp = config.getFirstProperty(
                 APIMgtGatewayConstants.BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_WAIT_MILLIS);
-        long maxWaitMillis = StringUtils.isNotEmpty(maxWaitProp) ? Long.parseLong(maxWaitProp) : 30000L;
+        long maxWaitMillis;
+        try {
+            maxWaitMillis = StringUtils.isNotEmpty(maxWaitProp) ? Long.parseLong(maxWaitProp) : 30000L;
+        } catch (NumberFormatException nfe) {
+            log.warn("Invalid MaxWaitMillis '" + maxWaitProp + "'. Falling back to 30000");
+            maxWaitMillis = 30000L;
+        }
 
-        if (StringUtils.isNotEmpty(initIdleCapacity)) {
-            initIdleCapSize = Integer.parseInt(initIdleCapacity);
-        } else {
+        try {
+            initIdleCapSize = StringUtils.isNotEmpty(initIdleCapacity) ? Integer.parseInt(initIdleCapacity) : 50;
+        } catch (NumberFormatException nfe) {
+            log.warn("Invalid InitIdleCapacity '" + initIdleCapacity + "'. Falling back to 50");
             initIdleCapSize = 50;
         }
 
