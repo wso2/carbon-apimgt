@@ -66,14 +66,4 @@ public class McpRequest {
     public void setId(Object id) {
         this.id = id;
     }
-
-    @Override
-    public String toString() {
-        return "McpRequest{" +
-                "jsonRpcVersion='" + jsonRpcVersion + '\'' +
-                ", id=" + id +
-                ", method='" + method + '\'' +
-                ", params=" + params +
-                '}';
-    }
 }

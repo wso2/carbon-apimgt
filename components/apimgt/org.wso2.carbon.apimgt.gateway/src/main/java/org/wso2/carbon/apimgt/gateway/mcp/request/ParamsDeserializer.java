@@ -17,19 +17,25 @@ public class ParamsDeserializer implements JsonDeserializer<Params>  {
     private static final Log log = LogFactory.getLog(ParamsDeserializer.class);
 
     @Override
-    public Params deserialize(JsonElement json, Type type, JsonDeserializationContext context) throws
-            JsonParseException {
+    public Params deserialize(JsonElement json, Type type, JsonDeserializationContext context)
+            throws JsonParseException {
         Params params = new Params();
 
         if (json != null && !json.isJsonNull()) {
+            if (!json.isJsonObject()) {
+                throw new JsonParseException("params must be a JSON object");
+            }
             JsonObject obj = json.getAsJsonObject();
-            JsonObject args = obj.getAsJsonObject("arguments");
+            JsonElement argsElement = obj.get("arguments");
 
             //iterate through the json object and print key value pairs
-            if (args == null || args.isJsonNull()) {
+            if (argsElement == null || argsElement.isJsonNull()) {
                 params.setArguments(new HashMap<>());
+            } else if (!argsElement.isJsonObject()) {
+                throw new JsonParseException("'arguments' must be a JSON object");
             } else {
                 Map<String, Object> arguments = new HashMap<>();
+                JsonObject args = argsElement.getAsJsonObject();
                 for (String key : args.keySet()) {
                     JsonElement value = args.get(key);
                     if (value != null && value.isJsonPrimitive()) {
