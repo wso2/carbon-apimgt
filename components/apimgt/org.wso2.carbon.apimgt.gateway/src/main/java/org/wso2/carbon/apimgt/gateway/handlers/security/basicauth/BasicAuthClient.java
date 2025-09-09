@@ -54,8 +54,18 @@ public class BasicAuthClient {
 
         ConfigurationContext configurationContext = ServiceReferenceHolder.getInstance()
                 .getAxis2ConfigurationContext();
+        if (configurationContext == null) {
+            log.error("Axis2 configuration context is not initialized");
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Axis2 configuration context is null");
+        }
         EventHubConfigurationDto eventHubConfigurationDto = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfiguration().getEventHubConfigurationDto();
+        if (eventHubConfigurationDto == null) {
+            log.error("Event hub configuration is not available");
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Event hub configuration is null");
+        }
         initializeServiceStub(configurationContext, eventHubConfigurationDto);
     }
 
