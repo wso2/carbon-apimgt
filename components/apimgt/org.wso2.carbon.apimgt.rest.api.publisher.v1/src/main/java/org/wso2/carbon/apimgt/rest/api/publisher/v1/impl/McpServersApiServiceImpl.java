@@ -1045,7 +1045,10 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 apiRevisionDeployments.add(apiRevisionDeployment);
             }
         }
-        apiProvider.undeployAPIRevisionDeployment(mcpServerId, revisionId, apiRevisionDeployments, organization);
+        if (log.isDebugEnabled()) {
+            log.debug("Undeploy MCP server revision. mcpServerId: " + mcpServerId + ", revisionId: " + revisionId);
+        }
+        apiProvider.undeployAPIRevisionDeployment(mcpServerId, revisionId, apiRevisionDeployments, organization, false);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse =
                 apiProvider.getAPIRevisionDeploymentList(revisionId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
