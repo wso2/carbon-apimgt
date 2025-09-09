@@ -155,6 +155,9 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             } finally {
                                 if (acquired) {
                                     releaseAcquiredLock(taskKey);
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Successfully released lock for discovery task " + taskKey);
+                                    }
                                 }
                             }
                         }, 0, scheduleWindow, TimeUnit.MINUTES);
