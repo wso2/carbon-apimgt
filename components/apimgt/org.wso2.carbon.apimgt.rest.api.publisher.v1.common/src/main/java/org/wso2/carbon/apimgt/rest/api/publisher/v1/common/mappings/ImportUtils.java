@@ -386,6 +386,7 @@ public class ImportUtils {
                     importedApiDTO.setVisibility(convertedOldAPI.getVisibility());
                     importedApiDTO.setVisibleRoles(convertedOldAPI.getVisibleRoles());
                     importedApiDTO.setVisibleTenants(convertedOldAPI.getVisibleTenants());
+                    importedApiDTO.setDisplayName(convertedOldAPI.getDisplayName());
                     importedApiDTO.setVisibleOrganizations(Collections.EMPTY_LIST); // ignore org visibility
                     importedApiDTO.setSubscriptionAvailability(convertedOldAPI.getSubscriptionAvailability());
                     importedApiDTO.setSubscriptionAvailableTenants(convertedOldAPI.getSubscriptionAvailableTenants());
