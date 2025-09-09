@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
@@ -63,11 +64,26 @@ public class CommonUtils {
      */
     public static APIInfo validateAPIExistence(String apiId) throws APIManagementException {
         APIProvider apiProvider = getLoggedInUserProvider();
-        APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+        APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId, APIConstants.API_IDENTIFIER_TYPE);
         if (apiInfo == null) {
             throw new APIManagementException("Couldn't retrieve existing API with API UUID: "
                     + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                     apiId));
+        }
+        return apiInfo;
+    }
+
+    /**
+     * @param apiId UUID of the API
+     * @return API details
+     * @throws APIManagementException when API does not exist in the DB
+     */
+    public static APIInfo validateMCPServerExistence(String apiId) throws APIManagementException {
+        APIProvider apiProvider = getLoggedInUserProvider();
+        APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId, APIConstants.API_TYPE_MCP);
+        if (apiInfo == null) {
+            throw new APIManagementException("Couldn't retrieve existing API with API UUID: " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
         }
         return apiInfo;
     }

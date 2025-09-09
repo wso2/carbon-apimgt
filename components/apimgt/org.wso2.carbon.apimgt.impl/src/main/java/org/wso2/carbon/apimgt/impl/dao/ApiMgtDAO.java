@@ -10428,15 +10428,37 @@ public class ApiMgtDAO {
      * @throws APIManagementException error while getting the API information from AM_API
      */
     public APIInfo getAPIInfoByUUID(String apiId) throws APIManagementException {
+        return getAPIInfoByUUID(apiId, null);
+    }
+
+    /**
+     * Retrieve basic information about the given API by the UUID quering only from AM_API
+     *
+     * @param apiId            UUID of the API
+     * @param requestedAPIType API Type
+     * @return basic information about the API
+     * @throws APIManagementException error while getting the API information from AM_API
+     */
+    public APIInfo getAPIInfoByUUID(String apiId, String requestedAPIType) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             APIRevision apiRevision = getRevisionByRevisionUUID(connection, apiId);
-            String sql = SQLConstants.RETRIEVE_API_INFO_FROM_UUID;
+            String sql;
+            if (requestedAPIType == null) {
+                sql = SQLConstants.RETRIEVE_API_INFO_FROM_UUID;
+            } else if (APIConstants.API_IDENTIFIER_TYPE.equalsIgnoreCase(requestedAPIType)) {
+                sql = SQLConstants.RETRIEVE_API_INFO_FROM_UUID_NON_MCP;
+            } else {
+                sql = SQLConstants.RETRIEVE_API_INFO_FROM_UUID_AND_TYPE;
+            }
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 if (apiRevision != null) {
                     preparedStatement.setString(1, apiRevision.getApiUUID());
                 } else {
                     preparedStatement.setString(1, apiId);
+                }
+                if (requestedAPIType != null && !APIConstants.API_IDENTIFIER_TYPE.equalsIgnoreCase(requestedAPIType)) {
+                    preparedStatement.setString(2, requestedAPIType);
                 }
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {

@@ -5881,9 +5881,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public API getAPIbyUUID(String uuid, String organization) throws APIManagementException {
+        return getAPIbyUUID(uuid, organization, null);
+    }
+
+    @Override
+    public API getAPIbyUUID(String uuid, String organization, String apiType) throws APIManagementException {
         Organization org = new Organization(organization);
         try {
-            PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
+            PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid, apiType);
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
                 APIIdentifier apiIdentifier = api.getId();
@@ -7836,7 +7841,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public String generateApiKey(String apiId, String organization) throws APIManagementException {
-        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId);
+        return generateApiKey(apiId, organization, null);
+    }
+
+    @Override
+    public String generateApiKey(String apiId, String organization, String apiType)
+            throws APIManagementException {
+
+        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId, apiType);
         if (apiInfo == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with ID: "
                     + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
@@ -8320,8 +8332,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
-        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(uuid);
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization)
+            throws APIManagementException {
+
+        return getAPIorAPIProductByUUID(uuid, organization, null);
+    }
+
+    @Override
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain, String apiType)
+            throws APIManagementException {
+        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(uuid, apiType);
         if (apiInfo != null) {
             if (apiInfo.getOrganization().equals(requestedTenantDomain)) {
                 if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiInfo.getApiType())) {
