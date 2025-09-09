@@ -26494,7 +26494,8 @@ public class ApiMgtDAO {
     public void deleteAPIPrimaryEndpointMappings(String apiUUID, String revisionUUID) throws APIManagementException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Deleting existing primary endpoint mappings for API : " + apiUUID);
+            log.debug(
+                    "Deleting existing primary endpoint mappings for API: " + apiUUID + ", revision: " + revisionUUID);
         }
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);

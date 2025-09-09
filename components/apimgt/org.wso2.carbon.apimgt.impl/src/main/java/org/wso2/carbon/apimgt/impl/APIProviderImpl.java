@@ -1267,6 +1267,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     apiMgtDAO.addAPIPrimaryEndpointMappings(api);
                 }
             }
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated the primary endpoint mappings of API: " + apiUUID);
+            }
         }
     }
 
@@ -9059,12 +9062,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public APIEndpointInfo updateAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint, String organization)
             throws APIManagementException {
         return apiMgtDAO.updateAPIEndpoint(apiUUID, apiEndpoint, organization);
-    }
-
-    @Override
-    @Deprecated
-    public void deleteAPIPrimaryEndpointMappings(String apiId) throws APIManagementException {
-        apiMgtDAO.deleteAPIPrimaryEndpointMappings(apiId, null);
     }
 
     @Override
