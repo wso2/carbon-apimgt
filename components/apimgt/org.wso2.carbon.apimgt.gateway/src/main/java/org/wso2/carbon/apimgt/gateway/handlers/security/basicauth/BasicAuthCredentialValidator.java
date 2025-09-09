@@ -127,6 +127,9 @@ public class BasicAuthCredentialValidator {
         } finally {
             if (basicAuthClient != null) {
                 try {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Releasing BasicAuthClient back to pool");
+                    }
                     BasicAuthClientPool.getInstance().release(basicAuthClient);
                 } catch (Exception e) {
                     if (log.isDebugEnabled()) {
