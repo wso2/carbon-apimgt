@@ -32,8 +32,10 @@ import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
@@ -50,14 +52,23 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
+import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.metrics.manager.Level;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -341,8 +352,32 @@ public class OAuthAuthenticator implements Authenticator {
             context = timer.start();
 
             try {
-                info = getAPIKeyValidator().getKeyValidationInfo(apiContext, accessToken, apiVersion, authenticationScheme,
-                        matchingResource, httpMethod, defaultVersionInvoked,keyManagerList);
+                boolean generateInternalKey = false;
+                final boolean isMcp = APIConstants.API_TYPE_MCP.equals(synCtx.getProperty(APIConstants.API_TYPE));
+                boolean isExistingApiSubtype = false;
+                List<String> referencedApiUuids = Collections.emptyList();
+
+                API matchedAPI = null;
+                if (isMcp) {
+                    matchedAPI = GatewayUtils.getAPI(synCtx);
+                    if (matchedAPI != null) {
+                        isExistingApiSubtype = APIConstants.API_SUBTYPE_EXISTING_API.equals(matchedAPI.getSubtype());
+                        if (isExistingApiSubtype && matchedAPI.getUrlMappings() != null) {
+                            HashSet<String> refs = new LinkedHashSet<>();
+                            for (URLMapping mapping : matchedAPI.getUrlMappings()) {
+                                if (mapping != null && mapping.getApiOperationMapping() != null) {
+                                    String id = mapping.getApiOperationMapping().getApiUuid();
+                                    if (StringUtils.isNotEmpty(id)) refs.add(id);
+                                }
+                            }
+                            generateInternalKey = true;
+                            referencedApiUuids = new ArrayList<>(refs);
+                        }
+                    }
+                }
+                info = getAPIKeyValidator().getKeyValidationInfo(apiContext, accessToken, apiVersion,
+                        authenticationScheme, matchingResource, httpMethod, defaultVersionInvoked, keyManagerList,
+                        generateInternalKey, referencedApiUuids);
             } catch (APISecurityException ex) {
                 if (includeTokenInfoInMsgCtx) {
                     synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token invalid");
@@ -384,10 +419,16 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setApplicationSpikesArrestUnit(info.getApplicationSpikeArrestUnit());
             authContext.setStopOnQuotaReach(info.isStopOnQuotaReach());
             authContext.setIsContentAware(info.isContentAware());
+            if (StringUtils.isNotBlank(info.getMcpUpstreamToken())) {
+                authContext.setMcpUpstreamToken(info.getMcpUpstreamToken());
+            }
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
             if (info.getProductName() != null && info.getProductProvider() != null) {
                 authContext.setProductName(info.getProductName());
                 authContext.setProductProvider(info.getProductProvider());
+            }
+            if (StringUtils.isNotBlank(info.getMcpUpstreamToken())) {
+                authContext.setMcpUpstreamToken(info.getMcpUpstreamToken());
             }
 
             /* Synapse properties required for BAM Mediator*/
@@ -420,6 +461,29 @@ public class OAuthAuthenticator implements Authenticator {
                     ", version: "+ apiVersion + " status: (" + info.getValidationStatus() +
                     ") - " + APISecurityConstants.getAuthenticationFailureMessage(info.getValidationStatus()));
         }
+    }
+
+    private JwtTokenInfoDTO getJwtTokenInfoDTO(JWTInfoDto jwtInfoDto, API matchedAPI) {
+        JwtTokenInfoDTO dto = new JwtTokenInfoDTO();
+        dto.setEndUserName(jwtInfoDto.getEndUser());
+        dto.setKeyType(jwtInfoDto.getKeyType());
+        dto.setExpirationTime(6000L);
+
+        Map<String, String> custom = new HashMap<>();
+        custom.put(APIMgtGatewayConstants.MCP_AUTH_CLAIM, Boolean.TRUE.toString());
+        dto.setCustomClaims(custom);
+
+        LinkedHashSet<String> refs = new LinkedHashSet<>();
+        if (matchedAPI != null && matchedAPI.getUrlMappings() != null) {
+            for (URLMapping m : matchedAPI.getUrlMappings()) {
+                if (m != null && m.getApiOperationMapping() != null) {
+                    String id = m.getApiOperationMapping().getApiUuid();
+                    if (StringUtils.isNotEmpty(id)) refs.add(id);
+                }
+            }
+        }
+        dto.setAudience(new ArrayList<>(refs));
+        return dto;
     }
 
     private String removeLeadingAndTrailing(String base) {

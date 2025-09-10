@@ -28,6 +28,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.api.Resource;
 import org.apache.synapse.api.dispatch.RESTDispatcher;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
@@ -48,8 +49,10 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
@@ -60,6 +63,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -122,6 +127,110 @@ public class APIKeyValidator {
     @MethodStats
     protected Cache getResourceCache() {
         return CacheProvider.getResourceCache();
+    }
+
+    public APIKeyValidationInfoDTO getKeyValidationInfo(String context, String apiKey, String apiVersion,
+                                                        String authenticationScheme, String matchingResource,
+                                                        String httpVerb, boolean defaultVersionInvoked,
+                                                        List<String> keyManagers, boolean generateInternalKey,
+                                                        List<String> referencedApiUuids) throws APISecurityException {
+
+        APIKeyValidationInfoDTO info = getKeyValidationInfo(context, apiKey, apiVersion, authenticationScheme,
+                matchingResource, httpVerb, defaultVersionInvoked, keyManagers);
+        if (!info.isAuthorized()) {
+            return info;
+        }
+        if (generateInternalKey) {
+            final String cacheKey = context + ":" + apiVersion + ":" + apiKey + ":" + APIConstants.API_TYPE_MCP;
+            String internalToken = null;
+            if (gatewayKeyCacheEnabled) {
+                Object cached = getGatewayTokenCache().get(cacheKey);
+                if (cached instanceof String) {
+                    String candidate = (String) cached;
+                    long skewMs = getTimeStampSkewInSeconds() * 1000L;
+                    ExtendedJWTConfigurationDto ext =
+                            org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder.getInstance()
+                                    .getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                                    .getJwtConfigurationDto();
+                    if (JWTUtil.isJWTValid(candidate, ext.getJwtDecoding(), skewMs)) {
+                        internalToken = candidate;
+                    } else {
+                        getGatewayTokenCache().remove(cacheKey);
+                    }
+                }
+            }
+            if (internalToken == null) {
+                ExtendedJWTConfigurationDto jwtCfg =
+                        org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder.getInstance()
+                                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                                .getJwtConfigurationDto();
+
+                JwtTokenInfoDTO tok = buildInternalJWTToken(info, jwtCfg, referencedApiUuids);
+                try {
+                    internalToken = new InternalAPIKeyGenerator().generateToken(tok);
+                } catch (APIManagementException e) {
+                    String warnMsg = "Error occurred while generating internal token for MCP";
+                    log.warn(warnMsg);
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, warnMsg);
+                }
+                if (gatewayKeyCacheEnabled && org.apache.commons.lang3.StringUtils.isNotBlank(internalToken)) {
+                    getGatewayTokenCache().put(cacheKey, internalToken);
+                }
+            }
+            info.setMcpUpstreamToken(internalToken);
+        }
+        return info;
+    }
+
+    private JwtTokenInfoDTO buildInternalJWTToken(APIKeyValidationInfoDTO info,
+                                                  ExtendedJWTConfigurationDto jwtConfigurationDto,
+                                                  List<String> referencedApiUuids) {
+
+        JwtTokenInfoDTO dto = new JwtTokenInfoDTO();
+        dto.setEndUserName(info.getEndUserName());
+        dto.setKeyType(info.getType());
+        dto.setExpirationTime(6000L);
+
+        Map<String, String> custom = new HashMap<>();
+        custom.put(APIMgtGatewayConstants.MCP_AUTH_CLAIM, Boolean.TRUE.toString());
+
+        String dialect = jwtConfigurationDto.getConsumerDialectUri();
+        if (dialect == null || dialect.isEmpty() || "/".equals(dialect)) {
+            dialect = APIConstants.DEFAULT_CARBON_DIALECT + "/";
+        } else if (!dialect.endsWith("/")) {
+            dialect = dialect + "/";
+        }
+        if (StringUtils.isNotEmpty(info.getSubscriber())) {
+            custom.put(dialect + APIMgtGatewayConstants.SUBSCRIBER_CLAIM, info.getSubscriber());
+        }
+        if (StringUtils.isNotEmpty(info.getApplicationId())) {
+            custom.put(dialect + APIMgtGatewayConstants.APPLICATION_ID_CLAIM, info.getApplicationId());
+        }
+        if (StringUtils.isNotEmpty(info.getApplicationName())) {
+            custom.put(dialect + APIMgtGatewayConstants.APPLICATION_NAME_CLAIM, info.getApplicationName());
+        }
+        if (StringUtils.isNotEmpty(info.getApplicationTier())) {
+            custom.put(dialect + APIMgtGatewayConstants.APPLICATION_TIER_CLAIM, info.getApplicationTier());
+        }
+        if (StringUtils.isNotEmpty(info.getTier())) {
+            custom.put(dialect + APIMgtGatewayConstants.TIER_CLAIM, info.getTier());
+        }
+        if (StringUtils.isNotEmpty(info.getApplicationUUID())) {
+            custom.put(dialect + APIMgtGatewayConstants.APPLICATION_UUID_CLAIM, info.getApplicationUUID());
+        }
+        if (StringUtils.isNotEmpty(info.getType())) {
+            custom.put(dialect + APIMgtGatewayConstants.KEY_TYPE_CLAIM, info.getType());
+        }
+        if (StringUtils.isNotEmpty(info.getEndUserName())) {
+            custom.put(dialect + APIMgtGatewayConstants.END_USER_CLAIM, info.getEndUserName());
+        }
+        dto.setCustomClaims(custom);
+        HashSet<String> audiences = new LinkedHashSet<>();
+        if (referencedApiUuids != null) {
+            audiences.addAll(referencedApiUuids);
+        }
+        dto.setAudience(new ArrayList<>(audiences));
+        return dto;
     }
 
     /**
