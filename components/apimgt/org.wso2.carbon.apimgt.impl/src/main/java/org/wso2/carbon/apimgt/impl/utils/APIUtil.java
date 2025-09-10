@@ -11940,7 +11940,7 @@ public final class APIUtil {
     }
 
     /**
-     * This method is used to validate and update the URI templates of an API
+     * Validate and update the URI templates of an API
      *
      * @param api                       API object
      * @param tenantId                  Tenant ID of the API
