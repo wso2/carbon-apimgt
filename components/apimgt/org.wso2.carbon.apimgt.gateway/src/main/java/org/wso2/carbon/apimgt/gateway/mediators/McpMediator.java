@@ -257,7 +257,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         }
 
         //Set received id to mcp response, Responses MUST include the same ID as the request they correspond to
-        Object id = messageContext.getProperty("RECEIVED_MCP_ID");
+        Object id = messageContext.getProperty(APIConstants.MCP.RECEIVED_MCP_ID);
 
         String messageBody;
         try {

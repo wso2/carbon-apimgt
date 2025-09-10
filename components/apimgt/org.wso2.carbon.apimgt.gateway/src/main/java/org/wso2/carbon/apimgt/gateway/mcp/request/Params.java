@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.mcp.request;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Collections;
 import java.util.Map;
 
 public class Params {
@@ -41,7 +42,7 @@ public class Params {
 
     //available in tools/call method request
     @SerializedName("arguments")
-    private Map<String, Object> arguments;
+    private Map<String, Object> arguments = Collections.emptyMap();
 
     //available in tools/list method request
     @SerializedName("cursor")
@@ -84,7 +85,7 @@ public class Params {
     }
 
     public void setArguments(Map<String, Object> arguments) {
-        this.arguments = arguments;
+        this.arguments = (arguments != null) ? arguments : Collections.emptyMap();
     }
 
     public String getCursor() {

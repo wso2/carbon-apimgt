@@ -325,7 +325,7 @@ public class MCPUtils {
                     processRequestBody(messageContext, resolvedRequest, parsedSchemaDefinition.isHasBody(), parsedSchemaDefinition.getContentType());
 
                     //set received id to msg context
-                    messageContext.setProperty("RECEIVED_MCP_ID", id);
+                    messageContext.setProperty(APIConstants.MCP.RECEIVED_MCP_ID, id);
                 } catch (MCPRequestResolverException e) {
                     throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE,
                             APIConstants.MCP.RpcConstants.INTERNAL_ERROR_MESSAGE, e.getMessage());
