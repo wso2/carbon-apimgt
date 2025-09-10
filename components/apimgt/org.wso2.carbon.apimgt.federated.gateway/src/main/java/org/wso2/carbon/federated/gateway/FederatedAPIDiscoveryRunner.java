@@ -155,9 +155,6 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             } finally {
                                 if (acquired) {
                                     releaseAcquiredLock(taskKey);
-                                    if (log.isDebugEnabled()) {
-                                        log.debug("Successfully released lock for discovery task " + taskKey);
-                                    }
                                 }
                             }
                         }, 0, scheduleWindow, TimeUnit.MINUTES);
@@ -245,11 +242,11 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                         existingAPI = existingApiOpt.orElse(null);
                     }
 
-                    if ((update && alreadyExistsWithEnvScope && !discovery.isAPIUpdated(discoveredAPI, apidto))
-                            || isPublishedAPIFromCP) {
+                    if (isPublishedAPIFromCP || ((update || alreadyExistsWithEnvScope)
+                            && !discovery.isAPIUpdated(discoveredAPI, apidto))) {
                         continue;
                     }
-                    // Adjust name if needed
+                    // Adjust the name if needed
                     if (alreadyExistsWithEnvScope) {
                         if (api.getDisplayName() == null) {
                             apidto.displayName(apidto.getName());
@@ -393,7 +390,6 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
             // 3) Expired; try to take over
             if (dao.updateExecutorTask(scheduledTimeMs, taskKey, FederatedAPIDiscoveryRunner.nodeId)) {
                 //4) If we succeeded, schedule the task immediately.
-                if (log.isDebugEnabled()) {}
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully acquired lock for discovery task " + taskKey + " after stealing from "
                             + holderScheduledTimeMs);
@@ -450,6 +446,9 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
         }
         try {
             ApiMgtDAO.getInstance().deleteExecutorTask(taskKey);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully released lock for discovery task " + taskKey);
+            }
         } catch (APIManagementException e) {
             log.error("Error while deleting executor task for " + taskKey, e);
         }
