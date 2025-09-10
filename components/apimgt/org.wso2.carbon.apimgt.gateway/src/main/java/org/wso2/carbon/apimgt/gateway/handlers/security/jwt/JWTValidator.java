@@ -26,9 +26,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
@@ -50,12 +50,15 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
+import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
 import org.wso2.carbon.apimgt.impl.utils.SigningUtil;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
@@ -64,10 +67,12 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
 import java.security.cert.Certificate;
 import java.text.ParseException;
-import java.util.Base64;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -332,13 +337,84 @@ public class JWTValidator {
                 }
                 log.debug("JWT authentication successful.");
                 String endUserToken = null;
-                if (jwtGenerationEnabled) {
-                    JWTInfoDto jwtInfoDto = GatewayUtils
-                            .generateJWTInfoDto(null, jwtValidationInfo, apiKeyValidationInfoDTO, synCtx);
+                JWTInfoDto jwtInfoDto = null;
+                API matchedAPI = null;
+                boolean skipEndUserJWT = false;
+                final boolean isMcp = APIConstants.API_TYPE_MCP.equals(synCtx.getProperty(APIConstants.API_TYPE));
+                if (isMcp) {
+                    matchedAPI = GatewayUtils.getAPI(synCtx);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Processing MCP request with context: " + matchedAPI.getContext()
+                                + " and version: " + matchedAPI.getVersion());
+                    }
+                    skipEndUserJWT = matchedAPI != null
+                            && APIConstants.API_SUBTYPE_EXISTING_API.equals(matchedAPI.getSubtype());
+                }
+                if (jwtGenerationEnabled && !skipEndUserJWT) {
+                    jwtInfoDto = GatewayUtils.generateJWTInfoDto(null, jwtValidationInfo,
+                            apiKeyValidationInfoDTO, synCtx);
                     endUserToken = generateAndRetrieveJWTToken(jwtTokenIdentifier, jwtInfoDto);
                 }
-                return GatewayUtils.generateAuthenticationContext(jwtTokenIdentifier, jwtValidationInfo, apiKeyValidationInfoDTO,
-                        endUserToken, true);
+                AuthenticationContext authenticationContext = GatewayUtils.generateAuthenticationContext(
+                        jwtTokenIdentifier, jwtValidationInfo, apiKeyValidationInfoDTO, endUserToken, true);
+                if (isMcp) {
+                    if (matchedAPI != null && APIConstants.API_SUBTYPE_EXISTING_API.equals(matchedAPI.getSubtype())) {
+                        if (jwtInfoDto == null) {
+                            jwtInfoDto = GatewayUtils.generateJWTInfoDto(null, jwtValidationInfo,
+                                    apiKeyValidationInfoDTO, synCtx);
+                        }
+                        final String jwtTokenCacheKey = jwtInfoDto.getApiContext() + ":" + jwtInfoDto.getVersion()
+                                + ":" + jwtTokenIdentifier + ":" + APIConstants.API_TYPE_MCP;
+                        String internalToken = null;
+                        if (isGatewayTokenCacheEnabled) {
+                            Object cachedTokenObj = getGatewayJWTTokenCache().get(jwtTokenCacheKey);
+                            if (cachedTokenObj instanceof String) {
+                                String cachedToken = (String) cachedTokenObj;
+                                long tsSkewMs = getTimeStampSkewInSeconds() * 1000;
+                                if (JWTUtil.isJWTValid(cachedToken, jwtConfigurationDto.getJwtDecoding(), tsSkewMs)) {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Using cached MCP upstream token for key: " + jwtTokenCacheKey);
+                                    }
+                                    internalToken = cachedToken;
+                                } else {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Cached MCP upstream token for key: " + jwtTokenCacheKey
+                                                + " expired, removing from cache");
+                                    }
+                                    getGatewayJWTTokenCache().remove(jwtTokenCacheKey);
+                                }
+                            }
+                        }
+                        if (StringUtils.isEmpty(internalToken)) {
+                            try {
+                                log.debug("Generating new MCP upstream token for existing API subtype");
+                                JwtTokenInfoDTO jwtTokenInfoDTO =
+                                        getJwtTokenInfoDTO(signedJWTInfo, jwtInfoDto, matchedAPI);
+                                internalToken = new InternalAPIKeyGenerator().generateToken(jwtTokenInfoDTO);
+                                if (isGatewayTokenCacheEnabled) {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Caching generated MCP upstream token with key: "
+                                                + jwtTokenCacheKey);
+                                    }
+                                    getGatewayJWTTokenCache().put(jwtTokenCacheKey, internalToken);
+                                }
+                            } catch (APIManagementException e) {
+                                log.error("Error while generating MCP upstream token", e);
+                                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+                            }
+                        }
+                        authenticationContext.setMcpUpstreamToken(internalToken);
+                    } else if (matchedAPI == null) {
+                        log.warn("No matching MCP server found for token: " + GatewayUtils.getMaskedToken(jwtHeader));
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("MCP request not for EXISTING_API. Received subtype " + matchedAPI.getSubtype() +
+                                    ". Skipping upstream token.");
+                        }
+                    }
+                }
+                return authenticationContext;
             } else {
                 if (includeTokenInfoInMsgCtx) {
                     if (jwtValidationInfo.isExpired()) {
@@ -357,6 +433,89 @@ public class JWTValidator {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
+    }
+
+    /**
+     * Creates a {@link JwtTokenInfoDTO} from the given JWT and API. Excludes standard claims and adds custom/user
+     * claims plus referenced API UUIDs as the audience.
+     *
+     * @param signedJWTInfo JWT details with claims
+     * @param jwtInfoDto    validation context and user info
+     * @param matchedAPI    API used to extract referenced APIs
+     * @return populated {@link JwtTokenInfoDTO}
+     */
+    private JwtTokenInfoDTO getJwtTokenInfoDTO(SignedJWTInfo signedJWTInfo, JWTInfoDto jwtInfoDto, API matchedAPI) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Creating MCP upstream token for API with context: " + jwtInfoDto.getApiContext()
+                    + " and version: " + jwtInfoDto.getVersion());
+        }
+        JwtTokenInfoDTO dto = new JwtTokenInfoDTO();
+        dto.setEndUserName(jwtInfoDto.getEndUser());
+        dto.setKeyType(jwtInfoDto.getKeyType());
+        dto.setExpirationTime(APIMgtGatewayConstants.MCP_AUTH_TOKEN_EXPIRATION_TIME);
+
+        Map<String, String> custom = new HashMap<>();
+        custom.putAll(getUserClaimsFromKeyManager(jwtInfoDto));
+        custom.put(APIMgtGatewayConstants.MCP_AUTH_CLAIM, Boolean.TRUE.toString());
+
+        if (jwtGenerationEnabled) {
+            String dialect = jwtConfigurationDto.getConsumerDialectUri();
+            if (dialect == null || dialect.isEmpty() || "/".equals(dialect)) {
+                dialect = APIConstants.DEFAULT_CARBON_DIALECT + "/";
+            } else if (!dialect.endsWith("/")) {
+                dialect = dialect + "/";
+            }
+            if (StringUtils.isNotEmpty(jwtInfoDto.getSubscriber())) {
+                custom.put(dialect + APIMgtGatewayConstants.SUBSCRIBER_CLAIM, jwtInfoDto.getSubscriber());
+            }
+            if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationId())) {
+                custom.put(dialect + APIMgtGatewayConstants.APPLICATION_ID_CLAIM, jwtInfoDto.getApplicationId());
+            }
+            if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationName())) {
+                custom.put(dialect + APIMgtGatewayConstants.APPLICATION_NAME_CLAIM, jwtInfoDto.getApplicationName());
+            }
+            if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationTier())) {
+                custom.put(dialect + APIMgtGatewayConstants.APPLICATION_TIER_CLAIM, jwtInfoDto.getApplicationTier());
+            }
+            if (StringUtils.isNotEmpty(jwtInfoDto.getSubscriptionTier())) {
+                custom.put(dialect + APIMgtGatewayConstants.TIER_CLAIM, jwtInfoDto.getSubscriptionTier());
+            }
+            if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationUUId())) {
+                custom.put(dialect + APIMgtGatewayConstants.APPLICATION_UUID_CLAIM, jwtInfoDto.getApplicationUUId());
+            }
+            if (StringUtils.isNotEmpty(jwtInfoDto.getKeyType())) {
+                custom.put(dialect + APIMgtGatewayConstants.KEY_TYPE_CLAIM, jwtInfoDto.getKeyType());
+            }
+            if (StringUtils.isNotEmpty(jwtInfoDto.getEndUser())) {
+                custom.put(dialect + APIMgtGatewayConstants.END_USER_CLAIM, jwtInfoDto.getEndUser());
+            }
+            if (jwtInfoDto.getEndUserTenantId() != MultitenantConstants.INVALID_TENANT_ID) {
+                custom.put(dialect + APIMgtGatewayConstants.END_USER_TENANT_ID_CLAIM,
+                        String.valueOf(jwtInfoDto.getEndUserTenantId()));
+            }
+        }
+        Set<String> excluded = new HashSet<>(APIMgtGatewayConstants.STANDARD_JWT_CLAIMS);
+        for (Map.Entry<String, Object> entry : signedJWTInfo.getJwtClaimsSet().getClaims().entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (key != null && value != null && !excluded.contains(key.toLowerCase())) {
+                custom.putIfAbsent(key, String.valueOf(value));
+            }
+        }
+        dto.setCustomClaims(custom);
+
+        LinkedHashSet<String> refs = new LinkedHashSet<>();
+        if (matchedAPI != null && matchedAPI.getUrlMappings() != null) {
+            for (URLMapping mapping : matchedAPI.getUrlMappings()) {
+                if (mapping != null && mapping.getApiOperationMapping() != null) {
+                    String id = mapping.getApiOperationMapping().getApiUuid();
+                    if (StringUtils.isNotEmpty(id)) refs.add(id);
+                }
+            }
+        }
+        dto.setAudience(new ArrayList<>(refs));
+        return dto;
     }
 
     private long getTtl() {

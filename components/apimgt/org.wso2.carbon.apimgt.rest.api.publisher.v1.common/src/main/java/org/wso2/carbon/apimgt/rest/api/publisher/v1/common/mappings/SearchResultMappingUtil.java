@@ -74,6 +74,10 @@ public class SearchResultMappingUtil {
         if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
             apiResultDTO.setType(SearchResultDTO.TypeEnum.MCP);
             apiResultDTO.setTransportType(APIConstants.API_TYPE_HTTP);
+        } else if (APIConstants.API_TYPE_PRODUCT.equals(api.getType())) {
+            // In API search, the API Products are also returned as APIs. Hence, we need to handle this case as well.
+            apiResultDTO.setType(SearchResultDTO.TypeEnum.APIPRODUCT);
+            apiResultDTO.setTransportType(APIConstants.API_TYPE_HTTP);
         } else {
             apiResultDTO.setType(SearchResultDTO.TypeEnum.API);
             apiResultDTO.setTransportType(api.getType());
@@ -117,6 +121,7 @@ public class SearchResultMappingUtil {
         apiProductResultDTO.setContext(context);
         apiProductResultDTO.setDisplayName(apiProduct.getDisplayName());
         apiProductResultDTO.setType(SearchResultDTO.TypeEnum.APIPRODUCT);
+        apiProductResultDTO.setTransportType(APIConstants.API_TYPE_HTTP);
         apiProductResultDTO.setDescription(apiProduct.getDescription());
         apiProductResultDTO.setStatus(apiProduct.getState());
         apiProductResultDTO.setThumbnailUri(apiProduct.getThumbnailUrl());
