@@ -31,6 +31,12 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.JWTTokenPayloadInfo;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
@@ -39,20 +45,32 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
+import org.wso2.carbon.apimgt.impl.utils.SigningUtil;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.cache.Cache;
 
 /**
@@ -63,6 +81,10 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
     private static final Log log = LogFactory.getLog(InternalAPIKeyAuthenticator.class);
 
     private String securityParam;
+    private boolean jwtGenerationEnabled;
+    private boolean isGatewayTokenCacheEnabled;
+    private ExtendedJWTConfigurationDto jwtConfigurationDto;
+    private static volatile long ttl = -1L;
 
     public InternalAPIKeyAuthenticator(String securityParam) {
         this.securityParam = securityParam;
@@ -70,7 +92,10 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
 
     @Override
     public void init(SynapseEnvironment env) {
-        // Nothing to do in init phase.
+        jwtConfigurationDto =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
+        jwtGenerationEnabled = jwtConfigurationDto.isEnabled();
+        isGatewayTokenCacheEnabled = GatewayUtils.isGatewayTokenCacheEnabled();
     }
 
     @Override
@@ -235,17 +260,45 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                         jwtTokenPayloadInfo.setAccessToken(internalKey);
                         getGatewayInternalKeyDataCache().put(cacheKey, jwtTokenPayloadInfo);
                     }
-                    JSONObject api = GatewayUtils.validateAPISubscription(apiContext, apiVersion,
-                            payload, splitToken, false);
+                    String mcpAuthClaim = payload.getStringClaim(APIMgtGatewayConstants.MCP_AUTH_CLAIM);
+                    JSONObject api = null;
+                    boolean isMCPAuthenticated = Boolean.parseBoolean(mcpAuthClaim);
+                    if (StringUtils.isBlank(mcpAuthClaim) || !isMCPAuthenticated) {
+                        // If the MCP authenticated claim is not present or false, we can proceed with the subscription
+                        // validation. This is to skip subscription validation since the MCP Server have done so already
+                        if (log.isDebugEnabled()) {
+                            log.debug("MCP auth claim not present or false, proceeding with subscription " +
+                                    "validation for API with context: " + apiContext + " and version: " + apiVersion);
+                        }
+                        api = GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload, splitToken, false);
+                    }
                     if (log.isDebugEnabled()) {
                         log.debug("Internal Key authentication successful.");
                     }
 
+                    String endUserToken = null;
+                    if (jwtGenerationEnabled && StringUtils.isNotBlank(mcpAuthClaim) && isMCPAuthenticated) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Generating JWT token for MCP authenticated request for API with context: "
+                                    + apiContext + " and version: " + apiVersion);
+                        }
+
+                        AbstractAPIMgtGatewayJWTGenerator jwtGenerator =
+                                resolveGenerator(GatewayUtils.getTenantDomain());
+                        JWTInfoDto jwtInfoDto = buildJWTInfoForInternalKey(payload, retrievedApi, synCtx);
+                        endUserToken = generateAndRetrieveJWTToken(jwtGenerator, tokenIdentifier, jwtInfoDto);
+                    }
 
                     AuthenticationContext authenticationContext = GatewayUtils
                             .generateAuthenticationContext(tokenIdentifier, payload, api, retrievedApi.getApiTier());
+
+                    if (StringUtils.isNotEmpty(endUserToken)) {
+                        authenticationContext.setCallerToken(endUserToken);
+                    }
+
+                    APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext,
+                            jwtGenerationEnabled ? getContextHeader() : null);
                     synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, authenticationContext.getUsername());
-                    APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext);
                     if (log.isDebugEnabled()) {
                         log.debug("User is authorized to access the resource using Internal Key.");
                     }
@@ -270,6 +323,274 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
         }
         return new AuthenticationResponse(false, true, false, APISecurityConstants.API_AUTH_GENERAL_ERROR,
                 APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+    }
+
+    private AbstractAPIMgtGatewayJWTGenerator resolveGenerator(String tenantDomain) throws APISecurityException {
+
+        final String key = jwtConfigurationDto.isTenantBasedSigningEnabled() ? tenantDomain
+                : MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        try {
+            return DataHolder.getInstance().getJwtGeneratorTenantMap().computeIfAbsent(key, k -> {
+                ExtendedJWTConfigurationDto configurationDto = copyBase(jwtConfigurationDto);
+                try {
+                    if (configurationDto.isTenantBasedSigningEnabled()) {
+                        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+                        configurationDto.setPublicCert(SigningUtil.getPublicCertificate(tenantId));
+                        configurationDto.setPrivateKey(SigningUtil.getSigningKey(tenantId));
+                    } else {
+                        configurationDto.setPublicCert(ServiceReferenceHolder.getInstance().getPublicCert());
+                        configurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
+                    }
+                    configurationDto.setTtl(getTtl());
+
+                    String impl = configurationDto.getGatewayJWTGeneratorImpl();
+                    ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                    if (cl == null) {
+                        cl = InternalAPIKeyAuthenticator.class.getClassLoader();
+                    }
+                    AbstractAPIMgtGatewayJWTGenerator jwtGenerator =
+                            (AbstractAPIMgtGatewayJWTGenerator) cl.loadClass(impl)
+                                    .getDeclaredConstructor()
+                                    .newInstance();
+                    jwtGenerator.setJWTConfigurationDto(configurationDto);
+                    return jwtGenerator;
+                } catch (APIManagementException | NoSuchMethodException | IllegalAccessException |
+                         InstantiationException | InvocationTargetException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (RuntimeException e) {
+            log.error("Error initializing JWT generator for tenant: " + tenantDomain, e);
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+        }
+    }
+
+    private ExtendedJWTConfigurationDto copyBase(ExtendedJWTConfigurationDto sourceConfigurationDto) {
+
+        ExtendedJWTConfigurationDto configurationDto = new ExtendedJWTConfigurationDto();
+        configurationDto.setEnabled(sourceConfigurationDto.isEnabled());
+        configurationDto.setGatewayJWTGeneratorImpl(sourceConfigurationDto.getGatewayJWTGeneratorImpl());
+        configurationDto.setJwtHeader(sourceConfigurationDto.getJwtHeader());
+        configurationDto.setConsumerDialectUri(sourceConfigurationDto.getConsumerDialectUri());
+        configurationDto.setJwtDecoding(sourceConfigurationDto.getJwtDecoding());
+        configurationDto.setTenantBasedSigningEnabled(sourceConfigurationDto.isTenantBasedSigningEnabled());
+        configurationDto.setSignatureAlgorithm(sourceConfigurationDto.getSignatureAlgorithm());
+        configurationDto.setUseKid(sourceConfigurationDto.useKid());
+        return configurationDto;
+    }
+
+    /**
+     * Builds a {@link JWTInfoDto} for Internal Key generation from the incoming JWT and API context.
+     * Extracts API metadata (context, version, name), reads dialect-scoped claims for
+     * subscriber/app/user fields, filters out standard claims, and embeds remaining claims
+     * into a {@link JWTValidationInfo} with proper expiry.
+     *
+     * @param payload    validated JWT claims of the caller
+     * @param matchedAPI API associated with the request (may be null)
+     * @param synCtx     Synapse message context providing API context/version
+     * @return populated {@link JWTInfoDto} ready for token generation
+     */
+    private JWTInfoDto buildJWTInfoForInternalKey(JWTClaimsSet payload, API matchedAPI, MessageContext synCtx) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Building JWT info for internal key for API with context: " + matchedAPI.getContext()
+                    + " and version: " + matchedAPI.getVersion());
+        }
+        JWTInfoDto dto = new JWTInfoDto();
+        // API meta
+        String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
+        String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        dto.setApiContext(apiContext);
+        dto.setVersion(apiVersion);
+        dto.setApiName(matchedAPI != null ? matchedAPI.getName() : null);
+
+        String dialect = jwtConfigurationDto.getConsumerDialectUri();
+        if (dialect == null || dialect.isEmpty() || "/".equals(dialect)) {
+            dialect = APIConstants.DEFAULT_CARBON_DIALECT + "/";
+        } else if (!dialect.endsWith("/")) {
+            dialect = dialect + "/";
+        }
+
+        Object subscriberObj = payload.getClaim(dialect + APIMgtGatewayConstants.SUBSCRIBER_CLAIM);
+        if (subscriberObj instanceof String && StringUtils.isNotBlank((String) subscriberObj)) {
+            dto.setSubscriber((String) subscriberObj);
+        }
+
+        Object applicationIdObj = payload.getClaim(dialect + APIMgtGatewayConstants.APPLICATION_ID_CLAIM);
+        if (applicationIdObj instanceof String && StringUtils.isNotBlank((String) applicationIdObj)) {
+            dto.setApplicationId((String) applicationIdObj);
+        }
+
+        Object appNameObj = payload.getClaim(dialect + APIMgtGatewayConstants.APPLICATION_NAME_CLAIM);
+        if (appNameObj instanceof String && StringUtils.isNotBlank((String) appNameObj)) {
+            dto.setApplicationName((String) appNameObj);
+        }
+
+        Object appTierObj = payload.getClaim(dialect + APIMgtGatewayConstants.APPLICATION_TIER_CLAIM);
+        if (appTierObj instanceof String && StringUtils.isNotBlank((String) appTierObj)) {
+            dto.setApplicationTier((String) appTierObj);
+        }
+
+        Object tierObj = payload.getClaim(dialect + APIMgtGatewayConstants.TIER_CLAIM);
+        if (tierObj instanceof String && StringUtils.isNotBlank((String) tierObj)) {
+            dto.setSubscriptionTier((String) tierObj);
+        }
+
+        Object appUuidObj = payload.getClaim(dialect + APIMgtGatewayConstants.APPLICATION_UUID_CLAIM);
+        if (appUuidObj instanceof String && StringUtils.isNotBlank((String) appUuidObj)) {
+            dto.setApplicationUUId((String) appUuidObj);
+        }
+
+        Object keyTypeObj = payload.getClaim(dialect + APIMgtGatewayConstants.KEY_TYPE_CLAIM);
+        if (keyTypeObj instanceof String && StringUtils.isNotBlank((String) keyTypeObj)) {
+            dto.setKeyType((String) keyTypeObj);
+        }
+
+        Object endUserObj = payload.getClaim(dialect + APIMgtGatewayConstants.END_USER_CLAIM);
+        if (endUserObj instanceof String && StringUtils.isNotBlank((String) endUserObj)) {
+            dto.setEndUser((String) endUserObj);
+        }
+
+        Object endUserTenantIdObj = payload.getClaim(dialect + APIMgtGatewayConstants.END_USER_TENANT_ID_CLAIM);
+        if (endUserTenantIdObj instanceof Number) {
+            dto.setEndUserTenantId(((Number) endUserTenantIdObj).intValue());
+        }
+
+        // Build JWTValidationInfo to carry scopes & claims (generator reads from here)
+        JWTValidationInfo vi = new JWTValidationInfo();
+        vi.setValid(true);
+        Map<String, Object> claims = new HashMap<>();
+        Set<String> exclude = new HashSet<>(APIMgtGatewayConstants.STANDARD_JWT_CLAIMS);
+        exclude.addAll(Arrays.asList(
+                APIMgtGatewayConstants.MCP_AUTH_CLAIM,
+                APIMgtGatewayConstants.TOKEN_TYPE_CLAIM,
+                APIMgtGatewayConstants.KEY_TYPE_CLAIM,
+                dialect + APIMgtGatewayConstants.SUBSCRIBER_CLAIM,
+                dialect + APIMgtGatewayConstants.APPLICATION_ID_CLAIM,
+                dialect + APIMgtGatewayConstants.APPLICATION_NAME_CLAIM,
+                dialect + APIMgtGatewayConstants.APPLICATION_TIER_CLAIM,
+                dialect + APIMgtGatewayConstants.TIER_CLAIM,
+                dialect + APIMgtGatewayConstants.APPLICATION_UUID_CLAIM,
+                dialect + APIMgtGatewayConstants.KEY_TYPE_CLAIM,
+                dialect + APIMgtGatewayConstants.END_USER_CLAIM,
+                dialect + APIMgtGatewayConstants.END_USER_TENANT_ID_CLAIM
+        ));
+        for (Map.Entry<String, Object> e : payload.getClaims().entrySet()) {
+            String k = e.getKey();
+            Object v = e.getValue();
+            if (k != null && v != null && !exclude.contains(k)) {
+                claims.putIfAbsent(k, v);
+            }
+        }
+        vi.setClaims(claims);
+        long nowMs = System.currentTimeMillis();
+        long expMs = (payload.getExpirationTime() != null) ?
+                payload.getExpirationTime().getTime() : nowMs + (getTtl() * 1000L);
+        vi.setExpiryTime(expMs);
+
+        dto.setJwtValidationInfo(vi);
+        return dto;
+    }
+
+    /**
+     * Returns a backend JWT for the given signature and {@link JWTInfoDto}, using cache when valid.
+     * Validates a cached token (if any) with timestamp skew; otherwise generates a new token and caches it.
+     *
+     * @param tokenSignature unique signature/key for the caller token (e.g., JWT ID/fingerprint)
+     * @param jwtInfoDto     metadata and claims used for token generation
+     * @return a signed JWT suitable for backend propagation
+     * @throws APISecurityException if token generation fails
+     */
+    private String generateAndRetrieveJWTToken(AbstractAPIMgtGatewayJWTGenerator jwtGenerator, String tokenSignature,
+                                               JWTInfoDto jwtInfoDto) throws APISecurityException {
+
+        String jwt = null;
+        String tenant = GatewayUtils.getTenantDomain();
+        String cacheKey =
+                tenant + ":" + jwtInfoDto.getApiContext() + ":" + jwtInfoDto.getVersion() + ":" + tokenSignature;
+
+        if (isGatewayTokenCacheEnabled) {
+            if (log.isDebugEnabled()) {
+                log.debug("Checking gateway JWT token cache for key: " + cacheKey);
+            }
+            Object cached = CacheProvider.getGatewayJWTTokenCache().get(cacheKey);
+            if (cached instanceof String) {
+                jwt = (String) cached;
+                long skewMs = getTimeStampSkewInSeconds() * 1000L;
+                boolean valid = JWTUtil.isJWTValid(jwt, jwtConfigurationDto.getJwtDecoding(), skewMs);
+                if (!valid) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Cached JWT token is invalid for key: " + cacheKey + ", removing from cache");
+                    }
+                    CacheProvider.getGatewayJWTTokenCache().remove(cacheKey);
+                    jwt = null;
+                }
+            }
+        }
+        if (jwt == null) {
+            try {
+                if (log.isDebugEnabled()) {
+                    log.debug("Generating new JWT token for internal key with signature: " + tokenSignature);
+                }
+                jwt = jwtGenerator.generateToken(jwtInfoDto);
+                if (isGatewayTokenCacheEnabled) {
+                    CacheProvider.getGatewayJWTTokenCache().put(cacheKey, jwt);
+                }
+            } catch (JWTGeneratorException e) {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+            }
+        }
+        return jwt;
+    }
+
+    /**
+     * Resolves and memoizes the JWT TTL (seconds) for gateway-issued tokens.
+     * Reads from APIM configuration, preferring token cache expiry when cache is enabled,
+     * otherwise falling back to the configured JWT expiry; defaults to 900s.
+     *
+     * @return TTL in seconds
+     */
+    private long getTtl() {
+
+        if (ttl != -1) {
+            return ttl;
+        }
+        synchronized (AbstractAPIMgtGatewayJWTGenerator.class) {
+            if (ttl != -1) {
+                return ttl;
+            }
+            APIManagerConfiguration config = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+            String gwTokenCacheConfig = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
+            boolean isGWTokenCacheEnabled = Boolean.parseBoolean(gwTokenCacheConfig);
+
+            if (isGWTokenCacheEnabled) {
+                String apimKeyCacheExpiry = config.getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+
+                if (apimKeyCacheExpiry != null) {
+                    ttl = Long.parseLong(apimKeyCacheExpiry);
+                } else {
+                    ttl = Long.valueOf(900);
+                }
+            } else {
+                String ttlValue = config.getFirstProperty(APIConstants.JWT_EXPIRY_TIME);
+                if (ttlValue != null) {
+                    ttl = Long.parseLong(ttlValue);
+                } else {
+                    //15 * 60 (convert 15 minutes to seconds)
+                    ttl = Long.valueOf(900);
+                }
+            }
+            return ttl;
+        }
+    }
+
+    protected long getTimeStampSkewInSeconds() {
+
+        return OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds();
     }
 
     private String extractInternalKey(MessageContext mCtx) {
@@ -333,5 +654,17 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
     public int getPriority() {
 
         return -10;
+    }
+
+    /**
+     * Get the context header defined in the config file
+     *
+     * @return context header
+     */
+    private String getContextHeader() {
+
+        APIManagerConfiguration apimConf = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        JWTConfigurationDto jwtConfigDto = apimConf.getJwtConfigurationDto();
+        return jwtConfigDto.getJwtHeader();
     }
 }
