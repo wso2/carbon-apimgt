@@ -93,8 +93,12 @@ public class APIKeyValidator {
     protected Log log = LogFactory.getLog(getClass());
 
     private ArrayList<URITemplate> uriTemplates = null;
+    private boolean jwtGenerationEnabled;
 
     public APIKeyValidator() {
+
+        jwtGenerationEnabled =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto().isEnabled();
 
         this.dataStore = new WSAPIKeyDataStore();
 
@@ -129,108 +133,69 @@ public class APIKeyValidator {
         return CacheProvider.getResourceCache();
     }
 
-    public APIKeyValidationInfoDTO getKeyValidationInfo(String context, String apiKey, String apiVersion,
-                                                        String authenticationScheme, String matchingResource,
-                                                        String httpVerb, boolean defaultVersionInvoked,
-                                                        List<String> keyManagers, boolean generateInternalKey,
-                                                        List<String> referencedApiUuids) throws APISecurityException {
+    /**
+     * Get the API key validated against the specified API. If generateInternalKey is true, an internal JWT token
+     * will be generated for MCP APIs.
+     *
+     * @param context               API context
+     * @param apiKey                API key to be validated
+     * @param apiVersion            API version number
+     * @param authenticationScheme  Authentication scheme (e.g., "OAuth" or "Basic")
+     * @param matchingResource      The resource which matches the request
+     * @param httpVerb              HTTP verb of the request (e.g., "GET", "POST")
+     * @param defaultVersionInvoked True if the default version of the API is invoked
+     * @param keyManagers           list of key managers to authenticate the API
+     * @param generateInternalKey   True if an internal JWT token to be generated for MCP APIs
+     * @param referencedApiUuids    List of API UUIDs that are referenced in the MCP request
+     * @return An APIKeyValidationInfoDTO object
+     * @throws APISecurityException If an error occurs while accessing backend services
+     */
+    public APIKeyValidationInfoDTO getKeyValidationInfoMCPServers(String context, String apiKey, String apiVersion,
+                                                                  String authenticationScheme, String matchingResource,
+                                                                  String httpVerb, boolean defaultVersionInvoked,
+                                                                  List<String> keyManagers, boolean generateInternalKey,
+                                                                  List<String> referencedApiUuids)
+            throws APISecurityException {
 
         APIKeyValidationInfoDTO info = getKeyValidationInfo(context, apiKey, apiVersion, authenticationScheme,
                 matchingResource, httpVerb, defaultVersionInvoked, keyManagers);
-        if (!info.isAuthorized()) {
-            return info;
-        }
-        if (generateInternalKey) {
+
+        if (info != null && info.isAuthorized() && generateInternalKey) {
             final String cacheKey = context + ":" + apiVersion + ":" + apiKey + ":" + APIConstants.API_TYPE_MCP;
-            String internalToken = null;
+            String mcpUpstreamToken = null;
+            ExtendedJWTConfigurationDto jwtConfigurationDto =
+                    org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder.getInstance()
+                            .getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                            .getJwtConfigurationDto();
             if (gatewayKeyCacheEnabled) {
                 Object cached = getGatewayTokenCache().get(cacheKey);
                 if (cached instanceof String) {
                     String candidate = (String) cached;
                     long skewMs = getTimeStampSkewInSeconds() * 1000L;
-                    ExtendedJWTConfigurationDto ext =
-                            org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder.getInstance()
-                                    .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                                    .getJwtConfigurationDto();
-                    if (JWTUtil.isJWTValid(candidate, ext.getJwtDecoding(), skewMs)) {
-                        internalToken = candidate;
+                    if (JWTUtil.isJWTValid(candidate, jwtConfigurationDto.getJwtDecoding(), skewMs)) {
+                        mcpUpstreamToken = candidate;
                     } else {
                         getGatewayTokenCache().remove(cacheKey);
                     }
                 }
             }
-            if (internalToken == null) {
-                ExtendedJWTConfigurationDto jwtCfg =
-                        org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder.getInstance()
-                                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                                .getJwtConfigurationDto();
+            if (mcpUpstreamToken == null) {
 
-                JwtTokenInfoDTO tok = buildInternalJWTToken(info, jwtCfg, referencedApiUuids);
+                JwtTokenInfoDTO token = buildInternalJWTToken(info, jwtConfigurationDto, referencedApiUuids);
                 try {
-                    internalToken = new InternalAPIKeyGenerator().generateToken(tok);
+                    mcpUpstreamToken = new InternalAPIKeyGenerator().generateToken(token);
                 } catch (APIManagementException e) {
-                    String warnMsg = "Error occurred while generating internal token for MCP";
+                    String warnMsg = "Error occurred while generating upstream token for MCP";
                     log.warn(warnMsg);
                     throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, warnMsg);
                 }
-                if (gatewayKeyCacheEnabled && org.apache.commons.lang3.StringUtils.isNotBlank(internalToken)) {
-                    getGatewayTokenCache().put(cacheKey, internalToken);
+                if (gatewayKeyCacheEnabled && StringUtils.isNotBlank(mcpUpstreamToken)) {
+                    getGatewayTokenCache().put(cacheKey, mcpUpstreamToken);
                 }
             }
-            info.setMcpUpstreamToken(internalToken);
+            info.setMcpUpstreamToken(mcpUpstreamToken);
         }
         return info;
-    }
-
-    private JwtTokenInfoDTO buildInternalJWTToken(APIKeyValidationInfoDTO info,
-                                                  ExtendedJWTConfigurationDto jwtConfigurationDto,
-                                                  List<String> referencedApiUuids) {
-
-        JwtTokenInfoDTO dto = new JwtTokenInfoDTO();
-        dto.setEndUserName(info.getEndUserName());
-        dto.setKeyType(info.getType());
-        dto.setExpirationTime(6000L);
-
-        Map<String, String> custom = new HashMap<>();
-        custom.put(APIMgtGatewayConstants.MCP_AUTH_CLAIM, Boolean.TRUE.toString());
-
-        String dialect = jwtConfigurationDto.getConsumerDialectUri();
-        if (dialect == null || dialect.isEmpty() || "/".equals(dialect)) {
-            dialect = APIConstants.DEFAULT_CARBON_DIALECT + "/";
-        } else if (!dialect.endsWith("/")) {
-            dialect = dialect + "/";
-        }
-        if (StringUtils.isNotEmpty(info.getSubscriber())) {
-            custom.put(dialect + APIMgtGatewayConstants.SUBSCRIBER_CLAIM, info.getSubscriber());
-        }
-        if (StringUtils.isNotEmpty(info.getApplicationId())) {
-            custom.put(dialect + APIMgtGatewayConstants.APPLICATION_ID_CLAIM, info.getApplicationId());
-        }
-        if (StringUtils.isNotEmpty(info.getApplicationName())) {
-            custom.put(dialect + APIMgtGatewayConstants.APPLICATION_NAME_CLAIM, info.getApplicationName());
-        }
-        if (StringUtils.isNotEmpty(info.getApplicationTier())) {
-            custom.put(dialect + APIMgtGatewayConstants.APPLICATION_TIER_CLAIM, info.getApplicationTier());
-        }
-        if (StringUtils.isNotEmpty(info.getTier())) {
-            custom.put(dialect + APIMgtGatewayConstants.TIER_CLAIM, info.getTier());
-        }
-        if (StringUtils.isNotEmpty(info.getApplicationUUID())) {
-            custom.put(dialect + APIMgtGatewayConstants.APPLICATION_UUID_CLAIM, info.getApplicationUUID());
-        }
-        if (StringUtils.isNotEmpty(info.getType())) {
-            custom.put(dialect + APIMgtGatewayConstants.KEY_TYPE_CLAIM, info.getType());
-        }
-        if (StringUtils.isNotEmpty(info.getEndUserName())) {
-            custom.put(dialect + APIMgtGatewayConstants.END_USER_CLAIM, info.getEndUserName());
-        }
-        dto.setCustomClaims(custom);
-        HashSet<String> audiences = new LinkedHashSet<>();
-        if (referencedApiUuids != null) {
-            audiences.addAll(referencedApiUuids);
-        }
-        dto.setAudience(new ArrayList<>(audiences));
-        return dto;
     }
 
     /**
@@ -356,6 +321,65 @@ public class APIKeyValidator {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     warnMsg);
         }
+    }
+
+    /**
+     * Build the internal JWT token for MCP APIs
+     *
+     * @param info                APIKeyValidationInfoDTO object
+     * @param jwtConfigurationDto Extended JWT configuration
+     * @param referencedApiUuids  List of API UUIDs that are referenced in the MCP request
+     * @return JwtTokenInfoDTO object
+     */
+    private JwtTokenInfoDTO buildInternalJWTToken(APIKeyValidationInfoDTO info,
+                                                  ExtendedJWTConfigurationDto jwtConfigurationDto,
+                                                  List<String> referencedApiUuids) {
+
+        JwtTokenInfoDTO dto = new JwtTokenInfoDTO();
+        dto.setEndUserName(info.getEndUserName());
+        dto.setKeyType(info.getType());
+        dto.setExpirationTime(APIMgtGatewayConstants.MCP_AUTH_TOKEN_EXPIRATION_TIME);
+        Map<String, String> custom = new HashMap<>();
+        custom.put(APIMgtGatewayConstants.MCP_AUTH_CLAIM, Boolean.TRUE.toString());
+        if (jwtGenerationEnabled) {
+            String dialect = jwtConfigurationDto.getConsumerDialectUri();
+            if (dialect == null || dialect.isEmpty() || "/".equals(dialect)) {
+                dialect = APIConstants.DEFAULT_CARBON_DIALECT + "/";
+            } else if (!dialect.endsWith("/")) {
+                dialect = dialect + "/";
+            }
+            if (StringUtils.isNotEmpty(info.getSubscriber())) {
+                custom.put(dialect + APIMgtGatewayConstants.SUBSCRIBER_CLAIM, info.getSubscriber());
+            }
+            if (StringUtils.isNotEmpty(info.getApplicationId())) {
+                custom.put(dialect + APIMgtGatewayConstants.APPLICATION_ID_CLAIM, info.getApplicationId());
+            }
+            if (StringUtils.isNotEmpty(info.getApplicationName())) {
+                custom.put(dialect + APIMgtGatewayConstants.APPLICATION_NAME_CLAIM, info.getApplicationName());
+            }
+            if (StringUtils.isNotEmpty(info.getApplicationTier())) {
+                custom.put(dialect + APIMgtGatewayConstants.APPLICATION_TIER_CLAIM, info.getApplicationTier());
+            }
+            if (StringUtils.isNotEmpty(info.getTier())) {
+                custom.put(dialect + APIMgtGatewayConstants.TIER_CLAIM, info.getTier());
+            }
+            if (StringUtils.isNotEmpty(info.getApplicationUUID())) {
+                custom.put(dialect + APIMgtGatewayConstants.APPLICATION_UUID_CLAIM, info.getApplicationUUID());
+            }
+            if (StringUtils.isNotEmpty(info.getType())) {
+                custom.put(dialect + APIMgtGatewayConstants.KEY_TYPE_CLAIM, info.getType());
+            }
+            if (StringUtils.isNotEmpty(info.getEndUserName())) {
+                custom.put(dialect + APIMgtGatewayConstants.END_USER_CLAIM, info.getEndUserName());
+            }
+        }
+        dto.setCustomClaims(custom);
+        HashSet<String> audiences = new LinkedHashSet<>();
+        if (referencedApiUuids != null) {
+            audiences.addAll(referencedApiUuids);
+        }
+        dto.setAudience(new ArrayList<>(audiences));
+        return dto;
     }
 
     protected void endTenantFlow() {

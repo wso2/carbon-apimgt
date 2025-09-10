@@ -18,8 +18,6 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.oauth;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.apache.axiom.om.OMElement;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -29,9 +27,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
@@ -54,11 +50,8 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
-import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
-import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.metrics.manager.Level;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
@@ -374,7 +367,7 @@ public class OAuthAuthenticator implements Authenticator {
                         }
                     }
                 }
-                info = getAPIKeyValidator().getKeyValidationInfo(apiContext, accessToken, apiVersion,
+                info = getAPIKeyValidator().getKeyValidationInfoMCPServers(apiContext, accessToken, apiVersion,
                         authenticationScheme, matchingResource, httpMethod, defaultVersionInvoked, keyManagerList,
                         generateInternalKey, referencedApiUuids);
             } catch (APISecurityException ex) {
@@ -426,9 +419,6 @@ public class OAuthAuthenticator implements Authenticator {
                 authContext.setProductName(info.getProductName());
                 authContext.setProductProvider(info.getProductProvider());
             }
-            if (StringUtils.isNotBlank(info.getMcpUpstreamToken())) {
-                authContext.setMcpUpstreamToken(info.getMcpUpstreamToken());
-            }
 
             /* Synapse properties required for BAM Mediator*/
             //String tenantDomain = MultitenantUtils.getTenantDomain(info.getApiPublisher());
@@ -460,29 +450,6 @@ public class OAuthAuthenticator implements Authenticator {
                     ", version: "+ apiVersion + " status: (" + info.getValidationStatus() +
                     ") - " + APISecurityConstants.getAuthenticationFailureMessage(info.getValidationStatus()));
         }
-    }
-
-    private JwtTokenInfoDTO getJwtTokenInfoDTO(JWTInfoDto jwtInfoDto, API matchedAPI) {
-        JwtTokenInfoDTO dto = new JwtTokenInfoDTO();
-        dto.setEndUserName(jwtInfoDto.getEndUser());
-        dto.setKeyType(jwtInfoDto.getKeyType());
-        dto.setExpirationTime(6000L);
-
-        Map<String, String> custom = new HashMap<>();
-        custom.put(APIMgtGatewayConstants.MCP_AUTH_CLAIM, Boolean.TRUE.toString());
-        dto.setCustomClaims(custom);
-
-        LinkedHashSet<String> refs = new LinkedHashSet<>();
-        if (matchedAPI != null && matchedAPI.getUrlMappings() != null) {
-            for (URLMapping m : matchedAPI.getUrlMappings()) {
-                if (m != null && m.getApiOperationMapping() != null) {
-                    String id = m.getApiOperationMapping().getApiUuid();
-                    if (StringUtils.isNotEmpty(id)) refs.add(id);
-                }
-            }
-        }
-        dto.setAudience(new ArrayList<>(refs));
-        return dto;
     }
 
     private String removeLeadingAndTrailing(String base) {
