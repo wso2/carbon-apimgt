@@ -449,7 +449,8 @@ public class MCPUtils {
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             JsonObject payload = resolvedRequest.getBody();
 
-            if (APIConstants.APPLICATION_JSON_MEDIA_TYPE.startsWith(contentType)) {
+            String ct = contentType != null ? contentType : "";
+            if (ct.startsWith(APIConstants.APPLICATION_JSON_MEDIA_TYPE)) {
                 try {
                     JsonUtil.removeJsonPayload(axis2MessageContext);
                     JsonObject safePayload = (payload != null) ? payload : new JsonObject();
