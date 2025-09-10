@@ -340,7 +340,7 @@ public class JWTValidator {
                 JWTInfoDto jwtInfoDto = null;
                 API matchedAPI = null;
                 boolean skipEndUserJWT = false;
-                final boolean isMcp = APIConstants.API_TYPE_MCP.equals(synCtx.getProperty(APIConstants.API_TYPE));
+                final boolean isMcp = APIConstants.API_TYPE_MCP.equals(apiType);
                 if (isMcp) {
                     matchedAPI = GatewayUtils.getAPI(synCtx);
                     if (log.isDebugEnabled()) {
