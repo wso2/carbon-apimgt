@@ -570,9 +570,7 @@ public class MCPUtils {
 
             // If server URL is not resolved using host header, pick the first vhost as the resource endpoint
             if (StringUtils.isEmpty(serverURL)) {
-                if (gwVhosts != null && !gwVhosts.isEmpty()) {
-                    serverURL = gwVhosts.get(0).getHttpsUrl();
-                }
+                serverURL = gwVhosts.get(0).getHttpsUrl();
             }
         }
         return serverURL;

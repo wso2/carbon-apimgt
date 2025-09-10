@@ -196,6 +196,11 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         String contextPath = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
         String serverURL = MCPUtils.getGatewayServerURL(hostHeader, contextPath);
 
+        if (StringUtils.isEmpty(serverURL)) {
+            log.error("Error while generating mcp payload for resource metadata");
+            return false;
+        }
+
         String resourceURL = serverURL + contextPath + APIMgtGatewayConstants.MCP_RESOURCE;
         oAuthProtectedResourceDTO.setResource(resourceURL);
 

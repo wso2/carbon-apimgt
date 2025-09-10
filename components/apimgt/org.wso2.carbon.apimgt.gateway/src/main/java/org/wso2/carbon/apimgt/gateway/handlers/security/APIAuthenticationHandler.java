@@ -779,15 +779,21 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                         }
 
                         String gwURL = MCPUtils.getGatewayServerURL(hostHeader, contextPath);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Constructed gateway URL for resource metadata: " + gwURL);
-                        }
+                        if (StringUtils.isEmpty(gwURL)) {
+                            headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
+                                    " error=\"invalid_token\"" +
+                                    ", error_description=\"The provided token is invalid\"");
+                        } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Constructed gateway URL for resource metadata: " + gwURL);
+                            }
 
-                        String resourceMetadata = gwURL + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
-                        headers.put(HttpHeaders.WWW_AUTHENTICATE, "Bearer resource_metadata=" +
-                                "\"" + resourceMetadata + "\","
-                                + " error=\"invalid_token\","
-                                + " error_description=\"Access token is missing or expired\"");
+                            String resourceMetadata = gwURL + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
+                            headers.put(HttpHeaders.WWW_AUTHENTICATE, "Bearer resource_metadata=" +
+                                    "\"" + resourceMetadata + "\","
+                                    + " error=\"invalid_token\","
+                                    + " error_description=\"Access token is missing or expired\"");
+                        }
                     }
                 } else {
                     headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +

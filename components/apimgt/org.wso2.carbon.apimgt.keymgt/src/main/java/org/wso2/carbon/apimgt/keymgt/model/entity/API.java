@@ -383,6 +383,8 @@ public class API implements CacheableEntity<String> {
     }
 
     public void setVhosts(List<VHost> vhosts) {
-        this.vhosts = (vhosts != null) ? vhosts : new ArrayList<>();
+        if (vhosts != null) {
+            this.vhosts = vhosts;
+        }
     }
 }
