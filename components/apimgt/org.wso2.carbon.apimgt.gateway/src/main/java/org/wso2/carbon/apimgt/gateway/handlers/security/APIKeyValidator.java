@@ -93,18 +93,16 @@ public class APIKeyValidator {
     protected Log log = LogFactory.getLog(getClass());
 
     private ArrayList<URITemplate> uriTemplates = null;
-    private boolean jwtGenerationEnabled;
+    private final boolean jwtGenerationEnabled;
 
     public APIKeyValidator() {
-
-        jwtGenerationEnabled =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto().isEnabled();
 
         this.dataStore = new WSAPIKeyDataStore();
 
         this.gatewayKeyCacheEnabled = isGatewayTokenCacheEnabled();
 
         this.isGatewayAPIResourceValidationEnabled = isAPIResourceValidationEnabled();
+        this.jwtGenerationEnabled = isJWTGenerationEnabled();
     }
 
     protected Cache getGatewayKeyCache() {
@@ -150,17 +148,21 @@ public class APIKeyValidator {
      * @return An APIKeyValidationInfoDTO object
      * @throws APISecurityException If an error occurs while accessing backend services
      */
-    public APIKeyValidationInfoDTO getKeyValidationInfoMCPServers(String context, String apiKey, String apiVersion,
-                                                                  String authenticationScheme, String matchingResource,
-                                                                  String httpVerb, boolean defaultVersionInvoked,
-                                                                  List<String> keyManagers, boolean generateInternalKey,
-                                                                  List<String> referencedApiUuids)
+    public APIKeyValidationInfoDTO getKeyValidationInfo(String context, String apiKey, String apiVersion,
+                                                        String authenticationScheme, String matchingResource,
+                                                        String httpVerb, boolean defaultVersionInvoked,
+                                                        List<String> keyManagers, boolean generateInternalKey,
+                                                        List<String> referencedApiUuids)
             throws APISecurityException {
 
         APIKeyValidationInfoDTO info = getKeyValidationInfo(context, apiKey, apiVersion, authenticationScheme,
                 matchingResource, httpVerb, defaultVersionInvoked, keyManagers);
 
         if (info != null && info.isAuthorized() && generateInternalKey) {
+            if (log.isDebugEnabled()) {
+                log.info("Internal key generation enabled for API with context: " + context + " and version: " +
+                        apiVersion);
+            }
             final String cacheKey = context + ":" + apiVersion + ":" + apiKey + ":" + APIConstants.API_TYPE_MCP;
             String mcpUpstreamToken = null;
             ExtendedJWTConfigurationDto jwtConfigurationDto =
@@ -175,21 +177,27 @@ public class APIKeyValidator {
                     if (JWTUtil.isJWTValid(candidate, jwtConfigurationDto.getJwtDecoding(), skewMs)) {
                         mcpUpstreamToken = candidate;
                     } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Cached MCP upstream token for key: " + cacheKey +
+                                    " is invalid, removing from cache");
+                        }
                         getGatewayTokenCache().remove(cacheKey);
                     }
                 }
             }
             if (mcpUpstreamToken == null) {
-
                 JwtTokenInfoDTO token = buildInternalJWTToken(info, jwtConfigurationDto, referencedApiUuids);
                 try {
                     mcpUpstreamToken = new InternalAPIKeyGenerator().generateToken(token);
                 } catch (APIManagementException e) {
-                    String warnMsg = "Error occurred while generating upstream token for MCP";
-                    log.warn(warnMsg);
-                    throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, warnMsg);
+                    String errorMsg = "Error occurred while generating upstream token for MCP";
+                    log.error(errorMsg, e);
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, errorMsg, e);
                 }
                 if (gatewayKeyCacheEnabled && StringUtils.isNotBlank(mcpUpstreamToken)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Caching generated MCP upstream token with key: " + cacheKey);
+                    }
                     getGatewayTokenCache().put(cacheKey, mcpUpstreamToken);
                 }
             }
@@ -423,6 +431,18 @@ public class APIKeyValidator {
             log.error("Did not found valid API Validation Information cache configuration. Use default configuration" + e);
         }
         return true;
+    }
+
+    /**
+     * Check whether JWT generation is enabled in the API Manager configuration.
+     *
+     * @return true if JWT generation is enabled, false otherwise
+     */
+    private boolean isJWTGenerationEnabled() {
+
+        APIManagerConfiguration config = getApiManagerConfiguration();
+        ExtendedJWTConfigurationDto jwtConfigurationDto = (config != null) ? config.getJwtConfigurationDto() : null;
+        return jwtConfigurationDto != null && jwtConfigurationDto.isEnabled();
     }
 
     public boolean isAPIResourceValidationEnabled() {
