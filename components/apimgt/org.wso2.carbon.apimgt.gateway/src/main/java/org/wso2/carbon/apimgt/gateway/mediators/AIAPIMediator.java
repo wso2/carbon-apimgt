@@ -387,6 +387,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         String requestPath = (String) axis2Ctx.getProperty(NhttpConstants.REST_URL_POSTFIX);
         if (StringUtils.isNotEmpty(requestPath)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Modifying request path for model: " + model + " with target identifier: " + targetModelMetadata.getAttributeIdentifier());
+            }
             URI uri = URI.create(requestPath);
             String rawPath = uri.getRawPath();
             String rawQuery = uri.getRawQuery();
@@ -403,16 +406,22 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                 finalPath.append("?").append(rawQuery);
             }
             axis2Ctx.setProperty(NhttpConstants.REST_URL_POSTFIX, finalPath.toString());
+            if (log.isDebugEnabled()) {
+                log.debug("Updated request path from: " + requestPath +" to: " + finalPath);
+            }
         }
     }
 
     private static String encodePathSegmentRFC3986(String segment) {
+        if (log.isDebugEnabled()) {
+            log.debug("Encoding path segment: " + segment);
+        }
         StringBuilder out = new StringBuilder();
         byte[] bytes = segment.getBytes(StandardCharsets.UTF_8);
         for (byte b : bytes) {
             char c = (char) (b & 0xFF);
             if (isUnreserved(c) || isSubDelim(c) || c == ':' || c == '@') {
-                out.append((char) (b & 0xFF));
+                out.append(c);
             } else {
                 out.append('%');
                 String hx = Integer.toHexString(b & 0xFF).toUpperCase();

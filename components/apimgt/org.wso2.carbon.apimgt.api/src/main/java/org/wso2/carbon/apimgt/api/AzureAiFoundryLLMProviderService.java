@@ -66,7 +66,7 @@ public class AzureAiFoundryLLMProviderService extends BuiltInLLMProviderService 
             LLMProviderAuthenticationConfiguration llmProviderAuthenticationConfiguration =
                     getLlmProviderAuthenticationConfiguration();
             llmProviderConfiguration.setAuthenticationConfiguration(llmProviderAuthenticationConfiguration);
-            llmProviderConfiguration.setAuthHeader(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_KEY);
+            llmProviderConfiguration.setAuthHeader(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_KEY);
             llmProviderConfiguration.setAuthQueryParam(null);
             llmProviderConfiguration.setConnectorType(this.getType());
 
@@ -122,7 +122,7 @@ public class AzureAiFoundryLLMProviderService extends BuiltInLLMProviderService 
         llmProviderAuthenticationConfiguration.setType(APIConstants.AIAPIConstants.API_KEY_AUTHENTICATION_TYPE);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(APIConstants.AIAPIConstants.API_KEY_HEADER_NAME,
-                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_KEY);
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_KEY);
         parameters.put(APIConstants.AIAPIConstants.API_KEY_HEADER_ENABLED, true);
         parameters.put(APIConstants.AIAPIConstants.API_KEY_QUERY_PARAMETER_ENABLED, false);
         llmProviderAuthenticationConfiguration.setParameters(parameters);

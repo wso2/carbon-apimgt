@@ -134,6 +134,7 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_CONNECTOR = "azureAiFoundry_1.0.0";
         public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_DESCRIPTION = "Azure AI Foundry service";
         public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_API_DEFINITION_FILE_NAME = "azure_ai_foundry_api.yaml";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_KEY = "api-key";
         public static final String LLM_PROVIDER_SERVICE_GEMINI_NAME = "Gemini";
         public static final String LLM_PROVIDER_SERVICE_GEMINI_VERSION = "1.0.0";
         public static final String LLM_PROVIDER_SERVICE_GEMINI_CONNECTOR = "gemini_1.0.0";
