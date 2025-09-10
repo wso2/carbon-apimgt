@@ -327,11 +327,11 @@ public class MCPUtils {
                     //set received id to msg context
                     messageContext.setProperty(APIConstants.MCP.RECEIVED_MCP_ID, id);
                 } catch (MCPRequestResolverException e) {
-                    throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE,
+                    throw new McpExceptionWithId(id, APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE,
                             APIConstants.MCP.RpcConstants.INTERNAL_ERROR_MESSAGE, e.getMessage());
                 }
             } else {
-                throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE,
+                throw new McpExceptionWithId(id, APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE,
                         APIConstants.MCP.RpcConstants.INTERNAL_ERROR_MESSAGE, "No matched tool found");
             }
         }
@@ -449,10 +449,11 @@ public class MCPUtils {
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             JsonObject payload = resolvedRequest.getBody();
 
-            if (APIConstants.APPLICATION_JSON_MEDIA_TYPE.equals(contentType)) {
+            if (APIConstants.APPLICATION_JSON_MEDIA_TYPE.startsWith(contentType)) {
                 try {
                     JsonUtil.removeJsonPayload(axis2MessageContext);
-                    JsonUtil.getNewJsonPayload(axis2MessageContext, new Gson().toJson(payload), true, true);
+                    JsonObject safePayload = (payload != null) ? payload : new JsonObject();
+                    JsonUtil.getNewJsonPayload(axis2MessageContext, new Gson().toJson(safePayload), true, true);
                     axis2MessageContext.setProperty(Constants.Configuration.MESSAGE_TYPE,
                             APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                     axis2MessageContext.setProperty(Constants.Configuration.CONTENT_TYPE,
