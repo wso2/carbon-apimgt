@@ -366,7 +366,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
      *
      * @param scheduledTimeMs The scheduled time for the task in milliseconds.
      * @param taskKey         The unique key for the task.
-     * @param ttlMilliseconds The time-to-live for the lock in seconds.
+     * @param ttlMilliseconds The time-to-live for the lock in milliseconds.
      * @return true if the lock was acquired and the task can proceed, false otherwise.
      */
     private boolean acquireLockToExecuteDiscovery(long scheduledTimeMs, String taskKey, long ttlMilliseconds) {
@@ -391,13 +391,22 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                 return false;
             }
             // 3) Expired; try to take over
-            dao.updateExecutorTask(scheduledTimeMs, taskKey, FederatedAPIDiscoveryRunner.nodeId);
+            if (dao.updateExecutorTask(scheduledTimeMs, taskKey, FederatedAPIDiscoveryRunner.nodeId)) {
+                //4) If we succeeded, schedule the task immediately.
+                if (log.isDebugEnabled()) {}
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully acquired lock for discovery task " + taskKey + " after stealing from "
+                            + holderScheduledTimeMs);
+                }
+                scheduledHeartBeatTasks.put(taskKey, scheduleHeartbeat(taskKey, ttlMilliseconds));
+                return true;
+            }
+            // 5) Failed to steal; give up.
             if (log.isDebugEnabled()) {
-                log.debug("Successfully acquired lock for discovery task " + taskKey + " after stealing from "
+                log.debug("Failed to acquire lock for discovery task " + taskKey + " after stealing from "
                         + holderScheduledTimeMs);
             }
-            scheduledHeartBeatTasks.put(taskKey, scheduleHeartbeat(taskKey, ttlMilliseconds));
-            return true;
+            return false;
         } catch (APIManagementException e) {
             log.warn("Failed to acquire lock for discovery task " + taskKey, e);
             return false;
@@ -405,11 +414,10 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     }
 
     /**
-     * .
      * The heartbeat task periodically updates the ScheduledTime of the task to prevent it from expiring.
      *
      * @param taskKey         The unique key for the task.
-     * @param ttlMilliseconds The time-to-live for the lock in seconds.
+     * @param ttlMilliseconds The time-to-live for the lock in milliseconds.
      * @return A ScheduledFuture representing the heartbeat task.
      */
     private ScheduledFuture<?> scheduleHeartbeat(String taskKey, long ttlMilliseconds) {
