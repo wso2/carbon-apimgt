@@ -359,15 +359,20 @@ public class OAuthAuthenticator implements Authenticator {
                             for (URLMapping mapping : matchedAPI.getUrlMappings()) {
                                 if (mapping != null && mapping.getApiOperationMapping() != null) {
                                     String id = mapping.getApiOperationMapping().getApiUuid();
-                                    if (StringUtils.isNotEmpty(id)) refs.add(id);
+                                    if (StringUtils.isNotEmpty(id)) {
+                                        refs.add(id);
+                                    }
                                 }
                             }
                             generateInternalKey = true;
                             referencedApiUuids = new ArrayList<>(refs);
                         }
+                    } else {
+                        log.warn(
+                                "No matching MCP server found for the request. Unable to generate MCP upstream token.");
                     }
                 }
-                info = getAPIKeyValidator().getKeyValidationInfoMCPServers(apiContext, accessToken, apiVersion,
+                info = getAPIKeyValidator().getKeyValidationInfo(apiContext, accessToken, apiVersion,
                         authenticationScheme, matchingResource, httpMethod, defaultVersionInvoked, keyManagerList,
                         generateInternalKey, referencedApiUuids);
             } catch (APISecurityException ex) {
