@@ -345,7 +345,7 @@ public class OAuthAuthenticator implements Authenticator {
 
             try {
                 boolean generateInternalKey = false;
-                final boolean isMcp = APIConstants.API_TYPE_MCP.equals(synCtx.getProperty(APIConstants.API_TYPE));
+                final boolean isMcp = APIConstants.API_TYPE_MCP.equals(apiType);
                 boolean isExistingApiSubtype = false;
                 List<String> referencedApiUuids = Collections.emptyList();
 
