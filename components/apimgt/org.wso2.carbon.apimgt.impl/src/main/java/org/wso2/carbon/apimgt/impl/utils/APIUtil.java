@@ -11938,4 +11938,29 @@ public final class APIUtil {
             return null;
         }
     }
+
+    /**
+     * This method is used to validate and update the URI templates of an API
+     *
+     * @param api                       API object
+     * @param tenantId                  Tenant ID of the API
+     * @throws APIManagementException   if an error occurs while validating or updating the URI templates
+     */
+    public static void validateAndUpdateURITemplates(API api, int tenantId) throws APIManagementException {
+        if (api.getUriTemplates() != null) {
+            for (URITemplate uriTemplate : api.getUriTemplates()) {
+                if (StringUtils.isEmpty(api.getApiLevelPolicy())) {
+                    // API level policy not attached.
+                    if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
+                        uriTemplate.setThrottlingTier(APIUtil.getDefaultAPILevelPolicy(tenantId));
+                    }
+                } else {
+                    uriTemplate.setThrottlingTier(api.getApiLevelPolicy());
+                }
+                if (StringUtils.isEmpty(uriTemplate.getAuthType())) {
+                    uriTemplate.setAuthType("Any");
+                }
+            }
+        }
+    }
 }
