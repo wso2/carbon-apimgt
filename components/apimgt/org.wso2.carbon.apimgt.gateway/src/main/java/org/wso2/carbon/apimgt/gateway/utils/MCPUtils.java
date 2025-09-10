@@ -560,8 +560,12 @@ public class MCPUtils {
             }
 
             if (!StringUtils.isEmpty(hostHeader)) {
+                String host = hostHeader.trim();
+                // Remove port if present in the host header
+                int colonIndex = host.indexOf(':');
+                host = (colonIndex > -1) ? host.substring(0, colonIndex) : host;
                 for (VHost vHost: gwVhosts) {
-                    if (vHost.getHost().equals(hostHeader)) {
+                    if (vHost.getHost() != null && vHost.getHost().equalsIgnoreCase(host)) {
                         serverURL = vHost.getHttpsUrl();
                         break;
                     }
