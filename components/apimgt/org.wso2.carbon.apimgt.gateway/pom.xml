@@ -342,6 +342,10 @@
             <artifactId>org.wso2.carbon.apimgt.spec.parser</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.mcp.transformer</groupId>
+            <artifactId>mcp-transformer-java</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

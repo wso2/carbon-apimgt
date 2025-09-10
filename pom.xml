@@ -2039,6 +2039,11 @@
                 <artifactId>org.wso2.carbon.apimgt.spec.parser</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.mcp.transformer</groupId>
+                <artifactId>mcp-transformer-java</artifactId>
+                <version>${mcp.transformer.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -2322,5 +2327,6 @@
         <tomcat.version>9.0.108</tomcat.version>
         <tika.version>2.7.0</tika.version>
         <batik.version>1.17</batik.version>
+        <mcp.transformer.version>0.9.0</mcp.transformer.version>
     </properties>
 </project>

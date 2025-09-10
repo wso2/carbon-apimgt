@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants.GatewayNotification.GatewayRegistrationResponse;
@@ -37,11 +38,15 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class DataHolder {
     private static final Log log  = LogFactory.getLog(DataHolder.class);
@@ -260,6 +265,30 @@ public class DataHolder {
                     log.debug("API : " + api.getApiName() + "is deployed successfully");
                 }
                 api.setRevisionId(gatewayAPIDTO.getRevision());
+            }
+        }
+    }
+
+    /**
+     * Populate vhosts information to API object
+     *
+     * @param gatewayAPIDTO gateway API DTO containing vhosts and other info
+     */
+    public void populateVhosts(GatewayAPIDTO gatewayAPIDTO) {
+        Map<String, API> apiMap = tenantAPIMap.get(gatewayAPIDTO.getTenantDomain());
+        if (apiMap != null) {
+            API api = apiMap.get(gatewayAPIDTO.getApiContext());
+            if (api != null) {
+                List<VHost> vhosts = gatewayAPIDTO.getVhosts();
+                api.setVhosts(vhosts != null ? vhosts : new ArrayList<>());
+                if (log.isDebugEnabled()) {
+                    log.debug("Populated vhosts info for API : " + api.getApiName());
+                }
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("API not found for context " + gatewayAPIDTO.getApiContext() + " in tenant domain "
+                            + gatewayAPIDTO.getTenantDomain());
+                }
             }
         }
     }
