@@ -406,7 +406,8 @@ public class JWTValidator {
                         }
                         authenticationContext.setMcpUpstreamToken(internalToken);
                     } else if (matchedAPI == null) {
-                        log.warn("No matching MCP server found for token: " + GatewayUtils.getMaskedToken(jwtHeader));
+                        log.warn(
+                                "No matching MCP server found for the request. Unable to generate MCP upstream token.");
                     } else {
                         if (log.isDebugEnabled()) {
                             log.debug("MCP request not for EXISTING_API. Received subtype " + matchedAPI.getSubtype() +
@@ -510,7 +511,9 @@ public class JWTValidator {
             for (URLMapping mapping : matchedAPI.getUrlMappings()) {
                 if (mapping != null && mapping.getApiOperationMapping() != null) {
                     String id = mapping.getApiOperationMapping().getApiUuid();
-                    if (StringUtils.isNotEmpty(id)) refs.add(id);
+                    if (StringUtils.isNotEmpty(id)) {
+                        refs.add(id);
+                    }
                 }
             }
         }
