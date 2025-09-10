@@ -265,6 +265,11 @@ public class DataHolder {
         }
     }
 
+    /**
+     * Populate vhosts information to API object
+     *
+     * @param gatewayAPIDTO gateway API DTO containing vhosts and other info
+     */
     public void populateVhosts(GatewayAPIDTO gatewayAPIDTO) {
         Map<String, API> apiMap = tenantAPIMap.get(gatewayAPIDTO.getTenantDomain());
         if (apiMap != null) {

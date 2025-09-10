@@ -58,6 +58,13 @@ import java.util.Map;
 public class MCPUtils {
     private static final Log log = LogFactory.getLog(MCPUtils.class);
 
+    /**
+     * Validates the MCP request.
+     *
+     * @param request MCP request object
+     * @return true if the request is valid, false otherwise
+     * @throws McpException if the request is invalid
+     */
     public static boolean validateRequest(McpRequest request) throws McpException {
         String jsonRpcVersion = request.getJsonRpcVersion();
         if (StringUtils.isEmpty(jsonRpcVersion)) {
@@ -132,6 +139,13 @@ public class MCPUtils {
         }
     }
 
+    /**
+     * Validates the MCP initialize request.
+     *
+     * @param id            id of the request
+     * @param requestObject MCP request object
+     * @throws McpException if the request is invalid
+     */
     public static void validateInitializeRequest(Object id, McpRequest requestObject) throws McpException {
         if (requestObject.getParams() != null) {
             Params params = requestObject.getParams();
@@ -152,6 +166,13 @@ public class MCPUtils {
         }
     }
 
+    /**
+     * Validates the MCP tools/call request.
+     *
+     * @param mcpRequest   MCP request object
+     * @param matchedApi   matched API in the gateway
+     * @throws McpException if the request is invalid
+     */
     private static void validateToolsCallRequest(McpRequest mcpRequest, API matchedApi) throws McpException {
         Params params = mcpRequest.getParams();
         if (params != null) {
@@ -178,6 +199,13 @@ public class MCPUtils {
     }
 
 
+    /**
+     * Handles the MCP initialize request.
+     *
+     * @param id          id of the request
+     * @param matchedApi  matched API in the gateway
+     * @return the response payload as a String
+     */
     public static McpResponseDto handleMcpInitialize(Object id, API matchedApi) {
         String name = matchedApi.getName();
         String version = matchedApi.getVersion();
@@ -187,12 +215,30 @@ public class MCPUtils {
                 200, null);
     }
 
+    /**
+     * Handles the MCP tools/list request.
+     *
+     * @param id          id of the request
+     * @param matchedApi  matched API in the gateway
+     * @param isThirdParty whether the request is from a third-party client
+     * @return the response payload as a String
+     */
     public static McpResponseDto handleMcpToolList(Object id, API matchedApi, boolean isThirdParty) {
         return new McpResponseDto(
                 MCPPayloadGenerator.generateToolListPayload(id, matchedApi.getUrlMappings(),
                         isThirdParty), 200, null);
     }
 
+    /**
+     * Handles the MCP tools/call request.
+     *
+     * @param messageContext message context of the request
+     * @param id             id of the request
+     * @param matchedApi     matched API in the gateway
+     * @param mcpRequest     MCP request object
+     * @return the response payload as a String
+     * @throws McpException if an error occurs while processing the request
+     */
     private static McpResponseDto handleMcpToolsCall(MessageContext messageContext, Object id, API matchedApi,
         McpRequest mcpRequest) throws McpException {
         Params params = mcpRequest.getParams();
@@ -209,10 +255,26 @@ public class MCPUtils {
         return null;
     }
 
+    /**
+     * Handles the MCP ping request.
+     *
+     * @param id id of the request
+     * @return the response payload as a String
+     */
     private static McpResponseDto handleMcpPing(Object id) {
         return new McpResponseDto(MCPPayloadGenerator.generatePingResponse(id), 200, null);
     }
 
+    /**
+     * Transforms the MCP request to a standard REST request.
+     *
+     * @param messageContext    message context of the request
+     * @param id                id of the request
+     * @param extendedOperation matched operation in the API
+     * @param mcpRequest        MCP request object
+     * @param subType           subtype of the API (existing API or direct backend)
+     * @throws McpException if an error occurs while transforming the request
+     */
     private static void transformMcpRequest(MessageContext messageContext, Object id, URLMapping extendedOperation,
                                             McpRequest mcpRequest, String subType) throws McpException {
         if (extendedOperation != null) {
@@ -275,6 +337,14 @@ public class MCPUtils {
         }
     }
 
+    /**
+     * Processes the resource path, query parameters, and path parameters.
+     *
+     * @param messageContext  message context of the request
+     * @param resolvedRequest resolved request object
+     * @param backendOperation backend operation object
+     * @throws McpException if an error occurs while processing the resource
+     */
     private static void processResource(MessageContext messageContext, ResolvedRequest resolvedRequest,
                                         BackendOperation backendOperation) throws McpException {
         //remove fully qualified path
@@ -335,6 +405,12 @@ public class MCPUtils {
         axis2MessageContext.setProperty(APIConstants.RESOURCE_METHOD, httpMethod.toString().toUpperCase());
     }
 
+    /**
+     * Processes the headers of the request.
+     *
+     * @param messageContext  message context of the request
+     * @param resolvedRequest resolved request object
+     */
     public static void processHeaders(MessageContext messageContext, ResolvedRequest resolvedRequest) {
         Map<String, Object> headerParams = resolvedRequest.getHeaderParams();
         if (headerParams != null && !headerParams.isEmpty()) {
@@ -356,6 +432,15 @@ public class MCPUtils {
         }
     }
 
+    /**
+     * Processes the request body of the request.
+     *
+     * @param messageContext  message context of the request
+     * @param resolvedRequest resolved request object
+     * @param hasBody         whether the request has a body
+     * @param contentType     content type of the request body
+     * @throws McpException if an error occurs while processing the request body
+     */
     public static void processRequestBody(MessageContext messageContext, ResolvedRequest resolvedRequest,
                                           boolean hasBody, String contentType) throws McpException {
 
@@ -385,16 +470,31 @@ public class MCPUtils {
         }
     }
 
+    /**
+     * Throws an error for a missing jsonrpc field.
+     *
+     * @throws McpException always
+     */
     private static void throwMissingJsonRpcError() throws McpException {
         throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
                 APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing jsonrpc field");
     }
 
+    /**
+     * Throws an error for an invalid jsonrpc version.
+     *
+     * @throws McpException always
+     */
     private static void throwMissingIdError() throws McpException {
         throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
                 APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing id field");
     }
 
+    /**
+     * Throws an error for a missing method field.
+     *
+     * @throws McpException always
+     */
     private static void throwMissingMethodError() throws McpException {
         throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
                 APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing method field");
