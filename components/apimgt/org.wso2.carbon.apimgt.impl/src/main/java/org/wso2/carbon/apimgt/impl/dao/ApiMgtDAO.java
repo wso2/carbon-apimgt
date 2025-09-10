@@ -17296,7 +17296,7 @@ public class ApiMgtDAO {
      * @param nodeId        The ID of the executor node that locks the task.
      * @return true if the executor task was updated successfully
      **/
-    public boolean updateExecutorTask(Long scheduledTime, String taskId, String nodeId)
+    public boolean updateExecutorTask(long scheduledTime, String taskId, String nodeId)
             throws APIManagementException {
         String query = SQLConstants.UPDATE_EXECUTOR_TASK_TO_LOCK_TABLE;
         try (Connection conn = APIMgtDBUtil.getConnection()) {
