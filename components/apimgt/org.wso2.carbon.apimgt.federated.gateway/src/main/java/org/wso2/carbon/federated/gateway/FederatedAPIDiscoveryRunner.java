@@ -124,10 +124,10 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     if (GatewayMode.WRITE_ONLY.getMode().equals(environment.getMode()) || scheduleWindow <= 0) {
                         log.info("Federated API discovery is disabled for environment: " + environment.getName());
                     } else {
-                        long scheduledTime = System.currentTimeMillis();
                         long ttl = TimeUnit.MINUTES.toMillis(scheduleWindow) / 2;
                         ScheduledFuture<?> newTask = executor.scheduleAtFixedRate(() -> {
                             boolean acquired = false;
+                            long scheduledTime = System.currentTimeMillis();
                             try {
                                 acquired = acquireLockToExecuteDiscovery(scheduledTime, taskKey, ttl);
                                 if (acquired) {
@@ -255,7 +255,8 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     }
 
                     if (isNewVersion) {
-                        String existingApiUUID = FederatedGatewayUtil.getAPIUUID(existingAPI, adminUsername, organization);
+                        String existingApiUUID = FederatedGatewayUtil.getAPIUUID(existingAPI, adminUsername,
+                                organization);
                         if (existingApiUUID != null) {
                             FederatedGatewayUtil.createNewAPIVersion(existingApiUUID, apidto.getVersion(),
                                     organization);
@@ -275,15 +276,16 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
 
                     // Import API
-                    ImportedAPIDTO importedApi = importExportAPI.importAPI(apiZip, true, true, update, true,
+                    ImportedAPIDTO importedApi = importExportAPI.importAPI(apiZip,true,
+                            true, update, true,
                             new String[]{APIConstants.APIM_PUBLISHER_SCOPE, APIConstants.APIM_CREATOR_SCOPE},
                             organization);
 
                     if (update) {
-                        ApiMgtDAO.getInstance().updateApiExternalApiMapping(importedApi.getApi().getUuid(),
+                        APIUtil.updateApiExternalApiMapping(importedApi.getApi().getUuid(),
                                 environment.getUuid(), discoveredAPI.getReferenceArtifact());
                     } else {
-                        ApiMgtDAO.getInstance().addApiExternalApiMapping(importedApi.getApi().getUuid(),
+                        APIUtil.addApiExternalApiMapping(importedApi.getApi().getUuid(),
                                 environment.getUuid(), discoveredAPI.getReferenceArtifact());
                     }
 
