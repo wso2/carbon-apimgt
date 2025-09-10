@@ -17205,16 +17205,19 @@ public class ApiMgtDAO {
                 ps.setString(2, taskId);
                 ps.setString(3, nodeId);
                 ps.execute();
+            } catch (SQLException e) {
+                if (e instanceof SQLIntegrityConstraintViolationException) {
+                    log.debug("Executor task already exists for the given task id: " + taskId);
+                    conn.rollback();
+                    return response;
+                }
+                conn.rollback();
+                handleException("Error while adding executor task to the database lock table: ", e);
             }
             conn.commit();
             response = true;
         } catch (SQLException e) {
-            if (e instanceof SQLIntegrityConstraintViolationException) {
-                log.debug("Executor task already exists for the given task id: " + taskId);
-                return response;
-            } else {
-                handleException("Error while verifying execution task availability: ", e);
-            }
+            handleException("Error while verifying execution task availability: ", e);
         }
         return response;
     }
@@ -17309,9 +17312,12 @@ public class ApiMgtDAO {
                 }
                 conn.rollback();
                 return false;
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Error while updating executor task: ", e);
             }
         } catch (SQLException e) {
-            handleException("Error while updating executor task: ", e);
+            handleException("Error updating executor task. Database connection could not be established: ", e);
         }
         return false;
     }
