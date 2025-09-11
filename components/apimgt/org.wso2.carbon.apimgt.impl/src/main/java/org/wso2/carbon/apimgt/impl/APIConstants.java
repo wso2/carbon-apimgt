@@ -527,7 +527,7 @@ public final class APIConstants {
     public static final String DEVPORTAL_MODE_HYBRID = "HYBRID";
     public static final String DEVPORTAL_MODE_MCP_ONLY = "MCP_ONLY";
     public static final String DEVPORTAL_MODE_API_ONLY = "API_ONLY";
-    public static final String FAILOVER_IN_LOADBALANCED_ENDPOINTS = "failoverInLoadbalancedEndpoints";
+    public static final String FAILOVER_IN_LOADBALANCED_ENDPOINTS_PROPERTY = "enableFailoverInLoadbalancedEndpoints";
     public static final String ENABLE_FAILOVER_IN_LOADBALANCED_ENDPOINTS = "EnableFailoverInLoadbalancedEndpoints";
 
     public static final Set<String> DEVPORTAL_MODES = Set.of(

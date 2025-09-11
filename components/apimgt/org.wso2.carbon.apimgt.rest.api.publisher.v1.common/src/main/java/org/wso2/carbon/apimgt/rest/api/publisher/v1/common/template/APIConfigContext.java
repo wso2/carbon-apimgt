@@ -116,7 +116,7 @@ public class APIConfigContext extends ConfigContext {
         context.put(APIConstants.ENABLE_RETRY_CALL_WITH_NEW_OAUTH_TOKEN, isRetryCallWithNewOAuthTokenEnabled());
 
         // Set the enable failover in load balanced endpoints property
-        context.put(APIConstants.FAILOVER_IN_LOADBALANCED_ENDPOINTS, isFailoverEnabled());
+        context.put(APIConstants.FAILOVER_IN_LOADBALANCED_ENDPOINTS_PROPERTY, isFailoverEnabled());
     }
 
     private void setApiProductVelocityContext(APIProduct apiProduct, VelocityContext context) {
@@ -170,7 +170,7 @@ public class APIConfigContext extends ConfigContext {
         context.put(APIConstants.ENABLE_RETRY_CALL_WITH_NEW_OAUTH_TOKEN, isRetryCallWithNewOAuthTokenEnabled());
 
         // Set the enable failover in load balanced endpoints property
-        context.put(APIConstants.FAILOVER_IN_LOADBALANCED_ENDPOINTS, isFailoverEnabled());
+        context.put(APIConstants.FAILOVER_IN_LOADBALANCED_ENDPOINTS_PROPERTY, isFailoverEnabled());
     }
 
     public String getAPIName(API api) {
