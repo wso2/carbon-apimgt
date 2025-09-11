@@ -3314,7 +3314,7 @@ public class PublisherCommonUtils {
         }
 
         PublisherCommonUtils.validateScopes(existingAPI);
-
+        APIUtil.validateAndUpdateURITemplates(existingAPI, APIUtil.getInternalOrganizationId(organization));
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
 
