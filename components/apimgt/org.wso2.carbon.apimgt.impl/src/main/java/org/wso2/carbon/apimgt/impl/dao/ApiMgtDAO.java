@@ -26448,12 +26448,11 @@ public class ApiMgtDAO {
      */
     public void addAPIPrimaryEndpointMappings(API api) throws APIManagementException {
 
-        String apiUUID = api.getUuid();
-        if (log.isDebugEnabled()){
-            log.debug("Adding primary endpoint mappings for API " + apiUUID);
-        }
-
         if (api.getPrimaryProductionEndpointId() != null || api.getPrimarySandboxEndpointId() != null) {
+            String apiUUID = api.getUuid();
+            if (log.isDebugEnabled()){
+                log.debug("Adding primary endpoint mappings for API: " + apiUUID);
+            }
             try (Connection connection = APIMgtDBUtil.getConnection()) {
                 connection.setAutoCommit(false);
                 String addPrimaryEndpointMappingQuery = SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING;
@@ -26477,10 +26476,11 @@ public class ApiMgtDAO {
                     }
                 } catch (SQLException e) {
                     connection.rollback();
-                    handleException("Error while adding primary endpoint mappings for API : " + apiUUID, e);
+                    handleException("Error while adding primary endpoint mappings for API: " + apiUUID, e);
                 }
             } catch (SQLException e) {
-                handleException("Error while updating primary endpoint mappings for API : " + api.getUuid(), e);
+                handleException("Database connection error while adding primary endpoint mappings for API: " + apiUUID,
+                        e);
             }
         }
     }
