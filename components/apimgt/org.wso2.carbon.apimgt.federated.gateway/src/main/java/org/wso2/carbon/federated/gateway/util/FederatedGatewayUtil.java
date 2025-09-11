@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -87,17 +88,17 @@ public class FederatedGatewayUtil {
         }
     }
 
-    public static void createNewAPIVersion(String apiUUID, String newVersion, String organization)
+    public static API createNewAPIVersion(String apiUUID, String newVersion, String organization)
             throws APIManagementException {
         if (Objects.isNull(newVersion)) {
             throw new APIManagementException("Invalid new API version format: " + newVersion + " for API: " + apiUUID);
         }
         APIProvider provider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                 getThreadLocalCarbonContext().getUsername());
-        provider.createNewAPIVersion(apiUUID, newVersion, true, organization);
         if (log.isDebugEnabled()) {
             log.debug("Created new API version for: " + apiUUID + " in organization: " + organization);
         }
+        return provider.createNewAPIVersion(apiUUID, newVersion, true, organization);
     }
 
     public static InputStream createZipAsInputStream(String apiYaml, String swaggerYaml, String deploymentYaml,

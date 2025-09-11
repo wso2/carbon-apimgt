@@ -17249,7 +17249,7 @@ public class ApiMgtDAO {
      * @param taskId               the unique identifier of the task
      */
     public void updateScheduledTimeOfExecutorTask(long updatedScheduledTime, String taskId) throws APIManagementException {
-        String query = SQLConstants.UPDATE_SCHEDULED_TIME_FROM_LOCK_TABLE;
+        String query = SQLConstants.UPDATE_LOCK_TIME_FROM_LOCK_TABLE;
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(query)) {
@@ -17271,18 +17271,18 @@ public class ApiMgtDAO {
      * If the task is not found or an error occurs, returns 0.
      **/
     public long getScheduledTimeFromExecutorTask(String taskId) throws APIManagementException {
-        String query = SQLConstants.GET_SCHEDULED_TIME_OF_EXECUTOR_TASK_SQL;
+        String query = SQLConstants.GET_LOCK_TIME_OF_EXECUTOR_TASK_SQL;
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(query)) {
                 ps.setString(1, taskId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        return rs.getLong("SCHEDULED_TIME");
+                        return rs.getLong("LOCK_TIME");
                     }
                 }
             }
         } catch (SQLException e) {
-            handleException("Error while getting executor task SCHEDULED_TIME: ", e);
+            handleException("Error while getting executor task LOCK_TIME: ", e);
         }
         return 0;
     }

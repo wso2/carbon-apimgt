@@ -265,12 +265,13 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                         }
                         apidto.setName(apidto.getName() + APIConstants.DELEM_UNDERSCORE + environment.getName());
                     }
-
+                    //if the discovered API is a new version, we need to create a new API version in the system
+                    API newAPI = null;
                     if (isNewVersion) {
                         String existingApiUUID = FederatedGatewayUtil.getAPIUUID(existingAPI, adminUsername,
                                 organization);
                         if (existingApiUUID != null) {
-                            FederatedGatewayUtil.createNewAPIVersion(existingApiUUID, apidto.getVersion(),
+                            newAPI = FederatedGatewayUtil.createNewAPIVersion(existingApiUUID, apidto.getVersion(),
                                     organization);
                             update = true;
                         }
@@ -288,14 +289,19 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
 
                     // Import API
-                    ImportedAPIDTO importedApi = importExportAPI.importAPI(apiZip,false,
+                    ImportedAPIDTO importedApi = importExportAPI.importAPI(apiZip, false,
                             true, update, true,
                             new String[]{APIConstants.APIM_PUBLISHER_SCOPE, APIConstants.APIM_CREATOR_SCOPE},
                             organization);
 
                     if (update) {
-                        APIUtil.updateApiExternalApiMapping(importedApi.getApi().getUuid(),
-                                environment.getUuid(), discoveredAPI.getReferenceArtifact());
+                        if (newAPI != null) {
+                            APIUtil.addApiExternalApiMapping(newAPI.getUuid(),
+                                    environment.getUuid(), discoveredAPI.getReferenceArtifact());
+                        } else {
+                            APIUtil.updateApiExternalApiMapping(importedApi.getApi().getUuid(),
+                                    environment.getUuid(), discoveredAPI.getReferenceArtifact());
+                        }
                     } else {
                         APIUtil.addApiExternalApiMapping(importedApi.getApi().getUuid(),
                                 environment.getUuid(), discoveredAPI.getReferenceArtifact());
@@ -471,8 +477,9 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
 
     /**
      * Get the reference object for an existing API.
+     *
      * @param environment The environment where the API is deployed.
-     * @param apiResult The API result object.
+     * @param apiResult   The API result object.
      * @return The reference object for the API.
      * @throws APIManagementException If an error occurs while retrieving the reference object.
      */
