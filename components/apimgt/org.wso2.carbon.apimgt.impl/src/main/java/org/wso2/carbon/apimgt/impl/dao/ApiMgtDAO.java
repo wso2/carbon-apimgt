@@ -26607,40 +26607,40 @@ public class ApiMgtDAO {
      */
     public void addAPIPrimaryEndpointMappings(API api) throws APIManagementException {
 
-        String apiUUID = api.getUuid();
-        if (log.isDebugEnabled()){
-            log.debug("Adding primary endpoint mappings for API " + apiUUID);
-        }
-
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            connection.setAutoCommit(false);
-            String addPrimaryEndpointMappingQuery = SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING;
-            try (PreparedStatement addPrimaryMapping = connection.prepareStatement(addPrimaryEndpointMappingQuery)) {
-                if (api.getPrimaryProductionEndpointId() != null) {
-                    addPrimaryMapping.setString(1, apiUUID);
-                    addPrimaryMapping.setString(2, api.getPrimaryProductionEndpointId());
-                    addPrimaryMapping.setString(3, APIConstants.API_REVISION_CURRENT_API);
-                    addPrimaryMapping.addBatch();
-                }
-                if (api.getPrimarySandboxEndpointId() != null) {
-                    addPrimaryMapping.setString(1, apiUUID);
-                    addPrimaryMapping.setString(2, api.getPrimarySandboxEndpointId());
-                    addPrimaryMapping.setString(3, APIConstants.API_REVISION_CURRENT_API);
-                    addPrimaryMapping.addBatch();
-                }
-                if (api.getPrimaryProductionEndpointId() != null || api.getPrimarySandboxEndpointId() != null) {
+        if (api.getPrimaryProductionEndpointId() != null || api.getPrimarySandboxEndpointId() != null) {
+            String apiUUID = api.getUuid();
+            if (log.isDebugEnabled()){
+                log.debug("Adding primary endpoint mappings for API: " + apiUUID);
+            }
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                connection.setAutoCommit(false);
+                String addPrimaryEndpointMappingQuery = SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING;
+                try (PreparedStatement addPrimaryMapping = connection.prepareStatement(addPrimaryEndpointMappingQuery)) {
+                    if (api.getPrimaryProductionEndpointId() != null) {
+                        addPrimaryMapping.setString(1, apiUUID);
+                        addPrimaryMapping.setString(2, api.getPrimaryProductionEndpointId());
+                        addPrimaryMapping.setString(3, APIConstants.API_REVISION_CURRENT_API);
+                        addPrimaryMapping.addBatch();
+                    }
+                    if (api.getPrimarySandboxEndpointId() != null) {
+                        addPrimaryMapping.setString(1, apiUUID);
+                        addPrimaryMapping.setString(2, api.getPrimarySandboxEndpointId());
+                        addPrimaryMapping.setString(3, APIConstants.API_REVISION_CURRENT_API);
+                        addPrimaryMapping.addBatch();
+                    }
                     addPrimaryMapping.executeBatch();
                     connection.commit();
                     if (log.isDebugEnabled()) {
                         log.debug("Successfully added primary endpoint mappings for API: " + apiUUID);
                     }
+                } catch (SQLException e) {
+                    connection.rollback();
+                    handleException("Error while adding primary endpoint mappings for API: " + apiUUID, e);
                 }
             } catch (SQLException e) {
-                connection.rollback();
-                handleException("Error while adding primary endpoint mappings for API : " + apiUUID, e);
+                handleException("Database connection error while adding primary endpoint mappings for API: " + apiUUID,
+                        e);
             }
-        } catch (SQLException e) {
-            handleException("Error while updating primary endpoint mappings for API : " + api.getUuid(), e);
         }
     }
 
