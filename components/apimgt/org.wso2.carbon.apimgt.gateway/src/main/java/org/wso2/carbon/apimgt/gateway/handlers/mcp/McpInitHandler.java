@@ -73,24 +73,23 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
             String path = (String) messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
             String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
 
+            String httpsPort = System.getProperty(APIMgtGatewayConstants.HTTPS_NIO_PORT);
+            if (!StringUtils.isEmpty(httpsPort)) {
+                messageContext.setProperty("uri.var.httpsPort", httpsPort);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("https.nio.port could not be resolved from System properties, hence default " +
+                            "value was set");
+                }
+                messageContext.setProperty("uri.var.httpsPort", "8243");
+            }
+
             if (StringUtils.startsWith(path, APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE) &&
                     StringUtils.equals(APIConstants.HTTP_GET, httpMethod)) {
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST, true);
             } else { //currently the only other mcp resource available is /mcp POST, it must have a jsonrpc payload
                 boolean isNoAuthMCPRequest = isNoAuthMCPRequest(buildMCPRequest(messageContext));
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST, isNoAuthMCPRequest);
-
-                String httpsPort = System.getProperty(APIMgtGatewayConstants.HTTPS_NIO_PORT);
-                if (!StringUtils.isEmpty(httpsPort)) {
-                    messageContext.setProperty(APIMgtGatewayConstants.HTTPS_NIO_PORT, httpsPort);
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("https.nio.port could not be resolved from System properties, hence default " +
-                                "value was set");
-                    }
-                    messageContext.setProperty(APIMgtGatewayConstants.HTTPS_NIO_PORT, "8243");
-                }
-
             }
         } catch (McpException e) {
             log.error("MCP init failed: " + String.valueOf(e.getData()), e);

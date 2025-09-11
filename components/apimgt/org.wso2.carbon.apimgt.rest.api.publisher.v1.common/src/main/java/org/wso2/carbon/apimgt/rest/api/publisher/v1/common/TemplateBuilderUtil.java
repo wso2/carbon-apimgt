@@ -102,7 +102,7 @@ public class TemplateBuilderUtil {
 
     private static final String ENDPOINT_PRODUCTION = "_PRODUCTION_";
     private static final String ENDPOINT_SANDBOX = "_SANDBOX_";
-    private static final String MCP_BACKEND_API_GATEWAY_URL = "https://localhost:{uri.var.gwHttpsPort}";
+    private static final String MCP_BACKEND_API_GATEWAY_URL = "https://localhost:{uri.var.httpsPort}";
 
     private static final Log log = LogFactory.getLog(TemplateBuilderUtil.class);
 
