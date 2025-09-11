@@ -81,7 +81,16 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST, isNoAuthMCPRequest);
 
                 String httpsPort = System.getProperty("https.nio.port");
-                messageContext.setProperty("https.nio.port", httpsPort);
+                if (!StringUtils.isEmpty(httpsPort)) {
+                    messageContext.setProperty("https.nio.port", httpsPort);
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("https.nio.port could not be resolved from System properties, hence default " +
+                                "value was set");
+                    }
+                    messageContext.setProperty("https.nio.port", "8243");
+                }
+
             }
         } catch (McpException e) {
             log.error("MCP init failed: " + String.valueOf(e.getData()), e);

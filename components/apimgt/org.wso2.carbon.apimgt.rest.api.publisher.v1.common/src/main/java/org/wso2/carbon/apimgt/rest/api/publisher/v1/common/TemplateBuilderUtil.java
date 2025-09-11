@@ -102,6 +102,7 @@ public class TemplateBuilderUtil {
 
     private static final String ENDPOINT_PRODUCTION = "_PRODUCTION_";
     private static final String ENDPOINT_SANDBOX = "_SANDBOX_";
+    private static final String MCP_BACKEND_API_GATEWAY_URL = "https://localhost:{uri.var.gwHttpsPort}";
 
     private static final Log log = LogFactory.getLog(TemplateBuilderUtil.class);
 
@@ -729,7 +730,7 @@ public class TemplateBuilderUtil {
 
                     //construct gw URL for reference API using the localhost gw HTTPS port and apiContext
                     StringBuilder endpoint = new StringBuilder();
-                    endpoint.append("https://localhost:{uri.var.gwHttpsPort}");
+                    endpoint.append(MCP_BACKEND_API_GATEWAY_URL);
                     Set<URITemplate> uriTemplateSet = api.getUriTemplates();
                     if (!uriTemplateSet.isEmpty()) {
                         URITemplate tempUri = (URITemplate) (uriTemplateSet.toArray()[0]);
@@ -738,6 +739,10 @@ public class TemplateBuilderUtil {
                             String refApiContext = apiOperationMapping.getApiContext();
                             endpoint.append(refApiContext);
                         }
+                    }
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("Constructed endpoint url for MCP reference API: " + endpoint.toString());
                     }
 
                     JsonObject urlObj = new JsonObject();
