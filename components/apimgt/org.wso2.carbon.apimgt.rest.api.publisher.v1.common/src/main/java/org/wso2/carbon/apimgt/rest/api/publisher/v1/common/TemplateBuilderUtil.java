@@ -728,7 +728,8 @@ public class TemplateBuilderUtil {
                         }
                     }
 
-                    //construct gw URL for reference API using the localhost gw HTTPS port and apiContext
+                    // construct gw URL for reference API using the localhost gw HTTPS port and apiContext
+                    // Here we assume that the MCP backend API always supports https at GW level
                     StringBuilder endpoint = new StringBuilder();
                     endpoint.append(MCP_BACKEND_API_GATEWAY_URL);
                     Set<URITemplate> uriTemplateSet = api.getUriTemplates();
