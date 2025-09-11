@@ -380,6 +380,10 @@ public class ExtensionListenerUtil {
                 Mediator extensionFaultSequence = messageContext.getSequence(APIConstants.EXTENSION_FAULT_SEQUENCE_NAME);
                 if (extensionFaultSequence != null) {
                     extensionFaultSequence.mediate(messageContext);
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Extension fault sequence not found: " + APIConstants.EXTENSION_FAULT_SEQUENCE_NAME);
+                    }
                 }
             }
             Utils.send(messageContext, extensionResponseDTO.getStatusCode());
