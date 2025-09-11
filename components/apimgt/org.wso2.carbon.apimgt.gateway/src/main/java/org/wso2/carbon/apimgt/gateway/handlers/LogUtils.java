@@ -170,6 +170,7 @@ class LogUtils {
                                 }
                             }
                         }
+                        break;
                     }
                 }
             }
