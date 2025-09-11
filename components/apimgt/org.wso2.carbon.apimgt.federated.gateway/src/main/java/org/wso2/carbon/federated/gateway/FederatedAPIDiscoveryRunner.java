@@ -255,6 +255,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
 
                     if (isPublishedAPIFromCP || (update &&
                             !discovery.isAPIUpdated(referenceArtifact, discoveredAPI.getReferenceArtifact()))) {
+                        discoveredAPIsFromFederatedGW.add(alreadyExistsWithEnvScope ? envScopedKey : apiKey);
                         continue;
                     }
                     // Adjust the name if needed
@@ -302,6 +303,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
 
                     // Track deployed
                     discoveredAPIsFromFederatedGW.add(alreadyExistsWithEnvScope ? envScopedKey : apiKey);
+
                     if (!update) {
                         alreadyDiscoveredAPIsList.add(apidto.getName() + APIConstants.DELEM_COLON
                                 + apidto.getVersion());
