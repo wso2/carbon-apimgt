@@ -733,7 +733,7 @@ public class TemplateBuilderUtil {
                     endpoint.append(MCP_BACKEND_API_GATEWAY_URL);
                     Set<URITemplate> uriTemplateSet = api.getUriTemplates();
                     if (!uriTemplateSet.isEmpty()) {
-                        URITemplate tempUri = (URITemplate) (uriTemplateSet.toArray()[0]);
+                        URITemplate tempUri = uriTemplateSet.iterator().next();
                         APIOperationMapping apiOperationMapping = tempUri.getAPIOperationMapping();
                         if (apiOperationMapping != null) {
                             String refApiContext = apiOperationMapping.getApiContext();
@@ -2176,18 +2176,6 @@ public class TemplateBuilderUtil {
             throw new APIManagementException("Error while deriving subscription endpoint from GraphQL API endpoint "
                     + "config: " + endpointConfig, e);
         }
-    }
-
-    private static String getEndpointURI(String[] uris, String scheme) {
-        if (uris == null || scheme == null) {
-            return null;
-        }
-        for (String uri : uris) {
-            if (uri != null && uri.startsWith(scheme)) {
-                return uri;
-            }
-        }
-        return null;
     }
 
 }
