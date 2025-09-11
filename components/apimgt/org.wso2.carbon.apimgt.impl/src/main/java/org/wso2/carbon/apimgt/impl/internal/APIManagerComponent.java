@@ -332,7 +332,9 @@ public class APIManagerComponent {
                     bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
                 }
             }
-            initializeAPIDiscoveryTasks(tenantDomain);
+            if (!configuration.isRuntimeReadOnly()) {
+                initializeAPIDiscoveryTasks(tenantDomain);
+            }
             bundleContext.registerService(ScopeValidator.class, new SystemScopesIssuer(), null);
             /* The service registration was moved to the end because the HTTP client configuration was not available
             with the previous placement, where the http client configuration was populated after registering the

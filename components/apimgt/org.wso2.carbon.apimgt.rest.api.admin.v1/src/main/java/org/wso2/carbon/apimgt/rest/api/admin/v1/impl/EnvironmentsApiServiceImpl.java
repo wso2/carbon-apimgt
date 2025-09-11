@@ -182,8 +182,9 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             GatewayVisibilityPermissionConfigurationDTO gatewayVisibilityPermissionConfigurationDTO =
                     env.getPermissions();
             validatePermissions(gatewayVisibilityPermissionConfigurationDTO);
-            EnvironmentDTO envDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(apiAdmin.addEnvironment(organization, env));
-            APIUtil.validateAndScheduleFederatedGatewayAPIDiscovery(env, organization, false);
+            Environment addedEnv = apiAdmin.addEnvironment(organization, env);
+            EnvironmentDTO envDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(addedEnv);
+            APIUtil.validateAndScheduleFederatedGatewayAPIDiscovery(addedEnv, organization, false);
             URI location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + envDTO.getId());
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.GATEWAY_ENVIRONMENTS, new Gson().toJson(envDTO),
                     APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());

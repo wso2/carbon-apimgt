@@ -987,6 +987,7 @@ public final class APIConstants {
     public static final String API_GATEWAY_PROVIDER = "Provider";
     public static final String API_GATEWAY_ADDITIONAL_PROPERTIES = "Properties";
     public static final String API_GATEWAY_ADDITIONAL_PROPERTY = "Property";
+    public static final String API_RUNTIME_READ_ONLY = "ReadOnly";
 
 
     public static final String CACHE_CONFIGS = "CacheConfigurations.";
