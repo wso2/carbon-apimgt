@@ -193,9 +193,8 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     + " in organization: " + organization);
         }
         try {
-            FederatedGatewayUtil.startTenantFlow(organization);
-            String adminUsername = APIUtil.getAdminUsername();
-
+            String adminUsername = APIUtil.getTenantAdminUserName(organization);
+            FederatedGatewayUtil.startTenantFlow(organization, adminUsername);
             Map<String, Map<String, ApiResult>> alreadyAvailableAPIs =
                     FederatedGatewayUtil.getDiscoveredAPIsFromFederatedGateway(environment, organization);
             List<String> discoveredAPIsFromFederatedGW = new ArrayList<>();
@@ -205,6 +204,9 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
 
             for (DiscoveredAPI discoveredAPI : apisToDeployInGatewayEnv) {
                 if (discoveredAPI == null) {
+                    if (debugLogEnabled) {
+                        log.debug("Discovered API is null. Skipping...");
+                    }
                     continue;
                 }
                 APIDTO apidto = fromAPItoDTO(discoveredAPI.getApi());
@@ -256,6 +258,10 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     if (isPublishedAPIFromCP || (update &&
                             !discovery.isAPIUpdated(referenceArtifact, discoveredAPI.getReferenceArtifact()))) {
                         discoveredAPIsFromFederatedGW.add(alreadyExistsWithEnvScope ? envScopedKey : apiKey);
+                        if (log.isDebugEnabled()) {
+                            log.debug("API: " + api.getId().getName() + " is already deployed in environment: "
+                                    + environment.getName() + " and new changes are not available. Skipping...");
+                        }
                         continue;
                     }
                     // Adjust the name if needed
@@ -451,7 +457,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
             } catch (Exception e) {
                 log.warn("Failed to extend TTL for task " + taskKey, e);
             }
-        }, ttlMilliseconds / 2, ttlMilliseconds / 2, TimeUnit.SECONDS);
+        }, ttlMilliseconds / 2, ttlMilliseconds / 2, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -485,6 +491,9 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
      */
     private String getReferenceObjectForExistingAPIs(Environment environment, ApiResult apiResult)
             throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving reference object for API ID: " + apiResult.getId());
+        }
         return APIUtil.getApiExternalApiMappingReferenceByApiId(apiResult.getId(), environment.getUuid());
     }
 }

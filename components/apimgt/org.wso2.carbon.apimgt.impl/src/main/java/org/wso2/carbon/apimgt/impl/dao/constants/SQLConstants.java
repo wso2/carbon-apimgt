@@ -2743,7 +2743,7 @@ public class SQLConstants {
                     "  ON R.REVISION_UUID = M.REVISION_UUID " +
                     "JOIN AM_API A " +
                     "  ON A.API_UUID = R.API_UUID " +
-                    "WHERE M.NAME = ? and A.ORGANIZATION = ? and A.INITIATED_FROM_GW = ?;";
+                    "WHERE M.NAME = ? and A.ORGANIZATION = ? and A.INITIATED_FROM_GW = ?";
 
     public static final String UPDATE_APPLICATION_POLICY_STATUS_SQL =
             "UPDATE AM_POLICY_APPLICATION SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";

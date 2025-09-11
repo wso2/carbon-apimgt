@@ -67,13 +67,18 @@ public class FederatedGatewayUtil {
     /**
      * Initializes tenant flow using current organization context.
      */
-    public static void startTenantFlow(String organization) throws APIManagementException {
+    public static void startTenantFlow(String organization, String adminUsername) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Starting tenant flow for organization: " + organization);
+        }
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext context = PrivilegedCarbonContext.getThreadLocalCarbonContext();
         context.setTenantDomain(organization);
-        String adminUsername = APIUtil.getTenantAdminUserName(organization);
         context.setUsername(adminUsername);
         context.setTenantId(APIUtil.getTenantId(adminUsername));
+        if (log.isDebugEnabled()) {
+            log.debug("Started tenant flow for organization: " + organization);
+        }
     }
 
     public static void deleteDeployment(String apiUUID, String organization, Environment environment) {
@@ -90,7 +95,7 @@ public class FederatedGatewayUtil {
 
     public static API createNewAPIVersion(String apiUUID, String newVersion, String organization)
             throws APIManagementException {
-        if (Objects.isNull(newVersion)) {
+        if (Objects.isNull(newVersion) || newVersion.trim().isEmpty() ) {
             throw new APIManagementException("Invalid new API version format: " + newVersion + " for API: " + apiUUID);
         }
         APIProvider provider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
@@ -184,7 +189,10 @@ public class FederatedGatewayUtil {
      */
     public static Map<String, Map<String, ApiResult>> getDiscoveredAPIsFromFederatedGateway(
             Environment environment, String organization) throws APIManagementException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving discovered and published APIs from environment: " + environment.getName()
+                    + " in organization: " + organization);
+        }
         Map<String, Map<String, ApiResult>> apisDeployedInGateway = new HashMap<>();
 
         apisDeployedInGateway.put(DISCOVERED_API_LIST,
