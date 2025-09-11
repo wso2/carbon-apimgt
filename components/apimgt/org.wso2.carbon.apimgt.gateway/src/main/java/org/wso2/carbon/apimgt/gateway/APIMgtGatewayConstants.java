@@ -74,6 +74,8 @@ public class APIMgtGatewayConstants {
     public static final String AM_CORRELATION_ID = "am.correlationID";
     public static final String REFERER = "Referer";
 
+    public static final String HTTPS_NIO_PORT = "https.nio.port";
+
     /**
      * Constants for regex protector.
      */

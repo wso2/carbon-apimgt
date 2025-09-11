@@ -80,15 +80,15 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                 boolean isNoAuthMCPRequest = isNoAuthMCPRequest(buildMCPRequest(messageContext));
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST, isNoAuthMCPRequest);
 
-                String httpsPort = System.getProperty("https.nio.port");
+                String httpsPort = System.getProperty(APIMgtGatewayConstants.HTTPS_NIO_PORT);
                 if (!StringUtils.isEmpty(httpsPort)) {
-                    messageContext.setProperty("https.nio.port", httpsPort);
+                    messageContext.setProperty(APIMgtGatewayConstants.HTTPS_NIO_PORT, httpsPort);
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug("https.nio.port could not be resolved from System properties, hence default " +
                                 "value was set");
                     }
-                    messageContext.setProperty("https.nio.port", "8243");
+                    messageContext.setProperty(APIMgtGatewayConstants.HTTPS_NIO_PORT, "8243");
                 }
 
             }
