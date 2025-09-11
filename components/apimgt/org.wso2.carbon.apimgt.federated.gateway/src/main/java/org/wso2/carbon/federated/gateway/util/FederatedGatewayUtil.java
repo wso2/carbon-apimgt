@@ -193,7 +193,7 @@ public class FederatedGatewayUtil {
             log.debug("Retrieving discovered and published APIs from environment: " + environment.getName()
                     + " in organization: " + organization);
         }
-        Map<String, Map<String, ApiResult>> apisDeployedInGateway = new HashMap<>();
+        Map<String, Map<String, ApiResult>> apisDeployedInGateway = new HashMap<>(2);
 
         apisDeployedInGateway.put(DISCOVERED_API_LIST,
                 buildApiMap(APIUtil.getAPIsDeployedInGatewayEnvironmentByOrg(environment.getName(), organization, true)));

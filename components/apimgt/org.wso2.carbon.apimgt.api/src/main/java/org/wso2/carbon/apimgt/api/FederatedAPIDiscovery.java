@@ -46,6 +46,6 @@ public interface FederatedAPIDiscovery {
     List<DiscoveredAPI> discoverAPI();
 
     default boolean isAPIUpdated(String existingReferenceArtifact, String newReferenceArtifact) {
-        return true;
+        return !java.util.Objects.equals(existingReferenceArtifact, newReferenceArtifact);
     }
 }
