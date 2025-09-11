@@ -26875,6 +26875,43 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Retrieves a list of APIs deployed in a specified gateway environment for a given organization.
+     *
+     * @param environmentName the name of the gateway environment in which the APIs are deployed
+     * @param organization the organization under which the APIs are managed
+     * @param isInitiatedFromGateway whether to retrieve APIs discovered from the gateway (true) or from CP (false)
+     * @return a list of {@code ApiResult} objects containing details of the deployed APIs
+     * @throws APIManagementException if an error occurs while retrieving the APIs from the database
+     */
+    public List<ApiResult> getAPIsDeployedInGatewayEnvironmentByOrg(String environmentName, String organization,
+                                                                    boolean isInitiatedFromGateway)
+            throws APIManagementException {
+        List<ApiResult> apiResults = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection
+                    .prepareStatement(SQLConstants.GET_API_DETAILS_DEPLOYED_IN_ENVIRONMENT)) {
+                preparedStatement.setString(1, environmentName);
+                preparedStatement.setString(2, organization);
+                preparedStatement.setInt(3, isInitiatedFromGateway ? 1 : 0);
+                try (ResultSet rs = preparedStatement.executeQuery()) {
+                    while (rs.next()) {
+                        ApiResult apiResult = new ApiResult();
+                        apiResult.setId(rs.getString("API_UUID"));
+                        apiResult.setName(rs.getString("API_NAME"));
+                        apiResult.setVersion(rs.getString("API_VERSION"));
+                        apiResult.setProvider(rs.getString("API_PROVIDER"));
+                        apiResult.setType(rs.getString("API_TYPE"));
+                        apiResults.add(apiResult);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving apis for the organization " + organization, e);
+        }
+        return apiResults;
+    }
+
+    /**
      * Finds a matching {@link URITemplate} from the given set based on the specified URI template and HTTP verb.
      *
      * @param templates   the set of {@link URITemplate} objects to search

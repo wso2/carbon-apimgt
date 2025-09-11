@@ -126,7 +126,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         try {
         this.validatePermissions(gatewayVisibilityPermissionConfigurationDTO);
         apiAdmin.updateEnvironment(organization, env);
-        APIUtil.validateAndScheduleFederatedGatewayAPIDiscovery(env, organization, true);
+        APIUtil.validateAndScheduleFederatedGatewayAPIDiscovery(env, organization);
         location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + environmentId);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while updating Environment : " + environmentId;
@@ -184,7 +184,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             validatePermissions(gatewayVisibilityPermissionConfigurationDTO);
             Environment addedEnv = apiAdmin.addEnvironment(organization, env);
             EnvironmentDTO envDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(addedEnv);
-            APIUtil.validateAndScheduleFederatedGatewayAPIDiscovery(addedEnv, organization, false);
+            APIUtil.validateAndScheduleFederatedGatewayAPIDiscovery(addedEnv, organization);
             URI location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + envDTO.getId());
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.GATEWAY_ENVIRONMENTS, new Gson().toJson(envDTO),
                     APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());

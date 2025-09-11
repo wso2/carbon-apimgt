@@ -24,12 +24,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
-import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -46,6 +44,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -70,7 +70,7 @@ public class FederatedGatewayUtil {
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext context = PrivilegedCarbonContext.getThreadLocalCarbonContext();
         context.setTenantDomain(organization);
-        String adminUsername = APIUtil.getAdminUsername();
+        String adminUsername = APIUtil.getTenantAdminUserName(organization);
         context.setUsername(adminUsername);
         context.setTenantId(APIUtil.getTenantId(adminUsername));
     }
@@ -145,6 +145,15 @@ public class FederatedGatewayUtil {
         return yaml.dump(yamlRoot);
     }
 
+    /**
+     * Retrieves the UUID of an API based on its name, the admin username, and the organization.
+     *
+     * @param apiName       The name of the API in the format "APIName:APIVersion".
+     * @param adminUsername The username of the admin who owns the API.
+     * @param organization  The name of the organization to which the API belongs.
+     * @return The UUID of the API as a String.
+     * @throws APIManagementException If the API name format is invalid or an error occurs while retrieving the UUID.
+     */
     public static String getAPIUUID(String apiName, String adminUsername, String organization)
             throws APIManagementException {
         String[] parts = apiName.split(DELEM_COLON, apiName.lastIndexOf(DELEM_COLON));
@@ -160,27 +169,47 @@ public class FederatedGatewayUtil {
         return uuid;
     }
 
-    public static Map<String, List<String>> getDiscoveredAPIsFromFederatedGateway(Environment environment,
-                                                                                  String organization,
-                                                                                  String providerName)
-            throws APIManagementException {
-        GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
-        Map<String, List<String>> apisDeployedInGateway = new HashMap<>();
-        List<String> discoveredAPIs = new ArrayList<>();
-        List<String> publishedAPIs = new ArrayList<>();
-        APIProvider provider = APIManagerFactory.getInstance().getAPIProvider(providerName);
-        List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = gatewayArtifactsMgtDAO
-                .retrieveGatewayArtifactsByLabel(new String[]{environment.getName()}, organization);
-        for (APIRuntimeArtifactDto apiRuntimeArtifactDto : apiRuntimeArtifactDtoList) {
-            API api = provider.getAPIbyUUID(apiRuntimeArtifactDto.getApiId(), organization);
-            if (api != null && !api.isInitiatedFromGateway()) {
-                publishedAPIs.add(apiRuntimeArtifactDto.getName() + ":" + apiRuntimeArtifactDto.getVersion());
-            } else {
-                discoveredAPIs.add(apiRuntimeArtifactDto.getName() + ":" + apiRuntimeArtifactDto.getVersion());
-            }
-        }
-        apisDeployedInGateway.put(DISCOVERED_API_LIST, discoveredAPIs);
-        apisDeployedInGateway.put(PUBLISHED_API_LIST, publishedAPIs);
+    /**
+     * Retrieves a map of discovered and published APIs from a specified federated gateway environment
+     * for the given organization.
+     *
+     * @param environment The federated gateway environment from which the API data should be retrieved.
+     * @param organization The organization for which the API data is to be retrieved.
+     * @return A map containing two entries:
+     *         - "DISCOVERED_API_LIST" mapped to a map of discovered APIs.
+     *         - "PUBLISHED_API_LIST" mapped to a map of published APIs.
+     *         Each inner map is structured as a mapping of API identifiers to their corresponding {@code ApiResult} objects.
+     * @throws APIManagementException If an error occurs while fetching the API data from the gateway.
+     */
+    public static Map<String, Map<String, ApiResult>> getDiscoveredAPIsFromFederatedGateway(
+            Environment environment, String organization) throws APIManagementException {
+
+        Map<String, Map<String, ApiResult>> apisDeployedInGateway = new HashMap<>();
+
+        apisDeployedInGateway.put(DISCOVERED_API_LIST,
+                buildApiMap(APIUtil.getAPIsDeployedInGatewayEnvironmentByOrg(environment.getName(), organization, true)));
+
+        apisDeployedInGateway.put(PUBLISHED_API_LIST,
+                buildApiMap(APIUtil.getAPIsDeployedInGatewayEnvironmentByOrg(environment.getName(), organization, false)));
+
         return apisDeployedInGateway;
     }
+
+    /**
+     * Builds a map of API identifiers to their corresponding {@code ApiResult} objects
+     * from the provided list of {@code ApiResult}.
+     * The API identifier is constructed as a combination of the API's name and version
+     * separated by a colon delimiter.
+     *
+     * @param apiResults A list of {@code ApiResult} objects from which the map is to be created.
+     * @return A map with keys as concatenated API identifiers (name + ":" + version)
+     *         and values as the corresponding {@code ApiResult} objects.
+     */
+    private static Map<String, ApiResult> buildApiMap(List<ApiResult> apiResults) {
+        return apiResults.stream()
+                .collect(Collectors.toMap(
+                        api -> api.getName() + DELEM_COLON + api.getVersion(),
+                        Function.identity()));
+    }
+
 }

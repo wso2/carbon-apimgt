@@ -45,7 +45,7 @@ public interface FederatedAPIDiscovery {
      */
     List<DiscoveredAPI> discoverAPI();
 
-    default boolean isAPIUpdated(Object existingReferenceArtifact, Object newReferenceArtifact) {
+    default boolean isAPIUpdated(String existingReferenceArtifact, String newReferenceArtifact) {
         return true;
     }
 }

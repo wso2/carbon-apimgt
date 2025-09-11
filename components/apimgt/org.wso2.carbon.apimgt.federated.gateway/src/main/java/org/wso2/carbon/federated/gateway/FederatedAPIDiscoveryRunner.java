@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.api.FederatedAPIDiscovery;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.dto.ImportedAPIDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayMode;
@@ -195,11 +196,12 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
             FederatedGatewayUtil.startTenantFlow(organization);
             String adminUsername = APIUtil.getAdminUsername();
 
-            Map<String, List<String>> alreadyAvailableAPIs =
-                    FederatedGatewayUtil.getDiscoveredAPIsFromFederatedGateway(environment, organization,
-                            adminUsername);
+            Map<String, Map<String, ApiResult>> alreadyAvailableAPIs =
+                    FederatedGatewayUtil.getDiscoveredAPIsFromFederatedGateway(environment, organization);
             List<String> discoveredAPIsFromFederatedGW = new ArrayList<>();
-            List<String> alreadyDiscoveredAPIsList = alreadyAvailableAPIs.get(DISCOVERED_API_LIST);
+            Map<String, ApiResult> alreadyDiscoveredAPIMap = alreadyAvailableAPIs.get(DISCOVERED_API_LIST);
+
+            List<String> alreadyDiscoveredAPIsList = new ArrayList<>(alreadyDiscoveredAPIMap.keySet());
 
             for (DiscoveredAPI discoveredAPI : apisToDeployInGatewayEnv) {
                 if (discoveredAPI == null) {
@@ -215,8 +217,8 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     // Determine import mode
                     boolean isNewVersion = false;
                     String existingAPI = null;
-                    boolean isPublishedAPIFromCP = alreadyAvailableAPIs.get(PUBLISHED_API_LIST).contains(apiKey) ||
-                            alreadyAvailableAPIs.get(PUBLISHED_API_LIST).contains(envScopedKey);
+                    boolean isPublishedAPIFromCP = alreadyAvailableAPIs.get(PUBLISHED_API_LIST).containsKey(apiKey) ||
+                            alreadyAvailableAPIs.get(PUBLISHED_API_LIST).containsKey(envScopedKey);
                     boolean update = alreadyDiscoveredAPIsList.contains(apiKey) ||
                             alreadyDiscoveredAPIsList.contains(envScopedKey);
                     boolean alreadyExistsWithEnvScope = alreadyDiscoveredAPIsList.contains(envScopedKey);
@@ -242,8 +244,17 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                         existingAPI = existingApiOpt.orElse(null);
                     }
 
-                    if (isPublishedAPIFromCP || ((update || alreadyExistsWithEnvScope)
-                            && !discovery.isAPIUpdated(discoveredAPI, apidto))) {
+                    String referenceArtifact = null;
+                    if (alreadyExistsWithEnvScope) {
+                        referenceArtifact = getReferenceObjectForExistingAPIs(environment,
+                                alreadyDiscoveredAPIMap.get(envScopedKey));
+                    } else if (update) {
+                        referenceArtifact = getReferenceObjectForExistingAPIs(environment,
+                                alreadyDiscoveredAPIMap.get(apiKey));
+                    }
+
+                    if (isPublishedAPIFromCP || (update &&
+                            !discovery.isAPIUpdated(referenceArtifact, discoveredAPI.getReferenceArtifact()))) {
                         continue;
                     }
                     // Adjust the name if needed
@@ -276,7 +287,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
 
                     // Import API
-                    ImportedAPIDTO importedApi = importExportAPI.importAPI(apiZip,true,
+                    ImportedAPIDTO importedApi = importExportAPI.importAPI(apiZip,false,
                             true, update, true,
                             new String[]{APIConstants.APIM_PUBLISHER_SCOPE, APIConstants.APIM_CREATOR_SCOPE},
                             organization);
@@ -454,5 +465,17 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
         } catch (APIManagementException e) {
             log.error("Error while deleting executor task for " + taskKey, e);
         }
+    }
+
+    /**
+     * Get the reference object for an existing API.
+     * @param environment The environment where the API is deployed.
+     * @param apiResult The API result object.
+     * @return The reference object for the API.
+     * @throws APIManagementException If an error occurs while retrieving the reference object.
+     */
+    private String getReferenceObjectForExistingAPIs(Environment environment, ApiResult apiResult)
+            throws APIManagementException {
+        return APIUtil.getApiExternalApiMappingReferenceByApiId(apiResult.getId(), environment.getUuid());
     }
 }
