@@ -79,6 +79,9 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
             } else { //currently the only other mcp resource available is /mcp POST, it must have a jsonrpc payload
                 boolean isNoAuthMCPRequest = isNoAuthMCPRequest(buildMCPRequest(messageContext));
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST, isNoAuthMCPRequest);
+
+                String httpsPort = System.getProperty("https.nio.port");
+                messageContext.setProperty("https.nio.port", httpsPort);
             }
         } catch (McpException e) {
             log.error("MCP init failed: " + String.valueOf(e.getData()), e);

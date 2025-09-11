@@ -727,39 +727,27 @@ public class TemplateBuilderUtil {
                         }
                     }
 
-                    String endpointsString = environment.getApiGatewayEndpoint();
-                    if (!StringUtils.isEmpty(endpointsString)) {
-                        String[] gwEndpoints = endpointsString.split(",");
-
-                        StringBuilder endpoint = new StringBuilder();
-                        String httpsURI = getEndpointURI(gwEndpoints, APIConstants.HTTPS_TRANSPORT_PROTOCOL_NAME);
-                        if (!StringUtils.isEmpty(httpsURI)) {
-                            endpoint.append(httpsURI);
-                        } else {
-                            String httpURI = getEndpointURI(gwEndpoints, APIConstants.HTTP_TRANSPORT_PROTOCOL_NAME);
-                            endpoint.append(httpURI);
+                    //construct gw URL for reference API using the localhost gw HTTPS port and apiContext
+                    StringBuilder endpoint = new StringBuilder();
+                    endpoint.append("https://localhost:{uri.var.gwHttpsPort}");
+                    Set<URITemplate> uriTemplateSet = api.getUriTemplates();
+                    if (!uriTemplateSet.isEmpty()) {
+                        URITemplate tempUri = (URITemplate) (uriTemplateSet.toArray()[0]);
+                        APIOperationMapping apiOperationMapping = tempUri.getAPIOperationMapping();
+                        if (apiOperationMapping != null) {
+                            String refApiContext = apiOperationMapping.getApiContext();
+                            endpoint.append(refApiContext);
                         }
-
-                        //construct gw URL for reference API
-                        Set<URITemplate> uriTemplateSet = api.getUriTemplates();
-                        if (!uriTemplateSet.isEmpty()) {
-                            URITemplate tempUri = (URITemplate) (uriTemplateSet.toArray()[0]);
-                            APIOperationMapping apiOperationMapping = tempUri.getAPIOperationMapping();
-                            if (apiOperationMapping != null) {
-                                String refApiContext = apiOperationMapping.getApiContext();
-                                endpoint.append(refApiContext);
-                            }
-                        }
-
-                        JsonObject urlObj = new JsonObject();
-                        urlObj.addProperty("url", endpoint.toString());
-                        JsonObject endpointConfig = new JsonObject();
-                        endpointConfig.addProperty(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
-                        endpointConfig.add(APIConstants.APIEndpoint.ENDPOINT_CONFIG_SANDBOX_ENDPOINTS, urlObj);
-                        endpointConfig.add(APIConstants.APIEndpoint.ENDPOINT_CONFIG_PRODUCTION_ENDPOINTS, urlObj);
-
-                        api.setEndpointConfig(endpointConfig.toString());
                     }
+
+                    JsonObject urlObj = new JsonObject();
+                    urlObj.addProperty("url", endpoint.toString());
+                    JsonObject endpointConfig = new JsonObject();
+                    endpointConfig.addProperty(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+                    endpointConfig.add(APIConstants.APIEndpoint.ENDPOINT_CONFIG_SANDBOX_ENDPOINTS, urlObj);
+                    endpointConfig.add(APIConstants.APIEndpoint.ENDPOINT_CONFIG_PRODUCTION_ENDPOINTS, urlObj);
+
+                    api.setEndpointConfig(endpointConfig.toString());
                 }
                 api.setUriTemplates(uriTemplates);
             }
