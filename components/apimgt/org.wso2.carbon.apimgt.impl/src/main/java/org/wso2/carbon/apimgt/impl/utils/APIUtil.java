@@ -3596,7 +3596,8 @@ public final class APIUtil {
     }
 
     private static void processExternalGatewayFeatureCatalogs(Map<String, Object> gatewayConfigsMap,
-                                                              Map<String, List<String>> apiData, GatewayAgentConfiguration gatewayConfiguration) {
+                                                              Map<String, List<String>> apiData,
+                                                              GatewayAgentConfiguration gatewayConfiguration) {
 
         GatewayPortalConfiguration config = null;
         try {
