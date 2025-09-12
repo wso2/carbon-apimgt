@@ -930,7 +930,7 @@ public class JWTValidator {
                 getGatewayTokenCache().remove(tokenIdentifier);
                 getGatewayJWTTokenCache().remove(tokenIdentifier);
                 final String mcpInternalTokenCacheKey = tokenIdentifier + ":" + APIConstants.API_TYPE_MCP;
-                getGatewayJWTTokenCache().remove(mcpInternalTokenCacheKey);
+                getGatewayTokenCache().remove(mcpInternalTokenCacheKey);
                 getInvalidTokenCache().put(tokenIdentifier, tenantDomain);
             }
             payload.setValid(false);

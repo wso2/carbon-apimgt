@@ -1083,7 +1083,7 @@ public class APIKeyValidatorTestCase {
             Mockito.verify(keyCache, Mockito.times(0)).put(Mockito.any(APIKeyValidationInfoDTO.class), Mockito
                     .anyString());
             Mockito.verify(invalidTokenCache, Mockito.times(1)).put(Mockito.anyString(), Mockito.anyString());
-            Mockito.verify(tokenCache, Mockito.times(1)).remove(Mockito.anyString());
+            Mockito.verify(tokenCache, Mockito.times(2)).remove(Mockito.anyString());
             Mockito.verify(invalidTokenCache, Mockito.times(0)).remove(Mockito.anyString());
             Mockito.verify(keyCache, Mockito.times(1)).remove(Mockito.anyString());
             Mockito.verify(apiKeyDataStore, Mockito.times(0)).getAPIKeyData(context, apiVersion, apiKey,
