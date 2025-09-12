@@ -135,6 +135,9 @@ public class AnalyticsDataPublisher {
                         }
                         metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configs);
                         metricReporters.add(metricReporter);
+                    } else if (type.equals(Constants.MOESIF_REPORTER_NAME)) {
+                        metricReporter = MetricReporterFactory.getInstance().createMoesifMetricReporter(configs);
+                        metricReporters.add(metricReporter);
                     } else {
                         metricReporter = MetricReporterFactory.getInstance().createLogMetricReporter(configs);
                         metricReporters.add(metricReporter);

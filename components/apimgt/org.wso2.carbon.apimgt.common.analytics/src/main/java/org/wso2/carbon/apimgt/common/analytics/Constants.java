@@ -41,4 +41,5 @@ public class Constants {
     public static final String AUTH_API_URL = "auth.api.url";
 
     public static final String CHOREO_REPORTER_NAME = "choreo";
+    public static final String MOESIF_REPORTER_NAME = "moesif";
 }
