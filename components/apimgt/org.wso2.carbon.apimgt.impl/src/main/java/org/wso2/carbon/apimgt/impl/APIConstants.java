@@ -1084,6 +1084,9 @@ public final class APIConstants {
     public static final String API_RESTAPI_ETAG_SKIP_URI = API_RESTAPI_ETAG_SKIP_LIST + "ETagSkipURI.";
     public static final String API_RESTAPI_ETAG_SKIP_URI_URI = API_RESTAPI_ETAG_SKIP_URI + "URI";
     public static final String API_RESTAPI_ETAG_SKIP_URI_HTTPMETHOD = API_RESTAPI_ETAG_SKIP_URI + "HTTPMethods";
+    public static final String API_RESTAPI_ADMIN_PERMISSION_RESTRICTED = API_RESTAPI + "AdminPermissionRestrictedAPIs.AdminPermissionRestrictedAPI.";
+    public static final String API_RESTAPI_ADMIN_PERMISSION_RESTRICTED_URI = API_RESTAPI_ADMIN_PERMISSION_RESTRICTED + "URI";
+    public static final String API_RESTAPI_ADMIN_PERMISSION_RESTRICTED_HTTPMethods = API_RESTAPI_ADMIN_PERMISSION_RESTRICTED + "HTTPMethods";
 
     public static final String JWT_EXPIRY_TIME = API_KEY_VALIDATOR + "JWTExpiryTime";
     public static final String JWT_AUDIENCES = "JWTAudiences";
