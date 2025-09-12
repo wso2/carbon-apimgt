@@ -18,9 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.api;
-
-import org.wso2.carbon.apimgt.api.model.API;
+package org.wso2.carbon.apimgt.api.model;
 
 /**
  * This class represents a discovered API.
