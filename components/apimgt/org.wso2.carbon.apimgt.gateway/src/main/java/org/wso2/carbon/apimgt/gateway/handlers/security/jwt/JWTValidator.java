@@ -68,7 +68,6 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import java.security.cert.Certificate;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -92,6 +91,7 @@ public class JWTValidator {
     ExtendedJWTConfigurationDto jwtConfigurationDto;
     JWTValidationService jwtValidationService;
     private static volatile long ttl = -1L;
+    private static Long mcpInternalTokenExpiryTime;
 
     public JWTValidator(APIKeyValidator apiKeyValidator, String tenantDomain) throws APIManagementException {
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -363,11 +363,10 @@ public class JWTValidator {
                             jwtInfoDto = GatewayUtils.generateJWTInfoDto(null, jwtValidationInfo,
                                     apiKeyValidationInfoDTO, synCtx);
                         }
-                        final String jwtTokenCacheKey = jwtInfoDto.getApiContext() + ":" + jwtInfoDto.getVersion()
-                                + ":" + jwtTokenIdentifier + ":" + APIConstants.API_TYPE_MCP;
+                        final String jwtTokenCacheKey = jwtTokenIdentifier + ":" + APIConstants.API_TYPE_MCP;
                         String internalToken = null;
                         if (isGatewayTokenCacheEnabled) {
-                            Object cachedTokenObj = getGatewayJWTTokenCache().get(jwtTokenCacheKey);
+                            Object cachedTokenObj = getGatewayTokenCache().get(jwtTokenCacheKey);
                             if (cachedTokenObj instanceof String) {
                                 String cachedToken = (String) cachedTokenObj;
                                 long tsSkewMs = getTimeStampSkewInSeconds() * 1000;
@@ -381,7 +380,7 @@ public class JWTValidator {
                                         log.debug("Cached MCP upstream token for key: " + jwtTokenCacheKey
                                                 + " expired, removing from cache");
                                     }
-                                    getGatewayJWTTokenCache().remove(jwtTokenCacheKey);
+                                    getGatewayTokenCache().remove(jwtTokenCacheKey);
                                 }
                             }
                         }
@@ -396,7 +395,7 @@ public class JWTValidator {
                                         log.debug("Caching generated MCP upstream token with key: "
                                                 + jwtTokenCacheKey);
                                     }
-                                    getGatewayJWTTokenCache().put(jwtTokenCacheKey, internalToken);
+                                    getGatewayTokenCache().put(jwtTokenCacheKey, internalToken);
                                 }
                             } catch (APIManagementException e) {
                                 log.error("Error while generating MCP upstream token", e);
@@ -454,7 +453,10 @@ public class JWTValidator {
         JwtTokenInfoDTO dto = new JwtTokenInfoDTO();
         dto.setEndUserName(jwtInfoDto.getEndUser());
         dto.setKeyType(jwtInfoDto.getKeyType());
-        dto.setExpirationTime(APIMgtGatewayConstants.MCP_AUTH_TOKEN_EXPIRATION_TIME);
+        if (mcpInternalTokenExpiryTime == null) {
+            mcpInternalTokenExpiryTime = getMcpInternalTokenExpiryTime();
+        }
+        dto.setExpirationTime(mcpInternalTokenExpiryTime);
 
         Map<String, String> custom = new HashMap<>();
         custom.putAll(getUserClaimsFromKeyManager(jwtInfoDto));
@@ -927,6 +929,8 @@ public class JWTValidator {
             if (isGatewayTokenCacheEnabled) {
                 getGatewayTokenCache().remove(tokenIdentifier);
                 getGatewayJWTTokenCache().remove(tokenIdentifier);
+                final String mcpInternalTokenCacheKey = tokenIdentifier + ":" + APIConstants.API_TYPE_MCP;
+                getGatewayJWTTokenCache().remove(mcpInternalTokenCacheKey);
                 getInvalidTokenCache().put(tokenIdentifier, tenantDomain);
             }
             payload.setValid(false);
@@ -1106,5 +1110,38 @@ public class JWTValidator {
      */
     private boolean isCNFValidationDisabled(Boolean disableCNFValidation, boolean defaultVal) {
         return JavaUtils.isTrueExplicitly(disableCNFValidation, defaultVal);
+    }
+
+    /**
+     * Get MCP internal token expiry time with buffer time
+     *
+     * @return MCP internal token expiry time in seconds
+     */
+    private Long getMcpInternalTokenExpiryTime() {
+
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        if (apiManagerConfiguration != null) {
+            String tokenCacheExpiryTime = apiManagerConfiguration.getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+            if (StringUtils.isNotEmpty(tokenCacheExpiryTime)) {
+                try {
+                    return applyMcpInternalTokenBuffer(Long.parseLong(tokenCacheExpiryTime));
+                } catch (NumberFormatException e) {
+                    log.warn("Error while parsing the MCP internal token expiry time. Falling back to default "
+                            + APIConstants.DEFAULT_TIMEOUT);
+                    return applyMcpInternalTokenBuffer(APIConstants.DEFAULT_TIMEOUT);
+                }
+            }
+        }
+        return applyMcpInternalTokenBuffer(APIConstants.DEFAULT_TIMEOUT);
+    }
+
+    /**
+     * Add buffer time to the MCP internal token expiry time to avoid edge cases
+     * where the token is expired by the time it reaches MCP.
+     */
+    private Long applyMcpInternalTokenBuffer(Long mcpAuthTokenExpirationTime) {
+
+        return mcpAuthTokenExpirationTime + APIMgtGatewayConstants.MCP_AUTH_TOKEN_EXPIRATION_BUFFER_TIME;
     }
 }
