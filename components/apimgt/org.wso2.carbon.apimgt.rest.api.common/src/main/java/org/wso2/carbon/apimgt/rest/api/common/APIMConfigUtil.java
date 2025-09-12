@@ -17,6 +17,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.common;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.rest.api.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
@@ -27,6 +29,7 @@ import java.util.Map;
 
 public class APIMConfigUtil {
 
+    private static final Log log = LogFactory.getLog(APIMConfigUtil.class);
     private static APIManagerConfiguration configuration = getApiManagerConfiguration();
 
     /**
@@ -34,7 +37,18 @@ public class APIMConfigUtil {
      * @return List of Audiences with basepath
      */
     public static Map<String, List<String>> getRestApiJWTAuthAudiences() {
-        return configuration.getRestApiJWTAuthAudiences();
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving REST API JWT authentication audiences from configuration");
+        }
+        if (configuration == null) {
+            log.warn("API Manager configuration is null when retrieving JWT auth audiences");
+            return null;
+        }
+        Map<String, List<String>> audiences = configuration.getRestApiJWTAuthAudiences();
+        if (audiences == null) {
+            log.warn("JWT auth audiences configuration is null");
+        }
+        return audiences;
     }
 
     /**
@@ -42,6 +56,17 @@ public class APIMConfigUtil {
      * @return Map<issuer, tokenIssuerDto>
      */
     public static Map<String, TokenIssuerDto> getTokenIssuerMap() {
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving token issuer map from JWT configuration");
+        }
+        if (configuration == null) {
+            log.warn("API Manager configuration is null when retrieving token issuer map");
+            return null;
+        }
+        if (configuration.getJwtConfigurationDto() == null) {
+            log.warn("JWT configuration DTO is null when retrieving token issuer map");
+            return null;
+        }
         return configuration.getJwtConfigurationDto().getTokenIssuerDtoMap();
     }
 
@@ -49,10 +74,26 @@ public class APIMConfigUtil {
      * @return APIManagerConfiguration
      */
     private static APIManagerConfiguration getApiManagerConfiguration() {
-        return ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving API Manager configuration from service reference holder");
+        }
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+        if (config == null) {
+            log.error("Failed to retrieve API Manager configuration from service reference holder");
+        } else {
+            log.info("Successfully retrieved API Manager configuration");
+        }
+        return config;
     }
 
     public static  Map<String, JWTValidator> getJWTValidatorMap (){
-        return ServiceReferenceHolder.getInstance().getJwtValidatorMap();
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving JWT validator map from service reference holder");
+        }
+        Map<String, JWTValidator> validatorMap = ServiceReferenceHolder.getInstance().getJwtValidatorMap();
+        if (validatorMap == null) {
+            log.warn("JWT validator map is null from service reference holder");
+        }
+        return validatorMap;
     }
 }

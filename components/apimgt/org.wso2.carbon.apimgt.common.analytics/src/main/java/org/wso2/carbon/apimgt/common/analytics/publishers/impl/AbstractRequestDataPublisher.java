@@ -42,7 +42,9 @@ public abstract class AbstractRequestDataPublisher implements RequestDataPublish
 
     @Override
     public void publish(Event analyticsEvent) {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Publishing analytics event");
+        }
         Map<String, Object> dataMap = OBJECT_MAPPER.convertValue(analyticsEvent, MAP_TYPE_REFERENCE);
         List<CounterMetric> multipleCounterMetrics = this.getMultipleCounterMetrics();
         if (multipleCounterMetrics == null) {

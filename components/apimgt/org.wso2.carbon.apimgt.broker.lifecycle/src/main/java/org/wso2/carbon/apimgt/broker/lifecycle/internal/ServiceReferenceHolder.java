@@ -20,7 +20,8 @@
 
 package org.wso2.carbon.apimgt.broker.lifecycle.internal;
 
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.andes.service.QpidService;
 import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 
@@ -29,6 +30,7 @@ import java.util.Set;
 
 public class ServiceReferenceHolder {
 
+    private static final Log log = LogFactory.getLog(ServiceReferenceHolder.class);
     private static ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private boolean shutDownStatus = false;
 
@@ -44,6 +46,9 @@ public class ServiceReferenceHolder {
     }
 
     public void setShutDownStatus(boolean shutDownStatus) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting shutdown status: " + shutDownStatus);
+        }
         this.shutDownStatus = shutDownStatus;
     }
 
@@ -56,15 +61,33 @@ public class ServiceReferenceHolder {
     }
 
     public void setQpidService(QpidService qpidService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting QpidService: " + (qpidService != null ? "bound" : "unbound"));
+        }
         this.qpidService = qpidService;
     }
 
     public void addListenerShutdownService(JMSListenerShutDownService shutDownService) {
-        this.listenerShutdownServiceSet.add(shutDownService);
+        if (shutDownService != null) {
+            this.listenerShutdownServiceSet.add(shutDownService);
+            if (log.isDebugEnabled()) {
+                log.debug("Added listener shutdown service. Total services: " + listenerShutdownServiceSet.size());
+            }
+        } else {
+            log.warn("Attempted to add null JMSListenerShutDownService");
+        }
     }
 
     public void removeListenerShutdownService(JMSListenerShutDownService shutDownService) {
-        this.listenerShutdownServiceSet.remove(shutDownService);
+        if (shutDownService != null) {
+            boolean removed = this.listenerShutdownServiceSet.remove(shutDownService);
+            if (log.isDebugEnabled()) {
+                log.debug("Removed listener shutdown service: " + removed + ". Total services: " + 
+                        listenerShutdownServiceSet.size());
+            }
+        } else {
+            log.warn("Attempted to remove null JMSListenerShutDownService");
+        }
     }
 
     public Set<JMSListenerShutDownService> getListenerShutdownServices() {

@@ -44,10 +44,14 @@ public class AuthFaultDataCollector extends AbstractFaultDataCollector {
 
     @Override
     public void collectFaultData(Event faultyEvent) throws AnalyticsException {
-        log.debug("handling auth failure analytics events");
-
+        if (log.isDebugEnabled()) {
+            log.debug("Handling auth failure analytics events");
+        }
         Application application = getUnknownApp();
         faultyEvent.setApplication(application);
+        if (log.isDebugEnabled()) {
+            log.debug("Processing auth fault event with unknown application");
+        }
         this.processRequest(faultyEvent);
     }
 }

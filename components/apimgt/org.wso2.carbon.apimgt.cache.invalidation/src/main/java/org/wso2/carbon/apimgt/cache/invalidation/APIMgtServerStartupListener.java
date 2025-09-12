@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.cache.invalidation;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.cache.invalidation.internal.DataHolder;
 import org.wso2.carbon.apimgt.common.jms.JMSTransportHandler;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
@@ -32,6 +34,7 @@ import org.wso2.carbon.core.ServerStartupObserver;
 public class APIMgtServerStartupListener implements ServerStartupObserver, ServerShutdownHandler,
         JMSListenerShutDownService {
 
+    private static final Log log = LogFactory.getLog(APIMgtServerStartupListener.class);
     private JMSTransportHandler jmsTransportHandlerForEventHub;
 
     public APIMgtServerStartupListener() {
@@ -45,6 +48,11 @@ public class APIMgtServerStartupListener implements ServerStartupObserver, Serve
         if (eventHubReceiverConfiguration != null) {
             this.jmsTransportHandlerForEventHub = new JMSTransportHandler(
                     eventHubReceiverConfiguration.getJmsConnectionParameters(), jmsTaskManagerProperties);
+            if (log.isDebugEnabled()) {
+                log.debug("JMS transport handler initialized for cache invalidation");
+            }
+        } else {
+            log.warn("EventHub receiver configuration not available for cache invalidation");
         }
     }
 
@@ -59,9 +67,18 @@ public class APIMgtServerStartupListener implements ServerStartupObserver, Serve
         if (DataHolder.getInstance().getCacheInvalidationConfiguration() != null &&
                 DataHolder.getInstance().getCacheInvalidationConfiguration().isEnabled() &&
                 jmsTransportHandlerForEventHub != null) {
+            log.info("Starting cache invalidation JMS listener");
             jmsTransportHandlerForEventHub.subscribeForJmsEvents(CachingConstants.TOPIC_NAME,
                     new APIMgtCacheInvalidationListener(DataHolder.getInstance().getCacheInvalidationConfiguration()));
             DataHolder.getInstance().setStarted(true);
+            log.info("Cache invalidation JMS listener started successfully");
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Cache invalidation JMS listener not started - configuration enabled: " +
+                          (DataHolder.getInstance().getCacheInvalidationConfiguration() != null &&
+                           DataHolder.getInstance().getCacheInvalidationConfiguration().isEnabled()) +
+                          ", transport handler available: " + (jmsTransportHandlerForEventHub != null));
+            }
         }
     }
 
@@ -71,8 +88,10 @@ public class APIMgtServerStartupListener implements ServerStartupObserver, Serve
         if (DataHolder.getInstance().getCacheInvalidationConfiguration() != null &&
                 DataHolder.getInstance().getCacheInvalidationConfiguration().isEnabled() &&
                 jmsTransportHandlerForEventHub != null) {
+            log.info("Stopping cache invalidation JMS listener due to server shutdown");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
             DataHolder.getInstance().setStarted(false);
+            log.info("Cache invalidation JMS listener stopped successfully");
         }
     }
 
@@ -82,8 +101,10 @@ public class APIMgtServerStartupListener implements ServerStartupObserver, Serve
         if (DataHolder.getInstance().getCacheInvalidationConfiguration() != null &&
                 DataHolder.getInstance().getCacheInvalidationConfiguration().isEnabled() &&
                 jmsTransportHandlerForEventHub != null) {
+            log.info("Shutting down cache invalidation JMS listener");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
             DataHolder.getInstance().setStarted(false);
+            log.info("Cache invalidation JMS listener shutdown completed");
         }
     }
 }

@@ -19,17 +19,26 @@
 package org.wso2.carbon.apimgt.api.quotalimiter;
 
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * This class handles API creation if API Quota Limit Extension not available.
  */
 public class OnPremQuotaLimiter implements ResourceQuotaLimiter {
 
+    private static final Log log = LogFactory.getLog(OnPremQuotaLimiter.class);
+
     /**
-     * @return Returns false since product-apim should allow for API creations since quota-limit extension not available there.
+     * @return Returns false since product-apim should allow for API creations since quota-limit extension not
+     * available there.
      */
     @Override
-    public boolean getQuotaLimitStatus(String orgID, String httpMethod, String pathToMatch, Map<String, Object> payload) {
+    public boolean getQuotaLimitStatus(String orgID, String httpMethod, String pathToMatch,
+                                       Map<String, Object> payload) {
+        if (log.isDebugEnabled()) {
+            log.debug("On-premises quota limit check - allowing API creation for org: " + orgID);
+        }
         return false;
     }
 }
