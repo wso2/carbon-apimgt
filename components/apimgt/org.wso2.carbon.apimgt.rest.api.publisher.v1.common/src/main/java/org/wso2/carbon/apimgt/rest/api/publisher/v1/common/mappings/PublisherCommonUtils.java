@@ -2023,6 +2023,9 @@ public class PublisherCommonUtils {
         String[] userRoleList = APIUtil.getListOfRoles(userName);
 
         if (APIUtil.hasPermission(userName, APIConstants.Permissions.APIM_ADMIN)) {
+            if (log.isDebugEnabled()) {
+                log.debug("User role has admin level permissions, therefore skipping role validation.");
+            }
             return "";
         }
         if (inputRoles != null && !inputRoles.isEmpty()) {
