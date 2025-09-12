@@ -1393,19 +1393,19 @@ public class SQLConstants {
             "INSERT INTO AM_SECURITY_AUDIT_UUID_MAPPING (API_ID, AUDIT_UUID) VALUES (?,?)";
 
     public static final String ADD_EXECUTOR_TASK_TO_LOCK_TABLE =
-            "INSERT INTO AM_EXECUTOR_TASK_LOCK (SCHEDULED_TIME, TASK_ID, NODE_ID) VALUES (?,?,?)";
+            "INSERT INTO AM_TASK_LOCK (LOCK_TIME, TASK_ID, NODE_ID) VALUES (?,?,?)";
 
     public static final String UPDATE_EXECUTOR_TASK_TO_LOCK_TABLE =
-            "UPDATE AM_EXECUTOR_TASK_LOCK SET SCHEDULED_TIME=?, NODE_ID=? WHERE TASK_ID=?";
+            "UPDATE AM_TASK_LOCK SET LOCK_TIME=?, NODE_ID=? WHERE TASK_ID=?";
 
     public static final String DELETE_EXECUTOR_TASK_FROM_LOCK_TABLE =
-            "DELETE FROM AM_EXECUTOR_TASK_LOCK WHERE TASK_ID = ?";
+            "DELETE FROM AM_TASK_LOCK WHERE TASK_ID = ?";
 
-    public static final String UPDATE_SCHEDULED_TIME_FROM_LOCK_TABLE =
-            "UPDATE AM_EXECUTOR_TASK_LOCK SET SCHEDULED_TIME = ? WHERE TASK_ID = ?";
+    public static final String UPDATE_LOCK_TIME_FROM_LOCK_TABLE =
+            "UPDATE AM_TASK_LOCK SET LOCK_TIME = ? WHERE TASK_ID = ?";
 
-    public static final String GET_SCHEDULED_TIME_OF_EXECUTOR_TASK_SQL = "SELECT SCHEDULED_TIME " +
-            "FROM AM_EXECUTOR_TASK_LOCK WHERE TASK_ID = ?";
+    public static final String GET_LOCK_TIME_OF_EXECUTOR_TASK_SQL = "SELECT LOCK_TIME " +
+            "FROM AM_TASK_LOCK WHERE TASK_ID = ?";
 
     public static final String REMOVE_SECURITY_AUDIT_MAP_SQL =
             "DELETE FROM AM_SECURITY_AUDIT_UUID_MAPPING WHERE API_ID = ?";
@@ -2735,6 +2735,15 @@ public class SQLConstants {
                     "SIDDHI_QUERY = ?, " +
                     "KEY_TEMPLATE = ? " +
                     "WHERE UUID = ?";
+
+    public static final String GET_API_DETAILS_DEPLOYED_IN_ENVIRONMENT =
+            "SELECT DISTINCT A.API_NAME, A.API_VERSION, A.API_UUID, A.API_PROVIDER, A.API_TYPE " +
+                    "FROM AM_DEPLOYMENT_REVISION_MAPPING M " +
+                    "JOIN AM_REVISION R " +
+                    "  ON R.REVISION_UUID = M.REVISION_UUID " +
+                    "JOIN AM_API A " +
+                    "  ON A.API_UUID = R.API_UUID " +
+                    "WHERE M.NAME = ? and A.ORGANIZATION = ? and A.INITIATED_FROM_GW = ?";
 
     public static final String UPDATE_APPLICATION_POLICY_STATUS_SQL =
             "UPDATE AM_POLICY_APPLICATION SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";

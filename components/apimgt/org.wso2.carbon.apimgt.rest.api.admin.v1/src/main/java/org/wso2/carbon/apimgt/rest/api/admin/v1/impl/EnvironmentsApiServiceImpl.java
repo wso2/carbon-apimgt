@@ -43,7 +43,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
     /**
      * Delete gateway environment
      *
-     * @param environmentId environment ID
+     * @param environmentId  environment ID
      * @param messageContext message context
      * @return 200 with empty response body
      * @throws APIManagementException if failed to delete
@@ -70,7 +70,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         Environment environment = apiAdmin.getEnvironment(organization, environmentId);
         if (environment == null) {
             throw new APIManagementException("Requested Gateway Environment not found",
-                                             ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND);
+                    ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND);
         }
 
         GatewayManagementDAO dao = GatewayManagementDAO.getInstance();
@@ -109,8 +109,8 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
     /**
      * Update gateway environment
      *
-     * @param environmentId environment ID
-     * @param body environment to be updated
+     * @param environmentId  environment ID
+     * @param body           environment to be updated
      * @param messageContext message context
      * @return updated environment
      * @throws APIManagementException if failed to update
@@ -126,7 +126,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         try {
         this.validatePermissions(gatewayVisibilityPermissionConfigurationDTO);
         apiAdmin.updateEnvironment(organization, env);
-        APIUtil.validateAndScheduleFederatedGatewayAPIDiscovery(env, organization, true);
+        APIUtil.validateAndScheduleFederatedGatewayAPIDiscovery(env, organization);
         location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + environmentId);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while updating Environment : " + environmentId;
@@ -159,7 +159,8 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
 
     /**
      * Create a dynamic gateway environment
-     * @param body environment to be created
+     *
+     * @param body           environment to be created
      * @param messageContext message context
      * @return created environment
      * @throws APIManagementException if failed to create
@@ -184,7 +185,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             validatePermissions(gatewayVisibilityPermissionConfigurationDTO);
             Environment addedEnv = apiAdmin.addEnvironment(organization, env);
             EnvironmentDTO envDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(addedEnv);
-            APIUtil.validateAndScheduleFederatedGatewayAPIDiscovery(addedEnv, organization, false);
+            APIUtil.validateAndScheduleFederatedGatewayAPIDiscovery(addedEnv, organization);
             URI location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + envDTO.getId());
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.GATEWAY_ENVIRONMENTS, new Gson().toJson(envDTO),
                     APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());
@@ -224,6 +225,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
 
     /**
      * Check whether the vhost configuration is supported for APK gateway type
+     *
      * @param vhosts
      * @return boolean
      */
@@ -240,6 +242,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
 
     /**
      * Check whether the vhost configuration is supported for APK gateway type
+     *
      * @param vhost
      * @return boolean
      */

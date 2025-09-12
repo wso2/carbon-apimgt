@@ -17249,7 +17249,7 @@ public class ApiMgtDAO {
      * @param taskId               the unique identifier of the task
      */
     public void updateScheduledTimeOfExecutorTask(long updatedScheduledTime, String taskId) throws APIManagementException {
-        String query = SQLConstants.UPDATE_SCHEDULED_TIME_FROM_LOCK_TABLE;
+        String query = SQLConstants.UPDATE_LOCK_TIME_FROM_LOCK_TABLE;
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(query)) {
@@ -17271,18 +17271,18 @@ public class ApiMgtDAO {
      * If the task is not found or an error occurs, returns 0.
      **/
     public long getScheduledTimeFromExecutorTask(String taskId) throws APIManagementException {
-        String query = SQLConstants.GET_SCHEDULED_TIME_OF_EXECUTOR_TASK_SQL;
+        String query = SQLConstants.GET_LOCK_TIME_OF_EXECUTOR_TASK_SQL;
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(query)) {
                 ps.setString(1, taskId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        return rs.getLong("SCHEDULED_TIME");
+                        return rs.getLong("LOCK_TIME");
                     }
                 }
             }
         } catch (SQLException e) {
-            handleException("Error while getting executor task SCHEDULED_TIME: ", e);
+            handleException("Error while getting executor task LOCK_TIME: ", e);
         }
         return 0;
     }
@@ -26940,6 +26940,43 @@ public class ApiMgtDAO {
             throw new APIManagementException("Error while retrieving apis for the organization " + organization, e,
                     ExceptionCodes.INTERNAL_ERROR);
         }
+    }
+
+    /**
+     * Retrieves a list of APIs deployed in a specified gateway environment for a given organization.
+     *
+     * @param environmentName the name of the gateway environment in which the APIs are deployed
+     * @param organization the organization under which the APIs are managed
+     * @param isInitiatedFromGateway whether to retrieve APIs discovered from the gateway (true) or from CP (false)
+     * @return a list of {@code ApiResult} objects containing details of the deployed APIs
+     * @throws APIManagementException if an error occurs while retrieving the APIs from the database
+     */
+    public List<ApiResult> getAPIsDeployedInGatewayEnvironmentByOrg(String environmentName, String organization,
+                                                                    boolean isInitiatedFromGateway)
+            throws APIManagementException {
+        List<ApiResult> apiResults = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection
+                    .prepareStatement(SQLConstants.GET_API_DETAILS_DEPLOYED_IN_ENVIRONMENT)) {
+                preparedStatement.setString(1, environmentName);
+                preparedStatement.setString(2, organization);
+                preparedStatement.setInt(3, isInitiatedFromGateway ? 1 : 0);
+                try (ResultSet rs = preparedStatement.executeQuery()) {
+                    while (rs.next()) {
+                        ApiResult apiResult = new ApiResult();
+                        apiResult.setId(rs.getString("API_UUID"));
+                        apiResult.setName(rs.getString("API_NAME"));
+                        apiResult.setVersion(rs.getString("API_VERSION"));
+                        apiResult.setProvider(rs.getString("API_PROVIDER"));
+                        apiResult.setType(rs.getString("API_TYPE"));
+                        apiResults.add(apiResult);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving apis for the organization " + organization, e);
+        }
+        return apiResults;
     }
 
     /**
