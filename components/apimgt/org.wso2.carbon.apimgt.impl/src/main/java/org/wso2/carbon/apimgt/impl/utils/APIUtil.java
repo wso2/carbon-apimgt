@@ -340,8 +340,6 @@ public final class APIUtil {
 
     private static boolean isContextCacheInitialized = false;
 
-    private static final String caseSensitiveCheckEnabled = System.getProperty(APIConstants.CASE_SENSITIVE_CHECK_PATH);
-
     public static final String DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION = "disableRoleValidationAtScopeCreation";
 
     public static final String DISABLE_API_CONTEXT_VALIDATION = "disableApiContextValidation";
@@ -7734,16 +7732,8 @@ public final class APIUtil {
     public static boolean compareRoleList(String[] userRoleList, String accessControlRole) {
         if (userRoleList != null) {
             for (String userRole : userRoleList) {
-                if (userRole != null) {
-                    if (Boolean.parseBoolean(caseSensitiveCheckEnabled)) {
-                        if (userRole.equals(accessControlRole)) {
-                            return true;
-                        }
-                    } else {
-                        if (userRole.equalsIgnoreCase(accessControlRole)) {
-                            return true;
-                        }
-                    }
+                if (userRole != null && userRole.equalsIgnoreCase(accessControlRole)) {
+                    return true;
                 }
             }
         }

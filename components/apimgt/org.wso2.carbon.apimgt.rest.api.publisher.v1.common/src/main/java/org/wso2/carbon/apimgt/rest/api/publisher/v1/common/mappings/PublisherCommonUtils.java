@@ -2023,7 +2023,7 @@ public class PublisherCommonUtils {
         String[] userRoleList = APIUtil.getListOfRoles(userName);
 
         if (APIUtil.hasPermission(userName, APIConstants.Permissions.APIM_ADMIN)) {
-            isMatched = true;
+            return "";
         }
         if (inputRoles != null && !inputRoles.isEmpty()) {
             if (Boolean.parseBoolean(System.getProperty(APIConstants.CASE_SENSITIVE_CHECK_PATH))) {
@@ -2035,7 +2035,7 @@ public class PublisherCommonUtils {
                             log.debug("Checking role: " + inputRole + " against user roles");
                         }
                         if (!isMatched && APIUtil.compareRoleList(userRoleList, inputRole)) {
-                            isMatched = true;
+                            return "";
                         }
                     }
                     if (!APIUtil.isRoleNameExist(userName, roleString)) {
