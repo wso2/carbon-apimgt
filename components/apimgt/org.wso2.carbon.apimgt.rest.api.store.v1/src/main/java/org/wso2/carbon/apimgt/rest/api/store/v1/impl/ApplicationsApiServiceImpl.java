@@ -1240,7 +1240,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         JSONObject jsonParamObj = new JSONObject();
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-        Application application = apiConsumer.getApplicationByUUID(applicationId);
+        Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
         String keyManagerName = APIConstants.KeyManager.DEFAULT_KEY_MANAGER;
         if (StringUtils.isNotEmpty(body.getKeyManager())) {
             keyManagerName = body.getKeyManager();

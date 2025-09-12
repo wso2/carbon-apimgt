@@ -19,11 +19,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import java.net.URI;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.lang3.StringUtils;
@@ -391,21 +387,59 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         String requestPath = (String) axis2Ctx.getProperty(NhttpConstants.REST_URL_POSTFIX);
         if (StringUtils.isNotEmpty(requestPath)) {
-            requestPath = URLDecoder.decode(requestPath, Charset.defaultCharset());
-            String updatedPath = requestPath.replaceAll(targetModelMetadata.getAttributeIdentifier(), model);
-            String encodedPath = Arrays.stream(updatedPath.split("/"))
-                    .map(segment -> {
-                        try {
-                            // Encode each segment individually
-                            return URLEncoder.encode(segment, StandardCharsets.UTF_8.toString());
-                        } catch (Exception e) {
-                            // In Java 10+, this exception is no longer thrown for UTF-8
-                            return segment;
-                        }
-                    })
-                    .collect(Collectors.joining("/"));
-            axis2Ctx.setProperty(NhttpConstants.REST_URL_POSTFIX, encodedPath);
+            if (log.isDebugEnabled()) {
+                log.debug("Modifying request path for model: " + model + " with target identifier: " + targetModelMetadata.getAttributeIdentifier());
+            }
+            URI uri = URI.create(requestPath);
+            String rawPath = uri.getRawPath();
+            String rawQuery = uri.getRawQuery();
+
+            // Encode only the substituted model as a path-segment-safe value and quote replacement
+            String encodedModel = encodePathSegmentRFC3986(model);
+            String updatedRawPath = rawPath.replaceAll(
+                    targetModelMetadata.getAttributeIdentifier(),
+                    java.util.regex.Matcher.quoteReplacement(encodedModel));
+
+            StringBuilder finalPath = new StringBuilder(updatedRawPath);
+            if (rawQuery != null) {
+                // Preserve original query as-is to avoid changing semantics
+                finalPath.append("?").append(rawQuery);
+            }
+            axis2Ctx.setProperty(NhttpConstants.REST_URL_POSTFIX, finalPath.toString());
+            if (log.isDebugEnabled()) {
+                log.debug("Updated request path from: " + requestPath +" to: " + finalPath);
+            }
         }
+    }
+
+    private static String encodePathSegmentRFC3986(String segment) {
+        if (log.isDebugEnabled()) {
+            log.debug("Encoding path segment: " + segment);
+        }
+        StringBuilder out = new StringBuilder();
+        byte[] bytes = segment.getBytes(StandardCharsets.UTF_8);
+        for (byte b : bytes) {
+            char c = (char) (b & 0xFF);
+            if (isUnreserved(c) || isSubDelim(c) || c == ':' || c == '@') {
+                out.append(c);
+            } else {
+                out.append('%');
+                String hx = Integer.toHexString(b & 0xFF).toUpperCase();
+                if (hx.length() == 1) out.append('0');
+                out.append(hx);
+            }
+        }
+        return out.toString();
+    }
+
+    private static boolean isUnreserved(char c) {
+        return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')
+                || c == '-' || c == '.' || c == '_' || c == '~';
+    }
+
+    private static boolean isSubDelim(char c) {
+        return c == '!' || c == '$' || c == '&' || c == '\'' || c == '(' || c == ')' ||
+                c == '*' || c == '+' || c == ',' || c == ';' || c == '=';
     }
 
     /**

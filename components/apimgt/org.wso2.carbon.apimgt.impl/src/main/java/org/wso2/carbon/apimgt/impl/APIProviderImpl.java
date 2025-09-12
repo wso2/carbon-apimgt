@@ -1229,8 +1229,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void updateAPIPrimaryEndpointsMapping(API api) throws APIManagementException {
         if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
-            // Delete any existing primary endpoint mappings
-            deleteAPIPrimaryEndpointMappings(api.getUuid());
+            String apiUUID = api.getUuid();
+            String revisionUUID = APIConstants.API_REVISION_CURRENT_API;
+            APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(apiUUID);
+            if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                apiUUID = apiRevision.getApiUUID();
+                revisionUUID = apiRevision.getRevisionUUID();
+            }
+
+            // Delete existing primary endpoint mappings
+            deleteAPIPrimaryEndpointMappings(apiUUID, revisionUUID);
 
             // Handle primary endpoint mapping addition if the API is an AI API
             String primaryProductionEndpointId = api.getPrimaryProductionEndpointId();
@@ -1248,16 +1256,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 } else if (isProductionEndpointFromAPIEndpointConfig) {
                     addDefaultPrimaryEndpoints(api, true, false);
                     if (primarySandboxEndpointId != null) {
-                        apiMgtDAO.addPrimaryEndpointMapping(api.getUuid(), primarySandboxEndpointId);
+                        apiMgtDAO.addPrimaryEndpointMapping(apiUUID, primarySandboxEndpointId, revisionUUID);
                     }
                 } else if (isSandboxEndpointFromAPIEndpointConfig) {
                     addDefaultPrimaryEndpoints(api, false, true);
                     if (primaryProductionEndpointId != null) {
-                        apiMgtDAO.addPrimaryEndpointMapping(api.getUuid(), primaryProductionEndpointId);
+                        apiMgtDAO.addPrimaryEndpointMapping(apiUUID, primaryProductionEndpointId, revisionUUID);
                     }
                 } else {
                     apiMgtDAO.addAPIPrimaryEndpointMappings(api);
                 }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated the primary endpoint mappings of API: " + apiUUID);
             }
         }
     }
@@ -7580,6 +7591,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiMgtDAO.deleteAPIRevision(apiRevision);
         apiMgtDAO.deleteAllAPIMetadataRevision(apiId, apiRevisionId);
+        apiMgtDAO.deleteAPIPrimaryEndpointMappingsByRevision(apiId, apiRevisionId);
         apiMgtDAO.deleteAIConfigurationRevision(apiRevision.getRevisionUUID());
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {
@@ -8921,6 +8933,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void removeAPIEndpoints(String apiUUID) throws APIManagementException {
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Removing endpoints for API: " + apiUUID);
+            }
             deleteAPIPrimaryEndpointMappings(apiUUID);
             deleteAPIEndpointsByApiUUID(apiUUID);
         } catch (APIManagementException e) {
@@ -9074,7 +9089,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void deleteAPIPrimaryEndpointMappings(String apiId) throws APIManagementException {
-        apiMgtDAO.deleteAPIPrimaryEndpointMappings(apiId);
+        apiMgtDAO.deleteAllAPIPrimaryEndpointMappingsByUUID(apiId);
+    }
+
+    @Override
+    public void deleteAPIPrimaryEndpointMappings(String apiId, String revisionUUID) throws APIManagementException {
+        apiMgtDAO.deleteAPIPrimaryEndpointMappingsByRevision(apiId, revisionUUID);
     }
 
     @Override
@@ -9119,7 +9139,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // Handle scenario where default primary endpoints were set on AI API creation. Hence, these endpoint UUIDs
         // will not be available under the AM_API_ENDPOINTS table.
-        List<String> endpointIds = apiMgtDAO.getPrimaryEndpointUUIDByAPIId(currentApiUuid);
+        List<String> endpointIds = apiMgtDAO.getPrimaryEndpointUUIDByAPIId(currentApiUuid, revisionUuid);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieved " + (endpointIds != null ?
+                    endpointIds.size() :
+                    0) + " primary endpoint IDs for API: " + currentApiUuid + ", revision: " + revisionUuid);
+        }
+
         if (endpointIds != null && !endpointIds.isEmpty()) {
             for (String endpointId : endpointIds) {
                 if (APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID.equals(endpointId)) {

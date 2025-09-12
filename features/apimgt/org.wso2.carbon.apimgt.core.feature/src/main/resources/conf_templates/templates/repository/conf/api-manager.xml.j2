@@ -1119,6 +1119,16 @@
          {%- endfor -%}
         </JWTAudiences>
         {% endif %}
+        <AdminPermissionRestrictedAPIs>
+        {% if apim.rest_api.admin_permission_restricted_api is defined %}
+        {% for uri in apim.rest_api.admin_permission_restricted_api %}
+            <AdminPermissionRestrictedAPI>
+                <URI>{{uri.uri_path}}</URI>
+                <HTTPMethods>{{uri.http_method}}</HTTPMethods>
+            </AdminPermissionRestrictedAPI>
+        {% endfor %}
+        {% endif %}
+        </AdminPermissionRestrictedAPIs>
     </RESTAPI>
     <ThrottlingConfigurations>
         <TrafficManager>

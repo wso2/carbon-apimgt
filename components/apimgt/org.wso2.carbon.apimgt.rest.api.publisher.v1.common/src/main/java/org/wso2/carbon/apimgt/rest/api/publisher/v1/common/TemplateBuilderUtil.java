@@ -102,6 +102,7 @@ public class TemplateBuilderUtil {
 
     private static final String ENDPOINT_PRODUCTION = "_PRODUCTION_";
     private static final String ENDPOINT_SANDBOX = "_SANDBOX_";
+    private static final String MCP_BACKEND_API_GATEWAY_URL = "https://localhost:{uri.var.httpsPort}";
 
     private static final Log log = LogFactory.getLog(TemplateBuilderUtil.class);
 
@@ -727,39 +728,32 @@ public class TemplateBuilderUtil {
                         }
                     }
 
-                    String endpointsString = environment.getApiGatewayEndpoint();
-                    if (!StringUtils.isEmpty(endpointsString)) {
-                        String[] gwEndpoints = endpointsString.split(",");
-
-                        StringBuilder endpoint = new StringBuilder();
-                        String httpsURI = getEndpointURI(gwEndpoints, APIConstants.HTTPS_TRANSPORT_PROTOCOL_NAME);
-                        if (!StringUtils.isEmpty(httpsURI)) {
-                            endpoint.append(httpsURI);
-                        } else {
-                            String httpURI = getEndpointURI(gwEndpoints, APIConstants.HTTP_TRANSPORT_PROTOCOL_NAME);
-                            endpoint.append(httpURI);
+                    // construct gw URL for reference API using the localhost gw HTTPS port and apiContext
+                    // Here we assume that the MCP backend API always supports https at GW level
+                    StringBuilder endpoint = new StringBuilder();
+                    endpoint.append(MCP_BACKEND_API_GATEWAY_URL);
+                    Set<URITemplate> uriTemplateSet = api.getUriTemplates();
+                    if (!uriTemplateSet.isEmpty()) {
+                        URITemplate tempUri = uriTemplateSet.iterator().next();
+                        APIOperationMapping apiOperationMapping = tempUri.getAPIOperationMapping();
+                        if (apiOperationMapping != null) {
+                            String refApiContext = apiOperationMapping.getApiContext();
+                            endpoint.append(refApiContext);
                         }
-
-                        //construct gw URL for reference API
-                        Set<URITemplate> uriTemplateSet = api.getUriTemplates();
-                        if (!uriTemplateSet.isEmpty()) {
-                            URITemplate tempUri = (URITemplate) (uriTemplateSet.toArray()[0]);
-                            APIOperationMapping apiOperationMapping = tempUri.getAPIOperationMapping();
-                            if (apiOperationMapping != null) {
-                                String refApiContext = apiOperationMapping.getApiContext();
-                                endpoint.append(refApiContext);
-                            }
-                        }
-
-                        JsonObject urlObj = new JsonObject();
-                        urlObj.addProperty("url", endpoint.toString());
-                        JsonObject endpointConfig = new JsonObject();
-                        endpointConfig.addProperty(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
-                        endpointConfig.add(APIConstants.APIEndpoint.ENDPOINT_CONFIG_SANDBOX_ENDPOINTS, urlObj);
-                        endpointConfig.add(APIConstants.APIEndpoint.ENDPOINT_CONFIG_PRODUCTION_ENDPOINTS, urlObj);
-
-                        api.setEndpointConfig(endpointConfig.toString());
                     }
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("Constructed endpoint url for MCP reference API: " + endpoint.toString());
+                    }
+
+                    JsonObject urlObj = new JsonObject();
+                    urlObj.addProperty("url", endpoint.toString());
+                    JsonObject endpointConfig = new JsonObject();
+                    endpointConfig.addProperty(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+                    endpointConfig.add(APIConstants.APIEndpoint.ENDPOINT_CONFIG_SANDBOX_ENDPOINTS, urlObj);
+                    endpointConfig.add(APIConstants.APIEndpoint.ENDPOINT_CONFIG_PRODUCTION_ENDPOINTS, urlObj);
+
+                    api.setEndpointConfig(endpointConfig.toString());
                 }
                 api.setUriTemplates(uriTemplates);
             }
@@ -2183,18 +2177,6 @@ public class TemplateBuilderUtil {
             throw new APIManagementException("Error while deriving subscription endpoint from GraphQL API endpoint "
                     + "config: " + endpointConfig, e);
         }
-    }
-
-    private static String getEndpointURI(String[] uris, String scheme) {
-        if (uris == null || scheme == null) {
-            return null;
-        }
-        for (String uri : uris) {
-            if (uri != null && uri.startsWith(scheme)) {
-                return uri;
-            }
-        }
-        return null;
     }
 
 }

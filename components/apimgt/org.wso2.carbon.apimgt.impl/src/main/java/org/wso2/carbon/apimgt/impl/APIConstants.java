@@ -534,6 +534,7 @@ public final class APIConstants {
             DEVPORTAL_MODE_API_ONLY
     );
 
+    public static final String API_REVISION_CURRENT_API = "Current API";
 
     public static class AWSConstants{
         // AWS S4 Constants
@@ -1083,6 +1084,9 @@ public final class APIConstants {
     public static final String API_RESTAPI_ETAG_SKIP_URI = API_RESTAPI_ETAG_SKIP_LIST + "ETagSkipURI.";
     public static final String API_RESTAPI_ETAG_SKIP_URI_URI = API_RESTAPI_ETAG_SKIP_URI + "URI";
     public static final String API_RESTAPI_ETAG_SKIP_URI_HTTPMETHOD = API_RESTAPI_ETAG_SKIP_URI + "HTTPMethods";
+    public static final String API_RESTAPI_ADMIN_PERMISSION_RESTRICTED = API_RESTAPI + "AdminPermissionRestrictedAPIs.AdminPermissionRestrictedAPI.";
+    public static final String API_RESTAPI_ADMIN_PERMISSION_RESTRICTED_URI = API_RESTAPI_ADMIN_PERMISSION_RESTRICTED + "URI";
+    public static final String API_RESTAPI_ADMIN_PERMISSION_RESTRICTED_HTTPMethods = API_RESTAPI_ADMIN_PERMISSION_RESTRICTED + "HTTPMethods";
 
     public static final String JWT_EXPIRY_TIME = API_KEY_VALIDATOR + "JWTExpiryTime";
     public static final String JWT_AUDIENCES = "JWTAudiences";
@@ -3690,6 +3694,7 @@ public final class APIConstants {
         public static final String HEADER_MCP_SESSION_ID = "Mcp-Session-Id";
         public static final String ACCEPT_JSON_AND_SSE = "application/json, text/event-stream";
         public static final String MCP_FAILURE_HANDLER = "_mcp_failure_handler_";
+        public static final String RECEIVED_MCP_ID = "RECEIVED_MCP_ID";
 
         // JSON keys used in payloads
         public static final String CAPABILITIES_KEY = "capabilities";

@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.gateway.mcp.request;
 
 import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -34,7 +35,7 @@ import java.lang.reflect.Type;
  * A custom deserializer was required to handle the id field, which can be either a string or an integer.
  */
 
-public class MCPRequestDeserializer implements com.google.gson.JsonDeserializer<McpRequest> {
+public class MCPRequestDeserializer implements JsonDeserializer<McpRequest> {
     private static final Log log = LogFactory.getLog(MCPRequestDeserializer.class);
 
     /**
