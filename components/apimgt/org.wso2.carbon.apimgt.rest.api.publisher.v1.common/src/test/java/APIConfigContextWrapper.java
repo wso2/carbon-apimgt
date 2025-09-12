@@ -33,4 +33,8 @@ public class APIConfigContextWrapper extends APIConfigContext {
     protected boolean isRetryCallWithNewOAuthTokenEnabled() {
         return false;
     }
+
+    protected boolean isFailoverEnabled() {
+        return false;
+    }
 }
