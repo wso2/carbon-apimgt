@@ -94,6 +94,7 @@ public class APIKeyValidator {
 
     private ArrayList<URITemplate> uriTemplates = null;
     private final boolean jwtGenerationEnabled;
+    private static Long mcpInternalTokenExpiryTime;
 
     public APIKeyValidator() {
 
@@ -163,7 +164,7 @@ public class APIKeyValidator {
                 log.info("Internal key generation enabled for API with context: " + context + " and version: " +
                         apiVersion);
             }
-            final String cacheKey = context + ":" + apiVersion + ":" + apiKey + ":" + APIConstants.API_TYPE_MCP;
+            final String cacheKey = apiKey + ":" + APIConstants.API_TYPE_MCP;
             String mcpUpstreamToken = null;
             ExtendedJWTConfigurationDto jwtConfigurationDto =
                     org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder.getInstance()
@@ -252,6 +253,8 @@ public class APIKeyValidator {
 
                         //Remove from the first level token cache as well.
                         getGatewayTokenCache().remove(apiKey);
+                        final String mcpInternalTokenCacheKey = apiKey + ":" + APIConstants.API_TYPE_MCP;
+                        getGatewayTokenCache().remove(mcpInternalTokenCacheKey);
                         // Put into invalid token cache
                         getInvalidTokenCache().put(apiKey, cachedToken);
                         info.setExpired(true);
@@ -346,7 +349,10 @@ public class APIKeyValidator {
         JwtTokenInfoDTO dto = new JwtTokenInfoDTO();
         dto.setEndUserName(info.getEndUserName());
         dto.setKeyType(info.getType());
-        dto.setExpirationTime(APIMgtGatewayConstants.MCP_AUTH_TOKEN_EXPIRATION_TIME);
+        if (mcpInternalTokenExpiryTime == null) {
+            mcpInternalTokenExpiryTime = getMcpInternalTokenExpiryTime();
+        }
+        dto.setExpirationTime(mcpInternalTokenExpiryTime);
         Map<String, String> custom = new HashMap<>();
         custom.put(APIMgtGatewayConstants.MCP_AUTH_CLAIM, Boolean.TRUE.toString());
         if (jwtGenerationEnabled) {
@@ -998,5 +1004,38 @@ public class APIKeyValidator {
 
     public Map<String, Scope> retrieveScopes(String tenantDomain) {
         return dataStore.retrieveScopes(tenantDomain);
+    }
+
+    /**
+     * Get MCP internal token expiry time with buffer time
+     *
+     * @return MCP internal token expiry time in seconds
+     */
+    private Long getMcpInternalTokenExpiryTime() {
+
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        if (apiManagerConfiguration != null) {
+            String tokenCacheExpiryTime = apiManagerConfiguration.getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+            if (StringUtils.isNotEmpty(tokenCacheExpiryTime)) {
+                try {
+                    return applyMcpInternalTokenBuffer(Long.parseLong(tokenCacheExpiryTime));
+                } catch (NumberFormatException e) {
+                    log.warn("Error while parsing the MCP internal token expiry time. Falling back to default "
+                            + APIConstants.DEFAULT_TIMEOUT);
+                    return applyMcpInternalTokenBuffer(APIConstants.DEFAULT_TIMEOUT);
+                }
+            }
+        }
+        return applyMcpInternalTokenBuffer(APIConstants.DEFAULT_TIMEOUT);
+    }
+
+    /**
+     * Add buffer time to the MCP internal token expiry time to avoid edge cases
+     * where the token is expired by the time it reaches MCP.
+     */
+    private Long applyMcpInternalTokenBuffer(Long mcpAuthTokenExpirationTime) {
+
+        return mcpAuthTokenExpirationTime + APIMgtGatewayConstants.MCP_AUTH_TOKEN_EXPIRATION_BUFFER_TIME;
     }
 }
