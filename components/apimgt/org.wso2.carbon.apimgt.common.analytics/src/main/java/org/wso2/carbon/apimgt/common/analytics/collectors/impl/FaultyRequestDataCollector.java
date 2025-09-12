@@ -72,6 +72,9 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
         case OTHER:
             unclassifiedFaultDataCollector.collectFaultData(faultyEvent);
             break;
+        default:
+            log.warn("Unhandled fault type: " + provider.getFaultType());
+            break;
         }
     }
 
@@ -88,6 +91,9 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
         MetaInfo metaInfo = provider.getMetaInfo();
         String userIp = provider.getEndUserIP();
         if (userIp == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("User IP is null in faulty event, setting to unknown value");
+            }
             userIp = Constants.UNKNOWN_VALUE;
         }
 

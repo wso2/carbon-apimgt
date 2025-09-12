@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -46,6 +48,8 @@ import javax.ws.rs.core.Response;
 
 public class OrganizationsApiServiceImpl implements OrganizationsApiService {
 
+    private static final Log log = LogFactory.getLog(OrganizationsApiServiceImpl.class);
+
     public Response organizationsGet(MessageContext messageContext) throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
@@ -56,11 +60,15 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
             if (orgInfo != null && orgInfo.getOrganizationId() != null) {
                 parentOrgId = orgInfo.getOrganizationId(); // assign current user org as the parent org.
             }
+            log.info("Retrieving organizations for parent: " + (parentOrgId != null ? parentOrgId : "null"));
             // retrieve child organizations for the current user.
             List<OrganizationDetailsDTO> orgList = apiAdmin.getOrganizations(parentOrgId,
                     superOrganization);
 
             OrganizationListDTO organizationsListDTO = OrganizationsMappingUtil.toOrganizationsListDTO(orgList, parentOrgId);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully retrieved " + orgList.size() + " organizations");
+            }
             return Response.ok().entity(organizationsListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Organizations";
@@ -71,6 +79,7 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
     public Response organizationsOrganizationIdDelete(String organizationId, MessageContext messageContext)
             throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
+        log.info("Deleting organization with ID: " + organizationId);
         try {
             String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
             OrganizationDetailsDTO organizationInfoDTO = apiAdmin.getOrganizationDetails(organizationId,
@@ -80,6 +89,7 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
                         ExceptionCodes.INVALID_ORGANINATION);
             }
             apiAdmin.deleteOrganization(organizationId, superOrganization);
+            log.info("Successfully deleted organization: " + organizationInfoDTO.getName());
 
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ORGANIZATION, new Gson().toJson(organizationInfoDTO),
                     APIConstants.AuditLogConstants.DELETED, RestApiCommonUtil.getLoggedInUsername());

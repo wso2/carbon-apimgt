@@ -128,7 +128,10 @@ public class RegistryPersistenceUtil {
      */
     public static GenericArtifact createAPIArtifactContent(GenericArtifact artifact, API api)
                                     throws APIManagementException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Creating API artifact content for API: " + 
+                    (api != null && api.getId() != null ? api.getId().getApiName() : "unknown"));
+        }
         try {
             String apiStatus = api.getStatus();
             artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, api.getId().getApiName());
@@ -347,6 +350,10 @@ public class RegistryPersistenceUtil {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully created API artifact content for API: " + 
+                    (api != null && api.getId() != null ? api.getId().getApiName() : "unknown"));
+        }
         return artifact;
     }
 
@@ -500,7 +507,10 @@ public class RegistryPersistenceUtil {
      */
     public static GenericArtifactManager getArtifactManager(Registry registry, String key)
             throws APIPersistenceException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Getting artifact manager for key: " + key + " and tenant: " + 
+                    ((registry instanceof UserRegistry) ? ((UserRegistry) registry).getTenantId() : "unknown"));
+        }
         GenericArtifactManager artifactManager = null;
 
         try {
@@ -517,6 +527,10 @@ public class RegistryPersistenceUtil {
             String msg = "Failed to initialize GenericArtifactManager";
             log.error(msg, e);
             throw new APIPersistenceException(msg, e);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully initialized artifact manager for key: " + key + 
+                    " result: " + (artifactManager != null ? "success" : "null"));
         }
         return artifactManager;
     }

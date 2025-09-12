@@ -41,9 +41,12 @@ public class AnalyticsServiceReferenceHolder {
     }
 
     public void setConfigurations(AnalyticsCommonConfiguration analyticsCommonConfiguration) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting analytics common configuration");
+        }
         this.analyticsCommonConfiguration = analyticsCommonConfiguration;
         // initialize data publisher at server start up
         AnalyticsDataPublisher.getInstance().initialize(analyticsCommonConfiguration);
-        log.debug("Analytics data publisher initialized.");
+        log.info("Analytics data publisher initialized successfully");
     }
 }

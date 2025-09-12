@@ -52,11 +52,14 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         APIAdmin apiAdmin = new APIAdminImpl();
         //String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        log.info("Deleting gateway environment: " + environmentId + " from organization: " + organization);
         if (apiAdmin.hasExistingDeployments(organization, environmentId)) {
+            log.warn("Cannot delete environment " + environmentId + " due to active deployments");
             RestApiUtil.handleConflict("Cannot delete the environment with id: " + environmentId
                     + " as active gateway policy deployment exist", log);
         }
         apiAdmin.deleteEnvironment(organization, environmentId);
+        log.info("Successfully deleted environment: " + environmentId);
         String info = "{'id':'" + environmentId + "'}";
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.GATEWAY_ENVIRONMENTS, info,
                 APIConstants.AuditLogConstants.DELETED, RestApiCommonUtil.getLoggedInUsername());
@@ -67,8 +70,12 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
     public Response environmentsEnvironmentIdGatewaysGet(String environmentId, MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving gateway instances for environment: " + environmentId);
+        }
         Environment environment = apiAdmin.getEnvironment(organization, environmentId);
         if (environment == null) {
+            log.warn("Gateway environment not found: " + environmentId);
             throw new APIManagementException("Requested Gateway Environment not found",
                     ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND);
         }
@@ -89,7 +96,9 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         GatewayInstanceListDTO listDTO = new GatewayInstanceListDTO();
         listDTO.setCount(gatewayList.size());
         listDTO.setList(gatewayList);
-
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully retrieved " + gatewayList.size() + " gateway instances for environment: " + environmentId);
+        }
         return Response.ok().entity(listDTO).build();
     }
 
@@ -97,11 +106,15 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
     public Response environmentsEnvironmentIdGet(String environmentId, MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving gateway environment: " + environmentId);
+        }
         Environment environment = apiAdmin.getEnvironment(organization, environmentId);
         if (environment != null) {
             EnvironmentDTO environmentDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(environment);
             return Response.ok().entity(environmentDTO).build();
         }
+        log.warn("Gateway environment not found: " + environmentId);
         throw new APIManagementException("Requested Gateway Environment not found",
                 ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND);
     }
@@ -119,6 +132,8 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         APIAdmin apiAdmin = new APIAdminImpl();
         body.setId(environmentId);
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        String envName = body.getName() != null ? body.getName() : "null";
+        log.info("Updating gateway environment: " + envName + " with ID: " + environmentId);
         Environment env = EnvironmentMappingUtil.fromEnvDtoToEnv(body);
         GatewayVisibilityPermissionConfigurationDTO gatewayVisibilityPermissionConfigurationDTO =
                 env.getPermissions();
@@ -126,6 +141,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         try {
         this.validatePermissions(gatewayVisibilityPermissionConfigurationDTO);
         apiAdmin.updateEnvironment(organization, env);
+        log.info("Successfully updated gateway environment: " + envName);
         APIUtil.validateAndScheduleFederatedGatewayAPIDiscovery(env, organization);
         location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + environmentId);
         } catch (URISyntaxException e) {
@@ -152,8 +168,12 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
     public Response environmentsGet(MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        log.info("Retrieving all gateway environments for organization: " + organization);
         List<Environment> envList = apiAdmin.getAllEnvironments(organization);
         EnvironmentListDTO envListDTO = EnvironmentMappingUtil.fromEnvListToEnvListDTO(envList);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully retrieved " + envList.size() + " gateway environments");
+        }
         return Response.ok().entity(envListDTO).build();
     }
 
@@ -167,6 +187,8 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
      */
     public Response environmentsPost(EnvironmentDTO body, MessageContext messageContext) throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        String envName = body.getName() != null ? body.getName() : "null";
+        log.info("Creating new gateway environment: " + envName + " for organization: " + organization);
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
             String gatewayType = body.getGatewayType();
@@ -185,6 +207,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             validatePermissions(gatewayVisibilityPermissionConfigurationDTO);
             Environment addedEnv = apiAdmin.addEnvironment(organization, env);
             EnvironmentDTO envDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(addedEnv);
+            log.info("Successfully created gateway environment: " + envName + " with ID: " + addedEnv.getId());
             APIUtil.validateAndScheduleFederatedGatewayAPIDiscovery(addedEnv, organization);
             URI location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + envDTO.getId());
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.GATEWAY_ENVIRONMENTS, new Gson().toJson(envDTO),

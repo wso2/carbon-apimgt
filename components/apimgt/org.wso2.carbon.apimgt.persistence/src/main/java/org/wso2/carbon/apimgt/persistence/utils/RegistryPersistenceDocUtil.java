@@ -37,7 +37,10 @@ import org.wso2.carbon.utils.CarbonUtils;
 public class RegistryPersistenceDocUtil {
     private static final Log log = LogFactory.getLog(RegistryPersistenceDocUtil.class);
     public static Documentation getDocumentation(GenericArtifact artifact) throws DocumentationPersistenceException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Converting generic artifact to documentation object for artifact ID: " + 
+                    (artifact != null ? artifact.getId() : "null"));
+        }
         Documentation documentation;
 
         try {
@@ -92,7 +95,12 @@ public class RegistryPersistenceDocUtil {
             }
 
         } catch (GovernanceException e) {
+            log.error("Failed to get documentation from artifact with ID: " + 
+                    (artifact != null ? artifact.getId() : "null"), e);
             throw new DocumentationPersistenceException("Failed to get documentation from artifact", e);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully converted artifact to documentation: " + documentation.getName());
         }
         return documentation;
     }
@@ -108,7 +116,10 @@ public class RegistryPersistenceDocUtil {
     
     public static GenericArtifactManager getDocumentArtifactManager(Registry registry)
             throws DocumentationPersistenceException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Getting document artifact manager for tenant: " + 
+                    ((registry instanceof UserRegistry) ? ((UserRegistry) registry).getTenantId() : "unknown"));
+        }
         GenericArtifactManager artifactManager = null;
         String key = "document";
         try {
@@ -179,7 +190,11 @@ public class RegistryPersistenceDocUtil {
     
     public static GenericArtifact createDocArtifactContent(GenericArtifact artifact, String apiName, String apiVersion,
             String apiProvider, Documentation documentation) throws DocumentationPersistenceException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Creating doc artifact content for API: " + apiName + " version: " + apiVersion + 
+                    " provider: " + apiProvider + " doc: " + 
+                    (documentation != null ? documentation.getName() : "null"));
+        }
         try {
             artifact.setAttribute(APIConstants.DOC_NAME, documentation.getName());
             artifact.setAttribute(APIConstants.DOC_SUMMARY, documentation.getSummary());
@@ -218,9 +233,13 @@ public class RegistryPersistenceDocUtil {
                     + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion;
             artifact.setAttribute(APIConstants.DOC_API_BASE_PATH, basePath);
         } catch (GovernanceException e) {
-            String msg = "Failed to create doc artifact content from :" + documentation.getName();
+            String msg = "Failed to create doc artifact content from: " + 
+                    (documentation != null ? documentation.getName() : "null");
             log.error(msg, e);
             throw new DocumentationPersistenceException(msg, e);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully created doc artifact content for documentation: " + documentation.getName());
         }
         return artifact;
     }
