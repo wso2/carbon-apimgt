@@ -73,6 +73,7 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private Set<String> applicationGroupIds = new HashSet<>();
     private Map<String, String> appAttributes;
     private boolean isExpired = false;
+    private String mcpUpstreamToken;
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -423,6 +424,16 @@ public class APIKeyValidationInfoDTO implements Serializable {
 
     public void setExpired(boolean expired) {
         isExpired = expired;
+    }
+
+    public String getMcpUpstreamToken() {
+
+        return mcpUpstreamToken;
+    }
+
+    public void setMcpUpstreamToken(String mcpUpstreamToken) {
+
+        this.mcpUpstreamToken = mcpUpstreamToken;
     }
 }
 
