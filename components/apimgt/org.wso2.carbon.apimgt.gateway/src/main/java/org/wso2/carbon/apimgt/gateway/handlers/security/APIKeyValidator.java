@@ -95,6 +95,7 @@ public class APIKeyValidator {
     private ArrayList<URITemplate> uriTemplates = null;
     private final boolean jwtGenerationEnabled;
     private static Long mcpInternalTokenExpiryTime;
+    private static InternalAPIKeyGenerator internalKeyGenerator;
 
     public APIKeyValidator() {
 
@@ -189,7 +190,10 @@ public class APIKeyValidator {
             if (mcpUpstreamToken == null) {
                 JwtTokenInfoDTO token = buildInternalJWTToken(info, jwtConfigurationDto, referencedApiUuids);
                 try {
-                    mcpUpstreamToken = new InternalAPIKeyGenerator().generateToken(token);
+                    if (internalKeyGenerator == null) {
+                        internalKeyGenerator = new InternalAPIKeyGenerator();
+                    }
+                    mcpUpstreamToken = internalKeyGenerator.generateToken(token);
                 } catch (APIManagementException e) {
                     String errorMsg = "Error occurred while generating upstream token for MCP";
                     log.error(errorMsg, e);
