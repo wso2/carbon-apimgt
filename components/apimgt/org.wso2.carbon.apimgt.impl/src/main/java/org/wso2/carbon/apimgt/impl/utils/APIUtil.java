@@ -105,6 +105,7 @@ import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
@@ -3577,7 +3578,7 @@ public final class APIUtil {
                 }
             } else {
                 GatewayAgentConfiguration externalGatewayConfiguration = externalGatewayConnectorConfigurationMap.get(gatewayType);
-                
+
                 if (externalGatewayConfiguration != null) {
                     processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, externalGatewayConfiguration);
                 } else {
@@ -3595,7 +3596,8 @@ public final class APIUtil {
     }
 
     private static void processExternalGatewayFeatureCatalogs(Map<String, Object> gatewayConfigsMap,
-        Map<String, List<String>> apiData, GatewayAgentConfiguration gatewayConfiguration) {
+                                                              Map<String, List<String>> apiData,
+                                                              GatewayAgentConfiguration gatewayConfiguration) {
 
         GatewayPortalConfiguration config = null;
         try {
@@ -8622,6 +8624,26 @@ public final class APIUtil {
     }
 
     /**
+     * Retrieves a list of APIs that are deployed in a specific gateway environment
+     * and belong to a specified organization.
+     *
+     * @param environmentName The name of the gateway environment to filter the deployed APIs.
+     * @param organization The organization to which the APIs belong.
+     * @param discoveredAPIs Flag indicating whether to include discovered APIs or APIs created from CP
+     * @return A list of ApiResult objects representing the APIs deployed in the specified
+     * gateway environment and belonging to the given organization.
+     * @throws APIManagementException If an error occurs while retrieving the APIs.
+     */
+    public static List<ApiResult> getAPIsDeployedInGatewayEnvironmentByOrg(String environmentName,
+                                                                           String organization,
+                                                                           boolean discoveredAPIs)
+            throws APIManagementException {
+
+        return ApiMgtDAO.getInstance().getAPIsDeployedInGatewayEnvironmentByOrg(environmentName, organization,
+                discoveredAPIs);
+    }
+
+    /**
      * Get gateway environments defined in the configuration: api-manager.xml
      *
      * @return map of configured environments against environment name
@@ -11883,19 +11905,15 @@ public final class APIUtil {
      *
      * @param environment   The environment to validate and schedule discovery for.
      * @param organization  The organization to which the environment belongs.
-     * @param updateEnvFlow Whether to update the environment flow before validation.
      */
-    public static void validateAndScheduleFederatedGatewayAPIDiscovery(Environment environment, String organization,
-                                                                       boolean updateEnvFlow) {
+    public static void validateAndScheduleFederatedGatewayAPIDiscovery(Environment environment, String organization) {
         FederatedAPIDiscoveryService federatedAPIDiscoveryService = ServiceReferenceHolder
                 .getInstance().getFederatedAPIDiscoveryService();
         try {
-            if (updateEnvFlow) {
-                APIAdminImpl apiAdmin = new APIAdminImpl();
-                environment = apiAdmin.getEnvironmentWithoutPropertyMasking(organization,
-                        environment.getUuid());
-                environment = apiAdmin.decryptGatewayConfigurationValues(environment);
-            }
+            APIAdminImpl apiAdmin = new APIAdminImpl();
+            environment = apiAdmin.getEnvironmentWithoutPropertyMasking(organization,
+                    environment.getUuid());
+            environment = apiAdmin.decryptGatewayConfigurationValues(environment);
             if (environment.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
                 federatedAPIDiscoveryService.scheduleDiscovery(environment, organization);
             }
@@ -11915,8 +11933,7 @@ public final class APIUtil {
         if (StringUtils.isBlank(epochMillis)) return null;
         try {
             return new Date(Long.parseLong(epochMillis));
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             log.warn("Provided epoch time string: " + epochMillis + " is not valid.", e);
             return null;
         }

@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.32.62-SNAPSHOT</version>
+        <version>9.32.76-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -103,6 +103,9 @@
                                 </bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.common.gateway:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>org.apache.httpcomponents.wso2:httpcore</bundleDef>
+                                <bundleDef>
+                                    com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${fasterxml.jackson.version}
+                                </bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

@@ -92,6 +92,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_RUNTIME_READ_ONLY;
 import static org.wso2.carbon.apimgt.impl.APIConstants.SHA_256;
 
 /**
@@ -176,6 +177,7 @@ public class APIManagerConfiguration {
     private boolean isTransactionCounterEnabled;
     private static boolean isMCPSupportEnabled = true;
     private static String devportalMode = APIConstants.DEVPORTAL_MODE_HYBRID;
+    private static volatile boolean isRuntimeReadOnly = false;
 
     public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
@@ -184,6 +186,14 @@ public class APIManagerConfiguration {
     public Map<String, ExtensionListener> getExtensionListenerMap() {
 
         return extensionListenerMap;
+    }
+
+    public boolean isRuntimeReadOnly() {
+        return isRuntimeReadOnly;
+    }
+
+    public void setRuntimeReadOnly(boolean runtimeReadOnly) {
+        this.isRuntimeReadOnly = runtimeReadOnly;
     }
 
     private Map<String, ExtensionListener> extensionListenerMap = new HashMap<>();
@@ -369,7 +379,9 @@ public class APIManagerConfiguration {
             OMElement element = (OMElement) childElements.next();
             String localName = element.getLocalName();
             nameStack.push(localName);
-            if ("APIKeyValidator".equals(localName)) {
+            if (API_RUNTIME_READ_ONLY.equals(localName)) {
+                    isRuntimeReadOnly = Boolean.parseBoolean(element.getText());
+            } else if ("APIKeyValidator".equals(localName)) {
                 OMElement keyManagerServiceUrl = element.getFirstChildWithName(new QName(APIConstants.AUTHSERVER_URL));
                 if (keyManagerServiceUrl != null) {
                     String serviceUrl = keyManagerServiceUrl.getText();

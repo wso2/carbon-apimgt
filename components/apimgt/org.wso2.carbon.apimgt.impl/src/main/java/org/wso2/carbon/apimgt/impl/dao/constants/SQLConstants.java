@@ -1392,6 +1392,21 @@ public class SQLConstants {
     public static final String ADD_SECURITY_AUDIT_MAP_SQL =
             "INSERT INTO AM_SECURITY_AUDIT_UUID_MAPPING (API_ID, AUDIT_UUID) VALUES (?,?)";
 
+    public static final String ADD_EXECUTOR_TASK_TO_LOCK_TABLE =
+            "INSERT INTO AM_TASK_LOCK (LOCK_TIME, TASK_ID, NODE_ID) VALUES (?,?,?)";
+
+    public static final String UPDATE_EXECUTOR_TASK_TO_LOCK_TABLE =
+            "UPDATE AM_TASK_LOCK SET LOCK_TIME=?, NODE_ID=? WHERE TASK_ID=?";
+
+    public static final String DELETE_EXECUTOR_TASK_FROM_LOCK_TABLE =
+            "DELETE FROM AM_TASK_LOCK WHERE TASK_ID = ?";
+
+    public static final String UPDATE_LOCK_TIME_FROM_LOCK_TABLE =
+            "UPDATE AM_TASK_LOCK SET LOCK_TIME = ? WHERE TASK_ID = ?";
+
+    public static final String GET_LOCK_TIME_OF_EXECUTOR_TASK_SQL = "SELECT LOCK_TIME " +
+            "FROM AM_TASK_LOCK WHERE TASK_ID = ?";
+
     public static final String REMOVE_SECURITY_AUDIT_MAP_SQL =
             "DELETE FROM AM_SECURITY_AUDIT_UUID_MAPPING WHERE API_ID = ?";
 
@@ -2721,6 +2736,15 @@ public class SQLConstants {
                     "KEY_TEMPLATE = ? " +
                     "WHERE UUID = ?";
 
+    public static final String GET_API_DETAILS_DEPLOYED_IN_ENVIRONMENT =
+            "SELECT DISTINCT A.API_NAME, A.API_VERSION, A.API_UUID, A.API_PROVIDER, A.API_TYPE " +
+                    "FROM AM_DEPLOYMENT_REVISION_MAPPING M " +
+                    "JOIN AM_REVISION R " +
+                    "  ON R.REVISION_UUID = M.REVISION_UUID " +
+                    "JOIN AM_API A " +
+                    "  ON A.API_UUID = R.API_UUID " +
+                    "WHERE M.NAME = ? and A.ORGANIZATION = ? and A.INITIATED_FROM_GW = ?";
+
     public static final String UPDATE_APPLICATION_POLICY_STATUS_SQL =
             "UPDATE AM_POLICY_APPLICATION SET IS_DEPLOYED = ? WHERE NAME = ? AND TENANT_ID = ?";
 
@@ -3229,6 +3253,19 @@ public class SQLConstants {
             "CONTEXT, CONTEXT_TEMPLATE, API_TIER, API_TYPE, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, " +
             " ORGANIZATION, REVISIONS_CREATED, STATUS, IS_EGRESS, API_SUBTYPE, API_DISPLAY_NAME, INITIATED_FROM_GW" +
             " FROM AM_API WHERE API_UUID = ?";
+
+    public static final String RETRIEVE_API_INFO_FROM_UUID_AND_TYPE =
+            "SELECT API_UUID, API_PROVIDER, API_NAME, API_VERSION, CONTEXT, CONTEXT_TEMPLATE, API_TIER, API_TYPE," +
+                    " CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME," +
+                    " ORGANIZATION, REVISIONS_CREATED, STATUS, IS_EGRESS, API_SUBTYPE, API_DISPLAY_NAME," +
+                    " INITIATED_FROM_GW FROM AM_API WHERE API_UUID = ? AND API_TYPE = ?";
+
+    public static final String RETRIEVE_API_INFO_FROM_UUID_NON_MCP =
+            "SELECT API_UUID, API_PROVIDER, API_NAME, API_VERSION, CONTEXT, CONTEXT_TEMPLATE, API_TIER, API_TYPE," +
+                    " CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME," +
+                    " ORGANIZATION, REVISIONS_CREATED, STATUS, IS_EGRESS, API_SUBTYPE, API_DISPLAY_NAME," +
+                    " INITIATED_FROM_GW FROM AM_API WHERE API_UUID = ? AND API_TYPE != 'MCP'";
+
     public static final String RETRIEVE_DEFAULT_VERSION = "SELECT DEFAULT_API_VERSION,PUBLISHED_DEFAULT_API_VERSION " +
             "FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER =?";
 
@@ -4965,19 +5002,24 @@ public class SQLConstants {
                         "ORGANIZATION) " +
                         "VALUES(?,?,?,?,?,?,?)";
 
-        public static final String DELETE_PRIMARY_ENDPOINT_MAPPING =
+        public static final String DELETE_PRIMARY_ENDPOINT_MAPPING_BY_API_UUID =
                 "DELETE FROM AM_API_PRIMARY_EP_MAPPING WHERE API_UUID = ?";
 
+        public static final String DELETE_PRIMARY_ENDPOINT_MAPPING_BY_API_UUID_AND_REVISION_UUID =
+                "DELETE FROM AM_API_PRIMARY_EP_MAPPING WHERE API_UUID = ? AND REVISION_UUID = ?";
+
         public static final String ADD_PRIMARY_ENDPOINT_MAPPING =
-                "INSERT INTO AM_API_PRIMARY_EP_MAPPING (API_UUID, ENDPOINT_UUID) VALUES(?,?)";
+                "INSERT INTO AM_API_PRIMARY_EP_MAPPING (API_UUID, ENDPOINT_UUID, REVISION_UUID) VALUES(?,?,?)";
 
         public static final String GET_PRIMARY_ENDPOINT_MAPPINGS =
-                "SELECT ENDPOINT_UUID FROM AM_API_PRIMARY_EP_MAPPING WHERE API_UUID = ?";
+                "SELECT ENDPOINT_UUID " +
+                        "FROM AM_API_PRIMARY_EP_MAPPING WHERE API_UUID = ? AND REVISION_UUID = ?";
 
         public static final String GET_API_PRIMARY_ENDPOINT_UUIDS_BY_API_UUID =
                 "SELECT AME.ENDPOINT_UUID " +
                         "FROM AM_API_ENDPOINTS AME INNER JOIN AM_API_PRIMARY_EP_MAPPING AMPM " +
-                        "ON (AMPM.ENDPOINT_UUID = AME.ENDPOINT_UUID AND AMPM.API_UUID = AME.API_UUID) " +
+                        "ON (AMPM.ENDPOINT_UUID = AME.ENDPOINT_UUID AND AMPM.API_UUID = AME.API_UUID " +
+                        "AND AMPM.REVISION_UUID = AME.REVISION_UUID) " +
                         "WHERE " +
                         "AME.API_UUID = ? " +
                         "AND AME.ORGANIZATION = ? " +
@@ -4986,7 +5028,8 @@ public class SQLConstants {
         public static final String GET_API_PRIMARY_ENDPOINT_UUID_BY_API_UUID_AND_KEY_TYPE =
                 "SELECT AME.ENDPOINT_UUID " +
                         "FROM AM_API_ENDPOINTS AME INNER JOIN AM_API_PRIMARY_EP_MAPPING AMPM " +
-                        "ON (AMPM.ENDPOINT_UUID = AME.ENDPOINT_UUID AND AMPM.API_UUID = AME.API_UUID) " +
+                        "ON (AMPM.ENDPOINT_UUID = AME.ENDPOINT_UUID AND AMPM.API_UUID = AME.API_UUID " +
+                        "AND AMPM.REVISION_UUID = AME.REVISION_UUID) " +
                         "WHERE " +
                         "AME.API_UUID = ? " +
                         "AND AME.ORGANIZATION = ? " +
@@ -4996,7 +5039,8 @@ public class SQLConstants {
         public static final String GET_API_PRIMARY_ENDPOINT_UUID_BY_API_UUID_AND_KEY_TYPE_REVISION =
                 "SELECT AME.ENDPOINT_UUID " +
                         "FROM AM_API_ENDPOINTS AME INNER JOIN AM_API_PRIMARY_EP_MAPPING AMPM " +
-                        "ON (AMPM.ENDPOINT_UUID = AME.ENDPOINT_UUID AND AMPM.API_UUID = AME.API_UUID) " +
+                        "ON (AMPM.ENDPOINT_UUID = AME.ENDPOINT_UUID AND AMPM.API_UUID = AME.API_UUID " +
+                        "AND AMPM.REVISION_UUID = AME.REVISION_UUID) " +
                         "WHERE " +
                         "AME.API_UUID = ? " +
                         "AND AME.ORGANIZATION = ? " +

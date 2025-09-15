@@ -81,6 +81,10 @@ public class SearchResultMappingUtil {
         if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
             apiResultDTO.setType(SearchResultDTO.TypeEnum.MCP);
             apiResultDTO.setTransportType(APIConstants.API_TYPE_HTTP);
+        } else if (APIConstants.API_TYPE_PRODUCT.equals(api.getType())) {
+            // In API search, the API Products are also returned as APIs. Hence, we need to handle this case as well.
+            apiResultDTO.setType(SearchResultDTO.TypeEnum.APIPRODUCT);
+            apiResultDTO.setTransportType(APIConstants.API_TYPE_HTTP);
         } else {
             apiResultDTO.setType(SearchResultDTO.TypeEnum.API);
             apiResultDTO.setTransportType(api.getType());
@@ -122,7 +126,7 @@ public class SearchResultMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
         apiResultDTO.setBusinessInformation(apiBusinessInformationDTO);
         apiResultDTO.setType(SearchResultDTO.TypeEnum.APIPRODUCT);
-        apiResultDTO.setTransportType(apiProduct.getType());
+        apiResultDTO.setTransportType(APIConstants.API_TYPE_HTTP);
         apiResultDTO.setDescription(apiProduct.getDescription());
         apiResultDTO.setStatus(apiProduct.getState());
         apiResultDTO.setThumbnailUri(apiProduct.getThumbnailUrl());
@@ -150,6 +154,7 @@ public class SearchResultMappingUtil {
         docResultDTO.setApiVersion(apiId.getVersion());
         docResultDTO.setApiProvider(apiId.getProviderName());
         docResultDTO.setApiUUID(api.getUUID());
+        docResultDTO.setAssociatedType(api.getType());
         return docResultDTO;
     }
 

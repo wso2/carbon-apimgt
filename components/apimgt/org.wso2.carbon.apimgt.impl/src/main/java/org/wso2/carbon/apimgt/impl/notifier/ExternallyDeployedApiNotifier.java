@@ -90,8 +90,6 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
         }
 
         try {
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
             List<APIRevisionDeployment> test = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
 
             for (APIRevisionDeployment deployment : test) {
@@ -105,7 +103,11 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                             if (referenceArtifact == null) {
                                 throw new DeployerException("API is not mapped with an External API");
                             }
-                            deleted = deployer.undeploy(referenceArtifact);
+                            if (log.isDebugEnabled()){
+                                log.debug("Undeploy API from external gateway: " + referenceArtifact +
+                                        " in environment: " + deploymentEnv);
+                            }
+                            deleted = deployer.undeploy(referenceArtifact, true);
                             if (!deleted) {
                                 throw new NotifierException("Error while deleting externally deployed API");
                             }
@@ -147,7 +149,11 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                             if (referenceArtifact == null) {
                                 throw new APIManagementException("API is not mapped with an External API");
                             }
-                            deleted = deployer.undeploy(referenceArtifact);
+                            if (log.isDebugEnabled()){
+                                log.debug("Undeploy API from external gateway: " + referenceArtifact +
+                                        " in environment: " + deploymentEnv);
+                            }
+                            deleted = deployer.undeploy(referenceArtifact, true);
                             if (!deleted) {
                                 throw new NotifierException("Error while deleting externally deployed API");
                             }

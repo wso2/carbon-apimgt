@@ -682,6 +682,7 @@ public class SubscriptionValidationSQLConstants {
                 "AM_API_OPERATION_MAPPING.REF_URL_MAPPING_ID, " +
                 "AM_API_URL_MAPPING.HTTP_METHOD, " +
                 "AM_API_URL_MAPPING.URL_PATTERN, " +
+                "AM_API.API_UUID, " +
                 "AM_API.API_NAME, " +
                 "AM_API.API_VERSION, " +
                 "AM_API.CONTEXT " +

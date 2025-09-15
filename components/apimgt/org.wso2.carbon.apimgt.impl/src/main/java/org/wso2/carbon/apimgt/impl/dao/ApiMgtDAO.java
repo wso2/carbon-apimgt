@@ -10428,15 +10428,37 @@ public class ApiMgtDAO {
      * @throws APIManagementException error while getting the API information from AM_API
      */
     public APIInfo getAPIInfoByUUID(String apiId) throws APIManagementException {
+        return getAPIInfoByUUID(apiId, null);
+    }
+
+    /**
+     * Retrieve basic information about the given API by the UUID quering only from AM_API
+     *
+     * @param apiId            UUID of the API
+     * @param requestedAPIType API Type
+     * @return basic information about the API
+     * @throws APIManagementException error while getting the API information from AM_API
+     */
+    public APIInfo getAPIInfoByUUID(String apiId, String requestedAPIType) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             APIRevision apiRevision = getRevisionByRevisionUUID(connection, apiId);
-            String sql = SQLConstants.RETRIEVE_API_INFO_FROM_UUID;
+            String sql;
+            if (requestedAPIType == null) {
+                sql = SQLConstants.RETRIEVE_API_INFO_FROM_UUID;
+            } else if (APIConstants.API_IDENTIFIER_TYPE.equalsIgnoreCase(requestedAPIType)) {
+                sql = SQLConstants.RETRIEVE_API_INFO_FROM_UUID_NON_MCP;
+            } else {
+                sql = SQLConstants.RETRIEVE_API_INFO_FROM_UUID_AND_TYPE;
+            }
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 if (apiRevision != null) {
                     preparedStatement.setString(1, apiRevision.getApiUUID());
                 } else {
                     preparedStatement.setString(1, apiId);
+                }
+                if (requestedAPIType != null && !APIConstants.API_IDENTIFIER_TYPE.equalsIgnoreCase(requestedAPIType)) {
+                    preparedStatement.setString(2, requestedAPIType);
                 }
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
@@ -16730,7 +16752,7 @@ public class ApiMgtDAO {
                         while (rs.next()) {
                             insertProductResourceMappingStatement.setInt(1, productId);
                             insertProductResourceMappingStatement.setInt(2, rs.getInt(1));
-                            insertProductResourceMappingStatement.setString(3, "Current API");
+                            insertProductResourceMappingStatement.setString(3, APIConstants.API_REVISION_CURRENT_API);
                             insertProductResourceMappingStatement.addBatch();
                         }
                     }
@@ -17161,6 +17183,143 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while adding new audit api id: ", e);
         }
+    }
+
+    /**
+     * Adds an executor task to the database lock table with the provided scheduled time, task ID, and node ID.
+     *
+     * @param scheduledTime the scheduled time of the task in milliseconds since epoch
+     * @param taskId        the unique identifier of the task
+     * @param nodeId        the identifier of the node where
+     * @return true if the lock is successfully acquired
+     *
+     */
+    public boolean addExecutorTask(Long scheduledTime, String taskId, String nodeId)
+            throws APIManagementException {
+        String query = SQLConstants.ADD_EXECUTOR_TASK_TO_LOCK_TABLE;
+        boolean response = false;
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                ps.setLong(1, scheduledTime);
+                ps.setString(2, taskId);
+                ps.setString(3, nodeId);
+                ps.execute();
+            } catch (SQLException e) {
+                if (e instanceof SQLIntegrityConstraintViolationException) {
+                    log.debug("Executor task already exists for the given task id: " + taskId);
+                    conn.rollback();
+                    return response;
+                }
+                conn.rollback();
+                handleException("Error while adding executor task to the database lock table: ", e);
+            }
+            conn.commit();
+            response = true;
+        } catch (SQLException e) {
+            handleException("Error while verifying execution task availability: ", e);
+        }
+        return response;
+    }
+
+    /**
+     * Removes the executor task from the database lock table.
+     *
+     * @param taskId the unique identifier of the task
+     * @throws APIManagementException
+     */
+    public void deleteExecutorTask(String taskId) throws APIManagementException {
+        String query = SQLConstants.DELETE_EXECUTOR_TASK_FROM_LOCK_TABLE;
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                ps.setString(1, taskId);
+                ps.executeUpdate();
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            handleException("Error while deleting executor task: ", e);
+        }
+    }
+
+    /**
+     * Update acquired lock time of the executor task.
+     *
+     * @param updatedScheduledTime the updated scheduled time of the task in milliseconds since epoch
+     * @param taskId               the unique identifier of the task
+     */
+    public void updateScheduledTimeOfExecutorTask(long updatedScheduledTime, String taskId) throws APIManagementException {
+        String query = SQLConstants.UPDATE_LOCK_TIME_FROM_LOCK_TABLE;
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                ps.setLong(1, updatedScheduledTime);
+                ps.setString(2, taskId);
+                ps.executeUpdate();
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            handleException("Error while updating executor task TTL: ", e);
+        }
+    }
+
+    /**
+     * Retrieves the scheduled time for a given executor task based on its task ID.
+     *
+     * @param taskId The unique identifier of the executor task for which the scheduled time is to be retrieved.
+     * @return The scheduled time of the specified executor task as a long value.
+     * If the task is not found or an error occurs, returns 0.
+     **/
+    public long getScheduledTimeFromExecutorTask(String taskId) throws APIManagementException {
+        String query = SQLConstants.GET_LOCK_TIME_OF_EXECUTOR_TASK_SQL;
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                ps.setString(1, taskId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getLong("LOCK_TIME");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while getting executor task LOCK_TIME: ", e);
+        }
+        return 0;
+    }
+
+    /**
+     * Updates the executor task in the database with the given scheduled time, task ID,
+     * and node ID. This method locks the task for the specified executor node.
+     *
+     * @param scheduledTime The scheduled time to set for the task in milliseconds.
+     * @param taskId        The unique identifier of the task to update.
+     * @param nodeId        The ID of the executor node that locks the task.
+     * @return true if the executor task was updated successfully
+     **/
+    public boolean updateExecutorTask(long scheduledTime, String taskId, String nodeId)
+            throws APIManagementException {
+        String query = SQLConstants.UPDATE_EXECUTOR_TASK_TO_LOCK_TABLE;
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                ps.setLong(1, scheduledTime);
+                ps.setString(2, nodeId);
+                ps.setString(3, taskId);
+                int rows = ps.executeUpdate();
+                if (rows == 1) {
+                    conn.commit();
+                    return true;
+                }
+                conn.rollback();
+                return false;
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Error while updating executor task: ", e);
+            }
+        } catch (SQLException e) {
+            handleException("Error updating executor task. Database connection could not be established: ", e);
+        }
+        return false;
     }
 
     /**
@@ -19567,31 +19726,22 @@ public class ApiMgtDAO {
 
                 // Add Primary Production endpoint mapping
                 String apiUUID = apiRevision.getApiUUID();
-                PreparedStatement addPrimaryMapping = connection
+                try (PreparedStatement addPrimaryMapping = connection
                         .prepareStatement(SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING);
-                PreparedStatement getPrimaryEpMappingStmt = connection.prepareStatement(
-                        SQLConstants.APIEndpointsSQLConstants.GET_API_PRIMARY_ENDPOINT_UUID_BY_API_UUID_AND_KEY_TYPE);
-                getPrimaryEpMappingStmt.setString(1, apiUUID);
-                getPrimaryEpMappingStmt.setString(2, organization);
-                getPrimaryEpMappingStmt.setString(3, APIConstants.APIEndpoint.PRODUCTION);
-                try (ResultSet resultSet = getPrimaryEpMappingStmt.executeQuery()) {
-                    if (resultSet.next()) {
-                        addPrimaryMapping.setString(1, apiRevision.getApiUUID());
-                        addPrimaryMapping.setString(2, resultSet.getString("ENDPOINT_UUID"));
-                        addPrimaryMapping.addBatch();
+                        PreparedStatement getPrimaryEpMappingsStmt = connection.prepareStatement(
+                                SQLConstants.APIEndpointsSQLConstants.GET_PRIMARY_ENDPOINT_MAPPINGS)) {
+                    getPrimaryEpMappingsStmt.setString(1, apiUUID);
+                    getPrimaryEpMappingsStmt.setString(2, APIConstants.API_REVISION_CURRENT_API);
+                    try (ResultSet resultSet = getPrimaryEpMappingsStmt.executeQuery()) {
+                        while (resultSet.next()) {
+                            addPrimaryMapping.setString(1, apiRevision.getApiUUID());
+                            addPrimaryMapping.setString(2, resultSet.getString("ENDPOINT_UUID"));
+                            addPrimaryMapping.setString(3, apiRevision.getRevisionUUID());
+                            addPrimaryMapping.addBatch();
+                        }
                     }
+                    addPrimaryMapping.executeBatch();
                 }
-                getPrimaryEpMappingStmt.setString(1, apiUUID);
-                getPrimaryEpMappingStmt.setString(2, organization);
-                getPrimaryEpMappingStmt.setString(3, APIConstants.APIEndpoint.SANDBOX);
-                try (ResultSet resultSet = getPrimaryEpMappingStmt.executeQuery()) {
-                    if (resultSet.next()) {
-                        addPrimaryMapping.setString(1, apiRevision.getApiUUID());
-                        addPrimaryMapping.setString(2, resultSet.getString("ENDPOINT_UUID"));
-                        addPrimaryMapping.addBatch();
-                    }
-                }
-                addPrimaryMapping.executeBatch();
 
                 // Adding to AM_API_CLIENT_CERTIFICATE
                 String getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE;
@@ -20447,11 +20597,21 @@ public class ApiMgtDAO {
 
                 removeBackendOfCurrentAPI(connection, apiRevision.getApiUUID());
                 deleteCurrentAPIMetadata(connection, apiRevision.getApiUUID());
+
                 // Removing related Current API Endpoint from AM_API_ENDPOINTS table
-                PreparedStatement removeAPIEndpointsStatement = connection.prepareStatement(SQLConstants
-                        .APIEndpointsSQLConstants.DELETE_CURRENT_API_ENDPOINTS);
-                removeAPIEndpointsStatement.setString(1, apiRevision.getApiUUID());
-                removeAPIEndpointsStatement.executeUpdate();
+                try (PreparedStatement removeAPIEndpointsStatement = connection.prepareStatement(SQLConstants
+                        .APIEndpointsSQLConstants.DELETE_CURRENT_API_ENDPOINTS)) {
+                    removeAPIEndpointsStatement.setString(1, apiRevision.getApiUUID());
+                    removeAPIEndpointsStatement.executeUpdate();
+                }
+
+                // Removing current API primary endpoint mappings from AM_API_PRIMARY_EP_MAPPING table
+                try (PreparedStatement removePrimaryEndpointMappingsStmt = connection.prepareStatement(
+                        SQLConstants.APIEndpointsSQLConstants.DELETE_PRIMARY_ENDPOINT_MAPPING_BY_API_UUID_AND_REVISION_UUID)) {
+                    removePrimaryEndpointMappingsStmt.setString(1, apiRevision.getApiUUID());
+                    removePrimaryEndpointMappingsStmt.setString(2, APIConstants.API_REVISION_CURRENT_API);
+                    removePrimaryEndpointMappingsStmt.executeUpdate();
+                }
 
                 List<Backend> backends = getBackendRevisions(connection, apiRevision.getApiUUID(),
                         apiRevision.getRevisionUUID(), organization);
@@ -20477,7 +20637,7 @@ public class ApiMgtDAO {
                 for (APIEndpointInfo apiEndpointInfo : apiEndpointInfoList) {
                     insertAPIEndpointStatement.setString(1, apiRevision.getApiUUID());
                     insertAPIEndpointStatement.setString(2, apiEndpointInfo.getId());
-                    insertAPIEndpointStatement.setString(3, "Current API");
+                    insertAPIEndpointStatement.setString(3, APIConstants.API_REVISION_CURRENT_API);
                     insertAPIEndpointStatement.setString(4, apiEndpointInfo.getName());
                     insertAPIEndpointStatement.setString(5, apiEndpointInfo.getDeploymentStage());
                     insertAPIEndpointStatement.setBinaryStream(6,
@@ -20486,6 +20646,28 @@ public class ApiMgtDAO {
                     insertAPIEndpointStatement.addBatch();
                 }
                 insertAPIEndpointStatement.executeBatch();
+
+                // Restoring to AM_API_PRIMARY_EP_MAPPING
+                try (PreparedStatement getPrimaryEndpoints = connection.prepareStatement(
+                        SQLConstants.APIEndpointsSQLConstants.GET_PRIMARY_ENDPOINT_MAPPINGS);
+                        PreparedStatement insertPrimaryEndpointMappingsStatement = connection.prepareStatement(
+                                SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING)) {
+                    getPrimaryEndpoints.setString(1, apiRevision.getApiUUID());
+                    getPrimaryEndpoints.setString(2, apiRevision.getRevisionUUID());
+                    List<String> primaryEndpoints = new ArrayList<>();
+                    try (ResultSet rs = getPrimaryEndpoints.executeQuery()) {
+                        while (rs.next()) {
+                            primaryEndpoints.add(rs.getString("ENDPOINT_UUID"));
+                        }
+                    }
+                    for (String primaryEndpointUUID : primaryEndpoints) {
+                        insertPrimaryEndpointMappingsStatement.setString(1, apiRevision.getApiUUID());
+                        insertPrimaryEndpointMappingsStatement.setString(2, primaryEndpointUUID);
+                        insertPrimaryEndpointMappingsStatement.setString(3, APIConstants.API_REVISION_CURRENT_API);
+                        insertPrimaryEndpointMappingsStatement.addBatch();
+                    }
+                    insertPrimaryEndpointMappingsStatement.executeBatch();
+                }
 
                 // Restoring to AM_API_URL_MAPPING table
                 PreparedStatement getURLMappingsStatement = connection.prepareStatement(SQLConstants
@@ -20726,7 +20908,7 @@ public class ApiMgtDAO {
                         insertClientCertificateStatement.setBoolean(5, false);
                         insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
                         insertClientCertificateStatement.setString(7, keyType);
-                        insertClientCertificateStatement.setString(8, "Current API");
+                        insertClientCertificateStatement.setString(8, APIConstants.API_REVISION_CURRENT_API);
                         insertClientCertificateStatement.addBatch();
                     }
                     insertClientCertificateStatement.executeBatch();
@@ -21381,6 +21563,7 @@ public class ApiMgtDAO {
                     if (resultSet.next()) {
                         addPrimaryMapping.setString(1, apiRevision.getApiUUID());
                         addPrimaryMapping.setString(2, resultSet.getString("ENDPOINT_UUID"));
+                        addPrimaryMapping.setString(3, apiRevision.getRevisionUUID());
                         addPrimaryMapping.addBatch();
                     }
                 }
@@ -21392,6 +21575,7 @@ public class ApiMgtDAO {
                     if (resultSet.next()) {
                         addPrimaryMapping.setString(1, apiRevision.getApiUUID());
                         addPrimaryMapping.setString(2, resultSet.getString("ENDPOINT_UUID"));
+                        addPrimaryMapping.setString(3, apiRevision.getRevisionUUID());
                         addPrimaryMapping.addBatch();
                     }
                 }
@@ -21407,7 +21591,7 @@ public class ApiMgtDAO {
                     while (rs.next()) {
                         insertProductResourceMappingStatement.setInt(1, apiId);
                         insertProductResourceMappingStatement.setInt(2, rs.getInt("URL_MAPPING_ID"));
-                        insertProductResourceMappingStatement.setString(3, "Current API");
+                        insertProductResourceMappingStatement.setString(3, APIConstants.API_REVISION_CURRENT_API);
                         insertProductResourceMappingStatement.addBatch();
                     }
                     insertProductResourceMappingStatement.executeBatch();
@@ -21448,7 +21632,7 @@ public class ApiMgtDAO {
                         insertClientCertificateStatement.setBoolean(5, false);
                         insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
                         insertClientCertificateStatement.setString(7, keyType);
-                        insertClientCertificateStatement.setString(8, "Current API");
+                        insertClientCertificateStatement.setString(8, APIConstants.API_REVISION_CURRENT_API);
                         insertClientCertificateStatement.addBatch();
                     }
                     insertClientCertificateStatement.executeBatch();
@@ -26249,6 +26433,7 @@ public class ApiMgtDAO {
                     while (resultSet.next()) {
                         addPrimaryMapping.setString(1, newApiUUID);
                         addPrimaryMapping.setString(2, resultSet.getString("ENDPOINT_UUID"));
+                        addPrimaryMapping.setString(3, APIConstants.API_REVISION_CURRENT_API);
                         addPrimaryMapping.addBatch();
                     }
                     addPrimaryMapping.executeBatch();
@@ -26359,7 +26544,7 @@ public class ApiMgtDAO {
         try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             statement.setString(1, apiUUID);
             statement.setString(2, apiEndpoint.getId());
-            statement.setString(3, "Current API");
+            statement.setString(3, APIConstants.API_REVISION_CURRENT_API);
             statement.setString(4, apiEndpoint.getName());
             statement.setString(5, apiEndpoint.getDeploymentStage());
             statement.setBinaryStream(6,
@@ -26394,7 +26579,7 @@ public class ApiMgtDAO {
                     for (APIEndpointInfo apiEndpoint : apiEndpointList) {
                         statement.setString(1, apiUUID);
                         statement.setString(2, apiEndpoint.getId());
-                        statement.setString(3, "Current API");
+                        statement.setString(3, APIConstants.API_REVISION_CURRENT_API);
                         statement.setString(4, apiEndpoint.getName());
                         statement.setString(5, apiEndpoint.getDeploymentStage());
                         statement.setBinaryStream(6,
@@ -26421,79 +26606,107 @@ public class ApiMgtDAO {
      * @throws APIManagementException if error occurs while adding primary endpoint mappings
      */
     public void addAPIPrimaryEndpointMappings(API api) throws APIManagementException {
-        String apiUUID = api.getUuid();
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            connection.setAutoCommit(false);
-            addPrimaryEndpointMapping(connection, apiUUID, api);
-        } catch (SQLException e) {
-            handleException("Error while updating primary endpoint mappings for API : " + api.getUuid(), e);
+
+        if (api.getPrimaryProductionEndpointId() != null || api.getPrimarySandboxEndpointId() != null) {
+            String apiUUID = api.getUuid();
+            if (log.isDebugEnabled()){
+                log.debug("Adding primary endpoint mappings for API: " + apiUUID);
+            }
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                connection.setAutoCommit(false);
+                String addPrimaryEndpointMappingQuery = SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING;
+                try (PreparedStatement addPrimaryMapping = connection.prepareStatement(addPrimaryEndpointMappingQuery)) {
+                    if (api.getPrimaryProductionEndpointId() != null) {
+                        addPrimaryMapping.setString(1, apiUUID);
+                        addPrimaryMapping.setString(2, api.getPrimaryProductionEndpointId());
+                        addPrimaryMapping.setString(3, APIConstants.API_REVISION_CURRENT_API);
+                        addPrimaryMapping.addBatch();
+                    }
+                    if (api.getPrimarySandboxEndpointId() != null) {
+                        addPrimaryMapping.setString(1, apiUUID);
+                        addPrimaryMapping.setString(2, api.getPrimarySandboxEndpointId());
+                        addPrimaryMapping.setString(3, APIConstants.API_REVISION_CURRENT_API);
+                        addPrimaryMapping.addBatch();
+                    }
+                    addPrimaryMapping.executeBatch();
+                    connection.commit();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully added primary endpoint mappings for API: " + apiUUID);
+                    }
+                } catch (SQLException e) {
+                    connection.rollback();
+                    handleException("Error while adding primary endpoint mappings for API: " + apiUUID, e);
+                }
+            } catch (SQLException e) {
+                handleException("Database connection error while adding primary endpoint mappings for API: " + apiUUID,
+                        e);
+            }
         }
     }
 
     /**
      * Delete primary endpoint mappings related to provided API UUID from AM_API_PRIMARY_EP_MAPPING
      *
-     * @param apiUUID API identifier
+     * @param apiUUID API UUID
      * @throws APIManagementException if error occurs while deleting primary endpoint mappings
      */
-    public void deleteAPIPrimaryEndpointMappings(String apiUUID) throws APIManagementException {
+    public void deleteAllAPIPrimaryEndpointMappingsByUUID(String apiUUID) throws APIManagementException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting primary endpoint mappings for API: " + apiUUID);
+        }
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            deleteExistingAPIPrimaryEndpointsMapping(connection, apiUUID);
+            String deleteQuery;
+            deleteQuery = SQLConstants.APIEndpointsSQLConstants.DELETE_PRIMARY_ENDPOINT_MAPPING_BY_API_UUID;
+            try (PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
+                preparedStatement.setString(1, apiUUID);
+                preparedStatement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error while deleting primary endpoint mappings for API: " + apiUUID, e);
+            }
         } catch (SQLException e) {
-            handleException("Error while deleting primary endpoint mappings of API : " + apiUUID, e);
+            handleException("Error while deleting primary endpoint mappings of API: " + apiUUID, e);
         }
     }
 
     /**
-     * Delete existing primary endpoint mappings using the provided DB connection
+     * Delete primary endpoint mappings related to provided API UUID and revision UUID from AM_API_PRIMARY_EP_MAPPING
      *
-     * @param connection DB connection
-     * @param apiUUID    API identifier
-     * @return true if deletion of existing primary endpoint mappings succeeds
-     * @throws SQLException           if an SQL error occurs while deleting primary endpoint mappings
-     * @throws APIManagementException if error occurs while deleting existing primary endpoint mappings
+     * @param apiUUID      API UUID
+     * @param revisionUUID Revision UUID
+     * @throws APIManagementException if error occurs while deleting primary endpoint mappings
      */
-    private boolean deleteExistingAPIPrimaryEndpointsMapping(Connection connection, String apiUUID)
-            throws SQLException, APIManagementException {
-        String deleteOldPrimaryMappingsQuery = SQLConstants.APIEndpointsSQLConstants.DELETE_PRIMARY_ENDPOINT_MAPPING;
-        try (PreparedStatement preparedStatement = connection.prepareStatement(deleteOldPrimaryMappingsQuery)) {
-            preparedStatement.setString(1, apiUUID);
-            preparedStatement.executeUpdate();
-            connection.commit();
-            return true;
-        } catch (SQLException e) {
-            connection.rollback();
-            handleException("Error while deleting primary endpoint mappings for API : " + apiUUID, e);
+    public void deleteAPIPrimaryEndpointMappingsByRevision(String apiUUID, String revisionUUID)
+            throws APIManagementException {
+
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "Deleting existing primary endpoint mappings for API: " + apiUUID + ", revision: " + revisionUUID);
         }
-        return false;
-    }
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            String deleteQuery;
+            deleteQuery = SQLConstants.APIEndpointsSQLConstants.DELETE_PRIMARY_ENDPOINT_MAPPING_BY_API_UUID_AND_REVISION_UUID;
 
-    private boolean addPrimaryEndpointMapping(Connection connection, String apiUUID, API api)
-            throws SQLException, APIManagementException {
-
-        String addPrimaryEndpointMappingQuery = SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING;
-        try (PreparedStatement addPrimaryMapping = connection.prepareStatement(addPrimaryEndpointMappingQuery)) {
-            if (api.getPrimaryProductionEndpointId() != null) {
-                addPrimaryMapping.setString(1, apiUUID);
-                addPrimaryMapping.setString(2, api.getPrimaryProductionEndpointId());
-                addPrimaryMapping.addBatch();
-            }
-            if (api.getPrimarySandboxEndpointId() != null) {
-                addPrimaryMapping.setString(1, apiUUID);
-                addPrimaryMapping.setString(2, api.getPrimarySandboxEndpointId());
-                addPrimaryMapping.addBatch();
-            }
-            if (api.getPrimaryProductionEndpointId() != null || api.getPrimarySandboxEndpointId() != null) {
-                addPrimaryMapping.executeBatch();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
+                preparedStatement.setString(1, apiUUID);
+                preparedStatement.setString(2, revisionUUID);
+                preparedStatement.executeUpdate();
                 connection.commit();
-                return true;
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException(
+                        "Error while deleting primary endpoint mappings for API: " + apiUUID + ", revision UUID: " + revisionUUID,
+                        e);
             }
         } catch (SQLException e) {
-            connection.rollback();
-            handleException("Error while adding primary endpoint mappings for API : " + apiUUID, e);
+            handleException(
+                    "Error while deleting primary endpoint mappings of API: " + apiUUID + ", revision UUID: " + revisionUUID,
+                    e);
         }
-        return false;
     }
 
     /**
@@ -26501,26 +26714,21 @@ public class ApiMgtDAO {
      *
      * @param apiUUID      API identifier
      * @param endpointUUID Endpoint identifier
+     * @param revisionUUID Revision identifier
      * @throws APIManagementException if an error occurs while adding the primary endpoint mapping
      */
-    public void addPrimaryEndpointMapping(String apiUUID, String endpointUUID) throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            connection.setAutoCommit(false);
-            String addPrimaryEndpointMappingQuery = SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING;
-            try (PreparedStatement addPrimaryMapping = connection.prepareStatement(addPrimaryEndpointMappingQuery)) {
-                addPrimaryMapping.setString(1, apiUUID);
-                addPrimaryMapping.setString(2, endpointUUID);
-                addPrimaryMapping.executeUpdate();
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException(
-                        "Error while adding primary endpoint mapping for API : " + apiUUID + ", endpointUUID : " + endpointUUID,
-                        e);
-            }
+    public void addPrimaryEndpointMapping(String apiUUID, String endpointUUID, String revisionUUID)
+            throws APIManagementException {
+        String query = SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, apiUUID);
+            stmt.setString(2, endpointUUID);
+            stmt.setString(3, revisionUUID);
+            stmt.executeUpdate();
         } catch (SQLException e) {
             handleException(
-                    "Error while adding primary endpoint mapping for API : " + apiUUID + ", endpointUUID : " + endpointUUID,
+                    "Error while adding primary endpoint mapping for API: " + apiUUID + ", endpointUUID: " + endpointUUID,
                     e);
         }
     }
@@ -26545,6 +26753,7 @@ public class ApiMgtDAO {
                     // add primary production endpoint mapping
                     addPrimaryMapping.setString(1, apiUUID);
                     addPrimaryMapping.setString(2, APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID);
+                    addPrimaryMapping.setString(3, APIConstants.API_REVISION_CURRENT_API);
                     addPrimaryMapping.addBatch();
                 }
 
@@ -26552,6 +26761,7 @@ public class ApiMgtDAO {
                     // add primary sandbox endpoint mapping
                     addPrimaryMapping.setString(1, apiUUID);
                     addPrimaryMapping.setString(2, APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID);
+                    addPrimaryMapping.setString(3, APIConstants.API_REVISION_CURRENT_API);
                     addPrimaryMapping.addBatch();
                 }
 
@@ -26568,11 +26778,28 @@ public class ApiMgtDAO {
         }
     }
 
-    public List<String> getPrimaryEndpointUUIDByAPIId(String apiUUID) throws APIManagementException {
+    /**
+     * Retrieve the list of primary endpoint UUIDs for the given API and revision. If the revision UUID is null, the
+     * 'Current API' revision is used.
+     *
+     * @param apiUUID      API UUID
+     * @param revisionUUID Revision UUID
+     * @return A list of primary endpoint UUIDs. Returns an empty list if none are found
+     * @throws APIManagementException If an error occurs while retrieving the data
+     */
+    public List<String> getPrimaryEndpointUUIDByAPIId(String apiUUID, String revisionUUID)
+            throws APIManagementException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving primary endpoint UUIDs for API: " + apiUUID + ", revision: " + revisionUUID);
+        }
         List<String> endpointIds = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.APIEndpointsSQLConstants.GET_PRIMARY_ENDPOINT_MAPPINGS)) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    SQLConstants.APIEndpointsSQLConstants.GET_PRIMARY_ENDPOINT_MAPPINGS)) {
                 preparedStatement.setString(1, apiUUID);
+                preparedStatement.setString(2,
+                        Objects.requireNonNullElse(revisionUUID, APIConstants.API_REVISION_CURRENT_API));
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         endpointIds.add(resultSet.getString("ENDPOINT_UUID"));
@@ -26713,6 +26940,43 @@ public class ApiMgtDAO {
             throw new APIManagementException("Error while retrieving apis for the organization " + organization, e,
                     ExceptionCodes.INTERNAL_ERROR);
         }
+    }
+
+    /**
+     * Retrieves a list of APIs deployed in a specified gateway environment for a given organization.
+     *
+     * @param environmentName the name of the gateway environment in which the APIs are deployed
+     * @param organization the organization under which the APIs are managed
+     * @param isInitiatedFromGateway whether to retrieve APIs discovered from the gateway (true) or from CP (false)
+     * @return a list of {@code ApiResult} objects containing details of the deployed APIs
+     * @throws APIManagementException if an error occurs while retrieving the APIs from the database
+     */
+    public List<ApiResult> getAPIsDeployedInGatewayEnvironmentByOrg(String environmentName, String organization,
+                                                                    boolean isInitiatedFromGateway)
+            throws APIManagementException {
+        List<ApiResult> apiResults = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection
+                    .prepareStatement(SQLConstants.GET_API_DETAILS_DEPLOYED_IN_ENVIRONMENT)) {
+                preparedStatement.setString(1, environmentName);
+                preparedStatement.setString(2, organization);
+                preparedStatement.setInt(3, isInitiatedFromGateway ? 1 : 0);
+                try (ResultSet rs = preparedStatement.executeQuery()) {
+                    while (rs.next()) {
+                        ApiResult apiResult = new ApiResult();
+                        apiResult.setId(rs.getString("API_UUID"));
+                        apiResult.setName(rs.getString("API_NAME"));
+                        apiResult.setVersion(rs.getString("API_VERSION"));
+                        apiResult.setProvider(rs.getString("API_PROVIDER"));
+                        apiResult.setType(rs.getString("API_TYPE"));
+                        apiResults.add(apiResult);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving apis for the organization " + organization, e);
+        }
+        return apiResults;
     }
 
     /**

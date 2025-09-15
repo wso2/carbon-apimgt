@@ -1229,8 +1229,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void updateAPIPrimaryEndpointsMapping(API api) throws APIManagementException {
         if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
-            // Delete any existing primary endpoint mappings
-            deleteAPIPrimaryEndpointMappings(api.getUuid());
+            String apiUUID = api.getUuid();
+            String revisionUUID = APIConstants.API_REVISION_CURRENT_API;
+            APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(apiUUID);
+            if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                apiUUID = apiRevision.getApiUUID();
+                revisionUUID = apiRevision.getRevisionUUID();
+            }
+
+            // Delete existing primary endpoint mappings
+            deleteAPIPrimaryEndpointMappings(apiUUID, revisionUUID);
 
             // Handle primary endpoint mapping addition if the API is an AI API
             String primaryProductionEndpointId = api.getPrimaryProductionEndpointId();
@@ -1248,16 +1256,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 } else if (isProductionEndpointFromAPIEndpointConfig) {
                     addDefaultPrimaryEndpoints(api, true, false);
                     if (primarySandboxEndpointId != null) {
-                        apiMgtDAO.addPrimaryEndpointMapping(api.getUuid(), primarySandboxEndpointId);
+                        apiMgtDAO.addPrimaryEndpointMapping(apiUUID, primarySandboxEndpointId, revisionUUID);
                     }
                 } else if (isSandboxEndpointFromAPIEndpointConfig) {
                     addDefaultPrimaryEndpoints(api, false, true);
                     if (primaryProductionEndpointId != null) {
-                        apiMgtDAO.addPrimaryEndpointMapping(api.getUuid(), primaryProductionEndpointId);
+                        apiMgtDAO.addPrimaryEndpointMapping(apiUUID, primaryProductionEndpointId, revisionUUID);
                     }
                 } else {
                     apiMgtDAO.addAPIPrimaryEndpointMappings(api);
                 }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated the primary endpoint mappings of API: " + apiUUID);
             }
         }
     }
@@ -2425,19 +2436,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void removeFromGateway(API api, Set<APIRevisionDeployment> gatewaysToRemove,
-                                   Set<String> environmentsToAdd) {
-        Set<String> environmentsToAddSet = new HashSet<>(environmentsToAdd);
+                                   Set<String> environmentsToAdd, boolean onDeleteOrRetire)
+            throws APIManagementException {
         Set<String> environmentsToRemove = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : gatewaysToRemove) {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
         }
         environmentsToRemove.removeAll(environmentsToAdd);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        gatewayManager.unDeployFromGateway(api, tenantDomain, environmentsToRemove);
+        gatewayManager.unDeployFromGateway(api, tenantDomain, environmentsToRemove, onDeleteOrRetire);
         if (log.isDebugEnabled()) {
-            String logMessage = "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
-                    + " deleted from gateway";
-            log.debug(logMessage);
+            log.debug("Removing API: " + api.getId().getApiName() + " from gateways. onDeleteOrRetire: " +
+                    onDeleteOrRetire);
         }
     }
 
@@ -2901,7 +2911,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 // Remove Custom Backend entries of the API
                 deleteCustomBackendByAPIID(apiUuid);
-                deleteAPIRevisions(apiUuid, organization);
+                deleteAPIRevisions(apiUuid, organization, true);
                 deleteAPIFromDB(api);
                 if (log.isDebugEnabled()) {
                     String logMessage =
@@ -3082,7 +3092,66 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    public void deleteAPIRevisions(String apiUUID, String organization, boolean onDeleteOrRetire)
+            throws APIManagementException {
+        boolean isAPIInitiatedFromGateway = apiMgtDAO.getIsAPIInitiatedFromGateway(apiUUID);
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting API revisions for API: " + apiUUID + " in organization: " + organization);
+        }
+        List<APIRevision> apiRevisionList = apiMgtDAO.getRevisionsListByAPIUUID(apiUUID);
+        WorkflowExecutor apiRevisionDeploymentWFExecutor = getWorkflowExecutor(
+                WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
+        WorkflowDTO wfDTO;
+
+        for (APIRevision apiRevision : apiRevisionList) {
+            if (!apiRevision.getApiRevisionDeploymentList().isEmpty()) {
+                if (!isAPIInitiatedFromGateway) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Undeploy API revision: " + apiRevision.getRevisionUUID() +
+                                " from gateways on delete/retire");
+                    }
+                    undeployAPIRevisionDeployment(apiUUID, apiRevision.getRevisionUUID(),
+                            apiRevision.getApiRevisionDeploymentList(), organization, onDeleteOrRetire);
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("API initiated from gateway. Removing revision deployment: " +
+                                apiRevision.getRevisionUUID() + " from DB only");
+                    }
+                    apiMgtDAO.removeAPIRevisionDeployment(apiRevision.getRevisionUUID(),
+                            apiRevision.getApiRevisionDeploymentList());
+                    // Also drop published label mappings for these environments to avoid stale state
+                    Set<String> envsToRemove = apiRevision.getApiRevisionDeploymentList().stream()
+                            .map(org.wso2.carbon.apimgt.api.model.APIRevisionDeployment::getDeployment)
+                            .collect(java.util.stream.Collectors.toSet());
+                    if (!envsToRemove.isEmpty()) {
+                        GatewayArtifactsMgtDAO.getInstance()
+                                .removePublishedGatewayLabels(apiUUID, apiRevision.getRevisionUUID(), envsToRemove);
+                    }
+                }
+            }
+            wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(apiRevision.getRevisionUUID(),
+                    WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
+            if (wfDTO != null && WorkflowStatus.CREATED == wfDTO.getStatus()) {
+                try {
+                    apiRevisionDeploymentWFExecutor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
+                } catch (WorkflowException e) {
+                    log.error("Failed to delete workflow entry for revision: " + apiRevision.getRevisionUUID(), e);
+                }
+            }
+            deleteAPIRevision(apiUUID, apiRevision.getRevisionUUID(), organization);
+            if (log.isDebugEnabled()) {
+                log.debug("Deleted API revision: " + apiRevision.getRevisionUUID() + " for API: " + apiUUID);
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully deleted all API revisions for API: " + apiUUID);
+        }
+    }
+
     public void deleteAPIRevisions(String apiUUID, String organization) throws APIManagementException {
+        if (log.isDebugEnabled()){
+            log.debug("Deleting API revisions for API: " + apiUUID + " in organization: " + organization);
+        }
         boolean isAPIInitiatedFromGateway = apiMgtDAO.getIsAPIInitiatedFromGateway(apiUUID);
         List<APIRevision> apiRevisionList = apiMgtDAO.getRevisionsListByAPIUUID(apiUUID);
         WorkflowExecutor apiRevisionDeploymentWFExecutor = getWorkflowExecutor(
@@ -3093,7 +3162,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (!apiRevision.getApiRevisionDeploymentList().isEmpty()) {
                 if (!isAPIInitiatedFromGateway) {
                     undeployAPIRevisionDeployment(apiUUID, apiRevision.getRevisionUUID(),
-                            apiRevision.getApiRevisionDeploymentList(), organization);
+                            apiRevision.getApiRevisionDeploymentList(), organization, false);
                 } else {
                     apiMgtDAO.removeAPIRevisionDeployment(apiRevision.getRevisionUUID(),
                             apiRevision.getApiRevisionDeploymentList());
@@ -5823,9 +5892,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public API getAPIbyUUID(String uuid, String organization) throws APIManagementException {
+        return getAPIbyUUID(uuid, organization, null);
+    }
+
+    @Override
+    public API getAPIbyUUID(String uuid, String organization, String apiType) throws APIManagementException {
         Organization org = new Organization(organization);
         try {
-            PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
+            PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid, apiType);
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
                 APIIdentifier apiIdentifier = api.getId();
@@ -7174,7 +7248,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             if (!deploymentsToRemove.isEmpty() && !skipDeployToGateway) {
                 apiMgtDAO.removeAPIRevisionDeployment(apiId, deploymentsToRemove);
-                removeFromGateway(api, deploymentsToRemove, targetEnvironments);
+                removeFromGateway(api, deploymentsToRemove, targetEnvironments, false);
             }
 
             GatewayArtifactsMgtDAO.getInstance().addAndRemovePublishedGatewayLabels(
@@ -7385,13 +7459,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param apiRevisionId          API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
      * @param organization           organization
+     * @param onDeleteOrRetire    flag to indicate if the undeploy is happening due to API delete or retire action
      * @throws APIManagementException if failed to add APIRevision
      */
     @Override
     public void undeployAPIRevisionDeployment(String apiId, String apiRevisionId,
-                                              List<APIRevisionDeployment> apiRevisionDeployments, String organization)
-            throws APIManagementException {
-
+                                              List<APIRevisionDeployment> apiRevisionDeployments, String organization,
+                                              boolean onDeleteOrRetire) throws APIManagementException {
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
         if (apiIdentifier == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
@@ -7417,11 +7491,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 revisionDeploymentWFExecutor.cleanUpPendingTask(revisionDeploymentWFRef);
             }
         } catch (WorkflowException ex) {
-            log.warn("Unable to delete Revision Deployment Workflow", ex);
+            log.warn("Unable to delete Revision Deployment Workflow for revision: " + apiRevisionId, ex);
         }
-        removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet());
+        if (log.isDebugEnabled()) {
+            log.debug("Undeploying API revision: " + apiRevision.getRevisionUUID() + " from gateways on delete/retire");
+        }
+        removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet(), onDeleteOrRetire);
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevisionId, environmentsToRemove);
+    }
+
+    /**
+     * Remove a new APIRevisionDeployment to an existing API
+     *
+     * @param apiId                  API UUID
+     * @param apiRevisionId          API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization           organization
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    @Override
+    public void undeployAPIRevisionDeployment(String apiId, String apiRevisionId,
+                                              List<APIRevisionDeployment> apiRevisionDeployments, String organization)
+            throws APIManagementException {
+        undeployAPIRevisionDeployment(apiId, apiRevisionId, apiRevisionDeployments, organization, false);
+
     }
 
     /**
@@ -7497,6 +7591,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiMgtDAO.deleteAPIRevision(apiRevision);
         apiMgtDAO.deleteAllAPIMetadataRevision(apiId, apiRevisionId);
+        apiMgtDAO.deleteAPIPrimaryEndpointMappingsByRevision(apiId, apiRevisionId);
         apiMgtDAO.deleteAIConfigurationRevision(apiRevision.getRevisionUUID());
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {
@@ -7758,7 +7853,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public String generateApiKey(String apiId, String organization) throws APIManagementException {
-        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId);
+        return generateApiKey(apiId, organization, null);
+    }
+
+    @Override
+    public String generateApiKey(String apiId, String organization, String apiType)
+            throws APIManagementException {
+
+        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId, apiType);
         if (apiInfo == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with ID: "
                     + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
@@ -8242,8 +8344,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
-        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(uuid);
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization)
+            throws APIManagementException {
+
+        return getAPIorAPIProductByUUID(uuid, organization, null);
+    }
+
+    @Override
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain, String apiType)
+            throws APIManagementException {
+        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(uuid, apiType);
         if (apiInfo != null) {
             if (apiInfo.getOrganization().equals(requestedTenantDomain)) {
                 if (APIConstants.API_PRODUCT.equalsIgnoreCase(apiInfo.getApiType())) {
@@ -8823,6 +8933,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void removeAPIEndpoints(String apiUUID) throws APIManagementException {
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Removing endpoints for API: " + apiUUID);
+            }
             deleteAPIPrimaryEndpointMappings(apiUUID);
             deleteAPIEndpointsByApiUUID(apiUUID);
         } catch (APIManagementException e) {
@@ -8976,7 +9089,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void deleteAPIPrimaryEndpointMappings(String apiId) throws APIManagementException {
-        apiMgtDAO.deleteAPIPrimaryEndpointMappings(apiId);
+        apiMgtDAO.deleteAllAPIPrimaryEndpointMappingsByUUID(apiId);
+    }
+
+    @Override
+    public void deleteAPIPrimaryEndpointMappings(String apiId, String revisionUUID) throws APIManagementException {
+        apiMgtDAO.deleteAPIPrimaryEndpointMappingsByRevision(apiId, revisionUUID);
     }
 
     @Override
@@ -9021,7 +9139,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // Handle scenario where default primary endpoints were set on AI API creation. Hence, these endpoint UUIDs
         // will not be available under the AM_API_ENDPOINTS table.
-        List<String> endpointIds = apiMgtDAO.getPrimaryEndpointUUIDByAPIId(currentApiUuid);
+        List<String> endpointIds = apiMgtDAO.getPrimaryEndpointUUIDByAPIId(currentApiUuid, revisionUuid);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieved " + (endpointIds != null ?
+                    endpointIds.size() :
+                    0) + " primary endpoint IDs for API: " + currentApiUuid + ", revision: " + revisionUuid);
+        }
+
         if (endpointIds != null && !endpointIds.isEmpty()) {
             for (String endpointId : endpointIds) {
                 if (APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID.equals(endpointId)) {

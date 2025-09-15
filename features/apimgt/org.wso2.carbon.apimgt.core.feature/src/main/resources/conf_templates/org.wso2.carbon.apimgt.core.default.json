@@ -250,5 +250,11 @@
   "apim.gateway_notification.registration.retry_duration": "10000",
   "apim.gateway_notification.registration.retry_progression_factor": "2.0",
   "apim.gateway_notification.cleanup.expiry_time": "120",
-  "apim.gateway_notification.cleanup.data_retention_period": "2629800"
+  "apim.gateway_notification.cleanup.data_retention_period": "2629800",
+  "apim.rest_api.admin_permission_restricted_api": [
+    {
+      "uri_path": "/api/am/gateway/*",
+      "http_method": "GET,DELETE,PUT,POST"
+    }
+  ]
 }

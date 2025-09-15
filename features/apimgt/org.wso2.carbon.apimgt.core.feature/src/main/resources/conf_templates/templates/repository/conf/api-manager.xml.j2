@@ -11,6 +11,9 @@
     By default secure vault is disabled.-->
     <EnableSecureVault>{{apim.enable_secure_vault}}</EnableSecureVault>
 
+    <!-- The following parameter is used to determine whether the runtime is act as a read only instance. -->
+    <ReadOnly>{{apim.read_only | default('false')}}</ReadOnly>
+
     <!-- This parameter is used to enable mutual tls based authentication support for APIs, when this is disabled,
     APIs will be protected with OAuth2 security-->
     <EnableMTLSForAPIs>true</EnableMTLSForAPIs>
@@ -1124,6 +1127,16 @@
          {%- endfor -%}
         </JWTAudiences>
         {% endif %}
+        <AdminPermissionRestrictedAPIs>
+        {% if apim.rest_api.admin_permission_restricted_api is defined %}
+        {% for uri in apim.rest_api.admin_permission_restricted_api %}
+            <AdminPermissionRestrictedAPI>
+                <URI>{{uri.uri_path}}</URI>
+                <HTTPMethods>{{uri.http_method}}</HTTPMethods>
+            </AdminPermissionRestrictedAPI>
+        {% endfor %}
+        {% endif %}
+        </AdminPermissionRestrictedAPIs>
     </RESTAPI>
     <ThrottlingConfigurations>
         <TrafficManager>

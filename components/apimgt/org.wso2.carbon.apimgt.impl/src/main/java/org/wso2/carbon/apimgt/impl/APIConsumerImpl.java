@@ -4146,14 +4146,18 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
         return result;
 }
-
     @Override
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
+        return getAPIorAPIProductByUUID(uuid, organization, null);
+    }
+
+    @Override
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization, String apiType)
+            throws APIManagementException {
 
         try {
             Organization org = new Organization(organization);
-            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org,
-                    uuid);
+            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid, apiType);
             if (devPortalApi != null) {
                 checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
                         devPortalApi.getVisibleRoles(), devPortalApi.getPublisherAccessControl(),
@@ -4507,6 +4511,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                 docItem.getApiVersion()));
                         api.setUuid(docItem.getApiUUID());
                         api.setDisplayName(docItem.getApiDisplayName());
+                        api.setType(docItem.getAssociatedType());
                         docMap.put(doc, api);
                     } else if (item instanceof APIDefSearchContent) {
                         APIDefSearchContent definitionItem = (APIDefSearchContent) item;

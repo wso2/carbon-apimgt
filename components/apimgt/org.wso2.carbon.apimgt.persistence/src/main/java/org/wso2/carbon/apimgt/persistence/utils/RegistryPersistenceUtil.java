@@ -1634,6 +1634,7 @@ public class RegistryPersistenceUtil {
                     getAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS)));
             api.setAdvertiseOnly(Boolean.parseBoolean(apiArtifact
                     .getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+            api.setType(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
 
         } catch (GovernanceException e) {
             throw new APIPersistenceException("Error while extracting api attributes ", e);
