@@ -11940,11 +11940,11 @@ public final class APIUtil {
     }
 
     /**
-     * Validate and update the URI templates of an API
+     * Validate and update the URI templates of an API.
      *
-     * @param api                       API object
-     * @param tenantId                  Tenant ID of the API
-     * @throws APIManagementException   if an error occurs while validating or updating the URI templates
+     * @param api                       API object.
+     * @param tenantId                  Tenant ID of the API.
+     * @throws APIManagementException   if an error occurs while validating or updating the URI templates.
      */
     public static void validateAndUpdateURITemplates(API api, int tenantId) throws APIManagementException {
         if (log.isDebugEnabled()) {
