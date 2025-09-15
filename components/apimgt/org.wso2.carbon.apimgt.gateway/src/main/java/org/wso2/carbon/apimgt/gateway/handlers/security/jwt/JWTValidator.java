@@ -92,6 +92,7 @@ public class JWTValidator {
     JWTValidationService jwtValidationService;
     private static volatile long ttl = -1L;
     private static Long mcpInternalTokenExpiryTime;
+    private static InternalAPIKeyGenerator internalKeyGenerator;
 
     public JWTValidator(APIKeyValidator apiKeyValidator, String tenantDomain) throws APIManagementException {
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -389,7 +390,10 @@ public class JWTValidator {
                                 log.debug("Generating new MCP upstream token for existing API subtype");
                                 JwtTokenInfoDTO jwtTokenInfoDTO =
                                         getJwtTokenInfoDTO(signedJWTInfo, jwtInfoDto, matchedAPI);
-                                internalToken = new InternalAPIKeyGenerator().generateToken(jwtTokenInfoDTO);
+                                if (internalKeyGenerator == null) {
+                                    internalKeyGenerator = new InternalAPIKeyGenerator();
+                                }
+                                internalToken = internalKeyGenerator.generateToken(jwtTokenInfoDTO);
                                 if (isGatewayTokenCacheEnabled) {
                                     if (log.isDebugEnabled()) {
                                         log.debug("Caching generated MCP upstream token with key: "
