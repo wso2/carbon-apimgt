@@ -3175,26 +3175,30 @@ public class ImportUtils {
             throws APIManagementException {
 
         String jsonContent = null;
+        String foundPath = null;
+        // Need to check for certs in this path to preserve the behavior for migrating users
+        String oldPathToClientCertificatesDirectory =
+                pathToArchive + File.separator + ImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY;
         /*
          since the certificate file is named by the alias, this also need to store in two separate directories
          considering the key type, to support same alias for production and sandbox
          */
-        String pathToClientCertificatesDirectory = pathToArchive + File.separator +
-                ImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY + File.separator + keyType;
-        String pathToYamlFile = pathToClientCertificatesDirectory + ImportExportConstants.CLIENT_CERTIFICATE_FILE
-                + ImportExportConstants.YAML_EXTENSION;
-        String pathToJsonFile = pathToClientCertificatesDirectory + ImportExportConstants.CLIENT_CERTIFICATE_FILE
-                + ImportExportConstants.JSON_EXTENSION;
+        String pathToClientCertificatesDirectory = oldPathToClientCertificatesDirectory + File.separator + keyType;
+        List<String> pathsToCheck = new ArrayList<>();
+        pathsToCheck.add(pathToClientCertificatesDirectory);
+        if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(keyType)) {
+            // check the old path in the production scenario only
+            pathsToCheck.add(oldPathToClientCertificatesDirectory);
+        }
+
         try {
-            // try loading file as YAML
-            if (CommonUtil.checkFileExistence(pathToYamlFile)) {
-                log.debug("Found client certificate file " + pathToYamlFile);
-                String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
-                jsonContent = CommonUtil.yamlToJson(yamlContent);
-            } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
-                // load as a json fallback
-                log.debug("Found client certificate file " + pathToJsonFile);
-                jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
+            for (String path : pathsToCheck) {
+                String content = getCertificateData(path);
+                if (content != null) {
+                    jsonContent = content;
+                    foundPath = path;
+                    break;
+                }
             }
             if (jsonContent == null) {
                 log.debug("No client certificate file found to be added, skipping");
@@ -3202,7 +3206,7 @@ public class ImportUtils {
             }
             JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
             JsonArray modifiedCertificatesData = addFileContentToCertificates(configElement.getAsJsonArray(),
-                    pathToClientCertificatesDirectory);
+                    foundPath);
 
             Gson gson = new Gson();
             return gson.fromJson(modifiedCertificatesData, new TypeToken<ArrayList<ClientCertificateDTO>>() {
@@ -3210,6 +3214,32 @@ public class ImportUtils {
         } catch (IOException e) {
             throw new APIManagementException("Error in reading certificates file", e);
         }
+    }
+
+    /**
+     * Get certificate data from the given path
+     *
+     * @param basePath base path to look for certs
+     * @return certificate data in json format
+     * @throws IOException when error occurs while reading the file
+     */
+    private static String getCertificateData(String basePath) throws IOException {
+        String pathToYamlFile = basePath + ImportExportConstants.CLIENT_CERTIFICATE_FILE
+                + ImportExportConstants.YAML_EXTENSION;
+        String pathToJsonFile = basePath + ImportExportConstants.CLIENT_CERTIFICATE_FILE
+                + ImportExportConstants.JSON_EXTENSION;
+        String jsonContent = null;
+        // try loading file as YAML
+        if (CommonUtil.checkFileExistence(pathToYamlFile)) {
+            log.debug("Found client certificate file " + pathToYamlFile);
+            String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
+            jsonContent = CommonUtil.yamlToJson(yamlContent);
+        } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
+            // load as a json fallback
+            log.debug("Found client certificate file " + pathToJsonFile);
+            jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
+        }
+        return jsonContent;
     }
 
     /**
