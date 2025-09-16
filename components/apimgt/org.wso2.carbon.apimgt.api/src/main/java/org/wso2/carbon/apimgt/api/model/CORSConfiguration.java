@@ -79,4 +79,13 @@ public class CORSConfiguration {
     public void setAccessControlAllowMethods(List<String> accessControlAllowMethods) {
         this.accessControlAllowMethods = accessControlAllowMethods;
     }
+    
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public boolean isEmpty() {
+        return (accessControlAllowOrigins == null || accessControlAllowOrigins.isEmpty()) &&
+                (accessControlAllowHeaders == null || accessControlAllowHeaders.isEmpty()) &&
+                (accessControlAllowMethods == null || accessControlAllowMethods.isEmpty()) &&
+                !accessControlAllowCredentials &&
+                !corsConfigurationEnabled;
+    }
 }
