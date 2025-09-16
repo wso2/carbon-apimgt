@@ -462,7 +462,7 @@ public class ImportUtils {
                     extractedAPIPolicies, currentTenantDomain);
 
             // Handle API Endpoints if endpoints file is defined
-            populateAPIWithEndpoints(importedApi, apiProvider, extractedFolderPath, organization);
+            populateAPIWithEndpoints(importedApi, importedApiDTO, apiProvider, extractedFolderPath, organization);
 
             // Update Custom Backend Data if endpoint type is selected to "custom_backend"
             Map endpointConf = (Map) importedApiDTO.getEndpointConfig();
@@ -1277,13 +1277,14 @@ public class ImportUtils {
      * This method is used to populate the API with endpoints.
      *
      * @param api                 API object
+     * @param importedApiDTO      The API DTO of the importing API
      * @param provider            API Provider
      * @param extractedFolderPath Extracted folder path of the API project
      * @param organization        Organization
      * @throws APIManagementException If an error occurs while populating the API with endpoints
      */
-    public static void populateAPIWithEndpoints(API api, APIProvider provider, String extractedFolderPath,
-                                                String organization) throws APIManagementException {
+    public static void populateAPIWithEndpoints(API api, APIDTO importedApiDTO, APIProvider provider,
+            String extractedFolderPath, String organization) throws APIManagementException {
 
         String apiUUID = api.getUuid();
         try {
@@ -1307,6 +1308,11 @@ public class ImportUtils {
                         APIEndpointInfo apiEndpointInfo =
                                 new Gson().fromJson(endpointObj, APIEndpointInfo.class);
                         String endpointUUID = apiEndpointInfo.getId();
+
+                        PublisherCommonUtils.encryptEndpointSecurityApiKeyCredentials(
+                                apiEndpointInfo.getEndpointConfig(), CryptoUtil.getDefaultCryptoUtil(),
+                                StringUtils.EMPTY, StringUtils.EMPTY, new APIDTOTypeWrapper(importedApiDTO));
+
                         try {
                             String createdEndpointUUID = provider.addAPIEndpoint(apiUUID, apiEndpointInfo,
                                     organization);
@@ -1324,6 +1330,9 @@ public class ImportUtils {
                 }
 
             }
+        } catch (CryptoException e) {
+            throw new APIManagementException("Error while encrypting endpoint security credentials for API: " + apiUUID,
+                    e, ExceptionCodes.ERROR_ENCRYPTING_ENDPOINT_SECURITY);
         } catch (IOException e) {
             throw new APIManagementException("Error while reading API endpoints from path: " + extractedFolderPath, e,
                     ExceptionCodes.ERROR_READING_API_ENDPOINTS_FILE);
