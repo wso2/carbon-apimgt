@@ -831,7 +831,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void addURITemplates(int apiId, API api, int tenantId) throws APIManagementException {
 
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-        validateAndUpdateURITemplates(api, tenantId);
+        APIUtil.validateAndUpdateURITemplates(api, tenantId);
         apiMgtDAO.addURITemplates(apiId, api, tenantId);
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getGlobalAndTenantKeyManagers(tenantDomain);
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
@@ -1318,7 +1318,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         List<API> mcpServers = getMCPServersUsedByAPI(api.getUuid(), api.getOrganization());
         if (mcpServers == null || mcpServers.isEmpty()) {
-            validateAndUpdateURITemplates(api, tenantId);
+            APIUtil.validateAndUpdateURITemplates(api, tenantId);
             apiMgtDAO.updateURITemplates(api, tenantId);
             if (log.isDebugEnabled()) {
                 log.debug("Successfully updated the URI templates of API: " + apiIdentifier + " in the database");
@@ -8392,24 +8392,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             return false;
         }
         return true;
-    }
-
-    private void validateAndUpdateURITemplates(API api, int tenantId) throws APIManagementException {
-        if (api.getUriTemplates() != null) {
-            for (URITemplate uriTemplate : api.getUriTemplates()) {
-                if (StringUtils.isEmpty(api.getApiLevelPolicy())) {
-                    // API level policy not attached.
-                    if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
-                        uriTemplate.setThrottlingTier(APIUtil.getDefaultAPILevelPolicy(tenantId));
-                    }
-                } else {
-                    uriTemplate.setThrottlingTier(api.getApiLevelPolicy());
-                }
-                if (StringUtils.isEmpty(uriTemplate.getAuthType())) {
-                    uriTemplate.setAuthType("Any");
-                }
-            }
-        }
     }
 
     /**

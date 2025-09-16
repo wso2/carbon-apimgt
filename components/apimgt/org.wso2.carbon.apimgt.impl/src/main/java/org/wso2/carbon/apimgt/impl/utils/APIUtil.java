@@ -11938,4 +11938,40 @@ public final class APIUtil {
             return null;
         }
     }
+
+    /**
+     * Validate and update the URI templates of an API.
+     *
+     * @param api                       API object.
+     * @param tenantId                  Tenant ID of the API.
+     * @throws APIManagementException   if an error occurs while validating or updating the URI templates.
+     */
+    public static void validateAndUpdateURITemplates(API api, int tenantId) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating and updating URI templates for API: " + api.getId().getApiName());
+        }
+        if (api.getUriTemplates() != null) {
+            for (URITemplate uriTemplate : api.getUriTemplates()) {
+                if (StringUtils.isEmpty(api.getApiLevelPolicy())) {
+                    // API level policy not attached.
+                    if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
+                        String defaultPolicy = APIUtil.getDefaultAPILevelPolicy(tenantId);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Setting default throttling tier: " + defaultPolicy + " for URI template: "
+                                    + uriTemplate.getUriTemplate());
+                        }
+                        uriTemplate.setThrottlingTier(defaultPolicy);
+                    }
+                } else {
+                    uriTemplate.setThrottlingTier(api.getApiLevelPolicy());
+                }
+                if (StringUtils.isEmpty(uriTemplate.getAuthType())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Setting default auth type 'Any' for URI template: " + uriTemplate.getUriTemplate());
+                    }
+                    uriTemplate.setAuthType("Any");
+                }
+            }
+        }
+    }
 }
