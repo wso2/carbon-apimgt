@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.LLMModel;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AIServiceProviderResponseDTO;
@@ -31,6 +33,8 @@ import java.util.stream.Collectors;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ModelProviderDTO;
 
 public class LLMProviderMappingUtil {
+
+    private static final Log log = LogFactory.getLog(LLMProviderMappingUtil.class);
 
     /**
      * Converts a list of LLMProvider objects to an LLMProviderSummaryResponseListDTO.
@@ -62,6 +66,9 @@ public class LLMProviderMappingUtil {
     public static LLMProviderResponseDTO fromProviderToProviderResponseDTO(LLMProvider llmProvider) {
 
         if (llmProvider == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Null LLMProvider provided for conversion to LLMProviderResponseDTO");
+            }
             return null;
         }
         LLMProviderResponseDTO llmProviderResponseDTO = new LLMProviderResponseDTO();
@@ -84,6 +91,9 @@ public class LLMProviderMappingUtil {
     public static AIServiceProviderResponseDTO fromProviderToAIServiceProviderResponseDTO(LLMProvider llmProvider) {
 
         if (llmProvider == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Null LLMProvider provided for conversion to AIServiceProviderResponseDTO");
+            }
             return null;
         }
         AIServiceProviderResponseDTO aiServiceProviderResponseDTO = new AIServiceProviderResponseDTO();
@@ -106,6 +116,9 @@ public class LLMProviderMappingUtil {
     private static LLMProviderSummaryResponseDTO fromProviderToProviderSummaryDTO(LLMProvider llmProvider) {
 
         if (llmProvider == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Null LLMProvider provided for conversion to LLMProviderSummaryResponseDTO");
+            }
             return null;
         }
 
@@ -127,6 +140,9 @@ public class LLMProviderMappingUtil {
     private static AIServiceProviderSummaryResponseDTO fromProviderToAIServiceProviderSummaryDTO(LLMProvider llmProvider) {
 
         if (llmProvider == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Null LLMProvider provided for conversion to AIServiceProviderSummaryResponseDTO");
+            }
             return null;
         }
 

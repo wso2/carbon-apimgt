@@ -20,10 +20,14 @@ import javax.ws.rs.core.Response;
 public class ApisApiServiceImpl implements ApisApiService {
 
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
+    private boolean debugEnabled = log.isDebugEnabled();
 
     public Response apisApiIdGet(String apiId, String tenantDomain, MessageContext messageContext) {
 
         tenantDomain = GatewayUtils.validateTenantDomain(tenantDomain, messageContext);
+        if (debugEnabled) {
+            log.debug("Retrieving API by ID: " + apiId + ", tenant: " + tenantDomain);
+        }
         SubscriptionDataStore subscriptionDataStore =
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         if (subscriptionDataStore == null) {
@@ -39,16 +43,26 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         }
         if (api == null) {
+            if (debugEnabled) {
+                log.debug("API not found for ID: " + apiId);
+            }
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         List<Subscription> subscriptionsByAPIId = subscriptionDataStore.getSubscriptionsByAPIId(api.getApiId());
         APIInfoDTO apiInfoDTO = GatewayUtils.generateAPIInfo(api, subscriptionsByAPIId, subscriptionDataStore);
+        if (debugEnabled) {
+            log.debug("Successfully retrieved API info for ID: " + apiId);
+        }
         return Response.ok().entity(apiInfoDTO).build();
     }
 
     public Response apisGet(String context, String version, String tenantDomain, MessageContext messageContext) {
 
         tenantDomain = GatewayUtils.validateTenantDomain(tenantDomain, messageContext);
+        if (debugEnabled) {
+            log.debug("Retrieving APIs - context: " + context + ", version: " + version + 
+                    ", tenant: " + tenantDomain);
+        }
         SubscriptionDataStore subscriptionDataStore =
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         if (subscriptionDataStore == null) {
@@ -59,9 +73,15 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (StringUtils.isNotEmpty(context) && StringUtils.isNotEmpty(version)) {
             API api = subscriptionDataStore.getApiByContextAndVersion(context, version);
             if (api == null) {
+                if (debugEnabled) {
+                    log.debug("No API found for context: " + context + ", version: " + version);
+                }
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
             APIListDTO apiListDTO = GatewayUtils.generateAPIListDTO(Collections.singletonList(api));
+            if (debugEnabled) {
+                log.debug("Found API for context: " + context + ", version: " + version);
+            }
             return Response.ok().entity(apiListDTO).build();
         } else if ((StringUtils.isEmpty(context) && StringUtils.isNotEmpty(version)) ||
                 (StringUtils.isNotEmpty(context) && StringUtils.isEmpty(version))) {
@@ -70,6 +90,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         } else {
             List<API> apiList = subscriptionDataStore.getAPIs();
             APIListDTO apiListDTO = GatewayUtils.generateAPIListDTO(apiList);
+            if (debugEnabled) {
+                log.debug("Retrieved " + apiList.size() + " APIs for tenant: " + tenantDomain);
+            }
             return Response.status(Response.Status.OK).entity(apiListDTO).build();
         }
     }

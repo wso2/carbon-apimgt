@@ -36,6 +36,10 @@ public class EventHubEventPublisherFactory implements EventPublisherFactory {
 
     @Override
     public void configure(Map<String, String> properties) {
+        if (log.isDebugEnabled()) {
+            log.debug("Configuring EventHubEventPublisherFactory with properties: " + 
+                    (properties != null ? properties.size() + " properties" : "null"));
+        }
         OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
         adapterConfiguration.setName(EventHubEventPublisherConstants.EVENT_HUB_NOTIFICATION_EVENT_PUBLISHER);
         adapterConfiguration.setType(EventHubEventPublisherConstants.BLOCKING_EVENT_TYPE);
@@ -43,6 +47,7 @@ public class EventHubEventPublisherFactory implements EventPublisherFactory {
         adapterConfiguration.setStaticProperties(properties);
         try {
             ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
+            log.info("Successfully created WSO2 Event Adapter for event hub notifications");
         } catch (OutputEventAdapterException e) {
             log.warn("Exception occurred while creating WSO2 Event Adapter. Event notification may not work "
                     + "properly", e);
@@ -51,6 +56,10 @@ public class EventHubEventPublisherFactory implements EventPublisherFactory {
 
     @Override
     public EventPublisher getEventPublisher(EventPublisherType eventPublisherType) {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting event publisher for type: " + (eventPublisherType != null ? 
+                    eventPublisherType.toString() : "null"));
+        }
         switch (eventPublisherType) {
             case TOKEN_REVOCATION:
             case ASYNC_WEBHOOKS:

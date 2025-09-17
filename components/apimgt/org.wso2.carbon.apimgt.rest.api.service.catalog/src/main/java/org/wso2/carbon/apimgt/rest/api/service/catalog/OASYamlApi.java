@@ -62,6 +62,9 @@ public class OASYamlApi {
             @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported") })
 
     public Response oasYamlGet() throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving OpenAPI definition for Service Catalog");
+        }
         try {
             if (openAPIDef == null) {
                 synchronized (LOCK_SERVICE_CATALOG_OPENAPI_DEF) {
@@ -69,6 +72,7 @@ public class OASYamlApi {
                         String definition = IOUtils
                                 .toString(this.getClass().getResourceAsStream("/service-catalog-api.yaml"), "UTF-8");
                         openAPIDef = new OAS3Parser().removeExamplesFromOpenAPI(definition);
+                        log.info("OpenAPI definition loaded and processed for Service Catalog");
                     }
                 }
             }

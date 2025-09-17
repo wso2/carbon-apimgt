@@ -181,6 +181,11 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
         String currentUsername = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         int currentTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
+        if (log.isDebugEnabled()) {
+            log.debug("Starting gateway artifact generation for " + apiRuntimeArtifactDtoList.size() + 
+                    " runtime artifacts for tenant: " + currentTenantDomain);
+        }
+
         List<CompletableFuture<ProcessingResult>> futures = apiRuntimeArtifactDtoList.stream()
             .map(runTimeArtifact -> CompletableFuture.supplyAsync(() -> {
                 // Set the Carbon context in the async thread
@@ -202,6 +207,10 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                         // TODO Environment not found scenarios should be handled before invoking this method.
                         try {
                             environment = APIUtil.getEnvironments(tenantDomain).get(label);
+                            if (environment == null) {
+                                log.warn("Environment not found for label: " + label + " in tenant: " + 
+                                        tenantDomain);
+                            }
                         } catch (APIManagementException e) {
                             result.success = false;
                             result.errorMessage = "Failed to get environment for tenant: " + tenantDomain +
@@ -291,9 +300,15 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                         gatewayAPIDTO.setRevision(runTimeArtifact.getRevision());
                                         result.content = new Gson().toJson(gatewayAPIDTO);
                                         result.success = true;
+                                        if (log.isDebugEnabled()) {
+                                            log.debug("Successfully processed gateway artifact for API: " + 
+                                                    result.name + " (" + result.apiId + ")");
+                                        }
                                     } else {
                                         result.success = false;
                                         result.errorMessage = "GatewayAPIDTO is null";
+                                        log.warn("GatewayAPIDTO is null for API: " + result.name + 
+                                                " (" + result.apiId + ")");
                                     }
                                 } finally {
                                     FileUtils.deleteQuietly(baseDirectory);
@@ -311,10 +326,14 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                             result.success = false;
                             result.errorMessage = "Environment not found for tenant: " + tenantDomain +
                                     ", label: " + label;
+                            log.error("Environment not found for API: " + result.name + " (" + 
+                                    result.apiId + ") in tenant: " + tenantDomain + ", label: " + label);
                         }
                     } else {
                         result.success = false;
                         result.errorMessage = "Runtime artifact is not a file";
+                        log.error("Runtime artifact is not a file for API: " + result.name + " (" + 
+                                result.apiId + ")");
                     }
                     return result;
                 } finally {
@@ -355,8 +374,11 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
         }
 
         if (!failedApis.isEmpty()) {
-            log.warn("Error while creating Synapse configurations for APIs " +
-                    String.join(", ", failedApis));
+            log.warn("Failed to create Synapse configurations for " + failedApis.size() + 
+                    " APIs: " + String.join(", ", failedApis));
+        } else {
+            log.info("Successfully generated gateway artifacts for all " + synapseArtifacts.size() + 
+                    " APIs");
         }
 
         runtimeArtifactDto.setFile(false);
@@ -374,6 +396,11 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
     @Override
     public RuntimeArtifactDto generateGatewayPolicyArtifact(
             List<GatewayPolicyArtifactDto> gatewayPolicyArtifactDtoList) throws APIManagementException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Generating gateway policy artifact for " + gatewayPolicyArtifactDtoList.size() + 
+                    " policy artifacts");
+        }
 
         RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
         List<String> synapseArtifacts = new ArrayList<>();
@@ -407,6 +434,9 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
             String content = new Gson().toJson(gatewayPolicyDTO);
             synapseArtifacts.add(content);
         }
+        
+        log.info("Successfully generated " + synapseArtifacts.size() + " gateway policy artifacts");
+        
         runtimeArtifactDto.setFile(false);
         runtimeArtifactDto.setArtifact(synapseArtifacts);
         return runtimeArtifactDto;
@@ -418,10 +448,16 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
 
         String policySequence;
         String seqExt = GATEWAY_EXT_SEQUENCE_PREFIX + SynapsePolicyAggregator.getSequenceExtensionFlow(flow);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Generating gateway policy sequence for flow: " + flow + ", sequence extension: " + seqExt);
+        }
+        
         try {
             policySequence = SynapsePolicyAggregator.generateGatewayPolicySequenceForPolicyMapping(
                     gatewayPolicyDataList, gatewayPolicyList, flow, seqExt);
         } catch (IOException e) {
+            log.error("Error generating gateway policy sequence for flow: " + flow, e);
             throw new APIManagementException(e);
         }
 
@@ -437,6 +473,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                     return gatewayPolicySequenceContentDto;
                 }
             } catch (APIManagementException | XMLStreamException e) {
+                log.error("Error building OM element for policy sequence flow: " + flow, e);
                 throw new APIManagementException(e);
             }
         }

@@ -19,6 +19,8 @@
  */
 package org.wso2.carbon.apimgt.rest.api.devops.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -37,28 +39,57 @@ import javax.ws.rs.core.Response;
  */
 public class TenantLogsApiServiceImpl implements TenantLogsApiService {
 
+    private static final Log log = LogFactory.getLog(TenantLogsApiServiceImpl.class);
+
     public Response tenantLogsTenantApisApiIdGet(String tenant, String apiId, MessageContext messageContext)
             throws APIManagementException {
-        APILoggingImpl apiLoggingImpl = new APILoggingImpl();
-        List<APILogInfoDTO> apiLogInfoDTOList = apiLoggingImpl.getAPILoggerListByApiId(tenant, apiId);
-        LoggingApiOutputListDTO loggingApiOutputListDT = DevopsAPIUtils.getLoggingAPIList(apiLogInfoDTOList);
-        return Response.ok().entity(loggingApiOutputListDT).build();
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving API loggers for tenant: " + tenant + ", apiId: " + apiId);
+        }
+        
+        try {
+            APILoggingImpl apiLoggingImpl = new APILoggingImpl();
+            List<APILogInfoDTO> apiLogInfoDTOList = apiLoggingImpl.getAPILoggerListByApiId(tenant, apiId);
+            LoggingApiOutputListDTO loggingApiOutputListDT = DevopsAPIUtils.getLoggingAPIList(apiLogInfoDTOList);
+            
+            log.info("Successfully retrieved API loggers for tenant: " + tenant + ", apiId: " + apiId);
+            return Response.ok().entity(loggingApiOutputListDT).build();
+        } catch (Exception e) {
+            log.error("Error occurred while retrieving API loggers for tenant: " + tenant + ", apiId: " + apiId, e);
+            throw e;
+        }
     }
 
     public Response tenantLogsTenantApisApiIdPut(String tenant, String apiId, LoggingApiInputDTO loggingApiInputDTO,
             MessageContext messageContext) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Updating API logger for tenant: " + tenant + ", apiId: " + apiId + 
+                    ", logLevel: " + (loggingApiInputDTO != null ? loggingApiInputDTO.getLogLevel() : "null"));
+        }
+        
         if (apiId != null) {
             if (DevopsAPIUtils.validateLogLevel(loggingApiInputDTO.getLogLevel())) {
-                APILoggingImpl apiLoggingImpl = new APILoggingImpl();
-                apiLoggingImpl.addUpdateAPILogger(tenant, apiId, loggingApiInputDTO.getLogLevel().toUpperCase(),
-                        loggingApiInputDTO.getResourceMethod(),loggingApiInputDTO.getResourcePath());
-                return Response.ok().entity(loggingApiInputDTO).build();
+                try {
+                    APILoggingImpl apiLoggingImpl = new APILoggingImpl();
+                    apiLoggingImpl.addUpdateAPILogger(tenant, apiId, loggingApiInputDTO.getLogLevel().toUpperCase(),
+                            loggingApiInputDTO.getResourceMethod(), loggingApiInputDTO.getResourcePath());
+                    
+                    log.info("Successfully updated API logger for tenant: " + tenant + ", apiId: " + apiId + 
+                            ", logLevel: " + loggingApiInputDTO.getLogLevel());
+                    return Response.ok().entity(loggingApiInputDTO).build();
+                } catch (Exception e) {
+                    log.error("Error occurred while updating API logger for tenant: " + tenant + ", apiId: " + apiId, e);
+                    throw e;
+                }
             } else {
+                log.warn("Invalid log level provided for tenant: " + tenant + ", apiId: " + apiId + 
+                        ", logLevel: " + loggingApiInputDTO.getLogLevel());
                 throw new APIManagementException("The input log level is incorrect: Input log level : " +
                         loggingApiInputDTO.getLogLevel(),
                         ExceptionCodes.from(ExceptionCodes.LOGGING_API_INCORRECT_LOG_LEVEL));
             }
         } else {
+            log.error("API ID is missing for tenant: " + tenant);
             throw new APIManagementException("API ID is missing",
                     ExceptionCodes.from(ExceptionCodes.LOGGING_API_MISSING_DATA));
         }
@@ -66,9 +97,22 @@ public class TenantLogsApiServiceImpl implements TenantLogsApiService {
 
     public Response tenantLogsTenantApisGet(String tenant, String logLevel, MessageContext messageContext)
             throws APIManagementException {
-        APILoggingImpl apiLoggingImpl = new APILoggingImpl();
-        List<APILogInfoDTO> apiLogInfoDTOList = apiLoggingImpl.getAPILoggerList(tenant, logLevel);
-        LoggingApiOutputListDTO loggingApiOutputListDTO = DevopsAPIUtils.getLoggingAPIList(apiLogInfoDTOList);
-        return Response.ok().entity(loggingApiOutputListDTO).build();
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving API loggers for tenant: " + tenant + ", logLevel: " + logLevel);
+        }
+        
+        try {
+            APILoggingImpl apiLoggingImpl = new APILoggingImpl();
+            List<APILogInfoDTO> apiLogInfoDTOList = apiLoggingImpl.getAPILoggerList(tenant, logLevel);
+            LoggingApiOutputListDTO loggingApiOutputListDTO = DevopsAPIUtils.getLoggingAPIList(apiLogInfoDTOList);
+            
+            log.info("Successfully retrieved API loggers for tenant: " + tenant + 
+                    (logLevel != null ? ", logLevel: " + logLevel : ""));
+            return Response.ok().entity(loggingApiOutputListDTO).build();
+        } catch (Exception e) {
+            log.error("Error occurred while retrieving API loggers for tenant: " + tenant + 
+                    (logLevel != null ? ", logLevel: " + logLevel : ""), e);
+            throw e;
+        }
     }
 }

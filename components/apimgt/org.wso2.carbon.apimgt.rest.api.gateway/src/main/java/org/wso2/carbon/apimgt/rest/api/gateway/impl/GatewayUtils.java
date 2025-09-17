@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.gateway.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
@@ -25,9 +27,15 @@ import java.util.List;
 
 public class GatewayUtils {
 
+    private static final Log log = LogFactory.getLog(GatewayUtils.class);
+    private static boolean debugEnabled = log.isDebugEnabled();
+
     public static String validateTenantDomain(String xWSO2Tenant, MessageContext messageContext) {
 
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        if (debugEnabled) {
+            log.debug("Validating tenant domain - requested: " + xWSO2Tenant + ", current user: " + tenantDomain);
+        }
         if (xWSO2Tenant == null) {
             return tenantDomain;
         } else {

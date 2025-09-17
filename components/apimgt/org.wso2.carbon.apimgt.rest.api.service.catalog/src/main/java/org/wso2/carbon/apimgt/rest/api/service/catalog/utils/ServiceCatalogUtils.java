@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.rest.api.service.catalog.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
@@ -31,13 +33,20 @@ import java.io.ByteArrayInputStream;
  * Util class to handle validations
  */
 public class ServiceCatalogUtils {
+    private static final Log log = LogFactory.getLog(ServiceCatalogUtils.class);
     private static final ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
 
     public static boolean checkServiceExistence(String serviceKey, int tenantId) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Checking service existence for key: " + serviceKey + " and tenantId: " + tenantId);
+        }
         return serviceCatalog.getMD5HashByKey(serviceKey, tenantId) != null;
     }
 
     public static ServiceEntry createServiceFromDTO(ServiceDTO serviceDTO, byte[] definitionFileByteArray) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Creating ServiceEntry from DTO for service: " + serviceDTO.getName());
+        }
         ServiceEntry service = new ServiceEntry();
         service.setName(serviceDTO.getName());
         service.setVersion(serviceDTO.getVersion());

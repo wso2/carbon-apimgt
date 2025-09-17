@@ -47,6 +47,7 @@ public class PublisherCommonServiceComponent {
      */
     @Activate
     protected void activate(org.osgi.service.component.ComponentContext context) {
+        log.info("Publisher Common Service Component activated successfully");
     }
 
     /**

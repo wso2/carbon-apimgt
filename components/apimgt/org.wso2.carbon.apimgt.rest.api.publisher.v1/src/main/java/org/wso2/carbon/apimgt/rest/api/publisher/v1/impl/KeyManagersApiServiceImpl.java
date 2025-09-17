@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -34,15 +36,24 @@ import javax.ws.rs.core.Response;
 
 public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
+    private static final Log log = LogFactory.getLog(KeyManagersApiServiceImpl.class);
+
     @Override
     public Response getAllKeyManagers(MessageContext messageContext) throws APIManagementException {
 
         String organization = RestApiUtil.getOrganization(messageContext);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving all key managers for organization: " + organization);
+        }
         APIAdmin apiAdmin = new APIAdminImpl();
         List<KeyManagerConfigurationDTO> keyManagerConfigurations =
                 apiAdmin.getKeyManagerConfigurationsByOrganization(organization, false);
         List<KeyManagerConfigurationDTO> globalKeyManagerConfigurations = apiAdmin.getGlobalKeyManagerConfigurations();
         keyManagerConfigurations.addAll(globalKeyManagerConfigurations);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieved " + keyManagerConfigurations.size() + " key managers for organization: " + organization);
+        }
         return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(keyManagerConfigurations)).build();
     }
 }

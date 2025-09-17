@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.common.gateway.util;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -46,6 +48,8 @@ import javax.net.ssl.SSLContext;
  * Utility Functions for Common gateway component.
  */
 public class CommonAPIUtil {
+    private static final Log log = LogFactory.getLog(CommonAPIUtil.class);
+    
     public static final String STRICT = "Strict";
     public static final String ALLOW_ALL = "AllowAll";
     public static final String DEFAULT_AND_LOCALHOST = "DefaultAndLocalhost";
@@ -81,6 +85,8 @@ public class CommonAPIUtil {
      * @return {@link HttpClient} with all proxy, TLS, ConnectionPooling related configurations
      */
     public static HttpClient getHttpClient(String protocol, HttpClientConfigurationDTO clientConfiguration) {
+        log.info("Creating HTTP client with protocol: " + protocol + ", maxConnections: " +
+                clientConfiguration.getConnectionLimit());
 
         int maxTotal = clientConfiguration.getConnectionLimit();
         int defaultMaxPerRoute = clientConfiguration.getMaximumConnectionsPerRoute();
@@ -111,6 +117,9 @@ public class CommonAPIUtil {
                 .setDefaultRequestConfig(params);
 
         if (proxyEnabled) {
+            if (log.isDebugEnabled()) {
+                log.debug("Configuring proxy: " + proxyHost + ":" + proxyPort + " with protocol: " + protocol);
+            }
             HttpHost host = new HttpHost(proxyHost, proxyPort, protocol);
             DefaultProxyRoutePlanner routePlanner;
             if (nonProxyHosts.length > 0) {
@@ -120,10 +129,15 @@ public class CommonAPIUtil {
             }
             clientBuilder.setRoutePlanner(routePlanner);
             if (!StringUtils.isBlank(proxyUsername) && proxyPassword.length > 0) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Setting proxy credentials for user: " + proxyUsername);
+                }
                 CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
                 credentialsProvider.setCredentials(new AuthScope(proxyHost, proxyPort),
                         new UsernamePasswordCredentials(proxyUsername, String.valueOf(proxyPassword)));
                 clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+            } else if (StringUtils.isBlank(proxyUsername)) {
+                log.warn("Proxy is enabled but credentials are not provided");
             }
         }
         return clientBuilder.build();

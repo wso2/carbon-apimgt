@@ -73,6 +73,11 @@ public class SynapsePolicyAggregator {
                                                                  String pathToAchieve)
             throws APIManagementException, IOException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Generating policy sequence for URI template set with " + uriTemplates.size() + 
+                    " templates, sequence name: " + sequenceName + ", flow: " + flow);
+        }
+
         List<Object> operationPolicyCaseList = new ArrayList<>();
         List<String> apiLevelPolicyRenderedList = new ArrayList<>();
         for (URITemplate template : uriTemplates) {

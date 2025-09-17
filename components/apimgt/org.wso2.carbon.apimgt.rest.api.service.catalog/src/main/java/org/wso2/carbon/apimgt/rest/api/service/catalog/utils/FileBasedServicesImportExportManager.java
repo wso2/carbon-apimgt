@@ -58,9 +58,13 @@ public class FileBasedServicesImportExportManager {
     public void importService(InputStream uploadedAppArchiveInputStream) throws APIManagementException {
         String appArchiveLocation = path + File.separator + IMPORTED_SERVICES +
                 APIConstants.ZIP_FILE_EXTENSION;
+        if (log.isDebugEnabled()) {
+            log.debug("Starting service import from archive: " + appArchiveLocation);
+        }
         try {
             extractUploadedArchiveService(uploadedAppArchiveInputStream,
                     appArchiveLocation, path);
+            log.info("Service archive extracted successfully to: " + path);
         } catch (IOException|APIImportExportException e) {
             String errorMsg = "Error occurred while importing service archive" + appArchiveLocation;
             log.error(errorMsg, e);
@@ -101,8 +105,12 @@ public class FileBasedServicesImportExportManager {
                                                            String archiveName) throws APIManagementException {
         String archivedFilePath;
         ExportArchive exportArchive = new ExportArchive();
+        if (log.isDebugEnabled()) {
+            log.debug("Creating export archive: " + archiveName + " from directory: " + sourceDirectory);
+        }
         try {
             archiveDirectory(sourceDirectory, archiveLocation, archiveName);
+            log.info("Export archive created successfully: " + archiveName);
         } catch (IOException e) {
             // cleanup the archive root directory
             try {
@@ -218,6 +226,9 @@ public class FileBasedServicesImportExportManager {
         String tempDirPath = System.getProperty(path) + File.separator + UUID.randomUUID().toString();
         File file = new File(tempDirPath);
         file.mkdir();
+        if (log.isDebugEnabled()) {
+            log.debug("Created temporary directory: " + tempDirPath);
+        }
         return tempDirPath;
     }
 }
