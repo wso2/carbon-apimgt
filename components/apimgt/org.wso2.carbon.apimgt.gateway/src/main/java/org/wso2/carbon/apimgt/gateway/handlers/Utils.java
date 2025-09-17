@@ -834,8 +834,14 @@ public class Utils {
      *
      * @return set of acceptable resources
      */
-    public static Set<Resource> getAcceptableResources(Resource[] allAPIResources,
-                                                       String httpMethod, String corsRequestMethod) {
+    public static Set<Resource> getAcceptableResources(Resource[] allAPIResources, String httpMethod,
+                                                       String corsRequestMethod, MessageContext messageContext) {
+        Object cachedResources = messageContext.getProperty("ACCEPTABLE_RESOURCES");
+        if (cachedResources instanceof Set) {
+            @SuppressWarnings("unchecked")
+            Set<Resource> acceptableResources = (Set<Resource>) cachedResources;
+            return acceptableResources;
+        }
         List<Resource> acceptableResourcesList = new LinkedList<>();
         for (Resource resource : allAPIResources) {
             //If the requesting method is OPTIONS or if the Resource contains the requesting method

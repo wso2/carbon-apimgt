@@ -148,6 +148,16 @@ class LogUtils {
             Map<String, Resource> resourcesMap = selectedApi.getResourcesMap();
             Set<Resource> acceptableResources = ApiUtils
                     .getAcceptableResources(resourcesMap, messageContext);
+            if ("OPTIONS".equals(httpMethod)) {
+                Map headers = getTransportHeaders(messageContext);
+                String actualVerb = (String) headers.get("Access-Control-Request-Method");
+                if (actualVerb != null) {
+                    Resource[] filteredResources = acceptableResources.toArray(new Resource[0]);
+                    acceptableResources = Utils.getAcceptableResources(
+                            filteredResources, httpMethod, actualVerb, messageContext);
+                }
+            }
+            messageContext.setProperty("ACCEPTABLE_RESOURCES", acceptableResources);
             if (!acceptableResources.isEmpty()) {
                 for (RESTDispatcher dispatcher : ApiUtils.getDispatchers()) {
                     selectedResource = dispatcher.findResource(messageContext, acceptableResources);
@@ -170,7 +180,6 @@ class LogUtils {
                                 }
                             }
                         }
-                        break;
                     }
                 }
             }
