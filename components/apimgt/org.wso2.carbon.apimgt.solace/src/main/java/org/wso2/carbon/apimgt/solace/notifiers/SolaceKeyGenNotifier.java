@@ -85,7 +85,9 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
      * @throws NotifierException if error occurs when patching applications on the Solace broker
      */
     private void syncSolaceApplicationClientId(ApplicationRegistrationEvent event) throws NotifierException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Syncing Solace application client ID for application: " + event.getApplicationUUID());
+        }
         // Get list of subscribed APIs in the application
         try {
             Application application = apiMgtDAO.getApplicationByUUID(event.getApplicationUUID());
@@ -163,8 +165,12 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
                 }
             }
         } catch (APIManagementException e) {
+            log.error("Error persisting keys to Solace broker for application " + event.getApplicationUUID() 
+                    + ": " + e.getMessage());
             throw new NotifierException("Error while persisting generated keys in solace Broker " + e.getMessage());
         }  catch (IOException e) {
+            log.error("I/O error persisting keys to Solace broker for application " + event.getApplicationUUID() 
+                    + ": " + e.getMessage());
             throw new NotifierException("I/O Error while persisting generated keys in solace Broker " + e.getMessage());
         }
     }

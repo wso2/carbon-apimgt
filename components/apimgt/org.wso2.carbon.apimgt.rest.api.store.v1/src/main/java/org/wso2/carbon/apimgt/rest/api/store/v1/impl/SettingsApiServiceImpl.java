@@ -63,6 +63,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
             SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO( isUserAvailable, monetizationEnabled,
                     recommendationEnabled, anonymousEnabled, organization);
+            log.info("Settings retrieved successfully for organization: " + organization);
             return Response.ok().entity(settingsDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Store Settings";

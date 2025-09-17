@@ -52,25 +52,42 @@ public class URLValidationInterceptor extends AbstractPhaseInterceptor<Message> 
     }
 
     public void validateMessage(Message message, String majorVersion, String latestVersion) {
-        if (message.get(PATH_INFO).toString()
-                .contains(message.get(BASE_PATH).toString().concat(latestVersion + pathSeparator))) {
-            message.put(PATH_INFO, message.get(PATH_INFO).toString()
-                    .replace(latestVersion + pathSeparator, ""));
-            message.put(REQUEST_URI, message.get(REQUEST_URI).toString().
-                    replace(latestVersion + pathSeparator, ""));
-            message.put(REQUEST_URL, message.get(REQUEST_URL).toString().
-                    replace(latestVersion + pathSeparator, ""));
-            message.put(RestApiConstants.API_VERSION, latestVersion);
+        String originalPath = message.get(PATH_INFO) != null ? message.get(PATH_INFO).toString() : null;
+        String basePath = message.get(BASE_PATH) != null ? message.get(BASE_PATH).toString() : null;
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Validating URL path: " + originalPath);
         }
-        if (message.get(PATH_INFO).toString()
-                .contains(message.get(BASE_PATH).toString().concat(majorVersion + pathSeparator))) {
-            message.put(PATH_INFO, message.get(PATH_INFO).toString()
-                    .replace(majorVersion + pathSeparator, ""));
-            message.put(REQUEST_URI, message.get(REQUEST_URI).toString()
-                    .replace(majorVersion + pathSeparator, ""));
-            message.put(REQUEST_URL, message.get(REQUEST_URL).toString()
-                    .replace(majorVersion + pathSeparator, ""));
-            message.put(RestApiConstants.API_VERSION, majorVersion);
+        
+        if (originalPath != null && basePath != null) {
+            if (originalPath.contains(basePath.concat(latestVersion + pathSeparator))) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Transforming path for latest version: " + latestVersion);
+                }
+                message.put(PATH_INFO, originalPath.replace(latestVersion + pathSeparator, ""));
+                message.put(REQUEST_URI, message.get(REQUEST_URI).toString().
+                        replace(latestVersion + pathSeparator, ""));
+                message.put(REQUEST_URL, message.get(REQUEST_URL).toString().
+                        replace(latestVersion + pathSeparator, ""));
+                message.put(RestApiConstants.API_VERSION, latestVersion);
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully set API version to: " + latestVersion);
+                }
+            }
+            if (originalPath.contains(basePath.concat(majorVersion + pathSeparator))) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Transforming path for major version: " + majorVersion);
+                }
+                message.put(PATH_INFO, originalPath.replace(majorVersion + pathSeparator, ""));
+                message.put(REQUEST_URI, message.get(REQUEST_URI).toString()
+                        .replace(majorVersion + pathSeparator, ""));
+                message.put(REQUEST_URL, message.get(REQUEST_URL).toString()
+                        .replace(majorVersion + pathSeparator, ""));
+                message.put(RestApiConstants.API_VERSION, majorVersion);
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully set API version to: " + majorVersion);
+                }
+            }
         }
     }
 

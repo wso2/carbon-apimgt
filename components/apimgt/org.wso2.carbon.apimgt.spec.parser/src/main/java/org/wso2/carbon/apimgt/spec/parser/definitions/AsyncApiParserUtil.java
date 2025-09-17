@@ -31,15 +31,29 @@ public class AsyncApiParserUtil {
     public static APIDefinitionValidationResponse validateAsyncAPISpecification(
             String schemaToBeValidated, boolean returnJSONContent) throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Validating AsyncAPI specification with returnJSONContent: " + returnJSONContent);
+        }
+
         APIDefinitionValidationResponse validationResponse = asyncApiParser.validateAPIDefinition(schemaToBeValidated, returnJSONContent);
         final String asyncAPIKeyNotFound = "#: required key [asyncapi] not found";
 
         if (!validationResponse.isValid()) {
+            if (log.isDebugEnabled()) {
+                log.debug("AsyncAPI validation failed with " + validationResponse.getErrorItems().size() + " errors");
+            }
             for (ErrorHandler errorItem : validationResponse.getErrorItems()) {
-                if (asyncAPIKeyNotFound.equals(errorItem.getErrorMessage())) {    //change it other way
+                if (asyncAPIKeyNotFound.equals(errorItem.getErrorMessage())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("AsyncAPI key not found in specification, adding custom error message");
+                    }
                     addErrorToValidationResponse(validationResponse, "#: attribute [asyncapi] should be present");
                     return validationResponse;
                 }
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("AsyncAPI specification validation successful");
             }
         }
 
@@ -49,26 +63,42 @@ public class AsyncApiParserUtil {
     public static APIDefinitionValidationResponse validateAsyncAPISpecificationByURL(
             String url, HttpClient httpClient, boolean returnJSONContent) throws APIManagementException{
 
+        if (log.isDebugEnabled()) {
+            log.debug("Validating AsyncAPI specification from URL: " + url);
+        }
+
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
 
         try {
             HttpGet httpGet = new HttpGet(url);
             HttpResponse response = httpClient.execute(httpGet);
+            int statusCode = response.getStatusLine().getStatusCode();
 
-            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Received HTTP response with status code: " + statusCode);
+            }
+
+            if (HttpStatus.SC_OK == statusCode) {
                 ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
                 Object obj = yamlReader.readValue(new URL(url), Object.class);
                 ObjectMapper jsonWriter = new ObjectMapper();
                 String json = jsonWriter.writeValueAsString(obj);
+                
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully retrieved and converted AsyncAPI specification from URL");
+                }
+                
                 validationResponse = validateAsyncAPISpecification(json, returnJSONContent);
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed to retrieve AsyncAPI specification - HTTP status: " + statusCode);
+                }
                 validationResponse.setValid(false);
                 validationResponse.getErrorItems().add(ExceptionCodes.ASYNCAPI_URL_NO_200);
             }
         } catch (IOException e) {
             ErrorHandler errorHandler = ExceptionCodes.ASYNCAPI_URL_MALFORMED;
-            //log the error and continue since this method is only intended to validate a definition
-            log.error(errorHandler.getErrorDescription(), e);
+            log.error("Failed to retrieve AsyncAPI specification from URL: " + url + ". " + errorHandler.getErrorDescription(), e);
 
             validationResponse.setValid(false);
             validationResponse.getErrorItems().add(errorHandler);

@@ -84,6 +84,9 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
      * @throws NotifierException if error occurs when removing applications from Solace broker
      */
     private void removeSolaceApplication(ApplicationEvent event) throws NotifierException {
+        if (log.isDebugEnabled()) {
+            log.debug("Removing Solace application: " + event.getApplicationName());
+        }
         // get list of subscribed APIs in the application
         Subscriber subscriber = new Subscriber(event.getSubscriber());
         try {
@@ -122,8 +125,8 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
                     applicationFoundInSolaceBroker = true;
 
                     if (log.isDebugEnabled()) {
-                        log.info("Found application '" + event.getApplicationName() + "' in Solace broker");
-                        log.info("Waiting until application removing workflow gets finished");
+                        log.debug("Found application '" + event.getApplicationName() + "' in Solace broker");
+                        log.debug("Waiting until application removing workflow gets finished");
                     }
 
                 } else if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
@@ -169,7 +172,9 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
      * @throws NotifierException if error occurs when renaming applications on the Solace broker
      */
     private void renameSolaceApplication(ApplicationEvent event) throws NotifierException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Renaming Solace application: " + event.getApplicationName());
+        }
         // get list of subscribed APIs in the application
         Subscriber subscriber = new Subscriber(event.getSubscriber());
 

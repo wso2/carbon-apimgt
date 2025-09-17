@@ -612,6 +612,12 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      * false to notify error with handler
      */
     public boolean handleRequest(MessageContext messageContext) {
+        String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+        String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Starting throttling evaluation for API: " + apiContext + ", version: " + apiVersion);
+        }
 
 //        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
 //            return true;

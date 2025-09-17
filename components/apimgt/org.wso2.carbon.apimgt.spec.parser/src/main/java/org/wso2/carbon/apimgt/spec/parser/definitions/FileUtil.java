@@ -52,6 +52,10 @@ public class FileUtil {
     public static String extractUploadedArchive(InputStream uploadedApiArchiveInputStream, String importedDirectoryName,
                                                 String apiArchiveLocation, String extractLocation)
             throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Starting archive extraction for directory: " + importedDirectoryName);
+        }
+        
         String archiveExtractLocation;
         try {
             // create api import directory structure
@@ -61,6 +65,8 @@ public class FileUtil {
             // extract the archive
             archiveExtractLocation = extractLocation + File.separator + importedDirectoryName;
             extractArchive(apiArchiveLocation, archiveExtractLocation);
+            
+            log.info("Successfully extracted API archive to: " + archiveExtractLocation);
         } catch (APIManagementException e) {
             deleteDirectory(extractLocation);
             String errorMsg = "Error in accessing uploaded API archive";
@@ -79,6 +85,9 @@ public class FileUtil {
     public static void createDirectory(String path) throws APIManagementException {
         try {
             Files.createDirectories(Paths.get(path));
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully created directory: " + path);
+            }
         } catch (IOException e) {
             String msg = "Error in creating directory at: " + path;
             log.error(msg, e);
@@ -95,6 +104,9 @@ public class FileUtil {
     public static void deleteDirectory(String path) throws APIManagementException {
         try {
             FileUtils.deleteDirectory(new File(path));
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully deleted directory: " + path);
+            }
         } catch (IOException e) {
             String errorMsg = "Error while deleting directory : " + path;
             log.error(errorMsg, e);
@@ -197,6 +209,9 @@ public class FileUtil {
                 if (entries > maxEntryCount) {
                     throw new APIManagementException("Too many files to unzip.");
                 }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully extracted archive: " + archiveFilePath + " with " + entries + " entries");
             }
             return archiveName;
         } catch (IOException e) {

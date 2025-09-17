@@ -17,6 +17,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.authenticators;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.message.Message;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -27,6 +29,8 @@ import javax.cache.Cache;
  * This class implemented for common methods of JWT and Opaque Authentications
  */
 public abstract class AbstractOAuthAuthenticator {
+
+    private static final Log log = LogFactory.getLog(AbstractOAuthAuthenticator.class);
 
     /**
      * @param message cxf message to be authenticated
@@ -39,6 +43,9 @@ public abstract class AbstractOAuthAuthenticator {
      * @return rest API token cache
      */
     public Cache getRESTAPITokenCache() {
+        if (log.isDebugEnabled()) {
+            log.debug("Accessing REST API token cache");
+        }
         return CacheProvider.getRESTAPITokenCache();
     }
 
@@ -46,6 +53,9 @@ public abstract class AbstractOAuthAuthenticator {
      * @return rest API invalid token cache
      */
      public Cache getRESTAPIInvalidTokenCache() {
+        if (log.isDebugEnabled()) {
+            log.debug("Accessing REST API invalid token cache");
+        }
         return CacheProvider.getRESTAPIInvalidTokenCache();
     }
 }

@@ -51,11 +51,18 @@ public class TokenMergeInterceptor extends AbstractPhaseInterceptor {
 
     @MethodStats
     public void handleMessage(Message message) throws Fault {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Starting token merge process");
+        }
+        
         //If Authorization headers are present anonymous URI check will be skipped
         String accessToken = RestApiUtil
                 .extractOAuthAccessTokenFromMessage(message, RestApiConstants.REGEX_BEARER_PATTERN,
                         RestApiConstants.AUTH_HEADER_NAME);
         if (accessToken == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("No access token found in authorization header, checking query parameters");
+            }
             String queryString = (String) message.get(QUERY_STRING);
             if (StringUtils.isNotEmpty(queryString)) {
                 String[] queryParams = queryString.split(APIConstants.SEARCH_AND_TAG);
@@ -65,25 +72,40 @@ public class TokenMergeInterceptor extends AbstractPhaseInterceptor {
                 String[] tokenParts = tokenFromQueryParam.split("=");
                 if (tokenParts.length == 2) {
                     accessToken = tokenParts[1];
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Access token extracted from query parameters");
+                    }
                 }
             }
         }
         if (accessToken == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("No access token found in request");
+            }
             return;
         }
 
         TreeMap<Object, Object> protocolMap = (TreeMap<Object, Object>) message.get(Message.PROTOCOL_HEADERS);
         if (protocolMap == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("No protocol headers found, skipping token merge");
+            }
             return;
         }
 
         ArrayList tokenCookie = (ArrayList) (protocolMap).get(RestApiConstants.COOKIE_HEADER_NAME);
         if (tokenCookie == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("No cookies found in headers");
+            }
             return;
         }
 
         String cookie = tokenCookie.get(0).toString();
         if (cookie == null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Cookie value is null");
+            }
             return;
         }
         cookie = cookie.trim();
@@ -115,11 +137,21 @@ public class TokenMergeInterceptor extends AbstractPhaseInterceptor {
         String[] tokenParts = tokenFromCookie.split("=");
         if (tokenParts.length == 2) {
             accessToken += tokenParts[1]; // Append the token section from cookie to token part from Auth header
+            if (logger.isDebugEnabled()) {
+                logger.debug("Successfully merged token parts from header and cookie");
+            }
+        } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Cookie token format invalid, using original token");
+            }
         }
         TreeMap headers = (TreeMap) message.get(Message.PROTOCOL_HEADERS);
         ArrayList authorizationHeader = new ArrayList<>();
         authorizationHeader.add(0, String.format("Bearer %s", accessToken));
         headers.put(RestApiConstants.AUTH_HEADER_NAME, authorizationHeader);
         message.put(Message.PROTOCOL_HEADERS, headers);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Authorization header updated with merged token");
+        }
     }
 }

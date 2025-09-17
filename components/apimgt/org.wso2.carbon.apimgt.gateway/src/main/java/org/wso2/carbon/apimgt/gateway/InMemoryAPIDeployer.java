@@ -97,6 +97,7 @@ public class InMemoryAPIDeployer {
     public boolean deployAPI(DeployAPIInGatewayEvent gatewayEvent) throws ArtifactSynchronizerException {
 
         String apiId = gatewayEvent.getUuid();
+        log.info("Starting API deployment for API ID: " + apiId);
         Set<String> gatewayLabels = gatewayEvent.getGatewayLabels();
         gatewayLabels.retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
         try {

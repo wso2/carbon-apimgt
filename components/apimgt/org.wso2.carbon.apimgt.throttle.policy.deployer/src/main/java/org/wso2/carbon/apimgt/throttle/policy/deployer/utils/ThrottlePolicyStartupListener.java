@@ -59,29 +59,46 @@ public class ThrottlePolicyStartupListener implements ServerStartupObserver, Ser
     @Override
     public void completedServerStartup() {
 
+        log.info("Server startup completed. Initiating throttle policy deployment and JMS subscription.");
         deployPoliciesInAsyncMode();
         jmsTransportHandlerForEventHub
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION,
                         new ThrottlePolicyJMSMessageListener());
+        log.info("Throttle policy startup process completed successfully.");
     }
 
     @Override
     public void invoke() {
 
         if (jmsTransportHandlerForEventHub != null) {
-            log.debug("Unsubscribe from JMS Events...");
+            log.info("Server shutdown initiated. Unsubscribing from JMS events.");
+            if (log.isDebugEnabled()) {
+                log.debug("Unsubscribing from JMS Events...");
+            }
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
+            log.info("JMS event unsubscription completed.");
+        } else {
+            log.warn("JMS transport handler is null during shutdown.");
         }
     }
 
     @Override
     public void run() {
 
-        PolicyUtil.deployAllPolicies();
+        log.info("Starting asynchronous deployment of all throttle policies.");
+        try {
+            PolicyUtil.deployAllPolicies();
+            log.info("Asynchronous policy deployment completed successfully.");
+        } catch (Exception e) {
+            log.error("Error occurred during asynchronous policy deployment", e);
+        }
     }
 
     private void deployPoliciesInAsyncMode() {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Starting policy deployment in asynchronous mode");
+        }
         new Thread(this).start();
     }
 
@@ -89,8 +106,14 @@ public class ThrottlePolicyStartupListener implements ServerStartupObserver, Ser
     public void shutDownListener() {
 
         if (jmsTransportHandlerForEventHub != null) {
-            log.debug("Unsubscribe from JMS Events...");
+            log.info("Shutting down JMS listener. Unsubscribing from JMS events.");
+            if (log.isDebugEnabled()) {
+                log.debug("Unsubscribing from JMS Events...");
+            }
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
+            log.info("JMS listener shutdown completed.");
+        } else {
+            log.warn("JMS transport handler is null during listener shutdown.");
         }
     }
 }

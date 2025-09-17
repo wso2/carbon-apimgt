@@ -83,14 +83,20 @@ public class EntitlementServiceClient {
         String decision = "DENY";
         try {
             decision = entitlementServiceStub.getDecisionByAttributes(subject, resource, action, environment);
-            System.out.println("\nXACML Decision is received : " + decision);
+            if (logger.isDebugEnabled()) {
+                logger.debug("XACML Decision received: " + decision + " for subject: " + subject + 
+                            ", resource: " + resource + ", action: " + action);
+            }
             String authCookie = (String) entitlementServiceStub._getServiceClient().getServiceContext()
                     .getProperty(HTTPConstants.COOKIE_STRING);
-            System.out.println("\nCookie is received for subsequent communication :  " + authCookie);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Authentication cookie received for subsequent XACML communication");
+            }
         } catch (RemoteException e) {
-            logger.error("Error while connecting PDP ", e);
+            logger.error("Error while connecting to PDP for XACML validation", e);
         } catch (EntitlementServiceException e) {
-            logger.error("Error while validating XACML policy for given request ", e);
+            logger.error("Error while validating XACML policy for request - subject: " + subject + 
+                        ", resource: " + resource + ", action: " + action, e);
         }
         return decision;
     }

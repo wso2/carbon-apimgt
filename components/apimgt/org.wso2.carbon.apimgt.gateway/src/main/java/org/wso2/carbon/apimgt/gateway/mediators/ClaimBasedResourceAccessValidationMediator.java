@@ -54,6 +54,9 @@ public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator
 
     @Override
     public boolean mediate(MessageContext messageContext) {
+        if (log.isDebugEnabled()) {
+            log.debug("Starting claim-based resource access validation for claim: " + accessVerificationClaim);
+        }
 
         String claimValueSentInToken;
         Map<String, String> jwtTokenClaims = (Map<String, String>) messageContext

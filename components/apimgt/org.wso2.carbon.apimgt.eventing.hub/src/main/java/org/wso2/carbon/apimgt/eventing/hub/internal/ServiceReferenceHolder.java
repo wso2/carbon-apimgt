@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.eventing.hub.internal;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 
@@ -24,6 +26,7 @@ import org.wso2.carbon.event.stream.core.EventStreamService;
  * Service reference holder for eventing hub.
  */
 public class ServiceReferenceHolder {
+    private static final Log log = LogFactory.getLog(ServiceReferenceHolder.class);
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private OutputEventAdapterService outputEventAdapterService;
     private EventStreamService eventStreamService;
@@ -37,6 +40,10 @@ public class ServiceReferenceHolder {
     }
 
     public void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting OutputEventAdapterService: " +
+                    (outputEventAdapterService != null ? "available" : "null"));
+        }
         this.outputEventAdapterService = outputEventAdapterService;
     }
 
@@ -45,6 +52,9 @@ public class ServiceReferenceHolder {
     }
 
     public void setEventStreamService(EventStreamService eventStreamService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting EventStreamService: " + (eventStreamService != null ? "available" : "null"));
+        }
         this.eventStreamService = eventStreamService;
     }
 
