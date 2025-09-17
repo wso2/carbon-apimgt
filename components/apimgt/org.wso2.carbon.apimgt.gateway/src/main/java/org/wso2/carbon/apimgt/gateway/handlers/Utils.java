@@ -838,9 +838,14 @@ public class Utils {
                                                        String corsRequestMethod, MessageContext messageContext) {
         Object cachedResources = messageContext.getProperty("ACCEPTABLE_RESOURCES");
         if (cachedResources instanceof Set) {
-            @SuppressWarnings("unchecked")
-            Set<Resource> acceptableResources = (Set<Resource>) cachedResources;
-            return acceptableResources;
+            if (log.isDebugEnabled()) {
+                log.debug("Returning cached acceptable resources for method: " + httpMethod);
+            }
+            return (Set<Resource>) cachedResources;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Computing acceptable resources for method: " + httpMethod + ", CORS method: "
+                    + corsRequestMethod);
         }
         List<Resource> acceptableResourcesList = new LinkedList<>();
         for (Resource resource : allAPIResources) {

@@ -178,6 +178,10 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                     Set<Resource> acceptableResources
                             = Utils.getAcceptableResources(allAPIResources, httpMethod, corsRequestMethod,
                             messageContext);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Found " + acceptableResources.size()
+                                + " acceptable resources for HTTP method: " + httpMethod);
+                    }
                     messageContext.setProperty("ACCEPTABLE_RESOURCES", acceptableResources);
                     if (!acceptableResources.isEmpty()) {
                         for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
