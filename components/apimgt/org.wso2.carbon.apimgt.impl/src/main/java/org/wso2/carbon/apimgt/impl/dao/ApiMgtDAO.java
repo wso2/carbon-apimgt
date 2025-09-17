@@ -654,7 +654,8 @@ public class ApiMgtDAO {
                 subscriber.setId(subscriberId);
                 subscriber.setTenantId(rs.getInt("TENANT_ID"));
                 subscriber.setEmail(rs.getString("EMAIL_ADDRESS"));
-                subscriber.setSubscribedDate(new java.util.Date(rs.getTimestamp("DATE_SUBSCRIBED").getTime()));
+                Timestamp dateSubscribed = rs.getTimestamp("DATE_SUBSCRIBED");
+                subscriber.setSubscribedDate(dateSubscribed == null ? null : new java.util.Date(dateSubscribed.getTime()));
                 return subscriber;
             }
         } catch (SQLException e) {
@@ -17937,8 +17938,10 @@ public class ApiMgtDAO {
                     workflow.setWorkflowType(rs.getString("WF_TYPE"));
                     String workflowstatus = rs.getString("WF_STATUS");
                     workflow.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(workflowstatus));
-                    workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toString());
-                    workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toString());
+                    Timestamp createdTime = rs.getTimestamp("WF_CREATED_TIME");
+                    workflow.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime));
+                    Timestamp updatedTime = rs.getTimestamp("WF_UPDATED_TIME");
+                    workflow.setUpdatedTime(updatedTime == null ? null : String.valueOf(updatedTime));
                     workflow.setWorkflowStatusDesc(rs.getString("WF_STATUS_DESC"));
                     workflow.setTenantId(rs.getInt("TENANT_ID"));
                     workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
@@ -18008,8 +18011,10 @@ public class ApiMgtDAO {
                     workflow.setWorkflowType(rs.getString("WF_TYPE"));
                     String workflowstatus = rs.getString("WF_STATUS");
                     workflow.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(workflowstatus));
-                    workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toString());
-                    workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toString());
+                    Timestamp createdTime = rs.getTimestamp("WF_CREATED_TIME");
+                    workflow.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime));
+                    Timestamp updatedTime = rs.getTimestamp("WF_UPDATED_TIME");
+                    workflow.setUpdatedTime(updatedTime == null ? null : String.valueOf(updatedTime));
                     workflow.setWorkflowStatusDesc(rs.getString("WF_STATUS_DESC"));
                     workflow.setTenantId(rs.getInt("TENANT_ID"));
                     workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
@@ -18079,8 +18084,10 @@ public class ApiMgtDAO {
                     workflow.setWorkflowType(rs.getString("WF_TYPE"));
                     String workflowstatus = rs.getString("WF_STATUS");
                     workflow.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(workflowstatus));
-                    workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toString());
-                    workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toString());
+                    Timestamp createdTime = rs.getTimestamp("WF_CREATED_TIME");
+                    workflow.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime));
+                    Timestamp updatedTime = rs.getTimestamp("WF_UPDATED_TIME");
+                    workflow.setUpdatedTime(updatedTime == null ? null : String.valueOf(updatedTime));
                     workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
                     workflow.setTenantId(rs.getInt("TENANT_ID"));
                     workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
