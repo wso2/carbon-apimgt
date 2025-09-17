@@ -238,5 +238,16 @@ public class APIMgtGatewayConstants {
     public static final String END_USER_TENANT_ID_CLAIM = "enduserTenantId";
     public static final String TOKEN_TYPE_CLAIM = "token_type";
 
+    // Basic Auth Client Pool configurations
+    public static final String BASIC_AUTH_VALIDATOR = "BasicAuthValidator.";
+    public static final String CONNECTION_POOL = "ConnectionPool.";
+    public static final String BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_IDLE =
+            BASIC_AUTH_VALIDATOR + CONNECTION_POOL + "MaxIdle";
+    public static final String BASIC_AUTH_VALIDATOR_CONNECTION_POOL_INIT_IDLE_CAPACITY =
+            BASIC_AUTH_VALIDATOR + CONNECTION_POOL + "InitIdleCapacity";
+    public static final String BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_ACTIVE =
+            BASIC_AUTH_VALIDATOR + CONNECTION_POOL + "MaxActive";
+    public static final String BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_WAIT_MILLIS =
+            BASIC_AUTH_VALIDATOR + CONNECTION_POOL + "MaxWaitMillis";
 }
 
