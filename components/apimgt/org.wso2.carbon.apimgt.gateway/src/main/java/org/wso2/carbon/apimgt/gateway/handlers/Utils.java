@@ -834,14 +834,28 @@ public class Utils {
      *
      * @return set of acceptable resources
      */
+    @Deprecated // Use getAcceptableResources(Resource[], String, String, MessageContext) instead
+    public static Set<Resource> getAcceptableResources(Resource[] allAPIResources,
+                                                       String httpMethod,
+                                                       String corsRequestMethod) {
+        return getAcceptableResources(allAPIResources, httpMethod, corsRequestMethod, null);
+    }
+
+    /**
+     * Select acceptable resources from the set of all resources based on requesting methods.
+     *
+     * @return set of acceptable resources
+     */
     public static Set<Resource> getAcceptableResources(Resource[] allAPIResources, String httpMethod,
                                                        String corsRequestMethod, MessageContext messageContext) {
-        Object cachedResources = messageContext.getProperty("ACCEPTABLE_RESOURCES");
-        if (cachedResources instanceof Set) {
-            if (log.isDebugEnabled()) {
-                log.debug("Returning cached acceptable resources for method: " + httpMethod);
+        if (messageContext != null) {
+            Object cachedResources = messageContext.getProperty("ACCEPTABLE_RESOURCES");
+            if (cachedResources instanceof Set) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Returning cached acceptable resources for method: " + httpMethod);
+                }
+                return (Set<Resource>) cachedResources;
             }
-            return (Set<Resource>) cachedResources;
         }
         if (log.isDebugEnabled()) {
             log.debug("Computing acceptable resources for method: " + httpMethod + ", CORS method: "
