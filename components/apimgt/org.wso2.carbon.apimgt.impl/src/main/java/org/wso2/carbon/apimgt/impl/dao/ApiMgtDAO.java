@@ -5950,7 +5950,8 @@ public class ApiMgtDAO {
                 workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(rs.getString("WF_TYPE"));
                 workflowDTO.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
                 workflowDTO.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                workflowDTO.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").getTime());
+                Timestamp createdTime = rs.getTimestamp("WF_CREATED_TIME");
+                workflowDTO.setCreatedTime(createdTime == null ? 0L : createdTime.getTime());
                 workflowDTO.setWorkflowReference(rs.getString("WF_REFERENCE"));
                 workflowDTO.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                 workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
@@ -6013,7 +6014,8 @@ public class ApiMgtDAO {
                 workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(rs.getString("WF_TYPE"));
                 workflowDTO.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
                 workflowDTO.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                workflowDTO.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").getTime());
+                Timestamp createdTime = rs.getTimestamp("WF_CREATED_TIME");
+                workflowDTO.setCreatedTime(createdTime == null ? 0L : createdTime.getTime());
                 workflowDTO.setWorkflowReference(rs.getString("WF_REFERENCE"));
                 workflowDTO.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                 workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
@@ -6051,7 +6053,8 @@ public class ApiMgtDAO {
                             .createWorkflowDTO(rs.getString("WF_TYPE"));
                     workflowDTO.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
                     workflowDTO.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                    workflowDTO.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").getTime());
+                    Timestamp createdTime = rs.getTimestamp("WF_CREATED_TIME");
+                    workflowDTO.setCreatedTime(createdTime == null ? 0L : createdTime.getTime());
                     workflowDTO.setWorkflowReference(rs.getString("WF_REFERENCE"));
                     workflowDTO.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                     workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
