@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.throttling.siddhi.extension;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
@@ -43,6 +45,9 @@ import java.util.Map;
  * INSERT ALL EVENTS into ResultStream;
  */
 public class SumAttributeAggregatorWithReset extends AttributeAggregator {
+    
+    private static final Log log = LogFactory.getLog(SumAttributeAggregatorWithReset.class);
+    
     private SumAttributeAggregatorWithReset sumOutputAttributeAggregator;
 
     /**
@@ -73,6 +78,10 @@ public class SumAttributeAggregatorWithReset extends AttributeAggregator {
             break;
         default:
             throw new OperationNotSupportedException("Sum not supported for " + type);
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Initialized SumAttributeAggregatorWithReset for type: " + type);
         }
 
     }

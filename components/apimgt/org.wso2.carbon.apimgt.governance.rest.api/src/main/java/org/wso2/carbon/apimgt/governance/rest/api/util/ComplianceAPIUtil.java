@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
@@ -59,6 +61,8 @@ import java.util.stream.Collectors;
  */
 public class ComplianceAPIUtil {
 
+    private static final Log log = LogFactory.getLog(ComplianceAPIUtil.class);
+
     /**
      * Get the artifacts compliance details DTO using the Artifact Reference Id, artifact type,
      * username and organization
@@ -76,13 +80,20 @@ public class ComplianceAPIUtil {
                                                                                String organization)
             throws APIMGovernanceException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Getting artifact compliance details for artifact: " + artifactRefId + " of type: " + 
+                    artifactType + " in organization: " + organization);
+        }
+
         // Check if the artifact is available
         if (!APIMGovernanceUtil.isArtifactAvailable(artifactRefId, artifactType, organization)) {
+            log.error("Artifact not found: " + artifactRefId + " in organization: " + organization);
             throw new APIMGovernanceException(APIMGovExceptionCodes.ARTIFACT_NOT_FOUND, artifactRefId, organization);
         }
 
         // Check if the artifact is visible to the user
         if (!APIMGovernanceUtil.isArtifactVisibleToUser(artifactRefId, artifactType, username, organization)) {
+            log.warn("User " + username + " is not authorized to view artifact: " + artifactRefId);
             throw new APIMGovernanceException(APIMGovExceptionCodes.UNAUTHORIZED_TO_VIEW_ARTIFACT, artifactRefId,
                     organization);
         }

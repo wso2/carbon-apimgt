@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.model.subscription.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -33,11 +35,18 @@ import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
+    private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
+
     @Override
     public Response applicationsGet(String xWSO2Tenant, Integer appId, MessageContext messageContext) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving applications. AppId: " + appId + ", Tenant: " + xWSO2Tenant);
+        }
+
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         if (appId != null && appId > 0) {
+            log.info("Retrieving application by ID: " + appId);
             List<Application> application = subscriptionValidationDAO.getApplicationById(appId);
             return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(application)
             ).build();
@@ -49,14 +58,17 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         }
         if (StringUtils.isNotEmpty(organization) && organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
                 xWSO2Tenant.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            log.info("Retrieving all applications across all organizations");
             return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(
                     subscriptionValidationDAO.getAllApplications())).build();
         }
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
+            log.info("Retrieving applications for tenant: " + xWSO2Tenant);
             return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(
                     subscriptionValidationDAO.getAllApplications(xWSO2Tenant)))
                     .build();
         }
+        log.info("Retrieving all applications for default tenant");
         return Response.ok().entity(SubscriptionValidationDataUtil.fromApplicationToApplicationListDTO(
                 subscriptionValidationDAO.getAllApplications())).build();
     }

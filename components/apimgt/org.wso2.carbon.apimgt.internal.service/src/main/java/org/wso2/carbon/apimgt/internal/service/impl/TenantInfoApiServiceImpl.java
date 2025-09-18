@@ -4,6 +4,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.LoadingTenants;
 import org.wso2.carbon.apimgt.impl.utils.TenantUtils;
@@ -29,10 +31,16 @@ import javax.ws.rs.core.SecurityContext;
 
 public class TenantInfoApiServiceImpl implements TenantInfoApiService {
 
+    private static final Log log = LogFactory.getLog(TenantInfoApiServiceImpl.class);
+
     public Response tenantInfoGet(String xWSO2Tenant, String filter, MessageContext messageContext)
             throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving tenant info. Tenant: " + xWSO2Tenant + ", Filter: " + filter);
+        }
         String tenantDomain = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         Tenant[] allTenants = TenantUtils.getAllTenants(tenantDomain, constructLoadingTenantsFromFilter(filter));
+        log.info("Retrieved tenant information for " + (allTenants != null ? allTenants.length : 0) + " tenants");
         return Response.ok().entity(getTenantInfoListDTO(allTenants)).build();
     }
 

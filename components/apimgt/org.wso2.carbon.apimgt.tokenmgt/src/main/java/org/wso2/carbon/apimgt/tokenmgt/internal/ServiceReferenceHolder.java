@@ -16,11 +16,14 @@
 
 package org.wso2.carbon.apimgt.tokenmgt.internal;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 
 public class ServiceReferenceHolder {
 
+    private static final Log log = LogFactory.getLog(ServiceReferenceHolder.class);
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
 
     private APIManagerConfigurationService amConfigurationService;
@@ -34,10 +37,16 @@ public class ServiceReferenceHolder {
     }
 
     public APIManagerConfigurationService getAPIManagerConfigurationService() {
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving API Manager Configuration Service");
+        }
         return amConfigurationService;
     }
 
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigurationService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting API Manager Configuration Service");
+        }
         this.amConfigurationService = amConfigurationService;
     }
 

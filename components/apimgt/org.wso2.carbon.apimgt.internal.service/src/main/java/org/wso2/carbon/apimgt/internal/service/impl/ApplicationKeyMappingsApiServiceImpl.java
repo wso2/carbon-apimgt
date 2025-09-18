@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -35,15 +37,24 @@ import javax.ws.rs.core.Response;
 
 public class ApplicationKeyMappingsApiServiceImpl implements ApplicationKeyMappingsApiService {
 
+    private static final Log log = LogFactory.getLog(ApplicationKeyMappingsApiServiceImpl.class);
+
     @Override
     public Response applicationKeyMappingsGet(String xWSO2Tenant, String consumerKey, String keymanager,
                                               MessageContext messageContext) throws APIManagementException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving application key mappings. ConsumerKey: " + consumerKey + ", KeyManager: " +
+                    keymanager + ", Tenant: " + xWSO2Tenant);
+        }
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         String organization = RestApiUtil.getOrganization(messageContext);
 
         if (StringUtils.isNotEmpty(consumerKey)) {
+            log.info("Retrieving application key mapping by consumer key: " + consumerKey + " for tenant: " +
+                    xWSO2Tenant);
             ApplicationKeyMapping keyMapping = subscriptionValidationDAO.getApplicationKeyMapping(consumerKey,
                     keymanager, xWSO2Tenant);
             List<ApplicationKeyMapping> applicationKeyMappings = new ArrayList<>();
@@ -54,15 +65,18 @@ public class ApplicationKeyMappingsApiServiceImpl implements ApplicationKeyMappi
                     fromApplicationKeyMappingToApplicationKeyMappingListDTO(applicationKeyMappings)).build();
         }
         if (StringUtils.isNotEmpty(organization) && !organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM))   {
+            log.info("Retrieving all application key mappings for organization: " + organization);
             return Response.ok().entity(SubscriptionValidationDataUtil.
                     fromApplicationKeyMappingToApplicationKeyMappingListDTO(subscriptionValidationDAO.
                             getAllApplicationKeyMappingsByOrganization(organization))).build();
         } else if (StringUtils.isNotEmpty(organization) && organization.equalsIgnoreCase(APIConstants.ORG_ALL_QUERY_PARAM) &&
                 xWSO2Tenant.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            log.info("Retrieving all application key mappings across all organizations");
             return Response.ok().entity(SubscriptionValidationDataUtil.
                     fromApplicationKeyMappingToApplicationKeyMappingListDTO(subscriptionValidationDAO.
                             getAllApplicationKeyMappings())).build();
         } else if (StringUtils.isNotEmpty(xWSO2Tenant)) {
+            log.info("Retrieving all application key mappings for tenant: " + xWSO2Tenant);
             return Response.ok().entity(SubscriptionValidationDataUtil.
                     fromApplicationKeyMappingToApplicationKeyMappingListDTO(subscriptionValidationDAO.
                             getAllApplicationKeyMappings(xWSO2Tenant))).build();

@@ -72,7 +72,9 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
     @Override
     public boolean doPostUpdateCredential(String userName, Object credential, UserStoreManager userStoreManager)
             throws org.wso2.carbon.user.core.UserStoreException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Post update credential for user: " + userName);
+        }
         clearGatewayUsernameCache(userName, getTenantDomain());
         return super.doPostUpdateCredential(userName, credential, userStoreManager);
     }
@@ -81,7 +83,9 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
     public boolean doPostUpdateCredentialByAdmin(String userName, Object credential,
                                                  UserStoreManager userStoreManager)
             throws org.wso2.carbon.user.core.UserStoreException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Post update credential by admin for user: " + userName);
+        }
         clearGatewayUsernameCache(userName,getTenantDomain());
         return super.doPostUpdateCredentialByAdmin(userName, credential, userStoreManager);
     }
@@ -90,7 +94,9 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
     public boolean doPostUpdateRoleListOfUser(String userName, String[] deletedRoles, String[] newRoles,
                                               UserStoreManager userStoreManager)
             throws org.wso2.carbon.user.core.UserStoreException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Post update role list for user: " + userName);
+        }
         clearGatewayUsernameCache(userName,getTenantDomain());
         return super.doPostUpdateRoleListOfUser(userName, deletedRoles, newRoles, userStoreManager);
     }
@@ -108,7 +114,9 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
     public boolean doPostAddUser(String userName, Object credential, String[] roleList, Map<String, String> claims,
                                  String profile, UserStoreManager userStoreManager)
             throws org.wso2.carbon.user.core.UserStoreException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Post add user: " + userName);
+        }
         clearGatewayUsernameCache(userName,getTenantDomain());
         return super.doPostAddUser(userName, credential, roleList, claims, profile, userStoreManager);
     }
@@ -116,7 +124,9 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
     @Override
     public boolean doPostDeleteUser(String userName, UserStoreManager userStoreManager)
             throws org.wso2.carbon.user.core.UserStoreException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Post delete user: " + userName);
+        }
         clearGatewayUsernameCache(userName,getTenantDomain());
         return super.doPostDeleteUser(userName, userStoreManager);
     }
@@ -160,7 +170,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
             userSignupWFExecutor.cleanUpPendingTask(workflowExtRef);
         } catch (WorkflowException | APIManagementException | UserStoreException e) {
             // exception is not thrown to the caller since this is a event Identity(IS) listener
-            log.error("Error while cleaning up workflow task for the user: " + username, e);
+            log.error("Error while cleaning up workflow task for user: " + username, e);
         }
         APIUtil.clearRoleCache(getUserName(username, userStoreManager));
         return true;
@@ -223,7 +233,9 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
         }
         client.invalidateCachedUsernames(usernameList, tenantDomain);
 
-        log.debug("Removed cached usernames of the Gateway.");
+        if (log.isDebugEnabled()) {
+            log.debug("Removed cached usernames from the Gateway");
+        }
 
     }
 

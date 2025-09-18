@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.notification;
 
 import com.google.gson.Gson;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.WebhooksDAO;
@@ -31,12 +33,23 @@ import java.util.Map;
  * This class implements to handle webhooks delivery status related notification events.
  */
 public class WebhooksDeliveryEventHandler implements EventHandler {
+
+    private static final Log log = LogFactory.getLog(WebhooksDeliveryEventHandler.class);
+
     @Override
     public boolean handleEvent(String event, Map<String, List<String>> headers) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Processing webhooks delivery event");
+        }
         WebhooksDeliveryEvent deliveryEvent = new Gson().fromJson(event, WebhooksDeliveryEvent.class);
-        WebhooksDAO.getInstance().updateDeliveryStatus(deliveryEvent.getApiUUID(), deliveryEvent.getAppID(),
-                deliveryEvent.getTenantDomain(), deliveryEvent.getCallback(), deliveryEvent.getTopic(),
-                deliveryEvent.getStatus());
+        if (deliveryEvent != null) {
+            log.info("Updating delivery status for webhook: " + deliveryEvent.getCallback());
+            WebhooksDAO.getInstance().updateDeliveryStatus(deliveryEvent.getApiUUID(), deliveryEvent.getAppID(),
+                    deliveryEvent.getTenantDomain(), deliveryEvent.getCallback(), deliveryEvent.getTopic(),
+                    deliveryEvent.getStatus());
+        } else {
+            log.error("Failed to parse webhooks delivery event from JSON");
+        }
         return true;
     }
 

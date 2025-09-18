@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
@@ -35,6 +37,8 @@ import javax.ws.rs.core.Response;
  */
 public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService {
 
+    private static final Log log = LogFactory.getLog(PolicyAdherenceApiServiceImpl.class);
+
     /**
      * Get the policy adherence summary
      *
@@ -44,11 +48,15 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
      */
     public Response getPolicyAdherenceSummary(MessageContext messageContext) throws APIMGovernanceException {
 
-
         PolicyManager policyManager = new PolicyManager();
         ComplianceManager complianceManager = new ComplianceManager();
 
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving policy adherence summary for organization: " + organization);
+        }
+
         List<String> policyIds = policyManager.getGovernancePolicies(organization)
                 .getGovernancePolicyList().stream().map(APIMGovernancePolicy::getId).collect(Collectors.toList());
 
@@ -64,6 +72,7 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
         policyAdherenceSummaryDTO.setFollowed(followedCount);
         policyAdherenceSummaryDTO.setUnApplied(policyIds.size() - followedCount - violatedCount);
 
+        log.info("Successfully retrieved policy adherence summary");
         return Response.ok().entity(policyAdherenceSummaryDTO).build();
     }
 

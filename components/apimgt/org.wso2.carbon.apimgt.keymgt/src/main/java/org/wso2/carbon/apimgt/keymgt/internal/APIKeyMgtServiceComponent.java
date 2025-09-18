@@ -55,6 +55,7 @@ public class APIKeyMgtServiceComponent {
     @Activate
     protected void activate(ComponentContext ctxt) {
         try {
+            log.info("Activating API Key Management Service Component");
             APIKeyMgtDataHolder.initData();
             log.debug("Key Manager User Operation Listener is enabled.");
             // Register subscription datastore related service
@@ -62,7 +63,9 @@ public class APIKeyMgtServiceComponent {
             // Register KeyManagerDataService
             serviceRegistration = ctxt.getBundleContext().registerService(KeyManagerDataService.class.getName(),
                     new KeyManagerDataServiceImpl(), null);
+            log.info("KeyManagerDataService registered successfully");
 
+            log.info("API Key Management Bundle started successfully");
             if (log.isDebugEnabled()) {
                 log.debug("Identity API Key Mgt Bundle is started.");
             }
@@ -73,9 +76,12 @@ public class APIKeyMgtServiceComponent {
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
+        log.info("Deactivating API Key Management Service Component");
         if (serviceRegistration != null) {
             serviceRegistration.unregister();
+            log.info("KeyManagerDataService unregistered successfully");
         }
+        log.info("API Key Management Bundle deactivated successfully");
         if (log.isDebugEnabled()) {
             log.info("Key Manager User Operation Listener is deactivated.");
         }

@@ -24,6 +24,7 @@ import io.opentracing.contrib.reporter.Reporter;
 import io.opentracing.contrib.reporter.TracerR;
 import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
@@ -37,11 +38,15 @@ import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 public class JaegerTracer implements OpenTracer {
 
     private static final String NAME = "jaeger";
+    private static final Log log = LogFactory.getLog(JaegerTracer.class);
     private static APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
             .getAPIManagerConfiguration();
 
     @Override
     public Tracer getTracer(String serviceName) {
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing Jaeger tracer for service: " + serviceName);
+        }
         String hostname = configuration.getFirstProperty(TracingConstants.JAEGER_CONFIG_HOST) != null ?
                 configuration.getFirstProperty(TracingConstants.JAEGER_CONFIG_HOST)
                 : TracingConstants.JAEGER_DEFAULT_HOST;
@@ -87,13 +92,19 @@ public class JaegerTracer implements OpenTracer {
         Tracer tracer = new Configuration(serviceName).withSampler(samplerConfig)
                 .withReporter(reporterConfig).getTracer();
 
+        if (log.isDebugEnabled()) {
+            log.debug("Jaeger tracer configured with host: " + hostname + ", port: " + port);
+        }
+
         if (tracerLogEnabled) {
             Reporter reporter = new TracingReporter(LogFactory.getLog(TracingConstants.TRACER));
             Tracer tracerR = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
             GlobalTracer.register(tracerR);
+            log.info("Jaeger tracer with logging enabled initialized for service: " + serviceName);
             return tracerR;
         } else {
             GlobalTracer.register(tracer);
+            log.info("Jaeger tracer initialized for service: " + serviceName);
             return tracer;
         }
     }

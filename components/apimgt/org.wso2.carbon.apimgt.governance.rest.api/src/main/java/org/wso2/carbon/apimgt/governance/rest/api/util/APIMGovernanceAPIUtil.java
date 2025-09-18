@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
@@ -31,6 +33,8 @@ import org.wso2.carbon.context.CarbonContext;
  */
 public class APIMGovernanceAPIUtil {
 
+    private static final Log log = LogFactory.getLog(APIMGovernanceAPIUtil.class);
+
     /**
      * Method to extract the validated organization
      *
@@ -41,9 +45,14 @@ public class APIMGovernanceAPIUtil {
 
         String organization = (String) ctx.get(APIMGovernanceAPIConstants.ORGANIZATION);
         if (organization == null) {
+            log.error("Organization not found in request context");
             throw new APIMGovernanceException(
                     "Organization is not found in the request", APIMGovExceptionCodes
                     .ORGANIZATION_NOT_FOUND);
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Validated organization: " + organization);
         }
         return organization;
     }

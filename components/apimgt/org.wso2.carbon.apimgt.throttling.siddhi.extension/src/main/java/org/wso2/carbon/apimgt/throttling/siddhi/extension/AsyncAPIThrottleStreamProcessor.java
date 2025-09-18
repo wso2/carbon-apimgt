@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.throttling.siddhi.extension;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
@@ -49,6 +51,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements SchedulingProcessor, FindableProcessor {
+    
+    private static final Log log = LogFactory.getLog(AsyncAPIThrottleStreamProcessor.class);
+    
     private long timeInMilliSeconds;
     private final ComplexEventChunk<StreamEvent> expiredEventChunk = new ComplexEventChunk<StreamEvent>(true);
     private Scheduler scheduler;
@@ -118,6 +123,11 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
                     "(<int|long|time> windowTime (and <int|long> startTime) (and <int|long> eventCount), but found "
                     + attributeExpressionExecutors.length + " input attributes");
         }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing AsyncAPIThrottleStreamProcessor with timeInMilliSeconds: " + timeInMilliSeconds +
+                    ", startTime: " + startTime + ", maxEventCount: " + maxEventCount);
+        }
 
         List<Attribute> attributeList = new ArrayList<Attribute>();
         attributeList.add(new Attribute("expiryTimeStamp", Attribute.Type.LONG));
@@ -144,6 +154,9 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
             if (currentTime >= expireEventTime) {
                 expireEventTime += timeInMilliSeconds;
                 scheduler.notifyAt(expireEventTime);
+                if (log.isDebugEnabled()) {
+                    log.debug("Throttle window expired, clearing throttle state map");
+                }
                 throttledStateMap.clear();
             }
 

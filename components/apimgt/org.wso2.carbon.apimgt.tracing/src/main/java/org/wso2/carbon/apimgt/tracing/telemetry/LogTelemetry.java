@@ -48,6 +48,10 @@ public class LogTelemetry implements APIMOpenTelemetry {
     @Override
     public void init(String serviceName) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing Log telemetry for service: " + serviceName);
+        }
+        
         boolean logEnabled = Boolean.parseBoolean(configuration.getFirstProperty(TelemetryConstants.LOG_ENABLED));
 
         if (logEnabled) {
@@ -70,8 +74,13 @@ public class LogTelemetry implements APIMOpenTelemetry {
                     .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
                     .build();
 
+            log.info("Log telemetry initialized successfully for service: " + serviceName);
             if (log.isDebugEnabled()) {
                 log.debug("OpenTelemetry instance: " + openTelemetry + " is configured.");
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Log telemetry is disabled for service: " + serviceName);
             }
         }
     }

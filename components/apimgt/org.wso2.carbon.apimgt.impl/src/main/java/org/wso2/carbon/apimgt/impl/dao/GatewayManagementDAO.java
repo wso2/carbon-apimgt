@@ -66,6 +66,15 @@ public class GatewayManagementDAO {
      * @throws APIManagementException if database operation fails
      */
     public int deleteOldGatewayRecords(Timestamp retentionThreshold) throws APIManagementException {
+        if (retentionThreshold == null) {
+            log.warn("Retention threshold is null while deleting old gateway records");
+            return 0;
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting gateway records older than: " + retentionThreshold);
+        }
+        
         int deletedCount = 0;
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -77,14 +86,15 @@ public class GatewayManagementDAO {
                 deletedCount = preparedStatement.executeUpdate();
                 connection.commit();
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Deleted " + deletedCount + " old gateway records");
-                }
+                log.info("Successfully deleted " + deletedCount + " old gateway records older than " 
+                        + retentionThreshold);
             } catch (SQLException e) {
+                log.error("Error occurred while deleting old gateway records, rolling back transaction", e);
                 connection.rollback();
                 throw new APIManagementException("Error deleting old gateway records", e);
             }
         } catch (SQLException e) {
+            log.error("Error getting database connection for deleting old gateway records", e);
             throw new APIManagementException("Error getting database connection", e);
         }
 
@@ -100,14 +110,29 @@ public class GatewayManagementDAO {
      * @throws APIManagementException if database operation fails
      */
     public boolean gatewayExists(String gatewayId, String organization) throws APIManagementException {
+        if (gatewayId == null || organization == null) {
+            log.warn("Gateway ID or organization is null while checking gateway existence");
+            return false;
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Checking gateway existence for Gateway ID: " + gatewayId + ", Organization: " + organization);
+        }
+        
         try (Connection connection = APIMgtDBUtil.getConnection(); PreparedStatement ps = connection.prepareStatement(
                 SQLConstants.GatewayManagementSQLConstants.SELECT_GATEWAY_SQL)) {
             ps.setString(1, gatewayId);
             ps.setString(2, organization);
             try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
+                boolean exists = rs.next();
+                if (log.isDebugEnabled()) {
+                    log.debug("Gateway " + gatewayId + " exists: " + exists + " in organization: " + organization);
+                }
+                return exists;
             }
         } catch (SQLException e) {
+            log.error("Error checking gateway existence for Gateway ID: " + gatewayId + ", Organization: " 
+                    + organization, e);
             throw new APIManagementException("Error checking gateway existence", e);
         }
     }
@@ -124,6 +149,17 @@ public class GatewayManagementDAO {
      */
     public void insertGatewayInstance(String gatewayId, String organization, List<String> envLabels,
                                       Timestamp lastUpdated, byte[] gwProperties) throws APIManagementException {
+        if (gatewayId == null || organization == null) {
+            log.warn("Gateway ID or organization is null while inserting gateway instance");
+            return;
+        }
+        
+        if (log.isDebugEnabled()) {
+            int envCount = envLabels != null ? envLabels.size() : 0;
+            log.debug("Inserting gateway instance - Gateway ID: " + gatewayId + ", Organization: " + organization + 
+                    ", Environment labels count: " + envCount);
+        }
+        
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement ps1 = connection.prepareStatement(
@@ -147,11 +183,16 @@ public class GatewayManagementDAO {
                 }
 
                 connection.commit();
+                log.info("Successfully inserted gateway instance - Gateway ID: " + gatewayId + ", Organization: " 
+                        + organization);
             } catch (SQLException e) {
+                log.error("Error inserting gateway instance for Gateway ID: " + gatewayId + ", Organization: " 
+                        + organization + ", rolling back transaction", e);
                 connection.rollback();
                 throw new APIManagementException("Error inserting gateway instance", e);
             }
         } catch (SQLException e) {
+            log.error("Error getting database connection for inserting gateway instance", e);
             throw new APIManagementException("Error getting database connection", e);
         }
     }
