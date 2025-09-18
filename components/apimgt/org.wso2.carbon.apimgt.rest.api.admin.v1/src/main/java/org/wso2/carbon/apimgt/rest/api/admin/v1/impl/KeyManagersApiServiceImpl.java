@@ -48,6 +48,9 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
     @Override
     public Response keyManagersDiscoverPost(String url, String type, MessageContext messageContext)
             throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Discovering OpenID Connect configuration from URL: " + (url != null ? url : "null"));
+        }
         if (StringUtils.isNotEmpty(url)) {
             Gson gson = new GsonBuilder().serializeNulls().create();
             OpenIDConnectDiscoveryClient openIDConnectDiscoveryClient =
@@ -62,6 +65,9 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                         .fromOpenIdConnectConfigurationToKeyManagerConfiguration(openIdConnectConfiguration);
                 keyManagerWellKnownResponseDTO.getValue().setWellKnownEndpoint(url);
                 keyManagerWellKnownResponseDTO.getValue().setType(type);
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully discovered OpenID Connect configuration from URL: " + url);
+                }
                 return Response.ok().entity(keyManagerWellKnownResponseDTO).build();
             }
 
@@ -72,11 +78,15 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
     public Response keyManagersGet(MessageContext messageContext) throws APIManagementException {
 
         String organization = RestApiUtil.getOrganization(messageContext);
+        log.info("Retrieving key managers for organization: " + organization);
         APIAdmin apiAdmin = new APIAdminImpl();
         List<KeyManagerConfigurationDTO> keyManagerConfigurationsByOrganization =
                 apiAdmin.getKeyManagerConfigurationsByOrganization(organization, true);
         KeyManagerListDTO keyManagerListDTO =
                 KeyManagerMappingUtil.toKeyManagerListDTO(keyManagerConfigurationsByOrganization);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully retrieved " + keyManagerConfigurationsByOrganization.size() + " key managers");
+        }
         return Response.ok().entity(keyManagerListDTO).build();
     }
 
@@ -84,17 +94,20 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             throws APIManagementException {
 
         String organization = RestApiUtil.getOrganization(messageContext);
+        log.info("Deleting key manager: " + keyManagerId + " from organization: " + organization);
 
         APIAdmin apiAdmin = new APIAdminImpl();
         KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                 apiAdmin.getKeyManagerConfigurationById(organization, keyManagerId);
         if (keyManagerConfigurationDTO != null) {
             apiAdmin.deleteKeyManagerConfigurationById(organization, keyManagerConfigurationDTO);
+            log.info("Successfully deleted key manager: " + keyManagerConfigurationDTO.getName());
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
                     new Gson().toJson(keyManagerConfigurationDTO), APIConstants.AuditLogConstants.DELETED,
                     RestApiCommonUtil.getLoggedInUsername());
             return Response.ok().build();
         } else {
+            log.warn("Key manager not found: " + keyManagerId);
             throw new APIManagementException("Requested KeyManager not found", ExceptionCodes.KEY_MANAGER_NOT_FOUND);
         }
     }
@@ -103,11 +116,17 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             throws APIManagementException {
 
         String organization = RestApiUtil.getOrganization(messageContext);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving key manager: " + keyManagerId + " for organization: " + organization);
+        }
         APIAdmin apiAdmin = new APIAdminImpl();
         KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                 apiAdmin.getKeyManagerConfigurationById(organization, keyManagerId);
         if (keyManagerConfigurationDTO != null) {
             KeyManagerDTO keyManagerDTO = KeyManagerMappingUtil.toKeyManagerDTO(keyManagerConfigurationDTO);
+            if (log.isDebugEnabled()) {
+                log.debug("Found key manager: " + keyManagerConfigurationDTO.getName());
+            }
             List<String> allowedOrgs = keyManagerDTO.getAllowedOrganizations();
             OrganizationInfo userOrganizationInfo = RestApiUtil.getOrganizationInfo(messageContext);
             if (userOrganizationInfo != null) {
@@ -120,6 +139,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             }
             return Response.ok(keyManagerDTO).build();
         }
+        log.warn("Key manager not found: " + keyManagerId);
         throw new APIManagementException("Requested KeyManager not found", ExceptionCodes.KEY_MANAGER_NOT_FOUND);
     }
 
@@ -127,6 +147,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             throws APIManagementException {
 
         String organization = RestApiUtil.getOrganization(messageContext);
+        String keyManagerName = body.getName() != null ? body.getName() : "null";
+        log.info("Updating key manager: " + keyManagerName + " with ID: " + keyManagerId);
         APIAdmin apiAdmin = new APIAdminImpl();
 
         List<String> allowedOrgs = body.getAllowedOrganizations();
@@ -156,6 +178,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                 }
                 KeyManagerConfigurationDTO retrievedKeyManagerConfigurationDTO =
                         apiAdmin.updateKeyManagerConfiguration(keyManagerConfigurationDTO);
+                log.info("Successfully updated key manager: " + keyManagerName);
                 APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
                         new Gson().toJson(keyManagerConfigurationDTO),
                         APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
@@ -218,6 +241,8 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
     public Response keyManagersPost(KeyManagerDTO body, MessageContext messageContext) throws APIManagementException {
 
         String organization = RestApiUtil.getOrganization(messageContext);
+        String keyManagerName = body.getName() != null ? body.getName() : "null";
+        log.info("Creating new key manager: " + keyManagerName + " for organization: " + organization);
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
@@ -227,6 +252,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             this.validatePermissions(keyManagerPermissionConfigurationDTO);
             KeyManagerConfigurationDTO createdKeyManagerConfiguration =
                     apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);
+            log.info("Successfully created key manager: " + keyManagerName + " with ID: " + createdKeyManagerConfiguration.getUuid());
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.KEY_MANAGER,
                     new Gson().toJson(keyManagerConfigurationDTO),
                     APIConstants.AuditLogConstants.CREATED, RestApiCommonUtil.getLoggedInUsername());

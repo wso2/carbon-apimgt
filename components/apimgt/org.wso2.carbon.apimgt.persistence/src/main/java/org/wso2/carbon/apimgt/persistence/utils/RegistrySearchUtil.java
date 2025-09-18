@@ -123,6 +123,9 @@ public class RegistrySearchUtil {
      * @throws APIManagementException If there is an error in the search query
      */
     private static String constructQueryWithProvidedCriterias(String inputSearchQuery) throws APIPersistenceException {
+        if (log.isDebugEnabled()) {
+            log.debug("Constructing search query from input: " + inputSearchQuery);
+        }
         String newSearchQuery = "";
 
         // for empty search query this method should return name=* as the new search query
@@ -153,6 +156,7 @@ public class RegistrySearchUtil {
 
             // doc content doesn't support AND search
             if (critereaMap.size() > 1 && critereaMap.containsKey(DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
+                log.warn("Invalid search query - AND based search is not supported for doc prefix: " + inputSearchQuery);
                 throw new APIPersistenceException(
                         "Invalid query. AND based search is not supported for " + "doc prefix");
             }
@@ -190,7 +194,9 @@ public class RegistrySearchUtil {
                 }
             }
         }
-
+        if (log.isDebugEnabled()) {
+            log.debug("Constructed search query: " + newSearchQuery);
+        }
         return newSearchQuery;
     }
 
@@ -630,6 +636,10 @@ public class RegistrySearchUtil {
     
     public static String getDevPortalSearchQuery(String searchQuery, UserContext ctx, boolean displayMultipleStatus,
                             boolean isAllowDisplayMultipleVersions) throws APIPersistenceException {
+        if (log.isDebugEnabled()) {
+            log.debug("Creating DevPortal search query for user: " + (ctx != null ? ctx.getUserame() : "unknown") + 
+                    " search: " + searchQuery + " multipleStatus: " + displayMultipleStatus);
+        }
         String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
         if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(modifiedQuery)) {
             
@@ -662,11 +672,17 @@ public class RegistrySearchUtil {
             }
         }
         modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(extractQuery(modifiedQuery, true), ctx);
+        if (log.isDebugEnabled()) {
+            log.debug("Final DevPortal search query: " + modifiedQuery);
+        }
         return modifiedQuery;
     }
 
     public static String getPublisherSearchQuery(String searchQuery, UserContext ctx) throws APIPersistenceException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Creating Publisher search query for user: " + (ctx != null ? ctx.getUserame() : "unknown") + 
+                    " search: " + searchQuery);
+        }
         // If the context is dynamic, modify the searchQuery to use the templated context instead of plain context
         if (searchQuery.contains("context") && searchQuery.contains("{")) {
             searchQuery = searchQuery.replace(CONTEXT_SEARCH_TYPE_PREFIX, CONTEXT_TEMPLATE_SEARCH_TYPE_PREFIX);
@@ -684,17 +700,27 @@ public class RegistrySearchUtil {
         newSearchQuery = extractQuery(newSearchQuery, false);
 
         newSearchQuery = RegistrySearchUtil.getPublisherRolesWrappedQuery(newSearchQuery, ctx);
+        if (log.isDebugEnabled()) {
+            log.debug("Final Publisher search query: " + newSearchQuery);
+        }
         return newSearchQuery;
     }
 
     public static String getPublisherProductSearchQuery(String searchQuery, UserContext ctx)
             throws APIPersistenceException {
+        if (log.isDebugEnabled()) {
+            log.debug("Creating Publisher product search query for user: " + (ctx != null ? ctx.getUserame() : "unknown") + 
+                    " search: " + searchQuery);
+        }
         //for now one criterea is supported
         String newSearchQuery = StringUtils.replace(searchQuery, ":", "=");
         newSearchQuery = searchQuery.equals("") ? GET_API_PRODUCT_QUERY : searchQuery + SEARCH_AND_TAG +
                 GET_API_PRODUCT_QUERY;
 
         newSearchQuery = RegistrySearchUtil.getPublisherRolesWrappedQuery(newSearchQuery, ctx);
+        if (log.isDebugEnabled()) {
+            log.debug("Final Publisher product search query: " + newSearchQuery);
+        }
         return newSearchQuery;
     }
     

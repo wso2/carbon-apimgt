@@ -21,6 +21,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -51,6 +53,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class RestApiAdminUtils {
+
+    private static final Log log = LogFactory.getLog(RestApiAdminUtils.class);
 
     private RestApiAdminUtils() {}
 
@@ -143,6 +147,9 @@ public class RestApiAdminUtils {
     }
 
     public static void validateIPAddress(String ipAddress) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating IP address: " + (ipAddress != null ? ipAddress : "null"));
+        }
         String ip4 = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}" +
                 "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
         String ip6 = "(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:)" +
@@ -159,6 +166,7 @@ public class RestApiAdminUtils {
         Matcher ip6Matcher = ip6Pattern.matcher(ipAddress);
         boolean result = !ip4Matcher.find() && !ip6Matcher.find();
         if (result) {
+            log.warn("Invalid IP address format: " + ipAddress);
             throw new APIManagementException(ipAddress + " is an invalid ip address format");
         }
     }
@@ -206,6 +214,7 @@ public class RestApiAdminUtils {
      */
     public static void importTenantTheme(InputStream themeContentInputStream, String tenantDomain)
             throws APIManagementException, IOException {
+        log.info("Starting tenant theme import for tenant: " + tenantDomain);
 
         byte[] buffer = new byte[1024];
         InputStream existingTenantTheme = null;

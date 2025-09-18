@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.rest.api.dcr.web;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.dto.FaultResponse;
 
 import javax.ws.rs.Produces;
@@ -38,6 +40,7 @@ import java.lang.reflect.Type;
 @Produces(MediaType.APPLICATION_JSON)
 public class FaultMessageBodyWriter implements MessageBodyWriter<FaultResponse> {
 
+    private static final Log log = LogFactory.getLog(FaultMessageBodyWriter.class);
     private static final String UTF_8 = "UTF-8";
 
     @Override
@@ -55,12 +58,20 @@ public class FaultMessageBodyWriter implements MessageBodyWriter<FaultResponse> 
     public void writeTo(FaultResponse faultResponse, Class<?> aClass, Type type, Annotation[] annotations,
                         MediaType mediaType, MultivaluedMap<String, Object> stringObjectMultivaluedMap,
                         OutputStream outputStream) throws IOException, WebApplicationException {
+        if (log.isDebugEnabled()) {
+            log.debug("Writing fault response with error code: " + 
+                    (faultResponse != null ? faultResponse.getCode() : "null"));
+        }
+        try {
             OutputStreamWriter writer = new OutputStreamWriter(outputStream, UTF_8);
             JsonObject response = new JsonObject();
             response.addProperty("error", faultResponse.getCode().getValue());
             response.addProperty("error_description", faultResponse.getDescription());
             getGson().toJson(response, type, writer);
-
+        } catch (Exception e) {
+            log.error("Error occurred while writing fault response", e);
+            throw e;
+        }
     }
 
     private Gson getGson() {

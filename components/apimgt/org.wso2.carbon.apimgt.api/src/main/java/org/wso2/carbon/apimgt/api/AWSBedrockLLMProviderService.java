@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.model.LLMModel;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
@@ -38,6 +40,8 @@ import org.wso2.carbon.apimgt.api.model.LLMProvider;
 )
 public class AWSBedrockLLMProviderService extends BuiltInLLMProviderService {
 
+    private static final Log log = LogFactory.getLog(AWSBedrockLLMProviderService.class);
+
     @Override
     public String getType() {
 
@@ -48,6 +52,7 @@ public class AWSBedrockLLMProviderService extends BuiltInLLMProviderService {
     public LLMProvider getLLMProvider()
             throws APIManagementException {
 
+        log.debug("Initializing AWS Bedrock LLM Provider");
         try {
             LLMProvider llmProvider = new LLMProvider();
             llmProvider.setName(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AWS_BEDROCK_NAME);
@@ -103,9 +108,11 @@ public class AWSBedrockLLMProviderService extends BuiltInLLMProviderService {
             llmProvider.setModelList(modelList);
 
             llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());
+            log.debug("Successfully configured AWS Bedrock LLM Provider");
             return llmProvider;
         } catch (Exception e) {
-            throw new APIManagementException("Error occurred when registering LLM Provider:" + this.getType(), e);
+            log.error("Error occurred when registering LLM Provider: " + this.getType(), e);
+            throw new APIManagementException("Error occurred when registering LLM Provider: " + this.getType(), e);
         }
     }
 

@@ -33,14 +33,26 @@ public class RestAPIAuthenticationManager {
     private static final Log log = LogFactory.getLog(RestAPIAuthenticationManager.class);
 
     public static RestAPIAuthenticator getAuthenticator(Map<String, Object> authContext) {
+        if (log.isDebugEnabled()) {
+            log.debug("Searching for appropriate authenticator for authentication context");
+        }
         ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
         if (serviceReferenceHolder.getAuthenticators() != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Found " + serviceReferenceHolder.getAuthenticators().size() + " authenticators to evaluate");
+            }
             for (RestAPIAuthenticator restAPIAuthenticator : serviceReferenceHolder.getAuthenticators()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Checking authenticator: " + restAPIAuthenticator.getClass().getSimpleName());
+                }
                 if (restAPIAuthenticator.canHandle(authContext)) {
-                    log.debug("Detected an appropriate authenticator to handle the request");
+                    log.info("Selected authenticator: " + restAPIAuthenticator.getClass().getSimpleName());
                     return restAPIAuthenticator;
                 };
             }
+            log.warn("No suitable authenticator found for the authentication context");
+        } else {
+            log.warn("No authenticators available in service reference holder");
         }
         return null;
     }

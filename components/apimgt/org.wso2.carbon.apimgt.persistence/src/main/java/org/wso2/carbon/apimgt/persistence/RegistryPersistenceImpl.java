@@ -167,7 +167,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @SuppressWarnings("unchecked")
     @Override
     public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
-
+        log.info("Adding API to persistence layer: " + 
+                (publisherAPI != null ? publisherAPI.getApiName() : "unknown") + 
+                " in organization: " + (org != null ? org.getName() : "unknown"));
         API api = APIMapper.INSTANCE.toApi(publisherAPI);
         boolean transactionCommitted = false;
         boolean tenantFlowStarted = false;
@@ -273,6 +275,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             api.setUuid(artifact.getId());
             transactionCommitted = true;
 
+            log.info("Successfully added API to persistence layer: " + api.getId().getApiName() + 
+                    " version: " + api.getId().getVersion() + " UUID: " + artifact.getId());
             if (log.isDebugEnabled()) {
                 log.debug("API details successfully added to the registry. API Name: " + api.getId().getApiName()
                         + ", API Version : " + api.getId().getVersion() + ", API context : " + api.getContext());
@@ -954,7 +958,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public void deleteAPI(Organization org, String apiId) throws APIPersistenceException {
-
+        log.info("Deleting API from persistence layer: " + apiId + 
+                " in organization: " + (org != null ? org.getName() : "unknown"));
         boolean transactionCommitted = false;
         boolean tenantFlowStarted = false;
         Registry registry = null;
@@ -1055,6 +1060,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             registry.commitTransaction();
             transactionCommitted = true;
+            log.info("Successfully deleted API from persistence layer: " + apiId);
         } catch (RegistryException e) {
             throw new APIPersistenceException("Failed to remove the API : " + apiId, e);
         } finally {

@@ -72,6 +72,9 @@ public class ApplicationPurge implements OrganizationPurge {
     @MethodStats
     @Override
     public LinkedHashMap<String, String> purge(String organization) {
+        if (log.isDebugEnabled()) {
+            log.debug("Starting application purge process for organization: " + organization);
+        }
         boolean isApplicationOrganizationExist = true;
         for (Map.Entry<String, String> task : applicationPurgeTaskMap.entrySet()) {
             int count = 0;
@@ -80,30 +83,49 @@ public class ApplicationPurge implements OrganizationPurge {
                 try {
                     switch (task.getKey()) {
                     case APIConstants.OrganizationDeletion.APPLICATION_ORG_EXIST:
+                        if (log.isDebugEnabled()) {
+                            log.debug("Checking if application organization exists for: " + organization);
+                        }
                         isApplicationOrganizationExist = applicationOrganizationExist(organization);
                         break;
                     case APIConstants.OrganizationDeletion.PENDING_SUBSCRIPTION_REMOVAL:
+                        if (log.isDebugEnabled()) {
+                            log.debug("Removing pending subscriptions for organization: " + organization);
+                        }
                         removePendingSubscriptions(organization);
                         break;
                     case APIConstants.OrganizationDeletion.APPLICATION_CREATION_WF_REMOVAL:
+                        if (log.isDebugEnabled()) {
+                            log.debug("Removing application creation workflows for organization: " + organization);
+                        }
                         removeApplicationCreationWorkflows(organization);
                         break;
                     case APIConstants.OrganizationDeletion.APPLICATION_REGISTRATION_REMOVAL:
+                        if (log.isDebugEnabled()) {
+                            log.debug("Deleting pending application registrations for organization: " + organization);
+                        }
                         deletePendingApplicationRegistrations(organization);
                         break;
                     case APIConstants.OrganizationDeletion.APPLICATION_REMOVAL:
+                        if (log.isDebugEnabled()) {
+                            log.debug("Deleting application list for organization: " + organization);
+                        }
                         deleteApplicationList(organization);
                         break;
                     }
                     applicationPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully completed task: " + task.getKey() + " for organization: " 
+                                + organization);
+                    }
                     break;
                 } catch (APIManagementException e) {
                     log.error("Error while deleting Application Data in organization " + organization, e);
                     applicationPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.FAIL);
-                    log.info("Re-trying to execute " + task.getKey() + " process for organization" + organization, e);
+                    log.info("Re-trying to execute " + task.getKey() + " process for organization: " + organization);
 
                     if (++count == maxTries) {
-                        log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
+                        log.error("Cannot execute " + task.getKey() + " process for organization: " + organization, e);
                         String errorMessage = e.getMessage();
                         if (e.getCause() != null) {
                             errorMessage = errorMessage + ". Cause: " + e.getCause().getMessage();
@@ -122,6 +144,9 @@ public class ApplicationPurge implements OrganizationPurge {
             }
         }
 
+        if (log.isDebugEnabled()) {
+            log.debug("Application purge process completed for organization: " + organization);
+        }
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ORGANIZATION, new Gson().toJson(applicationPurgeTaskMap),
                 APIConstants.AuditLogConstants.DELETED, OrganizationPurgeConstants.ORG_CLEANUP_EXECUTOR);
         return applicationPurgeTaskMap;

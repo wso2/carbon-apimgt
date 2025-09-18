@@ -17,6 +17,8 @@
 
 package org.wso2.carbon.apimgt.output.adapter.http;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.output.adapter.http.internal.util.ExtendedHTTPEventAdapterConstants;
 import org.wso2.carbon.event.output.adapter.core.MessageType;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapter;
@@ -35,6 +37,7 @@ import java.util.ResourceBundle;
  */
 public class ExtendedHTTPEventAdapterFactory extends OutputEventAdapterFactory {
 
+    private static final Log log = LogFactory.getLog(ExtendedHTTPEventAdapterFactory.class);
     private ResourceBundle resourceBundle =
             ResourceBundle.getBundle("org.wso2.carbon.apimgt.output.adapter.http.i18n.Resources",
                     Locale.getDefault());
@@ -156,7 +159,9 @@ public class ExtendedHTTPEventAdapterFactory extends OutputEventAdapterFactory {
     @Override
     public OutputEventAdapter createEventAdapter(OutputEventAdapterConfiguration eventAdapterConfiguration,
                                                  Map<String, String> globalProperties) {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Creating Extended HTTP event adapter instance for: " + eventAdapterConfiguration.getName());
+        }
         return new ExtendedHTTPEventAdapter(eventAdapterConfiguration, globalProperties);
     }
 }

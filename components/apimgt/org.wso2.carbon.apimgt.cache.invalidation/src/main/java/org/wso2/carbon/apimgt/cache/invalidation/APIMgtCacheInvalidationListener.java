@@ -100,6 +100,10 @@ public class APIMgtCacheInvalidationListener implements MessageListener {
         String nodeId = (String) map.get("nodeId");
         if (!DataHolder.getNodeId().equals(nodeId) &&
                 cacheInvalidationConfiguration.getDomain().equals(clusterDomain)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Processing cache invalidation for cache: " + cacheName + ", tenant: " + tenantDomain +
+                          ", from node: " + nodeId);
+            }
             try {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
@@ -107,19 +111,37 @@ public class APIMgtCacheInvalidationListener implements MessageListener {
                 carbonContext.setTenantDomain(tenantDomain);
                 CacheManager cacheManager = Caching.getCacheManagerFactory().getCacheManager(cacheManagerName);
                 Cache<Object, Object> cache = cacheManager.getCache(cacheName);
+                if (cache == null) {
+                    log.warn("Cache not found for invalidation: " + cacheName);
+                    return;
+                }
                 Object cacheKeyObject = constructCacheKeyObject(cacheKey);
                 if (cache instanceof CacheImpl) {
-
                     if (CLEAR_ALL_PREFIX.equals(cacheKeyObject)) {
                         ((CacheImpl) cache).removeAllLocal();
+                        if (log.isDebugEnabled()) {
+                            log.debug("All entries removed from cache: " + cacheName);
+                        }
                     } else {
                         ((CacheImpl) cache).removeLocal(cacheKeyObject);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Cache entry removed from cache: " + cacheName);
+                        }
                     }
+                } else {
+                    log.warn("Cache implementation not supported for local removal: " + cacheName);
                 }
             } catch (ClassNotFoundException e) {
-                log.error("Error while removing cache Object", e);
+                log.error("Error while constructing cache key object for cache: " + cacheName, e);
+            } catch (Exception e) {
+                log.error("Error while processing cache invalidation for cache: " + cacheName, e);
             } finally {
                 PrivilegedCarbonContext.endTenantFlow();
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Cache invalidation ignored - same node: " + DataHolder.getNodeId().equals(nodeId) +
+                          ", domain match: " + cacheInvalidationConfiguration.getDomain().equals(clusterDomain));
             }
         }
     }

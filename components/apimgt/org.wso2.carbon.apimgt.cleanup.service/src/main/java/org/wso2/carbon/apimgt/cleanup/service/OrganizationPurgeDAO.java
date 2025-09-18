@@ -86,7 +86,7 @@ public class OrganizationPurgeDAO {
                 }
             }
         } catch (SQLException e) {
-            log.error("Error while getting api data for organization" + orgId, e);
+            log.error("Error while getting API data for organization: " + orgId, e);
             handleException("Failed to get API list of organization " + orgId, e);
         }
         return isApiOrganizationDataExist;
@@ -111,7 +111,7 @@ public class OrganizationPurgeDAO {
                 }
             }
         } catch (SQLException e) {
-            log.error("Error while getting application list of organization" + orgId, e);
+            log.error("Error while getting application list of organization: " + orgId, e);
             handleException("Failed to get Application list of organization " + orgId, e);
         }
         return isApiOrganizationDataExist;
@@ -136,7 +136,7 @@ public class OrganizationPurgeDAO {
                 }
             }
         } catch (SQLException e) {
-            log.error("Error while getting key manager list of organization" + orgId, e);
+            log.error("Error while getting key manager list of organization: " + orgId, e);
             handleException("Failed to get key manager list of organization " + orgId, e);
         }
         return isApiOrganizationDataExist;
@@ -169,7 +169,7 @@ public class OrganizationPurgeDAO {
                 }
             }
         } catch (SQLException e) {
-            log.error("Error while getting apiUuid list of organization" + orgId, e);
+            log.error("Error while getting API UUID list of organization: " + orgId, e);
             handleException("Failed to get API apiUuid list of organization " + orgId, e);
         }
         return apiList;
@@ -182,16 +182,23 @@ public class OrganizationPurgeDAO {
      * @throws APIManagementException
      */
     public void deleteOrganizationAPIList(String organization) throws APIManagementException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Starting deletion of organization API list for: " + organization);
+        }
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
 
             deleteAmApiUrlMappings(connection, OrganizationPurgeConstants.REMOVE_AM_URL_MAPPINGS_SQL, organization);
             // Remove records from AM_API table and associated data through cascade delete
-            deleteOrganizationAPIData(connection, OrganizationPurgeConstants.REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL, organization);
-            deleteAPIsFromDefaultVersion(connection, OrganizationPurgeConstants.REMOVE_BULK_APIS_DEFAULT_VERSION_SQL, organization);
+            deleteOrganizationAPIData(connection, 
+                    OrganizationPurgeConstants.REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL, organization);
+            deleteAPIsFromDefaultVersion(connection, 
+                    OrganizationPurgeConstants.REMOVE_BULK_APIS_DEFAULT_VERSION_SQL, organization);
 
             //Remove API Cleanup tasks
+            if (log.isDebugEnabled()) {
+                log.debug("Removing API cleanup tasks for organization: " + organization);
+            }
             String convertStr = "";
             if (connection.getMetaData().getURL().contains("sqlserver")) {
                 convertStr = "CONVERT(CHAR, API.API_ID)";
@@ -199,9 +206,13 @@ public class OrganizationPurgeDAO {
                 convertStr = "CONVERT(API.API_ID, CHAR)";
             }
 
-            String deleteBulkAPIWF = OrganizationPurgeConstants.DELETE_BULK_API_WORKFLOWS_REQUEST_SQL.replaceAll("_CONVERT_PLACEHOLDER_", convertStr);
+            String deleteBulkAPIWF = OrganizationPurgeConstants.DELETE_BULK_API_WORKFLOWS_REQUEST_SQL
+                    .replaceAll("_CONVERT_PLACEHOLDER_", convertStr);
             deleteAPICleanupTasks(connection, deleteBulkAPIWF, organization);
             connection.commit();
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully completed deletion of organization API list for: " + organization);
+            }
         } catch (SQLException e) {
             handleException("Error while removing the  API data of organization " + organization + " from the database",
                     e);
@@ -219,7 +230,8 @@ public class OrganizationPurgeDAO {
             } catch (SQLException e1) {
                 log.error("Error while rolling back the failed operation", e1);
             }
-            handleException("Failed to remove API URL mapping data of organization " + organization + " from the database", e);
+            handleException("Failed to remove API URL mapping data of organization " + organization 
+                    + " from the database", e);
         }
     }
 
@@ -271,7 +283,9 @@ public class OrganizationPurgeDAO {
 
     public void deleteKeyManagerConfigurationList(List<KeyManagerConfigurationDTO> kmList, String organization)
             throws APIManagementException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting " + kmList.size() + " key manager configurations for organization: " + organization);
+        }
         List<String> kmIdList = kmList.stream().map(KeyManagerConfigurationDTO::getUuid).collect(Collectors.toList());
         List<String> collectionList = Collections.nCopies(kmIdList.size(), "?");
 
@@ -288,6 +302,9 @@ public class OrganizationPurgeDAO {
                 }
                 preparedStatement.execute();
                 conn.commit();
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully deleted key manager configurations for organization: " + organization);
+                }
             } catch (SQLException e) {
                 conn.rollback();
                 throw e;
@@ -305,13 +322,20 @@ public class OrganizationPurgeDAO {
      * @throws APIManagementException if failed to remove pending subscriptions
      */
     public void removePendingSubscriptions(String organization) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Removing pending subscriptions for organization: " + organization);
+        }
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     OrganizationPurgeConstants.DELETE_PENDING_SUBSCRIPTIONS_SQL)) {
                 preparedStatement.setString(1, organization);
-                preparedStatement.executeUpdate();
+                int deletedRows = preparedStatement.executeUpdate();
                 connection.commit();
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully removed " + deletedRows + " pending subscriptions for organization: " 
+                            + organization);
+                }
             } catch (SQLException e) {
                 try {
                     connection.rollback();
@@ -333,14 +357,20 @@ public class OrganizationPurgeDAO {
      * @throws APIManagementException if failed to remove application creation workflows
      */
     public void removeApplicationCreationWorkflows(String organization) throws APIManagementException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Removing application creation workflows for organization: " + organization);
+        }
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     OrganizationPurgeConstants.DELETE_APPLICATION_CREATION_WORKFLOWS_SQL)) {
                 preparedStatement.setString(1, organization);
-                preparedStatement.executeUpdate();
+                int deletedRows = preparedStatement.executeUpdate();
                 connection.commit();
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully removed " + deletedRows + " application creation workflows for " +
+                            "organization: " + organization);
+                }
             } catch (SQLException e) {
                 try {
                     connection.rollback();
@@ -365,14 +395,20 @@ public class OrganizationPurgeDAO {
      * @throws APIManagementException when failed to delete pending application registrations
      */
     public void deletePendingApplicationRegistrations(String organization) throws APIManagementException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting pending application registrations for organization: " + organization);
+        }
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     OrganizationPurgeConstants.REMOVE_PENDING_APPLICATION_REGISTRATIONS_SQL)) {
                 preparedStatement.setString(1, organization);
-                preparedStatement.executeUpdate();
+                int deletedRows = preparedStatement.executeUpdate();
                 connection.commit();
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully deleted " + deletedRows + " pending application registrations for " +
+                            "organization: " + organization);
+                }
             } catch (SQLException e) {
                 try {
                     connection.rollback();
@@ -396,6 +432,9 @@ public class OrganizationPurgeDAO {
      * @throws APIManagementException if failed to delete applications for organization
      */
     public void deleteApplicationList(String organization) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Starting deletion of application list for organization: " + organization);
+        }
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
 
@@ -426,15 +465,18 @@ public class OrganizationPurgeDAO {
                             if (keyManager != null) {
                                 try {
                                     keyManager.deleteMappedApplication(consumerKey);
-                                    log.info("Mapped application deleted for consumer key: " + consumerKey
-                                            + " and organization: " + organization);
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Mapped application deleted for consumer key: " + consumerKey
+                                                + " and organization: " + organization);
+                                    }
                                 } catch (APIManagementException e) {
                                     handleException(
                                             "Error while Deleting Client Application for consumer key: " + consumerKey
                                                     + " and organization: " + organization, e);
                                 }
                             }
-                            // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
+                            // OAuth app is deleted if only it has been created from API Store. 
+                            // For mapped clients we don't
                             // call delete.
                             if (!APIConstants.OAuthAppMode.MAPPED.name().equals(mode)) {
                                 //delete on oAuthorization server.
@@ -446,8 +488,10 @@ public class OrganizationPurgeDAO {
                                 if (keyManager != null) {
                                     try {
                                         keyManager.deleteApplication(consumerKey);
-                                        log.info("Client application deleted for consumer key: " + consumerKey
-                                                + " and organization: " + organization);
+                                        if (log.isDebugEnabled()) {
+                                            log.debug("Client application deleted for consumer key: " + consumerKey
+                                                    + " and organization: " + organization);
+                                        }
                                     } catch (APIManagementException e) {
                                         handleException("Error while Deleting Client Application for organization: "
                                                 + organization, e);
@@ -484,7 +528,9 @@ public class OrganizationPurgeDAO {
             }
 
             connection.commit();
-
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully completed deletion of application list for organization: " + organization);
+            }
         } catch (SQLException e) {
             handleException(
                     "Error while removing application details from the database for organization: " + organization, e);
