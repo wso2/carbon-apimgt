@@ -5954,25 +5954,33 @@ public class ApiMgtDAO {
                 workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
                 workflowDTO.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
 
-                InputStream metadataBlob = rs.getBinaryStream("WF_METADATA");
-                InputStream wfProperties = rs.getBinaryStream("WF_PROPERTIES");
-
                 Gson gson = new Gson();
-                if (metadataBlob != null) {
-                    String metadata = APIMgtDBUtil.getStringFromInputStream(metadataBlob);
-                    JSONObject metadataJson = gson.fromJson(metadata, JSONObject.class);
-                    workflowDTO.setMetadata(metadataJson);
-                } else {
-                    JSONObject metadataJson = new JSONObject();
-                    workflowDTO.setMetadata(metadataJson);
+                try (InputStream metadataBlob = rs.getBinaryStream("WF_METADATA")) {
+                    if (metadataBlob != null) {
+                        String metadata = APIMgtDBUtil.getStringFromInputStream(metadataBlob);
+                        JSONObject metadataJson = gson.fromJson(metadata, JSONObject.class);
+                        workflowDTO.setMetadata(metadataJson);
+                    } else {
+                        JSONObject metadataJson = new JSONObject();
+                        workflowDTO.setMetadata(metadataJson);
+                    }
+                } catch (IOException e) {
+                    log.error("Error occurred while converting metadata blob to string for the workflow: "
+                            + workflowReference, e);
                 }
-                if (wfProperties != null) {
-                    String properties = APIMgtDBUtil.getStringFromInputStream(wfProperties);
-                    JSONObject propertiesJson = gson.fromJson(properties, JSONObject.class);
-                    workflowDTO.setProperties(propertiesJson);
-                } else {
-                    JSONObject propertiesJson = new JSONObject();
-                    workflowDTO.setProperties(propertiesJson);
+
+                try (InputStream wfProperties = rs.getBinaryStream("WF_PROPERTIES")) {
+                    if (wfProperties != null) {
+                        String properties = APIMgtDBUtil.getStringFromInputStream(wfProperties);
+                        JSONObject propertiesJson = gson.fromJson(properties, JSONObject.class);
+                        workflowDTO.setProperties(propertiesJson);
+                    } else {
+                        JSONObject propertiesJson = new JSONObject();
+                        workflowDTO.setProperties(propertiesJson);
+                    }
+                } catch (IOException e) {
+                    log.error("Error occurred while converting properties blob to string for the workflow: "
+                            + workflowReference, e);
                 }
             }
         } catch (SQLException e) {
