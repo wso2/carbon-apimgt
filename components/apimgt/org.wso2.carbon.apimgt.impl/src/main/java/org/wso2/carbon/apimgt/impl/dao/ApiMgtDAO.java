@@ -5964,9 +5964,6 @@ public class ApiMgtDAO {
                         JSONObject metadataJson = new JSONObject();
                         workflowDTO.setMetadata(metadataJson);
                     }
-                } catch (IOException e) {
-                    log.error("Error occurred while converting metadata blob to string for the workflow: "
-                            + workflowReference, e);
                 }
 
                 try (InputStream wfProperties = rs.getBinaryStream("WF_PROPERTIES")) {
@@ -5978,12 +5975,9 @@ public class ApiMgtDAO {
                         JSONObject propertiesJson = new JSONObject();
                         workflowDTO.setProperties(propertiesJson);
                     }
-                } catch (IOException e) {
-                    log.error("Error occurred while converting properties blob to string for the workflow: "
-                            + workflowReference, e);
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Error while retrieving workflow details for " + workflowReference, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
@@ -18430,20 +18424,22 @@ public class ApiMgtDAO {
      */
     public InputStream getTenantTheme(int tenantId) throws APIManagementException {
 
-        InputStream tenantThemeContent = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.TenantThemeConstants.GET_TENANT_THEME)) {
             statement.setInt(1, tenantId);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                tenantThemeContent = resultSet.getBinaryStream("THEME");
+                try (InputStream tenantThemeContent = resultSet.getBinaryStream("THEME")) {
+                    byte[] tenantThemeContentBytes = IOUtils.toByteArray(tenantThemeContent);
+                    return new ByteArrayInputStream(tenantThemeContentBytes);
+                }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Failed to fetch tenant theme of tenant "
                     + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
-        return tenantThemeContent;
+        return null;
     }
 
     /**
@@ -18604,7 +18600,6 @@ public class ApiMgtDAO {
      * @throws APIManagementException If a database error occurs.
      */
     public InputStream getOrgTheme(String themeId, String organization) throws APIManagementException {
-        InputStream tenantThemeContent = null;
         String query = SQLConstants.DevPortalContentConstants.GET_THEME_ARTIFACT;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -18613,7 +18608,12 @@ public class ApiMgtDAO {
             statement.setString(3, DevPortalConstants.PUBLISHED_ORG_THEME);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                tenantThemeContent = resultSet.getBinaryStream(DevPortalConstants.ARTIFACT);
+                try (InputStream tenantThemeContent = resultSet.getBinaryStream(DevPortalConstants.ARTIFACT)) {
+                    byte[] tenantThemeContentBytes = IOUtils.toByteArray(tenantThemeContent);
+                    return new ByteArrayInputStream(tenantThemeContentBytes);
+                } catch (IOException e) {
+                    handleException("Failed to read organization theme content for organization " + organization, e);
+                }
             } else {
                 log.warn("User does not have the theme");
                 throw new APIManagementException(ExceptionCodes.USER_DOES_NOT_HAVE_THE_THEME);
@@ -18621,7 +18621,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to get organization theme for organization " + organization, e);
         }
-        return tenantThemeContent;
+        return null;
     }
 
     /**
@@ -18988,7 +18988,6 @@ public class ApiMgtDAO {
      * @throws APIManagementException If a database error occurs.
      */
     public InputStream getApiTheme(String themeId, String organization, String apiId) throws APIManagementException {
-        InputStream tenantThemeContent = null;
         String query = SQLConstants.DevPortalContentConstants.GET_THEME_ARTIFACT;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -18997,15 +18996,18 @@ public class ApiMgtDAO {
             statement.setString(3, DevPortalConstants.PUBLISHED_API_THEME);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                tenantThemeContent = resultSet.getBinaryStream(DevPortalConstants.ARTIFACT);
+                try (InputStream tenantThemeContent = resultSet.getBinaryStream(DevPortalConstants.ARTIFACT)) {
+                    byte[] tenantThemeContentBytes = IOUtils.toByteArray(tenantThemeContent);
+                    return new ByteArrayInputStream(tenantThemeContentBytes);
+                }
             } else {
                 log.warn("User does not have the theme");
                 throw new APIManagementException(ExceptionCodes.USER_DOES_NOT_HAVE_THE_THEME);
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Failed to get API theme for API ID: " + apiId + " and Organization: " + organization, e);
         }
-        return tenantThemeContent;
+        return null;
     }
 
     /**
