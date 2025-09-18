@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.mappings;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceActionType;
@@ -36,6 +38,8 @@ import java.util.stream.Collectors;
  * This class represents the Policy Mapping Utility
  */
 public class PolicyMappingUtil {
+
+    private static final Log log = LogFactory.getLog(PolicyMappingUtil.class);
 
     /**
      * Converts a GovernancePolicyDTO object to

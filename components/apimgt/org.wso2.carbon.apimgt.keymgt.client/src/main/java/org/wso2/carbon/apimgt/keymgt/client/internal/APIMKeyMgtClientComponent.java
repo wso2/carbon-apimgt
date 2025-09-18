@@ -38,22 +38,49 @@ public class APIMKeyMgtClientComponent {
 
     @Activate
     protected void activate(ComponentContext context) {
+        if (log.isDebugEnabled()) {
+            log.debug("Activating API Key Management Client Component");
+        }
         try {
-            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(getClientRepoLocation(), getAxis2ClientXmlLocation());
+            String clientRepoLocation = getClientRepoLocation();
+            String axis2ClientXmlLocation = getAxis2ClientXmlLocation();
+            if (log.isDebugEnabled()) {
+                log.debug("Creating configuration context from repository: " + clientRepoLocation + 
+                         " and axis2 client xml: " + axis2ClientXmlLocation);
+            }
+            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(
+                    clientRepoLocation, axis2ClientXmlLocation);
             ServiceReferenceHolder.getInstance().setAxis2ConfigurationContext(ctx);
+            log.info("API Key Management Client Component activated successfully");
         } catch (AxisFault axisFault) {
             log.error("Failed to initialize APIMKeyMgtClientComponent", axisFault);
         }
     }
 
+    @Deactivate
+    protected void deactivate(ComponentContext context) {
+        if (log.isDebugEnabled()) {
+            log.debug("Deactivating API Key Management Client Component");
+        }
+        log.info("API Key Management Client Component deactivated successfully");
+    }
+
     private String getAxis2ClientXmlLocation() {
-        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" + ".clientAxis2XmlLocation");
+        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" + 
+                ".clientAxis2XmlLocation");
+        if (axis2ClientXml == null && log.isDebugEnabled()) {
+            log.debug("Axis2Config.clientAxis2XmlLocation property not found in server configuration");
+        }
         return axis2ClientXml;
     }
 
     private String getClientRepoLocation() {
-        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" + ".ClientRepositoryLocation");
-        return axis2ClientXml;
+        String clientRepoLocation = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" + 
+                ".ClientRepositoryLocation");
+        if (clientRepoLocation == null && log.isDebugEnabled()) {
+            log.debug("Axis2Config.ClientRepositoryLocation property not found in server configuration");
+        }
+        return clientRepoLocation;
     }
 }
 

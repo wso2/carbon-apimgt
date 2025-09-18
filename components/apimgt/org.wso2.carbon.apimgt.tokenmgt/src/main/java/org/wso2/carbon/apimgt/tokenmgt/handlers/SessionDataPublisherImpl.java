@@ -108,7 +108,9 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
      */
     @Override public void publishSessionTermination(HttpServletRequest request, AuthenticationContext context,
             SessionContext sessionContext, Map<String, Object> params) {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Starting session termination processing");
+        }
         OAuthConsumerAppDTO[] appDTOs = new OAuthConsumerAppDTO[0];
         List<OAuthConsumerAppDTO> revokeAppList = new ArrayList<>();
         AuthenticatedUser authenticatedUser = (AuthenticatedUser) params.get(user);
@@ -117,13 +119,15 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
         String userStoreDomain = authenticatedUser.getUserStoreDomain();
         AuthenticatedUser federatedUser;
         SystemApplicationDTO[] systemApplicationDTOS = new SystemApplicationDTO[0];
+        
+        log.info("Processing session termination for user: " + username + " in tenant: " + tenantDomain);
 
         if (authenticatedUser.isFederatedUser()) {
             try {
                 federatedUser = buildAuthenticatedUser(authenticatedUser);
                 authenticatedUser = federatedUser;
             } catch (IdentityOAuth2Exception e) {
-                log.error("Error thrown while building authenticated user in logout flow for user " + authenticatedUser
+                log.error("Error while building authenticated user in logout flow for user " + authenticatedUser
                         .getUserName(), e);
             }
         }
@@ -136,7 +140,7 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
                 }
             }
         } catch (APIMgtDAOException e) {
-            log.error("Error thrown while retrieving system applications for the tenant domain " + tenantDomain, e);
+            log.error("Error while retrieving system applications for tenant domain: " + tenantDomain, e);
         }
 
         try {
@@ -148,7 +152,7 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
                 }
             }
         } catch (IdentityOAuthAdminException e) {
-            log.error("Error while retrieving applications authorized for the user " + authenticatedUser.getUserName(),
+            log.error("Error while retrieving applications authorized for user: " + authenticatedUser.getUserName(),
                     e);
         }
 
@@ -168,8 +172,8 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
                             .getAccessTokens(appDTO.getOauthConsumerKey(), authenticatedUser,
                                     authenticatedUser.getUserStoreDomain(), true);
                 } catch (IdentityOAuth2Exception e) {
-                    log.error("Error while retrieving access tokens for the application " + appDTO.getApplicationName()
-                            + "and the for user " + authenticatedUser.getUserName(), e);
+                    log.error("Error while retrieving access tokens for application: " + appDTO.getApplicationName()
+                            + "and user: " + authenticatedUser.getUserName(), e);
                 }
                 AuthenticatedUser authzUser;
                 if (accessTokenDOs != null) {
@@ -195,8 +199,8 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
                                             userStoreDomain, OAuth2Util.buildScopeString(accessTokenDO.getScope()),
                                             true);
                         } catch (IdentityOAuth2Exception e) {
-                            log.error("Error while retrieving scoped access tokens for the application " + appDTO
-                                    .getApplicationName() + "and the for user " + authenticatedUser.getUserName(), e);
+                            log.error("Error while retrieving scoped access tokens for application: " + appDTO
+                                    .getApplicationName() + "and user: " + authenticatedUser.getUserName(), e);
                         }
                         if (scopedToken != null) {
                             //Revoking token from database
@@ -205,8 +209,8 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
                                         .revokeAccessTokens(new String[] { scopedToken.getAccessToken() });
 
                             } catch (IdentityOAuth2Exception e) {
-                                log.error("Error while revoking access tokens related for the application " + appDTO
-                                                .getApplicationName() + "and the for user " + authenticatedUser.getUserName(),
+                                log.error("Error while revoking access tokens related for application: " + appDTO
+                                                .getApplicationName() + "and user: " + authenticatedUser.getUserName(),
                                         e);
                             }
                             //Revoking the oauth consent from database.
@@ -215,8 +219,8 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
                                         .revokeOAuthConsentByApplicationAndUser(
                                                 authzUser.getAuthenticatedSubjectIdentifier(), tenantDomain, username);
                             } catch (IdentityOAuth2Exception e) {
-                                log.error("Error while revoking access tokens related for the application " + appDTO
-                                                .getApplicationName() + "and the for user " + authenticatedUser.getUserName(),
+                                log.error("Error while revoking access tokens related for application: " + appDTO
+                                                .getApplicationName() + "and user: " + authenticatedUser.getUserName(),
                                         e);
                             }
                         }
@@ -263,7 +267,7 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
                 }
             }
         } catch (APIMgtDAOException e) {
-            log.error("Error thrown while retrieving system applications for the tenant domain " + tenantDomain, e);
+            log.error("Error while retrieving system applications for tenant domain: " + tenantDomain, e);
         }
         clientIds = systemAppClientIds;
 

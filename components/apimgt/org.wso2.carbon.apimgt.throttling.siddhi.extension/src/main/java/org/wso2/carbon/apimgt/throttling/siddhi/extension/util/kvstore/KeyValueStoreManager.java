@@ -56,6 +56,9 @@ public class KeyValueStoreManager {
         kvStoreType = getKeyValueStore();
         if (ThrottlingConstants.REDIS_TYPE.equalsIgnoreCase(kvStoreType)
                 || ThrottlingConstants.VALKEY_TYPE.equalsIgnoreCase(kvStoreType)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Creating JedisKeyValueStoreClient for type: " + kvStoreType);
+            }
             return new JedisKeyValueStoreClient();
         }
         else {
@@ -68,6 +71,10 @@ public class KeyValueStoreManager {
                 }
 
                 Constructor<?> constructor = clazz.getDeclaredConstructor();
+                
+                if (log.isDebugEnabled()) {
+                    log.debug("Creating custom KeyValueStoreClient: " + kvStoreType);
+                }
 
                 return (KeyValueStoreClient) constructor.newInstance();
 

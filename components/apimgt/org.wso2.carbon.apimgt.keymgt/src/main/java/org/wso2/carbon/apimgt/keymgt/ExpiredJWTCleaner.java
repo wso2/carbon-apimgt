@@ -45,6 +45,7 @@ public class ExpiredJWTCleaner implements Runnable {
             if (currentTime - lastUpdatedTime < DURATION) {
                 return;
             }
+            log.info("Starting expired JWT token cleanup process");
             cleanExpiredTokens();
         }
     }
@@ -56,6 +57,7 @@ public class ExpiredJWTCleaner implements Runnable {
             //Remove expired JWTs from revoke table
             apiMgtDAO.removeExpiredJWTs();
             lastUpdatedTime = System.currentTimeMillis();
+            log.info("JWT token cleanup completed successfully at: " + new Date(lastUpdatedTime));
             if (log.isDebugEnabled()) {
                 log.debug("Last JWT token cleanup performed at :" + new Date(lastUpdatedTime));
 

@@ -50,13 +50,13 @@ public class APITokenMgtServiceComponent {
 
     @Activate
     protected void activate(ComponentContext ctxt) {
-
+        log.info("Activating API Token Management Service Component");
         try {
             TokenMgtDataHolder.initData();
             listener = new KeyManagerUserOperationListener();
             serviceRegistration =
                     ctxt.getBundleContext().registerService(UserOperationEventListener.class.getName(), listener, null);
-            log.debug("Key Manager User Operation Listener is enabled.");
+            log.info("Key Manager User Operation Listener is enabled");
 
             APIManagerConfigurationService configurationService = ServiceReferenceHolder.getInstance()
                             .getAPIManagerConfigurationService();
@@ -75,13 +75,13 @@ public class APITokenMgtServiceComponent {
                     SessionDataPublisherImpl dataPublisher = new SessionDataPublisherImpl();
                     ctxt.getBundleContext()
                             .registerService(AuthenticationDataPublisher.class.getName(), dataPublisher, null);
-                    log.debug("SessionDataPublisherImpl bundle is activated");
+                    log.info("SessionDataPublisherImpl bundle is activated");
                 } catch (Throwable e) {
-                    log.error("SessionDataPublisherImpl bundle activation Failed", e);
+                    log.error("SessionDataPublisherImpl bundle activation failed", e);
                 }
             }
         } catch (Exception e) {
-            log.error("Failed to initialize key management service.", e);
+            log.error("Failed to initialize key management service", e);
         }
     }
 
@@ -91,9 +91,7 @@ public class APITokenMgtServiceComponent {
         if (serviceRegistration != null) {
             serviceRegistration.unregister();
         }
-        if (log.isDebugEnabled()) {
-            log.info("Key Manager User Operation Listener is deactivated.");
-        }
+        log.info("Key Manager User Operation Listener is deactivated");
     }
 
     @Reference(

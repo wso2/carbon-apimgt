@@ -82,6 +82,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         this.eventHubConfiguration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getEventHubConfigurationDto();
         this.tenantDomain = tenantDomain;
+        log.info("Initializing SubscriptionDataStore for tenant: " + tenantDomain);
         initializeStore();
     }
 
@@ -101,6 +102,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public void init() {
+        log.info("Starting data loading tasks for tenant: " + tenantDomain);
         initializeLoadingTasks();
     }
 
@@ -137,9 +139,11 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             }
             if (application != null && application.getId() != null && application.getId() != 0) {
                 // load to the memory
+                log.info("Application loaded and cached: " + appId);
                 log.debug("Loading Application to the in-memory datastore. applicationId = " + application.getId());
                 addOrUpdateApplication(application);
             } else {
+                log.warn("Application not found for id: " + appId);
                 log.debug("Application not found. applicationId = " + appId);
             }
         }
@@ -193,8 +197,11 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 }
                 if (applicationKeyMapping != null && !StringUtils.isEmpty(applicationKeyMapping.getConsumerKey())) {
                     // load to the memory
+                    log.info("Key mapping loaded and cached for key: " + key + ", keyManager: " + keyManager);
                     log.debug("Loading Keymapping to the in-memory datastore.");
                     addOrUpdateApplicationKeyMapping(applicationKeyMapping);
+                } else {
+                    log.warn("Key mapping not found for key: " + key + ", keyManager: " + keyManager);
                 }
             }
         }

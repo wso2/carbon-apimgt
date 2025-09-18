@@ -60,12 +60,31 @@ public class EnvironmentSpecificAPIPropertyDAO {
 
     public void addOrUpdateEnvironmentSpecificAPIProperties(String apiUuid, String envUuid, String content)
             throws APIManagementException {
+        if (apiUuid == null || envUuid == null) {
+            log.warn("API UUID or Environment UUID is null while adding/updating environment specific properties");
+            return;
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Adding or updating environment specific API properties for API: " + apiUuid + 
+                    ", Environment: " + envUuid);
+        }
+        
         boolean isConfigExist = isEnvironmentSpecificAPIPropertiesExist(apiUuid, envUuid);
         if (isConfigExist) {
+            if (log.isDebugEnabled()) {
+                log.debug("Configuration exists, updating environment specific properties for API: " + apiUuid);
+            }
             updateEnvironmentSpecificAPIProperties(apiUuid, envUuid, content);
         } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Configuration does not exist, adding new environment specific properties for API: " + apiUuid);
+            }
             addEnvironmentSpecificAPIProperties(apiUuid, envUuid, content);
         }
+        
+        log.info("Successfully processed environment specific API properties for API: " + apiUuid + 
+                ", Environment: " + envUuid);
     }
 
     private void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid, String content)
@@ -110,6 +129,16 @@ public class EnvironmentSpecificAPIPropertyDAO {
     }
 
     public String getEnvironmentSpecificAPIProperties(String apiUuid, String envUuid) throws APIManagementException {
+        if (apiUuid == null || envUuid == null) {
+            log.warn("API UUID or Environment UUID is null while retrieving environment specific properties");
+            return null;
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving environment specific API properties for API: " + apiUuid + 
+                    ", Environment: " + envUuid);
+        }
+        
         try (Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement preparedStatement = conn.prepareStatement(
                         EnvironmentSpecificAPIPropertyConstants.GET_ENVIRONMENT_SPECIFIC_API_PROPERTIES_SQL)) {
@@ -119,13 +148,23 @@ public class EnvironmentSpecificAPIPropertyDAO {
                 if (resultSet.next()) {
                     try (InputStream propertyConfigBlob = resultSet.getBinaryStream(1)) {
                         if (propertyConfigBlob != null) {
-                            return APIMgtDBUtil.getStringFromInputStream(propertyConfigBlob);
+                            String properties = APIMgtDBUtil.getStringFromInputStream(propertyConfigBlob);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Successfully retrieved environment specific properties for API: " + apiUuid);
+                            }
+                            return properties;
                         }
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("No environment specific properties found for API: " + apiUuid + 
+                                ", Environment: " + envUuid);
                     }
                 }
             }
         } catch (SQLException | IOException e) {
-            handleException("Error occurred when getting environment specific api properties", e);
+            handleException("Error occurred when getting environment specific api properties for API: " + apiUuid + 
+                    ", Environment: " + envUuid, e);
         }
         return null;
     }
@@ -150,11 +189,27 @@ public class EnvironmentSpecificAPIPropertyDAO {
 
     public Map<String, Map<String, Environment>> getEnvironmentSpecificAPIPropertiesOfAPIs(List<String> apiUuidS)
             throws APIManagementException {
+        if (apiUuidS == null || apiUuidS.isEmpty()) {
+            log.warn("API UUID list is null or empty while retrieving environment specific properties");
+            return new HashMap<>();
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving environment specific API properties for " + apiUuidS.size() + " APIs");
+        }
+        
         Map<String, org.wso2.carbon.apimgt.api.model.Environment> defaultEnvs = APIUtil.getReadOnlyEnvironments();
         List<String> envIds = defaultEnvs.values().stream().map(org.wso2.carbon.apimgt.api.model.Environment::getUuid)
                 .collect(Collectors.toList());
         Map<String, Map<String, Environment>> mgEnvs = getMGEnvironmentSpecificAPIPropertiesOfAPIs(apiUuidS);
-        return getDefaultEnvironmentSpecificAPIPropertiesOfAPIs(apiUuidS, envIds, mgEnvs);
+        Map<String, Map<String, Environment>> result = getDefaultEnvironmentSpecificAPIPropertiesOfAPIs(apiUuidS, 
+                envIds, mgEnvs);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully retrieved environment specific properties for " + result.size() + " APIs");
+        }
+        
+        return result;
     }
 
     /**

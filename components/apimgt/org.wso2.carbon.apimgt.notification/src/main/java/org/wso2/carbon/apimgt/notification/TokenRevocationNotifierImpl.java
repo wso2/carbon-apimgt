@@ -67,8 +67,12 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
     @Override
     public void sendMessageOnRealtime(String revokedToken, Properties properties) {
 
-        if (APIConstants.NotificationEvent.CONSUMER_APP_REVOCATION_EVENT.equals(properties
-                .getProperty(APIConstants.NotificationEvent.EVENT_TYPE))) {
+        String eventType = properties.getProperty(APIConstants.NotificationEvent.EVENT_TYPE);
+        if (log.isDebugEnabled()) {
+            log.debug("Processing realtime revocation event of type: " + eventType);
+        }
+
+        if (APIConstants.NotificationEvent.CONSUMER_APP_REVOCATION_EVENT.equals(eventType)) {
             Map<String, String> consumerKeyRevocationMap = new HashMap<>();
             consumerKeyRevocationMap.put(APIConstants.NotificationEvent.CONSUMER_KEY,
                     properties.getProperty(APIConstants.NotificationEvent.CONSUMER_KEY));
@@ -99,13 +103,16 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
                     Base64.encodeBase64(revokedTokenJson.getBytes(StandardCharsets.UTF_8));
             encodedRevokedToken = new String(encodedRevokedTokenStream, StandardCharsets.UTF_8);
         } catch (JsonProcessingException e) {
-            log.error("Error while encoding revoked token event for consumer key revocation event.");
+            log.error("Error while encoding revoked token event for consumer key revocation event", e);
         }
         return encodedRevokedToken;
     }
 
     private void sendRevokedTokenOnRealtime(String revokedToken, Properties properties) {
         //Variables related to Realtime Notifier
+        if (log.isDebugEnabled()) {
+            log.debug("Sending revoked token to realtime notifier");
+        }
         String type = null;
         long expiryTimeForJWT = 0L;
         if (properties.getProperty(APIConstants.NotificationEvent.EXPIRY_TIME) != null) {
@@ -139,6 +146,9 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
     @Override
     public void sendMessageToPersistentStorage(String revokedToken, Properties properties) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Sending revoked token to persistent storage");
+        }
         //Variables related to Persistent Notifier
         String defaultPersistentNotifierHostname = "https://localhost:2379/v2/keys/jti/";
         String persistentNotifierHostname = properties
@@ -166,18 +176,16 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
         HttpResponse etcdResponse;
         try {
             etcdResponse = etcdEPClient.execute(httpETCDPut);
-            if (etcdResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK
-                    || etcdResponse.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
+            int statusCode = etcdResponse.getStatusLine().getStatusCode();
+            if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_CREATED) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Successfully submitted the request for revoked token. HTTP status :" + etcdResponse
-                            .getStatusLine().getStatusCode());
+                    log.debug("Successfully submitted revoked token to persistent storage. HTTP status: " + statusCode);
                 }
             } else {
-                log.error("Sending revoked token to persistent storage failed. HTTP error code : " + etcdResponse
-                        .getStatusLine().getStatusCode());
+                log.error("Failed to send revoked token to persistent storage. HTTP status: " + statusCode);
             }
         } catch (IOException e) {
-            log.error("Error while sending revoked token to the persistent storage :", e);
+            log.error("Error while sending revoked token to persistent storage", e);
         }
     }
 

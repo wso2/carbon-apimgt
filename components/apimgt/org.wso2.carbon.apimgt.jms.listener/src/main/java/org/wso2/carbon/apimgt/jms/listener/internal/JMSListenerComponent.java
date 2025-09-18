@@ -49,12 +49,15 @@ public class JMSListenerComponent {
     @Activate
     protected void activate(ComponentContext context) {
 
-        log.debug("Activating component...");
+        if (log.isDebugEnabled()) {
+            log.debug("Activating JMS Listener component");
+        }
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
         if (configuration == null) {
-            log.warn("API Manager Configuration not properly set.");
+            log.warn("API Manager Configuration not properly set");
             return;
         }
+        log.info("JMS Listener component activation started");
         JMSListenerStartupShutdownListener jmsListenerStartupShutdownListener =
                 new JMSListenerStartupShutdownListener();
         registration = context.getBundleContext()
@@ -63,6 +66,7 @@ public class JMSListenerComponent {
                 .registerService(ServerShutdownHandler.class, jmsListenerStartupShutdownListener, null);
         registration = context.getBundleContext().registerService(JMSListenerShutDownService.class,
                 jmsListenerStartupShutdownListener, null);
+        log.info("JMS Listener component activated successfully");
     }
 
 
@@ -75,13 +79,17 @@ public class JMSListenerComponent {
             unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService configurationService) {
 
-        log.debug("Setting APIM Configuration Service");
+        if (log.isDebugEnabled()) {
+            log.debug("Setting APIM Configuration Service");
+        }
         ServiceReferenceHolder.getInstance().setAPIMConfigurationService(configurationService);
     }
 
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService configurationService) {
 
-        log.debug("Setting APIM Configuration Service");
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting APIM Configuration Service");
+        }
         ServiceReferenceHolder.getInstance().setAPIMConfigurationService(null);
     }
 
@@ -95,13 +103,17 @@ public class JMSListenerComponent {
             unbind = "unsetKeyManagerService")
     protected void setKeyManagerService(KeyManagerConfigurationService keyManagerService) {
 
-        log.debug("Setting KeyManager Configuration Service");
+        if (log.isDebugEnabled()) {
+            log.debug("Setting KeyManager Configuration Service");
+        }
         ServiceReferenceHolder.getInstance().setKeyManagerService(keyManagerService);
     }
 
     protected void unsetKeyManagerService(KeyManagerConfigurationService keyManagerService) {
 
-        log.debug("unSetting KeyManager Configuration Service");
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting KeyManager Configuration Service");
+        }
         ServiceReferenceHolder.getInstance().setKeyManagerService(null);
     }
 
@@ -111,11 +123,13 @@ public class JMSListenerComponent {
     protected void deactivate(ComponentContext componentContext) {
 
         if (log.isDebugEnabled()) {
-            log.debug("Deactivating component");
+            log.debug("Deactivating JMS Listener component");
         }
+        log.info("JMS Listener component deactivation started");
         if (this.registration != null) {
             this.registration.unregister();
         }
+        log.info("JMS Listener component deactivated successfully");
     }
     
 

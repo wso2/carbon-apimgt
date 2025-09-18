@@ -27,6 +27,7 @@ import io.opentracing.contrib.reporter.Reporter;
 import io.opentracing.contrib.reporter.TracerR;
 import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
@@ -46,12 +47,17 @@ import java.net.Proxy;
 public class ZipkinTracer implements OpenTracer {
 
     private static final String NAME = "zipkin";
+    private static final Log log = LogFactory.getLog(ZipkinTracer.class);
     private static APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
             .getAPIManagerConfiguration();
 
     @Override
     public Tracer getTracer(String serviceName) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing Zipkin tracer for service: " + serviceName);
+        }
+        
         boolean tracerLogEnabled =
                 Boolean.parseBoolean(configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED) != null
                         ? configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED)
@@ -91,13 +97,19 @@ public class ZipkinTracer implements OpenTracer {
                         TracingConstants.REQUEST_ID))
                 .build());
 
+        if (log.isDebugEnabled()) {
+            log.debug("Zipkin tracer configured with endpoint: " + endpoint);
+        }
+        
         if (tracerLogEnabled) {
             Reporter reporter = new TracingReporter(LogFactory.getLog(TracingConstants.TRACER));
             Tracer tracerR = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
             GlobalTracer.register(tracerR);
+            log.info("Zipkin tracer with logging enabled initialized for service: " + serviceName);
             return tracerR;
         } else {
             GlobalTracer.register(tracer);
+            log.info("Zipkin tracer initialized for service: " + serviceName);
             return tracer;
         }
     }
