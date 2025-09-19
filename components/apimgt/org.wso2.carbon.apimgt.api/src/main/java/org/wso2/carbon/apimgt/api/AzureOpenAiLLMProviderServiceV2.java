@@ -46,6 +46,7 @@ public class AzureOpenAiLLMProviderServiceV2 extends BuiltInLLMProviderService {
     public LLMProvider getLLMProvider()
             throws APIManagementException {
 
+        log.debug("Initializing Azure OpenAI AI Service Provider Version: " + this.getType());
         try {
             LLMProvider llmProvider = new LLMProvider();
             llmProvider.setName(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_NAME);
@@ -95,9 +96,11 @@ public class AzureOpenAiLLMProviderServiceV2 extends BuiltInLLMProviderService {
             llmProviderConfiguration.setMetadata(llmProviderMetadata);
 
             llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());
+            log.debug("Successfully configured Azure OpenAI LLM Provider Version: " + this.getType());
             return llmProvider;
         } catch (Exception e) {
-            throw new APIManagementException("Error occurred when registering LLM Provider:" + this.getType());
+            log.error("Error occurred when registering LLM Provider: " + this.getType());
+            throw new APIManagementException("Error occurred when registering LLM Provider: " + this.getType(), e);
         }
     }
 

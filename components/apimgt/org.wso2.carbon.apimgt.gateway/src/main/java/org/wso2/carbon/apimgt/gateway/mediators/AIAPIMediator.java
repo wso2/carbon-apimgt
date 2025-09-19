@@ -162,6 +162,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                                        LLMProviderInfo provider)
             throws XMLStreamException, IOException, APIManagementException {
 
+        log.debug("Processing inbound request for provider: " + provider.getName() + " with API version: " +
+                provider.getApiVersion());
         String targetEndpoint = null;
         if (messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT) != null) {
             targetEndpoint = (String) messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT);
@@ -176,6 +178,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             roundRobinConfigs =
                     (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.ROUND_ROBIN_CONFIGS);
             handleLoadBalancing(messageContext, providerConfiguration, roundRobinConfigs, provider);
+            log.debug("Load balancing configured, processing with round-robin configurations");
             return;
         }
 
@@ -191,6 +194,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         }
 
         if (failoverConfigMap != null && !failoverConfigMap.isEmpty()) {
+            log.info("Initializing failover for provider: " + provider.getName());
             initFailover(messageContext, providerConfiguration, failoverConfigMap, provider);
         }
 
@@ -226,10 +230,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             return;
         }
 
-        boolean isProviderAzureV1 =
-                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_NAME.equals(provider.getName()) &&
-                        APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_VERSION
-                                .equals(provider.getApiVersion());
+        boolean isProviderAzureV1 = isAzureV1Provider(provider);
 
         applyFailoverConfigs(messageContext, failoverConfig, providerConfiguration, !isProviderAzureV1);
     }
@@ -309,6 +310,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             }
 
             updateTargetEndpoint(messageContext, 1, failoverEndpoint);
+            log.info("Applied failover configuration with endpoint: " + failoverEndpoint.getEndpointId());
         }
         preserveFailoverPropertiesInMsgCtx(messageContext, policyConfig, targetModelEndpoint, failoverEndpoints);
     }
@@ -386,16 +388,16 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             org.apache.axis2.context.MessageContext axis2Ctx =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             RelayUtils.buildMessage(axis2Ctx);
-            boolean isProviderAzureV1 =
-                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_NAME.equals(provider.getName()) &&
-                            APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_VERSION
-                                    .equals(provider.getApiVersion());
+            boolean isProviderAzureV1 = isAzureV1Provider(provider);
+
             if (!isProviderAzureV1) {
                 modifyRequestPayload(targetModelEndpoint.getModel(), targetModelMetadata, axis2Ctx);
+                log.debug("Modified request payload with model: " + targetModelEndpoint.getModel());
             }
         } else if (APIConstants.AIAPIConstants.INPUT_SOURCE_PATH.equalsIgnoreCase(
                 targetModelMetadata.getInputSource())) {
             modifyRequestPath(targetModelEndpoint.getModel(), targetModelMetadata, messageContext);
+            log.debug("Modified request path with model: " + targetModelEndpoint.getModel());
         } else {
             log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
         }
@@ -403,6 +405,14 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, targetModelEndpoint.getEndpointId());
     }
 
+    /**
+     * Modifies the request path by replacing the target model identifier with the specified model.
+     *
+     * @param model               The new model to set in the request path.
+     * @param targetModelMetadata The {@link LLMProviderMetadata} containing metadata for extracting the model
+     *                            attribute.
+     * @param messageContext     The Synapse {@link MessageContext} containing the API request details.
+     */
     private void modifyRequestPath(String model, LLMProviderMetadata targetModelMetadata,
                                    MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2Ctx =
@@ -434,6 +444,12 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         }
     }
 
+    /**
+     * Encodes a path segment according to RFC 3986 standards.
+     *
+     * @param segment The path segment to encode.
+     * @return The encoded path segment.
+     */
     private static String encodePathSegmentRFC3986(String segment) {
         if (log.isDebugEnabled()) {
             log.debug("Encoding path segment: " + segment);
@@ -454,11 +470,23 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         return out.toString();
     }
 
+    /**
+     * Checks if the given character is an unreserved character as per RFC 3986.
+     *
+     * @param c The character to check.
+     * @return {@code true} if the character is unreserved, {@code false} otherwise.
+     */
     private static boolean isUnreserved(char c) {
         return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')
                 || c == '-' || c == '.' || c == '_' || c == '~';
     }
 
+    /**
+     * Checks if the given character is a sub-delimiter as per RFC 3986.
+     *
+     * @param c The character to check.
+     * @return {@code true} if the character is a sub-delimiter, {@code false} otherwise.
+     */
     private static boolean isSubDelim(char c) {
         return c == '!' || c == '$' || c == '&' || c == '\'' || c == '(' || c == ')' ||
                 c == '*' || c == '+' || c == ',' || c == ';' || c == '=';
@@ -481,6 +509,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                 requestModelMetadata.getInputSource())) {
             String contentType = (String) axis2MessageContext.getProperty(APIMgtGatewayConstants.REST_CONTENT_TYPE);
             if (contentType == null) {
+                log.debug("Content type is null, cannot extract request model");
                 return null;
             }
 
@@ -503,7 +532,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
             java.util.regex.Matcher matcher = pattern.matcher(rawPath);
             if (matcher.find()) {
-                return matcher.group();
+                String model = matcher.group();
+                log.debug("Extracted request model from path: " + model);
+                return model;
             }
         } else {
             log.debug("Unsupported input source for attribute: " + requestModelMetadata.getAttributeName());
@@ -631,10 +662,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             return;
         }
         if (failoverConfigs != null) {
-            boolean isProviderAzureV1 =
-                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_NAME.equals(provider.getName()) &&
-                            APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_VERSION
-                                    .equals(provider.getApiVersion());
+            boolean isProviderAzureV1 = isAzureV1Provider(provider);
             handleFailover(messageContext, providerConfigs, failoverConfigs, !isProviderAzureV1);
             return;
         }
@@ -737,6 +765,17 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
     }
 
     /**
+     * Checks if the given provider is Azure OpenAI V1 based on its name and API version.
+     *
+     * @param provider The LLMProviderInfo object containing provider details.
+     * @return true if the provider is Azure OpenAI V1, false otherwise.
+     */
+    private boolean isAzureV1Provider(LLMProviderInfo provider) {
+        return APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_NAME.equals(provider.getName()) &&
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_VERSION.equals(provider.getApiVersion());
+    }
+
+    /**
      * Handles failover logic when an API request fails.
      *
      * @param messageContext        The message context containing request details.
@@ -800,6 +839,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         }
 
         updateTargetEndpoint(messageContext, currentEndpointIndex + 1, failoverEndpoint);
+        log.info("Failover activated, switching to endpoint: " + failoverEndpoint.getEndpointId() + " at index: " + currentEndpointIndex);
     }
 
     /**
