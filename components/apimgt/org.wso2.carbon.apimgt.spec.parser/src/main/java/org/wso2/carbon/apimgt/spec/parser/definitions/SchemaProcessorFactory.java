@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.spec.parser.definitions;
 
 import io.swagger.v3.oas.models.media.Schema;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Factory class for creating and returning the appropriate {@link SchemaProcessor} based on the OpenAPI specification
@@ -31,6 +33,7 @@ import io.swagger.v3.oas.models.media.Schema;
  */
 public class SchemaProcessorFactory {
 
+    private static final Log log = LogFactory.getLog(SchemaProcessorFactory.class);
     private static final OpenAPI30SchemaProcessor OPEN_API_30_PROCESSOR = new OpenAPI30SchemaProcessor();
     private static final OpenAPI31To30SchemaProcessor OPEN_API_31_PROCESSOR = new OpenAPI31To30SchemaProcessor();
 
@@ -46,14 +49,30 @@ public class SchemaProcessorFactory {
      */
     public static SchemaProcessor getProcessor(Schema<?> schema) {
         if (schema == null || schema.getSpecVersion() == null) {
-            throw new IllegalArgumentException("Invalid schema or spec version");
+            String errorMsg = "Invalid schema or spec version";
+            log.error(errorMsg);
+            throw new IllegalArgumentException(errorMsg);
         }
-        if (APISpecParserConstants.OAS_V31.equalsIgnoreCase(schema.getSpecVersion().name())) {
+        
+        String specVersionName = schema.getSpecVersion().name();
+        if (log.isDebugEnabled()) {
+            log.debug("Selecting schema processor for spec version: " + specVersionName);
+        }
+        
+        if (APISpecParserConstants.OAS_V31.equalsIgnoreCase(specVersionName)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Using OpenAPI 3.1 to 3.0 schema processor");
+            }
             return OPEN_API_31_PROCESSOR;
-        } else if (APISpecParserConstants.OAS_V30.equalsIgnoreCase(schema.getSpecVersion().name()))  {
+        } else if (APISpecParserConstants.OAS_V30.equalsIgnoreCase(specVersionName))  {
+            if (log.isDebugEnabled()) {
+                log.debug("Using OpenAPI 3.0 schema processor");
+            }
             return OPEN_API_30_PROCESSOR;
         } else {
-            throw new IllegalArgumentException("Invalid spec version. Only supported 3.0 and 3.1.");
+            String errorMsg = "Invalid spec version: " + specVersionName + ". Only OpenAPI 3.0 and 3.1 are supported";
+            log.error(errorMsg);
+            throw new IllegalArgumentException(errorMsg);
         }
     }
 }

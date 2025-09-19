@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
  * This class represents the default ruleset model.
  */
 public class DefaultRuleset {
+
     private String name;
     private String description;
     private String ruleCategory;

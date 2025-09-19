@@ -85,6 +85,10 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                                          List<String> policyIds, String organization)
             throws APIMGovernanceException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Adding compliance evaluation request for artifact: " + artifactRefId + 
+                     " with " + policyIds.size() + " policies");
+        }
 
         String requestId;
         String artifactKey;
@@ -107,6 +111,11 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                         prepStmnt.setTimestamp(3, requestedTime);
                         prepStmnt.executeUpdate();
                     }
+                    log.info("Created new compliance evaluation request for artifact: " + artifactRefId);
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Using existing pending request for artifact: " + artifactRefId);
+                    }
                 }
                 addRequestPolicyMappings(connection, requestId, policyIds);
                 connection.commit();
@@ -116,6 +125,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             }
 
         } catch (SQLException e) {
+            log.error("Error adding compliance evaluation request for artifact: " + artifactRefId, e);
             throw new APIMGovernanceException(
                     APIMGovExceptionCodes.ERROR_WHILE_ADDING_NEW_GOV_EVAL_REQUEST, e, artifactRefId);
         }

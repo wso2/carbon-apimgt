@@ -80,9 +80,19 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                                                      String organization)
             throws APIMGovernanceException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Checking for policies with blocking actions for artifact: " + artifactRefId + 
+                     " in state: " + state);
+        }
         List<String> applicablePolicyIds = APIMGovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactRefId,
                 artifactType, state, organization);
-        return APIMGovernanceUtil.isBlockingActionsPresent(applicablePolicyIds, state, organization);
+        boolean hasBlockingActions = APIMGovernanceUtil.isBlockingActionsPresent(applicablePolicyIds, state, 
+                organization);
+        if (log.isDebugEnabled()) {
+            log.debug("Found " + applicablePolicyIds.size() + " applicable policies, blocking actions present: " + 
+                     hasBlockingActions);
+        }
+        return hasBlockingActions;
     }
 
     /**
@@ -100,6 +110,10 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                                         APIMGovernableState state, String organization) throws
             APIMGovernanceException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Starting async compliance evaluation for artifact: " + artifactRefId + " in state: " + state);
+        }
+
         // Check whether the artifact is governable and if not return
         boolean isArtifactGovernable = APIMGovernanceUtil.isArtifactGovernable(artifactRefId, artifactType);
         if (!isArtifactGovernable) {
@@ -113,10 +127,16 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         List<APIMGovernableState> dependentAPIMGovernableStates =
                 APIMGovernableState.getDependentGovernableStates(state);
 
+        log.info("Evaluating compliance for artifact: " + artifactRefId + " across " + 
+                dependentAPIMGovernableStates.size() + " dependent states");
+
         for (APIMGovernableState dependentState : dependentAPIMGovernableStates) {
             List<String> applicablePolicyIds = APIMGovernanceUtil
                     .getApplicablePoliciesForArtifactWithState(artifactRefId,
                             artifactType, dependentState, organization);
+            if (log.isDebugEnabled()) {
+                log.debug("Found " + applicablePolicyIds.size() + " applicable policies for state: " + dependentState);
+            }
             complianceManager.handleComplianceEvalAsync
                     (artifactRefId, artifactType, applicablePolicyIds, organization);
         }

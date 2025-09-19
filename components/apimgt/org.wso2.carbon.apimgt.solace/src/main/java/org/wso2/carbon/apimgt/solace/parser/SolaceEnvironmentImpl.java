@@ -52,6 +52,9 @@ public class SolaceEnvironmentImpl implements ExternalEnvironment {
      */
     @Override
     public List<AsyncProtocolEndpoint> getExternalEndpointURLs(Environment environment) {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting external endpoint URLs for environment: " + environment.getName());
+        }
         SolaceAdminApis solaceAdminApis = new SolaceAdminApis(environment.getServerURL(),
                 environment.getUserName(), environment.getPassword(), environment.
                 getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_DEV_NAME));
@@ -63,24 +66,36 @@ public class SolaceEnvironmentImpl implements ExternalEnvironment {
             try {
                 responseString = EntityUtils.toString(response.getEntity());
             } catch (IOException e) {
-                log.error(e.getMessage());
+                log.error("Error reading response entity for environment " + environment.getName() + ": " 
+                        + e.getMessage());
             }
 
-            JSONObject jsonObject = new JSONObject(responseString);
-            if (jsonObject.has("messagingProtocols")) {
-                JSONArray protocols = jsonObject.getJSONArray("messagingProtocols");
-                List<AsyncProtocolEndpoint> asyncProtocolEndpoints = new ArrayList<>();
-                for (int i = 0; i < protocols.length(); i++) {
-                    JSONObject protocolDetails = protocols.getJSONObject(i);
-                    String protocolName = protocolDetails.getJSONObject("protocol").getString("name");
-                    String endpointURI = protocolDetails.getString("uri");
-                    AsyncProtocolEndpoint asyncProtocolEndpoint = new AsyncProtocolEndpoint();
-                    asyncProtocolEndpoint.setProtocol(protocolName);
-                    asyncProtocolEndpoint.setProtocolUrl(endpointURI);
-                    asyncProtocolEndpoints.add(asyncProtocolEndpoint);
+            if (responseString != null) {
+                JSONObject jsonObject = new JSONObject(responseString);
+                if (jsonObject.has("messagingProtocols")) {
+                    JSONArray protocols = jsonObject.getJSONArray("messagingProtocols");
+                    List<AsyncProtocolEndpoint> asyncProtocolEndpoints = new ArrayList<>();
+                    for (int i = 0; i < protocols.length(); i++) {
+                        JSONObject protocolDetails = protocols.getJSONObject(i);
+                        String protocolName = protocolDetails.getJSONObject("protocol").getString("name");
+                        String endpointURI = protocolDetails.getString("uri");
+                        AsyncProtocolEndpoint asyncProtocolEndpoint = new AsyncProtocolEndpoint();
+                        asyncProtocolEndpoint.setProtocol(protocolName);
+                        asyncProtocolEndpoint.setProtocolUrl(endpointURI);
+                        asyncProtocolEndpoints.add(asyncProtocolEndpoint);
+                    }
+                    if (log.isDebugEnabled()) {
+                        log.debug("Found " + asyncProtocolEndpoints.size() + " protocol endpoints for environment: "
+                                + environment.getName());
+                    }
+                    return asyncProtocolEndpoints;
                 }
-                return asyncProtocolEndpoints;
+            } else {
+                log.warn("Empty response received for environment: " + environment.getName());
             }
+        } else {
+            log.error("Failed to get environment details for " + environment.getName() + ", status code: "
+                    + response.getStatusLine().getStatusCode());
         }
         return null;
     }

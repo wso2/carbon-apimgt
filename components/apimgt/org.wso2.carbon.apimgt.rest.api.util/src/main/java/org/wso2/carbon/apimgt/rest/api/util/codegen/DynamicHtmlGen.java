@@ -29,6 +29,8 @@ import io.swagger.models.Swagger;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.parser.util.DeserializationUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +38,7 @@ import java.util.*;
 
 public class DynamicHtmlGen extends StaticDocCodegen {
     
+    private static final Log log = LogFactory.getLog(DynamicHtmlGen.class);
     private Map<String, String> tagToSanitizedMap;
     
     public DynamicHtmlGen () {
@@ -71,23 +74,36 @@ public class DynamicHtmlGen extends StaticDocCodegen {
         op.notes = operation.getDescription();
 
         String resourcesPath = new File(inputSpec).getParent();
+        if (log.isDebugEnabled()) {
+            log.debug("Processing operation: " + httpMethod + " " + path);
+        }
         try {
             LinkedHashMap xExamples = (LinkedHashMap)operation.getVendorExtensions().get("x-examples");
             if (xExamples != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Found x-examples extension for operation: " + httpMethod + " " + path);
+                }
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode exampleNode;
                 String ref = (String)xExamples.get("$ref");
                 String[] segments = ref.split("#/");
                 if (segments.length >= 2) {
                     File exampleFile = new File(resourcesPath + File.separator + segments[0]);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Reading example file: " + exampleFile.getAbsolutePath());
+                    }
                     String content = FileUtils.readFileToString(exampleFile);
                     JsonNode rootNode = DeserializationUtils.readYamlTree(content);
                     exampleNode = rootNode.get(segments[1]);
                     if (exampleNode == null) {
+                        log.error("Could not find element '" + segments[1] + "' in " + exampleFile.getAbsolutePath());
                         throw new RuntimeException("Could not find element '" + segments[1] + "' in " + exampleFile);
                     }
                 } else {
                     File exampleFile = new File(resourcesPath + File.separator + ref);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Reading example file: " + exampleFile.getAbsolutePath());
+                    }
                     String content = FileUtils.readFileToString(exampleFile);
                     exampleNode = DeserializationUtils.readYamlTree(content);
                 }
@@ -177,11 +193,18 @@ public class DynamicHtmlGen extends StaticDocCodegen {
             List<Map<String, List<String>>> security = operation.getSecurity();
             if (security != null) {
                 List<String> scopes = security.get(0).get("OAuth2Security");
-                if (scopes.size() > 0) {
+                if (scopes != null && scopes.size() > 0) {
                     operation.getVendorExtensions().put("x-scopes", scopes);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Added OAuth2 scopes for operation: " + httpMethod + " " + path);
+                    }
                 }
             }
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully processed operation examples and security: " + httpMethod + " " + path);
+            }
         } catch (IOException e) {
+            log.error("Error while reading example file for operation: " + httpMethod + " " + path, e);
             throw new RuntimeException("Error while reading example file", e);
         }
         return op;

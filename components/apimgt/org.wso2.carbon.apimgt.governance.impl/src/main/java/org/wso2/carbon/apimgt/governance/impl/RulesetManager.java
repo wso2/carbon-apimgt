@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
@@ -43,6 +45,7 @@ import java.util.regex.Pattern;
  */
 public class RulesetManager {
 
+    private static final Log log = LogFactory.getLog(RulesetManager.class);
     private RulesetMgtDAO rulesetMgtDAO;
 
     public RulesetManager() {
@@ -58,8 +61,12 @@ public class RulesetManager {
      */
 
     public RulesetInfo createNewRuleset(Ruleset ruleset, String organization) throws APIMGovernanceException {
+        if (log.isDebugEnabled()) {
+            log.debug("Creating new ruleset: " + ruleset.getName() + " in organization: " + organization);
+        }
 
         if (rulesetMgtDAO.getRulesetByName(ruleset.getName(), organization) != null) {
+            log.warn("Ruleset with name " + ruleset.getName() + " already exists in organization: " + organization);
             throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_ALREADY_EXIST, ruleset.getName(),
                     organization);
         }
@@ -68,18 +75,25 @@ public class RulesetManager {
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();
 
-        validationEngine.validateRulesetContent(ruleset);
-        List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
+        try {
+            validationEngine.validateRulesetContent(ruleset);
+            List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
 
-        if (rules.isEmpty()) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT,
-                    ruleset.getName());
+            if (rules.isEmpty()) {
+                log.warn("No rules found in ruleset content for ruleset: " + ruleset.getName());
+                throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT,
+                        ruleset.getName());
+            }
+
+            RulesetInfo newRuleset = rulesetMgtDAO.createRuleset(ruleset, rules, organization);
+            log.info("Successfully created ruleset: " + newRuleset.getName() + " with " + rules.size() + " rules");
+            AuditLogger.log("Ruleset", "New ruleset %s with id %s created by user %s in organization %s",
+                    newRuleset.getName(), ruleset.getId(), ruleset.getCreatedBy(), organization);
+            return newRuleset;
+        } catch (Exception e) {
+            log.error("Error creating ruleset: " + ruleset.getName(), e);
+            throw e;
         }
-
-        RulesetInfo newRuleset = rulesetMgtDAO.createRuleset(ruleset, rules, organization);
-        AuditLogger.log("Ruleset", "New ruleset %s with id %s created by user %s in organization %s",
-                newRuleset.getName(), ruleset.getId(), ruleset.getCreatedBy(), organization);
-        return newRuleset;
     }
 
     /**
@@ -92,14 +106,20 @@ public class RulesetManager {
      */
 
     public void deleteRuleset(String rulesetId, String userName, String organization) throws APIMGovernanceException {
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting ruleset with ID: " + rulesetId + " in organization: " + organization);
+        }
         RulesetInfo ruleset = rulesetMgtDAO.getRulesetById(rulesetId, organization);
         if (ruleset == null) {
+            log.warn("Ruleset not found with ID: " + rulesetId);
             throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_NOT_FOUND, rulesetId);
         } else if (isRulesetAssociatedWithPolicies(rulesetId, organization)) {
+            log.warn("Cannot delete ruleset " + ruleset.getName() + " as it is associated with policies");
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_RULESET_ASSOCIATED_WITH_POLICIES,
                     ruleset.getId());
         }
         rulesetMgtDAO.deleteRuleset(rulesetId, organization);
+        log.info("Successfully deleted ruleset: " + ruleset.getName());
         AuditLogger.log("Ruleset", "Ruleset %s with id %s deleted by user %s in organization %s",
                 ruleset.getName(), ruleset.getId(), userName, organization);
     }

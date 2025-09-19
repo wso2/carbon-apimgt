@@ -85,7 +85,10 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
      * @throws NotifierException if error occurs when creating subscription for Solace APIs
      */
     private void createSubscription(SubscriptionEvent event) throws NotifierException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Creating Solace subscription for API: " + event.getApiUUID() 
+                    + ", Application: " + event.getApplicationUUID());
+        }
         String apiUUID = event.getApiUUID();
         String applicationUUID = event.getApplicationUUID();
 
@@ -122,6 +125,10 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
      * @throws NotifierException if error occurs when updating subscription for Solace APIs
      */
     private void updateSubscription(SubscriptionEvent event) throws NotifierException {
+        if (log.isDebugEnabled()) {
+            log.debug("Updating Solace subscription for API: " + event.getApiUUID() 
+                    + ", Application: " + event.getApplicationUUID());
+        }
         String apiUUID = event.getApiUUID();
         String applicationUUID = event.getApplicationUUID();
 
@@ -158,6 +165,10 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
      * @throws NotifierException if error occurs when deleting subscriptions from Solace APIs
      */
     private void removeSubscription(SubscriptionEvent event) throws NotifierException {
+        if (log.isDebugEnabled()) {
+            log.debug("Removing Solace subscription for API: " + event.getApiUUID() 
+                    + ", Application: " + event.getApplicationUUID());
+        }
         String apiUUID = event.getApiUUID();
         String applicationUUID = event.getApplicationUUID();
 

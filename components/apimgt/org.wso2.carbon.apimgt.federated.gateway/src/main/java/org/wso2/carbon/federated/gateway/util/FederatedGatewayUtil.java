@@ -83,11 +83,17 @@ public class FederatedGatewayUtil {
 
     public static void deleteDeployment(String apiUUID, String organization, Environment environment) {
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Deleting deployment for API: " + apiUUID + " in organization: " + organization 
+                        + " from environment: " + environment.getName());
+            }
             APIProvider provider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
             provider.deleteAPIRevisions(apiUUID, organization, true);
-            log.debug("Deleted Revision for: " + apiUUID + " organization: " + organization + " from environment: "
-                    + environment.getName());
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully deleted revision for API: " + apiUUID + " in organization: " + organization 
+                        + " from environment: " + environment.getName());
+            }
         } catch (APIManagementException e) {
             log.error("Error deleting Revision for API: " + apiUUID + " organization: " + organization, e);
         }
@@ -96,20 +102,31 @@ public class FederatedGatewayUtil {
     public static API createNewAPIVersion(String apiUUID, String newVersion, String organization)
             throws APIManagementException {
         if (Objects.isNull(newVersion) || newVersion.trim().isEmpty() ) {
+            log.error("Invalid new API version format provided for API: " + apiUUID);
             throw new APIManagementException("Invalid new API version format: " + newVersion + " for API: " + apiUUID);
         }
         APIProvider provider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                 getThreadLocalCarbonContext().getUsername());
         if (log.isDebugEnabled()) {
-            log.debug("Created new API version for: " + apiUUID + " in organization: " + organization);
+            log.debug("Creating new API version " + newVersion + " for API: " + apiUUID + " in organization: " 
+                    + organization);
         }
-        return provider.createNewAPIVersion(apiUUID, newVersion, true, organization);
+        API result = provider.createNewAPIVersion(apiUUID, newVersion, true, organization);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully created new API version " + newVersion + " for API: " + apiUUID 
+                    + " in organization: " + organization);
+        }
+        return result;
     }
 
     public static InputStream createZipAsInputStream(String apiYaml, String swaggerYaml, String deploymentYaml,
                                                      String zipName) throws IOException {
         if (apiYaml == null || swaggerYaml == null || deploymentYaml == null) {
+            log.error("Input parameters cannot be null for creating ZIP for API: " + zipName);
             throw new IllegalArgumentException("Input parameters cannot be null for API: " + zipName);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Creating ZIP archive for API: " + zipName);
         }
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try (ZipOutputStream zos = new ZipOutputStream(byteArrayOutputStream)) {
@@ -123,7 +140,9 @@ public class FederatedGatewayUtil {
             // Add deployment_environments.yaml
             addToZip(zos, zipName + "/" + DEPLOYMENT_ENVIRONMENTS_FILE_NAME, deploymentYaml);
         }
-
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully created ZIP archive for API: " + zipName);
+        }
         return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
     }
 
@@ -164,6 +183,7 @@ public class FederatedGatewayUtil {
             throws APIManagementException {
         String[] parts = apiName.split(DELEM_COLON, apiName.lastIndexOf(DELEM_COLON));
         if (parts.length != 2) {
+            log.error("Invalid API identifier format provided: " + apiName);
             throw new APIManagementException("Invalid API identifier format: " + apiName);
         }
 
@@ -184,7 +204,8 @@ public class FederatedGatewayUtil {
      * @return A map containing two entries:
      *         - "DISCOVERED_API_LIST" mapped to a map of discovered APIs.
      *         - "PUBLISHED_API_LIST" mapped to a map of published APIs.
-     *         Each inner map is structured as a mapping of API identifiers to their corresponding {@code ApiResult} objects.
+     *         Each inner map is structured as a mapping of API identifiers to their corresponding
+     *         {@code ApiResult} objects.
      * @throws APIManagementException If an error occurs while fetching the API data from the gateway.
      */
     public static Map<String, Map<String, ApiResult>> getDiscoveredAPIsFromFederatedGateway(
@@ -196,10 +217,12 @@ public class FederatedGatewayUtil {
         Map<String, Map<String, ApiResult>> apisDeployedInGateway = new HashMap<>(2);
 
         apisDeployedInGateway.put(DISCOVERED_API_LIST,
-                buildApiMap(APIUtil.getAPIsDeployedInGatewayEnvironmentByOrg(environment.getName(), organization, true)));
+                buildApiMap(APIUtil.getAPIsDeployedInGatewayEnvironmentByOrg(environment.getName(), organization, 
+                        true)));
 
         apisDeployedInGateway.put(PUBLISHED_API_LIST,
-                buildApiMap(APIUtil.getAPIsDeployedInGatewayEnvironmentByOrg(environment.getName(), organization, false)));
+                buildApiMap(APIUtil.getAPIsDeployedInGatewayEnvironmentByOrg(environment.getName(), organization, 
+                        false)));
 
         return apisDeployedInGateway;
     }

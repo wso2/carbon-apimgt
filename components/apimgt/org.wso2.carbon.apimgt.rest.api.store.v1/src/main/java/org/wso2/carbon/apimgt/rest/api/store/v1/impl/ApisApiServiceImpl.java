@@ -125,6 +125,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);
 
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieved " + allMatchedApis.size() + " APIs for query: " + query + ", user: " + username);
+            }
+
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, superOrganization);
             //Add pagination section in the response
             Object totalLength = allMatchedApisMap.get("length");
@@ -271,6 +275,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             comment.setUser(username);
             comment.setApiId(apiId);
             String createdCommentId = apiConsumer.addComment(apiId, comment, username);
+            log.info("Comment added successfully to API " + apiId + " by user " + username);
             Comment createdComment = apiConsumer.getComment(apiTypeWrapper, createdCommentId, 0, 0);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
 
@@ -575,6 +580,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                     if (commentEdited) {
                         if (apiConsumer.editComment(apiTypeWrapper, commentId, comment)) {
+                            log.info("Comment edited successfully for API " + apiId + " by user " + username);
                             Comment editedComment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
                             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(editedComment);
 
@@ -617,6 +623,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .get(RestApiConstants.USER_REST_API_SCOPES);
                 if (Arrays.asList(tokenScopes).contains("apim:admin") || comment.getUser().equals(username)) {
                     if (apiConsumer.deleteComment(apiTypeWrapper, commentId)) {
+                        log.info("Comment deleted for API " + apiId + " by user " + username);
                         JSONObject obj = new JSONObject();
                         obj.put("id", commentId);
                         obj.put("message", "The comment has been deleted");
@@ -828,6 +835,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             try {
                 sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(), api.getVersion(),
                         swaggerDefinition);
+                log.info("SDK generated successfully for API " + api.getName() + " in language " + language);
                 //Create the sdk response.
                 File sdkFile = new File(sdkArtifacts.get("zipFilePath"));
                 return Response.ok(sdkFile, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",
@@ -1019,26 +1027,32 @@ public class ApisApiServiceImpl implements ApisApiService {
                 //Below case 0[Rate 0] - is to remove ratings from a user
                 case 0: {
                     apiConsumer.rateAPI(id, APIRating.RATING_ZERO, username);
+                    log.info("Rating removed for API " + id + " by user " + username);
                     break;
                 }
                 case 1: {
                     apiConsumer.rateAPI(id, APIRating.RATING_ONE, username);
+                    log.info("Rating (1) added for API " + id + " by user " + username);
                     break;
                 }
                 case 2: {
                     apiConsumer.rateAPI(id, APIRating.RATING_TWO, username);
+                    log.info("Rating (2) added for API " + id + " by user " + username);
                     break;
                 }
                 case 3: {
                     apiConsumer.rateAPI(id, APIRating.RATING_THREE, username);
+                    log.info("Rating (3) added for API " + id + " by user " + username);
                     break;
                 }
                 case 4: {
                     apiConsumer.rateAPI(id, APIRating.RATING_FOUR, username);
+                    log.info("Rating (4) added for API " + id + " by user " + username);
                     break;
                 }
                 case 5: {
                     apiConsumer.rateAPI(id, APIRating.RATING_FIVE, username);
+                    log.info("Rating (5) added for API " + id + " by user " + username);
                     break;
                 }
                 default: {
@@ -1107,6 +1121,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //this will fail if user doesn't have access to the API or the API does not exist
             apiConsumer.checkAPIVisibility(apiId, organization);
             apiConsumer.removeAPIRating(apiId, username);
+            log.info("Rating deleted for API " + apiId + " by user " + username);
             return Response.ok().build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {

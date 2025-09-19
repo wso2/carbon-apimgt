@@ -294,7 +294,8 @@ public class ThrottlePolicyTemplateBuilder {
                 }
             }
         } catch (VelocityException e) {
-            log.error("Velocity Error", e);
+            log.error("Velocity template processing error while generating API level policy for: "
+                    + (policy != null ? policy.getName() : "unknown policy"), e);
             throw new APITemplateException("Velocity Error", e);
         }
         return policyArray;
@@ -361,7 +362,8 @@ public class ThrottlePolicyTemplateBuilder {
             }
             return writer.toString();
         } catch (VelocityException e) {
-            log.error("Velocity Error", e);
+            log.error("Velocity template processing error while generating API level default policy for: "
+                    + (policy != null ? policy.getName() : "unknown policy"), e);
             throw new APITemplateException("Velocity Error", e);
         }
     }
@@ -397,7 +399,8 @@ public class ThrottlePolicyTemplateBuilder {
             }
             template.merge(context, writer);
         } catch (VelocityException e) {
-            log.error("Velocity Error", e);
+            log.error("Velocity template processing error while generating global level policy for: "
+                    + (policy != null ? policy.getName() : "unknown policy"), e);
             throw new APITemplateException("Velocity Error", e);
         }
 
@@ -438,7 +441,8 @@ public class ThrottlePolicyTemplateBuilder {
             }
 
         } catch (VelocityException e) {
-            log.error("Velocity Error", e);
+            log.error("Velocity template processing error while generating application level policy for: "
+                    + (policy != null ? policy.getName() : "unknown policy"), e);
             throw new APITemplateException("Velocity Error", e);
         }
         return writer.toString();
@@ -483,7 +487,8 @@ public class ThrottlePolicyTemplateBuilder {
                 log.debug("Policy : " + writer.toString());
             }
         } catch (VelocityException e) {
-            log.error("Velocity Error", e);
+            log.error("Velocity template processing error while generating subscription level policy for: "
+                    + (policy != null ? policy.getName() : "unknown policy"), e);
             throw new APITemplateException("Velocity Error", e);
         }
         return writer.toString();
@@ -522,9 +527,14 @@ public class ThrottlePolicyTemplateBuilder {
             DistributedThrottleConfig dtConfig =  ServiceReferenceHolder.getInstance()
                     .getAPIMConfiguration()
                     .getDistributedThrottleConfig();
-            return dtConfig.isEnabled();
+            boolean isEnabled = dtConfig.isEnabled();
+            if (log.isDebugEnabled()) {
+                log.debug("Distributed throttling configuration loaded. Status: "
+                        + (isEnabled ? "enabled" : "disabled"));
+            }
+            return isEnabled;
         } catch (Exception e) {
-            log.warn("Failed to load distributed throttle configuration from API Manager config. Using defaults.", e);
+            log.warn("Failed to load distributed throttle configuration. Defaulting to non-distributed mode.", e);
             return false;
         }
     }

@@ -76,7 +76,7 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
                 long timeLeft = message.getJMSTimestamp() + eventHubConfigurationDto.getEventWaitingTime()
                         - System.currentTimeMillis();
                 if (log.isDebugEnabled()) {
-                    log.debug("Event Hub waiting time: " + timeLeft);
+                    log.debug("Event Hub waiting time: " + timeLeft + " ms");
                 }
                 if (timeLeft > 0) {
                     Thread.sleep(timeLeft);
@@ -84,7 +84,7 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
             }
             if (message != null) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Event received in JMS Event Receiver - " + message);
+                    log.debug("Throttle policy event received in JMS listener");
                 }
                 Topic jmsDestination = (Topic) message.getJMSDestination();
                 if (message instanceof TextMessage) {
@@ -100,28 +100,39 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
                              * timestamp - system time of the event published
                              * event - event data
                              */
+                            String eventType = payloadData.get(APIConstants.EVENT_TYPE).asText();
                             if (log.isDebugEnabled()) {
-                                log.debug("Event received from the topic of " + jmsDestination.getTopicName());
+                                log.debug("Notification event received from topic: " + jmsDestination.getTopicName()
+                                        + ", event type: " + eventType);
                             }
-                            handleNotificationMessage(payloadData.get(APIConstants.EVENT_TYPE).asText(),
-                                    payloadData.get(APIConstants.EVENT_PAYLOAD).asText());
+                            handleNotificationMessage(eventType, payloadData.get(APIConstants.EVENT_PAYLOAD).asText());
+                        } else {
+                            log.warn("Received notification message with null event type from topic: "
+                                    + jmsDestination.getTopicName());
                         }
                     }
                 } else {
-                    log.warn("Event dropped due to unsupported message type " + message.getClass());
+                    log.warn("Event dropped due to unsupported message type: " + message.getClass().getName());
                 }
             } else {
-                log.warn("Dropping the empty/null event received through jms receiver");
+                log.warn("Dropping empty/null event received through JMS receiver");
             }
-        } catch (JMSException | JsonProcessingException e) {
-            log.error("JMSException occurred when processing the received message ", e);
+        } catch (JMSException e) {
+            log.error("JMS exception occurred while processing throttle policy event", e);
+        } catch (JsonProcessingException e) {
+            log.error("JSON processing exception occurred while parsing throttle policy event", e);
         } catch (InterruptedException e) {
-            log.error("Error occurred while waiting to retrieve artifacts from event hub", e);
+            log.error("Thread interrupted while waiting to retrieve artifacts from event hub", e);
+            Thread.currentThread().interrupt();
         }
     }
 
     private void handleNotificationMessage(String eventType, String encodedEvent) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Processing notification message for event type: " + eventType);
+        }
+        
         byte[] eventDecoded = Base64.decodeBase64(encodedEvent);
         String eventJson = new String(eventDecoded, StandardCharsets.UTF_8);
 
@@ -135,6 +146,10 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
             boolean deletePolicy = APIConstants.EventType.POLICY_DELETE.toString().equals(eventType);
             Runnable task = null;
             PolicyEvent event = new Gson().fromJson(eventJson, PolicyEvent.class);
+            
+            if (log.isDebugEnabled()) {
+                log.debug("Processing " + eventType + " event for policy type: " + event.getPolicyType());
+            }
             if (event.getPolicyType() == APIConstants.PolicyType.SUBSCRIPTION) {
                 // handle subscription policies
                 SubscriptionPolicyEvent policyEvent = new Gson().fromJson(eventJson, SubscriptionPolicyEvent.class);

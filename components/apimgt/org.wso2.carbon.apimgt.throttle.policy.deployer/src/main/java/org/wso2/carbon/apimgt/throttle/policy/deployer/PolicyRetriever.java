@@ -195,10 +195,15 @@ public class PolicyRetriever {
             throws ThrottlePolicyDeployerException {
 
         String endpoint = baseURL + path;
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving policies from endpoint: " + endpoint + " for tenant: " + tenantDomain);
+        }
         try (CloseableHttpResponse httpResponse = invokeService(endpoint, tenantDomain)) {
             if (httpResponse.getStatusLine().getStatusCode() != 200) {
                 String errorMessage = EntityUtils.toString(httpResponse.getEntity(),
                         APIConstants.DigestAuthConstants.CHARSET);
+                log.warn("Failed to retrieve policies. Status code: " + httpResponse.getStatusLine().getStatusCode()
+                        + ", tenant: " + tenantDomain);
                 throw new ThrottlePolicyDeployerException(errorMessage + "Event-Hub status code is : "
                         + httpResponse.getStatusLine().getStatusCode());
             }
@@ -206,24 +211,31 @@ public class PolicyRetriever {
                 String responseString = EntityUtils.toString(httpResponse.getEntity(),
                         APIConstants.DigestAuthConstants.CHARSET);
                 if (log.isDebugEnabled()) {
-                    log.debug("Response: " + responseString);
+                    log.debug("Received policy response for tenant: " + tenantDomain + ", response length: "
+                            + (responseString != null ? responseString.length() : 0));
                 }
                 if (responseString != null && !responseString.isEmpty()) {
+                    log.info("Successfully retrieved policies for tenant: " + tenantDomain);
                     return new Gson().fromJson(responseString, policyClass);
                 }
             } else {
+                log.error("HTTP response entity is null for tenant: " + tenantDomain + ", endpoint: " + endpoint);
                 throw new ThrottlePolicyDeployerException("HTTP response is empty");
             }
         } catch (IOException e) {
-            String msg = "Error while executing the http client";
+            String msg = "Error while executing HTTP client for tenant: " + tenantDomain + ", endpoint: " + endpoint;
             log.error(msg, e);
             throw new ThrottlePolicyDeployerException(msg, e);
         }
+        log.warn("Retrieved null policy data for tenant: " + tenantDomain + ", endpoint: " + endpoint);
         return null;
     }
 
     private CloseableHttpResponse invokeService(String endpoint, String tenantDomain)
             throws IOException, ThrottlePolicyDeployerException {
+        if (log.isDebugEnabled()) {
+            log.debug("Invoking service endpoint: " + endpoint + " for tenant: " + tenantDomain);
+        }
         HttpGet method = new HttpGet(endpoint);
         URL url = new URL(endpoint);
         String username = eventHubConfigurationDto.getUsername();
@@ -237,8 +249,15 @@ public class PolicyRetriever {
                 + new String(credentials, APIConstants.DigestAuthConstants.CHARSET));
         HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
         try {
-            return APIUtil.executeHTTPRequestWithRetries(method, httpClient);
+            CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(method, httpClient);
+            if (log.isDebugEnabled()) {
+                log.debug("HTTP request successful for endpoint: " + endpoint + ", tenant: " + tenantDomain
+                        + ", status: " + response.getStatusLine().getStatusCode());
+            }
+            return response;
         } catch (APIManagementException e) {
+            log.error("API management exception while invoking service for tenant: " + tenantDomain
+                    + ", endpoint: " + endpoint, e);
             throw new ThrottlePolicyDeployerException(e);
         }
     }

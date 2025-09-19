@@ -398,6 +398,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         } 
 
         int applicationId = apiConsumer.addApplication(application, username, organization);
+        log.info("Application created successfully: " + applicationDto.getName() + " by user " + username);
 
         //retrieves the created application and send as the response
         return apiConsumer.getApplicationById(applicationId);
@@ -612,6 +613,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
         }
 
+        log.info("Application updated successfully: " + application.getName() + " by user " + username);
         //retrieves the updated application and send as the response
         return apiConsumer.getApplicationByUUID(applicationId);
     }
@@ -701,6 +703,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     }
                     String apiKey = apiConsumer.generateApiKey(application, userName, validityPeriod,
                             restrictedIP, restrictedReferer);
+                    log.info("API key generated successfully for application " + applicationId + " by user " + userName);
                     APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKey, validityPeriod);
                     return Response.ok().entity(apiKeyDto).build();
                 }
@@ -744,6 +747,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                     String tokenIdentifier = payload.getString(APIConstants.JwtTokenConstants.JWT_ID);
                                     String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
                                     apiConsumer.revokeAPIKey(tokenIdentifier, expiryTime, tenantDomain);
+                                    log.info("API key revoked successfully for application " + applicationId + " by user " + username);
                                     return Response.ok().build();
                                 } else {
                                     if (log.isDebugEnabled()) {
@@ -813,6 +817,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (application != null) {
                 if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
                     apiConsumer.removeApplication(application, username);
+                    log.info("Application deleted: " + application.getName() + " by user " + username);
                     if (APIConstants.ApplicationStatus.DELETE_PENDING.equals(application.getStatus())) {
                         if (application.getId() == -1) {
                             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -895,6 +900,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             username, application, body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes,
                             jsonParams, keyManagerName, organization, false);
+                    if (log.isDebugEnabled()) {
+                        log.debug("OAuth key generation requested for application " + applicationId + " with key type " +
+                                body.getKeyType().toString());
+                    }
                     ApplicationKeyDTO applicationKeyDTO =
                             ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                     applicationKeyDTO.setKeyManager(keyManagerName);

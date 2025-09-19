@@ -54,6 +54,9 @@ public class SolaceStoreUtils {
      */
     public static List<SolaceURLsDTO> getSolaceURLsInfo(Environment solaceEnvironment, String organizationName,
              String environmentName, List<String> availableProtocols) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting Solace URLs info for environment: " + environmentName);
+        }
         // Create solace admin APIs instance
         SolaceAdminApis solaceAdminApis = new SolaceAdminApis(solaceEnvironment.getServerURL(), solaceEnvironment.
                 getUserName(), solaceEnvironment.getPassword(), solaceEnvironment.getAdditionalProperties().
@@ -80,9 +83,13 @@ public class SolaceStoreUtils {
                     }
                 }
             } catch (IOException e) {
+                log.error("Error reading response entity for environment " + environmentName + ": " + e.getMessage());
                 throw new APIManagementException("Error occurred when retrieving protocols URLs from Solace " +
                         "admin apis");
             }
+        } else {
+            log.error("Failed to get environment details for " + environmentName + ", status code: "
+                    + response.getStatusLine().getStatusCode());
         }
         return solaceURLsDTOs;
     }
@@ -98,6 +105,9 @@ public class SolaceStoreUtils {
      */
     public static List<SolaceDeployedEnvironmentDTO> getSolaceDeployedEnvsInfo(Environment solaceEnvironment,
                  String solaceOrganization, String applicationUuid) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting Solace deployed environments info for application: " + applicationUuid);
+        }
         Map<String, Environment> gatewayEnvironmentMap = APIUtil.getReadOnlyGatewayEnvironments();
 
         // Create solace admin APIs instance
@@ -185,10 +195,13 @@ public class SolaceStoreUtils {
                     }
                 }
             } catch (IOException e) {
-                log.error(e.getMessage());
+                log.error("Error processing Solace application response for " + applicationUuid + ": "
+                        + e.getMessage());
             }
             return  solaceEnvironments;
         } else {
+            log.error("Failed to get application details for " + applicationUuid + ", status code: "
+                    + response.getStatusLine().getStatusCode());
             throw new APIManagementException("Solace Environment configurations are not provided properly");
         }
     }

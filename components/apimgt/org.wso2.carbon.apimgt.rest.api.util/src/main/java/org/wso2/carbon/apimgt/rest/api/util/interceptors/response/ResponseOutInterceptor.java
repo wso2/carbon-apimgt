@@ -17,6 +17,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.interceptors.response;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.jaxrs.impl.MetadataMap;
 import org.apache.cxf.message.Message;
@@ -29,6 +31,7 @@ import javax.ws.rs.core.MultivaluedMap;
  * This class adds security headers to prevent content sniffing and protect against XSS
  */
 public class ResponseOutInterceptor extends AbstractPhaseInterceptor<Message> {
+    private static final Log log = LogFactory.getLog(ResponseOutInterceptor.class);
     private static final String X_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options";
     private static final String X_XSS_PROTECTION = "X-XSS-Protection";
     private static final String NO_SNIFF = "nosniff";
@@ -40,9 +43,15 @@ public class ResponseOutInterceptor extends AbstractPhaseInterceptor<Message> {
 
     @Override
     public void handleMessage(Message message) throws Fault {
+        if (log.isDebugEnabled()) {
+            log.debug("Processing response message to add security headers");
+        }
         MultivaluedMap<String, Object> headers = (MetadataMap<String, Object>) message.get(Message.PROTOCOL_HEADERS);
         if (headers == null) {
             headers = new MetadataMap<>();
+            if (log.isDebugEnabled()) {
+                log.debug("Created new header map for response");
+            }
         }
         setOutBoundHeaders(message, headers);
     }
@@ -51,5 +60,8 @@ public class ResponseOutInterceptor extends AbstractPhaseInterceptor<Message> {
         headers.add(X_CONTENT_TYPE_OPTIONS, NO_SNIFF);
         headers.add(X_XSS_PROTECTION, XSS_PROTECTION_MODE_BLOCK);
         message.put(Message.PROTOCOL_HEADERS, headers);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully added security headers: X-Content-Type-Options and X-XSS-Protection");
+        }
     }
 }

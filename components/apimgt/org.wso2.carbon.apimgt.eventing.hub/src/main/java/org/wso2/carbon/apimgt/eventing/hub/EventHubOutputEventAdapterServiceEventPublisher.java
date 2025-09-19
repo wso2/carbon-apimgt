@@ -40,6 +40,9 @@ public class EventHubOutputEventAdapterServiceEventPublisher implements EventPub
     public void publish(EventPublisherEvent eventPublisherEvent) {
         boolean tenantFlowStarted = false;
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Publishing event through OutputEventAdapterService: " + eventPublisherEvent);
+            }
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext()
                     .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
@@ -49,6 +52,11 @@ public class EventHubOutputEventAdapterServiceEventPublisher implements EventPub
                     null,
                     eventPublisherEvent
             );
+            if (log.isDebugEnabled()) {
+                log.debug("Event published successfully through OutputEventAdapterService");
+            }
+        } catch (Exception e) {
+            log.error("Error occurred while publishing event through OutputEventAdapterService", e);
         } finally {
             if (tenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();

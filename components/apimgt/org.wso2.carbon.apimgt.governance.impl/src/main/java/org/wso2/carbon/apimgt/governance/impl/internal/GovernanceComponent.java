@@ -57,35 +57,57 @@ public class GovernanceComponent {
     @Activate
     protected void activate(ComponentContext componentContext) throws Exception {
 
-        if (log.isDebugEnabled()) {
-            log.debug("Governance component activated");
-        }
+        log.info("Activating APIM Governance component");
 
-        BundleContext bundleContext = componentContext.getBundleContext();
-        APIMGovServerStartupShutdownListener startupShutdownListener
-                = new APIMGovServerStartupShutdownListener();
-        registration = bundleContext
-                .registerService(ServerStartupObserver.class, startupShutdownListener, null);
-        registration = bundleContext
-                .registerService(ServerShutdownHandler.class, startupShutdownListener, null);
-        registration = bundleContext
-                .registerService(JMSListenerShutDownService.class, startupShutdownListener, null);
+        try {
+            BundleContext bundleContext = componentContext.getBundleContext();
+            APIMGovServerStartupShutdownListener startupShutdownListener
+                    = new APIMGovServerStartupShutdownListener();
+            registration = bundleContext
+                    .registerService(ServerStartupObserver.class, startupShutdownListener, null);
+            registration = bundleContext
+                    .registerService(ServerShutdownHandler.class, startupShutdownListener, null);
+            registration = bundleContext
+                    .registerService(JMSListenerShutDownService.class, startupShutdownListener, null);
 
-        APIMGovernanceDBUtil.initialize();
-        ComplianceEvaluationScheduler.initialize();
+            log.info("Successfully registered server lifecycle listeners");
 
-        String migrationEnabled = System.getProperty(APIMGovernanceConstants.MIGRATE);
-        if (migrationEnabled == null) {
-            APIMGovernanceConfigDeployer configDeployer = new APIMGovernanceConfigDeployer();
-            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
+            APIMGovernanceDBUtil.initialize();
+            log.info("APIM Governance database utilities initialized");
+
+            ComplianceEvaluationScheduler.initialize();
+            log.info("Compliance evaluation scheduler initialized");
+
+            String migrationEnabled = System.getProperty(APIMGovernanceConstants.MIGRATE);
+            if (migrationEnabled == null) {
+                APIMGovernanceConfigDeployer configDeployer = new APIMGovernanceConfigDeployer();
+                bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
+                log.info("APIM Governance config deployer registered");
+            } else {
+                log.info("Migration mode enabled, skipping config deployer registration");
+            }
+
+            log.info("APIM Governance component activated successfully");
+        } catch (Exception e) {
+            log.error("Error activating APIM Governance component", e);
+            throw e;
         }
     }
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
-        ComplianceEvaluationScheduler.shutdown();
-        if (registration != null) {
-            registration.unregister();
+        log.info("Deactivating APIM Governance component");
+        try {
+            ComplianceEvaluationScheduler.shutdown();
+            log.info("Compliance evaluation scheduler shutdown completed");
+            
+            if (registration != null) {
+                registration.unregister();
+                log.info("Server lifecycle listeners unregistered");
+            }
+            log.info("APIM Governance component deactivated successfully");
+        } catch (Exception e) {
+            log.error("Error during APIM Governance component deactivation", e);
         }
     }
 
@@ -96,10 +118,12 @@ public class GovernanceComponent {
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
+        log.info("Setting API Manager configuration service");
         ServiceReferenceHolder.getInstance().setAPIMConfigurationService(amcService);
     }
 
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
+        log.info("Unsetting API Manager configuration service");
         ServiceReferenceHolder.getInstance().setAPIMConfigurationService(null);
     }
 
@@ -112,13 +136,13 @@ public class GovernanceComponent {
             unbind = "unsetValidationEngineService"
     )
     protected void setValidationEngineService(ValidationEngine validationEngine) {
-
+        log.info("Setting validation engine service");
         ValidationEngineService validationEngineService = new ValidationEngineServiceImpl(validationEngine);
         ServiceReferenceHolder.getInstance().setValidationEngineService(validationEngineService);
     }
 
     protected void unsetValidationEngineService(ValidationEngine validationEngine) {
-
+        log.info("Unsetting validation engine service");
         ServiceReferenceHolder.getInstance().setValidationEngineService(null);
     }
 

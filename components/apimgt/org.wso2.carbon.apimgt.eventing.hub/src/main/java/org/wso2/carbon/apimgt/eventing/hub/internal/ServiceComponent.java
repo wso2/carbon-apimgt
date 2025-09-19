@@ -63,6 +63,9 @@ public class ServiceComponent {
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetOutputEventAdapterService")
     protected void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
+        if (log.isDebugEnabled()) {
+            log.debug("OutputEventAdapterService bound to ServiceReferenceHolder");
+        }
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(outputEventAdapterService);
     }
 
@@ -72,6 +75,9 @@ public class ServiceComponent {
      * @param outputEventAdapterService OutputEventAdapter service object to be unset
      */
     protected void unsetOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
+        if (log.isDebugEnabled()) {
+            log.debug("OutputEventAdapterService unbound from ServiceReferenceHolder");
+        }
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(null);
     }
 
@@ -87,6 +93,9 @@ public class ServiceComponent {
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetEventStreamService")
     protected void setEventStreamService(EventStreamService eventStreamService) {
+        if (log.isDebugEnabled()) {
+            log.debug("EventStreamService bound to ServiceReferenceHolder");
+        }
         ServiceReferenceHolder.getInstance().setEventStreamService(eventStreamService);
     }
 
@@ -96,6 +105,9 @@ public class ServiceComponent {
      * @param eventStreamService EventStreamService object to be unset
      */
     protected void unsetEventStreamService(EventStreamService eventStreamService) {
+        if (log.isDebugEnabled()) {
+            log.debug("EventStreamService unbound from ServiceReferenceHolder");
+        }
         ServiceReferenceHolder.getInstance().setEventStreamService(null);
     }
 }

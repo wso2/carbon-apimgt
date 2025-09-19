@@ -51,14 +51,17 @@ public class ThrottlePolicyDeployerComponent {
     @Activate
     protected void activate(ComponentContext context) {
 
-        log.debug("Activating component...");
+        if (log.isDebugEnabled()) {
+            log.debug("Activating throttle policy deployer component");
+        }
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
         if (configuration == null) {
-            log.warn("API Manager Configuration not properly set.");
+            log.warn("API Manager Configuration not properly set. Throttle policy deployer will not be activated.");
             return;
         }
         ThrottleProperties throttleProperties = configuration.getThrottleProperties();
         if (throttleProperties.isEnablePolicyDeployment()) {
+            log.info("Policy deployment is enabled. Registering throttle policy startup listener.");
             ThrottlePolicyStartupListener throttlePolicyStartupListener =
                     new ThrottlePolicyStartupListener();
             registration = context.getBundleContext()
@@ -67,6 +70,9 @@ public class ThrottlePolicyDeployerComponent {
                     .registerService(ServerShutdownHandler.class, throttlePolicyStartupListener, null);
             registration = context.getBundleContext()
                     .registerService(JMSListenerShutDownService.class, throttlePolicyStartupListener, null);
+            log.info("Throttle policy deployer component activated successfully.");
+        } else {
+            log.info("Policy deployment is disabled. Throttle policy deployer will not register listeners.");
         }
     }
 
@@ -78,13 +84,17 @@ public class ThrottlePolicyDeployerComponent {
             unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService configurationService) {
 
-        log.debug("Setting APIM Configuration Service");
+        if (log.isDebugEnabled()) {
+            log.debug("Setting APIM Configuration Service");
+        }
         ServiceReferenceHolder.getInstance().setAPIMConfigurationService(configurationService);
     }
 
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService configurationService) {
 
-        log.debug("Unsetting APIM Configuration Service");
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting APIM Configuration Service");
+        }
         ServiceReferenceHolder.getInstance().setAPIMConfigurationService(null);
     }
 
@@ -96,13 +106,17 @@ public class ThrottlePolicyDeployerComponent {
             unbind = "unsetEventProcessorService")
     protected void setEventProcessorService(EventProcessorService eventProcessorService) {
 
-        log.debug("Setting EventProcessor Service");
+        if (log.isDebugEnabled()) {
+            log.debug("Setting EventProcessor Service");
+        }
         ServiceReferenceHolder.getInstance().setEventProcessorService(eventProcessorService);
     }
 
     protected void unsetEventProcessorService(EventProcessorService eventProcessorService) {
 
-        log.debug("Unsetting EventProcessor Service");
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting EventProcessor Service");
+        }
         ServiceReferenceHolder.getInstance().setEventProcessorService(null);
     }
 

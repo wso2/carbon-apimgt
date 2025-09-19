@@ -121,16 +121,28 @@ public class OAuthAuthenticator implements Authenticator {
         String accessToken = null;
         remainingAuthHeader.set("");
         boolean defaultVersionInvoked = false;
+        
+        String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
+        String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        if (log.isDebugEnabled()) {
+            log.debug("Starting OAuth authentication for API: " + apiContext + ", version: " + apiVersion);
+        }
         Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         String tenantDomain = GatewayUtils.getTenantDomain();
         keyManagerList = GatewayUtils.getKeyManagers(synCtx);
         if (keyValidator == null) {
             this.keyValidator = new APIKeyValidator();
+            if (log.isDebugEnabled()) {
+                log.debug("Initialized new APIKeyValidator for tenant: " + tenantDomain);
+            }
         }
 
         if (jwtValidator == null) {
             this.jwtValidator = new JWTValidator(this.keyValidator, tenantDomain, this.getAudiences());
+            if (log.isDebugEnabled()) {
+                log.debug("Initialized new JWTValidator for tenant: " + tenantDomain);
+            }
         }
 
         config = getApiManagerConfiguration();
@@ -147,6 +159,8 @@ public class OAuthAuthenticator implements Authenticator {
             // the message is configurable. So we dont need to remove headers at this point.
             String authHeader = (String) headers.get(getSecurityHeader());
             if (authHeader == null) {
+                log.warn("OAuth authentication failed - Authorization header '" + getSecurityHeader() + 
+                        "' not found for API: " + apiContext);
                 if (log.isDebugEnabled()) {
                     log.debug("OAuth2 Authentication: Expected authorization header with the name '"
                             .concat(getSecurityHeader()).concat("' was not found."));
@@ -217,8 +231,8 @@ public class OAuthAuthenticator implements Authenticator {
             headers.remove(defaultAPIHeader);
         }
 
-        String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
-        String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
+        apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
@@ -259,6 +273,7 @@ public class OAuthAuthenticator implements Authenticator {
                     String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
                             .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
                     if (StringUtils.isNotEmpty(keyManager)) {
+                        log.info("JWT token validation - KeyManager '" + keyManager + "' identified for API: " + apiContext);
                         if (log.isDebugEnabled()){
                             log.debug("KeyManager " + keyManager + "found for authenticate token " + GatewayUtils.getMaskedToken(accessToken));
                         }
@@ -322,11 +337,16 @@ public class OAuthAuthenticator implements Authenticator {
                 try {
                     AuthenticationContext authenticationContext = jwtValidator.authenticate(signedJWTInfo, synCtx);
                     APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, securityContextHeader);
-                    log.debug("User is authorized using JWT token to access the resource.");
+                    log.info("JWT authentication successful for user: " + authenticationContext.getUsername() + 
+                            ", API: " + apiContext);
+                    if (log.isDebugEnabled()) {
+                        log.debug("User is authorized using JWT token to access the resource.");
+                    }
                     synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, authenticationContext.getUsername());
                     return new AuthenticationResponse(true, isMandatory, false, 0, null);
 
                 } catch (APISecurityException ex) {
+                    log.warn("JWT authentication failed for API: " + apiContext + " - " + ex.getMessage());
                     return new AuthenticationResponse(false, isMandatory, true,
                             ex.getErrorCode(), ex.getMessage());
                 }

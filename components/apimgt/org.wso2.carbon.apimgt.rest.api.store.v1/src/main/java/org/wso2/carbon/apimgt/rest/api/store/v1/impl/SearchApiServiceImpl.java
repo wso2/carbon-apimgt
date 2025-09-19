@@ -70,6 +70,10 @@ public class SearchApiServiceImpl implements SearchApiService {
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             Map<String, Object> result = null;
+            if (log.isDebugEnabled()) {
+                log.debug("Processing search query: " + query + " for user: " + username + " in organization: " +
+                        superOrganization);
+            }
             // Extracting search queries for the recommendation system
             apiConsumer.publishSearchQuery(query, username, superOrganization);
             boolean isOrganizationSupportEnabled = APIUtil.isOrganizationAccessControlEnabled();

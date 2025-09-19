@@ -93,6 +93,7 @@ public class ExportUtils {
         String appName = exportApplication.getName();
         String appOwner = exportApplication.getOwner();
         try {
+            log.info("Starting export for application: " + appName + " owned by: " + appOwner);
             // Creates a temporary directory to store the exported application artifact
             File exportFolder = createTempApplicationDirectory(appName, appOwner);
             exportApplicationBasePath = exportFolder.toString();
@@ -111,6 +112,7 @@ public class ExportUtils {
                             ImportExportConstants.TYPE_APPLICATION, applicationDtoToExport);
             CommonUtil.archiveDirectory(exportApplicationBasePath);
             FileUtils.deleteQuietly(new File(exportApplicationBasePath));
+            log.info("Application export completed successfully: " + appName);
             return new File(exportApplicationBasePath + APIConstants.ZIP_FILE_EXTENSION);
         } catch (IOException | APIImportExportException e) {
             throw new APIManagementException("Error while exporting Application: " + exportApplication.getName(), e);

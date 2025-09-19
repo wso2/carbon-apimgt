@@ -139,6 +139,11 @@ public class APIKeyValidator {
                                                         String matchingResource, String httpVerb,
                                                         boolean defaultVersionInvoked, List<String> keyManagers)
             throws APISecurityException {
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Starting key validation for API: " + context + ", version: " + apiVersion + 
+                     ", resource: " + matchingResource + ", method: " + httpVerb);
+        }
 
         String prefixedVersion = apiVersion;
         boolean valid;
@@ -159,6 +164,9 @@ public class APIKeyValidator {
             //If the access token exists in the first level cache.
             if (cachedToken != null) {
                 APIKeyValidationInfoDTO info = (APIKeyValidationInfoDTO) getGatewayKeyCache().get(cacheKey);
+                if (log.isDebugEnabled()) {
+                    log.debug("Cache lookup for API: " + context + " - " + (info != null ? "found" : "not found"));
+                }
 
                 if (info != null) {
                     if (APIUtil.isAccessTokenExpired(info)) {

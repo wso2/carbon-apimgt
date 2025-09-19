@@ -55,7 +55,7 @@ public class XACMLAuthenticationInterceptor extends AbstractPhaseInterceptor {
     public boolean handleRequest(Message message, ClassResourceInfo resourceInfo) {
 
         if (logger.isDebugEnabled()) {
-            logger.debug(String.format("Authenticating request: " + message.getId()));
+            logger.debug("Authenticating XACML request with ID: " + message.getId());
         }
         AuthorizationPolicy policy = message.get(AuthorizationPolicy.class);
         if (policy == null) {
@@ -74,16 +74,27 @@ public class XACMLAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
 
     private boolean isUserPermitted(String userName, String resource, String httpMethod, String[] arr) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Validating XACML permissions for user: " + userName + ", resource: " + resource + 
+                        ", method: " + httpMethod);
+        }
         try {
             String status;
             EntitlementServiceClient client = new EntitlementServiceClient();
             status = client.validateAction(userName, resource, httpMethod, arr);
             //TODO this permit need to be replaced with XACML constant for permitted.
-            if(status.equalsIgnoreCase("Permit")){
+            if(status != null && status.equalsIgnoreCase("Permit")) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("XACML validation successful for user: " + userName);
+                }
                 return true;
+            } else {
+                logger.warn("XACML validation denied for user: " + userName + ", resource: " + resource + 
+                           ", decision: " + status);
             }
         } catch (Exception e) {
-            logger.error("Error while validating XACML request" + e);
+            logger.error("Error while validating XACML request for user: " + userName + 
+                        ", resource: " + resource, e);
         }
         return false;
     }

@@ -79,7 +79,8 @@ public class EndpointCertificateDeployer {
     }
 
     public void deployCertificate(String alias) throws APIManagementException {
-
+        log.info("Starting certificate deployment for alias: " + alias + ", tenant: " + tenantDomain);
+        
         String endpoint = baseURL + APIConstants.CERTIFICATE_RETRIEVAL_ENDPOINT.concat("?alias=").concat(alias);
 
         try (CloseableHttpResponse closeableHttpResponse = invokeService(endpoint, tenantDomain)) {
