@@ -303,11 +303,13 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             SubscribedAPI subscribedAPI = apiConsumer.getSubscriptionByUUID(subscriptionId);
             //Check whether the subscription status is not empty and also not blocked
             if (body.getStatus() != null && subscribedAPI != null) {
-                if ("BLOCKED".equals(body.getStatus().value()) || "ON_HOLD".equals(body.getStatus().value())
-                        || "PROD_ONLY_BLOCKED".equals(body.getStatus().value()) || "PROD_ONLY_BLOCKED".equals(subscribedAPI.getSubStatus())
-                        || "REJECTED".equals(body.getStatus().value()) || "BLOCKED".equals(subscribedAPI.getSubStatus())
-                        || "ON_HOLD".equals(subscribedAPI.getSubStatus())
-                        || "REJECTED".equals(subscribedAPI.getSubStatus())) {
+                String bodyStatus = body.getStatus().value();
+                String subscribedStatus = subscribedAPI.getSubStatus();
+                if (APIConstants.SubscriptionStatus.BLOCKED.equals(bodyStatus) || APIConstants.SubscriptionStatus.ON_HOLD.equals(bodyStatus)
+                        || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(bodyStatus) || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subscribedStatus)
+                        || APIConstants.SubscriptionStatus.REJECTED.equals(bodyStatus) || APIConstants.SubscriptionStatus.BLOCKED.equals(subscribedStatus)
+                        || APIConstants.SubscriptionStatus.ON_HOLD.equals(subscribedStatus)
+                        || APIConstants.SubscriptionStatus.REJECTED.equals(subscribedStatus)) {
                     RestApiUtil.handleBadRequest(
                             "Cannot update subscriptions with provided or existing status", log);
                     return null;

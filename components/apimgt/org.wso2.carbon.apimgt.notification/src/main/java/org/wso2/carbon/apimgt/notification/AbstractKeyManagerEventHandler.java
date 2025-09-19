@@ -69,16 +69,13 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
         revocationRequestPublisher.publishRevocationEvents(tokenRevocationEvent.getAccessToken(), properties);
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
-
         String isRevokeTokenCleanupEnabled = config.getFirstProperty(APIConstants.ENABLE_REVOKE_TOKEN_CLEANUP);
-
         if (Boolean.parseBoolean(isRevokeTokenCleanupEnabled)) {
             // Cleanup expired revoked tokens from db.
             Runnable expiredJWTCleaner = new ExpiredJWTCleaner();
             Thread cleanupThread = new Thread(expiredJWTCleaner);
             cleanupThread.start();
         }
-
         return true;
     }
 
