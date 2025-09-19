@@ -1534,41 +1534,45 @@ public class TemplateBuilderUtil {
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
 
         if (isSecureVaultEnabled) {
-            org.json.JSONObject endpointConfig = new org.json.JSONObject(api.getEndpointConfig());
+            Gson gson = new Gson();
+            JsonObject endpointConfig = gson.fromJson(api.getEndpointConfig(), JsonObject.class);
 
             if (endpointConfig.has(APIConstants.ENDPOINT_SECURITY)) {
-                org.json.JSONObject endpoints =
-                        (org.json.JSONObject) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
-                org.json.JSONObject productionEndpointSecurity = (org.json.JSONObject)
-                        endpoints.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
-                org.json.JSONObject sandboxEndpointSecurity =
-                        (org.json.JSONObject) endpoints.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
-
-                boolean isProductionEndpointSecured = (boolean)
-                        productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
-                boolean isSandboxEndpointSecured = (boolean)
-                        sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
-                //for production endpoints
-                if (isProductionEndpointSecured) {
-                    addCredentialsToList(prefix, api, gatewayAPIDTO, productionEndpointSecurity,
+                JsonObject endpoints = endpointConfig.getAsJsonObject(APIConstants.ENDPOINT_SECURITY);
+                if (endpoints.has(APIConstants.ENDPOINT_SECURITY_PRODUCTION)) {
+                    JsonObject productionEndpointSecurity = endpoints.getAsJsonObject(
                             APIConstants.ENDPOINT_SECURITY_PRODUCTION);
-                }
-                if (isSandboxEndpointSecured) {
-                    addCredentialsToList(prefix, api, gatewayAPIDTO, sandboxEndpointSecurity,
-                            APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                    boolean isProductionEndpointSecured = productionEndpointSecurity.get(
+                            APIConstants.ENDPOINT_SECURITY_ENABLED).getAsBoolean();
+                    if (isProductionEndpointSecured) {
+                        addCredentialsToList(prefix, api, gatewayAPIDTO, productionEndpointSecurity,
+                                             APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                    }
 
+                }
+                if (endpoints.has(APIConstants.ENDPOINT_SECURITY_SANDBOX)) {
+                    JsonObject sandboxEndpointSecurity = endpoints.getAsJsonObject(
+                            APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                    boolean isSandboxEndpointSecured = sandboxEndpointSecurity.get(
+                            APIConstants.ENDPOINT_SECURITY_ENABLED).getAsBoolean();
+                    if (isSandboxEndpointSecured) {
+                        addCredentialsToList(prefix, api, gatewayAPIDTO, sandboxEndpointSecurity,
+                                             APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                    }
                 }
             } else if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA
-                    .equals(endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    .equals(endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
                 addAWSCredentialsToList(prefix, api, gatewayAPIDTO, endpointConfig);
             }
         }
     }
 
     private static void addAWSCredentialsToList(String prefix, API api, GatewayAPIDTO gatewayAPIDTO,
-                                                org.json.JSONObject endpointConfig) {
+                                                JsonObject endpointConfig) {
 
-        if (StringUtils.isNotEmpty((String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY))) {
+        if (endpointConfig.has(APIConstants.AMZN_SECRET_KEY) && !endpointConfig.get(APIConstants.AMZN_SECRET_KEY)
+                .isJsonNull() && StringUtils.isNotEmpty(
+                endpointConfig.get(APIConstants.AMZN_SECRET_KEY).getAsString())) {
             CredentialDto awsSecretDto = new CredentialDto();
             if (StringUtils.isNotEmpty(prefix)) {
                 awsSecretDto.setAlias(prefix.concat("--")
@@ -1578,17 +1582,17 @@ public class TemplateBuilderUtil {
                 awsSecretDto.setAlias(GatewayUtils.retrieveAWSCredAlias(api.getId().getApiName(),
                         api.getId().getVersion(), APIConstants.ENDPOINT_TYPE_AWSLAMBDA));
             }
-            awsSecretDto.setPassword((String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY));
+            awsSecretDto.setPassword(endpointConfig.get(APIConstants.AMZN_SECRET_KEY).getAsString());
             gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(awsSecretDto,
                     gatewayAPIDTO.getCredentialsToBeAdd()));
         }
     }
 
     private static void addCredentialsToList(String prefix, API api, GatewayAPIDTO gatewayAPIDTO,
-                                             org.json.JSONObject endpointSecurity, String type) {
+                                             JsonObject endpointSecurity, String type) {
 
-        if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase((String) endpointSecurity
-                .get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
+        if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase(
+                endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE).getAsString())) {
             CredentialDto clientSecretDto = new CredentialDto();
             if (StringUtils.isNotEmpty(prefix)) {
                 clientSecretDto.setAlias(prefix.concat("--").concat(GatewayUtils
@@ -1597,8 +1601,8 @@ public class TemplateBuilderUtil {
                 clientSecretDto.setAlias(GatewayUtils.retrieveOauthClientSecretAlias(api.getId().getApiName()
                         , api.getId().getVersion(), type));
             }
-            clientSecretDto.setPassword((String) endpointSecurity
-                    .get(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET));
+            clientSecretDto.setPassword(
+                    endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET).getAsString());
             gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(clientSecretDto,
                     gatewayAPIDTO.getCredentialsToBeAdd()));
             if (endpointSecurity.has(APIConstants.ENDPOINT_SECURITY_PASSWORD)) {
@@ -1610,16 +1614,15 @@ public class TemplateBuilderUtil {
                     passwordDto.setAlias(GatewayUtils.retrieveOAuthPasswordAlias(api.getId().getApiName()
                             , api.getId().getVersion(), type));
                 }
-                passwordDto.setPassword((String) endpointSecurity
-                        .get(APIConstants.ENDPOINT_SECURITY_PASSWORD));
+                passwordDto.setPassword(endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD).getAsString());
                 gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(passwordDto,
                         gatewayAPIDTO.getCredentialsToBeAdd()));
             }
             if (endpointSecurity.has(APIConstants.PROXY_CONFIGS)) {
-                org.json.JSONObject proxyConfigs = (org.json.JSONObject) endpointSecurity.get(APIConstants
-                        .PROXY_CONFIGS);
-                if (Boolean.TRUE.equals(proxyConfigs.get(APIConstants.PROXY_ENABLED))) {
-                    String proxyPassword = (String) proxyConfigs.get(APIConstants.ENDPOINT_SECURITY_PROXY_PASSWORD);
+                JsonObject proxyConfigs = endpointSecurity.getAsJsonObject(APIConstants.PROXY_CONFIGS);
+                if (proxyConfigs.get(APIConstants.PROXY_ENABLED).getAsBoolean()) {
+                    String proxyPassword = proxyConfigs.get(APIConstants.ENDPOINT_SECURITY_PROXY_PASSWORD)
+                            .getAsString();
                     CredentialDto proxyPasswordDto = new CredentialDto();
                     if (StringUtils.isNotEmpty(prefix)) {
                         proxyPasswordDto.setAlias(prefix.concat("--").concat(GatewayUtils
@@ -1634,8 +1637,8 @@ public class TemplateBuilderUtil {
                             gatewayAPIDTO.getCredentialsToBeAdd()));
                 }
             }
-        } else if (APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.equalsIgnoreCase((String)
-                endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
+        } else if (APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.equalsIgnoreCase(
+                endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE).getAsString())) {
             CredentialDto credentialDto = new CredentialDto();
             if (StringUtils.isNotEmpty(prefix)) {
                 credentialDto.setAlias(prefix.concat("--").concat(GatewayUtils
@@ -1644,8 +1647,7 @@ public class TemplateBuilderUtil {
                 credentialDto.setAlias(GatewayUtils.retrieveBasicAuthAlias(api.getId().getApiName()
                         , api.getId().getVersion(), type));
             }
-            credentialDto.setPassword((String)
-                    endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD));
+            credentialDto.setPassword(endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD).getAsString());
             gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(credentialDto,
                     gatewayAPIDTO.getCredentialsToBeAdd()));
         }
