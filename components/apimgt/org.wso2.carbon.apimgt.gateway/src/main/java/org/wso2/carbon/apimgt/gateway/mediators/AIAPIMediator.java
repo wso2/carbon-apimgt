@@ -310,7 +310,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             }
 
             updateTargetEndpoint(messageContext, 1, failoverEndpoint);
-            log.info("Applied failover configuration with endpoint: " + failoverEndpoint.getEndpointId());
+            log.info("Applied failover configuration with model: " + failoverEndpoint.getModel());
         }
         preserveFailoverPropertiesInMsgCtx(messageContext, policyConfig, targetModelEndpoint, failoverEndpoints);
     }
@@ -420,7 +420,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         String requestPath = (String) axis2Ctx.getProperty(NhttpConstants.REST_URL_POSTFIX);
         if (StringUtils.isNotEmpty(requestPath)) {
             if (log.isDebugEnabled()) {
-                log.debug("Modifying request path for model: " + model + " with target identifier: " + targetModelMetadata.getAttributeIdentifier());
+                log.debug("Modifying request path for model: " + model
+                        + " with target identifier: " + targetModelMetadata.getAttributeIdentifier());
             }
             URI uri = URI.create(requestPath);
             String rawPath = uri.getRawPath();
@@ -839,7 +840,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         }
 
         updateTargetEndpoint(messageContext, currentEndpointIndex + 1, failoverEndpoint);
-        log.info("Failover activated, switching to endpoint: " + failoverEndpoint.getEndpointId() + " at index: " + currentEndpointIndex);
+        log.info("Failover activated, switching to endpoint with model " + failoverEndpoint.getModel());
     }
 
     /**
