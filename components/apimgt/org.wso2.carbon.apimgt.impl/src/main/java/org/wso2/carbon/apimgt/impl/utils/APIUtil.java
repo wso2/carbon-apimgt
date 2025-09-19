@@ -8602,6 +8602,12 @@ public final class APIUtil {
         return ApiMgtDAO.getInstance().getApiExternalApiMappingReference(apiId, environmentId);
     }
 
+    public static Map<String, String> getApiExternalApiMappingReferenceByApiId(String apiId)
+            throws APIManagementException {
+
+        return ApiMgtDAO.getInstance().getApiExternalApiMappingReferences(apiId);
+    }
+
     public static void deleteApiExternalApiMapping(String apiId, String environmentId)
             throws APIManagementException {
 
