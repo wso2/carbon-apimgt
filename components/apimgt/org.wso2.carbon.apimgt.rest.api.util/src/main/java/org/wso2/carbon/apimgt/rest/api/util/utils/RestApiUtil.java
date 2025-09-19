@@ -135,6 +135,25 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns a generic errorDTO
+     *
+     * @param message     specifies the error message
+     * @param code        specifies the error code
+     * @param description specifies the error description
+     * @param moreInfo    specifies more information about the error
+     * @return A generic errorDTO with the specified details
+     */
+    public static ErrorDTO getErrorDTO(String message, Long code, String description, String moreInfo) {
+
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setCode(code);
+        errorDTO.setMoreInfo(moreInfo);
+        errorDTO.setMessage(message);
+        errorDTO.setDescription(description);
+        return errorDTO;
+    }
+
+    /**
      * Returns a generic errorDTO from an Error Handler
      *
      * @param errorHandler ErrorHandler object containing the error information
@@ -467,6 +486,20 @@ public class RestApiUtil {
      */
     public static ConflictException buildConflictException(String message, String description) {
         ErrorDTO errorDTO = getErrorDTO(message, 409l, description);
+        return new ConflictException(errorDTO);
+    }
+
+    /**
+     * Returns a new ConflictException
+     *
+     * @param message     summary of the error
+     * @param description description of the exception
+     * @param moreInfo    more information
+     * @return a new ConflictException with the specified details as a response DTO
+     */
+    public static ConflictException buildConflictException(String message, String description, String moreInfo) {
+
+        ErrorDTO errorDTO = getErrorDTO(message, 409l, description, moreInfo);
         return new ConflictException(errorDTO);
     }
 
@@ -897,6 +930,22 @@ public class RestApiUtil {
         ConflictException conflictException = buildConflictException(
                 RestApiConstants.STATUS_CONFLICT_MESSAGE_RESOURCE_ALREADY_EXISTS, description);
         log.error(description);
+        throw conflictException;
+    }
+
+    /**
+     * Logs the error, builds a ConflictException with specified details and throws it
+     *
+     * @param description description of the error
+     * @param moreInfo    More info link
+     * @param log         Log instance
+     * @throws ConflictException
+     */
+    public static void handleConflict(String description, String moreInfo, Log log) throws ConflictException {
+
+        ConflictException conflictException =
+                buildConflictException(RestApiConstants.STATUS_CONFLICT_MESSAGE_DEFAULT, description, moreInfo);
+        log.error(description + " " + moreInfo);
         throw conflictException;
     }
 
