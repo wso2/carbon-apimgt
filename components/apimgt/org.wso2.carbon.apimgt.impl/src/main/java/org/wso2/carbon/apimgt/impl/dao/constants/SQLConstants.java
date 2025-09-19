@@ -5012,11 +5012,11 @@ public class SQLConstants {
                 "INSERT INTO AM_API_PRIMARY_EP_MAPPING (API_UUID, ENDPOINT_UUID, REVISION_UUID) VALUES(?,?,?)";
 
         public static final String GET_PRIMARY_ENDPOINT_MAPPINGS =
-                "SELECT ENDPOINT_UUID " +
+                "SELECT DISTINCT ENDPOINT_UUID " +
                         "FROM AM_API_PRIMARY_EP_MAPPING WHERE API_UUID = ? AND REVISION_UUID = ?";
 
         public static final String GET_API_PRIMARY_ENDPOINT_UUIDS_BY_API_UUID =
-                "SELECT AME.ENDPOINT_UUID " +
+                "SELECT DISTINCT AME.ENDPOINT_UUID " +
                         "FROM AM_API_ENDPOINTS AME INNER JOIN AM_API_PRIMARY_EP_MAPPING AMPM " +
                         "ON (AMPM.ENDPOINT_UUID = AME.ENDPOINT_UUID AND AMPM.API_UUID = AME.API_UUID " +
                         "AND AMPM.REVISION_UUID = AME.REVISION_UUID) " +
@@ -5034,7 +5034,8 @@ public class SQLConstants {
                         "AME.API_UUID = ? " +
                         "AND AME.ORGANIZATION = ? " +
                         "AND AME.REVISION_UUID = 'Current API' " +
-                        "AND AME.KEY_TYPE = ?";
+                        "AND AME.KEY_TYPE = ? " +
+                        "LIMIT 1";
 
         public static final String GET_API_PRIMARY_ENDPOINT_UUID_BY_API_UUID_AND_KEY_TYPE_REVISION =
                 "SELECT AME.ENDPOINT_UUID " +
@@ -5045,7 +5046,8 @@ public class SQLConstants {
                         "AME.API_UUID = ? " +
                         "AND AME.ORGANIZATION = ? " +
                         "AND AME.REVISION_UUID = ? " +
-                        "AND AME.KEY_TYPE = ?";
+                        "AND AME.KEY_TYPE = ? " +
+                        "LIMIT 1";
 
         public static final String DELETE_API_ENDPOINTS_BY_API_UUID_AND_REVISION_UUID =
                 "DELETE FROM AM_API_ENDPOINTS WHERE API_UUID = ? AND REVISION_UUID = ? ";
