@@ -41,6 +41,9 @@ public class ServiceComponent {
 
     @Activate
     protected void activate(ComponentContext componentContext) {
+        if (log.isDebugEnabled()) {
+            log.debug("Activating Eventing Hub ServiceComponent");
+        }
         componentContext.getBundleContext().registerService(EventPublisherFactory.class.getName(),
                 new EventHubEventPublisherFactory(), null);
         log.info("Eventing Hub ServiceComponent is activated");
@@ -48,6 +51,9 @@ public class ServiceComponent {
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
+        if (log.isDebugEnabled()) {
+            log.debug("Deactivating Eventing Hub ServiceComponent");
+        }
         log.info("Eventing Hub ServiceComponent is deactivated");
     }
 
@@ -63,6 +69,9 @@ public class ServiceComponent {
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetOutputEventAdapterService")
     protected void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Binding OutputEventAdapterService");
+        }
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(outputEventAdapterService);
     }
 
@@ -72,6 +81,9 @@ public class ServiceComponent {
      * @param outputEventAdapterService OutputEventAdapter service object to be unset
      */
     protected void unsetOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unbinding OutputEventAdapterService");
+        }
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(null);
     }
 
@@ -87,6 +99,9 @@ public class ServiceComponent {
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetEventStreamService")
     protected void setEventStreamService(EventStreamService eventStreamService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Binding EventStreamService");
+        }
         ServiceReferenceHolder.getInstance().setEventStreamService(eventStreamService);
     }
 
@@ -96,6 +111,9 @@ public class ServiceComponent {
      * @param eventStreamService EventStreamService object to be unset
      */
     protected void unsetEventStreamService(EventStreamService eventStreamService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unbinding EventStreamService");
+        }
         ServiceReferenceHolder.getInstance().setEventStreamService(null);
     }
 }

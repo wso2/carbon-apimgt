@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.eventing;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.databridge.commons.Event;
 
 import java.util.Arrays;
@@ -27,6 +29,8 @@ import java.util.Objects;
  */
 public class EventPublisherEvent extends Event {
 
+    private static final Log log = LogFactory.getLog(EventPublisherEvent.class);
+
     /**
      * The event that needs to be logged in case if it is different from the payload.
      */
@@ -35,12 +39,18 @@ public class EventPublisherEvent extends Event {
 
     public EventPublisherEvent(String streamId, long timeStamp, Object[] payloadDataArray) {
         super(streamId, timeStamp, null, null, payloadDataArray);
+        if (log.isDebugEnabled()) {
+            log.debug("Created EventPublisherEvent with streamId: " + streamId + ", timestamp: " + timeStamp);
+        }
     }
 
     public EventPublisherEvent(java.lang.String streamId, long timeStamp, java.lang.Object[] payloadDataArray,
                                String loggingEvent) {
         this(streamId, timeStamp, payloadDataArray);
         this.loggingEvent = loggingEvent;
+        if (log.isDebugEnabled()) {
+            log.debug("Created EventPublisherEvent with custom logging event: " + loggingEvent);
+        }
     }
 
     @Override
@@ -57,5 +67,8 @@ public class EventPublisherEvent extends Event {
 
     public void setOrgId(String orgId) {
         this.orgId = orgId;
+        if (log.isDebugEnabled()) {
+            log.debug("Set organization ID: " + orgId);
+        }
     }
 }

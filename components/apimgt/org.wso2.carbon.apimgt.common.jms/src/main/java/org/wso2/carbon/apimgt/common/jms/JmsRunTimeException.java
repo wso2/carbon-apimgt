@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.common.jms;
  */
 public class JmsRunTimeException extends RuntimeException {
     public JmsRunTimeException(String s, Exception e) {
+        super(s, e);
     }
 
     public JmsRunTimeException() {

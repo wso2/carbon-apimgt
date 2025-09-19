@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.MeApiServiceImplUtils;
@@ -33,6 +35,8 @@ import javax.ws.rs.core.Response;
  */
 public class MeApiServiceImpl implements MeApiService {
 
+    private static final Log log = LogFactory.getLog(MeApiServiceImpl.class);
+
     /**
      * Check whether the logged-in user has given role
      *
@@ -42,14 +46,23 @@ public class MeApiServiceImpl implements MeApiService {
     public Response validateUserRole(String roleId, MessageContext messageContext) throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
+        if (log.isDebugEnabled()) {
+            log.debug("Validating user role for user: " + userName + ", roleId: " + roleId);
+        }
         boolean isUserInRole = false;
 
         if (roleId != null) {
             isUserInRole = MeApiServiceImplUtils.checkUserInRole(roleId, userName);
         }
         if (isUserInRole) {
+            if (log.isDebugEnabled()) {
+                log.debug("User " + userName + " has role: " + roleId);
+            }
             return Response.status(Response.Status.OK).build();
         } else {
+            if (log.isDebugEnabled()) {
+                log.debug("User " + userName + " does not have role: " + roleId);
+            }
             return Response.status(Response.Status.NOT_FOUND).build();
         }
     }
@@ -57,6 +70,11 @@ public class MeApiServiceImpl implements MeApiService {
     @Override
     public Response organizationInformation(MessageContext messageContext) throws APIManagementException {
         OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving organization information for org: " + 
+                     (orgInfo != null ? orgInfo.getOrganizationId() : "null"));
+        }
         OrganizationInfoDTO dto = new OrganizationInfoDTO();
         dto.setName(orgInfo.getName());
         dto.setOrganizationId(orgInfo.getOrganizationId());

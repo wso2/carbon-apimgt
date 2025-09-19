@@ -42,9 +42,13 @@ public class SequenceApiServiceImpl implements SequenceApiService {
             throws APIManagementException {
 
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
+        if (debugEnabled) {
+            log.debug("Retrieving sequences for API: " + apiName + ", version: " + version + 
+                    ", tenant: " + tenantDomain);
+        }
         List<String> deployedSequences = GatewayUtils.retrieveDeployedSequences(apiName, version, tenantDomain);
         if (debugEnabled) {
-            log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
+            log.debug("Retrieved " + deployedSequences.size() + " sequences for API: " + apiName);
         }
         SequencesDTO sequencesDTO = new SequencesDTO();
         sequencesDTO.sequences(deployedSequences);

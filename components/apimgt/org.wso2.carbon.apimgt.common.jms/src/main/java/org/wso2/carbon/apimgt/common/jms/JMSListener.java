@@ -132,7 +132,7 @@ public class JMSListener implements Runnable {
                         stm.getConnFactoryJNDIName());
             } catch (NamingException e) {
                 log.error("Error looking up connection factory : " + stm.getConnFactoryJNDIName() +
-                        "using JNDI properties : " + jmsProperties, e);
+                        " using JNDI properties for listener: " + listenerName, e);
             }
             connection = JMSUtils.createConnection(
                     jmsConFactory,
@@ -154,17 +154,13 @@ public class JMSListener implements Runnable {
             }
         }
         if (connection != null) {
-            log.info(
-                    "Connection successfully created towards the JMS provider for the listener: "
+            log.info("Connection successfully created towards the JMS provider for the listener: "
                             + stm.getJmsConsumerName() + "#" + stm.getDestinationJNDIName()
                             + ". The connected JMS provider is " + connection.toString()
                             .replace("\n", " | "));
         } else {
-            if (log.isDebugEnabled()) {
-                log.debug(
-                        "Connection could not be created towards the JMS provider for the listener: " 
+            log.warn("Connection could not be created towards the JMS provider for the listener: " 
                                 + stm.getJmsConsumerName() + "#" + stm.getDestinationJNDIName());
-            }
         }
         return (connection != null);
     }

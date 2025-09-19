@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.apimgt.core.authenticate;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -24,9 +26,21 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
 public class APITokenValidator {
 
+    private static final Log log = LogFactory.getLog(APITokenValidator.class);
+
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,
                                                String requiredAuthenticationLevel) throws APIManagementException {
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        return null;
+        if (log.isDebugEnabled()) {
+            log.debug("Validating API key for context: " + context + ", version: " + version);
+        }
+        
+        try {
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            log.info("API key validation initiated for context: " + context);
+            return null;
+        } catch (Exception e) {
+            log.error("Error occurred while validating API key for context: " + context, e);
+            throw new APIManagementException("API key validation failed", e);
+        }
     }
 }

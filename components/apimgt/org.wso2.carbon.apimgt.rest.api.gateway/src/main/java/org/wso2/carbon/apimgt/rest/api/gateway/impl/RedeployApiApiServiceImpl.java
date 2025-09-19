@@ -37,12 +37,15 @@ public class RedeployApiApiServiceImpl implements RedeployApiApiService {
                                     MessageContext messageContext) {
 
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
+        if (debugEnabled) {
+            log.debug("Initiating redeployment for API: " + apiName + ", version: " + version + 
+                    ", tenant: " + tenantDomain);
+        }
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
         try {
             inMemoryApiDeployer.reDeployAPI(apiName, version, tenantDomain);
-            if (debugEnabled) {
-                log.debug("Successfully deployed " + apiName + " in gateway");
-            }
+            log.info("Successfully redeployed API: " + apiName + " in gateway for tenant: " + 
+                    tenantDomain);
             DeployResponseDTO responseDTO = new DeployResponseDTO();
             responseDTO.setDeployStatus(DeployResponseDTO.DeployStatusEnum.DEPLOYED);
             responseDTO.setJsonPayload(apiName + " redeployed from the gateway");

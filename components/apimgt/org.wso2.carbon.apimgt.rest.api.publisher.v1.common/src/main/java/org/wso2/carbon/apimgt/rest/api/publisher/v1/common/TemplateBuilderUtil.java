@@ -113,6 +113,11 @@ public class TemplateBuilderUtil {
                                                            List<SoapToRestMediationDto> soapToRestMediationDtos)
             throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Building API template for API: " + (api != null ? api.getId().getApiName() : "null") + 
+                    " in tenant: " + tenantDomain);
+        }
+
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api, soapToRestInMediationDtos,
                 soapToRestMediationDtos);

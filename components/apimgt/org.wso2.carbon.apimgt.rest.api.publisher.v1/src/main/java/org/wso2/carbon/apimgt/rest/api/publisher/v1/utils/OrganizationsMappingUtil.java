@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils;
 
 import java.util.ArrayList;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import java.util.List;
 
 import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
@@ -26,11 +28,23 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
 public class OrganizationsMappingUtil {
 
+    private static final Log log = LogFactory.getLog(OrganizationsMappingUtil.class);
+
     public static OrganizationListDTO toOrganizationsListDTO(List<OrganizationDetailsDTO> orgList, String parentOrgId) {
+        if (log.isDebugEnabled()) {
+            log.debug("Converting " + (orgList != null ? orgList.size() : 0) + " organization(s) to DTO for parent: " + parentOrgId);
+        }
+        
         OrganizationListDTO listDto = new OrganizationListDTO();
         listDto.setCount(orgList.size());
         List<OrganizationDTO> list = new ArrayList<OrganizationDTO>();
         for (OrganizationDetailsDTO organizationDTO : orgList) {
+            if (organizationDTO == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping null OrganizationDetailsDTO in list");
+                }
+                continue;
+            }
             OrganizationDTO dto = new OrganizationDTO();
             dto.displayName(organizationDTO.getName());
             dto.setOrganizationId(organizationDTO.getOrganizationId());

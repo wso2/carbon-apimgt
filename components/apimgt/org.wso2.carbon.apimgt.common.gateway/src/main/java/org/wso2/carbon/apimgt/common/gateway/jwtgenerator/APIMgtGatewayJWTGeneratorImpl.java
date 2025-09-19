@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.common.gateway.jwtgenerator;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 
@@ -33,10 +35,13 @@ import java.util.concurrent.TimeUnit;
  * Default implementation of backend jwt generation.
  */
 public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGenerator {
+    private static final Log log = LogFactory.getLog(APIMgtGatewayJWTGeneratorImpl.class);
 
     @Override
     public Map<String, Object> populateStandardClaims(JWTInfoDto jwtInfoDto) {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Populating standard claims for JWT generation");
+        }
         long currentTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
         long expireIn = currentTime + super.jwtConfigurationDto.getTTL();
         String dialect = getDialectURI();
@@ -91,17 +96,25 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
         if (jwtInfoDto.getOrganizations() != null) {
             claims.put(JWTConstants.ORGANIZATIONS, jwtInfoDto.getOrganizations());
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Populated " + claims.size() + " standard claims");
+        }
         return claims;
     }
 
     @Override
     public Map<String, Object> populateCustomClaims(JWTInfoDto jwtInfoDto) {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Populating custom claims for JWT generation");
+        }
         String[] restrictedClaims = {"iss", "sub", "aud", "exp", "nbf", "iat", "jti", "application", "tierInfo",
                 "subscribedAPIs", "aut"};
         Map<String, Object> claims = new HashMap<>();
         Set<String> jwtExcludedClaims = jwtConfigurationDto.getJWTExcludedClaims();
         jwtExcludedClaims.addAll(Arrays.asList(restrictedClaims));
+        if (log.isDebugEnabled()) {
+            log.debug("Total excluded claims count: " + jwtExcludedClaims.size());
+        }
         Map<String, Object> jwtToken = jwtInfoDto.getJwtValidationInfo().getClaims();
         if (jwtToken != null) {
             for (Map.Entry<String, Object> jwtClaimEntry : jwtToken.entrySet()) {
@@ -109,6 +122,9 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
                     claims.put(jwtClaimEntry.getKey(), jwtClaimEntry.getValue());
                 }
             }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Populated " + claims.size() + " custom claims");
         }
         return claims;
     }

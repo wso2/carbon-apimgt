@@ -65,6 +65,7 @@ public class SwaggerYamlApi {
             if (openAPIDef == null) {
                 synchronized (LOCK_STORE_OPENAPI_DEF) {
                     if (openAPIDef == null) {
+                        log.info("Loading gateway API swagger definition");
                         try (InputStream defStream = this.getClass()
                                 .getClassLoader().getResourceAsStream("gateway-api.yaml")) {
                             String definition = IOUtils.toString(defStream, StandardCharsets.UTF_8);

@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -43,25 +45,37 @@ import javax.ws.rs.core.SecurityContext;
 
 public class OrganizationsApiServiceImpl implements OrganizationsApiService {
 
+    private static final Log log = LogFactory.getLog(OrganizationsApiServiceImpl.class);
+
     public Response organizationsGet(MessageContext messageContext) throws APIManagementException {
         
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+            
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieving organizations for super organization: " + superOrganization);
+            }
             String orgId = null;
             if (orgInfo != null && orgInfo.getOrganizationId() != null) {
                 orgId = orgInfo.getOrganizationId();
             } else {
                 String errorMessage = "User does not belong to any organization.";
+                log.warn(errorMessage);
                 throw new APIManagementException(errorMessage, ExceptionCodes.MISSING_ORGANINATION);
             }
             List<OrganizationDetailsDTO> orgList = apiProvider.getOrganizations(orgId, superOrganization);
+            
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieved " + (orgList != null ? orgList.size() : 0) + " organizations for orgId: " + orgId);
+            }
 
             OrganizationListDTO organizationsListDTO = OrganizationsMappingUtil.toOrganizationsListDTO(orgList, orgId);
             return Response.ok().entity(organizationsListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Organizations";
+            log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, e, ExceptionCodes.INTERNAL_ERROR);
         }
     }

@@ -19,7 +19,8 @@
  */
 package org.wso2.carbon.apimgt.rest.api.devops.impl;
 
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.devops.impl.correlation.ConfigCorrelationImpl;
@@ -36,48 +37,71 @@ import javax.ws.rs.core.Response;
  */
 public class ConfigApiServiceImpl implements ConfigApiService {
 
+    private static final Log log = LogFactory.getLog(ConfigApiServiceImpl.class);
 
     public Response configCorrelationGet(MessageContext messageContext) throws APIManagementException {
-        ConfigCorrelationImpl configCorrelationImpl = new ConfigCorrelationImpl();
-        List<CorrelationConfigDTO> correlationConfigDTOList =  configCorrelationImpl.getCorrelationConfigs();
-        CorrelationComponentsListDTO correlationComponentsListDTO =
-                DevopsAPIUtils.getCorrelationComponentsList(correlationConfigDTOList);
-        Response.Status status = Response.Status.OK;
-        return Response.status(status).entity(correlationComponentsListDTO).build();
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving correlation configuration");
+        }
+        
+        try {
+            ConfigCorrelationImpl configCorrelationImpl = new ConfigCorrelationImpl();
+            List<CorrelationConfigDTO> correlationConfigDTOList = configCorrelationImpl.getCorrelationConfigs();
+            CorrelationComponentsListDTO correlationComponentsListDTO =
+                    DevopsAPIUtils.getCorrelationComponentsList(correlationConfigDTOList);
+            
+            log.info("Successfully retrieved correlation configuration");
+            Response.Status status = Response.Status.OK;
+            return Response.status(status).entity(correlationComponentsListDTO).build();
+        } catch (Exception e) {
+            log.error("Error occurred while retrieving correlation configuration", e);
+            throw e;
+        }
     }
 
     public Response configCorrelationPut(CorrelationComponentsListDTO correlationComponentsListDTO,
             MessageContext messageContext) throws APIManagementException {
-        Boolean valid = DevopsAPIUtils.validateCorrelationComponentList(correlationComponentsListDTO);
-        if (valid) {
-            ConfigCorrelationImpl configCorrelationImpl = new ConfigCorrelationImpl();
+        if (log.isDebugEnabled()) {
+            log.debug("Updating correlation configuration");
+        }
+        
+        try {
+            Boolean valid = DevopsAPIUtils.validateCorrelationComponentList(correlationComponentsListDTO);
+            if (valid) {
+                ConfigCorrelationImpl configCorrelationImpl = new ConfigCorrelationImpl();
 
-            List<CorrelationConfigDTO> correlationConfigDTOList =
-                    DevopsAPIUtils.getCorrelationConfigDTOList(correlationComponentsListDTO);
+                List<CorrelationConfigDTO> correlationConfigDTOList =
+                        DevopsAPIUtils.getCorrelationConfigDTOList(correlationComponentsListDTO);
 
-            Boolean result = configCorrelationImpl.updateCorrelationConfigs(correlationConfigDTOList);
+                Boolean result = configCorrelationImpl.updateCorrelationConfigs(correlationConfigDTOList);
 
-            if (result) {
-                Response.Status status = Response.Status.OK;
-                return Response.status(status).entity(correlationComponentsListDTO).build();
+                if (result) {
+                    log.info("Successfully updated correlation configuration");
+                    Response.Status status = Response.Status.OK;
+                    return Response.status(status).entity(correlationComponentsListDTO).build();
+                } else {
+                    log.error("Failed to update correlation configuration");
+                    ErrorDTO errorObject = new ErrorDTO();
+                    Response.Status status = Response.Status.INTERNAL_SERVER_ERROR;
+                    errorObject.setCode((long) status.getStatusCode());
+                    errorObject.setMessage(status.toString());
+                    errorObject.setDescription("Failed to update the correlation configs");
+                    return Response.status(status).entity(errorObject).build();
+                }
+
             } else {
+                log.warn("Invalid correlation configuration provided in request");
                 ErrorDTO errorObject = new ErrorDTO();
-                Response.Status status = Response.Status.INTERNAL_SERVER_ERROR;
+                Response.Status status = Response.Status.BAD_REQUEST;
                 errorObject.setCode((long) status.getStatusCode());
                 errorObject.setMessage(status.toString());
-                errorObject.setDescription("Failed to update the correlation configs");
+                errorObject.setDescription("Invalid Request");
                 return Response.status(status).entity(errorObject).build();
             }
-
-        } else {
-            ErrorDTO errorObject = new ErrorDTO();
-            Response.Status status = Response.Status.BAD_REQUEST;
-            errorObject.setCode((long) status.getStatusCode());
-            errorObject.setMessage(status.toString());
-            errorObject.setDescription("Invalid Request");
-            return Response.status(status).entity(errorObject).build();
+        } catch (Exception e) {
+            log.error("Error occurred while updating correlation configuration", e);
+            throw e;
         }
-
     }
 
 }

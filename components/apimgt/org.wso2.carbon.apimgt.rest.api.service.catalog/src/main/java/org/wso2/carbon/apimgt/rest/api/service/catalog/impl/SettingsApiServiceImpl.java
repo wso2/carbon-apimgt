@@ -38,9 +38,13 @@ public class SettingsApiServiceImpl implements SettingsApiService {
     private static final Log log = LogFactory.getLog(SettingsApiService.class);
 
     public Response getSettings(MessageContext messageContext) {
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving service catalog settings");
+        }
         try {
             SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
             SettingsDTO settingsDTO = settingsMappingUtil.fromSettingsToDTO();
+            log.info("Service catalog settings retrieved successfully");
             return Response.ok().entity(settingsDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Service Catalog Settings";

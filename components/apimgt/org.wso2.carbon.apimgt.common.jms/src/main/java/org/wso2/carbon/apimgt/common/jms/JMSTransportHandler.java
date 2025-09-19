@@ -84,6 +84,9 @@ public class JMSTransportHandler {
         jmsConnectionFactory = new JMSConnectionFactory(parameters, ListenerConstants.CONNECTION_FACTORY_NAME);
         if (jmsTaskManagerProperties != null) {
             extractTaskManagerProperties(jmsTaskManagerProperties);
+            log.info("JMS Transport Handler initialized with custom task manager properties");
+        } else {
+            log.info("JMS Transport Handler initialized with default task manager properties");
         }
     }
 
@@ -131,6 +134,15 @@ public class JMSTransportHandler {
      */
     public void subscribeForJmsEvents(String topicName, MessageListener messageListener) {
 
+        if (topicName == null || topicName.trim().isEmpty()) {
+            log.error("Cannot subscribe to JMS events: topic name is null or empty");
+            return;
+        }
+        if (messageListener == null) {
+            log.error("Cannot subscribe to JMS events: message listener is null for topic " + topicName);
+            return;
+        }
+
         //Listening to throttleData topic
         JMSListener jmsMessageListener =
                 createJMSMessageListener(topicName, minThreadPoolSize, maxThreadPoolSize, keepAliveTimeInMillis,
@@ -147,6 +159,10 @@ public class JMSTransportHandler {
 
         Map<String, String> messageConfig = new HashMap<>();
         messageConfig.put(JMSConstants.PARAM_DESTINATION, topicName);
+        if (log.isDebugEnabled()) {
+            log.debug("Creating JMS task manager for topic: " + topicName + " with thread pool [min: " 
+                    + minThreadPoolSize + ", max: " + maxThreadPoolSize + "]");
+        }
         JMSTaskManager jmsTaskManager = JMSTaskManagerFactory
                 .createTaskManagerForService(jmsConnectionFactory,
                         ListenerConstants.CONNECTION_FACTORY_NAME,
@@ -170,15 +186,19 @@ public class JMSTransportHandler {
             synchronized (lock) {
                 if (!stopIssued) {
                     stopIssued = true;
-                    log.debug("Stopping JMS Listeners");
+                    log.info("Stopping " + jmsListenerList.size() + " JMS Listeners");
                     for (JMSListener jmsListener : jmsListenerList) {
                         jmsListener.stopListener();
                     }
-                    log.debug("JMS Listeners Stopped");
+                    log.info("JMS Listeners stopped successfully");
                     jmsConnectionFactory.stop();
-                    log.debug("JMS Connection Factory Stopped");
+                    log.info("JMS Connection Factory stopped successfully");
                 }
             }
+        } else if (stopIssued) {
+            log.warn("Shutdown already initiated, ignoring duplicate shutdown request");
+        } else {
+            log.warn("Cannot shutdown: JMS Connection Factory is null");
         }
     }
 

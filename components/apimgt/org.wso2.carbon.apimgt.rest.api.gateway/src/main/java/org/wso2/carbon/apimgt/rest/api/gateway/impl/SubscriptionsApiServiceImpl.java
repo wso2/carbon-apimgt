@@ -16,11 +16,16 @@ import javax.ws.rs.core.Response;
 public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
     private static final Log log = LogFactory.getLog(SubscriptionsApiServiceImpl.class);
+    private boolean debugEnabled = log.isDebugEnabled();
 
     public Response subscriptionsGet(String apiUUID, String appUUID, String tenantDomain,
                                      MessageContext messageContext) {
 
         tenantDomain = GatewayUtils.validateTenantDomain(tenantDomain, messageContext);
+        if (debugEnabled) {
+            log.debug("Retrieving subscription - apiUUID: " + apiUUID + ", appUUID: " + appUUID + 
+                    ", tenant: " + tenantDomain);
+        }
         SubscriptionDataStore subscriptionDataStore =
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         if (subscriptionDataStore == null) {
@@ -30,9 +35,16 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         if (StringUtils.isNotEmpty(apiUUID) && StringUtils.isNotEmpty(appUUID)) {
             Subscription subscription = subscriptionDataStore.getSubscriptionByUUID(apiUUID, appUUID);
             if (subscription == null) {
+                if (debugEnabled) {
+                    log.debug("No subscription found for apiUUID: " + apiUUID + ", appUUID: " + appUUID);
+                }
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
             SubscriptionDTO subscriptionDTO = GatewayUtils.convertToSubscriptionDto(subscription);
+            if (debugEnabled) {
+                log.debug("Successfully retrieved subscription for apiUUID: " + apiUUID + 
+                        ", appUUID: " + appUUID);
+            }
             return Response.ok().entity(subscriptionDTO).build();
 
         } else {

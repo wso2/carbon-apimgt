@@ -40,11 +40,14 @@ public class UndeployApiApiServiceImpl implements UndeployApiApiService {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
+        if (debugEnabled) {
+            log.debug("Initiating undeployment for API: " + apiName + ", version: " + version + 
+                    ", tenant: " + tenantDomain);
+        }
         try {
             inMemoryApiDeployer.unDeployAPI(apiName, version, tenantDomain);
-            if (debugEnabled) {
-                log.debug("Successfully undeployed " + apiName + " in gateway");
-            }
+            log.info("Successfully undeployed API: " + apiName + " from gateway for tenant: " + 
+                    tenantDomain);
             DeployResponseDTO deployResponseDTO = new DeployResponseDTO();
             deployResponseDTO.setDeployStatus(DeployResponseDTO.DeployStatusEnum.UNDEPLOYED);
             deployResponseDTO.setJsonPayload(apiName + " Undeployed from the gateway");

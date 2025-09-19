@@ -297,7 +297,8 @@ public class JMSTaskManager {
         }
 
         jmsTaskManagerState = STATE_STARTED;
-        log.info("Task manager for " + jmsConsumerName + " [re-]initialized");
+        log.info("Task manager for " + jmsConsumerName + " [re-]initialized with " + concurrentConsumers 
+                + " concurrent consumers");
     }
 
     /**
@@ -347,7 +348,7 @@ public class JMSTaskManager {
         if (jmsTaskManagerState != STATE_FAILURE) {
             jmsTaskManagerState = STATE_STOPPED;
         }
-        log.info("Task manager for jms consumer " + receiveTimeout + " shutdown");
+        log.info("Task manager for jms consumer " + jmsConsumerName + " shutdown");
     }
 
     /**
@@ -355,6 +356,9 @@ public class JMSTaskManager {
      * connection / or connections used by the poller tasks
      */
     public synchronized void pause() {
+        if (log.isDebugEnabled()) {
+            log.debug("Pausing JMS task manager for " + jmsConsumerName);
+        }
         for (MessageListenerTask lstTask : pollingTasks) {
             lstTask.pause();
         }
@@ -371,6 +375,9 @@ public class JMSTaskManager {
      * Resume receipt and processing of messages of paused tasks
      */
     public synchronized void resume() {
+        if (log.isDebugEnabled()) {
+            log.debug("Resuming JMS task manager for " + jmsConsumerName);
+        }
         for (MessageListenerTask lstTask : pollingTasks) {
             lstTask.resume();
         }
@@ -840,7 +847,7 @@ public class JMSTaskManager {
                 connection = sharedConnection;
                 setConnected(true);
                 if (log.isDebugEnabled()) {
-                    log.info("New shared connection assigned");
+                    log.debug("New shared connection assigned");
                 }
             }
             // else: Connection is shared and is already referenced by this.connection
@@ -947,7 +954,9 @@ public class JMSTaskManager {
             try {
                 conFactory = JMSUtils.lookup(
                         getInitialContext(), ConnectionFactory.class, getConnFactoryJNDIName());
-                log.debug("Connected to the JMS connection factory : " + getConnFactoryJNDIName());
+                if (log.isDebugEnabled()) {
+                    log.debug("Connected to the JMS connection factory : " + getConnFactoryJNDIName());
+                }
             } catch (NamingException e) {
                 handleException("Error looking up connection factory : " + getConnFactoryJNDIName()
                         + " using JNDI properties : " + JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
@@ -963,7 +972,9 @@ public class JMSTaskManager {
 
                 connection.setExceptionListener(this);
                 connection.start();
-                log.debug("JMS Connection " + jmsConsumerName + " created and started");
+                if (log.isDebugEnabled()) {
+                    log.debug("JMS Connection " + jmsConsumerName + " created and started");
+                }
 
             } catch (JMSException e) {
                 if (connection != null) {
@@ -996,7 +1007,7 @@ public class JMSTaskManager {
             } catch (Exception e) {
                 // Caching generic exception to create new connection for every exception
                 // Make connection and sharedConnection values to null in order to use newly created connection.
-                log.error("Error occurred due to " + e.getMessage());
+                log.error("Error occurred while creating JMS session for " + jmsConsumerName + ": " + e.getMessage());
                 connection = null;
                 sharedConnection = null;
                 handleException("Error creating JMS session for : " + jmsConsumerName, e);

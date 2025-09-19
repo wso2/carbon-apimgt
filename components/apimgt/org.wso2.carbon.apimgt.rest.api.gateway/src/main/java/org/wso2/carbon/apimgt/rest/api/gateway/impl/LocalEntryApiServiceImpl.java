@@ -41,11 +41,15 @@ public class LocalEntryApiServiceImpl implements LocalEntryApiService {
             throws APIManagementException {
 
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
+        if (debugEnabled) {
+            log.debug("Retrieving local entries for API: " + apiName + ", version: " + version + 
+                    ", tenant: " + tenantDomain);
+        }
 
         List<String> deployedLocalEntries = GatewayUtils.retrieveDeployedLocalEntries(apiName, version,
                 tenantDomain);
         if (debugEnabled) {
-            log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
+            log.debug("Retrieved " + deployedLocalEntries.size() + " local entries for API: " + apiName);
         }
         LocalEntryDTO localEntryDTO = new LocalEntryDTO();
         localEntryDTO.localEntries(deployedLocalEntries);

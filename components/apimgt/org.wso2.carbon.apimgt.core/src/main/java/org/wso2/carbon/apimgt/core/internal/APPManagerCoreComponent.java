@@ -42,15 +42,17 @@ public class APPManagerCoreComponent {
     @Activate
     protected void activate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
-            log.debug("HostObjectComponent activated");
+            log.debug("API Manager Core Component activated");
         }
+        log.info("API Manager Core Component started successfully");
     }
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
-            log.debug("HostObjectComponent deactivated");
+            log.debug("API Manager Core Component deactivated");
         }
+        log.info("API Manager Core Component stopped");
     }
 
     @Reference(
@@ -61,18 +63,24 @@ public class APPManagerCoreComponent {
              unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
         if (log.isDebugEnabled()) {
-            log.debug("WebApp manager configuration service bound to the WebApp host objects");
+            log.debug("API Manager configuration service bound to the API Manager core component");
         }
-        configuration = amcService.getAPIManagerConfiguration();
-        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(amcService);
+        if (amcService != null) {
+            configuration = amcService.getAPIManagerConfiguration();
+            ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(amcService);
+            log.info("API Manager configuration service bound successfully");
+        } else {
+            log.warn("Null API Manager configuration service provided during binding");
+        }
     }
 
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
         if (log.isDebugEnabled()) {
-            log.debug("WebApp manager configuration service unbound from the WebApp host objects");
+            log.debug("API Manager configuration service unbound from the API Manager core component");
         }
         configuration = null;
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
+        log.info("API Manager configuration service unbound successfully");
     }
 }
 

@@ -45,6 +45,11 @@ public class SequenceUtils {
     public static ConfigContext getSequenceTemplateConfigContext(
             List<SoapToRestMediationDto> soapToRestMediationDtoList, String seqType, ConfigContext configContext) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Building sequence template config context for " + soapToRestMediationDtoList.size() + 
+                    " mediation DTOs, sequence type: " + seqType);
+        }
+
         if (soapToRestMediationDtoList.size() > 0) {
             JSONObject pathObj = new JSONObject();
             for (SoapToRestMediationDto soapToRestMediationDto : soapToRestMediationDtoList) {

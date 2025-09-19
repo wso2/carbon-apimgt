@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -36,12 +38,22 @@ import javax.ws.rs.core.Response;
 
 public class LabelsApiServiceImpl implements LabelsApiService {
 
+    private static final Log log = LogFactory.getLog(LabelsApiServiceImpl.class);
+
     public Response getAllLabels(MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getValidatedOrganization(messageContext);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving all labels for tenant domain: " + tenantDomain);
+        }
         List<Label> labelList = apiProvider.getAllLabels(tenantDomain);
         LabelListDTO labelListDTO =
                 LabelMappingUtil.fromLabelListToLabelListDTO(labelList);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieved " + (labelList != null ? labelList.size() : 0) + " labels for tenant: " + tenantDomain);
+        }
         return Response.ok().entity(labelListDTO).build();
     }
 }
