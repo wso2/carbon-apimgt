@@ -162,8 +162,10 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                                        LLMProviderInfo provider)
             throws XMLStreamException, IOException, APIManagementException {
 
-        log.debug("Processing inbound request for provider: " + provider.getName() + " with API version: " +
-                provider.getApiVersion());
+        if (log.isDebugEnabled()) {
+            log.debug("Processing inbound request for provider: " + provider.getName() + " with API version: " +
+                    provider.getApiVersion());
+        }
         String targetEndpoint = null;
         if (messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT) != null) {
             targetEndpoint = (String) messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT);
@@ -194,7 +196,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         }
 
         if (failoverConfigMap != null && !failoverConfigMap.isEmpty()) {
-            log.info("Initializing failover for provider: " + provider.getName());
+            if (log.isDebugEnabled()) {
+                log.debug("Initializing failover for provider: " + provider.getName());
+            }
             initFailover(messageContext, providerConfiguration, failoverConfigMap, provider);
         }
 
@@ -306,7 +310,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                     targetModelMetadata.getInputSource())) {
                 modifyRequestPath(failoverEndpoint.getModel(), targetModelMetadata, messageContext);
             } else {
-                log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
+                if (log.isDebugEnabled()) {
+                    log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
+                }
             }
 
             updateTargetEndpoint(messageContext, 1, failoverEndpoint);
@@ -392,14 +398,20 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
 
             if (!isProviderAzureV1) {
                 modifyRequestPayload(targetModelEndpoint.getModel(), targetModelMetadata, axis2Ctx);
-                log.debug("Modified request payload with model: " + targetModelEndpoint.getModel());
+                if (log.isDebugEnabled()) {
+                    log.debug("Modified request payload with model: " + targetModelEndpoint.getModel());
+                }
             }
         } else if (APIConstants.AIAPIConstants.INPUT_SOURCE_PATH.equalsIgnoreCase(
                 targetModelMetadata.getInputSource())) {
             modifyRequestPath(targetModelEndpoint.getModel(), targetModelMetadata, messageContext);
-            log.debug("Modified request path with model: " + targetModelEndpoint.getModel());
+            if (log.isDebugEnabled()) {
+                log.debug("Modified request path with model: " + targetModelEndpoint.getModel());
+            }
         } else {
-            log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
+            if (log.isDebugEnabled()) {
+                log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
+            }
         }
 
         messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, targetModelEndpoint.getEndpointId());
@@ -534,11 +546,15 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             java.util.regex.Matcher matcher = pattern.matcher(rawPath);
             if (matcher.find()) {
                 String model = matcher.group();
-                log.debug("Extracted request model from path: " + model);
+                if (log.isDebugEnabled()) {
+                    log.debug("Extracted request model from path: " + model);
+                }
                 return model;
             }
         } else {
-            log.debug("Unsupported input source for attribute: " + requestModelMetadata.getAttributeName());
+            if (log.isDebugEnabled()) {
+                log.debug("Unsupported input source for attribute: " + requestModelMetadata.getAttributeName());
+            }
         }
 
         return null;

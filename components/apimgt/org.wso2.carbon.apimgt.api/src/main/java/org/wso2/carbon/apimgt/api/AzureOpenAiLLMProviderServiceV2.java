@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
@@ -106,9 +107,11 @@ public class AzureOpenAiLLMProviderServiceV2 extends BuiltInLLMProviderService {
 
     /**
      * Get LLM Provider Authentication Configuration.
+     *
      * @return LLMProviderAuthenticationConfiguration
      */
     private static LLMProviderAuthenticationConfiguration getLlmProviderAuthenticationConfiguration() {
+
         LLMProviderAuthenticationConfiguration llmProviderAuthenticationConfiguration =
                 new LLMProviderAuthenticationConfiguration();
         llmProviderAuthenticationConfiguration.setType(APIConstants.AIAPIConstants.API_KEY_AUTHENTICATION_TYPE);
