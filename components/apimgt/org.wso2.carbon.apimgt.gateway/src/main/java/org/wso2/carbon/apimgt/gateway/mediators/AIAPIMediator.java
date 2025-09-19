@@ -191,7 +191,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         }
 
         if (failoverConfigMap != null && !failoverConfigMap.isEmpty()) {
-            initFailover(messageContext, providerConfiguration, failoverConfigMap, providerName);
+            initFailover(messageContext, providerConfiguration, failoverConfigMap);
         }
 
     }
@@ -203,14 +203,12 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param messageContext        The Synapse {@link MessageContext} containing API request details.
      * @param providerConfiguration The {@link LLMProviderConfiguration} containing provider-specific configurations.
      * @param failoverConfigMap     Map of failover configs
-     * @param providerName          LLM service provider name
      * @throws XMLStreamException If an error occurs while processing the XML message.
      * @throws IOException        If an I/O error occurs during payload handling.
      */
     private void initFailover(MessageContext messageContext,
                               LLMProviderConfiguration providerConfiguration,
-                              Map<String, FailoverPolicyConfigDTO> failoverConfigMap,
-                              String providerName)
+                              Map<String, FailoverPolicyConfigDTO> failoverConfigMap)
             throws XMLStreamException, IOException, APIManagementException {
 
         org.apache.axis2.context.MessageContext axis2Ctx =
@@ -220,17 +218,12 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         String requestModel = extractRequestModel(getTargetModelMetadata(providerConfiguration), axis2Ctx);
 
         FailoverPolicyConfigDTO failoverConfig;
-        boolean isProviderAzure =
-                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_NAME.equals(providerName);
-        if (isProviderAzure) {
-            failoverConfig = failoverConfigMap.values().iterator().next();
-        } else {
-            failoverConfig = failoverConfigMap.get(requestModel);
-            if (requestModel == null || failoverConfig == null) {
-                return;
-            }
+
+        failoverConfig = failoverConfigMap.get(requestModel);
+        if (requestModel == null || failoverConfig == null) {
+            return;
         }
-        applyFailoverConfigs(messageContext, failoverConfig, providerConfiguration, !isProviderAzure);
+        applyFailoverConfigs(messageContext, failoverConfig, providerConfiguration);
     }
 
     /**
@@ -256,13 +249,12 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param messageContext        The API request context.
      * @param policyConfig          The failover policy configuration.
      * @param providerConfiguration The LLM provider configuration.
-     * @param modifyRequestPayload  Whether to modify request payload or not
      * @throws IOException            If request modification fails.
      * @throws APIManagementException If an API management error occurs.
      */
     private void applyFailoverConfigs(MessageContext messageContext, FailoverPolicyConfigDTO policyConfig,
-                                      LLMProviderConfiguration providerConfiguration, boolean modifyRequestPayload)
-            throws IOException, APIManagementException {
+                                      LLMProviderConfiguration providerConfiguration)
+            throws IOException, APIManagementException, XMLStreamException {
 
         FailoverPolicyDeploymentConfigDTO targetConfig = GatewayUtils.getTargetConfig(messageContext, policyConfig);
         if (targetConfig == null) {
@@ -290,9 +282,21 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                 return;
             }
             ModelEndpointDTO failoverEndpoint = failoverEndpoints.get(0);
-            if (modifyRequestPayload) {
-                modifyRequestPayload(failoverEndpoint.getModel(), providerConfiguration, messageContext);
+
+            LLMProviderMetadata targetModelMetadata = getTargetModelMetadata(providerConfiguration);
+
+            if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(targetModelMetadata.getInputSource())) {
+                org.apache.axis2.context.MessageContext axis2Ctx =
+                        ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                RelayUtils.buildMessage(axis2Ctx);
+                modifyRequestPayload(failoverEndpoint.getModel(), targetModelMetadata, axis2Ctx);
+            } else if (APIConstants.AIAPIConstants.INPUT_SOURCE_PATH.equalsIgnoreCase(
+                    targetModelMetadata.getInputSource())) {
+                modifyRequestPath(failoverEndpoint.getModel(), targetModelMetadata, messageContext);
+            } else {
+                log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
             }
+
             updateTargetEndpoint(messageContext, 1, failoverEndpoint);
         }
         preserveFailoverPropertiesInMsgCtx(messageContext, policyConfig, targetModelEndpoint, failoverEndpoints);
@@ -455,18 +459,36 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
     private String getRequestModel(LLMProviderMetadata requestModelMetadata,
                                    org.apache.axis2.context.MessageContext axis2MessageContext) {
 
-        String contentType = (String) axis2MessageContext.getProperty(APIMgtGatewayConstants.REST_CONTENT_TYPE);
-        if (contentType == null) {
-            return null;
-        }
+        if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(
+                requestModelMetadata.getInputSource())) {
+            String contentType = (String) axis2MessageContext.getProperty(APIMgtGatewayConstants.REST_CONTENT_TYPE);
+            if (contentType == null) {
+                return null;
+            }
 
-        String normalizedContentType = contentType.toLowerCase();
-        if (isUnsupportedContentType(normalizedContentType)) {
-            return null;
-        }
+            String normalizedContentType = contentType.toLowerCase();
+            if (isUnsupportedContentType(normalizedContentType)) {
+                return null;
+            }
 
-        if (normalizedContentType.contains(MediaType.APPLICATION_JSON)) {
-            return extractRequestModelFromJson(requestModelMetadata, axis2MessageContext);
+            if (normalizedContentType.contains(MediaType.APPLICATION_JSON)) {
+                return extractRequestModelFromJson(requestModelMetadata, axis2MessageContext);
+            }
+        } else if (APIConstants.AIAPIConstants.INPUT_SOURCE_PATH.equalsIgnoreCase(
+                requestModelMetadata.getInputSource())) {
+            String requestPath = (String) axis2MessageContext.getProperty(NhttpConstants.REST_URL_POSTFIX);
+
+            URI uri = URI.create(requestPath);
+            String rawPath = uri.getRawPath();
+
+            String regex = requestModelMetadata.getAttributeIdentifier();
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
+            java.util.regex.Matcher matcher = pattern.matcher(rawPath);
+            if (matcher.find()) {
+                return matcher.group();
+            }
+        } else {
+            log.debug("Unsupported input source for attribute: " + requestModelMetadata.getAttributeName());
         }
 
         return null;
@@ -591,9 +613,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             return;
         }
         if (failoverConfigs != null) {
-            boolean isProviderAzure =
-                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_NAME.equals(providerName);
-            handleFailover(messageContext, providerConfigs, failoverConfigs, !isProviderAzure);
+            handleFailover(messageContext, providerConfigs, failoverConfigs);
             return;
         }
         messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
@@ -700,14 +720,12 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param messageContext        The message context containing request details.
      * @param providerConfiguration The configuration details of the LLM provider.
      * @param failoverConfigs       Failover Configurations
-     * @param modifyRequestPayload  Whether to modify request payload or not
      * @throws XMLStreamException If an error occurs while handling XML streams.
      * @throws IOException        If an I/O error occurs during processing.
      */
     private void handleFailover(MessageContext messageContext,
                                 LLMProviderConfiguration providerConfiguration,
-                                Map<String, Object> failoverConfigs,
-                                boolean modifyRequestPayload)
+                                Map<String, Object> failoverConfigs)
             throws XMLStreamException, IOException {
 
         int currentEndpointIndex = getCurrentFailoverIndex(messageContext);
@@ -738,10 +756,22 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         ModelEndpointDTO failoverEndpoint = failoverEndpoints.get(currentEndpointIndex);
         updateJsonPayloadWithRequestPayload(messageContext,
                 (String) failoverConfigs.get(APIConstants.AIAPIConstants.REQUEST_PAYLOAD));
-        if (modifyRequestPayload) {
-            modifyRequestPayload(failoverEndpoint.getModel(), providerConfiguration, messageContext);
-        }
+
+        LLMProviderMetadata targetModelMetadata = getTargetModelMetadata(providerConfiguration);
+
         updateRequestMetadata(messageContext, failoverConfigs);
+
+        if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(targetModelMetadata.getInputSource())) {
+            org.apache.axis2.context.MessageContext axis2Ctx =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            RelayUtils.buildMessage(axis2Ctx);
+            modifyRequestPayload(failoverEndpoint.getModel(), targetModelMetadata, axis2Ctx);
+        } else if (APIConstants.AIAPIConstants.INPUT_SOURCE_PATH.equalsIgnoreCase(
+                targetModelMetadata.getInputSource())) {
+            modifyRequestPath(failoverEndpoint.getModel(), targetModelMetadata, messageContext);
+        } else {
+            log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
+        }
 
         updateTargetEndpoint(messageContext, currentEndpointIndex + 1, failoverEndpoint);
     }
