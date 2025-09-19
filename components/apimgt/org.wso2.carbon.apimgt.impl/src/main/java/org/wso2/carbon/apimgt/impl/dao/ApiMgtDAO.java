@@ -5954,28 +5954,30 @@ public class ApiMgtDAO {
                 workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
                 workflowDTO.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
 
-                InputStream metadataBlob = rs.getBinaryStream("WF_METADATA");
-                InputStream wfProperties = rs.getBinaryStream("WF_PROPERTIES");
-
                 Gson gson = new Gson();
-                if (metadataBlob != null) {
-                    String metadata = APIMgtDBUtil.getStringFromInputStream(metadataBlob);
-                    JSONObject metadataJson = gson.fromJson(metadata, JSONObject.class);
-                    workflowDTO.setMetadata(metadataJson);
-                } else {
-                    JSONObject metadataJson = new JSONObject();
-                    workflowDTO.setMetadata(metadataJson);
+                try (InputStream metadataBlob = rs.getBinaryStream("WF_METADATA")) {
+                    if (metadataBlob != null) {
+                        String metadata = APIMgtDBUtil.getStringFromInputStream(metadataBlob);
+                        JSONObject metadataJson = gson.fromJson(metadata, JSONObject.class);
+                        workflowDTO.setMetadata(metadataJson);
+                    } else {
+                        JSONObject metadataJson = new JSONObject();
+                        workflowDTO.setMetadata(metadataJson);
+                    }
                 }
-                if (wfProperties != null) {
-                    String properties = APIMgtDBUtil.getStringFromInputStream(wfProperties);
-                    JSONObject propertiesJson = gson.fromJson(properties, JSONObject.class);
-                    workflowDTO.setProperties(propertiesJson);
-                } else {
-                    JSONObject propertiesJson = new JSONObject();
-                    workflowDTO.setProperties(propertiesJson);
+
+                try (InputStream wfProperties = rs.getBinaryStream("WF_PROPERTIES")) {
+                    if (wfProperties != null) {
+                        String properties = APIMgtDBUtil.getStringFromInputStream(wfProperties);
+                        JSONObject propertiesJson = gson.fromJson(properties, JSONObject.class);
+                        workflowDTO.setProperties(propertiesJson);
+                    } else {
+                        JSONObject propertiesJson = new JSONObject();
+                        workflowDTO.setProperties(propertiesJson);
+                    }
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Error while retrieving workflow details for " + workflowReference, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
@@ -18422,20 +18424,25 @@ public class ApiMgtDAO {
      */
     public InputStream getTenantTheme(int tenantId) throws APIManagementException {
 
-        InputStream tenantThemeContent = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.TenantThemeConstants.GET_TENANT_THEME)) {
             statement.setInt(1, tenantId);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                tenantThemeContent = resultSet.getBinaryStream("THEME");
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    try (InputStream tenantThemeContent = resultSet.getBinaryStream("THEME")) {
+                        if (tenantThemeContent != null) {
+                            byte[] tenantThemeContentBytes = IOUtils.toByteArray(tenantThemeContent);
+                            return new ByteArrayInputStream(tenantThemeContentBytes);
+                        }
+                    }
+                }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Failed to fetch tenant theme of tenant "
                     + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
-        return tenantThemeContent;
+        return null;
     }
 
     /**
@@ -18596,24 +18603,29 @@ public class ApiMgtDAO {
      * @throws APIManagementException If a database error occurs.
      */
     public InputStream getOrgTheme(String themeId, String organization) throws APIManagementException {
-        InputStream tenantThemeContent = null;
         String query = SQLConstants.DevPortalContentConstants.GET_THEME_ARTIFACT;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, themeId);
             statement.setString(2, DevPortalConstants.DRAFTED_ORG_THEME);
             statement.setString(3, DevPortalConstants.PUBLISHED_ORG_THEME);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                tenantThemeContent = resultSet.getBinaryStream(DevPortalConstants.ARTIFACT);
-            } else {
-                log.warn("User does not have the theme");
-                throw new APIManagementException(ExceptionCodes.USER_DOES_NOT_HAVE_THE_THEME);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    try (InputStream tenantThemeContent = resultSet.getBinaryStream(DevPortalConstants.ARTIFACT)) {
+                        if (tenantThemeContent != null) {
+                            byte[] tenantThemeContentBytes = IOUtils.toByteArray(tenantThemeContent);
+                            return new ByteArrayInputStream(tenantThemeContentBytes);
+                        }
+                    }
+                } else {
+                    log.warn("User does not have the theme");
+                    throw new APIManagementException(ExceptionCodes.USER_DOES_NOT_HAVE_THE_THEME);
+                }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Failed to get organization theme for organization " + organization, e);
         }
-        return tenantThemeContent;
+        return null;
     }
 
     /**
@@ -18980,24 +18992,29 @@ public class ApiMgtDAO {
      * @throws APIManagementException If a database error occurs.
      */
     public InputStream getApiTheme(String themeId, String organization, String apiId) throws APIManagementException {
-        InputStream tenantThemeContent = null;
         String query = SQLConstants.DevPortalContentConstants.GET_THEME_ARTIFACT;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, themeId);
             statement.setString(2, DevPortalConstants.DRAFTED_API_THEME);
             statement.setString(3, DevPortalConstants.PUBLISHED_API_THEME);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                tenantThemeContent = resultSet.getBinaryStream(DevPortalConstants.ARTIFACT);
-            } else {
-                log.warn("User does not have the theme");
-                throw new APIManagementException(ExceptionCodes.USER_DOES_NOT_HAVE_THE_THEME);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    try (InputStream tenantThemeContent = resultSet.getBinaryStream(DevPortalConstants.ARTIFACT)) {
+                        if (tenantThemeContent != null) {
+                            byte[] tenantThemeContentBytes = IOUtils.toByteArray(tenantThemeContent);
+                            return new ByteArrayInputStream(tenantThemeContentBytes);
+                        }
+                    }
+                } else {
+                    log.warn("User does not have the theme");
+                    throw new APIManagementException(ExceptionCodes.USER_DOES_NOT_HAVE_THE_THEME);
+                }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Failed to get API theme for API ID: " + apiId + " and Organization: " + organization, e);
         }
-        return tenantThemeContent;
+        return null;
     }
 
     /**

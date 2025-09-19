@@ -208,40 +208,72 @@ public class RestApiAdminUtils {
             throws APIManagementException, IOException {
 
         byte[] buffer = new byte[1024];
-        InputStream existingTenantTheme = null;
-        InputStream themeContent = null;
-        File tenantThemeDirectory;
-        File backupDirectory = null;
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
-
+        try (InputStream inputStream = themeContentInputStream) {
             APIAdmin apiAdmin = new APIAdminImpl();
+            
             //add or update the tenant theme in the database
             if (apiAdmin.isTenantThemeExist(tenantId)) {
-                existingTenantTheme = apiAdmin.getTenantTheme(tenantId);
-                apiAdmin.updateTenantTheme(tenantId, themeContentInputStream);
-            } else {
-                apiAdmin.addTenantTheme(tenantId, themeContentInputStream);
-            }
-            //retrieve the tenant theme from the database to import it to the file system
-            themeContent = apiAdmin.getTenantTheme(tenantId);
-
-            //import the tenant theme to the file system
-            String outputFolder = getTenantThemeDirectoryPath(tenantDomain);
-            tenantThemeDirectory = new File(outputFolder);
-            if (!tenantThemeDirectory.exists()) {
-                if (!tenantThemeDirectory.mkdirs()) {
-                    APIUtil.handleException("Unable to create tenant theme directory at " + outputFolder);
+                try (InputStream existingTenantTheme = apiAdmin.getTenantTheme(tenantId)) {
+                    apiAdmin.updateTenantTheme(tenantId, inputStream);
+                    
+                    //retrieve the tenant theme from the database to import it to the file system
+                    try (InputStream themeContent = apiAdmin.getTenantTheme(tenantId)) {
+                        importThemeToFileSystem(themeContent, tenantDomain, buffer);
+                    } catch (APIManagementException | IOException e) {
+                        //if an error occurs, revert the changes that were done when importing a tenant theme
+                        revertTenantThemeImportChanges(tenantDomain, existingTenantTheme);
+                        throw new APIManagementException(e.getMessage(), e,
+                                ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, e.getMessage()));
+                    }
                 }
             } else {
-                //copy the existing tenant theme as a backup in case a restoration is needed to take place
-                String tempPath = getTenantThemeBackupDirectoryPath(tenantDomain);
-                backupDirectory = new File(tempPath);
-                FileUtils.copyDirectory(tenantThemeDirectory, backupDirectory);
-                //remove existing files inside the directory
-                FileUtils.cleanDirectory(tenantThemeDirectory);
+                apiAdmin.addTenantTheme(tenantId, inputStream);
+                
+                //retrieve the tenant theme from the database to import it to the file system
+                try (InputStream themeContent = apiAdmin.getTenantTheme(tenantId)) {
+                    importThemeToFileSystem(themeContent, tenantDomain, buffer);
+                } catch (APIManagementException | IOException e) {
+                    //if an error occurs, revert the changes that were done when importing a tenant theme
+                    revertTenantThemeImportChanges(tenantDomain, null);
+                    throw new APIManagementException(e.getMessage(), e,
+                            ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, e.getMessage()));
+                }
             }
-            //get the zip file content
+        }
+    }
+
+    /**
+     * Imports the content of the provided tenant theme archive to the file system
+     *
+     * @param themeContent content relevant to the tenant theme
+     * @param tenantDomain tenant to which the theme is imported
+     * @param buffer       byte array used as a buffer when reading the zip content
+     * @throws APIManagementException if an error occurs while performing file or directory related operations
+     * @throws IOException            if an error occurs while performing file or directory related operations
+     */
+    private static void importThemeToFileSystem(InputStream themeContent, String tenantDomain, byte[] buffer)
+            throws APIManagementException, IOException {
+        File tenantThemeDirectory;
+        File backupDirectory = null;
+        
+        //import the tenant theme to the file system
+        String outputFolder = getTenantThemeDirectoryPath(tenantDomain);
+        tenantThemeDirectory = new File(outputFolder);
+        if (!tenantThemeDirectory.exists()) {
+            if (!tenantThemeDirectory.mkdirs()) {
+                APIUtil.handleException("Unable to create tenant theme directory at " + outputFolder);
+            }
+        } else {
+            //copy the existing tenant theme as a backup in case a restoration is needed to take place
+            String tempPath = getTenantThemeBackupDirectoryPath(tenantDomain);
+            backupDirectory = new File(tempPath);
+            FileUtils.copyDirectory(tenantThemeDirectory, backupDirectory);
+            //remove existing files inside the directory
+            FileUtils.cleanDirectory(tenantThemeDirectory);
+        }
+        //get the zip file content
         try (ZipInputStream zipInputStream = new ZipInputStream(themeContent)) {
             //get the zipped file list entry
             ZipEntry zipEntry = zipInputStream.getNextEntry();
@@ -285,18 +317,9 @@ public class RestApiAdminUtils {
                 zipEntry = zipInputStream.getNextEntry();
             }
             zipInputStream.closeEntry();
-            zipInputStream.close();
             if (backupDirectory != null) {
                 FileUtils.deleteDirectory(backupDirectory);
             }
-        } catch (APIManagementException | IOException e) {
-            //if an error occurs, revert the changes that were done when importing a tenant theme
-            revertTenantThemeImportChanges(tenantDomain, existingTenantTheme);
-            throw new APIManagementException(e.getMessage(), e,
-                    ExceptionCodes.from(ExceptionCodes.TENANT_THEME_IMPORT_FAILED, tenantDomain, e.getMessage()));
-        } finally {
-            IOUtils.closeQuietly(themeContent);
-            IOUtils.closeQuietly(themeContentInputStream);
         }
     }
 
