@@ -1193,7 +1193,7 @@ public class PublisherCommonUtils {
      * @param cryptoUtil               encryption utility
      * @param oldProductionApiKeyValue previous production key
      * @param oldSandboxApiKeyValue    previous sandbox key
-     * @param apiDtoTypeWrapper            APIDTOWrapper to update can be aither APIDTO or MCPServerDTO
+     * @param apiDtoTypeWrapper        APIDTOWrapper to update can be either APIDTO or MCPServerDTO
      * @throws CryptoException        on encryption failure
      * @throws APIManagementException on invalid config or missing key
      */

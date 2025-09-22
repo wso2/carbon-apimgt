@@ -1287,6 +1287,9 @@ public class ImportUtils {
             String extractedFolderPath, String organization) throws APIManagementException {
 
         String apiUUID = api.getUuid();
+        if (log.isDebugEnabled()) {
+            log.debug("Populating API: " + apiUUID + " with endpoints");
+        }
         try {
             // Retrieve endpoints from artifact
             String jsonContent = getFileContentAsJson(
@@ -1312,13 +1315,16 @@ public class ImportUtils {
                         PublisherCommonUtils.encryptEndpointSecurityApiKeyCredentials(
                                 apiEndpointInfo.getEndpointConfig(), CryptoUtil.getDefaultCryptoUtil(),
                                 StringUtils.EMPTY, StringUtils.EMPTY, new APIDTOTypeWrapper(importedApiDTO));
+                        if (log.isDebugEnabled()) {
+                            log.debug("Encrypted endpoint security credentials for endpoint: " + endpointUUID);
+                        }
 
                         try {
                             String createdEndpointUUID = provider.addAPIEndpoint(apiUUID, apiEndpointInfo,
                                     organization);
                             if (log.isDebugEnabled()) {
-                                log.debug("API Endpoint with UUID: " + createdEndpointUUID +
-                                        " has been added to the API");
+                                log.debug(
+                                        "Successfully added endpoint with UUID: " + createdEndpointUUID + " for API: " + apiUUID);
                             }
                         } catch (APIManagementException e) {
                             throw new APIManagementException(

@@ -815,7 +815,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Endpoint URL is invalid"),
     INVALID_MEDIA_TYPE_VALIDATION(902050, "Invalid or mismatched media type detected.", 415,
             "File extension '%s' does not match detected MIME type '%s'"),
-    ERROR_ENCRYPTING_ENDPOINT_SECURITY(902051, "Error while encrypting the endpoint security details", 500,
+    ERROR_ENCRYPTING_ENDPOINT_SECURITY(902055, "Error while encrypting the endpoint security details", 500,
             "Error while encrypting the endpoint security details. %s", true),
 
     // Guardrail related codes
