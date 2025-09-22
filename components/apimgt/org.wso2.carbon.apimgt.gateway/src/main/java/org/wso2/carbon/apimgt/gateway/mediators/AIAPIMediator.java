@@ -153,7 +153,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      *
      * @param messageContext        The message context of the request.
      * @param providerConfiguration The configuration of the LLM provider.
-     * @param provider          LLM Service provider
+     * @param provider              LLM Service provider
      * @throws XMLStreamException If an error occurs while processing the XML stream.
      * @throws IOException        If an I/O error occurs.
      */
@@ -180,7 +180,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             roundRobinConfigs =
                     (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.ROUND_ROBIN_CONFIGS);
             handleLoadBalancing(messageContext, providerConfiguration, roundRobinConfigs, provider);
-            log.debug("Load balancing configured, processing with round-robin configurations");
+            if (log.isDebugEnabled()) {
+                log.debug("Load balancing configured, processing with round-robin configurations");
+            }
             return;
         }
 
@@ -211,7 +213,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param messageContext        The Synapse {@link MessageContext} containing API request details.
      * @param providerConfiguration The {@link LLMProviderConfiguration} containing provider-specific configurations.
      * @param failoverConfigMap     Map of failover configs
-     * @param provider LLM service provider
+     * @param provider              LLM service provider
      * @throws XMLStreamException If an error occurs while processing the XML message.
      * @throws IOException        If an I/O error occurs during payload handling.
      */
@@ -262,9 +264,10 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param messageContext        The API request context.
      * @param policyConfig          The failover policy configuration.
      * @param providerConfiguration The LLM provider configuration.
-     * @param modifyRequestPayload Whether to modify request payload or not
+     * @param modifyRequestPayload  Whether to modify request payload or not
      * @throws IOException            If request modification fails.
      * @throws APIManagementException If an API management error occurs.
+     * @throws XMLStreamException     If an error occurs while processing the XML message.
      */
     private void applyFailoverConfigs(MessageContext messageContext, FailoverPolicyConfigDTO policyConfig,
                                       LLMProviderConfiguration providerConfiguration, boolean modifyRequestPayload)
@@ -372,7 +375,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param messageContext
      * @param providerConfiguration The {@link LLMProviderConfiguration} containing provider-specific configurations.
      * @param roundRobinConfigs     The target model for which load balancing is applied.
-     * @param provider LLM service provider
+     * @param provider              LLM service provider
      * @throws XMLStreamException If an error occurs while processing the XML message.
      * @throws IOException        If an I/O error occurs during request modification.
      */
@@ -622,7 +625,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param providerConfigs    The configuration of the LLM provider.
      * @param llmProviderService The service handling LLM provider operations.
      * @param metadataMap        A map containing metadata information.
-     * @param provider       LLM service provider
+     * @param provider           LLM service provider
      * @throws APIManagementException If an API management error occurs.
      * @throws XMLStreamException     If an error occurs while processing the XML stream.
      * @throws IOException            If an I/O error occurs.
@@ -798,7 +801,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param messageContext        The message context containing request details.
      * @param providerConfiguration The configuration details of the LLM provider.
      * @param failoverConfigs       Failover Configurations
-     * @param modifyRequestPayload Whether to modify request payload or not
+     * @param modifyRequestPayload  Whether to modify request payload or not
      * @throws XMLStreamException If an error occurs while handling XML streams.
      * @throws IOException        If an I/O error occurs during processing.
      */
@@ -852,7 +855,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                 targetModelMetadata.getInputSource())) {
             modifyRequestPath(failoverEndpoint.getModel(), targetModelMetadata, messageContext);
         } else {
-            log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
+            if (log.isDebugEnabled()){
+                log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
+            }
         }
 
         updateTargetEndpoint(messageContext, currentEndpointIndex + 1, failoverEndpoint);
