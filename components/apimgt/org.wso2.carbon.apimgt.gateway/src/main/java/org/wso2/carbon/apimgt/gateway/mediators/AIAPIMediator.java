@@ -301,6 +301,10 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             ModelEndpointDTO failoverEndpoint = failoverEndpoints.get(0);
 
             LLMProviderMetadata targetModelMetadata = getTargetModelMetadata(providerConfiguration);
+            if (targetModelMetadata == null) {
+                log.error("Target model metadata is null. Cannot apply failover request modifications.");
+                return;
+            }
 
             if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(targetModelMetadata.getInputSource())) {
                 org.apache.axis2.context.MessageContext axis2Ctx =
