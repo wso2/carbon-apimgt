@@ -1307,8 +1307,7 @@ public class ImportUtils {
                     JsonArray endpoints = endpointsJson.getAsJsonArray();
                     for (JsonElement endpointElement : endpoints) {
                         JsonObject endpointObj = endpointElement.getAsJsonObject();
-                        APIEndpointInfo apiEndpointInfo =
-                                new Gson().fromJson(endpointObj, APIEndpointInfo.class);
+                        APIEndpointInfo apiEndpointInfo = new Gson().fromJson(endpointObj, APIEndpointInfo.class);
                         String endpointUUID = apiEndpointInfo.getId();
 
                         try {
@@ -1318,18 +1317,19 @@ public class ImportUtils {
                             Map endpointConfig = apiEndpointInfo.getEndpointConfig();
                             if (endpointConfig != null) {
                                 // Encrypt endpoint security credentials
-                                PublisherCommonUtils.encryptApiKeyInternal(
-                                        endpointConfig, CryptoUtil.getDefaultCryptoUtil(), StringUtils.EMPTY,
-                                        StringUtils.EMPTY, apiEndpointInfo::setEndpointConfig
-                                );
+                                PublisherCommonUtils.encryptApiKeyInternal(endpointConfig,
+                                        CryptoUtil.getDefaultCryptoUtil(), StringUtils.EMPTY, StringUtils.EMPTY,
+                                        apiEndpointInfo::setEndpointConfig);
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Successfully encrypted endpoint security credentials for endpoint: " + endpointUUID);
+                                    log.debug(
+                                            "Successfully encrypted endpoint security credentials for endpoint: " +
+                                                    endpointUUID);
                                 }
                             }
                         } catch (APIManagementException | CryptoException e) {
                             throw new APIManagementException(
-                                    "Error while encrypting endpoint security credentials for endpoint: "
-                                            + endpointUUID + " of API: " + apiUUID,
+                                    "Error while encrypting endpoint security credentials for endpoint: " +
+                                            endpointUUID + " of API: " + apiUUID,
                                     e, ExceptionCodes.from(ExceptionCodes.ERROR_ENCRYPTING_ENDPOINT_SECURITY,
                                     endpointUUID));
                         }
@@ -1339,13 +1339,12 @@ public class ImportUtils {
                                     organization);
                             if (log.isDebugEnabled()) {
                                 log.debug(
-                                        "Successfully added endpoint with UUID: " + createdEndpointUUID + " for API: " + apiUUID);
+                                        "Successfully added endpoint with UUID: " + createdEndpointUUID +
+                                                " for API: " + apiUUID);
                             }
                         } catch (APIManagementException e) {
-                            throw new APIManagementException(
-                                    "Error while adding API Endpoint with ID: " + endpointUUID,
-                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINT,
-                                    endpointUUID));
+                            throw new APIManagementException("Error while adding API Endpoint with ID: " + endpointUUID,
+                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINT, endpointUUID));
                         }
                     }
                 }
