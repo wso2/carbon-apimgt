@@ -18,6 +18,7 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.security.PrivateKey;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -65,11 +66,25 @@ public class InternalAPIKeyGenerator implements ApiKeyGenerator {
         if (expireIn != -1) {
             jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.EXPIRY_TIME, expireIn);
         }
-        jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS,
-                jwtTokenInfoDTO.getSubscribedApiDTOList());
+        if (jwtTokenInfoDTO.getSubscribedApiDTOList() != null &&
+                !jwtTokenInfoDTO.getSubscribedApiDTOList().isEmpty()) {
+            jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS,
+                    jwtTokenInfoDTO.getSubscribedApiDTOList());
+        }
         jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.KEY_TYPE, jwtTokenInfoDTO.getKeyType());
         jwtClaimsSetBuilder.claim(APIConstants.JwtTokenConstants.TOKEN_TYPE,
                 APIConstants.JwtTokenConstants.INTERNAL_KEY_TOKEN_TYPE);
+
+        Map<String, String> custom = jwtTokenInfoDTO.getCustomClaims();
+        if (custom != null) {
+            for (Map.Entry<String, String> entry : custom.entrySet()) {
+                String key = entry.getKey();
+                if (APIConstants.JwtTokenConstants.RESERVED_CLAIMS.contains(key)) {
+                    continue;
+                }
+                jwtClaimsSetBuilder.claim(key, entry.getValue());
+            }
+        }
         return jwtClaimsSetBuilder.build();
     }
 

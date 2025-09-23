@@ -294,6 +294,7 @@ public final class APIConstants {
     // Those constance are used in API artifact.
     public static final String API_OVERVIEW_NAME = "overview_name";
     public static final String API_OVERVIEW_TYPE = "overview_type";
+    public static final String API_OVERVIEW_DISPLAY_NAME = "overview_displayName";
     public static final String API_OVERVIEW_VERSION = "overview_version";
     public static final String API_OVERVIEW_VERSION_COMPARABLE = "overview_versionComparable";
     public static final String API_OVERVIEW_VERSION_TYPE = "overview_versionType";
@@ -464,6 +465,7 @@ public final class APIConstants {
     public static final String JWT_DECODING = "JWTDecoding";
     public static final String ENABLE_USER_CLAIMS = "EnableUserClaims";
     public static final String BINDING_FEDERATED_USER_CLAIMS = "EnableBindingFederatedUserClaims";
+    public static final String BINDING_FEDERATED_USER_CLAIMS_FOR_OPAQUE = "EnableBindingFederatedUserClaimsForOpaque";
     public static final String TOKEN_GENERATOR_IMPL = "JWTGeneratorImpl";
     public static final String ENABLE_JWT_GENERATION = "EnableJWTGeneration";
     public static final String Enable_JWKS_API = "EnableJWKSApi";
@@ -525,6 +527,8 @@ public final class APIConstants {
     public static final String DEVPORTAL_MODE_HYBRID = "HYBRID";
     public static final String DEVPORTAL_MODE_MCP_ONLY = "MCP_ONLY";
     public static final String DEVPORTAL_MODE_API_ONLY = "API_ONLY";
+    public static final String FAILOVER_IN_LOADBALANCED_ENDPOINTS_PROPERTY = "enableFailoverInLoadbalancedEndpoints";
+    public static final String ENABLE_FAILOVER_IN_LOADBALANCED_ENDPOINTS = "EnableFailoverInLoadbalancedEndpoints";
 
     public static final Set<String> DEVPORTAL_MODES = Set.of(
             DEVPORTAL_MODE_HYBRID,
@@ -532,6 +536,7 @@ public final class APIConstants {
             DEVPORTAL_MODE_API_ONLY
     );
 
+    public static final String API_REVISION_CURRENT_API = "Current API";
 
     public static class AWSConstants{
         // AWS S4 Constants
@@ -949,6 +954,8 @@ public final class APIConstants {
         public static final String CONFIGURE_GOVERNANCE = "/permission/admin/configure/governance";
         public static final String RESOURCE_GOVERN = "/permission/admin/manage/resources/govern";
 
+        public static final String TENANT_MANAGE_MODIFY = "/permission/protected/manage/modify";
+
         private Permissions() {
 
         }
@@ -982,6 +989,7 @@ public final class APIConstants {
     public static final String API_GATEWAY_PROVIDER = "Provider";
     public static final String API_GATEWAY_ADDITIONAL_PROPERTIES = "Properties";
     public static final String API_GATEWAY_ADDITIONAL_PROPERTY = "Property";
+    public static final String API_RUNTIME_READ_ONLY = "ReadOnly";
 
 
     public static final String CACHE_CONFIGS = "CacheConfigurations.";
@@ -1078,6 +1086,9 @@ public final class APIConstants {
     public static final String API_RESTAPI_ETAG_SKIP_URI = API_RESTAPI_ETAG_SKIP_LIST + "ETagSkipURI.";
     public static final String API_RESTAPI_ETAG_SKIP_URI_URI = API_RESTAPI_ETAG_SKIP_URI + "URI";
     public static final String API_RESTAPI_ETAG_SKIP_URI_HTTPMETHOD = API_RESTAPI_ETAG_SKIP_URI + "HTTPMethods";
+    public static final String API_RESTAPI_ADMIN_PERMISSION_RESTRICTED = API_RESTAPI + "AdminPermissionRestrictedAPIs.AdminPermissionRestrictedAPI.";
+    public static final String API_RESTAPI_ADMIN_PERMISSION_RESTRICTED_URI = API_RESTAPI_ADMIN_PERMISSION_RESTRICTED + "URI";
+    public static final String API_RESTAPI_ADMIN_PERMISSION_RESTRICTED_HTTPMethods = API_RESTAPI_ADMIN_PERMISSION_RESTRICTED + "HTTPMethods";
 
     public static final String JWT_EXPIRY_TIME = API_KEY_VALIDATOR + "JWTExpiryTime";
     public static final String JWT_AUDIENCES = "JWTAudiences";
@@ -1799,6 +1810,7 @@ public final class APIConstants {
     public static final String KEYMANAGER_SERVERURL = API_KEY_VALIDATOR + "ServerURL";
     public static final String CARBON_LOCALIP = "carbon.local.ip";
     public static final String HTTPS_TRANSPORT_PORT = "https.transport.port";
+    public static final String ENABLE_MCP_SUPPORT = "enableMCPSupport";
 
     public static final String APIPROVIDER_HOSTCACHE = "apiProvideHostObjectCache";
     public static final String TENANTCOUNT_CACHEKEY = "apiProviderCacheKey";
@@ -2571,6 +2583,8 @@ public final class APIConstants {
         public static final String DECODING_ALGORITHM_BASE64URL = "base64url";
         public static final String APP_DOMAIN = "app_td";
         public static final String USER_DOMAIN = "user_td";
+        public static final Set<String> RESERVED_CLAIMS =
+                Set.of("sub","iss","aud","exp","iat","jti","azp","nbf","scope","scp","aut","typ","alg");
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
@@ -3211,7 +3225,7 @@ public final class APIConstants {
         public static final String GATEWAY_INSTRUCTION_REMOVE = "Remove";
         public static final String GATEWAY_INSTRUCTION_ANY = "ANY";
         public static final String SYNAPSE_ATTRIBUTES = "/synapse-attributes";
-        public static final String GATEAY_SYNAPSE_ARTIFACTS = "/runtime-artifacts";
+        public static final String GATEWAY_SYNAPSE_ARTIFACTS = "/runtime-artifacts";
         public static final String GATEWAY_POLICY_SYNAPSE_ARTIFACTS = "/gateway-policy-artifacts";
         public static final String DATA_SOURCE_NAME = "DataSourceName";
         public static final String DATA_RETRIEVAL_MODE = "DataRetrievalMode";
@@ -3684,6 +3698,8 @@ public final class APIConstants {
         public static final String HEADER_ACCEPT = "Accept";
         public static final String HEADER_MCP_SESSION_ID = "Mcp-Session-Id";
         public static final String ACCEPT_JSON_AND_SSE = "application/json, text/event-stream";
+        public static final String MCP_FAILURE_HANDLER = "_mcp_failure_handler_";
+        public static final String RECEIVED_MCP_ID = "RECEIVED_MCP_ID";
 
         // JSON keys used in payloads
         public static final String CAPABILITIES_KEY = "capabilities";
@@ -3704,6 +3720,8 @@ public final class APIConstants {
 
         // SSE parsing
         public static final String SSE_DATA_PREFIX = "data:";
+
+        public static final String MCP_AUTH_CLAIM = "MCP_AUTHENTICATED";
 
         /**
          * This class contains constants used for RPC processing

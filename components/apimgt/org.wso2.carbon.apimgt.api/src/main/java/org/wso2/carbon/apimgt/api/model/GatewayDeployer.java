@@ -43,6 +43,7 @@ public interface GatewayDeployer {
 
     /**
      * This method returns the type of Gateway
+     *
      * @return gateway type
      */
     String getType();
@@ -50,11 +51,19 @@ public interface GatewayDeployer {
     /**
      * Deploy API artifact to provided environment in the external gateway
      *
-     * @param api API to be deployed into in the external gateway
+     * @param api               API to be deployed into in the external gateway
      * @param externalReference reference artifact
      * @throws APIManagementException if error occurs when deploying APIs to in the external gateway
      */
     String deploy(API api, String externalReference) throws APIManagementException;
+
+    /**
+     * @param externalReference reference artifact
+     * @throws APIManagementException if error occurs when un-deploying APIs from external gateway
+     * @deprecated Use {@link #undeploy(String, boolean)} instead.
+     * Undeploy API artifact from provided environment
+     */
+    boolean undeploy(String externalReference) throws APIManagementException;
 
     /**
      * Undeploy API artifact from provided environment
@@ -62,7 +71,11 @@ public interface GatewayDeployer {
      * @param externalReference reference artifact
      * @throws APIManagementException if error occurs when un-deploying APIs from external gateway
      */
-    boolean undeploy(String externalReference) throws APIManagementException;
+    default boolean undeploy(String externalReference, boolean delete) throws APIManagementException {
+        // Backward-compat: fall back to the legacy method if implementers haven't overridden the delete-aware API.
+        return undeploy(externalReference);
+    }
+
 
     /**
      * This method returns the validation result of a given API with the external gateway
@@ -82,7 +95,7 @@ public interface GatewayDeployer {
      * This method returns the resolved API execution URL by replacing all placeholders appropriately
      *
      * @param externalReference reference artifact
-     * @param httpScheme HTTP scheme to use for the URL
+     * @param httpScheme        HTTP scheme to use for the URL
      * @return String api execution url
      * @throws APIManagementException if an error occurs when resolving the API execution URL
      */
@@ -90,7 +103,6 @@ public interface GatewayDeployer {
         // Backward-compat: fall back to the legacy method if implementers haven't overridden the scheme-aware API.
         return getAPIExecutionURL(externalReference);
     }
-
 
 
     /**

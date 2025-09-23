@@ -73,7 +73,6 @@ import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.MonetizationConfigurationDto;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -93,6 +92,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_RUNTIME_READ_ONLY;
 import static org.wso2.carbon.apimgt.impl.APIConstants.SHA_256;
 
 /**
@@ -177,6 +177,7 @@ public class APIManagerConfiguration {
     private boolean isTransactionCounterEnabled;
     private static boolean isMCPSupportEnabled = true;
     private static String devportalMode = APIConstants.DEVPORTAL_MODE_HYBRID;
+    private static volatile boolean isRuntimeReadOnly = false;
 
     public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
@@ -185,6 +186,14 @@ public class APIManagerConfiguration {
     public Map<String, ExtensionListener> getExtensionListenerMap() {
 
         return extensionListenerMap;
+    }
+
+    public boolean isRuntimeReadOnly() {
+        return isRuntimeReadOnly;
+    }
+
+    public void setRuntimeReadOnly(boolean runtimeReadOnly) {
+        this.isRuntimeReadOnly = runtimeReadOnly;
     }
 
     private Map<String, ExtensionListener> extensionListenerMap = new HashMap<>();
@@ -370,7 +379,9 @@ public class APIManagerConfiguration {
             OMElement element = (OMElement) childElements.next();
             String localName = element.getLocalName();
             nameStack.push(localName);
-            if ("APIKeyValidator".equals(localName)) {
+            if (API_RUNTIME_READ_ONLY.equals(localName)) {
+                    isRuntimeReadOnly = Boolean.parseBoolean(element.getText());
+            } else if ("APIKeyValidator".equals(localName)) {
                 OMElement keyManagerServiceUrl = element.getFirstChildWithName(new QName(APIConstants.AUTHSERVER_URL));
                 if (keyManagerServiceUrl != null) {
                     String serviceUrl = keyManagerServiceUrl.getText();
@@ -2119,6 +2130,20 @@ public class APIManagerConfiguration {
                     omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));
             if (jwtUserClaimsElement != null) {
                 jwtConfigurationDto.setEnableUserClaims(Boolean.parseBoolean(jwtUserClaimsElement.getText()));
+                OMElement isBindFederatedUserClaimsForOpaque =
+                        omElement.getFirstChildWithName(new QName(APIConstants.BINDING_FEDERATED_USER_CLAIMS_FOR_OPAQUE));
+                if (isBindFederatedUserClaimsForOpaque != null) {
+                    boolean bindValue = Boolean.parseBoolean(isBindFederatedUserClaimsForOpaque.getText());
+                    jwtConfigurationDto.setBindFederatedUserClaimsForOpaque(bindValue);
+                    if (log.isDebugEnabled()) {
+                        log.debug("BindFederatedUserClaimsForOpaque configuration element found. Value = " +
+                                bindValue);
+                    }
+                } else {
+                    jwtConfigurationDto.setBindFederatedUserClaimsForOpaque(false);
+                    log.debug("BindFederatedUserClaimsForOpaque configuration element not found. " +
+                            "Defaulting to false.");
+                }
             }
             OMElement enableTenantBaseSigningElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_TENANT_BASE_SIGNING));
@@ -3046,8 +3071,8 @@ public class APIManagerConfiguration {
                 omElement.getFirstChildWithName(new QName(APIConstants.AI.MCP_SUPPORT_ENABLED));
         if (mcpServerConfigElement != null
                 && StringUtils.isNotEmpty(mcpServerConfigElement.getText())) {
-
             isMCPSupportEnabled = Boolean.parseBoolean(mcpServerConfigElement.getText().trim());
+            System.setProperty(APIConstants.ENABLE_MCP_SUPPORT, Boolean.toString(isMCPSupportEnabled));
         }
     }
 

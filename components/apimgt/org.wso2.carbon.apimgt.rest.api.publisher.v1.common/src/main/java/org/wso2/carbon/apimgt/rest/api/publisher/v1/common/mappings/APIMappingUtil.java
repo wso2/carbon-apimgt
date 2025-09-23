@@ -18,7 +18,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.apicurio.datamodels.Library;
@@ -166,6 +165,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -226,6 +226,7 @@ public class APIMappingUtil {
         context = updateContextWithVersion(dto.getVersion(), originalContext, context);
         model.setContext(context);
         model.setDescription(dto.getDescription());
+        model.setDisplayName(dto.getDisplayName());
 
         Object endpointConfig = dto.getEndpointConfig();
         if (endpointConfig != null) {
@@ -394,6 +395,9 @@ public class APIMappingUtil {
             model.setAccessControl(APIConstants.NO_ACCESS_CONTROL);
             model.setAccessControlRoles("null");
         } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Setting access control roles for API: " + apiId);
+            }
             model.setAccessControlRoles(StringUtils.join(accessControlRoles, ',').toLowerCase());
             model.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY);
         }
@@ -1129,6 +1133,7 @@ public class APIMappingUtil {
         apiInfoDTO.setEgress(api.isEgress() == 1); // true -1, false - 0
         apiInfoDTO.setSubtype(api.getSubtype());
         apiInfoDTO.setInitiatedFromGateway(api.isInitiatedFromGateway());
+        apiInfoDTO.setDisplayName(api.getDisplayName() != null ? api.getDisplayName() : api.getId().getApiName());
         return apiInfoDTO;
     }
 
@@ -2139,6 +2144,7 @@ public class APIMappingUtil {
         }
         MCPServerDTO dto = new MCPServerDTO();
         dto.setName(model.getId().getApiName());
+        dto.setDisplayName(model.getDisplayName() != null ? model.getDisplayName() : model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
         String providerName = model.getId().getProviderName();
         dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
@@ -2450,7 +2456,6 @@ public class APIMappingUtil {
         subtypeConfigurationDTO.setSubtype(model.getSubtype());
         dto.setSubtypeConfiguration(subtypeConfigurationDTO);
         dto.setInitiatedFromGateway(model.isInitiatedFromGateway());
-        dto.setDisplayName(model.getDisplayName());
         String protocolVersion = model.getMetadata() != null
                 ? model.getMetadata().get(APIConstants.MCP.PROTOCOL_VERSION_KEY) : null;
         if (protocolVersion != null) {
@@ -3548,6 +3553,8 @@ public class APIMappingUtil {
             MCPServerOperationDTO operationsDTO = getMCPServerOperationFromURITemplate(uriTemplate);
             operationsDTOList.add(operationsDTO);
         }
+        operationsDTOList.sort(Comparator.comparing(MCPServerOperationDTO::getTarget,
+                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
         return operationsDTOList;
     }
 
@@ -3851,6 +3858,12 @@ public class APIMappingUtil {
             if (apiProduct.getApiSecurity() != null) {
                 productDto.setSecurityScheme(Arrays.asList(apiProduct.getApiSecurity().split(",")));
             }
+            if (apiProduct.getCreatedTime() != null) {
+                productDto.setCreatedTime(String.valueOf(apiProduct.getCreatedTime().getTime()));
+            }
+            if (apiProduct.getLastUpdated() != null) {
+                productDto.setUpdatedTime(String.valueOf(apiProduct.getLastUpdated().getTime()));
+            }
             if (apiProduct.getAudiences() != null) {
                 productDto.setAudiences(new ArrayList<>(apiProduct.getAudiences()));
             }
@@ -3859,6 +3872,8 @@ public class APIMappingUtil {
             productDto.setTechnicalOwner(apiProduct.getTechnicalOwner());
             productDto.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
             productDto.setMonetizedInfo(apiProduct.isMonetizationEnabled());
+            productDto.setDisplayName(
+                    apiProduct.getDisplayName() != null ? apiProduct.getDisplayName() : apiProduct.getId().getName());
             productDto.setEgress(apiProduct.isEgress() == 1);
 
             list.add(productDto);
@@ -3897,6 +3912,8 @@ public class APIMappingUtil {
         APIProductDTO productDto = new APIProductDTO();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         productDto.setName(product.getId().getName());
+        productDto.setDisplayName(
+                product.getDisplayName() != null ? product.getDisplayName() : product.getId().getName());
         productDto.setProvider(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
         productDto.setId(product.getUuid());
         productDto.setVersion(product.getId().getVersion());
@@ -4162,6 +4179,7 @@ public class APIMappingUtil {
         product.setID(id);
         product.setUuid(dto.getId());
         product.setDescription(dto.getDescription());
+        product.setDisplayName(dto.getDisplayName() != null ? dto.getDisplayName() : dto.getName());
 
         String context = dto.getContext();
         final String originalContext = context;
@@ -4739,56 +4757,81 @@ public class APIMappingUtil {
         return handleEndpointSecurity(endpointSecurity);
     }
 
-    private static JSONObject handleEndpointSecurity(JSONObject endpointSecurity) {
+    private static JSONObject handleEndpointSecurity(JSONObject endpointSecurity) throws APIManagementException {
 
-        JSONObject endpointSecurityElement = new JSONObject();
-        endpointSecurityElement.putAll(endpointSecurity);
-        if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
-            JSONObject sandboxEndpointSecurity = new JSONObject(
-                    (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX));
-            if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase((String) sandboxEndpointSecurity
-                    .get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
-                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
+        try {
+            JSONObject endpointSecurityElement = new JSONObject();
+            endpointSecurityElement.putAll(endpointSecurity);
+            if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                JSONObject sandboxEndpointSecurity = new JSONObject(
+                        (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX));
+                if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase((String) sandboxEndpointSecurity
+                        .get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
+                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, StringUtils.EMPTY);
+                }
+                if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
+                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, StringUtils.EMPTY);
+                }
+                if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
+                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, StringUtils.EMPTY);
+                }
+                if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null) {
+                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, StringUtils.EMPTY);
+                }
+                Object customParamsObj =
+                        sandboxEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                if (customParamsObj != null) {
+                    if (customParamsObj instanceof String) {
+                        customParamsObj = new JSONParser().parse(customParamsObj.toString());
+                    } else if (customParamsObj instanceof Map) {
+                        customParamsObj = new JSONObject((Map) customParamsObj);
+                    }
+                    maskSecretCustomParameters((JSONObject) customParamsObj);
+                    sandboxEndpointSecurity.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS,
+                            customParamsObj);
+                }
+                endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, sandboxEndpointSecurity);
             }
-            if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
-                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
+            if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                JSONObject productionEndpointSecurity = new JSONObject(
+                        (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION));
+                if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase((String) productionEndpointSecurity
+                        .get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
+                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, StringUtils.EMPTY);
+                }
+                if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
+                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, StringUtils.EMPTY);
+                }
+                if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
+                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, StringUtils.EMPTY);
+                }
+                if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null) {
+                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, StringUtils.EMPTY);
+                }
+                Object customParamsObj =
+                        productionEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                if (customParamsObj != null) {
+                    if (customParamsObj instanceof String) {
+                        customParamsObj = new JSONParser().parse(customParamsObj.toString());
+                    } else if (customParamsObj instanceof Map) {
+                        customParamsObj = new JSONObject((Map) customParamsObj);
+                    }
+                    maskSecretCustomParameters((JSONObject) customParamsObj);
+                    productionEndpointSecurity.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS,
+                            customParamsObj);
+                }
+                endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
             }
-            if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
-                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
-            }
-            if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null) {
-                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, "");
-            }
-            Object customParamsObj = sandboxEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
-            if (customParamsObj instanceof JSONObject) {
-                maskSecretCustomParameters((JSONObject) customParamsObj);
-            }
-            endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, sandboxEndpointSecurity);
+            return endpointSecurityElement;
+        } catch (ParseException e) {
+            String errorMsg = "Error while parsing custom OAuth parameters in endpoint security configuration.";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e);
+        } catch (ClassCastException e) {
+            String errorMsg = "Error while handling custom OAuth parameters; expected a JSON object.";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e);
         }
-        if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
-            JSONObject productionEndpointSecurity = new JSONObject(
-                    (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION));
-            if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase((String) productionEndpointSecurity
-                    .get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
-                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
-            }
-            if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
-                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
-            }
-            if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
-                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
-            }
-            if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null) {
-                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, "");
-            }
-            Object customParamsObj =
-                    productionEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
-            if (customParamsObj instanceof JSONObject) {
-                maskSecretCustomParameters((JSONObject) customParamsObj);
-            }
-            endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
-        }
-        return endpointSecurityElement;
     }
 
     /**
@@ -4838,6 +4881,9 @@ public class APIMappingUtil {
                                         CryptoUtil cryptoUtil) throws CryptoException, ParseException {
 
         Object sectionObj = endpointSecurityElement.get(sectionKey);
+
+        // In endpoint retrieval path, the sectionObj is a Map. In API/MCP retrieval path, it is a JSONObject.
+        // Using instanceof Map to handle both cases.
         if (sectionObj instanceof Map) {
             @SuppressWarnings("unchecked")
             JSONObject deploymentStage = new JSONObject((Map<String, Object>) sectionObj);
@@ -4857,13 +4903,21 @@ public class APIMappingUtil {
                 deploymentStage.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY,
                         new String(cryptoUtil.base64DecodeAndDecrypt(awsSecretKeyValue)));
             }
-            String customParamsStr = (String) deploymentStage.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
-            if (StringUtils.isNotEmpty(customParamsStr) && !"{}".equals(customParamsStr)) {
-                JSONParser parser = new JSONParser();
-                JSONObject customParams = (JSONObject) parser.parse(customParamsStr);
-                decryptCustomOauthParameters(customParams, cryptoUtil);
-                deploymentStage.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParams);
+
+            // In the API/MCP retrieval path, custom parameters are stored as a String.
+            // In the AI API endpoint retrieval path, custom parameters are received as a LinkedHashMap.
+            // No need to handle that case, since AI APIs do not currently support OAuth endpoint security.
+            if (deploymentStage.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String) {
+                String customParametersString = (String) deploymentStage.get(
+                        APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                if (StringUtils.isNotEmpty(customParametersString)) {
+                    JSONParser parser = new JSONParser();
+                    JSONObject customParameters = (JSONObject) parser.parse(customParametersString);
+                    decryptCustomOauthParameters(customParameters, cryptoUtil);
+                    deploymentStage.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParameters);
+                }
             }
+
             endpointSecurityElement.put(sectionKey, deploymentStage);
         }
     }
@@ -5080,31 +5134,26 @@ public class APIMappingUtil {
         }
         dto.setId(endpoint.getId());
         dto.setName(endpoint.getName());
-        String endpointConfigJson = endpoint.getEndpointConfig();
-        if (endpointConfigJson != null && !endpointConfigJson.isEmpty()) {
+        String endpointConfigString = endpoint.getEndpointConfig();
+        if (endpointConfigString != null && !endpointConfigString.isEmpty()) {
             try {
-                ObjectMapper mapper = new ObjectMapper();
-                Map<String, Object> endpointConfigMap = mapper.readValue(
-                        endpointConfigJson, new TypeReference<Map<String, Object>>() {
-                        });
-                Object securityObj = endpointConfigMap.get(APIConstants.ENDPOINT_SECURITY);
-                if (securityObj != null) {
-                    Map<String, Object> securityMap = (Map<String, Object>) securityObj;
-                    if (securityMap instanceof Map) {
-                        JSONObject endpointSecurityJson = new JSONObject(securityMap);
-                        if (endpointSecurityJson != null && !endpointSecurityJson.isEmpty()) {
-                            endpointSecurityJson = handleEndpointSecurity(endpointSecurityJson,
-                                    organization, preserveCredentials);
-                            if (preserveCredentials) {
-                                endpointSecurityJson = handleEndpointSecurityDecrypt(endpointSecurityJson);
-                            }
-                            endpointConfigMap.put(APIConstants.ENDPOINT_SECURITY, endpointSecurityJson);
+                JSONParser parser = new JSONParser();
+                JSONObject endpointConfigJsonObj = (JSONObject) parser.parse(endpointConfigString);
+                Object securityObj = endpointConfigJsonObj.get(APIConstants.ENDPOINT_SECURITY);
+                if (securityObj instanceof JSONObject) {
+                    JSONObject endpointSecurityJson = (JSONObject) securityObj;
+                    if (!endpointSecurityJson.isEmpty()) {
+                        endpointSecurityJson = handleEndpointSecurity(endpointSecurityJson, organization,
+                                preserveCredentials);
+                        if (preserveCredentials) {
+                            endpointSecurityJson = handleEndpointSecurityDecrypt(endpointSecurityJson);
                         }
+                        endpointConfigJsonObj.put(APIConstants.ENDPOINT_SECURITY, endpointSecurityJson);
                     }
                 }
-                String updatedConfigJson = mapper.writeValueAsString(endpointConfigMap);
+                String updatedConfigJson = endpointConfigJsonObj.toJSONString();
                 dto.setEndpointConfig(updatedConfigJson);
-            } catch (JsonProcessingException e) {
+            } catch (ParseException e) {
                 String msg = "Error while processing endpoint configuration JSON.";
                 handleException(msg, e);
             }

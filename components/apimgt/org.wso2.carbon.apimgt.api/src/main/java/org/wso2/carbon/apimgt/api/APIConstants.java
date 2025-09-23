@@ -102,18 +102,18 @@ public class APIConstants {
         public static final String LLM_CONFIGS_ENDPOINT = "/llm-providers";
         public static final String CONFIGURATIONS = "configurations";
         public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_NAME = "AzureOpenAI";
-        public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_VERSION = "1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_VERSION = "2.0.0";
         public static final String LLM_PROVIDER_SERVICE_AWS_BEDROCK_VERSION = "1.0.0";
-        public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_CONNECTOR = "azureOpenAi_1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_CONNECTOR = "azureOpenAi_2.0.0";
         public static final String LLM_PROVIDER_SERVICE_AWS_BEDROCK_CONNECTOR = "awsBedrock_1.0.0";
         public static final String LLM_PROVIDER_SERVICE_AWS_BEDROCK_NAME = "AWSBedrock";
         public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_KEY = "api-key";
-        public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_API_DEFINITION_FILE_NAME = "azure_api.yaml";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_API_DEFINITION_FILE_NAME = "azure_openai_api.yaml";
         public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_DESCRIPTION = "Azure OpenAI service";
         public static final String LLM_PROVIDER_SERVICE_AWS_BEDROCK_DESCRIPTION = "AWS Bedrock service";
         public static final String LLM_PROVIDER_SERVICE_OPENAI_NAME = "OpenAI";
-        public static final String LLM_PROVIDER_SERVICE_OPENAI_VERSION = "1.0.0";
-        public static final String LLM_PROVIDER_SERVICE_OPENAI_CONNECTOR = "openAi_1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_OPENAI_VERSION = "2.0.0";
+        public static final String LLM_PROVIDER_SERVICE_OPENAI_CONNECTOR = "openAi_2.0.0";
         public static final String LLM_PROVIDER_SERVICE_OPENAI_KEY = "Authorization";
         public static final String LLM_PROVIDER_SERVICE_OPENAI_API_DEFINITION_FILE_NAME = "openai_api.yaml";
         public static final String LLM_PROVIDER_SERVICE_OPENAI_DESCRIPTION = "OpenAI service";
@@ -123,6 +123,24 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_KEY = "Authorization";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_API_DEFINITION_FILE_NAME = "mistral_api.yaml";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_DESCRIPTION = "Mistral AI service";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_NAME = "Anthropic";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_VERSION = "1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_CONNECTOR = "anthropic_1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_KEY = "x-api-key";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_API_DEFINITION_FILE_NAME = "anthropic_api.yaml";
+        public static final String LLM_PROVIDER_SERVICE_ANTHROPIC_CLAUDE_DESCRIPTION = "Anthropic Claude LLM Service";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_NAME = "AzureAIFoundry";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_VERSION = "1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_CONNECTOR = "azureAiFoundry_1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_DESCRIPTION = "Azure AI Foundry service";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_API_DEFINITION_FILE_NAME = "azure_ai_foundry_api.yaml";
+        public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_KEY = "api-key";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_NAME = "Gemini";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_VERSION = "1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_CONNECTOR = "gemini_1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_DESCRIPTION = "Gemini service";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_API_DEFINITION_FILE_NAME = "gemini_api.yaml";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_KEY = "X-goog-api-key";
         public static final String LLM_PROVIDER_SERVICE_METADATA_REQUEST_MODEL = "requestModel";
         public static final String LLM_PROVIDER_SERVICE_METADATA_RESPONSE_MODEL = "responseModel";
         public static final String LLM_PROVIDER_SERVICE_METADATA_MODEL = "model";
@@ -133,10 +151,25 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_MODEL = "$.model";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_PROMPT_TOKEN_COUNT = "$.usage" +
                 ".prompt_tokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_INPUT_TOKEN = "$.usage" +
+                ".input_tokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_OUTPUT_TOKEN = "$.usage" +
+                ".output_tokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_ANTHROPIC_REMAINING_TOKEN_COUNT = "anthropic-ratelimit-tokens-remaining";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_COMPLETION_TOKEN_COUNT = "$.usage" +
                 ".completion_tokens";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_TOTAL_TOKEN_COUNT = "$.usage.total_tokens";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_REMAINING_TOKEN_COUNT = "x-ratelimit-remaining-tokens";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_REQUEST_METADATA_IDENTIFIER_MODEL =
+                "(?<=models/)[a-zA-Z0-9.\\-]+";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_PROMPT_TOKEN_COUNT =
+                "$.usageMetadata.promptTokenCount";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_CANDIDATES_TOKEN_COUNT =
+                "$.usageMetadata.candidatesTokenCount";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_TOTAL_TOKEN_COUNT =
+                "$.usageMetadata.totalTokenCount";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_RESPONSE_METADATA_IDENTIFIER_MODEL =
+                "$.modelVersion";
         public static final String LLM_PROVIDER_SERVICE_DEFAULT = "default";
         public static final String NULL = "null";
         public static final String LLM_PROVIDER = "LLM_PROVIDER";
@@ -166,7 +199,6 @@ public class APIConstants {
         public static final String ENDPOINT_SEQUENCE = "_EndpointsSeq";
         public static final String REQUEST_TIMEOUT = "REQUEST_TIMEOUT";
         public static final String HTTP_PROTOCOL_TYPE = "HTTP";
-        public static final String QUERY_API_TYPE_MCP = "type:MCP";
         public static final String LLM_PROVIDER_SERVICE_AWSBEDROCK_OPENAI_API_DEFINITION_FILE_NAME =
                 "aws_bedrock_api.yaml";
         public static final String INPUT_SOURCE_PATH = "pathParams";
@@ -181,5 +213,16 @@ public class APIConstants {
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_ANTHROPIC = "Anthropic";
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_DEEPSEEK = "DeepSeek";
         public static final String LLM_MODEL_PROVIDER_AWS_BEDROCK_META = "Meta";
+        public static final String LLM_MODEL_PROVIDER_AZURE_FOUNDRY_OPENAI = "OpenAI";
+        public static final String LLM_MODEL_PROVIDER_AZURE_FOUNDRY_COHERE = "Cohere";
+        public static final String LLM_MODEL_PROVIDER_AZURE_FOUNDRY_XAI = "xAI";
+    }
+
+    public static class UnifiedSearchConstants {
+        public static final String QUERY_API_TYPE_APIS_PUBLISHER = "type:HTTP type:WS type:SOAPTOREST type:GRAPHQL " +
+                "type:SOAP type:SSE type:WEBSUB type:WEBHOOK type:ASYNC";
+        public static final String QUERY_API_TYPE_APIS_DEVPORTAL = "type:HTTP type:WS type:SOAPTOREST type:GRAPHQL " +
+                "type:SOAP type:SSE type:WEBSUB type:WEBHOOK type:ASYNC type:APIProduct";
+        public static final String QUERY_API_TYPE_MCP = "type:MCP";
     }
 }

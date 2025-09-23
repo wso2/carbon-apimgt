@@ -60,6 +60,7 @@ import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.uri.template.URITemplateException;
+import org.wso2.uri.template.parser.URITemplateParser;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 
 import java.io.File;
@@ -88,6 +89,7 @@ public class RestApiUtil {
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> uriToHttpMethodsMap;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> basicAuthBlockedUriToHttpMethodsMap;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> ETagSkipListURIToHttpMethodsMap;
+    private static Dictionary<String, List<String>> adminRestrictedUriToHttpMethodsMap;
 
     public static <T> ErrorDTO getConstraintViolationErrorDTO(Set<ConstraintViolation<T>> violations) {
         ErrorDTO errorDTO = new ErrorDTO();
@@ -127,6 +129,25 @@ public class RestApiUtil {
         ErrorDTO errorDTO = new ErrorDTO();
         errorDTO.setCode(code);
         errorDTO.setMoreInfo("");
+        errorDTO.setMessage(message);
+        errorDTO.setDescription(description);
+        return errorDTO;
+    }
+
+    /**
+     * Returns a generic errorDTO
+     *
+     * @param message     specifies the error message
+     * @param code        specifies the error code
+     * @param description specifies the error description
+     * @param moreInfo    specifies more information about the error
+     * @return A generic errorDTO with the specified details
+     */
+    public static ErrorDTO getErrorDTO(String message, Long code, String description, String moreInfo) {
+
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setCode(code);
+        errorDTO.setMoreInfo(moreInfo);
         errorDTO.setMessage(message);
         errorDTO.setDescription(description);
         return errorDTO;
@@ -465,6 +486,20 @@ public class RestApiUtil {
      */
     public static ConflictException buildConflictException(String message, String description) {
         ErrorDTO errorDTO = getErrorDTO(message, 409l, description);
+        return new ConflictException(errorDTO);
+    }
+
+    /**
+     * Returns a new ConflictException
+     *
+     * @param message     summary of the error
+     * @param description description of the exception
+     * @param moreInfo    more information
+     * @return a new ConflictException with the specified details as a response DTO
+     */
+    public static ConflictException buildConflictException(String message, String description, String moreInfo) {
+
+        ErrorDTO errorDTO = getErrorDTO(message, 409l, description, moreInfo);
         return new ConflictException(errorDTO);
     }
 
@@ -902,6 +937,22 @@ public class RestApiUtil {
      * Logs the error, builds a ConflictException with specified details and throws it
      *
      * @param description description of the error
+     * @param moreInfo    More info link
+     * @param log         Log instance
+     * @throws ConflictException
+     */
+    public static void handleConflict(String description, String moreInfo, Log log) throws ConflictException {
+
+        ConflictException conflictException =
+                buildConflictException(RestApiConstants.STATUS_CONFLICT_MESSAGE_DEFAULT, description, moreInfo);
+        log.error(description + " " + moreInfo);
+        throw conflictException;
+    }
+
+    /**
+     * Logs the error, builds a ConflictException with specified details and throws it
+     *
+     * @param description description of the error
      * @param log Log instance
      * @throws ConflictException
      */
@@ -1091,6 +1142,49 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns the admin permission restricted URIs and associated HTTP methods for REST API by reading api-manager.xml
+     * configuration
+     *
+     * @return A Dictionary with the admin permission restricted URIs and the associated HTTP methods
+     * @throws APIManagementException If an error occurs while parsing the URI configuration
+     */
+    private static Dictionary<String, List<String>> getAdminPermissionRestrictedURIsToMethodsMapFromConfig()
+            throws APIManagementException {
+        URITemplateParser parser = new URITemplateParser();
+        Hashtable<String, List<String>> uriToMethodsMap = new Hashtable<>();
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        List<String> uriList = apiManagerConfiguration.getProperty(
+                APIConstants.API_RESTAPI_ADMIN_PERMISSION_RESTRICTED_URI);
+        List<String> methodsList = apiManagerConfiguration.getProperty(
+                APIConstants.API_RESTAPI_ADMIN_PERMISSION_RESTRICTED_HTTPMethods);
+
+        if (uriList != null && methodsList != null) {
+            if (uriList.size() != methodsList.size()) {
+                String errorMsg = "Provided Admin Permission Restricted URIs for REST API are invalid. Every 'AdminPermissionRestrictedAPI' should include 'URI' and 'HTTPMethods' elements";
+                log.error(errorMsg);
+                return new Hashtable<>();
+            }
+
+            for (int i = 0; i < uriList.size(); i++) {
+                String uri = uriList.get(i);
+                uri = uri.replace("/{version}", "");
+                try {
+                    parser.parse(uri);
+                    String methodsForUri = methodsList.get(i);
+                    List<String> methodListForUri = Arrays.asList(methodsForUri.split(","));
+                    uriToMethodsMap.put(uri, methodListForUri);
+                } catch (URITemplateException e) {
+                    String msg = "Error in parsing uri " + uri + " when retrieving AdminPermissionRestricted URIs for REST API";
+                    log.error(msg, e);
+                    throw new APIManagementException(msg, e);
+                }
+            }
+        }
+        return uriToMethodsMap;
+    }
+
+    /**
      * Returns the white-listed URIs and associated HTTP methods for REST API. If not already read before, reads
      * api-manager.xml configuration, store the results in a static reference and returns the results.
      * Otherwise returns previously stored the static reference object.
@@ -1105,6 +1199,23 @@ public class RestApiUtil {
             uriToHttpMethodsMap = getAllowedURIsToMethodsMapFromConfig();
         }
         return uriToHttpMethodsMap;
+    }
+
+    /**
+     * Returns the AdminPermissionRestricted URIs and associated HTTP methods for REST API. If not already read before, reads
+     * api-manager.xml configuration, store the results in a static reference and returns the results.
+     * Otherwise, returns previously stored the static reference object.
+     *
+     * @return A Dictionary with the permission restricted URIs and the associated HTTP methods
+     * @throws APIManagementException If an error occurs while parsing the URI configuration
+     */
+    public static Dictionary<String, List<String>> getAdminPermissionRestrictedURIsToMethodsMap()
+            throws APIManagementException {
+
+        if (adminRestrictedUriToHttpMethodsMap == null) {
+            adminRestrictedUriToHttpMethodsMap = getAdminPermissionRestrictedURIsToMethodsMapFromConfig();
+        }
+        return adminRestrictedUriToHttpMethodsMap;
     }
 
     /**

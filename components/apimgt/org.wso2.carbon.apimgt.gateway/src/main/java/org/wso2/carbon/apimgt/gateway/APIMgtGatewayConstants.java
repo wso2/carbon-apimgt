@@ -19,6 +19,11 @@
 
 package org.wso2.carbon.apimgt.gateway;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 public class APIMgtGatewayConstants {
 
     public static final String CONSUMER_KEY = "api.ut.consumerKey";
@@ -69,6 +74,8 @@ public class APIMgtGatewayConstants {
     public static final String AM_CORRELATION_ID = "am.correlationID";
     public static final String REFERER = "Referer";
 
+    public static final String HTTPS_NIO_PORT = "https.nio.port";
+
     /**
      * Constants for regex protector.
      */
@@ -101,6 +108,7 @@ public class APIMgtGatewayConstants {
     public static final String SCHEMA_VALIDATION = "schemaValidation";
     public static final String XSD_URL = "xsdURL";
     public static final String UTF8 = "UTF-8";
+    public static final String INVALID_XML_FORMAT_MSG = "Invalid XML format in the request payload";
 
     /**
      * Web socket header for jwt assertion.
@@ -212,5 +220,34 @@ public class APIMgtGatewayConstants {
     public static final String MCP_NO_AUTH_REQUEST = "MCP_NO_AUTH_REQUEST";
     public static final String MCP_RESOURCE= "/mcp";
     public static final String MCP_WELL_KNOWN_RESOURCE = "/.well-known/oauth-protected-resource";
+    public static final String MCP_AUTH_CLAIM = "MCP_AUTHENTICATED";
+    public static final Long MCP_AUTH_TOKEN_EXPIRATION_TIME = 6000L;
+    /**
+     * JWT Claim related Constants
+     */
+    public static final Set<String> STANDARD_JWT_CLAIMS = Collections.unmodifiableSet(new HashSet<>(
+            Arrays.asList("sub", "iss", "aud", "exp", "iat", "jti", "azp", "nbf", "scope", "scp", "aut")));
+    public static final String SUBSCRIBER_CLAIM = "subscriber";
+    public static final String APPLICATION_ID_CLAIM = "applicationid";
+    public static final String APPLICATION_NAME_CLAIM = "applicationname";
+    public static final String APPLICATION_TIER_CLAIM = "applicationtier";
+    public static final String TIER_CLAIM = "tier";
+    public static final String APPLICATION_UUID_CLAIM = "applicationUUId";
+    public static final String KEY_TYPE_CLAIM = "keytype";
+    public static final String END_USER_CLAIM = "enduser";
+    public static final String END_USER_TENANT_ID_CLAIM = "enduserTenantId";
+    public static final String TOKEN_TYPE_CLAIM = "token_type";
+
+    // Basic Auth Client Pool configurations
+    public static final String BASIC_AUTH_VALIDATOR = "BasicAuthValidator.";
+    public static final String CONNECTION_POOL = "ConnectionPool.";
+    public static final String BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_IDLE =
+            BASIC_AUTH_VALIDATOR + CONNECTION_POOL + "MaxIdle";
+    public static final String BASIC_AUTH_VALIDATOR_CONNECTION_POOL_INIT_IDLE_CAPACITY =
+            BASIC_AUTH_VALIDATOR + CONNECTION_POOL + "InitIdleCapacity";
+    public static final String BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_ACTIVE =
+            BASIC_AUTH_VALIDATOR + CONNECTION_POOL + "MaxActive";
+    public static final String BASIC_AUTH_VALIDATOR_CONNECTION_POOL_MAX_WAIT_MILLIS =
+            BASIC_AUTH_VALIDATOR + CONNECTION_POOL + "MaxWaitMillis";
 }
 

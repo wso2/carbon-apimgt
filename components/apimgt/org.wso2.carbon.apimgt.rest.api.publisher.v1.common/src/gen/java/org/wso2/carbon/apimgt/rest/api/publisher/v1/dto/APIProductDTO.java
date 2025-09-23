@@ -33,6 +33,7 @@ public class APIProductDTO   {
   
     private String id = null;
     private String name = null;
+    private String displayName = null;
     private String context = null;
     private String version = null;
     private String description = null;
@@ -240,6 +241,24 @@ return null;
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   * Human-friendly name shown in UI. Length limited to DB column size.
+   **/
+  public APIProductDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Pizza Shack API Product", value = "Human-friendly name shown in UI. Length limited to DB column size.")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
@@ -1012,6 +1031,7 @@ return null;
     APIProductDTO apIProduct = (APIProductDTO) o;
     return Objects.equals(id, apIProduct.id) &&
         Objects.equals(name, apIProduct.name) &&
+        Objects.equals(displayName, apIProduct.displayName) &&
         Objects.equals(context, apIProduct.context) &&
         Objects.equals(version, apIProduct.version) &&
         Objects.equals(description, apIProduct.description) &&
@@ -1059,7 +1079,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, version, description, provider, hasThumbnail, state, enableSchemaValidation, isDefaultVersion, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, lastUpdatedTimestamp, gatewayVendor, apis, scopes, categories, workflowStatus, audiences, egress);
+    return Objects.hash(id, name, displayName, context, version, description, provider, hasThumbnail, state, enableSchemaValidation, isDefaultVersion, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, lastUpdatedTimestamp, gatewayVendor, apis, scopes, categories, workflowStatus, audiences, egress);
   }
 
   @Override
@@ -1069,6 +1089,7 @@ return null;
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");

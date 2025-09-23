@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.rest.api.gateway.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.rest.api.gateway.ServerStartupHealthcheckApiService;
 

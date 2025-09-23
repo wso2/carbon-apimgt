@@ -431,6 +431,7 @@ public class ThrottlePolicyTemplateBuilder {
             setConstantContext(context);
             context.put("policy", policy);
             context.put("quotaPolicy", policy.getDefaultLimit());
+            context.put("isDistributed", getDistributedStatus());
             template.merge(context, writer);
             if (log.isDebugEnabled()) {
                 log.debug("Policy : " + writer.toString());

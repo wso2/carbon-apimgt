@@ -89,7 +89,7 @@ public class APIOperationMappingDTO   {
   
   @ApiModelProperty(example = "1.0.0", value = "")
   @JsonProperty("apiContext")
- @Size(min=1,max=30)  public String getApiContext() {
+ @Size(min=1,max=232)  public String getApiContext() {
     return apiContext;
   }
   public void setApiContext(String apiContext) {

@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers;
 
 import org.apache.axis2.Constants;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.api.API;
@@ -29,7 +30,7 @@ import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-
+import org.apache.commons.logging.Log;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -38,6 +39,8 @@ import java.util.Set;
  * Provides util methods for the LogsHandler
  */
 class LogUtils {
+
+    private static final Log log = LogFactory.getLog(LogUtils.class);
 
     protected static String getAuthorizationHeader(Map headers) {
         return (String) headers.get(HttpHeaders.AUTHORIZATION);
@@ -148,6 +151,25 @@ class LogUtils {
             Map<String, Resource> resourcesMap = selectedApi.getResourcesMap();
             Set<Resource> acceptableResources = ApiUtils
                     .getAcceptableResources(resourcesMap, messageContext);
+            if ("OPTIONS".equals(httpMethod)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Processing OPTIONS request for CORS pre-flight check");
+                }
+                Map headers = getTransportHeaders(messageContext);
+                String actualVerb = (String) headers.get("Access-Control-Request-Method");
+                if (actualVerb != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Access-Control-Request-Method header found with value: " + actualVerb);
+                    }
+                    Resource[] filteredResources = acceptableResources.toArray(new Resource[0]);
+                    acceptableResources = Utils.getAcceptableResources(
+                            filteredResources, httpMethod, actualVerb, messageContext);
+                }
+            }
+            messageContext.setProperty("ACCEPTABLE_RESOURCES", acceptableResources);
+            if (log.isDebugEnabled()) {
+                log.debug("Set ACCEPTABLE_RESOURCES property with " + acceptableResources.size() + " resources");
+            }
             if (!acceptableResources.isEmpty()) {
                 for (RESTDispatcher dispatcher : ApiUtils.getDispatchers()) {
                     selectedResource = dispatcher.findResource(messageContext, acceptableResources);

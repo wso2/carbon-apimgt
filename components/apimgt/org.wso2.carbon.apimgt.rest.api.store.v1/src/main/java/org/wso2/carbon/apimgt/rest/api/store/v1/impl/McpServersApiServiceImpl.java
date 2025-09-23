@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIConstants.UnifiedSearchConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -77,8 +78,6 @@ import java.util.Set;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.QUERY_API_TYPE_MCP;
-
 /**
  * Implementation of the McpServersApiService interface, providing methods to manage MCP servers,
  * including adding comments, ratings, and retrieving server details.
@@ -106,7 +105,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization,
+                    APIConstants.API_TYPE_MCP);
             Comment comment = new Comment();
             comment.setText(postRequestBodyDTO.getContent());
             comment.setCategory(postRequestBodyDTO.getCategory());
@@ -232,7 +232,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization,
+                    APIConstants.API_TYPE_MCP);
             Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
             if (comment != null) {
                 String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
@@ -325,7 +326,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization,
+                    APIConstants.API_TYPE_MCP);
             Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
             if (comment != null) {
                 if (comment.getUser().equals(username)) {
@@ -388,7 +390,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization,
+                    APIConstants.API_TYPE_MCP);
             String parentCommentID = null;
             CommentList comments = apiConsumer.getComments(apiTypeWrapper, parentCommentID, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
@@ -429,7 +432,11 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        query = query == null ? QUERY_API_TYPE_MCP : QUERY_API_TYPE_MCP + " " + query;
+        if (query == null || query.isEmpty()) {
+            query = UnifiedSearchConstants.QUERY_API_TYPE_MCP;
+        } else {
+            query = query + " " + UnifiedSearchConstants.QUERY_API_TYPE_MCP;
+        }
         APIListDTO apiListDTO = new APIListDTO();
         try {
             String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -508,7 +515,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization,
+                    APIConstants.API_TYPE_MCP);
             Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
 
             if (comment != null) {
@@ -773,50 +781,6 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * Generates a client SDK for a specific MCP server in the requested programming language.
-     *
-     * @param mcpServerId    the UUID of the MCP server for which the SDK is to be generated
-     * @param language       the programming language for which the SDK is to be generated
-     * @param xWSO2Tenant    the tenant header (not directly used here, may be validated upstream)
-     * @param messageContext the message context containing request-related metadata
-     * @return a {@link Response} with the generated SDK file as an attachment
-     * @throws APIManagementException if an error occurs during SDK generation or retrieval
-     */
-    @Override
-    public Response getMCPServerSDK(String mcpServerId, String language, String xWSO2Tenant,
-                                    MessageContext messageContext) throws APIManagementException {
-
-        if (StringUtils.isEmpty(mcpServerId) || StringUtils.isEmpty(language)) {
-            String message = "Error generating the SDK. API id or language should not be empty";
-            RestApiUtil.handleBadRequest(message, log);
-        }
-        String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
-        OrganizationInfo userOrgInfo = RestApiUtil.getOrganizationInfo(messageContext);
-        userOrgInfo.setSuperOrganization(superOrganization);
-        APIDTO api = getMCPServerByMCPServerId(mcpServerId, superOrganization, userOrgInfo);
-        APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
-        Map<String, String> sdkArtifacts;
-        String swaggerDefinition = api.getApiDefinition();
-        if (api != null) {
-            try {
-                sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(), api.getVersion(),
-                        swaggerDefinition);
-                //Create the sdk response.
-                File sdkFile = new File(sdkArtifacts.get("zipFilePath"));
-                return Response.ok(sdkFile, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",
-                        "attachment; filename=\"" + sdkArtifacts.get("zipFileName") + "\"").build();
-            } catch (APIClientGenerationException e) {
-                String message =
-                        "Error generating client sdk for MCP Server: " + api.getName() + " for language: " + language;
-                RestApiUtil.handleInternalServerError(message, e, log);
-            }
-        }
-        String message = "Could not find a MCP Server for ID " + mcpServerId;
-        RestApiUtil.handleResourceNotFoundError(message, log);
-        return null;
-    }
-
-    /**
      * Retrieves the available subscription policies for a specific MCP server.
      * The policies are filtered based on the tiers associated with the MCP server.
      *
@@ -851,101 +815,6 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                     }
                 }
                 return Response.ok().entity(apiThrottlingPolicies).build();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Retrieves the Swagger definition of a specific MCP server, optionally filtered by environment and query
-     * parameters.
-     *
-     * @param mcpServerId     the UUID of the MCP server whose Swagger definition is to be retrieved
-     * @param environmentName the name of the environment for which the Swagger definition is requested (optional)
-     * @param ifNoneMatch     optional ETag for conditional requests (not directly used here)
-     * @param xWSO2Tenant     the tenant header (not directly used here, may be validated upstream)
-     * @param xWSO2TenantQ    the tenant query parameter (not directly used here, may be validated upstream)
-     * @param query           additional query parameters for filtering (optional)
-     * @param messageContext  the message context containing request-related metadata
-     * @return a {@link Response} with the Swagger definition as a JSON attachment
-     * @throws APIManagementException if an error occurs during Swagger retrieval or processing
-     */
-    @Override
-    public Response getMCPServerSwagger(String mcpServerId, String environmentName, String ifNoneMatch,
-                                        String xWSO2Tenant, String xWSO2TenantQ, String query,
-                                        MessageContext messageContext) {
-
-        try {
-            String organization;
-            if (StringUtils.isNotEmpty(xWSO2TenantQ) && StringUtils.isEmpty(xWSO2Tenant)) {
-                organization = RestApiUtil.getRequestedTenantDomain(xWSO2TenantQ);
-            } else {
-                organization = RestApiUtil.getValidatedOrganization(messageContext);
-            }
-            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-
-            API api = apiConsumer.getLightweightAPIByUUID(mcpServerId, organization);
-            if (api.getUuid() == null) {
-                api.setUuid(mcpServerId);
-            }
-
-            if (api.getSwaggerDefinition() != null) {
-                api.setSwaggerDefinition(APIUtil.removeInterceptorsFromSwagger(
-                        APIUtil.removeXMediationScriptsFromSwagger(api.getSwaggerDefinition())));
-            } else {
-                api.setSwaggerDefinition(apiConsumer.getOpenAPIDefinition(mcpServerId, organization));
-            }
-            if (StringUtils.isEmpty(environmentName)) {
-                Map<String, Environment> existingEnvironments = APIUtil.getEnvironments(organization);
-
-                for (String environmentNameOfApi : api.getEnvironments()) {
-                    if (existingEnvironments.get(environmentNameOfApi) != null) {
-                        environmentName = environmentNameOfApi;
-                        break;
-                    }
-                }
-                if (StringUtils.isEmpty(environmentName)) {
-
-                    if (!existingEnvironments.keySet().isEmpty()) {
-                        environmentName = existingEnvironments.keySet().iterator().next();
-                    }
-                }
-            }
-
-            String apiSwagger = null;
-            if (StringUtils.isNotEmpty(environmentName)) {
-                try {
-                    if (StringUtils.isNotEmpty(query)) {
-                        String kmId = APIMappingUtil.getKmIdValue(query);
-                        if (StringUtils.isNotBlank(kmId)) {
-                            apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironmentByKm(api, environmentName, kmId);
-                        }
-                    } else {
-                        apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironment(api, environmentName);
-                    }
-                } catch (APIManagementException e) {
-                    // handle gateway not found exception otherwise pass it
-                    if (RestApiUtil.isDueToResourceNotFound(e)) {
-                        RestApiUtil.handleResourceNotFoundError(
-                                "Gateway environment '" + environmentName + "' not found", e, log);
-                        return null;
-                    }
-                    throw e;
-                }
-            } else {
-                apiSwagger = api.getSwaggerDefinition();
-            }
-
-            return Response.ok().entity(apiSwagger).header("Content-Disposition",
-                    "attachment; filename=\"" + "swagger.json" + "\"").build();
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving swagger of API : " + mcpServerId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
         return null;
@@ -1017,7 +886,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization,
+                    APIConstants.API_TYPE_MCP);
             CommentList comments = apiConsumer.getComments(apiTypeWrapper, commentId, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
@@ -1105,7 +975,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization);
+            ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization,
+                    APIConstants.API_TYPE_MCP);
             String status = api.getStatus();
             String userOrg = userOrgInfo.getOrganizationId();
 

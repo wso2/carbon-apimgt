@@ -20,6 +20,7 @@ import javax.validation.Valid;
 
 public class APISearchResultAllOfDTO   {
   
+    private String displayName = null;
     private String description = null;
     private String context = null;
     private String contextTemplate = null;
@@ -36,6 +37,26 @@ public class APISearchResultAllOfDTO   {
     private String businessOwnerEmail = null;
     private String technicalOwner = null;
     private String technicalOwnerEmail = null;
+    private String createdTime = null;
+    private String updatedTime = null;
+
+  /**
+   * Human-friendly name shown in UI. Length limited to DB column size.
+   **/
+  public APISearchResultAllOfDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Pizza Shack API", value = "Human-friendly name shown in UI. Length limited to DB column size.")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
 
   /**
    * A brief description about the API
@@ -317,6 +338,42 @@ public class APISearchResultAllOfDTO   {
     this.technicalOwnerEmail = technicalOwnerEmail;
   }
 
+  /**
+   * Created time as unix timestamp in milliseconds.
+   **/
+  public APISearchResultAllOfDTO createdTime(String createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1756199448644", value = "Created time as unix timestamp in milliseconds.")
+  @JsonProperty("createdTime")
+  public String getCreatedTime() {
+    return createdTime;
+  }
+  public void setCreatedTime(String createdTime) {
+    this.createdTime = createdTime;
+  }
+
+  /**
+   * Update time as unix timestamp in milliseconds.
+   **/
+  public APISearchResultAllOfDTO updatedTime(String updatedTime) {
+    this.updatedTime = updatedTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1756199448644", value = "Update time as unix timestamp in milliseconds.")
+  @JsonProperty("updatedTime")
+  public String getUpdatedTime() {
+    return updatedTime;
+  }
+  public void setUpdatedTime(String updatedTime) {
+    this.updatedTime = updatedTime;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -327,7 +384,8 @@ public class APISearchResultAllOfDTO   {
       return false;
     }
     APISearchResultAllOfDTO apISearchResultAllOf = (APISearchResultAllOfDTO) o;
-    return Objects.equals(description, apISearchResultAllOf.description) &&
+    return Objects.equals(displayName, apISearchResultAllOf.displayName) &&
+        Objects.equals(description, apISearchResultAllOf.description) &&
         Objects.equals(context, apISearchResultAllOf.context) &&
         Objects.equals(contextTemplate, apISearchResultAllOf.contextTemplate) &&
         Objects.equals(version, apISearchResultAllOf.version) &&
@@ -342,12 +400,14 @@ public class APISearchResultAllOfDTO   {
         Objects.equals(businessOwner, apISearchResultAllOf.businessOwner) &&
         Objects.equals(businessOwnerEmail, apISearchResultAllOf.businessOwnerEmail) &&
         Objects.equals(technicalOwner, apISearchResultAllOf.technicalOwner) &&
-        Objects.equals(technicalOwnerEmail, apISearchResultAllOf.technicalOwnerEmail);
+        Objects.equals(technicalOwnerEmail, apISearchResultAllOf.technicalOwnerEmail) &&
+        Objects.equals(createdTime, apISearchResultAllOf.createdTime) &&
+        Objects.equals(updatedTime, apISearchResultAllOf.updatedTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(description, context, contextTemplate, version, provider, status, thumbnailUri, advertiseOnly, gatewayVendor, gatewayType, hasThumbnail, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
+    return Objects.hash(displayName, description, context, contextTemplate, version, provider, status, thumbnailUri, advertiseOnly, gatewayVendor, gatewayType, hasThumbnail, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, createdTime, updatedTime);
   }
 
   @Override
@@ -355,6 +415,7 @@ public class APISearchResultAllOfDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APISearchResultAllOfDTO {\n");
     
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    contextTemplate: ").append(toIndentedString(contextTemplate)).append("\n");
@@ -371,6 +432,8 @@ public class APISearchResultAllOfDTO   {
     sb.append("    businessOwnerEmail: ").append(toIndentedString(businessOwnerEmail)).append("\n");
     sb.append("    technicalOwner: ").append(toIndentedString(technicalOwner)).append("\n");
     sb.append("    technicalOwnerEmail: ").append(toIndentedString(technicalOwnerEmail)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
     sb.append("}");
     return sb.toString();
   }

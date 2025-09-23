@@ -69,13 +69,19 @@ public class SearchResultMappingUtil {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
         apiResultDTO.setContext(context);
+        apiResultDTO.setDisplayName(api.getDisplayName());
         apiResultDTO.setContextTemplate(api.getContextTemplate());
         if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
             apiResultDTO.setType(SearchResultDTO.TypeEnum.MCP);
+            apiResultDTO.setTransportType(APIConstants.API_TYPE_HTTP);
+        } else if (APIConstants.API_TYPE_PRODUCT.equals(api.getType())) {
+            // In API search, the API Products are also returned as APIs. Hence, we need to handle this case as well.
+            apiResultDTO.setType(SearchResultDTO.TypeEnum.APIPRODUCT);
+            apiResultDTO.setTransportType(APIConstants.API_TYPE_HTTP);
         } else {
-            apiResultDTO.setType(SearchResultDTO.TypeEnum.API); // To maintain backward compatibility
+            apiResultDTO.setType(SearchResultDTO.TypeEnum.API);
+            apiResultDTO.setTransportType(api.getType());
         }
-        apiResultDTO.setTransportType(api.getType());
         apiResultDTO.setDescription(api.getDescription());
         apiResultDTO.setStatus(api.getStatus());
         apiResultDTO.setThumbnailUri(api.getThumbnailUrl());
@@ -88,6 +94,9 @@ public class SearchResultMappingUtil {
         apiResultDTO.setTechnicalOwner(api.getTechnicalOwner());
         apiResultDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
         apiResultDTO.setMonetizedInfo(api.isMonetizationEnabled());
+        apiResultDTO.setCreatedTime(api.getCreatedTime());
+        apiResultDTO.setUpdatedTime(
+                api.getLastUpdated() != null ? String.valueOf(api.getLastUpdated().getTime()) : api.getCreatedTime());
         return apiResultDTO;
     }
 
@@ -110,7 +119,9 @@ public class SearchResultMappingUtil {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
         apiProductResultDTO.setContext(context);
+        apiProductResultDTO.setDisplayName(apiProduct.getDisplayName());
         apiProductResultDTO.setType(SearchResultDTO.TypeEnum.APIPRODUCT);
+        apiProductResultDTO.setTransportType(APIConstants.API_TYPE_HTTP);
         apiProductResultDTO.setDescription(apiProduct.getDescription());
         apiProductResultDTO.setStatus(apiProduct.getState());
         apiProductResultDTO.setThumbnailUri(apiProduct.getThumbnailUrl());
@@ -120,6 +131,11 @@ public class SearchResultMappingUtil {
         apiProductResultDTO.setTechnicalOwner(apiProduct.getTechnicalOwner());
         apiProductResultDTO.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
         apiProductResultDTO.setMonetizedInfo(apiProduct.isMonetizationEnabled());
+        apiProductResultDTO.setCreatedTime(
+                apiProduct.getCreatedTime() != null ? String.valueOf(apiProduct.getCreatedTime().getTime()) : null);
+        apiProductResultDTO.setUpdatedTime(apiProduct.getLastUpdated() != null ?
+                String.valueOf(apiProduct.getLastUpdated().getTime()) :
+                (apiProduct.getCreatedTime() != null ? String.valueOf(apiProduct.getCreatedTime().getTime()) : null));
         return apiProductResultDTO;
     }
 
@@ -138,15 +154,21 @@ public class SearchResultMappingUtil {
         docResultDTO.setDocType(DocumentSearchResultDTO.DocTypeEnum.valueOf(document.getType().toString()));
         docResultDTO.setType(SearchResultDTO.TypeEnum.DOC);
         docResultDTO.setSummary(document.getSummary());
-        docResultDTO.associatedType(APIConstants.AuditLogConstants.API);
+        docResultDTO.associatedType(api.getType());
         docResultDTO.setVisibility(mapVisibilityFromDocumentToDTO(document.getVisibility()));
         docResultDTO.setSourceType(mapSourceTypeFromDocumentToDTO(document.getSourceType()));
         docResultDTO.setOtherTypeName(document.getOtherTypeName());
         APIIdentifier apiId = api.getId();
         docResultDTO.setApiName(apiId.getApiName());
+        docResultDTO.setApiDisplayName(api.getDisplayName());
         docResultDTO.setApiVersion(apiId.getVersion());
         docResultDTO.setApiProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         docResultDTO.setApiUUID(api.getUUID());
+        docResultDTO.setCreatedTime(
+                document.getCreatedDate() != null ? String.valueOf(document.getCreatedDate().getTime()) : null);
+        docResultDTO.setUpdatedTime(document.getLastUpdated() != null ?
+                String.valueOf(document.getLastUpdated().getTime()) :
+                (document.getCreatedDate() != null ? String.valueOf(document.getCreatedDate().getTime()) : null));
         return docResultDTO;
     }
 
@@ -165,9 +187,15 @@ public class SearchResultMappingUtil {
         docResultDTO.setOtherTypeName(document.getOtherTypeName());
         APIProductIdentifier apiId = apiProduct.getId();
         docResultDTO.setApiName(apiId.getName());
+        docResultDTO.setApiDisplayName(apiProduct.getDisplayName());
         docResultDTO.setApiVersion(apiId.getVersion());
         docResultDTO.setApiProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         docResultDTO.setApiUUID(apiProduct.getUuid());
+        docResultDTO.setCreatedTime(
+                document.getCreatedDate() != null ? String.valueOf(document.getCreatedDate().getTime()) : null);
+        docResultDTO.setUpdatedTime(document.getLastUpdated() != null ?
+                String.valueOf(document.getLastUpdated().getTime()) :
+                (document.getCreatedDate() != null ? String.valueOf(document.getCreatedDate().getTime()) : null));
         return docResultDTO;
     }
 
@@ -257,11 +285,14 @@ public class SearchResultMappingUtil {
         apiDefSearchResultDTO.setType(SearchResultDTO.TypeEnum.DEFINITION);
         apiDefSearchResultDTO.setApiUUID(apiDefResult.getApiUuid());
         apiDefSearchResultDTO.setApiName(apiDefResult.getApiName());
+        apiDefSearchResultDTO.setApiDisplayName(apiDefResult.getApiDisplayName());
         apiDefSearchResultDTO.setApiContext(apiDefResult.getApiContext());
         apiDefSearchResultDTO.setApiVersion(apiDefResult.getApiVersion());
         apiDefSearchResultDTO.setApiProvider(apiDefResult.getApiProvider());
         apiDefSearchResultDTO.setApiType(apiDefResult.getApiType());
         apiDefSearchResultDTO.setAssociatedType(apiDefResult.getAssociatedType());
+        apiDefSearchResultDTO.setCreatedTime(String.valueOf(apiDefResult.getCreatedTime()));
+        apiDefSearchResultDTO.setUpdatedTime(String.valueOf(apiDefResult.getUpdatedTime()));
         if (apiDefResult.getName().contains("swagger")) {
             apiDefSearchResultDTO.setName(apiDefResult.getApiName() + " REST API Definition");
         } else if (apiDefResult.getName().contains("graphql")) {

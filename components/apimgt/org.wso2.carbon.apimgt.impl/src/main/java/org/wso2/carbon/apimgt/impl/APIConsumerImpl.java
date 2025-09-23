@@ -3811,29 +3811,31 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             if (servers == null || servers.size() == 0) {
                 return null;
             }
-            JsonObject server = servers.get(0).getAsJsonObject();
-            if (server == null || !server.has("url")) {
-                return null;
-            }
-            String resolvedUrl = server.get("url").getAsString();
-            JsonObject variables = server.getAsJsonObject("variables");
-            if (variables != null && variables.has("basePath")) {
-                JsonObject basePath = variables.getAsJsonObject("basePath");
-                if (basePath != null && basePath.has("default")) {
-                    String stageName = basePath.get("default").getAsString();
-                    resolvedUrl = resolvedUrl
-                            .replace("/{basePath}", "/" + stageName)
-                            .replace("{basePath}", stageName);
-                }
-            }
-            if (StringUtils.isBlank(resolvedUrl)) {
-                return null;
-            }
             Map<String, String> hostsWithSchemes = new HashMap<>();
-            if (StringUtils.startsWithIgnoreCase(resolvedUrl, APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
-                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, resolvedUrl);
-            } else {
-                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, resolvedUrl);
+            for (JsonElement serverElement : servers) {
+                JsonObject server = serverElement.getAsJsonObject();
+                if (server == null || !server.has("url")) {
+                    continue;
+                }
+                String resolvedUrl = server.get("url").getAsString();
+                JsonObject variables = server.getAsJsonObject("variables");
+                if (variables != null && variables.has("basePath")) {
+                    JsonObject basePath = variables.getAsJsonObject("basePath");
+                    if (basePath != null && basePath.has("default")) {
+                        String stageName = basePath.get("default").getAsString();
+                        resolvedUrl = resolvedUrl
+                                .replace("/{basePath}", "/" + stageName)
+                                .replace("{basePath}", stageName);
+                    }
+                }
+                if (StringUtils.isBlank(resolvedUrl)) {
+                    continue;
+                }
+                if (StringUtils.startsWithIgnoreCase(resolvedUrl, APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
+                    hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, resolvedUrl);
+                } else {
+                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, resolvedUrl);
+                }
             }
             return hostsWithSchemes;
         } catch (RuntimeException e) {
@@ -4144,14 +4146,18 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
         return result;
 }
-
     @Override
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
+        return getAPIorAPIProductByUUID(uuid, organization, null);
+    }
+
+    @Override
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization, String apiType)
+            throws APIManagementException {
 
         try {
             Organization org = new Organization(organization);
-            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org,
-                    uuid);
+            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid, apiType);
             if (devPortalApi != null) {
                 checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
                         devPortalApi.getVisibleRoles(), devPortalApi.getPublisherAccessControl(),
@@ -4504,20 +4510,31 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         API api = new API(new APIIdentifier(docItem.getApiProvider(), docItem.getApiName(),
                                 docItem.getApiVersion()));
                         api.setUuid(docItem.getApiUUID());
+                        api.setDisplayName(docItem.getApiDisplayName());
+                        api.setType(docItem.getAssociatedType());
                         docMap.put(doc, api);
                     } else if (item instanceof APIDefSearchContent) {
                         APIDefSearchContent definitionItem = (APIDefSearchContent) item;
-                        APIDefinitionContentSearchResult apiDefSearchResult = new APIDefinitionContentSearchResult();
-                        apiDefSearchResult.setId(definitionItem.getId());
-                        apiDefSearchResult.setName(definitionItem.getName());
-                        apiDefSearchResult.setApiUuid(definitionItem.getApiUUID());
-                        apiDefSearchResult.setApiName(definitionItem.getApiName());
-                        apiDefSearchResult.setApiContext(definitionItem.getApiContext());
-                        apiDefSearchResult.setApiProvider(definitionItem.getApiProvider());
-                        apiDefSearchResult.setApiVersion(definitionItem.getApiVersion());
-                        apiDefSearchResult.setApiType(definitionItem.getApiType());
-                        apiDefSearchResult.setAssociatedType(definitionItem.getAssociatedType()); //API or API product
-                        defSearchList.add(apiDefSearchResult);
+                        if (!APIConstants.API_TYPE_MCP.equals(definitionItem.getAssociatedType())) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Processing API definition search result for API: " +
+                                        definitionItem.getApiName() + " - " + definitionItem.getApiVersion());
+                            }
+                            APIDefinitionContentSearchResult apiDefSearchResult =
+                                    new APIDefinitionContentSearchResult();
+                            apiDefSearchResult.setId(definitionItem.getId());
+                            apiDefSearchResult.setName(definitionItem.getName());
+                            apiDefSearchResult.setApiUuid(definitionItem.getApiUUID());
+                            apiDefSearchResult.setApiName(definitionItem.getApiName());
+                            apiDefSearchResult.setApiDisplayName(definitionItem.getApiDisplayName());
+                            apiDefSearchResult.setApiContext(definitionItem.getApiContext());
+                            apiDefSearchResult.setApiProvider(definitionItem.getApiProvider());
+                            apiDefSearchResult.setApiVersion(definitionItem.getApiVersion());
+                            apiDefSearchResult.setApiType(definitionItem.getApiType());
+                            apiDefSearchResult.setAssociatedType(
+                                    definitionItem.getAssociatedType()); //API or API product
+                            defSearchList.add(apiDefSearchResult);
+                        }
                     } else if ("API".equals(item.getType())) {
                         DevPortalSearchContent publisherAPI = (DevPortalSearchContent) item;
                         API api = new API(new APIIdentifier(publisherAPI.getProvider(), publisherAPI.getName(),
@@ -4526,6 +4543,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         api.setContext(publisherAPI.getContext());
                         api.setContextTemplate(publisherAPI.getContext());
                         api.setStatus(publisherAPI.getStatus());
+                        api.setDisplayName(publisherAPI.getDisplayName());
                         api.setBusinessOwner(publisherAPI.getBusinessOwner());
                         api.setBusinessOwnerEmail(publisherAPI.getBusinessOwnerEmail());
                         api.setTechnicalOwner(publisherAPI.getTechnicalOwner());
@@ -4536,6 +4554,32 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         api.setDescription(publisherAPI.getDescription());
                         api.setType(publisherAPI.getTransportType());
                         apiSet.add(api);
+                    } else if (APIConstants.API_TYPE_MCP.equals(item.getType())) {
+                        DevPortalSearchContent publisherAPI = (DevPortalSearchContent) item;
+                        if (log.isDebugEnabled()) {
+                            log.debug("Processing MCP Server type with ID: " + publisherAPI.getId());
+                        }
+                        API api = new API(new APIIdentifier(publisherAPI.getProvider(), publisherAPI.getName(),
+                                publisherAPI.getVersion()));
+                        api.setUuid(publisherAPI.getId());
+                        api.setContext(publisherAPI.getContext());
+                        api.setContextTemplate(publisherAPI.getContext());
+                        api.setStatus(publisherAPI.getStatus());
+                        api.setDisplayName(publisherAPI.getDisplayName());
+                        api.setBusinessOwner(publisherAPI.getBusinessOwner());
+                        api.setBusinessOwnerEmail(publisherAPI.getBusinessOwnerEmail());
+                        api.setTechnicalOwner(publisherAPI.getTechnicalOwner());
+                        api.setTechnicalOwnerEmail(publisherAPI.getTechnicalOwnerEmail());
+                        api.setMonetizationEnabled(publisherAPI.getMonetizationStatus());
+                        api.setAdvertiseOnly(publisherAPI.getAdvertiseOnly());
+                        api.setRating(APIUtil.getAverageRating(publisherAPI.getId()));
+                        api.setDescription(publisherAPI.getDescription());
+                        api.setType(publisherAPI.getType());
+                        apiSet.add(api);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Added MCP Server to search results: " + api.getId().getApiName() + " - " +
+                                    api.getId().getVersion());
+                        }
                     } else if ("APIProduct".equals(item.getType())) {
                         DevPortalSearchContent devAPIProduct = (DevPortalSearchContent) item;
                         APIProduct apiProduct = new APIProduct(
@@ -4544,6 +4588,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         apiProduct.setUuid(devAPIProduct.getId());
                         apiProduct.setContextTemplate(devAPIProduct.getContext());
                         apiProduct.setState(devAPIProduct.getStatus());
+                        apiProduct.setDisplayName(devAPIProduct.getDisplayName());
                         apiProduct.setType(devAPIProduct.getTransportType());
                         apiProduct.setBusinessOwner(devAPIProduct.getBusinessOwner());
                         apiProduct.setBusinessOwnerEmail(devAPIProduct.getBusinessOwnerEmail());

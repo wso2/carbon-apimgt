@@ -1444,9 +1444,28 @@ public interface APIProvider extends APIManager {
      * @param apiRevisionId          API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
      * @param organization           identifier of the organization
+     * @param onDeleteOrRetire    true if the deployment is initiated from API delete or retire, false otherwise
      * @throws APIManagementException if failed to add APIRevision
      */
-    void undeployAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments, String organization) throws APIManagementException;
+    void undeployAPIRevisionDeployment(String apiId, String apiRevisionId,
+                                       List<APIRevisionDeployment> apiRevisionDeployments, String organization,
+                                       boolean onDeleteOrRetire) throws APIManagementException;
+
+
+    /**
+     * Adds a new APIRevisionDeployment to an existing API
+     * @deprecated use {@link #undeployAPIRevisionDeployment(String, String, List, String, boolean)}
+     * @param apiId                  API UUID
+     * @param apiRevisionId          API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization           identifier of the organization
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    default void undeployAPIRevisionDeployment(String apiId, String apiRevisionId,
+                                               List<APIRevisionDeployment> apiRevisionDeployments, String organization)
+            throws APIManagementException {
+        undeployAPIRevisionDeployment(apiId, apiRevisionId, apiRevisionDeployments, organization, false);
+    }
 
     /**
      * Restore a provided API Revision as the working copy of the API
@@ -1468,9 +1487,24 @@ public interface APIProvider extends APIManager {
      */
     void deleteAPIRevision(String apiId, String apiRevisionId, String organization) throws APIManagementException;
 
+
+    /**
+     * Delete all API Revisions when the API is deleted or retired
+     *
+     * @param apiUUID       API UUID
+     * @param organization Identifier of an organization
+     * @param onDeleteOrRetire true when invoked during API delete or retire flows; false otherwise
+     * @throws APIManagementException
+     */
+    default void deleteAPIRevisions(String apiUUID, String organization, boolean onDeleteOrRetire) throws APIManagementException{
+        // Fallback for older implementations that only implement the 2-arg method
+        deleteAPIRevisions(apiUUID, organization);
+    }
+
+
     /**
      * Delete all API Revision
-     *
+     * @deprecated use {@link #deleteAPIRevisions(String, String, boolean)}
      * @param apiId        API UUID
      * @param organization Identifier of an organization
      * @throws APIManagementException if failed to delete APIRevision
@@ -1549,6 +1583,17 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     String generateApiKey(String apiId, String organization) throws APIManagementException;
+
+    /**
+     * Generate API Key for the given API with MCP (Multi Channel Publishing) type
+     *
+     * @param apiId        API UUID
+     * @param organization Organization
+     * @param apiType      API Type
+     * @return Generated API Key
+     * @throws APIManagementException if failed to generate API Key
+     */
+    String generateApiKey(String apiId, String organization, String apiType) throws APIManagementException;
 
     List<APIRevisionDeployment> getAPIRevisionsDeploymentList(String apiId) throws APIManagementException;
 
@@ -1671,6 +1716,15 @@ public interface APIProvider extends APIManager {
      */
     APIEndpointInfo updateAPIEndpoint(String apiId, APIEndpointInfo apiEndpoint, String organization)
             throws APIManagementException;
+
+    /**
+     * Delete API primary endpoint mappings by providing the API UUID
+     *
+     * @param apiId        API UUID
+     * @param revisionUUID API Revision UUID
+     * @throws APIManagementException if an error occurs while deleting the primary endpoint mappings
+     */
+    void deleteAPIPrimaryEndpointMappings(String apiId, String revisionUUID) throws APIManagementException;
 
     /**
      * Delete API primary endpoint mappings by providing the API UUID
@@ -1960,6 +2014,17 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed get API from APIIdentifier
      */
     API getAPIbyUUID(String uuid, String organization) throws APIManagementException;
+
+    /**
+     * Returns details of an API
+     *
+     * @param uuid         UUID of the API's registry artifact
+     * @param organization Identifier of an organization
+     * @param apiType      API Type
+     * @return An API object related to the given artifact id or null
+     * @throws APIManagementException if failed get API from APIIdentifier
+     */
+    API getAPIbyUUID(String uuid, String organization, String apiType) throws APIManagementException;
 
     /**
      * Get API UUID by the API Identifier.
@@ -2332,14 +2397,16 @@ public interface APIProvider extends APIManager {
     List<Backend> getMCPServerBackends(String apiUuid, String organization) throws APIManagementException;
 
     /**
-     * Updates the MCP server backend with the provided details.
+     * Updates the MCP server oldBackend with the provided details.
      *
      * @param apiId        the UUID of the API or API revision
-     * @param backend      the {@link Backend} object containing updated details
+     * @param oldBackend   the {@link Backend} object containing updated details
+     * @param newBackend   the {@link Backend} object containing new details to be updated
      * @param organization the organization name
-     * @throws APIManagementException if an error occurs while updating the backend API
+     * @throws APIManagementException if an error occurs while updating the oldBackend API
      */
-    void updateMCPServerBackend(String apiId, Backend backend, String organization) throws APIManagementException;
+    void updateMCPServerBackend(String apiId, Backend oldBackend, Backend newBackend, String organization)
+            throws APIManagementException;
 
     /**
      * Retrieves the list of MCP servers used by a specific API.

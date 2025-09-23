@@ -112,6 +112,7 @@ public class InMemoryAPIDeployer {
                 DataHolder.getInstance().addKeyManagerToAPIMapping(apiId, gatewayAPIDTO.getKeyManagers());
                 DataHolder.getInstance().addAPIMetaData(gatewayEvent);
                 DataHolder.getInstance().markAPIAsDeployed(gatewayAPIDTO);
+                DataHolder.getInstance().populateVhosts(gatewayAPIDTO);
                 syncAPIPropertiesAcrossComponents(gatewayAPIDTO);
                 if (log.isDebugEnabled()) {
                     log.debug("API with " + apiId + " is deployed in gateway with the labels " + String.join(",",
@@ -149,6 +150,7 @@ public class InMemoryAPIDeployer {
                 addDeployedGraphqlQLToAPI(gatewayAPIDTO);
                 DataHolder.getInstance().addKeyManagerToAPIMapping(apiId, gatewayAPIDTO.getKeyManagers());
                 DataHolder.getInstance().markAPIAsDeployed(gatewayAPIDTO);
+                DataHolder.getInstance().populateVhosts(gatewayAPIDTO);
                 syncAPIPropertiesAcrossComponents(gatewayAPIDTO);
                 if (log.isDebugEnabled()) {
                     log.debug("API with " + apiId + " is deployed in gateway with the labels " + String.join(",",
@@ -242,9 +244,16 @@ public class InMemoryAPIDeployer {
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext()
                             .setTenantDomain(tenantDomain, true);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Retrieving all artifacts for the gateway with the labels: " + labelString +
+                                " for tenant: " + tenantDomain);
+                    }
                     List<String> gatewayRuntimeArtifacts = ServiceReferenceHolder.getInstance().getArtifactRetriever()
                             .retrieveAllArtifacts(encodedString, tenantDomain);
+                    log.info("Retrieved " + gatewayRuntimeArtifacts.size() + " artifacts for deployment");
                     if (gatewayRuntimeArtifacts.isEmpty()) {
+                        log.warn("No artifacts found for gateway labels: " + labelString +
+                                " in tenant: " + tenantDomain);
                         return true;
                     }
                     if (redeployChangedAPIs) {
@@ -260,20 +269,10 @@ public class InMemoryAPIDeployer {
                                     reDeployAPIs(gatewayAPIDTO, apiMap, assignedGatewayLabels, tenantDomain, apiGatewayAdmin);
                                 } else {
                                     deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
-
-                                    deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
-                                                                                    gatewayAPIDTO.getRevision(), true,
-                                                                                    APIConstants.AuditLogConstants.DEPLOY, null, null, tenantDomain);
                                     syncAPIPropertiesAcrossComponents(gatewayAPIDTO);
                                 }
                             }
                         } catch (AxisFault axisFault) {
-                            deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
-                                                                            gatewayAPIDTO.getRevision(), false,
-                                                                            APIConstants.AuditLogConstants.DEPLOY,
-                                                                            ExceptionCodes.INTERNAL_ERROR.getErrorCode(),
-                                                                            axisFault.getMessage(), tenantDomain);
-
                             log.error("Error in deploying " + gatewayAPIDTO.getName() + " to the Gateway ", axisFault);
                             errorCount++;
                         }
@@ -339,19 +338,13 @@ public class InMemoryAPIDeployer {
                                                     api.getContext());
                 unDeployAPI(deployAPIInGatewayEvent);
                 deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
-                deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
-                                                                gatewayAPIDTO.getRevision(),
-                                                                true, APIConstants.AuditLogConstants.DEPLOY, null, null,
-                                                                tenantDomain);
                 syncAPIPropertiesAcrossComponents(gatewayAPIDTO);
             } else if (DataHolder.getInstance().getGatewayRegistrationResponse()
                     != APIConstants.GatewayNotification.GatewayRegistrationResponse.ACKNOWLEDGED) {
                 // If the gateway is not registered yet or if it is registered during
                 // reconnect
-                deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
-                                                                gatewayAPIDTO.getRevision(),
-                                                                true, APIConstants.AuditLogConstants.DEPLOY, null, null,
-                                                                tenantDomain);
+                deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO,
+                                                                true, APIConstants.AuditLogConstants.DEPLOY, null, null);
             }
         } else {
             if (log.isDebugEnabled()) {
@@ -369,6 +362,7 @@ public class InMemoryAPIDeployer {
         DataHolder.getInstance().addKeyManagerToAPIMapping(gatewayAPIDTO.getApiId(),
                 gatewayAPIDTO.getKeyManagers());
         DataHolder.getInstance().markAPIAsDeployed(gatewayAPIDTO);
+        DataHolder.getInstance().populateVhosts(gatewayAPIDTO);
     }
 
 

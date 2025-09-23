@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.LoadingTenants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.stratos.common.exception.TenantMgtException;
 import org.wso2.carbon.tenant.mgt.services.TenantMgtService;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -70,6 +71,7 @@ public class TenancyLoader {
                     try {
                         if (tenantMgtService.isDomainAvailable(tenantInfo.getDomain())) {
                             TenantUtils.addTenant(tenantInfo);
+                            APIUtil.loadTenantConfigBlockingMode(tenantInfo.getDomain());
                         } else {
                             TenantUtils.updateTenant(tenantInfo);
                         }

@@ -105,6 +105,7 @@ import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
@@ -287,6 +288,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -746,6 +748,7 @@ public final class APIUtil {
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+            api.setDisplayName(artifact.getAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME));
 
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
 
@@ -886,6 +889,7 @@ public final class APIUtil {
             api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
             api.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+            api.setDisplayName(artifact.getAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME));
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             try {
@@ -1018,6 +1022,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
             artifact.setAttribute(APIConstants.API_OVERVIEW_TYPE, api.getType());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME, api.getDisplayName());
 
             StringBuilder policyBuilder = new StringBuilder();
             for (Tier tier : api.getAvailableTiers()) {
@@ -1200,6 +1205,7 @@ public final class APIUtil {
             // This is to support the pluggable version strategy.
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, apiProduct.getContextTemplate());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
+            artifact.setAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME, apiProduct.getDisplayName());
 
             //set monetization status (i.e - enabled or disabled)
             artifact.setAttribute(
@@ -2752,6 +2758,8 @@ public final class APIUtil {
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             //set uuid
             api.setUUID(artifact.getId());
+            // set display name
+            api.setDisplayName(artifact.getAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME));
             // set url
             api.setStatus(getLcStateFromArtifact(artifact));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
@@ -3534,26 +3542,49 @@ public final class APIUtil {
             apiData.put(key, new ArrayList<>());
         }
 
-        for (int i = 0; i < synapseApiTypes.size(); i++) {
-            String apiType = synapseApiTypes.get(i).getAsString();
-            if (apiData.containsKey(apiType)) {
-                apiData.get(apiType).add(APIConstants.WSO2_SYNAPSE_GATEWAY);
-            }
-        }
-
-        for (int i = 0; i < apkApiTypes.size(); i++) {
-            String apiType = apkApiTypes.get(i).getAsString();
-            if (apiData.containsKey(apiType)) {
-                apiData.get(apiType).add(APIConstants.WSO2_APK_GATEWAY);
-            }
-        }
-
         Map<String, GatewayAgentConfiguration> externalGatewayConnectorConfigurationMap =
                 ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
 
-        externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
-            processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, gatewayConfiguration);
-        });
+        // Get the gateway types from the deployment.toml and process each external gateway type in the same order as
+        // they are defined in the deployment.toml.
+        List<String> gatewayTypes = APIUtil.getGatewayTypes();
+
+        // trim and deduplicate while preserving order
+        LinkedHashSet<String> orderedGatewayTypes = new LinkedHashSet<>();
+        if (gatewayTypes != null) {
+            for (String t : gatewayTypes) {
+                if (StringUtils.isNotBlank(t)) {
+                    orderedGatewayTypes.add(t.trim());
+                }
+            }
+        }
+
+        for (String gatewayType : orderedGatewayTypes) {
+            if (APIConstants.API_GATEWAY_TYPE_REGULAR.equalsIgnoreCase(gatewayType)) {
+                for (JsonElement element : synapseApiTypes) {
+                    String apiType = element.getAsString();
+                    if (apiData.containsKey(apiType)) {
+                        apiData.get(apiType).add(APIConstants.WSO2_SYNAPSE_GATEWAY);
+                    }
+                }
+            } else if (APIConstants.API_GATEWAY_TYPE_APK.equalsIgnoreCase(gatewayType)) {
+                for (JsonElement element : apkApiTypes) {
+                    String apiType = element.getAsString();
+                    if (apiData.containsKey(apiType)) {
+                        apiData.get(apiType).add(APIConstants.WSO2_APK_GATEWAY);
+                    }
+                }
+            } else {
+                GatewayAgentConfiguration externalGatewayConfiguration = externalGatewayConnectorConfigurationMap.get(gatewayType);
+
+                if (externalGatewayConfiguration != null) {
+                    processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, externalGatewayConfiguration);
+                } else {
+                    log.warn("No configuration found for external gateway type: " +
+                            StringEscapeUtils.escapeJava(gatewayType));
+                }
+            }
+        }
 
         GatewayFeatureCatalog gatewayFeatureCatalog = new GatewayFeatureCatalog();
         gatewayFeatureCatalog.setApiTypes(apiData);
@@ -3563,7 +3594,8 @@ public final class APIUtil {
     }
 
     private static void processExternalGatewayFeatureCatalogs(Map<String, Object> gatewayConfigsMap,
-                                                              Map<String, List<String>> apiData, GatewayAgentConfiguration gatewayConfiguration) {
+                                                              Map<String, List<String>> apiData,
+                                                              GatewayAgentConfiguration gatewayConfiguration) {
 
         GatewayPortalConfiguration config = null;
         try {
@@ -7698,10 +7730,9 @@ public final class APIUtil {
      * @return true if the Array contains the role specified.
      */
     public static boolean compareRoleList(String[] userRoleList, String accessControlRole) {
-
         if (userRoleList != null) {
             for (String userRole : userRoleList) {
-                if (userRole.equalsIgnoreCase(accessControlRole)) {
+                if (userRole != null && userRole.equalsIgnoreCase(accessControlRole)) {
                     return true;
                 }
             }
@@ -8580,6 +8611,26 @@ public final class APIUtil {
     public static void deleteApiExternalApiMappings(String apiId) throws APIManagementException {
 
         ApiMgtDAO.getInstance().deleteApiExternalApiMappings(apiId);
+    }
+
+    /**
+     * Retrieves a list of APIs that are deployed in a specific gateway environment
+     * and belong to a specified organization.
+     *
+     * @param environmentName The name of the gateway environment to filter the deployed APIs.
+     * @param organization The organization to which the APIs belong.
+     * @param discoveredAPIs Flag indicating whether to include discovered APIs or APIs created from CP
+     * @return A list of ApiResult objects representing the APIs deployed in the specified
+     * gateway environment and belonging to the given organization.
+     * @throws APIManagementException If an error occurs while retrieving the APIs.
+     */
+    public static List<ApiResult> getAPIsDeployedInGatewayEnvironmentByOrg(String environmentName,
+                                                                           String organization,
+                                                                           boolean discoveredAPIs)
+            throws APIManagementException {
+
+        return ApiMgtDAO.getInstance().getAPIsDeployedInGatewayEnvironmentByOrg(environmentName, organization,
+                discoveredAPIs);
     }
 
     /**
@@ -10292,6 +10343,7 @@ public final class APIUtil {
                     artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE)));
             api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(
                     APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
+            api.setDisplayName(artifact.getAttribute(APIConstants.API_OVERVIEW_DISPLAY_NAME));
 
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
 
@@ -11669,8 +11721,13 @@ public final class APIUtil {
      * @throws NullPointerException if the input URL is null
      */
     public static String trimTrailingSlashes(String url) {
-        while (url.endsWith("/")) {
-            url = url.substring(0, url.length() - 1);
+        if (log.isDebugEnabled()) {
+            log.debug("Trimming trailing slashes from URL: " + url);
+        }
+        if (url.length() > 1) {
+            while (url.endsWith("/")) {
+                url = url.substring(0, url.length() - 1);
+            }
         }
         return url;
     }
@@ -11838,25 +11895,73 @@ public final class APIUtil {
      *
      * @param environment   The environment to validate and schedule discovery for.
      * @param organization  The organization to which the environment belongs.
-     * @param updateEnvFlow Whether to update the environment flow before validation.
      */
-    public static void validateAndScheduleFederatedGatewayAPIDiscovery(Environment environment, String organization,
-                                                                       boolean updateEnvFlow) {
+    public static void validateAndScheduleFederatedGatewayAPIDiscovery(Environment environment, String organization) {
         FederatedAPIDiscoveryService federatedAPIDiscoveryService = ServiceReferenceHolder
                 .getInstance().getFederatedAPIDiscoveryService();
         try {
-            if (updateEnvFlow) {
-                APIAdminImpl apiAdmin = new APIAdminImpl();
-                environment = apiAdmin.getEnvironmentWithoutPropertyMasking(organization,
-                        environment.getUuid());
-                environment = apiAdmin.decryptGatewayConfigurationValues(environment);
-            }
+            APIAdminImpl apiAdmin = new APIAdminImpl();
+            environment = apiAdmin.getEnvironmentWithoutPropertyMasking(organization,
+                    environment.getUuid());
+            environment = apiAdmin.decryptGatewayConfigurationValues(environment);
             if (environment.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
                 federatedAPIDiscoveryService.scheduleDiscovery(environment, organization);
             }
         } catch (APIManagementException e) {
             log.error("Error while validating and scheduling federated gateway API discovery for environment: "
                     + environment.getName() + " in organization: " + organization, e);
+        }
+    }
+
+    /**
+     * Converts an epoch time string to a Date object.
+     *
+     * @param epochMillis The epoch time in milliseconds as a string.
+     * @return The corresponding Date object, or null if the input is blank or invalid.
+     */
+    public static Date convertEpochStringToDate(String epochMillis) {
+        if (StringUtils.isBlank(epochMillis)) return null;
+        try {
+            return new Date(Long.parseLong(epochMillis));
+        } catch (NumberFormatException e) {
+            log.warn("Provided epoch time string: " + epochMillis + " is not valid.", e);
+            return null;
+        }
+    }
+
+    /**
+     * Validate and update the URI templates of an API.
+     *
+     * @param api                       API object.
+     * @param tenantId                  Tenant ID of the API.
+     * @throws APIManagementException   if an error occurs while validating or updating the URI templates.
+     */
+    public static void validateAndUpdateURITemplates(API api, int tenantId) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating and updating URI templates for API: " + api.getId().getApiName());
+        }
+        if (api.getUriTemplates() != null) {
+            for (URITemplate uriTemplate : api.getUriTemplates()) {
+                if (StringUtils.isEmpty(api.getApiLevelPolicy())) {
+                    // API level policy not attached.
+                    if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
+                        String defaultPolicy = APIUtil.getDefaultAPILevelPolicy(tenantId);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Setting default throttling tier: " + defaultPolicy + " for URI template: "
+                                    + uriTemplate.getUriTemplate());
+                        }
+                        uriTemplate.setThrottlingTier(defaultPolicy);
+                    }
+                } else {
+                    uriTemplate.setThrottlingTier(api.getApiLevelPolicy());
+                }
+                if (StringUtils.isEmpty(uriTemplate.getAuthType())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Setting default auth type 'Any' for URI template: " + uriTemplate.getUriTemplate());
+                    }
+                    uriTemplate.setAuthType("Any");
+                }
+            }
         }
     }
 }

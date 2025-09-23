@@ -29,6 +29,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -171,25 +172,25 @@ public class DeploymentStatusNotifier {
     /**
      * Submits an API deployment status notification for batched processing.
      *
-     * @param apiId        the API identifier (required)
-     * @param revisionId   the API revision identifier (optional)
-     * @param success      true if the deployment was successful, false otherwise
-     * @param action       the deployment action performed (e.g., "DEPLOY", "UNDEPLOY")
-     * @param errorCode    error code for failed deployments (can be null)
-     * @param errorMessage error message for failed deployments (can be null or empty)
-     * @param tenantDomain the tenant domain (required)
+     * @param gatewayAPIDTO the GatewayAPIDTO containing API information (required)
+     * @param success       true if the deployment was successful, false otherwise
+     * @param action        the deployment action performed (e.g., "DEPLOY", "UNDEPLOY")
+     * @param errorCode     error code for failed deployments (can be null)
+     * @param errorMessage  error message for failed deployments (can be null or empty)
      */
-    public void submitDeploymentStatus(String apiId, String revisionId, boolean success, String action, Long errorCode,
-                                       String errorMessage, String tenantDomain) {
+    public void submitDeploymentStatus(GatewayAPIDTO gatewayAPIDTO, boolean success, String action, Long errorCode,
+                                       String errorMessage) {
         if (!gatewayNotificationConfig.isEnabled()){
             return;
         }
-        if (apiId == null || action == null || tenantDomain == null) {
-            log.warn("Invalid deployment status submission: apiId, action, and tenantDomain cannot be null");
+        if (gatewayAPIDTO == null || gatewayAPIDTO.getApiId() == null || action == null || 
+                gatewayAPIDTO.getTenantDomain() == null) {
+            log.warn("Invalid deployment status submission: gatewayAPIDTO, apiId, action, and tenantDomain cannot be null");
             return;
         }
-        DeploymentStatusJob job = new DeploymentStatusJob(apiId, revisionId, success, action, errorCode, errorMessage,
-                                                          tenantDomain);
+        DeploymentStatusJob job = new DeploymentStatusJob(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getRevision(), 
+                                                          success, action, errorCode, errorMessage,
+                                                          gatewayAPIDTO.getTenantDomain());
         if (!currentBatch.offer(job)) {
             log.error(String.format("Deployment status notification queue is full. "
                                             + "Cannot accept new job for API: %s. Current queue size: %d, Max capacity: %d",

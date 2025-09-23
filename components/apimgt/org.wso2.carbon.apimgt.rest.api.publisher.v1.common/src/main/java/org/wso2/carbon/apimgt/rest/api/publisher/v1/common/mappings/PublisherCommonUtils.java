@@ -909,6 +909,7 @@ public class PublisherCommonUtils {
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
         apiToUpdate.setGatewayType(apiDtoToUpdate.getGatewayType());
+        apiToUpdate.setDisplayName(apiDtoToUpdate.getDisplayName());
 
         //validate API categories
         List<APICategory> apiCategories = apiToUpdate.getApiCategories();
@@ -1107,6 +1108,7 @@ public class PublisherCommonUtils {
         SwaggerData swaggerData = new SwaggerData(apiToUpdate);
         String definitionToAdd = new OAS3Parser().generateAPIDefinition(swaggerData);
         apiToUpdate.setSwaggerDefinition(definitionToAdd);
+        apiToUpdate.setDisplayName(apiDtoToUpdate.getDisplayName());
 
         apiToUpdate.setOrganization(originalAPI.getOrganization());
         apiToUpdate.setSubtype(originalAPI.getSubtype());
@@ -1467,8 +1469,15 @@ public class PublisherCommonUtils {
                     // Change default value of customParameters JSONObject to String
                     if (endpointSecurityProduction
                             .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof Map) {
-                        LinkedHashMap<String, Object> customParametersHashMap = (LinkedHashMap<String, Object>)
+                        Object customParamsObj =
                                 endpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+
+                        LinkedHashMap<String, Object> customParametersHashMap = null;
+                        if (customParamsObj instanceof JSONObject) {
+                            customParametersHashMap = new LinkedHashMap<>((JSONObject) customParamsObj);
+                        } else {
+                            customParametersHashMap = new LinkedHashMap<>((Map<String, Object>) customParamsObj);
+                        }
 
                         // Process secret custom parameters
                         encryptSecretCustomParameters(cryptoUtil, oldProductionCustomParams, customParametersHashMap);
@@ -1524,9 +1533,15 @@ public class PublisherCommonUtils {
                     // Change default value of customParameters JSONObject to String
                     if (endpointSecuritySandbox
                             .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof Map) {
-                        LinkedHashMap<String, Object> customParametersHashMap =
-                                (LinkedHashMap<String, Object>) endpointSecuritySandbox
-                                        .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                        Object customParamsObj =
+                                endpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+
+                        LinkedHashMap<String, Object> customParametersHashMap = null;
+                        if (customParamsObj instanceof JSONObject) {
+                            customParametersHashMap = new LinkedHashMap<>((JSONObject) customParamsObj);
+                        } else {
+                            customParametersHashMap = new LinkedHashMap<>((Map<String, Object>) customParamsObj);
+                        }
 
                         // Process secret custom parameters
                         encryptSecretCustomParameters(cryptoUtil, oldSandboxCustomParams, customParametersHashMap);
@@ -2005,12 +2020,13 @@ public class PublisherCommonUtils {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         boolean isMatched = false;
-        String[] userRoleList = null;
+        String[] userRoleList = APIUtil.getListOfRoles(userName);
 
         if (APIUtil.hasPermission(userName, APIConstants.Permissions.APIM_ADMIN)) {
-            isMatched = true;
-        } else {
-            userRoleList = APIUtil.getListOfRoles(userName);
+            if (log.isDebugEnabled()) {
+                log.debug("User role has admin level permissions, therefore skipping role validation.");
+            }
+            return "";
         }
         if (inputRoles != null && !inputRoles.isEmpty()) {
             if (Boolean.parseBoolean(System.getProperty(APIConstants.CASE_SENSITIVE_CHECK_PATH))) {
@@ -2018,8 +2034,11 @@ public class PublisherCommonUtils {
                 String roleString = String.join(",", inputRoles);
                 if (userRoleList != null) {
                     for (String inputRole : inputRoles) {
-                        if (!isMatched && userRoleList != null && APIUtil.compareRoleList(userRoleList, inputRole)) {
-                            isMatched = true;
+                        if (log.isDebugEnabled()) {
+                            log.debug("Checking role: " + inputRole + " against user roles");
+                        }
+                        if (!isMatched && APIUtil.compareRoleList(userRoleList, inputRole)) {
+                            return "";
                         }
                     }
                     if (!APIUtil.isRoleNameExist(userName, roleString)) {
@@ -2428,9 +2447,22 @@ public class PublisherCommonUtils {
                 ? apiProvider.getAPIbyUUID(backendApiUuid, organization)
                 : null;
         if (refApi == null) {
-            throw new APIManagementException(
-                    String.format("Referenced API not found: %s", backendApiUuid),
-                    ExceptionCodes.API_NOT_FOUND);
+            String error = "Referenced API not found. UUID: " + backendApiUuid;
+            log.error(error);
+            throw new APIManagementException(error, ExceptionCodes.API_NOT_FOUND);
+        }
+        if (!APIConstants.API_TYPE_HTTP.equalsIgnoreCase(refApi.getType())
+                || APIConstants.API_SUBTYPE_AI_API.equalsIgnoreCase(refApi.getSubtype())) {
+            String error = "Referenced API with UUID: " + backendApiUuid + " is not supported for MCP. " +
+                    "Invalid API type. Found API type: " + refApi.getType() + ", subtype: " + refApi.getSubtype();
+            log.error(error);
+            throw new APIManagementException(error, ExceptionCodes.INVALID_REFERENCE_API);
+        }
+        if (!APIConstants.WSO2_SYNAPSE_GATEWAY.equals(refApi.getGatewayType())) {
+            String error = "Referenced API with UUID: " + backendApiUuid + " is not supported for MCP. " +
+                    "Invalid Gateway type. Found gateway type: " + refApi.getGatewayType();
+            log.error(error);
+            throw new APIManagementException(error, ExceptionCodes.INVALID_REFERENCE_API);
         }
         return generateMCPFeatures(apiToAdd.getSubtype(), refApi.getSwaggerDefinition(),
                 apiToAdd.getUriTemplates(), refApi.getId(), oasParser);
@@ -3285,7 +3317,7 @@ public class PublisherCommonUtils {
         }
 
         PublisherCommonUtils.validateScopes(existingAPI);
-
+        APIUtil.validateAndUpdateURITemplates(existingAPI, APIUtil.getInternalOrganizationId(organization));
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
 
@@ -4993,5 +5025,128 @@ public class PublisherCommonUtils {
             operationList.add(serverOperation);
         }
         return operationList;
+    }
+
+    /**
+     * Update the backend for an MCP server.
+     *
+     * @param mcpServerId  ID of the MCP server
+     * @param oldBackend   Old backend API to be replaced
+     * @param backend      New backend API to be updated
+     * @param organization Organization of the logged-in user
+     * @param apiProvider  API Provider instance
+     * @throws APIManagementException if there is an error in API management operations
+     */
+    public static void updateMCPServerBackend(String mcpServerId, Backend oldBackend, Backend backend,
+                                              String organization, APIProvider apiProvider)
+            throws APIManagementException {
+
+        try {
+            if (log.isDebugEnabled()) {
+                log.info("Updating MCP Server backend for MCP Server with ID: " + mcpServerId);
+            }
+            prepareForEndpointSecurity(backend, oldBackend);
+            apiProvider.updateMCPServerBackend(mcpServerId, oldBackend, backend, organization);
+        } catch (ParseException | CryptoException e) {
+            throw new APIManagementException(
+                    "Error while processing endpoint security for MCP Server " + mcpServerId, e);
+        }
+    }
+
+    /**
+     * Prepares the new backend API for endpoint security by encrypting OAuth and API key information.
+     *
+     * @param newBackend the new backend API to be prepared
+     * @param oldBackend the old backend API to retrieve existing security information
+     * @throws ParseException         if there is an error parsing the endpoint configuration
+     * @throws APIManagementException if there is an error in API management operations
+     * @throws CryptoException        if there is an error in cryptographic operations
+     */
+    private static void prepareForEndpointSecurity(Backend newBackend, Backend oldBackend)
+            throws ParseException, APIManagementException, CryptoException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Preparing endpoint security for backend with ID: " + oldBackend.getId());
+        }
+        JSONParser parser = new JSONParser();
+        JSONObject oldEndpointConfig = null;
+        String oldEndpointConfigString = oldBackend.getEndpointConfig();
+        if (StringUtils.isNotBlank(oldEndpointConfigString)) {
+            oldEndpointConfig = (JSONObject) parser.parse(oldEndpointConfigString);
+        }
+        String oldProductionApiSecret = null;
+        String oldSandboxApiSecret = null;
+
+        String oldProductionApiKeyValue = null;
+        String oldSandboxApiKeyValue = null;
+        Object oldProductionCustomParams = null;
+        Object oldSandboxCustomParams = null;
+
+        if (oldEndpointConfig != null) {
+            if ((oldEndpointConfig.containsKey(APIConstants.ENDPOINT_SECURITY))) {
+                JSONObject oldEndpointSecurity = (JSONObject) oldEndpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                if (oldEndpointSecurity != null &&
+                        oldEndpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION)
+                        && oldEndpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                    JSONObject oldEndpointSecurityProduction = (JSONObject) oldEndpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
+
+                    if (oldEndpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CLIENT_ID) != null
+                            && oldEndpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)
+                            != null) {
+                        oldProductionApiSecret = oldEndpointSecurityProduction
+                                .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                    } else if (oldEndpointSecurityProduction
+                            .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER) != null
+                            && oldEndpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null
+                            && oldEndpointSecurityProduction
+                            .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE) != null) {
+                        oldProductionApiKeyValue = oldEndpointSecurityProduction
+                                .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
+                    }
+                    if (oldEndpointSecurityProduction.containsKey(
+                            APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) && oldEndpointSecurityProduction.get(
+                            APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) != null) {
+                        oldProductionCustomParams = parser.parse(
+                                oldEndpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS)
+                                        .toString());
+                    }
+                }
+                if (oldEndpointSecurity != null &&
+                        oldEndpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX)
+                        && oldEndpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                    JSONObject oldEndpointSecuritySandbox = (JSONObject) oldEndpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
+
+                    if (oldEndpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CLIENT_ID) != null
+                            && oldEndpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)
+                            != null) {
+                        oldSandboxApiSecret = oldEndpointSecuritySandbox
+                                .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                    } else if (oldEndpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER) != null
+                            && oldEndpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null
+                            && oldEndpointSecuritySandbox
+                            .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE) != null) {
+                        oldSandboxApiKeyValue = oldEndpointSecuritySandbox
+                                .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
+                    }
+                    if (oldEndpointSecuritySandbox.containsKey(
+                            APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) && oldEndpointSecuritySandbox.get(
+                            APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) != null) {
+                        oldSandboxCustomParams = parser.parse(
+                                oldEndpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS)
+                                        .toString());
+                    }
+                }
+            }
+        }
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+
+        PublisherCommonUtils.encryptEndpointSecurityOAuthInternal(newBackend.getEndpointConfigAsMap(), cryptoUtil,
+                oldProductionApiSecret, oldSandboxApiSecret, oldProductionCustomParams, oldSandboxCustomParams,
+                newBackend::setEndpointConfigFromMap);
+
+        PublisherCommonUtils.encryptApiKeyInternal(newBackend.getEndpointConfigAsMap(), cryptoUtil,
+                oldProductionApiKeyValue, oldSandboxApiKeyValue, newBackend::setEndpointConfigFromMap);
     }
 }

@@ -24,6 +24,7 @@ public class APIProductInfoDTO   {
   
     private String id = null;
     private String name = null;
+    private String displayName = null;
     private String context = null;
     private String description = null;
     private String provider = null;
@@ -31,6 +32,8 @@ public class APIProductInfoDTO   {
     private Boolean hasThumbnail = null;
     private String state = null;
     private List<String> securityScheme = new ArrayList<String>();
+    private String createdTime = null;
+    private String updatedTime = null;
     private String gatewayVendor = null;
     private List<String> audiences = new ArrayList<String>();
     private Boolean monetizedInfo = null;
@@ -74,6 +77,24 @@ public class APIProductInfoDTO   {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   * Display name of the API Product. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. 
+   **/
+  public APIProductInfoDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Calculator Product API", value = "Display name of the API Product. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. ")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
@@ -197,6 +218,42 @@ public class APIProductInfoDTO   {
   }
   public void setSecurityScheme(List<String> securityScheme) {
     this.securityScheme = securityScheme;
+  }
+
+  /**
+   * Created time as unix timestamp in milliseconds.
+   **/
+  public APIProductInfoDTO createdTime(String createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1756199448644", value = "Created time as unix timestamp in milliseconds.")
+  @JsonProperty("createdTime")
+  public String getCreatedTime() {
+    return createdTime;
+  }
+  public void setCreatedTime(String createdTime) {
+    this.createdTime = createdTime;
+  }
+
+  /**
+   * Update time as unix timestamp in milliseconds.
+   **/
+  public APIProductInfoDTO updatedTime(String updatedTime) {
+    this.updatedTime = updatedTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1756199448644", value = "Update time as unix timestamp in milliseconds.")
+  @JsonProperty("updatedTime")
+  public String getUpdatedTime() {
+    return updatedTime;
+  }
+  public void setUpdatedTime(String updatedTime) {
+    this.updatedTime = updatedTime;
   }
 
   /**
@@ -349,6 +406,7 @@ public class APIProductInfoDTO   {
     APIProductInfoDTO apIProductInfo = (APIProductInfoDTO) o;
     return Objects.equals(id, apIProductInfo.id) &&
         Objects.equals(name, apIProductInfo.name) &&
+        Objects.equals(displayName, apIProductInfo.displayName) &&
         Objects.equals(context, apIProductInfo.context) &&
         Objects.equals(description, apIProductInfo.description) &&
         Objects.equals(provider, apIProductInfo.provider) &&
@@ -356,6 +414,8 @@ public class APIProductInfoDTO   {
         Objects.equals(hasThumbnail, apIProductInfo.hasThumbnail) &&
         Objects.equals(state, apIProductInfo.state) &&
         Objects.equals(securityScheme, apIProductInfo.securityScheme) &&
+        Objects.equals(createdTime, apIProductInfo.createdTime) &&
+        Objects.equals(updatedTime, apIProductInfo.updatedTime) &&
         Objects.equals(gatewayVendor, apIProductInfo.gatewayVendor) &&
         Objects.equals(audiences, apIProductInfo.audiences) &&
         Objects.equals(monetizedInfo, apIProductInfo.monetizedInfo) &&
@@ -368,7 +428,7 @@ public class APIProductInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, version, hasThumbnail, state, securityScheme, gatewayVendor, audiences, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, egress);
+    return Objects.hash(id, name, displayName, context, description, provider, version, hasThumbnail, state, securityScheme, createdTime, updatedTime, gatewayVendor, audiences, monetizedInfo, businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail, egress);
   }
 
   @Override
@@ -378,6 +438,7 @@ public class APIProductInfoDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
@@ -385,6 +446,8 @@ public class APIProductInfoDTO   {
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    audiences: ").append(toIndentedString(audiences)).append("\n");
     sb.append("    monetizedInfo: ").append(toIndentedString(monetizedInfo)).append("\n");

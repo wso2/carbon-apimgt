@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.32.24-SNAPSHOT</version>
+        <version>9.32.82-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -342,6 +342,10 @@
             <artifactId>org.wso2.carbon.apimgt.spec.parser</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.mcp.transformer</groupId>
+            <artifactId>mcp-transformer-java</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -455,6 +459,7 @@
                             org.apache.axis2.engine; version="${axis2.osgi.version.range}",
                             org.apache.axis2.rpc.receivers; version="${axis2.osgi.version.range}",
                             org.apache.axis2.context; version="${axis2.osgi.version.range}",
+                            org.apache.commons.io.*;version="${import.package.version.commons.io}",
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
                             org.apache.synapse,
                             org.apache.synapse.config,

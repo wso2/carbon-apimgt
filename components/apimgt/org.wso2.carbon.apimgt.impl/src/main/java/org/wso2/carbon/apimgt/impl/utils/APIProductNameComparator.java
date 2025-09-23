@@ -29,7 +29,13 @@ import java.util.Comparator;
 public class APIProductNameComparator implements Comparator<APIProduct>, Serializable {
 
     public int compare(APIProduct product1, APIProduct product2) {
-        if (product1.getId().getName().equalsIgnoreCase(product2.getId().getName())) {
+        String displayNameAPI1 = (product1.getDisplayName() != null && !product1.getDisplayName().trim().isEmpty())
+                ? product1.getDisplayName()
+                : product1.getId().getName();
+        String displayNameAPI2 = (product2.getDisplayName() != null && !product2.getDisplayName().trim().isEmpty())
+                ? product2.getDisplayName()
+                : product2.getId().getName();
+        if (displayNameAPI1.equalsIgnoreCase(displayNameAPI2)) {
             if (product1.getId().getVersion().equals(product2.getId().getVersion())) {
                 //only compare APIProduct provider name
                 return product1.getId().getProviderName().compareToIgnoreCase(product2.getId().getProviderName());
@@ -39,7 +45,7 @@ public class APIProductNameComparator implements Comparator<APIProduct>, Seriali
             }
         } else {
             //only compare APIProduct name
-            return product1.getId().getName().compareToIgnoreCase(product2.getId().getName());
+            return displayNameAPI1.compareToIgnoreCase(displayNameAPI2);
         }
     }
 }

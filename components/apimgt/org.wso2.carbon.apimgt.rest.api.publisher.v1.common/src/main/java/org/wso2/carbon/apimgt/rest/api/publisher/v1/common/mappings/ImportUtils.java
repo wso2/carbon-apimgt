@@ -386,6 +386,7 @@ public class ImportUtils {
                     importedApiDTO.setVisibility(convertedOldAPI.getVisibility());
                     importedApiDTO.setVisibleRoles(convertedOldAPI.getVisibleRoles());
                     importedApiDTO.setVisibleTenants(convertedOldAPI.getVisibleTenants());
+                    importedApiDTO.setDisplayName(convertedOldAPI.getDisplayName());
                     importedApiDTO.setVisibleOrganizations(Collections.EMPTY_LIST); // ignore org visibility
                     importedApiDTO.setSubscriptionAvailability(convertedOldAPI.getSubscriptionAvailability());
                     importedApiDTO.setSubscriptionAvailableTenants(convertedOldAPI.getSubscriptionAvailableTenants());
@@ -578,7 +579,7 @@ public class ImportUtils {
                         //before deleting
                         apiProvider
                                 .undeployAPIRevisionDeployment(importedAPIUuid, earliestRevisionUuid, deploymentsList,
-                                        organization);
+                                        organization, false);
                         apiProvider.deleteAPIRevision(importedAPIUuid, earliestRevisionUuid, tenantDomain);
                         revisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
                         if (log.isDebugEnabled()) {
@@ -786,15 +787,19 @@ public class ImportUtils {
                     importedApiDTO.monetization(oldDTO.getMonetization());
                     importedApiDTO.setTags(oldDTO.getTags());
                 }
-
                 final API apiToUpdate = PublisherCommonUtils
                         .prepareForUpdateApi(targetApi, importedApiDTO, apiProvider, tokenScopes);
-
-                final List<Backend> backendList = getMCPServerBackends(extractedFolderPath);
-                for (Backend backend : backendList) {
-                    apiProvider.updateMCPServerBackend(targetApi.getUuid(), backend, organization);
+                List<Backend> existingBackends = apiProvider.getMCPServerBackends(targetApi.getUuid(), organization);
+                List<Backend> importedBackends = getMCPServerBackends(extractedFolderPath);
+                if (existingBackends.isEmpty() || importedBackends.isEmpty()) {
+                    throw new APIManagementException("No backends found to update for API: " + targetApi.getUuid());
                 }
-
+                Backend oldBackend = existingBackends.get(0);
+                Backend importedBackend = importedBackends.get(0);
+                Backend backend = new Backend(oldBackend);
+                backend.setEndpointConfig(importedBackend.getEndpointConfig());
+                PublisherCommonUtils.updateMCPServerBackend(targetApi.getUuid(), oldBackend, backend, organization
+                        , apiProvider);
                 apiProvider.updateAPI(apiToUpdate, targetApi);
                 importedApi = apiProvider.getAPIbyUUID(targetApi.getUuid(), organization);
 
@@ -925,7 +930,7 @@ public class ImportUtils {
                                 apiProvider.getAPIRevisionDeploymentList(earliestRevisionUuid);
 
                         apiProvider.undeployAPIRevisionDeployment(
-                                importedAPIUuid, earliestRevisionUuid, deploymentsList, organization);
+                                importedAPIUuid, earliestRevisionUuid, deploymentsList, organization, false);
                         apiProvider.deleteAPIRevision(importedAPIUuid, earliestRevisionUuid, tenantDomain);
                         revisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
 
@@ -2833,12 +2838,16 @@ public class ImportUtils {
                             apiTypeWrapper.getApi().getUuid() :
                             apiTypeWrapper.getApiProduct().getUuid();
                     if (docContentExists) {
+                        String inlineContent = null;
                         try (FileInputStream inputStream = new FileInputStream(
                                 individualDocumentFilePath + File.separator + folderName)) {
-                            String inlineContent = IOUtils.toString(inputStream, ImportExportConstants.CHARSET);
-                            PublisherCommonUtils.addDocumentationContent(documentation, apiProvider, apiOrApiProductId,
-                                    documentation.getId(), organization, inlineContent);
+                            inlineContent = IOUtils.toString(inputStream, ImportExportConstants.CHARSET);
+                        } catch (FileNotFoundException e) {
+                            // For inline & Markdown docs, if the content file is not found, content will be a space.
+                            inlineContent = " ";
                         }
+                        PublisherCommonUtils.addDocumentationContent(documentation, apiProvider, apiOrApiProductId,
+                                documentation.getId(), organization, inlineContent);
                     } else if (ImportExportConstants.FILE_DOC_TYPE.equalsIgnoreCase(docSourceType)) {
                         String filePath = documentation.getFilePath();
                         try (FileInputStream inputStream = new FileInputStream(

@@ -128,10 +128,13 @@ return null;
     }
     private VisibilityEnum visibility = null;
     private String apiName = null;
+    private String apiDisplayName = null;
     private String apiVersion = null;
     private String apiProvider = null;
     private String apiUUID = null;
     private String associatedType = null;
+    private String createdTime = null;
+    private String updatedTime = null;
 
   /**
    **/
@@ -254,6 +257,24 @@ return null;
   }
 
   /**
+   * Human-friendly name shown in UI for associated API. Length limited to DB column size.
+   **/
+  public DocumentSearchResultAllOfDTO apiDisplayName(String apiDisplayName) {
+    this.apiDisplayName = apiDisplayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Pizza Shack API", value = "Human-friendly name shown in UI for associated API. Length limited to DB column size.")
+  @JsonProperty("apiDisplayName")
+  public String getApiDisplayName() {
+    return apiDisplayName;
+  }
+  public void setApiDisplayName(String apiDisplayName) {
+    this.apiDisplayName = apiDisplayName;
+  }
+
+  /**
    * The version of the associated API
    **/
   public DocumentSearchResultAllOfDTO apiVersion(String apiVersion) {
@@ -322,6 +343,42 @@ return null;
     this.associatedType = associatedType;
   }
 
+  /**
+   * Created time as unix timestamp in milliseconds.
+   **/
+  public DocumentSearchResultAllOfDTO createdTime(String createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1756199448644", value = "Created time as unix timestamp in milliseconds.")
+  @JsonProperty("createdTime")
+  public String getCreatedTime() {
+    return createdTime;
+  }
+  public void setCreatedTime(String createdTime) {
+    this.createdTime = createdTime;
+  }
+
+  /**
+   * Update time as unix timestamp in milliseconds.
+   **/
+  public DocumentSearchResultAllOfDTO updatedTime(String updatedTime) {
+    this.updatedTime = updatedTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1756199448644", value = "Update time as unix timestamp in milliseconds.")
+  @JsonProperty("updatedTime")
+  public String getUpdatedTime() {
+    return updatedTime;
+  }
+  public void setUpdatedTime(String updatedTime) {
+    this.updatedTime = updatedTime;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -339,15 +396,18 @@ return null;
         Objects.equals(otherTypeName, documentSearchResultAllOf.otherTypeName) &&
         Objects.equals(visibility, documentSearchResultAllOf.visibility) &&
         Objects.equals(apiName, documentSearchResultAllOf.apiName) &&
+        Objects.equals(apiDisplayName, documentSearchResultAllOf.apiDisplayName) &&
         Objects.equals(apiVersion, documentSearchResultAllOf.apiVersion) &&
         Objects.equals(apiProvider, documentSearchResultAllOf.apiProvider) &&
         Objects.equals(apiUUID, documentSearchResultAllOf.apiUUID) &&
-        Objects.equals(associatedType, documentSearchResultAllOf.associatedType);
+        Objects.equals(associatedType, documentSearchResultAllOf.associatedType) &&
+        Objects.equals(createdTime, documentSearchResultAllOf.createdTime) &&
+        Objects.equals(updatedTime, documentSearchResultAllOf.updatedTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(docType, summary, sourceType, sourceUrl, otherTypeName, visibility, apiName, apiVersion, apiProvider, apiUUID, associatedType);
+    return Objects.hash(docType, summary, sourceType, sourceUrl, otherTypeName, visibility, apiName, apiDisplayName, apiVersion, apiProvider, apiUUID, associatedType, createdTime, updatedTime);
   }
 
   @Override
@@ -362,10 +422,13 @@ return null;
     sb.append("    otherTypeName: ").append(toIndentedString(otherTypeName)).append("\n");
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
+    sb.append("    apiDisplayName: ").append(toIndentedString(apiDisplayName)).append("\n");
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
     sb.append("    apiProvider: ").append(toIndentedString(apiProvider)).append("\n");
     sb.append("    apiUUID: ").append(toIndentedString(apiUUID)).append("\n");
     sb.append("    associatedType: ").append(toIndentedString(associatedType)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
     sb.append("}");
     return sb.toString();
   }

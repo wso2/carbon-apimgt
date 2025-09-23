@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthe
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -110,6 +111,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private String securityContextHeader;
     protected APIKeyValidator keyValidator;
     protected boolean isOauthParamsInitialized = false;
+    private static final Pattern validHostHeaderPattern =
+            Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
 
     public String getApiUUID() {
         return apiUUID;
@@ -760,18 +763,33 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                                 " error=\"invalid_token\"" +
                                 ", error_description=\"The provided token is invalid\"");
                     } else {
-                        // We need to adjust this to support vhost instead of constructing the URL here
-                        String hostAddress = APIUtil.getHostAddress();
-                        if ("localhost".equals(hostAddress)) {
-                            hostAddress += ":";
-                            hostAddress += (8243  + APIUtil.getPortOffset());
+                        // Derive the outward facing host and port from host header
+                        String hostHeader = headers.get(APIMgtGatewayConstants.HOST);
+
+                        if (StringUtils.isBlank(hostHeader) || !validHostHeaderPattern.matcher(hostHeader).matches()) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Missing or malformed host header in request.Extracting host header " +
+                                        "from config.");
+                            }
+                            hostHeader = APIUtil.getHostAddress();
                         }
-                        String resourceMetadata = APIConstants.HTTPS_PROTOCOL + APIConstants.URL_SCHEME_SEPARATOR +
-                                hostAddress + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
-                        headers.put(HttpHeaders.WWW_AUTHENTICATE, "Bearer resource_metadata=" +
-                                "\"" + resourceMetadata + "\","
-                                + " error=\"invalid_token\","
-                                + " error_description=\"Access token is missing or expired\"");
+
+                        String gwURL = MCPUtils.getGatewayServerURL(hostHeader, contextPath);
+                        if (StringUtils.isEmpty(gwURL)) {
+                            headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
+                                    " error=\"invalid_token\"" +
+                                    ", error_description=\"The provided token is invalid\"");
+                        } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Constructed gateway URL for resource metadata: " + gwURL);
+                            }
+
+                            String resourceMetadata = gwURL + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
+                            headers.put(HttpHeaders.WWW_AUTHENTICATE, "Bearer resource_metadata=" +
+                                    "\"" + resourceMetadata + "\","
+                                    + " error=\"invalid_token\","
+                                    + " error_description=\"Access token is missing or expired\"");
+                        }
                     }
                 } else {
                     headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +

@@ -27,6 +27,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
+import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants.GatewayNotification.GatewayRegistrationResponse;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
@@ -36,10 +38,15 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class DataHolder {
     private static final Log log  = LogFactory.getLog(DataHolder.class);
@@ -52,6 +59,8 @@ public class DataHolder {
     private Map<String, Boolean> tenantDeployStatus = new HashMap<>();
     private Map<String, LLMProviderInfo> llmProviderMap = new HashMap<>();
     private final Map<String, Cache<String, Long>> apiSuspendedEndpoints = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, AbstractAPIMgtGatewayJWTGenerator> jwtGeneratorTenantMap =
+            new ConcurrentHashMap<>();
 
     private boolean isAllGatewayPoliciesDeployed = false;
     private boolean tenantsProvisioned = false;
@@ -179,7 +188,12 @@ public class DataHolder {
     }
 
     public boolean isAllApisDeployed() {
-        return tenantDeployStatus.values().stream().allMatch(Boolean::booleanValue);
+        for (Boolean b : tenantDeployStatus.values()) {
+            if (!b.booleanValue()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public Map<String, Boolean> getTenantDeployStatus() {
@@ -255,6 +269,30 @@ public class DataHolder {
         }
     }
 
+    /**
+     * Populate vhosts information to API object
+     *
+     * @param gatewayAPIDTO gateway API DTO containing vhosts and other info
+     */
+    public void populateVhosts(GatewayAPIDTO gatewayAPIDTO) {
+        Map<String, API> apiMap = tenantAPIMap.get(gatewayAPIDTO.getTenantDomain());
+        if (apiMap != null) {
+            API api = apiMap.get(gatewayAPIDTO.getApiContext());
+            if (api != null) {
+                List<VHost> vhosts = gatewayAPIDTO.getVhosts();
+                api.setVhosts(vhosts != null ? vhosts : new ArrayList<>());
+                if (log.isDebugEnabled()) {
+                    log.debug("Populated vhosts info for API : " + api.getApiName());
+                }
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("API not found for context " + gatewayAPIDTO.getApiContext() + " in tenant domain "
+                            + gatewayAPIDTO.getTenantDomain());
+                }
+            }
+        }
+    }
+
     public Map<String, Map<String, API>> getTenantAPIMap() {
         return tenantAPIMap;
     }
@@ -311,7 +349,9 @@ public class DataHolder {
     private void initializeTenantDeploymentStatusMap() {
         try {
             Set<String> tenants = GatewayUtils.getTenantsToBeDeployed();
-            tenantDeployStatus = tenants.stream().collect(Collectors.toMap(str -> str, str -> false));
+            for (String str : tenants) {
+                tenantDeployStatus.putIfAbsent(str, false);
+            }
         } catch (APIManagementException e) {
             log.error("Error while initializing tenant deployment status map", e);
         }
@@ -441,5 +481,16 @@ public class DataHolder {
                 }
             }
         }
+    }
+
+    /**
+     * Returns the map of JWT generators per tenant domain.
+     *
+     * @return ConcurrentMap where the key is the tenant domain and the value is the corresponding
+     * AbstractAPIMgtGatewayJWTGenerator instance.
+     */
+    public ConcurrentMap<String, AbstractAPIMgtGatewayJWTGenerator> getJwtGeneratorTenantMap() {
+
+        return jwtGeneratorTenantMap;
     }
 }

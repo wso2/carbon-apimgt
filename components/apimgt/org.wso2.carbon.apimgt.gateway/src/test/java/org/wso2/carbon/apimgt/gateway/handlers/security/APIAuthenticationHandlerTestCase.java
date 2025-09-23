@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.caching.impl.Util;
@@ -55,7 +56,8 @@ import java.util.TreeMap;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Util.class, MetricManager.class, Timer.Context.class, APIUtil.class, GatewayUtils.class,
-        ServiceReferenceHolder.class, MultitenantUtils.class, APIKeyValidator.class})
+        ServiceReferenceHolder.class, MultitenantUtils.class, APIKeyValidator.class,
+        org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.class,})
 public class APIAuthenticationHandlerTestCase {
 
     private Timer.Context context;
@@ -90,6 +92,17 @@ public class APIAuthenticationHandlerTestCase {
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn
                 (apiManagerConfigurationService);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder gatewayServiceReferenceHolder =
+                Mockito.mock(org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.class);
+        Mockito.when(org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.getInstance())
+                .thenReturn(gatewayServiceReferenceHolder);
+        Mockito.when(gatewayServiceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+
+        ExtendedJWTConfigurationDto jwtCfg = new ExtendedJWTConfigurationDto();
+        jwtCfg.setEnabled(false);
+        Mockito.when(apiManagerConfiguration.getJwtConfigurationDto()).thenReturn(jwtCfg);
+
         Mockito.when(apiManagerConfiguration.getExtensionListenerMap()).thenReturn(extensionListenerMap);
         apiKeyValidator = Mockito.mock(APIKeyValidator.class);
     }
@@ -346,12 +359,17 @@ public class APIAuthenticationHandlerTestCase {
       APIAuthenticationHandler apiAuthenticationHandler = new APIAuthenticationHandler();
         PowerMockito.mockStatic(MetricManager.class);
         Timer timer = Mockito.mock(Timer.class);
-        Mockito.when(timer.start()).thenReturn(context);
+        Timer.Context localCtx = Mockito.mock(Timer.Context.class);
+        Mockito.when(timer.start()).thenReturn(localCtx);
+
         PowerMockito.when(MetricManager.name(APIConstants.METRICS_PREFIX, "APIAuthenticationHandler"))
                 .thenReturn("org.wso2.amAPIAuthenticationHandler");
         PowerMockito.when(MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, "org.wso2.amAPIAuthenticationHandler"))
                 .thenReturn(timer);
-        Mockito.verify(apiAuthenticationHandler.startMetricTimer());
+
+        Timer.Context returned = apiAuthenticationHandler.startMetricTimer();
+        Assert.assertSame(localCtx, returned);              // assert return
+        Mockito.verify(timer, Mockito.times(1)).start();
     }
 
     @Test

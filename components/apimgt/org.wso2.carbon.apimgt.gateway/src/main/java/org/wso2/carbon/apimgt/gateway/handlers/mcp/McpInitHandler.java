@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.mcp;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -36,8 +37,11 @@ import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.exception.McpException;
+import org.wso2.carbon.apimgt.gateway.mcp.request.MCPRequestDeserializer;
 import org.wso2.carbon.apimgt.gateway.mcp.request.Params;
 import org.wso2.carbon.apimgt.gateway.mcp.request.McpRequest;
+import org.wso2.carbon.apimgt.gateway.mcp.request.ParamsDeserializer;
+import org.wso2.carbon.apimgt.gateway.mcp.response.McpResponseDto;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -69,6 +73,17 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
             String path = (String) messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
             String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
 
+            String httpsPort = System.getProperty(APIMgtGatewayConstants.HTTPS_NIO_PORT);
+            if (!StringUtils.isEmpty(httpsPort)) {
+                messageContext.setProperty("uri.var.httpsPort", httpsPort);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("https.nio.port could not be resolved from System properties, hence default " +
+                            "value was set");
+                }
+                messageContext.setProperty("uri.var.httpsPort", "8243");
+            }
+
             if (StringUtils.startsWith(path, APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE) &&
                     StringUtils.equals(APIConstants.HTTP_GET, httpMethod)) {
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST, true);
@@ -77,7 +92,9 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST, isNoAuthMCPRequest);
             }
         } catch (McpException e) {
-            log.error("Error in MCP handleRequest flow", e);
+            log.error("MCP init failed: " + String.valueOf(e.getData()), e);
+            MCPUtils.handleMCPFailure(messageContext, new McpResponseDto(e.getErrorMessage(), e.getErrorCode(), null));
+            return false;
         }
         return true;
     }
@@ -123,8 +140,14 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
             if (JsonUtil.hasAJsonPayload(axis2MC)) {
                 messageBody = JsonUtil.jsonPayloadToString(axis2MC);
 
-                Gson gson = new Gson();
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(McpRequest.class, new MCPRequestDeserializer())
+                        .registerTypeAdapter(Params.class, new ParamsDeserializer())
+                        .create();
                 McpRequest request = gson.fromJson(messageBody, McpRequest.class);
+                if (log.isDebugEnabled()) {
+                    log.debug("Deserialized MCP request: " + request);
+                }
                 if (!MCPUtils.validateRequest(request)) {
                     throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
                             APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Invalid Request");
@@ -178,13 +201,13 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
             case APIConstants.MCP.METHOD_INITIALIZE:
             case APIConstants.MCP.METHOD_PING:
             case APIConstants.MCP.METHOD_NOTIFICATION_INITIALIZED:
+            case APIConstants.MCP.METHOD_RESOURCES_LIST:
+            case APIConstants.MCP.METHOD_RESOURCE_TEMPLATE_LIST:
+            case APIConstants.MCP.METHOD_PROMPTS_LIST:
                 return true;
 
             case APIConstants.MCP.METHOD_TOOL_LIST:
             case APIConstants.MCP.METHOD_TOOL_CALL:
-            case APIConstants.MCP.METHOD_RESOURCES_LIST:
-            case APIConstants.MCP.METHOD_RESOURCE_TEMPLATE_LIST:
-            case APIConstants.MCP.METHOD_PROMPTS_LIST:
                 return false;
 
             default:

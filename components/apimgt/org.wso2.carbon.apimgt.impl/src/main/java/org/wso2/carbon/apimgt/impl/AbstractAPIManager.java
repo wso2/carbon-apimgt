@@ -215,6 +215,10 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getAPIInfoByUUID(id);
     }
 
+    public APIInfo getAPIInfoByUUID(String id, String apiType) throws APIManagementException {
+        return apiMgtDAO.getAPIInfoByUUID(id, apiType);
+    }
+
 
     protected TenantManager getTenantManager() {
 

@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.gateway.mcp.request.McpRequestProcessor;
 import org.wso2.carbon.apimgt.gateway.mcp.response.McpResponseDto;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.MCPPayloadGenerator;
+import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -52,6 +53,7 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Mediator for handling MCP (Model Context Protocol) requests and responses in the API Gateway.
@@ -64,6 +66,8 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
     private static final String MCP_PROCESSED = "MCP_PROCESSED";
     private static final String IN_FLOW = "IN";
     private static final String OUT_FLOW = "OUT";
+    private static final Pattern validHostHeaderPattern =
+            Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
 
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
@@ -122,6 +126,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                 handleMcpResponse(messageContext);
             } catch (McpException e) {
                 log.error("Error while handling MCP response", e);
+                MCPUtils.handleMCPFailure(messageContext, new McpResponseDto(e.getErrorMessage(), e.getErrorCode(), null));
                 return false;
             }
         }
@@ -136,7 +141,8 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
 
         McpResponseDto mcpResponse = McpRequestProcessor.processRequest(messageContext, matchedAPI, requestBody);
         if (APIConstants.MCP.METHOD_INITIALIZE.equals(mcpMethod) || APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod)
-            || APIConstants.MCP.METHOD_PING.equals(mcpMethod)) {
+            || APIConstants.MCP.METHOD_PING.equals(mcpMethod) || APIConstants.MCP.METHOD_PROMPTS_LIST.equals(mcpMethod)
+            || (APIConstants.MCP.METHOD_TOOL_CALL.equals(mcpMethod) && mcpResponse != null)) {
             messageContext.setProperty(MCP_PROCESSED, "true");
             if (mcpResponse != null) {
                 try {
@@ -172,14 +178,28 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             log.error("Multiple Key Managers found for MCP Server: " + matchedAPI.getUuid() + ".");
             skipAuthServersAttribute = true;
         }
-        // We need to adjust this to support vhost instead of constructing the URL here
-        String contextPath = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
-        String hostAddress = APIUtil.getHostAddress();
-        String serverURL = APIConstants.HTTPS_PROTOCOL + APIConstants.URL_SCHEME_SEPARATOR + hostAddress;
-        if ("localhost".equals(hostAddress)) {
-            serverURL += ":";
-            serverURL += (8243  + APIUtil.getPortOffset());
+
+        // Derive the outward facing host and port from host header
+        org.apache.axis2.context.MessageContext axis2MC =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        String hostHeader = headers != null ? (String) headers.get(APIMgtGatewayConstants.HOST) : null;
+        if (StringUtils.isBlank(hostHeader) || !validHostHeaderPattern.matcher(hostHeader).matches()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Missing or malformed host header in request.Extracting host header from config.");
+            }
+            hostHeader = APIUtil.getHostAddress();
         }
+
+
+        String contextPath = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+        String serverURL = MCPUtils.getGatewayServerURL(hostHeader, contextPath);
+
+        if (StringUtils.isEmpty(serverURL)) {
+            log.error("Error while generating mcp payload for resource metadata");
+            return false;
+        }
+
         String resourceURL = serverURL + contextPath + APIMgtGatewayConstants.MCP_RESOURCE;
         oAuthProtectedResourceDTO.setResource(resourceURL);
 
@@ -241,7 +261,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         }
 
         //Set received id to mcp response, Responses MUST include the same ID as the request they correspond to
-        Object id = messageContext.getProperty("RECEIVED_MCP_ID");
+        Object id = messageContext.getProperty(APIConstants.MCP.RECEIVED_MCP_ID);
 
         String messageBody;
         try {

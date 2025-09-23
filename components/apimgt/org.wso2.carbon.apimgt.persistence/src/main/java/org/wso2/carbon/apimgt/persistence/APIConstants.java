@@ -29,6 +29,7 @@ public final class APIConstants {
 
     // Those constance are used in API artifact.
     public static final String API_OVERVIEW_NAME = "overview_name";
+    public static final String API_OVERVIEW_DISPLAY_NAME = "overview_displayName";
     public static final String API_OVERVIEW_TYPE = "overview_type";
     public static final String API_OVERVIEW_VERSION = "overview_version";
     public static final String API_OVERVIEW_VERSION_TYPE = "overview_versionType";
@@ -322,10 +323,7 @@ public final class APIConstants {
     public static final String TYPE_SEARCH_TYPE_KEY = "type=";
 
     public static final String[] API_SUPPORTED_TYPE_LIST =
-            {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB", "WEBHOOK", "ASYNC"};
-
-    public static final String[] API_SUPPORTED_TYPE_LIST_DEVPORTAL =
-            {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB", "WEBHOOK", "ASYNC", "APIProduct"};
+            {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB", "WEBHOOK", "ASYNC", "MCP"};
 
     public static class AuditLogConstants {
         public static final String API_PRODUCT = "APIProduct";
@@ -384,6 +382,7 @@ public final class APIConstants {
     public static final String USER_CTX_PROPERTY_SKIP_ROLES = "skipRoles";
     public static final String USER_CTX_PROPERTY_ORGS_AVAILABLE = "organizationsAvailable";
     public static final String API = "API";
+    public static final String MCP = "MCP";
 
     public static final String API_CUSTOM_SEQUENCE_TYPE_IN = "in";
     public static final String API_CUSTOM_SEQUENCE_TYPE_OUT = "out";
@@ -403,6 +402,8 @@ public final class APIConstants {
     public static final String API_TYPE_WS = "WS";
     public static final String API_TYPE_GRAPHQL = "GRAPHQL";
     public static final String API_TYPE_SOAP = "SOAP";
+    public static final String API_TYPE_MCP = "MCP";
+    public static final String API_IDENTIFIER_TYPE = "API";
 
     // API Subtype constants
     public static final String API_SUBTYPE_DEFAULT = "DEFAULT";

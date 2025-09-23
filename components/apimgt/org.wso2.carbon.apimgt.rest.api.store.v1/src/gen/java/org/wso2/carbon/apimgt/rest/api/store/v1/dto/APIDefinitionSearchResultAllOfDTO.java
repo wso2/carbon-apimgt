@@ -21,6 +21,7 @@ import javax.validation.Valid;
 public class APIDefinitionSearchResultAllOfDTO   {
   
     private String apiName = null;
+    private String apiDisplayName = null;
     private String apiVersion = null;
     private String apiContext = null;
     private String apiUUID = null;
@@ -44,6 +45,24 @@ public class APIDefinitionSearchResultAllOfDTO   {
   }
   public void setApiName(String apiName) {
     this.apiName = apiName;
+  }
+
+  /**
+   * Human-friendly name shown in UI for associated API. Length limited to DB column size.
+   **/
+  public APIDefinitionSearchResultAllOfDTO apiDisplayName(String apiDisplayName) {
+    this.apiDisplayName = apiDisplayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Pizza Shack API", value = "Human-friendly name shown in UI for associated API. Length limited to DB column size.")
+  @JsonProperty("apiDisplayName")
+  public String getApiDisplayName() {
+    return apiDisplayName;
+  }
+  public void setApiDisplayName(String apiDisplayName) {
+    this.apiDisplayName = apiDisplayName;
   }
 
   /**
@@ -165,6 +184,7 @@ public class APIDefinitionSearchResultAllOfDTO   {
     }
     APIDefinitionSearchResultAllOfDTO apIDefinitionSearchResultAllOf = (APIDefinitionSearchResultAllOfDTO) o;
     return Objects.equals(apiName, apIDefinitionSearchResultAllOf.apiName) &&
+        Objects.equals(apiDisplayName, apIDefinitionSearchResultAllOf.apiDisplayName) &&
         Objects.equals(apiVersion, apIDefinitionSearchResultAllOf.apiVersion) &&
         Objects.equals(apiContext, apIDefinitionSearchResultAllOf.apiContext) &&
         Objects.equals(apiUUID, apIDefinitionSearchResultAllOf.apiUUID) &&
@@ -175,7 +195,7 @@ public class APIDefinitionSearchResultAllOfDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiName, apiVersion, apiContext, apiUUID, apiProvider, apiType, associatedType);
+    return Objects.hash(apiName, apiDisplayName, apiVersion, apiContext, apiUUID, apiProvider, apiType, associatedType);
   }
 
   @Override
@@ -184,6 +204,7 @@ public class APIDefinitionSearchResultAllOfDTO   {
     sb.append("class APIDefinitionSearchResultAllOfDTO {\n");
     
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
+    sb.append("    apiDisplayName: ").append(toIndentedString(apiDisplayName)).append("\n");
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
     sb.append("    apiContext: ").append(toIndentedString(apiContext)).append("\n");
     sb.append("    apiUUID: ").append(toIndentedString(apiUUID)).append("\n");

@@ -16,7 +16,13 @@
  */
 package org.wso2.carbon.apimgt.api.model;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import java.io.Serializable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Represents a Backend service.
@@ -29,6 +35,18 @@ public class Backend implements Serializable {
     private String name;
     private String definition;
     private String endpointConfig;
+
+    public Backend() {
+
+    }
+
+    public Backend(Backend backend) {
+
+        this.id = backend.id;
+        this.name = backend.name;
+        this.definition = backend.definition;
+        this.endpointConfig = backend.endpointConfig;
+    }
 
     public String getId() {
 
@@ -69,5 +87,33 @@ public class Backend implements Serializable {
     public void setName(String name) {
 
         this.name = name;
+    }
+
+    /**
+     * Returns the endpoint configuration as a Map.
+     *
+     * @return A Map representing the endpoint configuration, or null if the configuration is empty or null.
+     * @throws ParseException If there is an error parsing the JSON string.
+     */
+    public Map<String, Object> getEndpointConfigAsMap() throws ParseException {
+
+        if (endpointConfig == null || endpointConfig.isEmpty()) return null;
+        JSONObject obj = (JSONObject) new JSONParser().parse(endpointConfig);
+        return new LinkedHashMap<>(obj);
+    }
+
+    /**
+     * Sets the endpoint configuration from a Map.
+     *
+     * @param map A Map representing the endpoint configuration. If null, the endpoint configuration will be set to
+     *            null.
+     */
+    public void setEndpointConfigFromMap(Map<String, Object> map) {
+
+        if (map == null) {
+            this.endpointConfig = null;
+            return;
+        }
+        this.endpointConfig = JSONObject.toJSONString(map);
     }
 }

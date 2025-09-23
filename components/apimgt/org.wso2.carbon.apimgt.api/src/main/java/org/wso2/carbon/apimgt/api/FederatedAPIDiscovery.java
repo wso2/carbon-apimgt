@@ -20,7 +20,7 @@
 
 package org.wso2.carbon.apimgt.api;
 
-import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.DiscoveredAPI;
 import org.wso2.carbon.apimgt.api.model.Environment;
 
 import java.util.List;
@@ -44,5 +44,9 @@ public interface FederatedAPIDiscovery {
      * Discovers APIs from the federated environment.
      * This method should be called to initiate the discovery process.
      */
-    List<API> discoverAPI();
+    List<DiscoveredAPI> discoverAPI();
+
+    default boolean isAPIUpdated(String existingReferenceArtifact, String newReferenceArtifact) {
+        return !java.util.Objects.equals(existingReferenceArtifact, newReferenceArtifact);
+    }
 }
