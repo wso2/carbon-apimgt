@@ -655,7 +655,7 @@ public class ApiMgtDAO {
                 subscriber.setTenantId(rs.getInt("TENANT_ID"));
                 subscriber.setEmail(rs.getString("EMAIL_ADDRESS"));
                 Timestamp dateSubscribed = rs.getTimestamp("DATE_SUBSCRIBED");
-                subscriber.setSubscribedDate(dateSubscribed == null ? null : new java.util.Date(dateSubscribed.getTime()));
+                subscriber.setSubscribedDate(dateSubscribed == null ? null : new Date(dateSubscribed.getTime()));
                 return subscriber;
             }
         } catch (SQLException e) {
