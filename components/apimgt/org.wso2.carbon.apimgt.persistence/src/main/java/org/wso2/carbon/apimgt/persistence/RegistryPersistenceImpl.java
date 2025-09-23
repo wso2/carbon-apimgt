@@ -626,9 +626,16 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
 
             if (api.getSwaggerDefinition() != null) {
-                String resourcePath = RegistryPersistenceUtil.getOpenAPIDefinitionFilePath(api.getId().getName(),
-                        api.getId().getVersion(), api.getId().getProviderName());
-                resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+                String apiPath = GovernanceUtils.getArtifactPath(registry, api.getUuid());
+                int prependIndex = apiPath.lastIndexOf(APIConstants.API_RESOURCE_NAME);
+                if (prependIndex == -1) {
+                    throw new APIPersistenceException(
+                            "API resource name '" + APIConstants.API_RESOURCE_NAME + "' not found in API path: "
+                                    + apiPath);
+                }
+                String apiSourcePath = apiPath.substring(0, prependIndex);
+                String resourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                        + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
                 Resource resource;
                 if (!registry.resourceExists(resourcePath)) {
                     resource = registry.newResource();
@@ -914,10 +921,15 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         return null;
                     }
                 }
-                String definitionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
-                        + RegistryPersistenceUtil.replaceEmailDomain(api.getId().getProviderName())
-                        + RegistryConstants.PATH_SEPARATOR + api.getId().getName() + RegistryConstants.PATH_SEPARATOR
-                        + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR
+                String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
+                int prependIndex = apiPath.lastIndexOf(APIConstants.API_RESOURCE_NAME);
+                if (prependIndex == -1) {
+                    throw new APIPersistenceException(
+                            "API resource name '" + APIConstants.API_RESOURCE_NAME + "' not found in API path: "
+                                    + apiPath);
+                }
+                String apiSourcePath = apiPath.substring(0, prependIndex);
+                String definitionPath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
                         + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
 
                 if (registry.resourceExists(definitionPath)) {
@@ -2214,16 +2226,21 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
 
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
-
-            String apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(
-                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
+            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             String visibleRoles = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
             String visibility = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
-            String resourcePath = RegistryPersistenceUtil.getOpenAPIDefinitionFilePath(apiName, apiVersion,
-                    apiProviderName);
-            resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+            String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
+            int prependIndex = apiPath.lastIndexOf(APIConstants.API_RESOURCE_NAME);
+            if (prependIndex == -1) {
+                throw new OASPersistenceException(
+                        "API resource name '" + APIConstants.API_RESOURCE_NAME + "' not found in API path: "
+                                + apiPath);
+            }
+            String apiSourcePath = apiPath.substring(0, prependIndex);
+            String resourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                    + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
             Resource resource;
             if (!registry.resourceExists(resourcePath)) {
                 resource = registry.newResource();
@@ -4158,8 +4175,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 if (log.isDebugEnabled()) {
                     log.debug("Changing the provider name of API with id: " + apiId + " to " + providerName);
                 }
-                artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, RegistryPersistenceUtil
-                        .replaceEmailDomain(providerName));
+                artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, providerName);
                 artifactManager.updateGenericArtifact(artifact);
                 userRegistry.commitTransaction();
                 if (log.isDebugEnabled()) {
