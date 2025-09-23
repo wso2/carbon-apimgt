@@ -1594,6 +1594,18 @@ public class ApisApiServiceImpl implements ApisApiService {
                 validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
                 try {
+
+                    List<API> mcpServers = apiProvider.getMCPServersUsedByAPI(apiId, organization);
+                    if (mcpServers != null && !mcpServers.isEmpty()) {
+                        List<String> mcpServerNames = new ArrayList<>();
+                        for (API mcpServer : mcpServers) {
+                            mcpServerNames.add(mcpServer.getId().getApiName());
+                        }
+                        String errorMsg = "Cannot remove the API as it is used by MCP server(s).";
+                        String moreInfo = "API " + apiId + " is used by MCP server(s): " + mcpServerNames;
+                        RestApiUtil.handleConflict(errorMsg, moreInfo, log);
+                    }
+
                     //check if the API has subscriptions
                     //Todo : need to optimize this check. This method seems too costly to check if subscription exists
                     List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiId, organization);
