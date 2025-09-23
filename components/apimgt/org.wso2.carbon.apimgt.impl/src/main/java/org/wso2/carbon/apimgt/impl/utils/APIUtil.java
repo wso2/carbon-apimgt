@@ -6018,9 +6018,11 @@ public final class APIUtil {
         if (log.isDebugEnabled()) {
             log.debug("Loading trust store for SSL context creation. KeyStore: " + keyStorePath);
         }
+
+        char[] passwordChars = new char[0];
         try {
             KeyStore trustStore = KeyStore.getInstance(keyStoreType);
-            char[] passwordChars = keyStorePassword.toCharArray();
+            passwordChars = keyStorePassword.toCharArray();
             try (InputStream keyStoreStream = Files.newInputStream(path)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Loading trust store from: " + keyStorePath);
@@ -6046,11 +6048,12 @@ public final class APIUtil {
         } catch (KeyManagementException e) {
             log.error("Failed to initialize SSLContext from trust store: " + keyStorePath + ": " + e.getMessage());
             sslContext = SSLContexts.createDefault();
+        } finally {
+            Arrays.fill(passwordChars, '\0');
         }
 
         return CommonAPIUtil.getHttpClient(protocol, configuration, sslContext);
     }
-
 
     /**
      * This method will return a relative URL for given registry resource which we can used to retrieve the resource
