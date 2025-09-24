@@ -1283,9 +1283,12 @@ public class ImportUtils {
      * @throws APIManagementException If an error occurs while populating the API with endpoints
      */
     public static void populateAPIWithEndpoints(API api, APIProvider provider, String extractedFolderPath,
-                                                String organization) throws APIManagementException {
+            String organization) throws APIManagementException {
 
         String apiUUID = api.getUuid();
+        if (log.isDebugEnabled()) {
+            log.debug("Populating API: " + apiUUID + " with endpoints");
+        }
         try {
             // Retrieve endpoints from artifact
             String jsonContent = getFileContentAsJson(
@@ -1304,21 +1307,44 @@ public class ImportUtils {
                     JsonArray endpoints = endpointsJson.getAsJsonArray();
                     for (JsonElement endpointElement : endpoints) {
                         JsonObject endpointObj = endpointElement.getAsJsonObject();
-                        APIEndpointInfo apiEndpointInfo =
-                                new Gson().fromJson(endpointObj, APIEndpointInfo.class);
+                        APIEndpointInfo apiEndpointInfo = new Gson().fromJson(endpointObj, APIEndpointInfo.class);
                         String endpointUUID = apiEndpointInfo.getId();
+
+                        try {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Processing endpoint with UUID: " + endpointUUID + " for API: " + apiUUID);
+                            }
+                            Map endpointConfig = apiEndpointInfo.getEndpointConfig();
+                            if (endpointConfig != null) {
+                                // Encrypt endpoint security credentials
+                                PublisherCommonUtils.encryptApiKeyInternal(endpointConfig,
+                                        CryptoUtil.getDefaultCryptoUtil(), StringUtils.EMPTY, StringUtils.EMPTY,
+                                        apiEndpointInfo::setEndpointConfig);
+                                if (log.isDebugEnabled()) {
+                                    log.debug(
+                                            "Successfully encrypted endpoint security credentials for endpoint: " +
+                                                    endpointUUID);
+                                }
+                            }
+                        } catch (APIManagementException | CryptoException e) {
+                            throw new APIManagementException(
+                                    "Error while encrypting endpoint security credentials for endpoint: " +
+                                            endpointUUID + " of API: " + apiUUID,
+                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ENCRYPTING_ENDPOINT_SECURITY,
+                                    endpointUUID));
+                        }
+
                         try {
                             String createdEndpointUUID = provider.addAPIEndpoint(apiUUID, apiEndpointInfo,
                                     organization);
                             if (log.isDebugEnabled()) {
-                                log.debug("API Endpoint with UUID: " + createdEndpointUUID +
-                                        " has been added to the API");
+                                log.debug(
+                                        "Successfully added endpoint with UUID: " + createdEndpointUUID +
+                                                " for API: " + apiUUID);
                             }
                         } catch (APIManagementException e) {
-                            throw new APIManagementException(
-                                    "Error while adding API Endpoint with ID: " + endpointUUID,
-                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINT,
-                                    endpointUUID));
+                            throw new APIManagementException("Error while adding API Endpoint with ID: " + endpointUUID,
+                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINT, endpointUUID));
                         }
                     }
                 }
