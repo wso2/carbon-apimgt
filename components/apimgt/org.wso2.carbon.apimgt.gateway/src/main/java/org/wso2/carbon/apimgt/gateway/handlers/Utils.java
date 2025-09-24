@@ -774,6 +774,19 @@ public class Utils {
     }
 
     /**
+     * Evaluate current request transport and message context to check if it is a MCP request execution path.
+     *
+     * @param messageContext MessageContext
+     * @return true if MCP request execution path
+     */
+    public static boolean isMCPRequest(MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+        String apiType = (String) messageContext.getProperty(APIMgtGatewayConstants.API_TYPE);
+        return apiType != null && apiType.equals(APIConstants.API_TYPE_MCP);
+    }
+
+    /**
      * @param certificate SSL Certificate
      * @return X509Certificate
      */
