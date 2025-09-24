@@ -138,6 +138,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             query = query + " " + UnifiedSearchConstants.QUERY_API_TYPE_APIS_PUBLISHER;
         }
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieving APIs with query: " + query + ", limit: " + limit + ", offset: " + offset);
+            }
 
             //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":")) {
@@ -162,6 +165,10 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Found " + allMatchedApis.size() + " APIs matching the query");
+            }
 
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
 
@@ -242,14 +249,23 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO createdApiDTO;
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            
+            if (log.isDebugEnabled()) {
+                log.debug("Creating API: " + (body != null ? body.getName() : "null") + " by user: " + username + 
+                         " in organization: " + organization);
+            }
+            
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             API createdApi = PublisherCommonUtils
                     .addAPIWithGeneratedSwaggerDefinition(new APIDTOTypeWrapper(body), oasVersion,
-                            RestApiCommonUtil.getLoggedInUsername(),
-                            organization, orgInfo );
+                            username, organization, orgInfo );
             createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
             //This URI used to set the location header of the POST response
             createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
+            
+            log.info("API created successfully: " + createdApi.getId().getApiName() + " by user: " + username);
+            
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
@@ -1575,6 +1591,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             String username = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+            
+            if (log.isDebugEnabled()) {
+                log.debug("Deleting API: " + apiId + " by user: " + username + " in organization: " + organization);
+            }
 
             boolean isAPIExistDB = false;
             APIManagementException error = null;
@@ -1646,6 +1666,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             try {
                 apiProvider.deleteAPI(apiId, organization);
                 isDeleted = true;
+                log.info("API deleted successfully: " + apiId + " by user: " + username);
             } catch (APIManagementException e) {
                 log.error("Error while deleting API " + apiId + "on organization " + organization, e);
             }

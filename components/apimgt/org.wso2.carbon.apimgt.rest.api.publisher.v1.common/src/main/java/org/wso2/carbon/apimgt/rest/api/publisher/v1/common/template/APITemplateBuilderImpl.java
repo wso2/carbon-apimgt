@@ -109,6 +109,10 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     public String getConfigStringForAIAPI(Environment environment, SimplifiedEndpoint productionEndpoint,
                                           SimplifiedEndpoint sandboxEndpoint) throws APITemplateException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Generating AI API configuration for API: " + (api != null ? api.getId().getApiName() : "null"));
+        }
+
         StringWriter writer = new StringWriter();
 
         try {
@@ -138,7 +142,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             context.put("defaultSandboxEndpoint", sandboxEndpoint);
             t.merge(context, writer);
         } catch (Exception e) {
-            log.error("Velocity Error", e);
+            log.error("Error generating AI API configuration for API: " + 
+                    (api != null ? api.getId().getApiName() : "null"), e);
             throw new APITemplateException("Velocity Error", e);
         }
         return writer.toString();
@@ -146,6 +151,12 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
     @Override
     public String getConfigStringForTemplate(Environment environment) throws APITemplateException {
+
+        if (log.isDebugEnabled()) {
+            String name = api != null ? api.getId().getApiName() : 
+                         (apiProduct != null ? apiProduct.getId().getName() : "unknown");
+            log.debug("Generating template configuration for: " + name);
+        }
 
         StringWriter writer = new StringWriter();
 
@@ -209,7 +220,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             t.merge(context, writer);
 
         } catch (Exception e) {
-            log.error("Velocity Error", e);
+            String name = api != null ? api.getId().getApiName() : 
+                         (apiProduct != null ? apiProduct.getId().getName() : "unknown");
+            log.error("Error generating template configuration for: " + name, e);
             throw new APITemplateException("Velocity Error", e);
         }
         return writer.toString();
@@ -217,6 +230,11 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
     @Override
     public String getConfigStringForPrototypeScriptAPI(Environment environment) throws APITemplateException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Generating prototype script API configuration for API: " + 
+                    (api != null ? api.getId().getApiName() : "null"));
+        }
 
         StringWriter writer = new StringWriter();
 

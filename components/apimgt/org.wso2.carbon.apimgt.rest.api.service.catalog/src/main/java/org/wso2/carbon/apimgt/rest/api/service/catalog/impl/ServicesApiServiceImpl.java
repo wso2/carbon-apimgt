@@ -82,6 +82,9 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                                Attachment definitionFileDetail, String inlineContent, MessageContext messageContext) {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
+        if (log.isDebugEnabled()) {
+            log.debug("Adding service: " + serviceDTO.getServiceKey() + " for tenant: " + tenantId);
+        }
         try {
             validateInputParams(definitionFileInputStream, definitionFileDetail, inlineContent);
             ServiceEntry existingService = serviceCatalog.getServiceByKey(serviceDTO.getServiceKey(), tenantId);
@@ -103,6 +106,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                         .STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, errorMsg, StringUtils.EMPTY)).build();
             }
             String serviceId = serviceCatalog.addService(service, tenantId, userName);
+            log.info("Service added successfully with ID: " + serviceId + " and key: " + serviceDTO.getServiceKey());
             ServiceEntry createdService = serviceCatalog.getServiceByUUID(serviceId, tenantId);
             return Response.ok().entity(ServiceEntryMappingUtil.fromServiceToDTO(createdService, false)).build();
         } catch (APIManagementException e) {
@@ -117,6 +121,9 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     public Response deleteService(String serviceId, MessageContext messageContext) {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting service with ID: " + serviceId + " for tenant: " + tenantId);
+        }
         try {
             // Check whether a service already exists for the given service ID
             serviceCatalog.getServiceByUUID(serviceId, tenantId);
@@ -127,6 +134,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 RestApiUtil.handleConflict(message, log);
             }
             serviceCatalog.deleteService(serviceId, tenantId);
+            log.info("Service deleted successfully with ID: " + serviceId);
             return Response.noContent().build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -146,6 +154,9 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         String pathToExportDir = FileBasedServicesImportExportManager.createDir(RestApiConstants.JAVA_IO_TMPDIR);
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
+        if (log.isDebugEnabled()) {
+            log.debug("Exporting service: " + name + " version: " + version + " for tenant: " + tenantId);
+        }
         String archiveName = name + APIConstants.KEY_SEPARATOR + version;
         ServiceEntry serviceEntry;
         String exportedFileName = null;
@@ -165,6 +176,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                         pathToExportDir, archiveName);
                 exportedServiceArchiveFile = new File(exportArchive.getArchiveName());
                 exportedFileName = exportedServiceArchiveFile.getName();
+                log.info("Service exported successfully: " + name + " version: " + version);
                 Response.ResponseBuilder responseBuilder =
                         Response.status(Response.Status.OK).entity(exportedServiceArchiveFile)
                                 .type(MediaType.APPLICATION_OCTET_STREAM);
@@ -242,6 +254,9 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                                   String verifier, MessageContext messageContext) throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
+        if (log.isDebugEnabled()) {
+            log.debug("Importing service with overwrite: " + overwrite + " for tenant: " + tenantId);
+        }
         String tempDirPath = FileBasedServicesImportExportManager.createDir(RestApiConstants.JAVA_IO_TMPDIR);
         List<ServiceInfoDTO> serviceList;
         HashMap<String, ServiceEntry> serviceEntries;
@@ -312,6 +327,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 if (serviceListToImport.size() > 0) {
                     importedServiceList = serviceCatalog.importServices(serviceListToImport, tenantId, userName,
                             overwrite);
+                    log.info("Successfully imported " + importedServiceList.size() + " services");
                 }
             } catch (APIManagementException e) {
                 if (ExceptionCodes.SERVICE_IMPORT_FAILED_WITHOUT_OVERWRITE.getErrorCode() == e.getErrorHandler()
@@ -395,6 +411,9 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         if (StringUtils.isEmpty(serviceId)) {
             RestApiUtil.handleBadRequest("The service Id should not be empty", log);
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Updating service with ID: " + serviceId + " for tenant: " + tenantId);
+        }
         validateInputParams(definitionFileInputStream, definitionFileDetail, inlineContent);
         try {
             ServiceEntry existingService = serviceCatalog.getServiceByUUID(serviceId, tenantId);
@@ -419,6 +438,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             }
             service.setUuid(existingService.getUuid());
             serviceCatalog.updateService(service, tenantId, userName);
+            log.info("Service updated successfully with ID: " + serviceId);
             ServiceEntry createdService = serviceCatalog.getServiceByUUID(serviceId, tenantId);
             return Response.ok().entity(ServiceEntryMappingUtil.fromServiceToDTO(createdService, false)).build();
         } catch (APIManagementException e) {

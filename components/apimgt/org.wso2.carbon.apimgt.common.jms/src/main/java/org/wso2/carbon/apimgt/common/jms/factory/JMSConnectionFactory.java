@@ -96,9 +96,12 @@ public class JMSConnectionFactory {
             context = new InitialContext(parameters);
             conFactory = JMSUtils.lookup(context, ConnectionFactory.class,
                                          parameters.get(JMSConstants.PARAM_CONFAC_JNDI_NAME));
-            log.info("JMS ConnectionFactory : " + name + " initialized");
+            log.info("JMS ConnectionFactory : " + name + " initialized with JNDI name: " 
+                    + parameters.get(JMSConstants.PARAM_CONFAC_JNDI_NAME));
 
         } catch (NamingException e) {
+            log.error("Failed to initialize JMS ConnectionFactory : " + name + " with JNDI name: " 
+                    + parameters.get(JMSConstants.PARAM_CONFAC_JNDI_NAME), e);
             throw new JmsRunTimeException("Cannot acquire JNDI context, JMS Connection factory : "
                                                  + parameters.get(JMSConstants.PARAM_CONFAC_JNDI_NAME)
                                                  + " or default destination : "
@@ -132,11 +135,16 @@ public class JMSConnectionFactory {
      * Close all connections, sessions etc.. and stop this connection factory
      */
     public synchronized void stop() {
+        if (log.isDebugEnabled()) {
+            log.debug("Stopping JMS ConnectionFactory : " + name);
+        }
         if (sharedConnection != null) {
             try {
                 sharedConnection.close();
             } catch (JMSException e) {
                 log.warn("Error shutting down connection factory : " + name, e);
+            } finally {
+                sharedConnection = null;
             }
         }
 
@@ -145,8 +153,11 @@ public class JMSConnectionFactory {
                 context.close();
             } catch (NamingException e) {
                 log.warn("Error while closing the InitialContext of factory : " + name, e);
+            } finally {
+                context = null;
             }
         }
+        log.info("JMS ConnectionFactory : " + name + " stopped");
     }
 
     /**
@@ -204,6 +215,8 @@ public class JMSConnectionFactory {
         try {
             return JMSUtils.lookupDestination(context, destinationName, parameters.get(JMSConstants.PARAM_DEST_TYPE));
         } catch (NamingException e) {
+            log.error("Failed to lookup JMS destination: " + destinationName + " of type " 
+                    + parameters.get(JMSConstants.PARAM_DEST_TYPE) + " for JMS CF: " + name);
             handleException("Error looking up the JMS destination with name " + destinationName
                             + " of type " + parameters.get(JMSConstants.PARAM_DEST_TYPE), e);
         }

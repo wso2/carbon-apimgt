@@ -16,11 +16,15 @@
 
 package org.wso2.carbon.apimgt.core.internal;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 
 public class ServiceReferenceHolder {
+
+    private static final Log log = LogFactory.getLog(ServiceReferenceHolder.class);
 
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
 
@@ -40,18 +44,38 @@ public class ServiceReferenceHolder {
     }
 
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigurationService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting API Manager Configuration Service");
+        }
         this.amConfigurationService = amConfigurationService;
-        setAPIGatewayKeyCacheStatus(amConfigurationService.getAPIManagerConfiguration());
+        if (amConfigurationService != null) {
+            setAPIGatewayKeyCacheStatus(amConfigurationService.getAPIManagerConfiguration());
+            log.info("API Manager Configuration Service set successfully");
+        } else {
+            log.warn("Null API Manager Configuration Service provided");
+        }
     }
 
     public void  setAPIGatewayKeyCacheStatus(APIManagerConfiguration config) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting API Gateway key cache status");
+        }
         try {
+            if (config != null) {
                 String serviceURL = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
                 isGatewayAPIKeyValidationEnabled = Boolean.parseBoolean(serviceURL);
-            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Gateway API key validation enabled: " + isGatewayAPIKeyValidationEnabled);
+                }
+            } else {
+                log.warn("API Manager configuration is null, disabling gateway API key validation");
                 isGatewayAPIKeyValidationEnabled = false;
             }
-       }
+        } catch (Exception e) {
+            log.error("Error occurred while setting API Gateway key cache status", e);
+            isGatewayAPIKeyValidationEnabled = false;
+        }
+    }
 
     public boolean isGatewayAPIKeyValidationEnabled(){
         return isGatewayAPIKeyValidationEnabled;

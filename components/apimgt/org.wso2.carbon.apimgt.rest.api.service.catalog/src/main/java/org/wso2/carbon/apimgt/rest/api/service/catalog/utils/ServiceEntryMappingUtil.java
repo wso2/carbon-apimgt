@@ -99,6 +99,9 @@ public class ServiceEntryMappingUtil {
         HashMap<String, ServiceEntry> endpointDetails = new HashMap<>();
         File[] files = new File(path).listFiles();
         assert files != null;
+        if (log.isDebugEnabled()) {
+            log.debug("Processing " + files.length + " files from directory: " + path);
+        }
         for (File file : files) {
             if (file.isDirectory()) {
                 ServiceEntry serviceInfo = new ServiceEntry();
@@ -116,6 +119,9 @@ public class ServiceEntryMappingUtil {
                     serviceInfo.setMetadata(new ByteArrayInputStream(FileUtils.readFileToByteArray(metadataFile)));
                     key = serviceInfo.getServiceKey();
                     serviceInfo.setEndpointDef(new ByteArrayInputStream(FileUtils.readFileToByteArray(definitionFile)));
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully processed service: " + key);
+                    }
                 } catch (IOException e) {
                     RestApiUtil.handleInternalServerError("Error while reading service resource files. " +
                             "Zip might not include valid data", e, log);
@@ -235,6 +241,9 @@ public class ServiceEntryMappingUtil {
      */
     public static String generateServiceFiles(ServiceEntry serviceEntry) {
         String pathToCreateFiles = FileBasedServicesImportExportManager.createDir(RestApiConstants.JAVA_IO_TMPDIR);
+        if (log.isDebugEnabled()) {
+            log.debug("Generating service files for: " + serviceEntry.getServiceKey());
+        }
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String metadataString = gson.toJson(serviceEntry);

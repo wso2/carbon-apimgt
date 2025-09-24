@@ -185,7 +185,7 @@ public class JMSTaskManagerFactory {
             value = cfMap.get(key);
         }
         if (value == null) {
-            throw new JmsRunTimeException("Service/connection factory property : " + key);
+            throw new JmsRunTimeException("Service/connection factory property is missing : " + key);
         }
         return value;
     }

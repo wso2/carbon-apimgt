@@ -42,11 +42,21 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
                                    MessageContext messageContext) throws APIManagementException {
 
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
+        if (debugEnabled) {
+            log.debug("Retrieving API artifacts for API: " + apiName + ", version: " + version + 
+                    ", tenant: " + tenantDomain);
+        }
         String api = GatewayUtils.retrieveDeployedAPI(apiName, version, tenantDomain);
         if (StringUtils.isNotEmpty(api)) {
+            if (debugEnabled) {
+                log.debug("Successfully retrieved API artifacts for API: " + apiName);
+            }
             APIArtifactDTO apiArtifactDTO = new APIArtifactDTO();
             apiArtifactDTO.api(api);
             return Response.ok().entity(apiArtifactDTO).build();
+        }
+        if (debugEnabled) {
+            log.debug("No API artifacts found for API: " + apiName + ", version: " + version);
         }
         return Response.status(Response.Status.NOT_FOUND).build();
     }

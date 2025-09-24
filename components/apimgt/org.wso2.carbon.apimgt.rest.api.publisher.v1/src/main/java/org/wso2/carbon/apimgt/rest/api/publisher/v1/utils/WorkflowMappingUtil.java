@@ -16,6 +16,8 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -32,7 +34,13 @@ import java.util.Map;
  */
 public class WorkflowMappingUtil {
 
+    private static final Log log = LogFactory.getLog(WorkflowMappingUtil.class);
+
     public static WorkflowListDTO fromWorkflowsToDTO(Workflow[] workflows, int limit, int offset) {
+        if (log.isDebugEnabled()) {
+            log.debug("Converting " + (workflows != null ? workflows.length : 0) + " workflows to DTO with limit: " + limit + ", offset: " + offset);
+        }
+        
         WorkflowListDTO workflowListDTO = new WorkflowListDTO();
         List<WorkflowInfoDTO> workflowInfoDTOs = workflowListDTO.getList();
         if (workflowInfoDTOs == null) {
@@ -51,12 +59,22 @@ public class WorkflowMappingUtil {
     }
 
     public static WorkflowInfoDTO fromWorkflowsToInfoDTO(Workflow workflow) {
+        if (workflow == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Null Workflow provided for conversion to WorkflowInfoDTO");
+            }
+            return null;
+        }
 
         WorkflowInfoDTO workflowInfoDTO = new WorkflowInfoDTO();
         if (workflow.getWorkflowType().equals(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION)) {
             workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.SUBSCRIPTION_CREATION);
         } else if (workflow.getWorkflowType().equals(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE)) {
             workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.SUBSCRIPTION_UPDATE);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Unknown workflow type: " + workflow.getWorkflowType());
+            }
         }
         workflowInfoDTO.setWorkflowStatus(WorkflowInfoDTO.WorkflowStatusEnum.valueOf(workflow.getStatus().toString()));
         workflowInfoDTO.setCreatedTime(workflow.getCreatedTime());

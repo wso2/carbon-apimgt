@@ -58,7 +58,9 @@ public class Md5HashGenerator {
      * @return String
      */
     public static HashMap<String, String> generateHash(String path, String algorithm) {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Generating hash for path: " + path + " using algorithm: " + algorithm);
+        }
         File dir = new File(path);
         return validateInputParams(Objects.requireNonNull(dir.listFiles()), algorithm);
     }
@@ -93,6 +95,9 @@ public class Md5HashGenerator {
                     }
                     try {
                         endpoints.put(key, calculateHash(fileArray, algorithm));
+                        if (log.isDebugEnabled()) {
+                            log.debug("Generated hash for service key: " + key);
+                        }
                     } catch (NoSuchAlgorithmException | IOException e) {
                         RestApiUtil.handleInternalServerError("Failed to generate MD5 Hash due to " +
                                 e.getMessage(), log);

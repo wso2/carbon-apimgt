@@ -39,11 +39,15 @@ public class EndPointsApiServiceImpl implements EndPointsApiService {
             throws APIManagementException {
 
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
+        if (debugEnabled) {
+            log.debug("Retrieving endpoints for API: " + apiName + ", version: " + version + 
+                    ", tenant: " + tenantDomain);
+        }
 
         List<String> deployedEndpoints = GatewayUtils.retrieveDeployedEndpoints(apiName, version,
                 tenantDomain);
         if (debugEnabled) {
-            log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
+            log.debug("Retrieved " + deployedEndpoints.size() + " endpoints for API: " + apiName);
         }
         EndpointsDTO endpointsDTO = new EndpointsDTO();
         endpointsDTO.endpoints(deployedEndpoints);

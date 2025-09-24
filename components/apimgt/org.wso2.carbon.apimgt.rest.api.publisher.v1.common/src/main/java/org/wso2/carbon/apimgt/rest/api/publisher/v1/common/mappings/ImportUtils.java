@@ -2148,6 +2148,10 @@ public class ImportUtils {
 
     public static APIDTO retrievedAPIDto(String pathToArchive) throws IOException, APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving API DTO from archive path: " + pathToArchive);
+        }
+
         JsonObject jsonObject = retrievedAPIDtoJson(pathToArchive);
         return new Gson().fromJson(jsonObject, APIDTO.class);
     }
@@ -2709,6 +2713,8 @@ public class ImportUtils {
             return FileUtils
                     .readFileToString(new File(pathToArchive + ImportExportConstants.JSON_SWAGGER_DEFINITION_LOCATION));
         }
+        log.error("Missing swagger file in archive path: " + pathToArchive + 
+                ". Either swagger.json or swagger.yaml should be present");
         throw new IOException("Missing swagger file. Either swagger.json or swagger.yaml should present");
     }
 

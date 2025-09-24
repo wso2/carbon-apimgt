@@ -18,6 +18,8 @@ package org.wso2.carbon.apimgt.common.gateway.jwttransformer;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
@@ -32,12 +34,15 @@ import java.util.Map;
  * Default implementation of jwt transformer.
  */
 public class DefaultJWTTransformer implements JWTTransformer {
+    private static final Log log = LogFactory.getLog(DefaultJWTTransformer.class);
 
     protected TokenIssuerDto tokenIssuer = null;
 
     @Override
     public String getTransformedConsumerKey(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Transforming consumer key from JWT claims");
+        }
         try {
             if (tokenIssuer.getConsumerKeyClaim() == null) {
                 if (jwtClaimsSet.getClaim(JWTConstants.CONSUMER_KEY) != null) {
@@ -65,7 +70,9 @@ public class DefaultJWTTransformer implements JWTTransformer {
 
     @Override
     public List<String> getTransformedScopes(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Transforming scopes from JWT claims");
+        }
         try {
             String scopeClaim = JWTConstants.SCOPE;
             if (StringUtils.isNotEmpty(tokenIssuer.getScopesClaim())) {
@@ -80,14 +87,22 @@ public class DefaultJWTTransformer implements JWTTransformer {
         } catch (ParseException e) {
             throw new JWTGeneratorException("Error while parsing JWT claims", e);
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Using default scope: " + JWTConstants.OAUTH2_DEFAULT_SCOPE);
+        }
         return Arrays.asList(JWTConstants.OAUTH2_DEFAULT_SCOPE);
     }
 
     @Override
     public JWTClaimsSet transform(JWTClaimsSet jwtClaimsSet) {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Transforming JWT claims with token issuer configuration");
+        }
         JWTClaimsSet.Builder transformedJWT = new JWTClaimsSet.Builder();
         if (tokenIssuer != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Applying claim mappings from token issuer configuration");
+            }
             Map<String, ClaimMappingDto> claimConfigurations = tokenIssuer.getClaimConfigurations();
             for (Map.Entry<String, Object> claimEntry : jwtClaimsSet.getClaims().entrySet()) {
                 ClaimMappingDto claimMappingDto = claimConfigurations.get(claimEntry.getKey());
@@ -98,6 +113,9 @@ public class DefaultJWTTransformer implements JWTTransformer {
                 transformedJWT.claim(claimKey, claimEntry.getValue());
             }
             return transformedJWT.build();
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("No token issuer configuration found, returning original JWT claims");
         }
         return jwtClaimsSet;
     }

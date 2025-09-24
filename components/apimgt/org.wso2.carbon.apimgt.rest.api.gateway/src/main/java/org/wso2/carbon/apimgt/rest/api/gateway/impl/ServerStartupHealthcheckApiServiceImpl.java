@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.gateway.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.rest.api.gateway.ServerStartupHealthcheckApiService;
@@ -27,12 +29,22 @@ import javax.ws.rs.core.Response;
 
 public class ServerStartupHealthcheckApiServiceImpl implements ServerStartupHealthcheckApiService {
 
+    private static final Log log = LogFactory.getLog(ServerStartupHealthcheckApiServiceImpl.class);
+    private boolean debugEnabled = log.isDebugEnabled();
+
     public Response serverStartupHealthcheckGet(MessageContext messageContext) {
+        if (debugEnabled) {
+            log.debug("Performing server startup health check");
+        }
         boolean isAllApisDeployed = GatewayUtils.isAllApisDeployed();
         boolean isAllGatewayPoliciesDeployed = GatewayUtils.isAllGatewayPoliciesDeployed();
         if (GatewayUtils.isTenantsProvisioned() && isAllApisDeployed && isAllGatewayPoliciesDeployed) {
+            log.info("Server startup health check passed - all components ready");
             return Response.status(Response.Status.OK).build();
         }
+        log.warn("Server startup health check failed - tenants: " + GatewayUtils.isTenantsProvisioned() + 
+                ", APIs deployed: " + isAllApisDeployed + ", policies deployed: " + 
+                isAllGatewayPoliciesDeployed);
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 }

@@ -43,6 +43,9 @@ public class SettingsMappingUtil {
      * @throws APIManagementException
      */
     public SettingsDTO fromSettingsToDTO() throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Converting settings to DTO");
+        }
         SettingsDTO settingsDTO = new SettingsDTO();
         settingsDTO.setScopes(getScopeList());
         return settingsDTO;
@@ -61,6 +64,9 @@ public class SettingsMappingUtil {
         List<String> scopeList = new ArrayList<>();
         for (Scope entry : scopeSet) {
             scopeList.add(entry.getKey());
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieved " + scopeList.size() + " scopes from service catalog API definition");
         }
         return scopeList;
     }

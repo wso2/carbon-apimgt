@@ -38,16 +38,31 @@ public class EventHubEventStreamServiceEventPublisher implements EventPublisher 
 
     @Override
     public void publish(EventPublisherEvent eventPublisherEvent) {
+        if (log.isDebugEnabled()) {
+            log.debug("Publishing event through EventStreamService: " + (eventPublisherEvent != null ? 
+                    "event available" : "null event"));
+        }
         boolean tenantFlowStarted = false;
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext()
                     .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
             tenantFlowStarted = true;
+            if (log.isDebugEnabled()) {
+                log.debug("Started tenant flow for super tenant domain");
+            }
             ServiceReferenceHolder.getInstance().getEventStreamService().publish(eventPublisherEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully published event through EventStreamService");
+            }
+        } catch (Exception e) {
+            log.error("Error occurred while publishing event through EventStreamService", e);
         } finally {
             if (tenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
+                if (log.isDebugEnabled()) {
+                    log.debug("Ended tenant flow");
+                }
             }
         }
     }

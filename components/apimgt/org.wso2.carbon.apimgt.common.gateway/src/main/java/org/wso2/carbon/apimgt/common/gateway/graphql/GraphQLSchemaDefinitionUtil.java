@@ -27,6 +27,8 @@ import graphql.language.TypeDefinition;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import graphql.schema.idl.UnExecutableSchemaGenerator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
 
 import java.util.ArrayList;
@@ -39,6 +41,7 @@ import java.util.Optional;
  * Contains utils for processing GraphQLSchemaDefinition
  */
 public class GraphQLSchemaDefinitionUtil {
+    private static final Log log = LogFactory.getLog(GraphQLSchemaDefinitionUtil.class);
 
     /**
      * Extract GraphQL Operations from given schema.
@@ -48,6 +51,9 @@ public class GraphQLSchemaDefinitionUtil {
      * @return the arrayList of APIOperationsDTO
      */
     public static ArrayList<String> getSupportedFields(TypeDefinitionRegistry typeRegistry, String type) {
+        if (log.isDebugEnabled()) {
+            log.debug("Extracting supported fields for operation type: " + type);
+        }
         ArrayList<String> operationArray = new ArrayList<>();
         Map<String, TypeDefinition> operationList = typeRegistry.types();
         for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
@@ -73,6 +79,9 @@ public class GraphQLSchemaDefinitionUtil {
                 }
             }
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Found " + operationArray.size() + " supported fields for type: " + type);
+        }
         return operationArray;
     }
 
@@ -85,8 +94,13 @@ public class GraphQLSchemaDefinitionUtil {
     public static boolean isSubscriptionAvailable(String schema) {
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
-        return UnExecutableSchemaGenerator.makeUnExecutableSchema(typeRegistry).getSubscriptionType() != null ?
-                true : false;
+        if (log.isDebugEnabled()) {
+            log.debug("Checking subscription availability in GraphQL schema");
+        }
+        boolean subscriptionAvailable = UnExecutableSchemaGenerator.makeUnExecutableSchema(typeRegistry)
+                .getSubscriptionType() != null;
+        log.info("GraphQL subscription availability: " + subscriptionAvailable);
+        return subscriptionAvailable;
     }
 
     /**
