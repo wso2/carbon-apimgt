@@ -3163,7 +3163,7 @@ public class OAS3Parser extends APIDefinition {
         resource.setPolicy(APISpecParserConstants.DEFAULT_SUB_POLICY_UNLIMITED);
         resource.setPath(path);
         resource.setVerb(APISpecParserConstants.HTTP_GET);
-        addResourceToSwagger(openAPI, resource, true);
+        addResourceToSwagger(openAPI, resource, false);
     }
 
     /**

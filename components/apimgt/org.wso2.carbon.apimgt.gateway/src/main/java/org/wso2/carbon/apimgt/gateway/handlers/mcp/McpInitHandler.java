@@ -87,12 +87,13 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
             if (StringUtils.startsWith(path, APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE) &&
                     StringUtils.equals(APIConstants.HTTP_GET, httpMethod)) {
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST, true);
-            } else if (StringUtils.startsWith(path,  APIMgtGatewayConstants.MCP_RESOURCE) &&
+            } else if (StringUtils.startsWith(path, APIMgtGatewayConstants.MCP_RESOURCE) &&
                     StringUtils.equals(APIConstants.HTTP_GET, httpMethod)) {
                 McpResponseDto errorResponse = new McpResponseDto("Server-Sent Events (SSE) not supported",
                         405, null);
                 MCPUtils.handleMCPFailure(messageContext, errorResponse);
-            } else { //currently the only other mcp resource available is /mcp POST, it must have a jsonrpc payload
+                return false;
+            } else {
                 boolean isNoAuthMCPRequest = isNoAuthMCPRequest(buildMCPRequest(messageContext));
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST, isNoAuthMCPRequest);
             }
