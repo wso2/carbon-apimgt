@@ -1421,7 +1421,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 JsonObject additionalPropertiesJson = (JsonObject) new JsonParser()
                         .parse((String) additionalProperties);
                 for (Map.Entry<String, JsonElement> entry : additionalPropertiesJson.entrySet()) {
-                    String additionalProperty = entry.getValue().getAsString();
                     if (entry.getValue().isJsonArray()) {
                         if (APIConstants.KeyManager.APPLICATION_SCOPES.equals(entry.getKey())) {
                             JsonArray scopes = entry.getValue().getAsJsonArray();
@@ -1434,6 +1433,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                             }
                         }
                     } else {
+                        // Considering additional property as a primitive data type
+                        String additionalProperty = entry.getValue().getAsString();
                         if (StringUtils.isNotBlank(additionalProperty) && !StringUtils.equals(additionalProperty,
                                 APIConstants.KeyManager.NOT_APPLICABLE_VALUE)) {
                             try {
