@@ -295,6 +295,10 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
 
                     // Import API
+                    if (debugLogEnabled) {
+                        log.debug("Importing API: " + api.getId().getName() + " version: " + apidto.getVersion() 
+                                + " to environment: " + environment.getName());
+                    }
                     ImportedAPIDTO importedApi = importExportAPI.importAPI(apiZip, false,
                             true, update, true,
                             new String[]{APIConstants.APIM_PUBLISHER_SCOPE, APIConstants.APIM_CREATOR_SCOPE},
@@ -337,6 +341,10 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     try {
                         String apiUUID = FederatedGatewayUtil.getAPIUUID(apiName, adminUsername, organization);
                         if (apiUUID != null) {
+                            if (debugLogEnabled) {
+                                log.debug("Removing API: " + apiName + " from environment: " + environment.getName() 
+                                        + " as it was not discovered in the latest cycle");
+                            }
                             FederatedGatewayUtil.deleteDeployment(apiUUID, organization, environment);
                         } else {
                             if (debugLogEnabled) {
@@ -363,6 +371,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     }
 
     public static void shutdown() {
+        log.info("Initiating shutdown of federated API discovery service");
         scheduledDiscoveryTasks.values().forEach(f -> f.cancel(false));
         executor.shutdown();
         scheduledHeartBeatTasks.values().forEach(f -> f.cancel(false));
@@ -376,6 +385,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                 ttlUpdateExecutor.shutdownNow();
                 log.warn("Forced shutdown of TTL update executor after timeout");
             }
+            log.info("Successfully shut down federated API discovery service");
         } catch (InterruptedException e) {
             executor.shutdownNow();
             ttlUpdateExecutor.shutdownNow();

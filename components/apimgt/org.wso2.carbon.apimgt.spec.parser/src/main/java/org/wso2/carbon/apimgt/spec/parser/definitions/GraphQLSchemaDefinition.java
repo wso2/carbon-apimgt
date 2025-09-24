@@ -59,8 +59,13 @@ public class GraphQLSchemaDefinition {
      * @return the arrayList of APIOperationsDTO
      */
     public List<URITemplate> extractGraphQLOperationList(TypeDefinitionRegistry typeRegistry, String type) {
+        if (log.isDebugEnabled()) {
+            log.debug("Extracting GraphQL operations for type: " + (type != null ? type : "all types"));
+        }
+        
         List<URITemplate> operationArray = new ArrayList<>();
         Map<java.lang.String, TypeDefinition> operationList = typeRegistry.types();
+        
         for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
             Optional<SchemaDefinition> schemaDefinition = typeRegistry.schemaDefinition();
             if (schemaDefinition.isPresent()) {
@@ -70,6 +75,9 @@ public class GraphQLSchemaDefinition {
                             .equalsIgnoreCase(operationTypeDefinition.getTypeName().getName()) &&
                             (type == null || type.equals(operationTypeDefinition.getName().toUpperCase()));
                     if (canAddOperation) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Adding GraphQL operations for type: " + operationTypeDefinition.getName());
+                        }
                         addOperations(entry, operationTypeDefinition.getName().toUpperCase(), operationArray);
                     }
                 }
@@ -79,9 +87,16 @@ public class GraphQLSchemaDefinition {
                         || entry.getValue().getName().equalsIgnoreCase(APISpecParserConstants.GRAPHQL_SUBSCRIPTION)) &&
                         (type == null || type.equals(entry.getValue().getName().toUpperCase()));
                 if (canAddOperation) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding GraphQL operations for default type: " + entry.getKey());
+                    }
                     addOperations(entry, entry.getKey(), operationArray);
                 }
             }
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully extracted " + operationArray.size() + " GraphQL operations");
         }
         return operationArray;
     }
@@ -93,8 +108,17 @@ public class GraphQLSchemaDefinition {
      * @return the arrayList of APIOperationsDTO
      */
     public List<URITemplate> extractGraphQLOperationList(String schema) {
+        if (log.isDebugEnabled()) {
+            log.debug("Parsing GraphQL schema to extract operations");
+        }
+        
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully parsed GraphQL schema, extracting operations");
+        }
+        
         return extractGraphQLOperationList(typeRegistry, null);
     }
 

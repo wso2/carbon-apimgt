@@ -70,7 +70,16 @@ public class PolicyUtil {
      */
     public static void deployPolicy(Policy policy, PolicyEvent policyEvent) {
         if (!isTenantAvailable(policy.getTenantDomain())) {
+            if (log.isDebugEnabled()) {
+                log.debug("Tenant " + policy.getTenantDomain() + " not available for policy deployment. "
+                        + "Skipping policy: " + policy.getName());
+            }
             return;
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Deploying policy: " + policy.getName() + " of type: " + policy.getType()
+                    + " for tenant: " + policy.getTenantDomain());
         }
         EventProcessorService eventProcessorService =
                 ServiceReferenceHolder.getInstance().getEventProcessorService();
@@ -152,18 +161,28 @@ public class PolicyUtil {
                     executionPlan = eventProcessorService.getActiveExecutionPlan(policyPlanName);
                 } catch (ExecutionPlanConfigurationException e) {
                     // Deploy new policies
+                    if (log.isDebugEnabled()) {
+                        log.debug("Deploying new execution plan: " + policyPlanName);
+                    }
                     eventProcessorService.deployExecutionPlan(flowString);
+                    log.info("Successfully deployed new policy execution plan: " + policyPlanName);
                 }
                 if (executionPlan != null) {
                     // Update existing policies
+                    if (log.isDebugEnabled()) {
+                        log.debug("Updating existing execution plan: " + policyPlanName);
+                    }
                     eventProcessorService.editActiveExecutionPlan(flowString, policyPlanName);
+                    log.info("Successfully updated existing policy execution plan: " + policyPlanName);
                 }
             }
 
         } catch (APITemplateException e) {
-            log.error("Error in creating execution plan", e);
+            log.error("Error in creating execution plan for policy: " + policy.getName() + ", tenant: "
+                    + policy.getTenantDomain(), e);
         } catch (ExecutionPlanConfigurationException | ExecutionPlanDependencyValidationException e) {
-            log.error("Error in deploying execution plan", e);
+            log.error("Error in deploying execution plan for policy: " + policy.getName() + ", tenant: "
+                    + policy.getTenantDomain(), e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -173,18 +192,29 @@ public class PolicyUtil {
      * Deploy all the throttle policies retrieved from the database in the Traffic Manager.
      */
     public static void deployAllPolicies() {
+        if (log.isDebugEnabled()) {
+            log.debug("Starting deployment of all throttle policies");
+        }
         PolicyRetriever policyRetriever = new PolicyRetriever();
         try {
             // Deploy all the policies retrieved from the database
             SubscriptionPolicyList subscriptionPolicies = new SubscriptionPolicyList();
             if (migrationEnabled == null) {
+                log.info("Retrieving all subscription policies for deployment");
                 subscriptionPolicies = policyRetriever.getAllSubscriptionPolicies();
+            } else {
+                log.info("Migration mode enabled. Skipping subscription policy retrieval.");
             }
+            log.info("Retrieving application policies for deployment");
             ApplicationPolicyList applicationPolicies = policyRetriever.getAllApplicationPolicies();
+            log.info("Retrieving API policies for deployment");
             ApiPolicyList apiPolicies = policyRetriever.getAllApiPolicies();
+            log.info("Retrieving global policies for deployment");
             GlobalPolicyList globalPolicies = policyRetriever.getAllGlobalPolicies();
             // Undeploy all existing policies
+            log.info("Undeploying existing policies before fresh deployment");
             undeployAllPolicies();
+            log.info("Deploying subscription policies. Total count: " + subscriptionPolicies.getList().size());
             for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies.getList()) {
                 if (!(APIConstants.UNLIMITED_TIER.equalsIgnoreCase(subscriptionPolicy.getName())
                         || APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED.
@@ -194,21 +224,25 @@ public class PolicyUtil {
                     deployPolicy(subscriptionPolicy, null);
                 }
             }
+            log.info("Deploying application policies. Total count: " + applicationPolicies.getList().size());
             for (ApplicationPolicy applicationPolicy : applicationPolicies.getList()) {
                 if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(applicationPolicy.getName())) {
                     deployPolicy(applicationPolicy, null);
                 }
             }
+            log.info("Deploying API policies. Total count: " + apiPolicies.getList().size());
             for (ApiPolicy apiPolicy : apiPolicies.getList()) {
                 if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiPolicy.getName())) {
                     deployPolicy(apiPolicy, null);
                 }
             }
+            log.info("Deploying global policies. Total count: " + globalPolicies.getList().size());
             for (GlobalPolicy globalPolicy : globalPolicies.getList()) {
                 deployPolicy(globalPolicy, null);
             }
+            log.info("Completed deployment of all throttle policies successfully");
         } catch (ThrottlePolicyDeployerException e) {
-            log.error("Error in retrieving throttle policies", e);
+            log.error("Error in retrieving throttle policies for deployment", e);
         }
     }
 

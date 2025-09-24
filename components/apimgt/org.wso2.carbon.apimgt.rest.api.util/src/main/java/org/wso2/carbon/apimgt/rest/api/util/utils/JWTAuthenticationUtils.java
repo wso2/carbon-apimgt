@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.utils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.message.Message;
 import java.util.Map;
 
@@ -25,6 +27,8 @@ import java.util.Map;
 
 public class JWTAuthenticationUtils {
 
+    private static final Log log = LogFactory.getLog(JWTAuthenticationUtils.class);
+
     /**
      * To getting the updated inbound message
      * @param inMessage - current inbound message
@@ -32,8 +36,19 @@ public class JWTAuthenticationUtils {
      * @return updated cxf Message instance
      */
     public static Message addToMessageContext(Message inMessage, Map<String,Object> authContext) {
-        for (String key : authContext.keySet()) {
-            inMessage.put(key, authContext.get(key));
+        if (log.isDebugEnabled()) {
+            log.debug("Adding authentication context to message with " + 
+                      (authContext != null ? authContext.size() : 0) + " properties");
+        }
+        if (authContext != null) {
+            for (String key : authContext.keySet()) {
+                if (key != null) {
+                    inMessage.put(key, authContext.get(key));
+                }
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully updated message context with authentication properties");
         }
         return inMessage;
     }

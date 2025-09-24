@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -67,6 +69,8 @@ import java.util.zip.ZipInputStream;
  */
 public class APIGovernanceHandler implements ArtifactGovernanceHandler {
 
+    private static final Log log = LogFactory.getLog(APIGovernanceHandler.class);
+
     /**
      * This method is used to get all the apis of a given type in a given organization
      *
@@ -76,6 +80,9 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
      */
     @Override
     public List<String> getAllArtifacts(String organization) throws APIMGovernanceException {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting all artifacts for organization: " + organization);
+        }
         List<String> apiIds = new ArrayList<>();
         List<ApiResult> apis;
         try {
@@ -83,8 +90,10 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
             for (ApiResult api : apis) {
                 apiIds.add(api.getId());
             }
+            log.info("Retrieved " + apiIds.size() + " artifacts for organization: " + organization);
             return apiIds;
         } catch (APIManagementException e) {
+            log.error("Error while getting API list for organization: " + organization, e);
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_LIST, e, organization);
         }
 
@@ -100,6 +109,9 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
      */
     @Override
     public List<String> getAllArtifacts(String username, String organization) throws APIMGovernanceException {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting all artifacts for user: " + username + " in organization: " + organization);
+        }
         List<String> apiIds = new ArrayList<>();
         try {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(username);
@@ -107,8 +119,10 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
             for (API api : apis) {
                 apiIds.add(api.getUuid());
             }
+            log.info("Retrieved " + apiIds.size() + " artifacts for user: " + username);
             return apiIds;
         } catch (APIManagementException e) {
+            log.error("Error while getting API list for user: " + username, e);
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_LIST, e, organization);
         }
     }
@@ -122,6 +136,9 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
      */
     @Override
     public List<String> getArtifactsByLabel(String label) throws APIMGovernanceException {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting artifacts for label: " + label);
+        }
         List<String> apiIds = new ArrayList<>();
         try {
             List<ApiResult> apis = LabelsDAO.getInstance().getMappedApisForLabel(label);
@@ -129,9 +146,11 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
             for (ApiResult api : apis) {
                 apiIds.add(api.getId());
             }
+            log.info("Retrieved " + apiIds.size() + " artifacts for label: " + label);
             return apiIds;
 
         } catch (APIManagementException e) {
+            log.error("Error while getting APIs for label: " + label, e);
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_APIS_FOR_LABEL, e, label);
         }
     }

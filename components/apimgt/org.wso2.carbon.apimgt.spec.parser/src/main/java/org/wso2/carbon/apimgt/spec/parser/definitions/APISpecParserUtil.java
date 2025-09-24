@@ -17,11 +17,15 @@
  */
 package org.wso2.carbon.apimgt.spec.parser.definitions;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.Scope;
 
 import java.util.Set;
 
 public class APISpecParserUtil {
+
+    private static final Log log = LogFactory.getLog(APISpecParserUtil.class);
 
     /**
      * Find scope object in a set based on the key
@@ -31,11 +35,35 @@ public class APISpecParserUtil {
      * @return Scope - scope object
      */
     public static Scope findScopeByKey(Set<Scope> scopes, String key) {
+        if (scopes == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Scopes set is null, returning null for key: " + key);
+            }
+            return null;
+        }
+        
+        if (key == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Search key is null, returning null");
+            }
+            return null;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Searching for scope with key: " + key + " in " + scopes.size() + " scopes");
+        }
 
         for (Scope scope : scopes) {
-            if (scope.getKey().equals(key)) {
+            if (scope != null && scope.getKey() != null && scope.getKey().equals(key)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Found scope with key: " + key);
+                }
                 return scope;
             }
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Scope not found for key: " + key);
         }
         return null;
     }

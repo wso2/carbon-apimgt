@@ -66,7 +66,14 @@ public class PolicyManager {
     public APIMGovernancePolicy createGovernancePolicy(String organization, APIMGovernancePolicy
             governancePolicy) throws APIMGovernanceException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Creating governance policy: " + governancePolicy.getName() + 
+                     " in organization: " + organization);
+        }
+
         if (policyMgtDAO.getGovernancePolicyByName(governancePolicy.getName(), organization) != null) {
+            log.warn("Policy with name " + governancePolicy.getName() + 
+                    " already exists in organization: " + organization);
             throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_ALREADY_EXISTS,
                     governancePolicy.getName(), organization);
         }
@@ -76,6 +83,8 @@ public class PolicyManager {
         addMissingNotifyActions(governancePolicy);
 
         APIMGovernancePolicy newPolicy = policyMgtDAO.createGovernancePolicy(governancePolicy, organization);
+        log.info("Successfully created governance policy: " + newPolicy.getName() + 
+                " with " + newPolicy.getActions().size() + " actions");
         AuditLogger.log("Governance Policy",
                 "New governance policy %s with ID %s created by user %s in organization %s",
                 newPolicy.getName(), newPolicy.getId(), newPolicy.getCreatedBy(), organization);
@@ -187,12 +196,18 @@ public class PolicyManager {
      */
 
     public void deletePolicy(String policyId, String username, String organization) throws APIMGovernanceException {
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting governance policy with ID: " + policyId + 
+                     " in organization: " + organization);
+        }
         APIMGovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
         if (policy == null) {
+            log.warn("Policy not found with ID: " + policyId);
             throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, policyId);
         }
 
         policyMgtDAO.deletePolicy(policyId, organization);
+        log.info("Successfully deleted governance policy: " + policy.getName());
         AuditLogger.log("Governance Policy", "Governance policy %s with ID %s deleted by user %s in organization %s",
                 policy.getName(), policy.getId(), username, organization);
     }

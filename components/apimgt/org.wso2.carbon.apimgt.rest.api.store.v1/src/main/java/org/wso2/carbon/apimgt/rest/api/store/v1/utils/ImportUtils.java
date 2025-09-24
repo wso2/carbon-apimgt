@@ -268,10 +268,14 @@ public class ImportUtils {
                         // It will throw an error if subscriber already exists
                         if (update == null || !update) {
                             apiConsumer.addSubscription(apiTypeWrapper, userId, application);
+                            log.info("Subscription imported successfully for API " + apiIdentifier.getName() +
+                                    "-" + apiIdentifier.getVersion());
                         } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId
                                 , application.getId())) {
                             // on update skip subscriptions that already exists
                             apiConsumer.addSubscription(apiTypeWrapper, userId, application);
+                            log.info("Subscription imported successfully for API " + apiIdentifier.getName() +
+                                    "-" + apiIdentifier.getVersion());
                         }
                     } else if (ignoreTier != null && ignoreTier && apiTypeWrapper.getStatus() != null
                             && APIConstants.PUBLISHED.equals(apiTypeWrapper.getStatus())) {
@@ -280,10 +284,14 @@ public class ImportUtils {
                         // It will throw an error if subscriber already exists
                         if (update == null || !update) {
                             apiConsumer.addSubscription(apiTypeWrapper, userId, application);
+                            log.info("Subscription imported successfully for API " + apiIdentifier.getName() +
+                                    "-" + apiIdentifier.getVersion());
                         } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId
                                 , application.getId())) {
                             // on update skip subscriptions that already exists
                             apiConsumer.addSubscription(apiTypeWrapper, userId, application);
+                            log.info("Subscription imported successfully for API " + apiIdentifier.getName() +
+                                    "-" + apiIdentifier.getVersion());
                         }
                     } else {
                         log.error("Failed to import Subscription as API/API Product "
@@ -410,10 +418,14 @@ public class ImportUtils {
                     applicationKeyDTO.getKeyType().toString(), applicationKeyDTO.getCallbackUrl(),
                     accessAllowDomainsArray, Long.toString(applicationKeyDTO.getToken().getValidityTime()), tokenScopes,
                     jsonParams, applicationKeyDTO.getKeyManager(), null, true);
+            log.info("Application key imported successfully for application " + application.getName() +
+                    " with key type " + applicationKeyDTO.getKeyType().toString());
         } else {
             apiConsumer.updateAuthClient(username, application, applicationKeyDTO.getKeyType().toString(),
                     applicationKeyDTO.getCallbackUrl(), null, null, null, application.getGroupId(), jsonParams,
                     applicationKeyDTO.getKeyManager());
+            log.info("Application key updated successfully for application " + application.getName() +
+                    " with key type " + applicationKeyDTO.getKeyType().toString());
         }
     }
 }

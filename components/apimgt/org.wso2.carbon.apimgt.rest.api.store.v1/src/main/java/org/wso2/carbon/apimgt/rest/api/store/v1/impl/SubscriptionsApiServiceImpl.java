@@ -243,6 +243,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
             SubscriptionResponse subscriptionResponse = apiConsumer
                     .addSubscription(apiTypeWrapper, username, application);
+            log.info("Subscription created successfully - API: " + body.getApiId() + ", Application: " +
+                    body.getApplicationId() + ", User: " + username);
             SubscribedAPI addedSubscribedAPI = apiConsumer
                     .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
             SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI,
@@ -555,6 +557,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             apiConsumer.removeSubscription(subscribedAPI, organization);
+            log.info("Subscription deleted - ID: " + subscriptionId + " by user " + username);
             if (subscribedAPI != null &&
                     APIConstants.SubscriptionStatus.DELETE_PENDING.equals(subscribedAPI.getSubStatus())) {
                 if (subscribedAPI.getSubscriptionId() == -1) {

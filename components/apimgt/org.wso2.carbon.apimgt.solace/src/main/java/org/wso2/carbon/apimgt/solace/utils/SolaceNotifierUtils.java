@@ -52,6 +52,9 @@ public class SolaceNotifierUtils {
      */
     public static SolaceAdminApis getSolaceAdminApis()
             throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing Solace admin APIs");
+        }
         Map<String, Environment> thirdPartyEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
         Environment solaceEnvironment = null;
 
@@ -62,10 +65,14 @@ public class SolaceNotifierUtils {
         }
 
         if (solaceEnvironment != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Found Solace environment: " + solaceEnvironment.getName());
+            }
             return new SolaceAdminApis(solaceEnvironment.getServerURL(), solaceEnvironment.
                     getUserName(), solaceEnvironment.getPassword(), solaceEnvironment.getAdditionalProperties().
                     get(SolaceConstants.SOLACE_ENVIRONMENT_DEV_NAME));
         } else {
+            log.error("Solace environment not found in gateway configurations");
             throw new APIManagementException("Solace Environment configurations are not provided properly");
         }
     }
@@ -134,7 +141,7 @@ public class SolaceNotifierUtils {
             APIManagementException {
         SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
         if (log.isDebugEnabled()) {
-            log.info("Renaming solace application display name....");
+            log.debug("Renaming solace application display name....");
         }
 
         CloseableHttpResponse response = solaceAdminApis.renameApplication(organization, application);
@@ -163,7 +170,7 @@ public class SolaceNotifierUtils {
                                                       String consumerSecret) throws APIManagementException {
         SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
         if (log.isDebugEnabled()) {
-            log.info("Identified as Solace Application. Patching CliendID and Secret in solace application.....");
+            log.debug("Identified as Solace Application. Patching ClientID and Secret in solace application.....");
         }
 
         CloseableHttpResponse response = solaceAdminApis.patchClientIdForApplication(organization, application,
@@ -338,14 +345,16 @@ public class SolaceNotifierUtils {
     public static void deployApplicationToSolaceBroker(Application application, ArrayList<String> apiProducts,
                                                        String organization)
             throws IOException, APIManagementException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Deploying application " + application.getName() + " to Solace broker");
+        }
         SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
 
         // check existence of the developer
         CloseableHttpResponse response1 = solaceAdminApis.developerGet(organization);
         if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             if (log.isDebugEnabled()) {
-                log.info("Developer found in Solace Broker");
+                log.debug("Developer found in Solace Broker");
             }
 
             //check application status
@@ -354,7 +363,7 @@ public class SolaceNotifierUtils {
             if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 // app already exists
                 if (log.isDebugEnabled()) {
-                    log.info("Solace application '" + application.getName() + "' already exists in Solace." +
+                    log.debug("Solace application '" + application.getName() + "' already exists in Solace." +
                             " Updating Application......");
                 }
 
@@ -380,7 +389,7 @@ public class SolaceNotifierUtils {
                 if (responseString.contains(String.valueOf(HttpStatus.SC_NOT_FOUND))) {
                     // create new app
                     if (log.isDebugEnabled()) {
-                        log.info("Solace application '" + application.getName() + "' not found in Solace Broker." +
+                        log.debug("Solace application '" + application.getName() + "' not found in Solace Broker." +
                                 "Creating new application......");
                     }
                     CloseableHttpResponse response4 = solaceAdminApis.createApplication(organization, application,

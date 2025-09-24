@@ -160,6 +160,10 @@ public class JWTValidator {
 
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Starting JWT authentication for API: " + apiContext + ", version: " + apiVersion);
+        }
 
 
         org.apache.axis2.context.MessageContext axis2MsgContext =

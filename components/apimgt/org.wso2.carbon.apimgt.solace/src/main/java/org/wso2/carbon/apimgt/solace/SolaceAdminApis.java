@@ -72,6 +72,9 @@ public class SolaceAdminApis {
         this.userName = userName;
         this.password = password;
         this.developerUserName = developerUserName;
+        if (log.isDebugEnabled()) {
+            log.debug("SolaceAdminApis initialized for user: " + userName + ", baseUrl: " + baseUrl);
+        }
     }
 
     private String getBase64EncodedCredentials() {
@@ -87,7 +90,9 @@ public class SolaceAdminApis {
      * @return CloseableHttpResponse of the GET call
      */
     public CloseableHttpResponse environmentGET(String organization, String environment) {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Checking environment availability: " + environment + " in organization: " + organization);
+        }
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpGet httpGet = new HttpGet(baseUrl + "/" + organization + "/" + "environments" + "/" + environment);
@@ -95,7 +100,7 @@ public class SolaceAdminApis {
         try {
             return APIUtil.executeHTTPRequest(httpGet, httpClient);
         } catch (IOException | APIManagementException e) {
-            log.error(e.getMessage());
+            log.error("Error checking environment availability for " + environment + ": " + e.getMessage());
         }
         return null;
     }
@@ -109,6 +114,9 @@ public class SolaceAdminApis {
      * @return CloseableHttpResponse of the PUT call
      */
     public CloseableHttpResponse registerAPI(String organization, String title, String apiDefinition) {
+        if (log.isDebugEnabled()) {
+            log.debug("Registering API: " + title + " in organization: " + organization);
+        }
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpPut httpPut = new HttpPut(baseUrl + "/" + organization + "/apis/" + title);
@@ -121,7 +129,7 @@ public class SolaceAdminApis {
             jsonNodeTree = new ObjectMapper().readTree(apiDefinition);
             jsonAsYaml = new YAMLMapper().writeValueAsString(jsonNodeTree);
         } catch (JsonProcessingException e) {
-            log.error(e.getMessage());
+            log.error("Error converting JSON to YAML for API " + title + ": " + e.getMessage());
         }
         //add definition to request body
         if (jsonAsYaml != null) {
@@ -129,13 +137,13 @@ public class SolaceAdminApis {
             try {
                 params = new StringEntity(jsonAsYaml);
             } catch (UnsupportedEncodingException e) {
-                log.error(e.getMessage());
+                log.error("Error creating StringEntity for API " + title + ": " + e.getMessage());
             }
             httpPut.setEntity(params);
             try {
                 return APIUtil.executeHTTPRequest(httpPut, httpClient);
             } catch (IOException | APIManagementException e) {
-                log.error(e.getMessage());
+                log.error("Error executing HTTP request for API registration " + title + ": " + e.getMessage());
             }
         }
         return null;
@@ -153,6 +161,9 @@ public class SolaceAdminApis {
      */
     public CloseableHttpResponse createAPIProduct(String organization, String environment, Aai20Document aai20Document,
                                          String apiProductName, String apiNameForRegistration) {
+        if (log.isDebugEnabled()) {
+            log.debug("Creating API product: " + apiProductName + " for API: " + apiNameForRegistration);
+        }
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpPost httpPost = new HttpPost(baseUrl + "/" + organization + "/apiProducts");
@@ -166,12 +177,12 @@ public class SolaceAdminApis {
             params2 = new StringEntity(requestBody.toString());
             httpPost.setEntity(params2);
         } catch (UnsupportedEncodingException e) {
-            log.error(e.getMessage());
+            log.error("Error creating request entity for API product " + apiProductName + ": " + e.getMessage());
         }
         try {
             return APIUtil.executeHTTPRequest(httpPost, httpClient);
         } catch (IOException | APIManagementException e) {
-            log.error(e.getMessage());
+            log.error("Error creating API product " + apiProductName + ": " + e.getMessage());
         }
         return null;
     }
@@ -184,6 +195,9 @@ public class SolaceAdminApis {
      * @return CloseableHttpResponse of the GET call
      */
     public CloseableHttpResponse registeredAPIGet(String organization, String apiTitle) {
+        if (log.isDebugEnabled()) {
+            log.debug("Checking registered API: " + apiTitle + " in organization: " + organization);
+        }
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpGet httpGet = new HttpGet(baseUrl + "/" + organization + "/apis/" + apiTitle);
@@ -191,7 +205,7 @@ public class SolaceAdminApis {
         try {
             return APIUtil.executeHTTPRequest(httpGet, httpClient);
         } catch (IOException | APIManagementException e) {
-            log.error(e.getMessage());
+            log.error("Error checking registered API " + apiTitle + ": " + e.getMessage());
         }
         return null;
     }
@@ -204,6 +218,9 @@ public class SolaceAdminApis {
      * @return CloseableHttpResponse of the GET call
      */
     public CloseableHttpResponse apiProductGet(String organization, String apiProductName) {
+        if (log.isDebugEnabled()) {
+            log.debug("Checking API product: " + apiProductName + " in organization: " + organization);
+        }
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpGet httpGet = new HttpGet(baseUrl + "/" + organization + "/apiProducts/" + apiProductName);
@@ -211,7 +228,7 @@ public class SolaceAdminApis {
         try {
             return APIUtil.executeHTTPRequest(httpGet, httpClient);
         } catch (IOException | APIManagementException e) {
-            log.error(e.getMessage());
+            log.error("Error checking API product " + apiProductName + ": " + e.getMessage());
         }
         return null;
     }
@@ -223,6 +240,9 @@ public class SolaceAdminApis {
      * @return CloseableHttpResponse of the GET call
      */
     public CloseableHttpResponse developerGet(String organization) {
+        if (log.isDebugEnabled()) {
+            log.debug("Checking developer: " + developerUserName + " in organization: " + organization);
+        }
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpGet httpGet = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName);
@@ -230,7 +250,7 @@ public class SolaceAdminApis {
         try {
             return APIUtil.executeHTTPRequest(httpGet, httpClient);
         } catch (IOException | APIManagementException e) {
-            log.error(e.getMessage());
+            log.error("Error checking developer " + developerUserName + ": " + e.getMessage());
         }
         return null;
     }
@@ -244,6 +264,10 @@ public class SolaceAdminApis {
      * @return CloseableHttpResponse of the GET call
      */
     public CloseableHttpResponse applicationGet(String organization, String uuid, String syntax) {
+        if (log.isDebugEnabled()) {
+            log.debug("Checking application: " + uuid + " with syntax: " + syntax + " in organization: " 
+                    + organization);
+        }
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpGet httpGet;
@@ -258,7 +282,7 @@ public class SolaceAdminApis {
         try {
             return APIUtil.executeHTTPRequest(httpGet, httpClient);
         } catch (IOException | APIManagementException e) {
-            log.error(e.getMessage());
+            log.error("Error checking application " + uuid + ": " + e.getMessage());
         }
         return null;
     }
