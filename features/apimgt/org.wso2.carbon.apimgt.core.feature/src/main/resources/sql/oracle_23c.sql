@@ -4333,7 +4333,7 @@ CREATE TABLE AM_TASK_LOCK (
 -- End of API-MGT Tables --
 
 --performance indexes start--
-/
+
 create index IDX_ITS_LMT on IDN_THRIFT_SESSION (LAST_MODIFIED_TIME)
 /
 create index IDX_IOAT_UT on IDN_OAUTH2_ACCESS_TOKEN (USER_TYPE)
