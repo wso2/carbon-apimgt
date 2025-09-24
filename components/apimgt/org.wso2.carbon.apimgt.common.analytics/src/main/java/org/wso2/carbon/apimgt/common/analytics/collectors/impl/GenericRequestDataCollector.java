@@ -41,6 +41,9 @@ public class GenericRequestDataCollector implements RequestDataCollector {
     }
 
     public void collectData() throws AnalyticsException {
+        if (log.isDebugEnabled()) {
+            log.debug("Collecting analytics data for event category: " + provider.getEventCategory());
+        }
         switch (provider.getEventCategory()) {
         case SUCCESS:
             successDataCollector.collectData();
@@ -50,6 +53,9 @@ public class GenericRequestDataCollector implements RequestDataCollector {
             break;
         case INVALID:
             unclassifiedDataCollector.collectData();
+            break;
+        default:
+            log.warn("Unhandled event category: " + provider.getEventCategory());
             break;
         }
     }

@@ -72,6 +72,9 @@ public class PersistenceUtil {
     }
 
     public static String extractPDFText(InputStream inputStream) throws IOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Extracting text from PDF document");
+        }
         PDFParser parser = new PDFParser(inputStream);
         parser.parse();
         COSDocument cosDoc = parser.getDocument();
@@ -82,12 +85,18 @@ public class PersistenceUtil {
     }
 
     public static String extractDocXText(InputStream inputStream) throws IOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Extracting text from DOCX document");
+        }
         XWPFDocument doc = new XWPFDocument(inputStream);
         XWPFWordExtractor msWord2007Extractor = new XWPFWordExtractor(doc);
         return msWord2007Extractor.getText();
     }
 
     public static String extractDocText(InputStream inputStream) throws IOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Extracting text from DOC document");
+        }
         POIFSFileSystem fs = new POIFSFileSystem(inputStream);
         WordExtractor msWord2003Extractor = new WordExtractor(fs);
         return msWord2003Extractor.getText();
@@ -106,6 +115,9 @@ public class PersistenceUtil {
 
     public static File writeStream(InputStream uploadedInputStream, String fileName)
             throws PersistenceException {
+        if (log.isDebugEnabled()) {
+            log.debug("Writing stream to file: " + fileName);
+        }
         String randomFolderName = RandomStringUtils.randomAlphanumeric(10);
         String tmpFolder = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator
                 + APIConstants.DOC_UPLOAD_TMPDIR + File.separator + randomFolderName;
@@ -114,6 +126,7 @@ public class PersistenceUtil {
 
         boolean folderCreated = docFile.mkdirs();
         if (!folderCreated) {
+            log.error("Failed to create temporary folder for document upload at path: " + tmpFolder);
             throw new PersistenceException("Failed to create temporary folder for document upload ");
         }
 
@@ -131,14 +144,23 @@ public class PersistenceUtil {
         } finally {
             IOUtils.closeQuietly(outFileStream);
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully wrote stream to file: " + fileName + " at path: " + docFile.getAbsolutePath());
+        }
         return docFile;
     }
 
     public static InputStream readStream(File docFile, String fileName) throws PersistenceException {
+        if (log.isDebugEnabled()) {
+            log.debug("Reading stream from file: " + fileName + " at path: " + 
+                    (docFile != null ? docFile.getAbsolutePath() : "null"));
+        }
         try {
             InputStream newInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + fileName);
             return newInputStream;
         } catch (FileNotFoundException e) {
+            log.error("Failed to open file: " + fileName + " at path: " + 
+                    (docFile != null ? docFile.getAbsolutePath() : "null"), e);
             throw new PersistenceException("Failed to open file ");
         }
     }

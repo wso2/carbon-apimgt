@@ -112,9 +112,15 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
 
         String userIp = provider.getEndUserIP();
         if (userName == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("User name is null, setting to unknown value");
+            }
             userName = Constants.UNKNOWN_VALUE;
         }
         if (userIp == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("User IP is null, setting to unknown value");
+            }
             userIp = Constants.UNKNOWN_VALUE;
         } else {
             // Mask User IP if configured
@@ -123,6 +129,9 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
             }
         }
         if (userAgent == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("User agent is null, setting to unknown value");
+            }
             userAgent = Constants.UNKNOWN_VALUE;
         } else {
             if (maskData.containsKey("api.analytics.user.agent")) {
@@ -142,6 +151,9 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
         event.setUserName(userName);
         event.setUserIp(userIp);
 
+        if (log.isDebugEnabled()) {
+            log.debug("Publishing success analytics event for API: " + (api != null ? api.getApiName() : "unknown"));
+        }
         this.processor.publish(event);
     }
 
@@ -150,18 +162,27 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
             switch (type) {
                 case IPV4_PROP_TYPE:
                     String[] octets = value.toString().split("\\.");
-
+                    if (octets.length != 4) {
+                        log.warn("Invalid IPv4 format for masking: " + value);
+                        return USERNAME_MASK_VALUE;
+                    }
                     // Sample output: 192.168.***.98
                     return octets[0] + "." + octets[1] + "." + IPV4_MASK_VALUE + "." + octets[3];
                 case IPV6_PROP_TYPE:
                     octets = value.toString().split(":");
-
+                    if (octets.length != 8) {
+                        log.warn("Invalid IPv6 format for masking: " + value);
+                        return USERNAME_MASK_VALUE;
+                    }
                     // Sample output: 2001:0db8:85a3:****:****:****:****:7334
                     return octets[0] + ":" + octets[1] + ":" + octets[2] + ":" + IPV6_MASK_VALUE + ":" + IPV6_MASK_VALUE
                             + ":" + IPV6_MASK_VALUE + ":" + IPV6_MASK_VALUE + ":" + octets[7];
                 case EMAIL_PROP_TYPE:
                     String[] email = value.toString().split("@");
-
+                    if (email.length != 2) {
+                        log.warn("Invalid email format for masking: " + value);
+                        return USERNAME_MASK_VALUE;
+                    }
                     // Sample output: *****@gmail.com
                     return EMAIL_MASK_VALUE + "@" + email[1];
                 case USERNAME_PROP_TYPE:

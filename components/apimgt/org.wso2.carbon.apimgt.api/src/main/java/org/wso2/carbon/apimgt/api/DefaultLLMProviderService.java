@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
@@ -32,6 +34,8 @@ import org.wso2.carbon.apimgt.api.model.LLMProvider;
 )
 public class DefaultLLMProviderService extends BuiltInLLMProviderService {
 
+    private static final Log log = LogFactory.getLog(DefaultLLMProviderService.class);
+
     @Override
     public String getType() {
 
@@ -41,6 +45,7 @@ public class DefaultLLMProviderService extends BuiltInLLMProviderService {
     @Override
     public LLMProvider getLLMProvider() {
 
+        log.debug("Default LLM Provider service accessed");
         return null;
     }
 

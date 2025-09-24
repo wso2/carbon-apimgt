@@ -41,7 +41,10 @@ public class LifecycleComponent {
 
     @Activate
     protected void activate(ComponentContext context) {
-        log.debug("Activating component...");
+        if (log.isDebugEnabled()) {
+            log.debug("Activating APIMGT broker lifecycle component");
+        }
+        log.info("APIMGT broker lifecycle component activated successfully");
         return;
     }
 
@@ -52,32 +55,45 @@ public class LifecycleComponent {
              policy = ReferencePolicy.DYNAMIC, 
              unbind = "unsetQpidService")
     public void setQpidService(QpidService qpidService) {
-        log.debug("Setting QpidService...");
+        if (log.isDebugEnabled()) {
+            log.debug("Setting QpidService reference");
+        }
         ServiceReferenceHolder.getInstance().setQpidService(qpidService);
         if (qpidService != null) {
+            log.info("QpidService bound successfully, registering broker lifecycle listener");
             qpidService.registerBrokerLifecycleListener(new BrokerLifecycleListener() {
 
                 @Override
                 public void onShuttingdown() {
                     if (ServiceReferenceHolder.getInstance().getListenerShutdownServices().isEmpty()) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("No JMS listeners to shutdown");
+                        }
                         return;
                     }
-                    log.debug("Triggering a Shutdown of the Listener...");
+                    log.info("Broker shutting down, initiating JMS listener shutdown sequence");
                     for (JMSListenerShutDownService listenerShutdownService :
                             ServiceReferenceHolder.getInstance().getListenerShutdownServices()) {
                         listenerShutdownService.shutDownListener();
+                    }
+                    if (log.isDebugEnabled()) {
+                        log.debug("JMS listener shutdown sequence completed");
                     }
                 }
 
                 @Override
                 public void onShutdown() {
+                    log.info("Broker shutdown completed");
                 }
             });
         }
     }
 
     public void unsetQpidService(QpidService qpidService) {
-        log.debug("Un Setting QpidService...");
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting QpidService reference");
+        }
+        log.info("QpidService unbound");
         ServiceReferenceHolder.getInstance().setQpidService(null);
     }
 
@@ -88,12 +104,16 @@ public class LifecycleComponent {
              policy = ReferencePolicy.DYNAMIC, 
              unbind = "removeShutDownService")
     public void addShutDownService(JMSListenerShutDownService shutDownService) {
-        log.debug("Adding JMS Listener Shutdown Service");
+        if (log.isDebugEnabled()) {
+            log.debug("Adding JMS listener shutdown service: " + shutDownService.getClass().getSimpleName());
+        }
         ServiceReferenceHolder.getInstance().addListenerShutdownService(shutDownService);
     }
 
     public void removeShutDownService(JMSListenerShutDownService shutDownService) {
-        log.debug("Removing JMS Listener Shutdown Service");
+        if (log.isDebugEnabled()) {
+            log.debug("Removing JMS listener shutdown service: " + shutDownService.getClass().getSimpleName());
+        }
         ServiceReferenceHolder.getInstance().removeListenerShutdownService(shutDownService);
 
     }

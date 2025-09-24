@@ -17,6 +17,8 @@
 
 package org.wso2.carbon.apimgt.common.analytics.collectors.impl.fault;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.FaultDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.CommonRequestDataCollector;
@@ -32,6 +34,7 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCate
  * Abstract faulty request data collector.
  */
 public abstract class AbstractFaultDataCollector extends CommonRequestDataCollector implements FaultDataCollector {
+    private static final Log log = LogFactory.getLog(AbstractFaultDataCollector.class);
 
     protected FaultCategory subType;
     private RequestDataPublisher processor;
@@ -47,13 +50,17 @@ public abstract class AbstractFaultDataCollector extends CommonRequestDataCollec
     }
 
     protected final void processRequest(Event faultyEvent) throws InvalidCategoryException {
-
         Error error = provider.getError(this.subType);
         if (!isValidSubCategory(error.getErrorMessage())) {
+            log.warn("Invalid sub-category for fault type: " + this.subType + ", error: " + 
+                     (faultyEvent.getError() != null ? faultyEvent.getError().getErrorMessage() : "null"));
             throw new InvalidCategoryException(this.subType, faultyEvent.getError().getErrorMessage().toString());
         }
         faultyEvent.setErrorType(this.subType.name());
         faultyEvent.setError(error);
+        if (log.isDebugEnabled()) {
+            log.debug("Processing fault event for category: " + this.subType.name());
+        }
         this.processor.publish(faultyEvent);
     }
 

@@ -169,6 +169,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 //If we need to remove this validation due to cross tenant subscription feature, we have to further validate
                 //and verify that the invoking user's tenant domain has an API subscribed by this application
                 if (tenantDomain.equals(applicationTenantDomain)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Processing application attributes for application: " + application.getName());
+                    }
                     // Remove hidden attributes and set the rest of the attributes from config
                     JSONArray applicationAttributesFromConfig = apiConsumer.getAppAttributesFromConfig(username);
                     Map<String, String> existingApplicationAttributes = application.getApplicationAttributes();
@@ -200,6 +203,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationId, e, log);
         }
+        log.warn("Application not found: " + applicationId);
         RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
         return null;
     }

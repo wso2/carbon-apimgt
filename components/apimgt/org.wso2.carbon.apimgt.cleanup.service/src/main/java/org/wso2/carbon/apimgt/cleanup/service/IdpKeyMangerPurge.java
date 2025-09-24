@@ -74,6 +74,9 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
     @MethodStats
     @Override
     public LinkedHashMap<String, String> purge(String organization) {
+        if (log.isDebugEnabled()) {
+            log.debug("Starting IDP-KeyManager purge process for organization: " + organization);
+        }
 
         List<KeyManagerConfigurationDTO> keyManagerList = new ArrayList<>();
         boolean isKeyManagerOrganizationExist = true;
@@ -84,27 +87,47 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
                 try {
                     switch (task.getKey()) {
                     case APIConstants.OrganizationDeletion.KM_ORGANIZATION_EXIST:
+                        if (log.isDebugEnabled()) {
+                            log.debug("Checking if key manager organization exists for: " + organization);
+                        }
                         isKeyManagerOrganizationExist = organizationPurgeDAO.keyManagerOrganizationExist(organization);
                         break;
                     case APIConstants.OrganizationDeletion.KM_RETRIEVER:
+                        if (log.isDebugEnabled()) {
+                            log.debug("Retrieving key manager configurations for organization: " + organization);
+                        }
                         keyManagerList = apiAdmin.getKeyManagerConfigurationsByOrganization(organization, false);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Found " + keyManagerList.size() + " key managers for organization: " 
+                                    + organization);
+                        }
                         break;
                     case APIConstants.OrganizationDeletion.IDP_DATA_REMOVER:
+                        if (log.isDebugEnabled()) {
+                            log.debug("Deleting IDP data for organization: " + organization);
+                        }
                         deleteIdpList(organization, keyManagerList);
                         break;
                     case APIConstants.OrganizationDeletion.KM_DATA_REMOVER:
+                        if (log.isDebugEnabled()) {
+                            log.debug("Removing key manager configurations for organization: " + organization);
+                        }
                         organizationPurgeDAO.deleteKeyManagerConfigurationList(keyManagerList, organization);
                         break;
                     }
                     IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.COMPLETED);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully completed task: " + task.getKey() + " for organization: " 
+                                + organization);
+                    }
                     break;
                 } catch (APIManagementException e) {
                     log.error("Error while deleting IDP-KeyManager Data in organization " + organization, e);
                     IdpKeyMangerPurgeTaskMap.put(task.getKey(), APIConstants.OrganizationDeletion.FAIL);
-                    log.info("Re-trying to execute " + task.getKey() + " process for organization" + organization, e);
+                    log.info("Re-trying to execute " + task.getKey() + " process for organization: " + organization);
 
                     if (++count == maxTries) {
-                        log.error("Cannot execute " + task.getKey() + " process for organization" + organization, e);
+                        log.error("Cannot execute " + task.getKey() + " process for organization: " + organization, e);
                         String errorMessage = e.getMessage();
                         if (e.getCause() != null) {
                             errorMessage = errorMessage + ". Cause: " + e.getCause().getMessage();
@@ -123,6 +146,9 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
             }
         }
 
+        if (log.isDebugEnabled()) {
+            log.debug("IDP-KeyManager purge process completed for organization: " + organization);
+        }
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ORGANIZATION,
                 new Gson().toJson(IdpKeyMangerPurgeTaskMap), APIConstants.AuditLogConstants.DELETED,
                 OrganizationPurgeConstants.ORG_CLEANUP_EXECUTOR);
@@ -133,8 +159,16 @@ public class IdpKeyMangerPurge implements OrganizationPurge {
             throws APIManagementException {
         for (KeyManagerConfigurationDTO keyManager : keyManagerList) {
             try {
+                if (log.isDebugEnabled()) {
+                    log.debug("Deleting identity provider: " + keyManager.getName() + " for organization: " 
+                            + organization);
+                }
                 apiAdmin.deleteIdentityProvider(organization, keyManager);
+                log.info("Successfully deleted identity provider: " + keyManager.getName() + " for organization: " 
+                        + organization);
             } catch (APIManagementException e) {
+                log.error("Failed to delete identity provider: " + keyManager.getName() + " for organization: " 
+                        + organization, e);
                 throw e;
             }
         }

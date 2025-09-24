@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.api;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.model.LLMModel;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
@@ -39,6 +41,8 @@ import java.util.List;
 )
 public class OpenAiLLMProviderService extends BuiltInLLMProviderService {
 
+    private static final Log log = LogFactory.getLog(OpenAiLLMProviderService.class);
+
     @Override
     public String getType() {
 
@@ -49,6 +53,7 @@ public class OpenAiLLMProviderService extends BuiltInLLMProviderService {
     public LLMProvider getLLMProvider()
             throws APIManagementException {
 
+        log.debug("Initializing OpenAI LLM Provider");
         try {
             LLMProvider llmProvider = new LLMProvider();
             llmProvider.setName(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_OPENAI_NAME);
@@ -101,9 +106,11 @@ public class OpenAiLLMProviderService extends BuiltInLLMProviderService {
             llmProvider.setModelList(modelList);
 
             llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());
+            log.debug("Successfully configured OpenAI LLM Provider");
             return llmProvider;
         } catch (Exception e) {
-            throw new APIManagementException("Error occurred when registering LLM Provider:" + this.getType());
+            log.error("Error occurred when registering LLM Provider: " + this.getType(), e);
+            throw new APIManagementException("Error occurred when registering LLM Provider: " + this.getType(), e);
         }
     }
 

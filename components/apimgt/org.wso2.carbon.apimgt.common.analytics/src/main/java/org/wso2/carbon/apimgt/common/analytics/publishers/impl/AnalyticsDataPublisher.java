@@ -104,6 +104,9 @@ public class AnalyticsDataPublisher {
     }
 
     public void initialize(AnalyticsCommonConfiguration commonConfig) {
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing analytics data publisher");
+        }
         Map<String, String> configs = commonConfig.getConfigurations();
         String reporterClass = configs.get("publisher.reporter.class");
         List<String> reporterTypes = getReporterTypesOrNull(configs.get("type"));
@@ -112,6 +115,9 @@ public class AnalyticsDataPublisher {
             List<MetricReporter> metricReporters = new ArrayList<>();
             MetricReporter metricReporter;
             if (reporterClass != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Creating metric reporter using class: " + reporterClass);
+                }
                 metricReporter = MetricReporterFactory.getInstance()
                         .createMetricReporter(reporterClass, configs);
                 metricReporters.add(metricReporter);
@@ -145,6 +151,7 @@ public class AnalyticsDataPublisher {
                 String authEndpoint = configs.get(Constants.AUTH_API_URL);
 
                 if (authEndpoint == null || authEndpoint.isEmpty()) {
+                    log.warn("Analytics config endpoint is not provided, using default configuration");
                     throw new MetricCreationException("Analytics Config Endpoint is not provided.");
                 }
 
@@ -175,22 +182,23 @@ public class AnalyticsDataPublisher {
 
             // not necessary to handle IllegalArgumentException here
             // since we are handling it in getSuccessOrFaultyCounterMetrics method
+            log.info("Analytics data publisher initialization completed successfully");
         } catch (MetricCreationException e) {
             log.error("Error while creating the metric reporter", e);
         }
     }
 
     public List<CounterMetric> getSuccessMetricReporters() throws MetricCreationException {
-
-        if (this.successMetricReporters.isEmpty()) {
+        if (this.successMetricReporters == null || this.successMetricReporters.isEmpty()) {
+            log.warn("No success metric reporters are initialized");
             throw new MetricCreationException("None of AnalyticsDataPublishers are initialized.");
         }
         return successMetricReporters;
     }
 
     public List<CounterMetric> getFaultyMetricReporters() throws MetricCreationException {
-
-        if (this.faultyMetricReporters.isEmpty()) {
+        if (this.faultyMetricReporters == null || this.faultyMetricReporters.isEmpty()) {
+            log.warn("No faulty metric reporters are initialized");
             throw new MetricCreationException("None of AnalyticsDataPublishers are initialized.");
         }
         return faultyMetricReporters;

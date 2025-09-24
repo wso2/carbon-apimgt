@@ -84,6 +84,9 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
     public void init() throws OutputEventAdapterException {
 
         tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing Extended HTTP event adapter for tenant: " + tenantId);
+        }
 
         //ExecutorService will be assigned  if it is null
         if (executorService == null) {
@@ -122,6 +125,7 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
             }
             executorService = new ThreadPoolExecutor(minThread, maxThread, defaultKeepAliveTime, TimeUnit.MILLISECONDS,
                     new LinkedBlockingQueue<Runnable>(jobQueSize));
+            log.info("HTTP adapter thread pool initialized with min threads: " + minThread + ", max threads: " + maxThread);
 
             //configurations for the httpConnectionManager which will be shared by every http adapter
             int defaultMaxConnectionsPerHost;
@@ -146,6 +150,9 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
             connectionManager = new MultiThreadedHttpConnectionManager();
             connectionManager.getParams().setDefaultMaxConnectionsPerHost(defaultMaxConnectionsPerHost);
             connectionManager.getParams().setMaxTotalConnections(maxTotalConnections);
+            if (log.isDebugEnabled()) {
+                log.debug("HTTP connection manager configured with max connections per host: " + defaultMaxConnectionsPerHost + ", total connections: " + maxTotalConnections);
+            }
 
             Map<String, String> staticProperties = eventAdapterConfiguration.getStaticProperties();
             if (staticProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_CONSUMER_KEY) != null) {
@@ -154,6 +161,9 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
                         staticProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_CONSUMER_KEY),
                         staticProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_CONSUMER_SECRET));
                 this.oauthURL = staticProperties.get(ExtendedHTTPEventAdapterConstants.ADAPTER_OAUTH_URL);
+                if (log.isDebugEnabled()) {
+                    log.debug("OAuth2 access token generator initialized for URL: " + this.oauthURL);
+                }
             }
         }
     }
@@ -168,6 +178,9 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
     public void connect() {
 
         this.checkHTTPClientInit(eventAdapterConfiguration.getStaticProperties());
+        if (log.isDebugEnabled()) {
+            log.debug("Extended HTTP event adapter connected successfully");
+        }
     }
 
     @Override
@@ -189,14 +202,23 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
                         this.oauthURL = endpointURL.getProtocol() + "://" + endpointURL.getHost() + ":"
                                 + endpointURL.getPort();
                         accessTokenGenerator.setOauthUrl(oauthURL);
+                        if (log.isDebugEnabled()) {
+                            log.debug("OAuth URL derived from endpoint: " + this.oauthURL);
+                        }
                     } catch (MalformedURLException e) {
                         EventAdapterUtil.logAndDrop(eventAdapterConfiguration.getName(), message,
                                 "Incorrect end point configurations", log, tenantId);
                     }
                 }
                 String accessToken = accessTokenGenerator.getAccessToken();
+                if (log.isDebugEnabled()) {
+                    log.debug("Publishing message using OAuth2 authentication to URL: " + url);
+                }
                 executorService.execute(new HTTPSender(url, payload, accessToken, headers, httpClient));
             } else if (username != null && password != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Publishing message using basic authentication to URL: " + url);
+                }
                 executorService.execute(new HTTPSender(url, payload, username, password, headers, httpClient));
             } else {
                 EventAdapterUtil.logAndDrop(eventAdapterConfiguration.getName(), message,
@@ -242,6 +264,9 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
                 try {
                     HttpHost host = new HttpHost(proxyHost, Integer.parseInt(proxyPort));
                     this.httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, host);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Proxy configuration set - Host: " + proxyHost + ", Port: " + proxyPort);
+                    }
                 } catch (NumberFormatException e) {
                     log.error("Invalid proxy port: " + proxyPort + ", "
                             + "ignoring proxy settings for HTTP output event adaptor.", e);
@@ -255,6 +280,9 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
                 contentType = ExtendedHTTPEventAdapterConstants.TEXT_PLAIN_CONTENT_TYPE;
             } else {
                 contentType = ExtendedHTTPEventAdapterConstants.TEXT_XML_CONTENT_TYPE;
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("HTTP client initialized with content type: " + contentType);
             }
 
         }
@@ -275,7 +303,7 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
             if (keyValue.length == 2) {
                 result.put(keyValue[0].trim(), keyValue[1].trim());
             } else {
-                log.warn("Header property '" + header + "' is not defined in the correct format.");
+                log.warn("Header property '" + header + "' is not defined in the correct format");
             }
         }
         return result;
@@ -365,8 +393,14 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
             try {
                 if (clientMethod.equalsIgnoreCase(ExtendedHTTPEventAdapterConstants.CONSTANT_HTTP_PUT)) {
                     method = new PutMethod(this.getUrl());
+                    if (log.isDebugEnabled()) {
+                        log.debug("Sending HTTP PUT request to: " + this.getUrl());
+                    }
                 } else {
                     method = new PostMethod(this.getUrl());
+                    if (log.isDebugEnabled()) {
+                        log.debug("Sending HTTP POST request to: " + this.getUrl());
+                    }
                 }
                 if (hostConfiguration == null) {
                     URL hostUrl = new URL(this.getUrl());
@@ -390,8 +424,14 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
                     }
                 }
                 int statusCode = this.getHttpClient().executeMethod(hostConfiguration, method);
+                if (log.isDebugEnabled()) {
+                    log.debug("HTTP request completed with status code: " + statusCode);
+                }
                 if (statusCode == HttpStatus.SC_UNAUTHORIZED && accessTokenGenerator != null){
+                    log.warn("HTTP request returned unauthorized status, removing invalid OAuth token");
                     accessTokenGenerator.removeInvalidToken(new String[]{APIConstants.OAUTH2_DEFAULT_SCOPE});
+                } else if (statusCode >= 400) {
+                    log.warn("HTTP request failed with status code: " + statusCode + " for URL: " + this.getUrl());
                 }
             } catch (IOException e) {
                 EventAdapterUtil.logAndDrop(eventAdapterConfiguration.getName(), this.getPayload(),
@@ -399,6 +439,9 @@ public class ExtendedHTTPEventAdapter implements OutputEventAdapter {
             } finally {
                 if (method != null) {
                     method.releaseConnection();
+                    if (log.isDebugEnabled()) {
+                        log.debug("HTTP connection released for URL: " + this.getUrl());
+                    }
                 }
             }
         }
