@@ -40,11 +40,13 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayPolicyArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
@@ -84,12 +86,6 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
     private static final Log log = LogFactory.getLog(SynapseArtifactGenerator.class);
     private static final String GATEWAY_EXT_SEQUENCE_PREFIX = "WSO2AMGW--Ext";
 
-    // Thread pool configuration
-    private static final int CORE_POOL_SIZE = 10;
-    private static final int MAX_POOL_SIZE = 50;
-    private static final long KEEP_ALIVE_TIME_MS = 60000L;
-    private static final int QUEUE_CAPACITY = 1000;
-
     private ThreadPoolExecutor artifactThreadPoolExecutor;
 
     /**
@@ -99,12 +95,25 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
     protected void activate(ComponentContext componentContext) {
         log.info("Initializing SynapseArtifactGenerator thread pool executor");
 
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+
+        // Thread pool configuration
+        int corePoolSize = Integer.parseInt(
+                config.getFirstProperty(APIConstants.SynapseArtifactGenerator.CORE_POOL_SIZE));
+        int maxPoolSize = Integer.parseInt(
+                config.getFirstProperty(APIConstants.SynapseArtifactGenerator.MAX_POOL_SIZE));
+        long keepAliveTime = Long.parseLong(
+                config.getFirstProperty(APIConstants.SynapseArtifactGenerator.KEEP_ALIVE_TIME_MS));
+        int queueCapacity = Integer.parseInt(
+                config.getFirstProperty(APIConstants.SynapseArtifactGenerator.QUEUE_CAPACITY));
+
         this.artifactThreadPoolExecutor = new ThreadPoolExecutor(
-                CORE_POOL_SIZE,
-                MAX_POOL_SIZE,
-                KEEP_ALIVE_TIME_MS,
+                corePoolSize,
+                maxPoolSize,
+                keepAliveTime,
                 TimeUnit.MILLISECONDS,
-                new ArrayBlockingQueue<>(QUEUE_CAPACITY),
+                new ArrayBlockingQueue<>(queueCapacity),
                 new ThreadFactory() {
                     private final AtomicInteger count = new AtomicInteger(1);
                     @Override
@@ -123,8 +132,8 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                     }
                 }
         );
-        log.info("SynapseArtifactGenerator thread pool initialized: core=" + CORE_POOL_SIZE +
-                ", max=" + MAX_POOL_SIZE + ", queue=" + QUEUE_CAPACITY);
+        log.info("SynapseArtifactGenerator thread pool initialized: core=" + corePoolSize +
+                ", max=" + maxPoolSize + ", keepAliveMs=" + keepAliveTime + ", queue=" + queueCapacity);
     }
 
     /**

@@ -2048,5 +2048,15 @@
           </GatewayCleanup>
       </GatewayNotificationConfiguration>
 
+      <!-- SynapseArtifactGenerator thread pool configuration -->
+      <SynapseArtifactGenerator>
+          <ThreadPool>
+              <CorePoolSize>{{apim.synapse_artifact_generator.thread_pool.core_pool_size}}</CorePoolSize>
+              <MaxPoolSize>{{apim.synapse_artifact_generator.thread_pool.max_pool_size}}</MaxPoolSize>
+              <KeepAliveTimeMs>{{apim.synapse_artifact_generator.thread_pool.keep_alive_time_ms}}</KeepAliveTimeMs>
+              <QueueCapacity>{{apim.synapse_artifact_generator.thread_pool.queue_capacity}}</QueueCapacity>
+          </ThreadPool>
+      </SynapseArtifactGenerator>
+
       <EnableFailoverInLoadbalancedEndpoints>{{apim.endpoint_config.loadbalanced.enable_failover}}</EnableFailoverInLoadbalancedEndpoints>
 </APIManager>
