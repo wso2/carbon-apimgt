@@ -3592,6 +3592,13 @@ public final class APIUtil {
                         apiData.get(apiType).add(APIConstants.WSO2_APK_GATEWAY);
                     }
                 }
+            } else if (APIConstants.SOLACE.equalsIgnoreCase(gatewayType)) {
+                for (JsonElement element : solaceApiTypes) {
+                    String apiType = element.getAsString();
+                    if (apiData.containsKey(apiType)) {
+                        apiData.get(apiType).add(APIConstants.SOLACE);
+                    }
+                }
             } else {
                 GatewayAgentConfiguration externalGatewayConfiguration = externalGatewayConnectorConfigurationMap.get(gatewayType);
 
