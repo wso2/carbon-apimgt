@@ -3231,12 +3231,16 @@ public class ImportUtils {
         String jsonContent = null;
         // try loading file as YAML
         if (CommonUtil.checkFileExistence(pathToYamlFile)) {
-            log.debug("Found client certificate file " + pathToYamlFile);
+            if (log.isDebugEnabled()) {
+                log.debug("Found client certificate file " + pathToYamlFile);
+            }
             String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
             jsonContent = CommonUtil.yamlToJson(yamlContent);
         } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
             // load as a json fallback
-            log.debug("Found client certificate file " + pathToJsonFile);
+            if (log.isDebugEnabled()) {
+                log.debug("Found client certificate file " + pathToJsonFile);
+            }
             jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
         }
         return jsonContent;
