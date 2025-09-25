@@ -4,7 +4,7 @@ info:
   description: Azure OpenAI APIs for completions and search
   version: 2025-04-01-preview
 servers:
-  - url: https://{resource-name}.openai.azure.com/openai
+  - url: https://{resource-name}.openai.azure.com
     variables:
       resource-name:
         default: your-resource-name
@@ -13,7 +13,7 @@ security:
       - api.read
   - apiKey: []
 paths:
-  /assistants:
+  /openai/assistants:
     get:
       operationId: List_Assistants
       tags:
@@ -98,7 +98,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/assistantObject"
-  /assistants/{assistant_id}:
+  /openai/assistants/{assistant_id}:
     get:
       operationId: Get_Assistant
       tags:
@@ -183,7 +183,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/deleteAssistantResponse"
-  /threads:
+  /openai/threads:
     post:
       operationId: Create_Thread
       tags:
@@ -210,7 +210,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/threadObject"
-  /threads/{thread_id}:
+  /openai/threads/{thread_id}:
     get:
       operationId: Get_Thread
       tags:
@@ -295,7 +295,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/deleteThreadResponse"
-  /threads/{thread_id}/messages:
+  /openai/threads/{thread_id}/messages:
     get:
       operationId: List_Messages
       tags:
@@ -397,7 +397,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/messageObject"
-  /threads/{thread_id}/messages/{message_id}:
+  /openai/threads/{thread_id}/messages/{message_id}:
     get:
       operationId: Get_Message
       tags:
@@ -468,7 +468,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/messageObject"
-  /threads/runs:
+  /openai/threads/runs:
     post:
       operationId: Create_Thread_And_Run
       tags:
@@ -495,7 +495,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/runObject"
-  /threads/{thread_id}/runs:
+  /openai/threads/{thread_id}/runs:
     get:
       operationId: List_Runs
       tags:
@@ -607,7 +607,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/runObject"
-  /threads/{thread_id}/runs/{run_id}:
+  /openai/threads/{thread_id}/runs/{run_id}:
     get:
       operationId: Get_Run
       tags:
@@ -678,7 +678,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/runObject"
-  /threads/{thread_id}/runs/{run_id}/submit_tool_outputs:
+  /openai/threads/{thread_id}/runs/{run_id}/submit_tool_outputs:
     post:
       operationId: Submit_Tool_Outputs_To_Run
       tags:
@@ -718,7 +718,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/runObject"
-  /threads/{thread_id}/runs/{run_id}/cancel:
+  /openai/threads/{thread_id}/runs/{run_id}/cancel:
     post:
       operationId: Cancel_Run
       tags:
@@ -751,7 +751,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/runObject"
-  /threads/{thread_id}/runs/{run_id}/steps:
+  /openai/threads/{thread_id}/runs/{run_id}/steps:
     get:
       operationId: List_Run_Steps
       tags:
@@ -837,7 +837,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/listRunStepsResponse"
-  /threads/{thread_id}/runs/{run_id}/steps/{step_id}:
+  /openai/threads/{thread_id}/runs/{run_id}/steps/{step_id}:
     get:
       operationId: Get_Run_Step
       tags:
@@ -895,7 +895,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/runStepObject"
-  /vector_stores:
+  /openai/vector_stores:
     get:
       operationId: List_Vector_Stores
       tags:
@@ -973,7 +973,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/vectorStoreObject"
 
-  /vector_stores/{vector_store_id}:
+  /openai/vector_stores/{vector_store_id}:
     get:
       operationId: Get_Vector_Store
       tags:
@@ -1060,7 +1060,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/deleteVectorStoreResponse"
 
-  /vector_stores/{vector_store_id}/files:
+  /openai/vector_stores/{vector_store_id}/files:
     get:
       operationId: List_Vector_Store_Files
       tags:
@@ -1166,7 +1166,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/vectorStoreFileObject"
 
-  /vector_stores/{vector_store_id}/files/{file_id}:
+  /openai/vector_stores/{vector_store_id}/files/{file_id}:
     get:
       operationId: Get_Vector_Store_File
       tags:
@@ -1266,7 +1266,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/vectorStoreFileObject"
-  /vector_stores/{vector_store_id}/files/{file_id}/content:
+  /openai/vector_stores/{vector_store_id}/files/{file_id}/content:
     get:
       operationId: retrieveVectorStoreFileContent
       tags:
@@ -1294,7 +1294,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/VectorStoreFileContentResponse"
-  /vector_stores/{vector_store_id}/search:
+  /openai/vector_stores/{vector_store_id}/search:
     post:
       operationId: searchVectorStore
       tags:
@@ -1323,7 +1323,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/VectorStoreSearchResultsPage"
 
-  /vector_stores/{vector_store_id}/file_batches:
+  /openai/vector_stores/{vector_store_id}/file_batches:
     post:
       operationId: Create_Vector_Store_File_Batch
       tags:
@@ -1359,7 +1359,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/vectorStoreFileBatchObject"
 
-  /vector_stores/{vector_store_id}/file_batches/{batch_id}:
+  /openai/vector_stores/{vector_store_id}/file_batches/{batch_id}:
     get:
       operationId: Get_Vector_Store_File_Batch
       tags:
@@ -1395,7 +1395,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/vectorStoreFileBatchObject"
 
-  /vector_stores/{vector_store_id}/file_batches/{batch_id}/cancel:
+  /openai/vector_stores/{vector_store_id}/file_batches/{batch_id}/cancel:
     post:
       operationId: Cancel_Vector_Store_File_Batch
       tags:
@@ -1429,7 +1429,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/vectorStoreFileBatchObject"
 
-  /vector_stores/{vector_store_id}/file_batches/{batch_id}/files:
+  /openai/vector_stores/{vector_store_id}/file_batches/{batch_id}/files:
     get:
       operationId: List_Vector_Store_File_Batch_Files
       tags:
@@ -1506,7 +1506,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/listVectorStoreFilesResponse"
-  /realtimeapi/sessions:
+  /openai/realtimeapi/sessions:
     post:
       summary: >
         Create an ephemeral API token for use in client-side applications with
@@ -1541,7 +1541,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RealtimeSessionCreateResponse"
-  /realtimeapi/transcription_sessions:
+  /openai/realtimeapi/transcription_sessions:
     post:
       summary: >
         Create an ephemeral API token for use in client-side applications with
@@ -1578,7 +1578,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RealtimeTranscriptionSessionCreateResponse"
-  /responses:
+  /openai/responses:
     post:
       summary: >
         Creates a model response. Provide [text](/docs/guides/text) or
@@ -1634,7 +1634,7 @@ paths:
               schema:
                 type: string
 
-  /responses/{response_id}:
+  /openai/responses/{response_id}:
     get:
       summary: |
         Retrieves a model response with the given ID.
@@ -1723,7 +1723,7 @@ paths:
               description: Request ID for troubleshooting purposes
               schema:
                 type: string
-  /responses/{response_id}/input_items:
+  /openai/responses/{response_id}/input_items:
     get:
       summary: Returns a list of input items for a given response.
       tags:
