@@ -10921,6 +10921,69 @@ paths:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             -F file=@streetlights.yml "https://127.0.0.1:9443/api/am/publisher/v4/apis/01234567-0123-0123-0123-012345678901/asyncapi"'
+
+  /apis/integrated-apis/{vendor}:
+    get:
+      summary: Retrieve Integrated APIs.
+      description: |
+        Retrieve Integrated APIs.
+      operationId: getIntegratedAPIs
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      tags:
+        - Integrated APIs
+      parameters:
+        - name: vendor
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            List of Integrated APIs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IntegratedAPIResponse'
+
+  /apis/integrated-apis/{vendor}/definition:
+    get:
+      summary: Retrieve the definition of an integrated API.
+      description: |
+        Retrieve the definition of an integrated API.
+      operationId: getIntegratedApiDefinition
+      parameters:
+        - name: vendor
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: params
+          in: query
+          description: Parameters to retrieve the definition of an integrated API
+          required: true
+          schema:
+            type: string
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      tags:
+        - Integrated APIs
+      responses:
+        200:
+          description: |
+            API definition of an integrated API
+          content:
+            application/json:
+              schema:
+                type: object
+
   /apis/{apiId}/environments/{envId}/keys:
     get:
       tags:
@@ -14494,6 +14557,7 @@ components:
             If the provider value is not given, the user invoking the API will be used as the provider.
           example: admin
 
+
     #-----------------------------------------------------
     # The API Revision resource
     #-----------------------------------------------------
@@ -15164,6 +15228,17 @@ components:
           example: Sample calculator application
         subscriptionCount:
           type: integer
+    IntegratedAPIResponse:
+      type: object
+      properties:
+        apiId:
+          type: string
+        apiName:
+          type: string
+        plans:
+          type: array
+          items:
+            type: string
     DocumentList:
       title: Document List
       type: object

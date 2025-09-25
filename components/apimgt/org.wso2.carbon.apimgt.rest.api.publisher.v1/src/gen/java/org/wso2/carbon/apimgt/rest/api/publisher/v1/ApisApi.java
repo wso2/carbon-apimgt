@@ -120,7 +120,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates")
         })
     }, tags={ "Client Certificates",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The Certificate added successfully. ", response = ClientCertMetadataDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
@@ -221,7 +221,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "API Endpoints",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created API Endpoint object in the body. ", response = APIEndpointDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
@@ -339,7 +339,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Labels Attach",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with updated Label object list ", response = LabelListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
@@ -469,7 +469,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @DELETE
     @Path("/{apiId}/client-certs/{keyType}/{alias}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a Certificate of a Given Key Type", notes = "This operation can be used to delete an uploaded certificate of a given key type. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -478,7 +478,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:client_certificates_update", description = "Update and delete client certificates")
         })
     }, tags={ "Client Certificates",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The Certificate deleted successfully. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
@@ -546,7 +546,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @DELETE
     @Path("/{apiId}/cancel-revision-workflow/{revisionId}/{envName}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete Pending Revision Deployment Workflow Tasks", notes = "This operation can be used to remove pending revision deployment requests that are in pending state ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -555,7 +555,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
     }, tags={ "API Revisions",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Revision deployment pending task removed successfully. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
@@ -586,7 +586,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @DELETE
     @Path("/{apiId}/endpoints/{endpointId}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete an Endpoint", notes = "This operation can be used to delete a API endpoint. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -596,7 +596,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "API Endpoints",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Endpoint deleted successfully. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
@@ -606,7 +606,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @DELETE
     @Path("/{apiId}/api-themes/{id}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete an API theme", notes = "Deletes the API theme for the given API ID.", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -614,7 +614,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Successfully deleted", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
@@ -676,7 +676,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Labels Detach",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with updated Label object list ", response = LabelListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
@@ -808,7 +808,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/client-certs/{keyType}/{alias}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the Certificate Information of a Given Key Type", notes = "This operation can be used to get the information about a certificate of a given key type. ", response = CertificateInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -818,7 +818,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates")
         })
     }, tags={ "Client Certificates",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. ", response = CertificateInfoDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
@@ -850,7 +850,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/client-certs/{keyType}/{alias}/content")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Download a Certificate of Given Key Type", notes = "This operation can be used to download a certificate which matches the given alias and key type. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -860,7 +860,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates")
         })
     }, tags={ "Client Certificates",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
@@ -891,7 +891,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/client-certs/{keyType}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve/ Search Uploaded Client Certificates of a given key type", notes = "This operation can be used to retrieve and search the uploaded client certificates of a given key type. ", response = ClientCertificatesDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -901,7 +901,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates")
         })
     }, tags={ "Client Certificates",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with the list of matching certificate information in the body. ", response = ClientCertificatesDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
@@ -1360,7 +1360,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/endpoints/{endpointId}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get an Endpoint", notes = "This operation can be used to get an endpoint of an API by UUID. ", response = APIEndpointDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1371,7 +1371,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "API Endpoints",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API Endpoint object is returned. ", response = APIEndpointDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
@@ -1381,7 +1381,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/endpoints")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all API Endpoints", notes = "This operation can be used to get all the available endpoints of an API. ", response = APIEndpointListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1392,7 +1392,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "API Endpoints",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of API endpoints. ", response = APIEndpointListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
@@ -1403,7 +1403,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/api-themes/{id}/content")
-
+    
     @Produces({ "application/zip", "application/json" })
     @ApiOperation(value = "Retrieve API theme as zip", notes = "Returns the API theme as a zip file for the given API ID.", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1411,7 +1411,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Returns the API theme zip file", response = File.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
@@ -1423,7 +1423,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/api-themes")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve API themes", notes = "Returns the list of API themes and their publish status for the given API.", response = ContentPublishStatusResponseDTO.class, responseContainer = "List", authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1431,7 +1431,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "List of API themes", response = ContentPublishStatusResponseDTO.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
@@ -1537,8 +1537,40 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
-    @Path("/{apiId}/labels")
+    @Path("/integrated-apis/{vendor}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve Integrated APIs.", notes = "Retrieve Integrated APIs. ", response = IntegratedAPIResponseDTO.class, responseContainer = "List", authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "Integrated APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "List of Integrated APIs. ", response = IntegratedAPIResponseDTO.class, responseContainer = "List") })
+    public Response getIntegratedAPIs(@ApiParam(value = "",required=true) @PathParam("vendor") String vendor) throws APIManagementException{
+        return delegate.getIntegratedAPIs(vendor, securityContext);
+    }
 
+    @GET
+    @Path("/integrated-apis/{vendor}/definition")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve the definition of an integrated API.", notes = "Retrieve the definition of an integrated API. ", response = Object.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "Integrated APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "API definition of an integrated API ", response = Object.class) })
+    public Response getIntegratedApiDefinition(@ApiParam(value = "",required=true) @PathParam("vendor") String vendor,  @NotNull @ApiParam(value = "Parameters to retrieve the definition of an integrated API",required=true)  @QueryParam("params") String params) throws APIManagementException{
+        return delegate.getIntegratedApiDefinition(vendor, params, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/labels")
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Labels of an API", notes = "This operation can be used to get the labels of an API. ", response = LabelListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1548,7 +1580,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Labels",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with Label object list ", response = LabelListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response getLabelsOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
@@ -1557,7 +1589,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/mcp-servers-usage")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve MCP Server(s) that uses the given API", notes = "This operation can be used to retrieve/identify MCP Server(s) that uses the API given by the `apiId` parameter. ", response = MCPServerMetadataListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1565,45 +1597,13 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "APIs",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of qualifying MCP Servers returned. ", response = MCPServerMetadataListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getMCPServerUsage(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
         return delegate.getMCPServerUsage(apiId, securityContext);
-    }
-
-    @GET
-    @Path("/integrated-apis/{vendor}")
-
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve Integrated APIs.", notes = "Retrieve Integrated APIs. ", response = IntegratedAPIResponseDTO.class, responseContainer = "List", authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
-        })
-    }, tags={ "Integrated APIs",  })
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "List of Integrated APIs. ", response = IntegratedAPIResponseDTO.class, responseContainer = "List") })
-    public Response getIntegratedAPIs(@ApiParam(value = "",required=true) @PathParam("vendor") String vendor) throws APIManagementException{
-        return delegate.getIntegratedAPIs(vendor, securityContext);
-    }
-
-    @GET
-    @Path("/integrated-apis/{vendor}/definition")
-
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve the definition of an integrated API.", notes = "Retrieve the definition of an integrated API. ", response = Object.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
-        })
-    }, tags={ "Integrated APIs",  })
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "API definition of an integrated API ", response = Object.class) })
-    public Response getIntegratedApiDefinition(@ApiParam(value = "",required=true) @PathParam("vendor") String vendor,  @NotNull @ApiParam(value = "Parameters to retrieve the definition of an integrated API",required=true)  @QueryParam("params") String params) throws APIManagementException{
-        return delegate.getIntegratedApiDefinition(vendor, params, securityContext);
     }
 
     @GET
@@ -1651,7 +1651,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/sequence-backend/{type}/content")
-
+    
     @Produces({ "application/xml", "application/json" })
     @ApiOperation(value = "Get Sequence of Custom Backend", notes = "This operation can be used to get Sequence of the Custom Backend", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1661,7 +1661,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
         })
     }, tags={ "APIs",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Requested API Custom Backend is returned ", response = File.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
@@ -1671,7 +1671,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/sequence-backend")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Sequence Backends of the API", notes = "This operation can be used to get Sequence Backend data of the API", response = SequenceBackendListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1681,7 +1681,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
         })
     }, tags={ "APIs",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Requested API Sequence Backend is returned ", response = SequenceBackendListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
@@ -1756,7 +1756,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Successfully imported", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
@@ -1912,7 +1912,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @DELETE
     @Path("/{apiId}/sequence-backend/{type}")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete Sequence Backend of the API", notes = "This operation can be used to remove the Sequence Backend of the API", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1921,7 +1921,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "APIs",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
@@ -1942,7 +1942,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "APIs",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with updated API object ", response = APIDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
@@ -2029,7 +2029,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:client_certificates_manage", description = "View, create, update and remove client certificates")
         })
     }, tags={ "Client Certificates",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The Certificate updated successfully. ", response = ClientCertMetadataDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
@@ -2168,7 +2168,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "API Endpoints",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Updated API Endpoint is returned. ", response = APIEndpointDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
@@ -2188,7 +2188,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Successfully updated status", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),

@@ -116,7 +116,7 @@ public class APIDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "Pizza Shack API", value = "Human-friendly name shown in UI. Length limited to DB column size.")
   @JsonProperty("displayName")
   public String getDisplayName() {
@@ -622,7 +622,7 @@ public class APIDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "false", value = "Flag indicating this API was discovered/initiated via the gateway (federated discovery) rather than created in the Control Plane.")
   @JsonProperty("initiatedFromGateway")
   public Boolean isInitiatedFromGateway() {
@@ -710,7 +710,7 @@ public class APIDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "solace", value = "")
   @JsonProperty("gatewayType")
   public String getGatewayType() {

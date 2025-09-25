@@ -84,14 +84,14 @@ public class APIInfoDTO   {
   }
 
   /**
-   * Display name of the API. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name.
+   * Display name of the API. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. 
    **/
   public APIInfoDTO displayName(String displayName) {
     this.displayName = displayName;
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "Calculator API", value = "Display name of the API. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. ")
   @JsonProperty("displayName")
   public String getDisplayName() {
@@ -351,7 +351,7 @@ public class APIInfoDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "solace", value = "")
   @JsonProperty("gatewayType")
   public String getGatewayType() {
