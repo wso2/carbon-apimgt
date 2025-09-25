@@ -255,7 +255,12 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                 Object statusCodeObject = axis2MessageContext.getProperty(APIMgtGatewayConstants.HTTP_SC);
                 int statusCode = 0;
                 if (statusCodeObject instanceof String) {
-                    statusCode = Integer.parseInt(String.valueOf(statusCodeObject));
+                    String scString = ((String) statusCodeObject).trim();
+                    if (StringUtils.isNumeric(scString)) {
+                        statusCode = Integer.parseInt(scString);
+                    } else {
+                        log.warn("Skipping non-numeric HTTP status in axis2 context: " + scString);
+                    }
                 } else if (null != statusCodeObject) {
                     statusCode = (Integer) statusCodeObject;
                 }
