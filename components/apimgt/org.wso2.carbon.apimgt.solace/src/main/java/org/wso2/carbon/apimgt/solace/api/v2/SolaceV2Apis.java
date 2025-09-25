@@ -116,7 +116,7 @@ public class SolaceV2Apis {
             integratedSolaceApisResponse.setIntegratedSolaceEventApis(integratedSolaceApis);
 
             return integratedSolaceApisResponse;
-        } catch (SolaceApiClientException e) {
+        } catch (SolaceApiClientException | FeignException e) {
             throw new APIManagementException("Error while getting event API products", e);
         }
     }
@@ -139,7 +139,7 @@ public class SolaceV2Apis {
         try {
             return solaceV2ApimApisClient.getEventApiAsyncApiDefinition(
                     eventApiProductId, planId, eventApiId, Collections.singletonMap("asyncApiVersion", "2.2.0"));
-        } catch (SolaceApiClientException e) {
+        } catch (SolaceApiClientException | FeignException e) {
             throw new APIManagementException("Error while getting event API async API definition", e);
         }
     }
@@ -163,7 +163,7 @@ public class SolaceV2Apis {
                     return planObject.get("id").getAsString();
                 }
             }
-        } catch (SolaceApiClientException e) {
+        } catch (SolaceApiClientException | FeignException e) {
             throw new APIManagementException("Error while getting event API product plans", e);
         }
         return null;
@@ -194,7 +194,7 @@ public class SolaceV2Apis {
             JsonObject createdAppRegistrationResponse = solaceV2ApimApisClient.createAppRegistration(appRegistration);
             JsonObject data = createdAppRegistrationResponse.getAsJsonObject("data");
             return new Gson().fromJson(data, AppRegistration.class);
-        } catch (SolaceApiClientException e) {
+        } catch (SolaceApiClientException | FeignException e) {
             throw new APIManagementException("Error while creating app registration", e);
         }
     }
@@ -230,7 +230,7 @@ public class SolaceV2Apis {
     public void deleteAppRegistration(String registrationId) throws APIManagementException {
         try {
             solaceV2ApimApisClient.deleteAppRegistration(registrationId);
-        } catch (SolaceApiClientException e) {
+        } catch (SolaceApiClientException | FeignException e) {
             throw new APIManagementException("Error while deleting app registration", e);
         }
     }
@@ -253,7 +253,7 @@ public class SolaceV2Apis {
         credentialsPayload.add("secret", new Gson().toJsonTree(secret));
         try {
             solaceV2ApimApisClient.createCredentials(appRegistrationId, credentialsPayload);
-        } catch (SolaceApiClientException e) {
+        } catch (SolaceApiClientException | FeignException e) {
             throw new APIManagementException("Error while creating credentials", e);
         }
     }
@@ -275,7 +275,7 @@ public class SolaceV2Apis {
         accessRequest.setPlanId(planId);
         try {
             solaceV2ApimApisClient.createAccessRequest(appRegistrationId, accessRequest);
-        } catch (SolaceApiClientException e) {
+        } catch (SolaceApiClientException | FeignException e) {
             throw new APIManagementException("Error while creating access request", e);
         }
     }
@@ -301,7 +301,7 @@ public class SolaceV2Apis {
             if (accessRequestId != null) {
                 solaceV2ApimApisClient.deleteAccessRequest(appRegistrationId, accessRequestId);
             }
-        } catch (SolaceApiClientException e) {
+        } catch (SolaceApiClientException | FeignException e) {
             throw new APIManagementException("Error while deleting access request", e);
         }
     }

@@ -17,6 +17,7 @@ package org.wso2.carbon.apimgt.solace.notifiers;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
@@ -76,13 +77,13 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
                 }
             }
             return true;
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | JsonSyntaxException e) {
             throw new NotifierException("Error while processing subscription event", e);
         }
     }
 
     private void createAccessRequest(SubscriptionEvent subscriptionEvent, String asyncApiDefinitionString,
-            APIConsumer apiConsumer) throws APIManagementException {
+            APIConsumer apiConsumer) throws APIManagementException, JsonSyntaxException {
         JsonObject asyncApiDefinition = new JsonParser().parse(asyncApiDefinitionString).getAsJsonObject();
         JsonObject infoObject = asyncApiDefinition.getAsJsonObject(INFO_OBJECT_KEY);
         String eventApiProductId = infoObject.get(EVENT_API_PRODUCT_ID).getAsString();
@@ -125,7 +126,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
     }
 
     private void deleteAccessRequest(SubscriptionEvent subscriptionEvent, String asyncApiDefinitionString,
-            APIConsumer apiConsumer) throws APIManagementException {
+            APIConsumer apiConsumer) throws APIManagementException, JsonSyntaxException {
         JsonObject asyncApiDefinition = new JsonParser().parse(asyncApiDefinitionString).getAsJsonObject();
         JsonObject infoObject = asyncApiDefinition.getAsJsonObject(INFO_OBJECT_KEY);
         String eventApiProductId = infoObject.get(EVENT_API_PRODUCT_ID).getAsString();

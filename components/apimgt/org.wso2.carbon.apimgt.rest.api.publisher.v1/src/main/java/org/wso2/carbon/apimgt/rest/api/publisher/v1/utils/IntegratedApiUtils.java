@@ -98,21 +98,26 @@ public class IntegratedApiUtils {
 
     private static Response getSolaceApiDefinition(Map<String, Object> params) throws APIManagementException {
         // Validate required query parameters
-        String eventApiProductId = params.get("eventApiProductId").toString();
-        if (eventApiProductId == null) {
+        Object eventApiProductIdObj = params.get("eventApiProductId");
+        if (eventApiProductIdObj == null) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Query parameter 'eventApiProductId' is required").build();
         }
-        String planId = params.get("planId").toString();
-        if (planId == null) {
+        String eventApiProductId = eventApiProductIdObj.toString();
+
+        Object planIdObj = params.get("planId");
+        if (planIdObj == null) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Query parameter 'planId' is required").build();
         }
-        String eventApiId = params.get("eventApiId").toString();
-        if (eventApiId == null) {
+        String planId = planIdObj.toString();
+
+        Object eventApiIdObj = params.get("eventApiId");
+        if (eventApiIdObj == null) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Query parameter 'eventApiId' is required").build();
         }
+        String eventApiId = eventApiIdObj.toString();
 
         SolaceConfig solaceConfig = APIUtil.getSolaceConfig();
         if (solaceConfig != null && solaceConfig.isEnabled()) {

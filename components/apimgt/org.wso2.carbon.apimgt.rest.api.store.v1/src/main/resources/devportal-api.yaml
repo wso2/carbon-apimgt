@@ -5187,8 +5187,7 @@ components:
         gatewayType:
           title: Gateway type of the API
           type: string
-          example:
-            solace
+          example: solace
         gatewayVendor:
           title: Gateway vendor of the API
           type: string
