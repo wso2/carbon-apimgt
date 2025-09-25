@@ -60,6 +60,10 @@ public class EnvironmentMappingUtil {
         environmentDTO.setGatewayType(environment.getGatewayType());
         environmentDTO.setServerUrl(environment.getServerURL());
         environmentDTO.setMode(EnvironmentDTO.ModeEnum.valueOf(environment.getMode()));
+        EnvironmentDTO.ModeEnum modeEnum = EnvironmentDTO.ModeEnum.fromValue(environment.getMode());
+        if (modeEnum != null) {
+            environmentDTO.setMode(modeEnum);
+        }
         environmentDTO.setShowInApiConsole(environment.isShowInConsole());
         environmentDTO.setProvider(environment.getProvider());
         GatewayVisibilityPermissionConfigurationDTO permissions = environment.getPermissions();
