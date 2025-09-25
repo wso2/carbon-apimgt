@@ -817,6 +817,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "File extension '%s' does not match detected MIME type '%s'"),
     ERROR_ENCRYPTING_ENDPOINT_SECURITY(902055, "Error while encrypting the endpoint security details", 500,
             "Error while encrypting the endpoint security details. %s", true),
+    API_ENDPOINT_NAME_EMPTY(902056, "Endpoint name cannot be empty", 400, "Endpoint name cannot be empty"),
 
     // Guardrail related codes
     GUARDRAIL_VIOLATION(900514, "Guardrail intervened.", 446,
