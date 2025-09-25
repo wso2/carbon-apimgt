@@ -2792,7 +2792,9 @@ public class OAS3Parser extends APIDefinition {
         if (uriTemplate.getDescription() == null || uriTemplate.getDescription().isEmpty()) {
             String description = Optional.ofNullable(match.operation.getDescription())
                     .filter(desc -> !desc.isEmpty())
-                    .orElse(match.operation.getSummary());
+                    .orElse(Optional.ofNullable(match.operation.getSummary())
+                            .filter(sum -> !sum.isEmpty())
+                            .orElse(StringUtils.EMPTY));
             uriTemplate.setDescription(description);
         }
 
