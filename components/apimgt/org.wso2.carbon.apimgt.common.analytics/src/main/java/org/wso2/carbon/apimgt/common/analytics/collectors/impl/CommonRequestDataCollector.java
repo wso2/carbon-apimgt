@@ -81,6 +81,9 @@ public abstract class CommonRequestDataCollector extends AbstractRequestDataColl
      *         Returns a fully masked string for unrecognized types or null if the value is not a String.
      */
     public String maskAnalyticsData(String type, Object value) {
+        if (log.isDebugEnabled()) {
+            log.debug("Masking analytics data of type: " + type);
+        }
         if (value instanceof String) {
             switch (type) {
                 case IPV4_PROP_TYPE:
