@@ -3490,13 +3490,18 @@ public final class APIUtil {
         return gatewayTypesList;
     }
 
+    /**
+     * This method retrieves supported gateway modes for all gateway types
+     * @return a map of supported gateway modes
+     */
     public static Map<String, List<String>> getSupportedGatewayModes() {
         Map<String, List<String>> supportedModes = new HashMap<>();
         Map<String, GatewayAgentConfiguration> externalGatewayConnectorConfigurationMap =
                 ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
         List<String> gatewayTypesList = getGatewayTypes();
         for (String type : gatewayTypesList) {
-            if (APIConstants.API_GATEWAY_TYPE_REGULAR.equals(type) || APIConstants.API_GATEWAY_TYPE_APK.equals(type)) {
+            if (APIConstants.API_GATEWAY_TYPE_REGULAR.equalsIgnoreCase(type)
+                    || APIConstants.API_GATEWAY_TYPE_APK.equalsIgnoreCase(type)) {
                 List<String> modeArray = new ArrayList<>();
                 modeArray.add(GatewayMode.WRITE_ONLY.getMode());
                 if (APIConstants.API_GATEWAY_TYPE_APK.equals(type)) {
