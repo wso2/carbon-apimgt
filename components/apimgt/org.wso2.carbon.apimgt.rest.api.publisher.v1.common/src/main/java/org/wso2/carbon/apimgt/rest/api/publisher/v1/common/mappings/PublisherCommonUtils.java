@@ -4283,8 +4283,9 @@ public class PublisherCommonUtils {
 
         // validate endpoint name
         if (StringUtils.isBlank(apiEndpointDTO.getName())) {
-            log.error("Endpoint name validation failed: name cannot be empty for API: " + apiId);
-            throw new APIManagementException("Endpoint name cannot be empty", ExceptionCodes.API_ENDPOINT_NAME_EMPTY);
+            log.error("Endpoint name cannot be empty");
+            throw new APIManagementException("Endpoint name cannot be empty",
+                    ExceptionCodes.INVALID_API_ENDPOINT_PAYLOAD);
         }
 
         String oldApiEndpointSecret = null;
@@ -4424,8 +4425,9 @@ public class PublisherCommonUtils {
 
         // validate endpoint name
         if (StringUtils.isBlank(apiEndpoint.getName())) {
-            log.error("Endpoint name validation failed: name cannot be empty for API: " + apiId);
-            throw new APIManagementException("Endpoint name cannot be empty", ExceptionCodes.API_ENDPOINT_NAME_EMPTY);
+            log.error("Endpoint name cannot be empty");
+            throw new APIManagementException("Endpoint name cannot be empty",
+                    ExceptionCodes.INVALID_API_ENDPOINT_PAYLOAD);
         }
 
         if (APIConstants.APIEndpoint.PRODUCTION.equals(
