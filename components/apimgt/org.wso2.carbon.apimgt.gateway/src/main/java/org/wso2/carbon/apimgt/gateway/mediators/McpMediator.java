@@ -307,7 +307,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             axis2MessageContext.removeProperty(APIConstants.NO_ENTITY_BODY);
         } catch (Exception e) {
             throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE, APIConstants.MCP.RpcConstants.
-                    INTERNAL_ERROR_MESSAGE, "Internal error while processing MCP response");
+                    INTERNAL_ERROR_MESSAGE, e);
         }
     }
 
