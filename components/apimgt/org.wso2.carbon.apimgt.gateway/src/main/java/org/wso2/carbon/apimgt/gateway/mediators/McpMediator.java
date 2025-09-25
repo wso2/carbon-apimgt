@@ -250,8 +250,13 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         if (APIConstants.MCP.METHOD_TOOL_CALL.equals(mcpMethod)) {
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            int statusCode = (Integer) axis2MessageContext.getProperty(APIMgtGatewayConstants.HTTP_SC);
-            Object id = messageContext.getProperty(APIConstants.MCP.RECEIVED_MCP_ID);
+            Object statusCodeObject = axis2MessageContext.getProperty(APIMgtGatewayConstants.HTTP_SC);
+            int statusCode = 0;
+            if (statusCodeObject instanceof String) {
+                statusCode = Integer.parseInt(String.valueOf(statusCodeObject));
+            } else if (null != statusCodeObject) {
+                statusCode = (Integer) statusCodeObject;
+            }
 
             try {
                 RelayUtils.buildMessage(axis2MessageContext);
@@ -268,6 +273,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                 messageBody = isError ? "Error occurred during tool call. HTTP Status Code: " + statusCode : "";
             }
 
+            Object id = messageContext.getProperty(APIConstants.MCP.RECEIVED_MCP_ID);
             buildMCPResponse(messageContext, id, isError, messageBody);
         }
     }
@@ -289,11 +295,9 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             axis2MessageContext.setProperty(Constants.Configuration.CONTENT_TYPE,
                     APIConstants.APPLICATION_JSON_MEDIA_TYPE);
 
-            // Overwrite the HTTP status code to 200 for error responses as MCP uses JSON-RPC
-            if (isError) {
-                axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, 200);
-                axis2MessageContext.removeProperty(APIConstants.NO_ENTITY_BODY);
-            }
+            // for JSON-RPC compliance, set HTTP_SC to 200 for all MCP responses
+            axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, 200);
+            axis2MessageContext.removeProperty(APIConstants.NO_ENTITY_BODY);
         } catch (Exception e) {
             throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE, APIConstants.MCP.RpcConstants.
                     INTERNAL_ERROR_MESSAGE, "Internal error while processing MCP response");
