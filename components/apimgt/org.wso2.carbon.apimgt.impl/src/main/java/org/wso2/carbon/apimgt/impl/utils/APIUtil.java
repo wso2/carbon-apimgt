@@ -3489,6 +3489,18 @@ public final class APIUtil {
         return gatewayTypesList;
     }
 
+    public static Map<String, List<String>> getSupportedGatewayModes() {
+        Map<String, List<String>> supportedModes = new HashMap<>();
+        Map<String, GatewayAgentConfiguration> externalGatewayConnectorConfigurationMap =
+                ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
+        List<String> gatewayTypesList = getGatewayTypes();
+        for (String type : gatewayTypesList) {
+            GatewayAgentConfiguration externalGatewayConfiguration = externalGatewayConnectorConfigurationMap.get(type);
+            supportedModes.put(type, externalGatewayConfiguration.getSupportedModes());
+        }
+        return supportedModes;
+    }
+
     public static GatewayFeatureCatalog getGatewayFeatureCatalog() throws APIManagementException {
 
         Gson gson = new Gson();

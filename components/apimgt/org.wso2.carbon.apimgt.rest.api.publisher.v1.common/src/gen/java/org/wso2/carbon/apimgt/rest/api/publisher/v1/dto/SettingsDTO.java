@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayFeatureCatalogDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
@@ -30,6 +32,7 @@ public class SettingsDTO   {
     private String devportalUrl = null;
     private List<EnvironmentDTO> environment = new ArrayList<EnvironmentDTO>();
     private List<String> gatewayTypes = new ArrayList<String>();
+    private Map<String, List<String>> supportedGatewayModes = new HashMap<String, List<String>>();
     private GatewayFeatureCatalogDTO gatewayFeatureCatalog = null;
     private List<String> scopes = new ArrayList<String>();
     private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<MonetizationAttributeDTO>();
@@ -103,6 +106,24 @@ public class SettingsDTO   {
   }
   public void setGatewayTypes(List<String> gatewayTypes) {
     this.gatewayTypes = gatewayTypes;
+  }
+
+  /**
+   **/
+  public SettingsDTO supportedGatewayModes(Map<String, List<String>> supportedGatewayModes) {
+    this.supportedGatewayModes = supportedGatewayModes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("supportedGatewayModes")
+  public Map<String, List<String>> getSupportedGatewayModes() {
+    return supportedGatewayModes;
+  }
+  public void setSupportedGatewayModes(Map<String, List<String>> supportedGatewayModes) {
+    this.supportedGatewayModes = supportedGatewayModes;
   }
 
   /**
@@ -494,6 +515,7 @@ public class SettingsDTO   {
     return Objects.equals(devportalUrl, settings.devportalUrl) &&
         Objects.equals(environment, settings.environment) &&
         Objects.equals(gatewayTypes, settings.gatewayTypes) &&
+        Objects.equals(supportedGatewayModes, settings.supportedGatewayModes) &&
         Objects.equals(gatewayFeatureCatalog, settings.gatewayFeatureCatalog) &&
         Objects.equals(scopes, settings.scopes) &&
         Objects.equals(monetizationAttributes, settings.monetizationAttributes) &&
@@ -519,7 +541,7 @@ public class SettingsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, designAssistantEnabled, aiAuthTokenProvided, isGatewayNotificationEnabled, isMCPSupportEnabled, customProperties);
+    return Objects.hash(devportalUrl, environment, gatewayTypes, supportedGatewayModes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, designAssistantEnabled, aiAuthTokenProvided, isGatewayNotificationEnabled, isMCPSupportEnabled, customProperties);
   }
 
   @Override
@@ -530,6 +552,7 @@ public class SettingsDTO   {
     sb.append("    devportalUrl: ").append(toIndentedString(devportalUrl)).append("\n");
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("    gatewayTypes: ").append(toIndentedString(gatewayTypes)).append("\n");
+    sb.append("    supportedGatewayModes: ").append(toIndentedString(supportedGatewayModes)).append("\n");
     sb.append("    gatewayFeatureCatalog: ").append(toIndentedString(gatewayFeatureCatalog)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");
