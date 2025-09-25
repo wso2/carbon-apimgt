@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 
+import com.google.gson.Gson;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
@@ -68,13 +69,24 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
 import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.API_OBJECT;
+import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.MASK_VALUE;
+import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_HEADERS;
+import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_HEADER_MASK;
+import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.RESPONSE_HEADERS;
+import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.RESPONSE_HEADER_MASK;
+import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.SEND_HEADER;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.UNKNOWN_VALUE;
 
 public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
@@ -83,6 +95,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     private MessageContext messageContext;
     private AnalyticsCustomDataProvider analyticsCustomDataProvider;
     private Boolean buildResponseMessage = null;
+    private static Map<String, String> reporterProperties = ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
+                .getAPIAnalyticsConfiguration().getReporterProperties();
 
     public SynapseAnalyticsDataProvider(MessageContext messageContext) {
 
@@ -406,36 +420,70 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Map<String, Object> getProperties() {
-        Map<String, Object> customProperties;
+        final Map<String, Object> custom = analyticsCustomDataProvider != null
+                ? analyticsCustomDataProvider.getCustomProperties(messageContext)
+                : new LinkedHashMap<>();
 
-        if (analyticsCustomDataProvider != null) {
-            customProperties = analyticsCustomDataProvider.getCustomProperties(messageContext);
-        } else {
-            customProperties = new HashMap<>();
+        // Core fields
+        custom.put(Constants.API_USER_NAME_KEY, getUserName());
+        custom.put(Constants.API_CONTEXT_KEY, getApiContext());
+        custom.put(Constants.RESPONSE_SIZE, getResponseSize());
+        custom.put(Constants.RESPONSE_CONTENT_TYPE, getResponseContentType());
+        custom.put(Constants.CERTIFICATE_COMMON_NAME, getCommonName());
+
+        // Headers (optional)
+        if (shouldSendHeaders()) {
+            if (messageContext instanceof Axis2MessageContext) {
+                Axis2MessageContext axis2 = (Axis2MessageContext) messageContext;
+
+                // Request headers via analytics metadata
+                Map<String, Object> analyticsMeta = axis2.getAnalyticsMetadata();
+                if (analyticsMeta != null) {
+                    Object reqHeadersObj = analyticsMeta.get(REQUEST_HEADERS);
+                    if (reqHeadersObj instanceof Map) {
+                        Map<String, Object> reqHeaders = (Map<String, Object>) reqHeadersObj;
+                        Map<String, Object> maskedReq =
+                                applyMask(reqHeaders, parseMaskSet(getMaskProperties().get(REQUEST_HEADER_MASK)));
+                        if (!maskedReq.isEmpty()) {
+                            custom.put(REQUEST_HEADERS, maskedReq);
+                        }
+                    }
+                }
+
+                // Response headers via Axis2 transport property
+                Object respHeadersObj = axis2.getAxis2MessageContext().getProperty(TRANSPORT_HEADERS);
+                if (respHeadersObj instanceof Map) {
+                    Map<String, Object> respHeaders = (Map<String, Object>) respHeadersObj;
+                    Map<String, Object> maskedResp =
+                            applyMask(respHeaders, parseMaskSet(getMaskProperties().get(RESPONSE_HEADER_MASK)));
+                    if (!maskedResp.isEmpty()) {
+                        custom.put(RESPONSE_HEADERS, maskedResp);
+                    }
+                }
+            }
         }
-        customProperties.put(Constants.API_USER_NAME_KEY, getUserName());
-        customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
-        customProperties.put(Constants.RESPONSE_SIZE, getResponseSize());
-        customProperties.put(Constants.RESPONSE_CONTENT_TYPE, getResponseContentType());
-        customProperties.put(Constants.CERTIFICATE_COMMON_NAME, getCommonName());
 
-        org.wso2.carbon.apimgt.keymgt.model.entity.API api =
-                (org.wso2.carbon.apimgt.keymgt.model.entity.API) messageContext.getProperty(API_OBJECT);
-        customProperties.put(Constants.IS_EGRESS, api.getEgress());
-        customProperties.put(Constants.SUBTYPE, api.getSubtype());
-
-        if (messageContext.getProperty(AIAPIConstants.AI_API_RESPONSE_METADATA) != null) {
-            Object requestStartTimeObj = messageContext.getProperty(Constants.REQUEST_START_TIME_PROPERTY);
-            long requestStartTime = requestStartTimeObj == null ? 0L : (long) requestStartTimeObj;
-            int requestStartHour = getHourByUTC(requestStartTime);
-            getAiAnalyticsData(
-                    (Map) messageContext.getProperty(AIAPIConstants.AI_API_RESPONSE_METADATA),
-                    requestStartHour,
-                    customProperties
-            );
+        // API attributes (egress/subtype)
+        Object apiObj = messageContext.getProperty(API_OBJECT);
+        if (apiObj instanceof org.wso2.carbon.apimgt.keymgt.model.entity.API) {
+            org.wso2.carbon.apimgt.keymgt.model.entity.API api =
+                    (org.wso2.carbon.apimgt.keymgt.model.entity.API) apiObj;
+            custom.put(Constants.IS_EGRESS, api.getEgress());
+            custom.put(Constants.SUBTYPE, api.getSubtype());
         }
-        return customProperties;
+
+        // AI analytics enrichment (optional)
+        Object aiMeta = messageContext.getProperty(AIAPIConstants.AI_API_RESPONSE_METADATA);
+        if (aiMeta instanceof Map) {
+            Object startTimeObj = messageContext.getProperty(Constants.REQUEST_START_TIME_PROPERTY);
+            long startTime = (startTimeObj instanceof Long) ? (Long) startTimeObj : 0L;
+            int startHourUtc = getHourByUTC(startTime);
+            getAiAnalyticsData((Map) aiMeta, startHourUtc, custom);
+        }
+
+        return custom;
     }
 
     public static int getHourByUTC(long timestampMillis) {
@@ -646,5 +694,59 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             return (String) messageContext.getProperty(APIConstants.CERTIFICATE_COMMON_NAME);
         }
         return Constants.NOT_APPLICABLE_VALUE;
+    }
+
+    /**
+     * Check whether to send headers in the analytics event.
+     * Default: false
+     */
+    private boolean shouldSendHeaders() {
+        // reporterProperties.get(SEND_HEADER) might be null; treat as false.
+        String v = reporterProperties.get(SEND_HEADER);
+        return v != null && Boolean.parseBoolean(v);
+    }
+
+    /**
+     * Parse a JSON array of strings into a case-insensitive set.
+     * Accepts null/blank -> empty set.
+     * Example JSON: ["authorization","cookie"]
+     */
+    private Set<String> parseMaskSet(String json) {
+        if (json == null || json.trim().isEmpty()) {
+            return Collections.emptySet();
+        }
+        try {
+            List<String> list = new Gson().fromJson(json, new com.google.gson.reflect.TypeToken<List<String>>() {}.getType());
+            if (list == null || list.isEmpty()) return Collections.emptySet();
+            // Case-insensitive membership check: store lowercase
+            return list.stream().filter(Objects::nonNull).map(String::toLowerCase).collect(Collectors.toSet());
+        } catch (Exception ignore) {
+            // On malformed JSON, fail safe: don't mask anything rather than blow up
+            return Collections.emptySet();
+        }
+    }
+
+    /**
+     * Applies a mask to the specified headers based on the provided mask set.
+     * If a header key is present in the mask set (case-insensitive), its value is replaced with a masked value.
+     * Otherwise, the header is retained as is.
+     *
+     * @param headers the map containing headers to be processed; can be null or empty
+     * @param maskSet the set of header keys (case-insensitive) to be masked; can be empty
+     * @return a new map containing the masked or unmasked headers
+     */
+    private Map<String, Object> applyMask(Map<String, Object> headers, Set<String> maskSet) {
+        if (headers == null || headers.isEmpty()) return Collections.emptyMap();
+        Map<String, Object> out = new LinkedHashMap<>(Math.max(16, headers.size()));
+        if (maskSet.isEmpty()) {
+            out.putAll(headers);
+            return out;
+        }
+        for (Map.Entry<String, Object> e : headers.entrySet()) {
+            String key = String.valueOf(e.getKey());
+            boolean masked = maskSet.contains(key.toLowerCase());
+            out.put(key, masked ? MASK_VALUE : e.getValue());
+        }
+        return out;
     }
 }

@@ -27,6 +27,14 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
+import static org.wso2.carbon.apimgt.common.analytics.Constants.MASK_VALUE;
+import static org.wso2.carbon.apimgt.common.analytics.Constants.EMAIL_PROP_TYPE;
+import static org.wso2.carbon.apimgt.common.analytics.Constants.IPV4_MASK_VALUE;
+import static org.wso2.carbon.apimgt.common.analytics.Constants.IPV4_PROP_TYPE;
+import static org.wso2.carbon.apimgt.common.analytics.Constants.IPV6_MASK_VALUE;
+import static org.wso2.carbon.apimgt.common.analytics.Constants.IPV6_PROP_TYPE;
+import static org.wso2.carbon.apimgt.common.analytics.Constants.USERNAME_PROP_TYPE;
+
 /**
  * Contain the common data collectors.
  */
@@ -59,5 +67,45 @@ public abstract class CommonRequestDataCollector extends AbstractRequestDataColl
         OffsetDateTime offsetDateTime = OffsetDateTime
                 .ofInstant(Instant.ofEpochMilli(time), ZoneOffset.UTC.normalized());
         return offsetDateTime.toString();
+    }
+
+    /**
+     * Masks sensitive analytics data based on the provided type.
+     * The method supports masking for IPv4, IPv6, email addresses, and usernames,
+     * returning appropriately formatted and partially masked strings.
+     *
+     * @param type the type of data to be masked. Supported types include:
+     *             "IPV4", "IPV6", "EMAIL", "USERNAME".
+     * @param value the actual value to be masked. Must be of type String.
+     * @return the masked string value based on the specified type.
+     *         Returns a fully masked string for unrecognized types or null if the value is not a String.
+     */
+    public String maskAnalyticsData(String type, Object value) {
+        if (value instanceof String) {
+            switch (type) {
+                case IPV4_PROP_TYPE:
+                    String[] octets = value.toString().split("\\.");
+
+                    // Sample output: 192.168.***.98
+                    return octets[0] + "." + octets[1] + "." + IPV4_MASK_VALUE + "." + octets[3];
+                case IPV6_PROP_TYPE:
+                    octets = value.toString().split(":");
+
+                    // Sample output: 2001:0db8:85a3:****:****:****:****:7334
+                    return octets[0] + ":" + octets[1] + ":" + octets[2] + ":" + IPV6_MASK_VALUE + ":" + IPV6_MASK_VALUE
+                            + ":" + IPV6_MASK_VALUE + ":" + IPV6_MASK_VALUE + ":" + octets[7];
+                case EMAIL_PROP_TYPE:
+                    String[] email = value.toString().split("@");
+
+                    // Sample output: *****@gmail.com
+                    return MASK_VALUE + "@" + email[1];
+                case USERNAME_PROP_TYPE:
+                    return Constants.MASK_VALUE;
+                default:
+                    // Sample output: ********
+                    return Constants.MASK_VALUE;
+            }
+        }
+        return null;
     }
 }

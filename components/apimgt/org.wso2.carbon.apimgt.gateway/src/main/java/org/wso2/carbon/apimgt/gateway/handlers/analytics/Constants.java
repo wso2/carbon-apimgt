@@ -77,6 +77,12 @@ public class Constants {
 
     public static final String CERTIFICATE_COMMON_NAME = "commonName";
     public static final String NOT_APPLICABLE_VALUE = "N/A";
+    public static final String SEND_HEADER = "send_headers";
+    public static final String REQUEST_HEADERS= "requestHeaders";
+    public static final String RESPONSE_HEADERS= "responseHeaders";
+    public static final String RESPONSE_HEADER_MASK = "response_headers";
+    public static final String REQUEST_HEADER_MASK = "request_headers";
+    public static final String MASK_VALUE = "*****";
 
     public static final String AI_METADATA = "aiMetadata";
     public static final String AI_VENDOR_NAME = "vendorName";
