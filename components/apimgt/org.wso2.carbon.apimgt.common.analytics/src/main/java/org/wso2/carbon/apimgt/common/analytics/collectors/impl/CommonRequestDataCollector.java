@@ -100,10 +100,10 @@ public abstract class CommonRequestDataCollector extends AbstractRequestDataColl
                     // Sample output: *****@gmail.com
                     return MASK_VALUE + "@" + email[1];
                 case USERNAME_PROP_TYPE:
-                    return Constants.MASK_VALUE;
+                    return MASK_VALUE;
                 default:
                     // Sample output: ********
-                    return Constants.MASK_VALUE;
+                    return MASK_VALUE;
             }
         }
         return null;

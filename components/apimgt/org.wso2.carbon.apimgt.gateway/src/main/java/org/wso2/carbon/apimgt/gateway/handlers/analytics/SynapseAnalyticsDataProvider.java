@@ -97,6 +97,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     private Boolean buildResponseMessage = null;
     private static Map<String, String> reporterProperties = ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
                 .getAPIAnalyticsConfiguration().getReporterProperties();
+    private static final Gson gson = new Gson();
 
     public SynapseAnalyticsDataProvider(MessageContext messageContext) {
 
@@ -716,10 +717,13 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             return Collections.emptySet();
         }
         try {
-            List<String> list = new Gson().fromJson(json, new com.google.gson.reflect.TypeToken<List<String>>() {}.getType());
-            if (list == null || list.isEmpty()) return Collections.emptySet();
+            List<String> list = gson.fromJson(json, new com.google.gson.reflect.TypeToken<List<String>>() {}.getType());
+            if (list == null || list.isEmpty()) {
+                return Collections.emptySet();
+            }
             // Case-insensitive membership check: store lowercase
-            return list.stream().filter(Objects::nonNull).map(String::toLowerCase).collect(Collectors.toSet());
+            return list.stream().filter(Objects::nonNull).map(
+                    s -> s.toLowerCase(java.util.Locale.ROOT)).collect(Collectors.toSet());
         } catch (Exception ignore) {
             // On malformed JSON, fail safe: don't mask anything rather than blow up
             return Collections.emptySet();
@@ -737,14 +741,14 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
      */
     private Map<String, Object> applyMask(Map<String, Object> headers, Set<String> maskSet) {
         if (headers == null || headers.isEmpty()) return Collections.emptyMap();
-        Map<String, Object> out = new LinkedHashMap<>(Math.max(16, headers.size()));
+        Map<String, Object> out = new LinkedHashMap<>(headers.size());
         if (maskSet.isEmpty()) {
             out.putAll(headers);
             return out;
         }
         for (Map.Entry<String, Object> e : headers.entrySet()) {
             String key = String.valueOf(e.getKey());
-            boolean masked = maskSet.contains(key.toLowerCase());
+            boolean masked =maskSet.contains(key.toLowerCase(java.util.Locale.ROOT));
             out.put(key, masked ? MASK_VALUE : e.getValue());
         }
         return out;
