@@ -2195,9 +2195,9 @@ public class ImportUtils {
     private static void handleCustomParams(JSONObject endpointSecurity, String deploymentStg) {
 
         if (endpointSecurity.get(deploymentStg) instanceof JSONObject) {
-            log.debug("Handling custom parameters in endpoint security for " + deploymentStg);
             JSONObject security = (JSONObject) endpointSecurity.get(deploymentStg);
             if (security.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof JSONObject) {
+                log.debug("Handling custom parameters in endpoint security for " + deploymentStg);
                 security.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS,
                         ((JSONObject) security.get(
                                 APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS)).toJSONString());
