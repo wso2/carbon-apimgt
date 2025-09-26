@@ -434,7 +434,9 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         custom.put(Constants.CERTIFICATE_COMMON_NAME, getCommonName());
 
         // Headers (optional)
+        // Headers (optional)
         if (shouldSendHeaders()) {
+            log.debug("Including headers in analytics event");
             if (messageContext instanceof Axis2MessageContext) {
                 Axis2MessageContext axis2 = (Axis2MessageContext) messageContext;
 
