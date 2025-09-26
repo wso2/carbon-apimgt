@@ -333,7 +333,8 @@ public class InboundWebSocketProcessor implements WebSocketProcessor {
             MessageContext synCtx = getMessageContext(inboundMessageContext);
             API api = InboundWebsocketProcessorUtil.getApi(synCtx, inboundMessageContext);
             if (api == null) {
-                throw new ResourceNotFoundException("No matching API found to dispatch the request");
+                throw new ResourceNotFoundException("No matching API was found to dispatch the request for path : "
+                        + inboundMessageContext.getRequestPath());
             }
             inboundMessageContext.setApi(api);
             reConstructFullUriWithVersion(req, synCtx, inboundMessageContext);
@@ -362,7 +363,8 @@ public class InboundWebSocketProcessor implements WebSocketProcessor {
             if (selectedResource == null) {
                 WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
                         org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.RESOURCE_NOT_FOUND_ERROR_CODE);
-                throw new ResourceNotFoundException("No matching resource found to dispatch the request");
+                throw new ResourceNotFoundException("No matching resource was found to dispatch the request for path : "
+                        + inboundMessageContext.getRequestPath());
             }
             if (APIConstants.GRAPHQL_API.equals(inboundMessageContext.getElectedAPI().getApiType())) {
                 inboundMessageContext.setGraphQLSchemaDTO(DataHolder.getInstance()
