@@ -44,6 +44,7 @@ public class PublisherAPIProductInfo {
     private Set<String> audiences;
     private String createdTime;
     private String updatedTime;
+    private String description;
 
     public Set<String> getAudiences() {
         return audiences;
@@ -151,7 +152,16 @@ public class PublisherAPIProductInfo {
     public String getUpdatedTime() {
         return updatedTime;
     }
+
     public void setUpdatedTime(String updatedTime) {
         this.updatedTime = updatedTime;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }
