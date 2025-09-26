@@ -70,6 +70,16 @@ public class SolaceV2Apis {
     }
 
     /**
+     * Validates that the Solace V2 APIM APIs client is properly initialized.
+     * @throws APIManagementException if the client is not initialized
+     */
+    private void validateClientInitialization() throws APIManagementException {
+        if (solaceV2ApimApisClient == null) {
+            throw new APIManagementException("Solace V2 APIM APIs client is not initialized properly.");
+        }
+    }
+
+    /**
      * Gets a list of Solace Event API Products that contain only one Solace Event API.
      * Each Solace Event API in the returned response, will be in the format of an Integrated API.
      * A Solace Event API will be represented as an API in WSO2 APIM. In order to access a Solace Event API, we need a
@@ -80,6 +90,7 @@ public class SolaceV2Apis {
      * @throws APIManagementException   If an error occurs while getting event API products.
      */
     public IntegratedSolaceApisResponse getEventApiProducts() throws APIManagementException {
+        validateClientInitialization();
         try {
             SolaceEventApiProductsResponse eventApiProducts = solaceV2ApimApisClient.getEventApiProducts();
 
@@ -136,6 +147,7 @@ public class SolaceV2Apis {
      */
     public JsonObject getEventApiAsyncApiDefinition(String eventApiProductId, String planId, String eventApiId)
             throws APIManagementException {
+        validateClientInitialization();
         try {
             return solaceV2ApimApisClient.getEventApiAsyncApiDefinition(
                     eventApiProductId, planId, eventApiId, Collections.singletonMap("asyncApiVersion", "2.2.0"));
@@ -155,6 +167,7 @@ public class SolaceV2Apis {
      */
     public String getEventApiProductPlanId(String eventApiProductId, String planName)
             throws APIManagementException {
+        validateClientInitialization();
         try {
             JsonObject response = solaceV2ApimApisClient.getEventApiProductPlans(eventApiProductId);
             for (JsonElement planElement : response.getAsJsonArray("data")) {
@@ -184,6 +197,7 @@ public class SolaceV2Apis {
     public AppRegistration createAppRegistration(String appRegistrationId, String appSource, String appName,
                                                  String appSourceOwner, String applicationDomainId)
             throws APIManagementException {
+        validateClientInitialization();
         AppRegistration appRegistration = new AppRegistration();
         appRegistration.setRegistrationId(appRegistrationId);
         appRegistration.setSource(appSource);
@@ -206,15 +220,18 @@ public class SolaceV2Apis {
      * @throws APIManagementException   If an error occurs while checking if app registration exists.
      */
     public boolean isAppRegistrationExists(String appRegistrationId) throws APIManagementException {
+        validateClientInitialization();
         try {
             JsonObject response = solaceV2ApimApisClient.getAppRegistration(appRegistrationId);
-            if (response.has("data")) {
+            if (response != null && response.has("data")) {
                 return true;
             }
         } catch (FeignException e) {
             if (404 == e.status()) {
                 return false;
             }
+            throw new APIManagementException("Error while checking if app registration exists with id: " +
+                    appRegistrationId, e);
         } catch (SolaceApiClientException e) {
             throw new APIManagementException("Error while checking if app registration exists with id: " +
                     appRegistrationId, e);
@@ -228,6 +245,7 @@ public class SolaceV2Apis {
      * @throws APIManagementException   If an error occurs while deleting app registration.
      */
     public void deleteAppRegistration(String registrationId) throws APIManagementException {
+        validateClientInitialization();
         try {
             solaceV2ApimApisClient.deleteAppRegistration(registrationId);
         } catch (SolaceApiClientException | FeignException e) {
@@ -246,6 +264,7 @@ public class SolaceV2Apis {
      */
     public void createCredentials(String appRegistrationId, String consumerKey, String consumerSecret)
             throws APIManagementException {
+        validateClientInitialization();
         AppRegistration.Credentials.Secret secret = new AppRegistration.Credentials.Secret();
         secret.setConsumerKey(consumerKey);
         secret.setConsumerSecret(consumerSecret);
@@ -268,6 +287,7 @@ public class SolaceV2Apis {
      */
     public void createAccessRequest(String eventApiProductId, String planId, String appRegistrationId)
             throws APIManagementException {
+        validateClientInitialization();
         String accessRequestId = getAccessRequestId(appRegistrationId, eventApiProductId, planId);
         AppRegistration.AccessRequest accessRequest = new AppRegistration.AccessRequest();
         accessRequest.setAccessRequestId(accessRequestId);
@@ -287,13 +307,19 @@ public class SolaceV2Apis {
      * @throws APIManagementException   If an error occurs while deleting access request.
      */
     public void deleteAccessRequest(String appRegistrationId, String eventApiProductId) throws APIManagementException {
+        validateClientInitialization();
         try {
             JsonObject response = solaceV2ApimApisClient.getAccessRequests(appRegistrationId);
             JsonArray dataArray = response.getAsJsonArray("data");
             String accessRequestId = null;
             for (JsonElement element : dataArray) {
+                if (!element.isJsonObject()) {
+                    continue;
+                }
                 JsonObject accessRequest = element.getAsJsonObject();
-                if (eventApiProductId.equals(accessRequest.get("eventApiProductId").getAsString())) {
+                if (accessRequest.has("eventApiProductId")
+                        && accessRequest.has("accessRequestId")
+                        && eventApiProductId.equals(accessRequest.get("eventApiProductId").getAsString())) {
                     accessRequestId = accessRequest.get("accessRequestId").getAsString();
                     break;
                 }

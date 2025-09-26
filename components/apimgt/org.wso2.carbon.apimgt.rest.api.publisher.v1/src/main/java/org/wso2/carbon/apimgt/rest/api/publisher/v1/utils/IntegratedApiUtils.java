@@ -70,6 +70,10 @@ public class IntegratedApiUtils {
     private static List<IntegratedAPIResponseDTO> mapSolaceResponseToIntegratedApis(
             IntegratedSolaceApisResponse integratedSolaceApisResponse) {
         List<IntegratedAPIResponseDTO> integratedApis = new ArrayList<>();
+        if (integratedSolaceApisResponse == null
+                || integratedSolaceApisResponse.getIntegratedSolaceEventApis() == null) {
+            return integratedApis;
+        }
         for (IntegratedSolaceApisResponse.EventApi integratedSolaceEventApi :
                 integratedSolaceApisResponse.getIntegratedSolaceEventApis()) {
             IntegratedAPIResponseDTO integratedApi = new IntegratedAPIResponseDTO();
