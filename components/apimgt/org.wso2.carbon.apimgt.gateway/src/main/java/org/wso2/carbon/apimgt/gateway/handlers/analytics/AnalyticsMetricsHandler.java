@@ -143,6 +143,7 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
      * @return the value of the `User-Agent` header if available in the transport headers, or null otherwise
      */
     private String getUserAgentAndCopyRequestHeadersToContext(MessageContext messageContext) {
+        log.debug("Extracting User-Agent and copying request headers to analytics metadata");
         Axis2MessageContext axis2mc = (Axis2MessageContext) messageContext;
 
         Object transportHeadersObj =
