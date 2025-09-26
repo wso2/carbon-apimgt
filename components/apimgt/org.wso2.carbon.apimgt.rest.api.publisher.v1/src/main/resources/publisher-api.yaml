@@ -15951,6 +15951,19 @@ components:
           type: string
           example: Regular
           default: Regular
+        mode:
+          type: string
+          enum:
+            - READ_ONLY
+            - READ_WRITE
+            - WRITE_ONLY
+          example: READ_WRITE
+          default: WRITE_ONLY
+          description: |
+            The mode of the environment. This indicates whether the environment is in read-only or read-write mode.
+            **READ_ONLY:** The environment is in read-only mode. API cannot be deployed, only discovery is possible.
+            **READ_WRITE:** The environment is in read-write mode. APIs can be deployed and discovered.
+            **WRITE_ONLY:** The environment is in write-only mode/ APIs only can be deployed.
         serverUrl:
           type: string
           example: https://localhost:9443/services/
