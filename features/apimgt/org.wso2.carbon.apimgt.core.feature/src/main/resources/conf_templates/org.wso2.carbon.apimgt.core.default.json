@@ -257,5 +257,6 @@
       "uri_path": "/api/am/gateway/*",
       "http_method": "GET,DELETE,PUT,POST"
     }
-  ]
+  ],
+  "apim.certificate_manager.events_enabled": true
 }
