@@ -171,15 +171,18 @@ public class LifeCycleUtils {
                         || endPoint != null && endPoint.trim().length() > 0
                         || api.isAdvertiseOnly() && (api.getApiExternalProductionEndpoint() != null
                         || api.getApiExternalSandboxEndpoint() != null)) {
-                    if ((isOauthProtected && (tiers == null || tiers.size() == 0)) && !api.isAdvertiseOnly()) {
+                    if ((isOauthProtected && (tiers == null || tiers.size() == 0)) && !api.isAdvertiseOnly()
+                            && !api.isInitiatedFromGateway()) {
                         throw new APIManagementException("Failed to publish service to API store. No Tiers selected",
                                 ExceptionCodes.from(ExceptionCodes.FAILED_PUBLISHING_API_NO_TIERS_SELECTED,
                                         api.getUuid()));
                     }
                 } else {
-                    throw new APIManagementException("Failed to publish service to API store. No endpoint selected",
-                            ExceptionCodes.from(ExceptionCodes.FAILED_PUBLISHING_API_NO_ENDPOINT_SELECTED,
-                                    api.getUuid()));
+                    if (!api.isInitiatedFromGateway()) {
+                        throw new APIManagementException("Failed to publish service to API store. No endpoint selected",
+                                ExceptionCodes.from(ExceptionCodes.FAILED_PUBLISHING_API_NO_ENDPOINT_SELECTED,
+                                        api.getUuid()));
+                    }
                 }
             }
 
