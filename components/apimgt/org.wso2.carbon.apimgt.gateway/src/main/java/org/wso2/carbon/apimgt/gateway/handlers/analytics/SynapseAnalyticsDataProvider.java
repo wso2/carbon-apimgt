@@ -422,6 +422,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, Object> getProperties() {
+        log.debug("Building properties for analytics event");
         final Map<String, Object> custom = analyticsCustomDataProvider != null
                 ? analyticsCustomDataProvider.getCustomProperties(messageContext)
                 : new LinkedHashMap<>();
