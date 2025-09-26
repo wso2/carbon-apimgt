@@ -95,8 +95,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     private MessageContext messageContext;
     private AnalyticsCustomDataProvider analyticsCustomDataProvider;
     private Boolean buildResponseMessage = null;
-    private static Map<String, String> reporterProperties = ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
-                .getAPIAnalyticsConfiguration().getReporterProperties();
+    private static Map<String, String> reporterProperties = null;
     private static final Gson gson = new Gson();
 
     public SynapseAnalyticsDataProvider(MessageContext messageContext) {
@@ -709,6 +708,10 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
      */
     private boolean shouldSendHeaders() {
         // reporterProperties.get(SEND_HEADER) might be null; treat as false.
+        if (reporterProperties == null) {
+            reporterProperties = ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
+                    .getAPIAnalyticsConfiguration().getReporterProperties();
+        }
         String v = reporterProperties.get(SEND_HEADER);
         return v != null && Boolean.parseBoolean(v);
     }
