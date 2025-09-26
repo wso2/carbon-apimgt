@@ -173,13 +173,17 @@ public class LifeCycleUtils {
                         || api.getApiExternalSandboxEndpoint() != null)) {
                     if ((isOauthProtected && (tiers == null || tiers.size() == 0)) && !api.isAdvertiseOnly()
                             && !api.isInitiatedFromGateway()) {
-                        throw new APIManagementException("Failed to publish service to API store. No Tiers selected",
+                        String errorMessage = "Failed to publish service to API store. No Tiers selected";
+                        log.error(errorMessage + " for API: " + api.getUuid());
+                        throw new APIManagementException(errorMessage,
                                 ExceptionCodes.from(ExceptionCodes.FAILED_PUBLISHING_API_NO_TIERS_SELECTED,
                                         api.getUuid()));
                     }
                 } else {
                     if (!api.isInitiatedFromGateway()) {
-                        throw new APIManagementException("Failed to publish service to API store. No endpoint selected",
+                        String errorMessage = "Failed to publish service to API store. No endpoint selected";
+                        log.error(errorMessage + " for API: " + api.getUuid());
+                        throw new APIManagementException(errorMessage,
                                 ExceptionCodes.from(ExceptionCodes.FAILED_PUBLISHING_API_NO_ENDPOINT_SELECTED,
                                         api.getUuid()));
                     }
