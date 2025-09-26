@@ -1057,7 +1057,7 @@ public class TemplateBuilderUtil {
             return null;
         }
         GatewayUtils.setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
-        if (!APIConstants.API_TYPE_MCP.equals(api.getType())) {
+        if (!APIConstants.API_TYPE_MCP.equalsIgnoreCase(api.getType())) {
             setAPIFaultSequencesToBeAdded(api, gatewayAPIDTO, extractedPath, apidto);
             setCustomSequencesToBeAdded(api, gatewayAPIDTO, extractedPath, apidto);
         } else {
