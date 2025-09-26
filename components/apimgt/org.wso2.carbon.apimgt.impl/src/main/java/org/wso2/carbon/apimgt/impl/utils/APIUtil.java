@@ -117,7 +117,6 @@ import org.wso2.carbon.apimgt.api.model.GatewayAPIValidationResult;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
-import org.wso2.carbon.apimgt.api.model.GatewayMode;
 import org.wso2.carbon.apimgt.api.model.GatewayPortalConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayFeatureCatalog;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -3488,40 +3487,6 @@ public final class APIUtil {
             gatewayTypesList = Arrays.asList(gatewayTypes.replace(" ", "").split(","));
         }
         return gatewayTypesList;
-    }
-
-    /**
-     * This method retrieves supported gateway modes for all gateway types
-     * @return a map of supported gateway modes
-     */
-    public static Map<String, List<String>> getSupportedGatewayModes() {
-        Map<String, List<String>> supportedModes = new HashMap<>();
-        Map<String, GatewayAgentConfiguration> externalGatewayConnectorConfigurationMap =
-                ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
-        List<String> gatewayTypesList = getGatewayTypes();
-        for (String type : gatewayTypesList) {
-            if (APIConstants.API_GATEWAY_TYPE_REGULAR.equalsIgnoreCase(type)
-                    || APIConstants.API_GATEWAY_TYPE_APK.equalsIgnoreCase(type)) {
-                List<String> modeArray = new ArrayList<>();
-                modeArray.add(GatewayMode.WRITE_ONLY.getMode());
-                if (APIConstants.API_GATEWAY_TYPE_APK.equals(type)) {
-                    modeArray.add(GatewayMode.READ_ONLY.getMode());
-                }
-                supportedModes.put(type, modeArray);
-            }
-            if (!(APIConstants.API_GATEWAY_TYPE_REGULAR.equalsIgnoreCase(
-                    type)) && !(APIConstants.API_GATEWAY_TYPE_APK.equalsIgnoreCase(type))) {
-                GatewayAgentConfiguration externalGatewayConfiguration = externalGatewayConnectorConfigurationMap.get(
-                        type);
-                if (externalGatewayConfiguration != null) {
-                    supportedModes.put(type, externalGatewayConfiguration.getSupportedModes());
-                } else {
-                    log.warn("No configuration found for external gateway type: "
-                            + StringEscapeUtils.escapeJava(type));
-                }
-            }
-        }
-        return supportedModes;
     }
 
     public static GatewayFeatureCatalog getGatewayFeatureCatalog() throws APIManagementException {

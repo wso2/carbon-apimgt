@@ -17781,12 +17781,6 @@ components:
             - AWS
           items:
             type: string
-        supportedGatewayModes:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              type: string
         GatewayFeatureCatalog:
           title: Gateway feature Catalog
           type: object

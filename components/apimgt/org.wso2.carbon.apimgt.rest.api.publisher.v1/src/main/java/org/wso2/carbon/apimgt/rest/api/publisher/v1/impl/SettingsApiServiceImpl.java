@@ -56,7 +56,6 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO(isUserAvailable, organization);
             settingsDTO.setScopes(getScopeList());
             settingsDTO.setGatewayTypes(APIUtil.getGatewayTypes());
-            settingsDTO.setSupportedGatewayModes(APIUtil.getSupportedGatewayModes());
             settingsDTO.setCustomProperties(APIUtil.getCustomProperties(organization));
             return Response.ok().entity(settingsDTO).build();
         } catch (APIManagementException | IOException e) {
