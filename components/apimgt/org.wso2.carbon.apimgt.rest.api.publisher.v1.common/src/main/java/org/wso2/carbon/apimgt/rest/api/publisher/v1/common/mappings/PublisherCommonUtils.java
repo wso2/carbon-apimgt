@@ -4280,6 +4280,14 @@ public class PublisherCommonUtils {
     public static APIEndpointDTO updateAPIEndpoint(String apiId, String endpointId, APIEndpointDTO apiEndpointDTO,
             String organization, APIProvider apiProvider)
             throws APIManagementException, CryptoException, JsonProcessingException {
+
+        // validate endpoint name
+        if (StringUtils.isBlank(apiEndpointDTO.getName())) {
+            log.error("Endpoint name cannot be empty");
+            throw new APIManagementException("Endpoint name cannot be empty",
+                    ExceptionCodes.INVALID_API_ENDPOINT_PAYLOAD);
+        }
+
         String oldApiEndpointSecret = null;
         APIEndpointDTO oldEndpointDto = getAPIEndpoint(apiId, endpointId, apiProvider, true);
         Map oldEndpointConfig = (Map) oldEndpointDto.getEndpointConfig();
@@ -4413,6 +4421,13 @@ public class PublisherCommonUtils {
         if (!APIUtil.validateEndpointURL(endpointURL)) {
             throw new APIManagementException("Invalid/Malformed endpoint URL detected",
                     ExceptionCodes.API_ENDPOINT_URL_INVALID);
+        }
+
+        // validate endpoint name
+        if (StringUtils.isBlank(apiEndpoint.getName())) {
+            log.error("Endpoint name cannot be empty");
+            throw new APIManagementException("Endpoint name cannot be empty",
+                    ExceptionCodes.INVALID_API_ENDPOINT_PAYLOAD);
         }
 
         if (APIConstants.APIEndpoint.PRODUCTION.equals(
