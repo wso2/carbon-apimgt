@@ -155,6 +155,9 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
         Map<String, Object> headers = new HashMap<>((Map<String, ?>) transportHeadersObj);
 
         if (!headers.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Processing " + headers.size() + " request headers for analytics");
+            }
             headers.remove(APIConstants.AUTHORIZATION_HEADER_DEFAULT); // drop sensitive header
             axis2mc.setAnalyticsMetadata(Constants.REQUEST_HEADERS, headers);
             return (String) headers.get(APIConstants.USER_AGENT);
