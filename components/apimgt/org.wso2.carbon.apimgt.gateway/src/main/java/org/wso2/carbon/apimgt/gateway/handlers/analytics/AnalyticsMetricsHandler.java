@@ -149,6 +149,7 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
                 axis2mc.getAxis2MessageContext().getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
         if (!(transportHeadersObj instanceof Map)) {
+            log.debug("No transport headers available in message context");
             return null; // no headers available
         }
 
