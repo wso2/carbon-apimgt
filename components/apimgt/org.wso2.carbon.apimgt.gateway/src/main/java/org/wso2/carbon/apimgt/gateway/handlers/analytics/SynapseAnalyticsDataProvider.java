@@ -722,6 +722,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             return list.stream().filter(Objects::nonNull).map(String::toLowerCase).collect(Collectors.toSet());
         } catch (Exception ignore) {
             // On malformed JSON, fail safe: don't mask anything rather than blow up
+            log.warn("Failed to parse mask configuration JSON. No headers will be masked.");
             return Collections.emptySet();
         }
     }
