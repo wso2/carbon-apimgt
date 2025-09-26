@@ -143,18 +143,23 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
      * @return the value of the `User-Agent` header if available in the transport headers, or null otherwise
      */
     private String getUserAgentAndCopyRequestHeadersToContext(MessageContext messageContext) {
+        log.debug("Extracting User-Agent and copying request headers to analytics metadata");
         Axis2MessageContext axis2mc = (Axis2MessageContext) messageContext;
 
         Object transportHeadersObj =
                 axis2mc.getAxis2MessageContext().getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
         if (!(transportHeadersObj instanceof Map)) {
+            log.debug("No transport headers available in message context");
             return null; // no headers available
         }
 
         Map<String, Object> headers = new HashMap<>((Map<String, ?>) transportHeadersObj);
 
         if (!headers.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Processing " + headers.size() + " request headers for analytics");
+            }
             headers.remove(APIConstants.AUTHORIZATION_HEADER_DEFAULT); // drop sensitive header
             axis2mc.setAnalyticsMetadata(Constants.REQUEST_HEADERS, headers);
             return (String) headers.get(APIConstants.USER_AGENT);

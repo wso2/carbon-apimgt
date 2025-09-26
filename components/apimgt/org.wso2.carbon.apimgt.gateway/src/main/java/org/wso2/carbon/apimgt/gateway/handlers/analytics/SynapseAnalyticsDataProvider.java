@@ -423,6 +423,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, Object> getProperties() {
+        log.debug("Building properties for analytics event");
         final Map<String, Object> custom = analyticsCustomDataProvider != null
                 ? analyticsCustomDataProvider.getCustomProperties(messageContext)
                 : new LinkedHashMap<>();
@@ -435,7 +436,9 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         custom.put(Constants.CERTIFICATE_COMMON_NAME, getCommonName());
 
         // Headers (optional)
+        // Headers (optional)
         if (shouldSendHeaders()) {
+            log.debug("Including headers in analytics event");
             if (messageContext instanceof Axis2MessageContext) {
                 Axis2MessageContext axis2 = (Axis2MessageContext) messageContext;
 
@@ -461,6 +464,9 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                             applyMask(respHeaders, parseMaskSet(getMaskProperties().get(RESPONSE_HEADER_MASK)));
                     if (!maskedResp.isEmpty()) {
                         custom.put(RESPONSE_HEADERS, maskedResp);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Added " + maskedResp.size() + " response headers to analytics event");
+                        }
                     }
                 }
             }
@@ -726,6 +732,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                     s -> s.toLowerCase(java.util.Locale.ROOT)).collect(Collectors.toSet());
         } catch (Exception ignore) {
             // On malformed JSON, fail safe: don't mask anything rather than blow up
+            log.warn("Failed to parse mask configuration JSON. No headers will be masked.");
             return Collections.emptySet();
         }
     }
