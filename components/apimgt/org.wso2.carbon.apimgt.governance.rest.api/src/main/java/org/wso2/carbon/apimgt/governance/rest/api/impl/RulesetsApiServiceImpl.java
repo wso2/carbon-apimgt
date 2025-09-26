@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.springframework.http.HttpHeaders;
@@ -58,6 +60,8 @@ import javax.ws.rs.core.Response;
  */
 public class RulesetsApiServiceImpl implements RulesetsApiService {
 
+    private static final Log log = LogFactory.getLog(RulesetsApiServiceImpl.class);
+
     /**
      * Create a new Governance Ruleset
      *
@@ -82,13 +86,20 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
                                   MessageContext messageContext) throws APIMGovernanceException {
         RulesetInfoDTO createdRulesetDTO;
         URI createdRulesetURI;
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Creating ruleset: " + name + " of type: " + ruleType + " in organization: " + organization);
+        }
 
         // Validation done manually for multipart form data
         if (name != null && name.length() > 256) {
+            log.warn("Ruleset name exceeds maximum length: " + name);
             throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
                     String.format("Rule name `%s` exceeds " +
                             "the maximum length of 256 characters", name));
         } else if (description != null && description.length() > 1024) {
+            log.warn("Ruleset description exceeds maximum length for: " + name);
             throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
                     String.format("Rule description `%s` exceeds " +
                             "the maximum length of 1024 characters", description));
@@ -111,7 +122,6 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             ruleset.setRulesetContent(rulesetContent);
 
             String username = APIMGovernanceAPIUtil.getLoggedInUsername();
-            String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
             ruleset.setCreatedBy(username);
 
             RulesetManager rulesetManager = new RulesetManager();
@@ -120,13 +130,17 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             createdRulesetDTO = RulesetMappingUtil.fromRulesetInfoToRulesetInfoDTO(createdRuleset);
             createdRulesetURI = new URI(
                     APIMGovernanceAPIConstants.RULESET_PATH + "/" + createdRulesetDTO.getId());
+
+            log.info("Successfully created ruleset: " + name + " with ID: " + createdRulesetDTO.getId());
             return Response.created(createdRulesetURI).entity(createdRulesetDTO).build();
 
         } catch (URISyntaxException e) {
             String error = String.format("Error while creating URI for new Ruleset %s",
                     name);
+            log.error("URI creation failed for ruleset: " + name, e);
             throw new APIMGovernanceException(error, e, APIMGovExceptionCodes.INTERNAL_SERVER_ERROR);
         } catch (IOException e) {
+            log.error("Error converting ruleset content stream to byte array for: " + name, e);
             throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_COVERTING_RULESET_CONTENT_STREAM_TO_BYTE_ARRAY, e);
         } finally {

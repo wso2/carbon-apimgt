@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.throttling.siddhi.extension;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
@@ -41,6 +43,9 @@ import java.util.Map;
  * INSERT ALL EVENTS into ResultStream;
  */
 public class CountAttributeAggregatorWithReset extends AttributeAggregator {
+    
+    private static final Log log = LogFactory.getLog(CountAttributeAggregatorWithReset.class);
+    
     private static Attribute.Type type = Attribute.Type.LONG;
     private long value = 0l;
 
@@ -52,7 +57,9 @@ public class CountAttributeAggregatorWithReset extends AttributeAggregator {
      */
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Initialized CountAttributeAggregatorWithReset");
+        }
     }
 
     public Attribute.Type getReturnType() {

@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.dao;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtDAOException;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
@@ -36,7 +36,7 @@ import java.util.concurrent.Semaphore;
  */
 public class SystemConfigurationsDAO {
 
-    private static final Logger log = LoggerFactory.getLogger(SystemConfigurationsDAO.class);
+    private static final Log log = LogFactory.getLog(SystemConfigurationsDAO.class);
     private static Semaphore semaphore = new Semaphore(1);
     private static SystemConfigurationsDAO INSTANCE = null;
 
@@ -72,6 +72,14 @@ public class SystemConfigurationsDAO {
      */
     @UsedByMigrationClient
     public void addSystemConfig(String organization, String type, String config) throws APIManagementException {
+        if (organization == null || type == null || config == null) {
+            log.warn("Organization, type, or config is null while adding system configuration");
+            return;
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Adding system configuration - Organization: " + organization + ", Type: " + type);
+        }
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(
@@ -83,7 +91,11 @@ public class SystemConfigurationsDAO {
                 statement.setBinaryStream(3, new ByteArrayInputStream(config.getBytes()));
                 statement.executeUpdate();
                 connection.commit();
+                
+                log.info("Successfully added " + type + " configuration for organization: " + organization);
             } catch (SQLException e) {
+                log.error("Error adding " + type + " configuration for organization: " + organization + 
+                        ", rolling back transaction", e);
                 handleConnectionRollBack(connection);
                 throw e;
             }
@@ -101,6 +113,14 @@ public class SystemConfigurationsDAO {
      */
     @UsedByMigrationClient
     public String getSystemConfig(String organization, String type) throws APIManagementException {
+        if (organization == null || type == null) {
+            log.warn("Organization or type is null while retrieving system configuration");
+            return null;
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving system configuration - Organization: " + organization + ", Type: " + type);
+        }
 
         ResultSet rs;
         String systemConfig = null;
@@ -114,9 +134,18 @@ public class SystemConfigurationsDAO {
                 InputStream systemConfigBlob = rs.getBinaryStream("CONFIGURATION");
                 if (systemConfigBlob != null) {
                     systemConfig = APIMgtDBUtil.getStringFromInputStream(systemConfigBlob);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully retrieved " + type + " configuration for organization: " 
+                                + organization);
+                    }
+                }
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("No " + type + " configuration found for organization: " + organization);
                 }
             }
         } catch (SQLException e) {
+            log.error("Error retrieving " + type + " configuration for organization: " + organization, e);
             handleException("Failed to retrieve " + type + " Configuration for org: " + organization, e);
         }
         return systemConfig;
@@ -131,6 +160,14 @@ public class SystemConfigurationsDAO {
      */
     @UsedByMigrationClient
     public void updateSystemConfig(String organization, String type, String config) throws APIManagementException {
+        if (organization == null || type == null || config == null) {
+            log.warn("Organization, type, or config is null while updating system configuration");
+            return;
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Updating system configuration - Organization: " + organization + ", Type: " + type);
+        }
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(
@@ -142,7 +179,11 @@ public class SystemConfigurationsDAO {
                 statement.setString(3, type);
                 statement.executeUpdate();
                 connection.commit();
+                
+                log.info("Successfully updated " + type + " configuration for organization: " + organization);
             } catch (SQLException e) {
+                log.error("Error updating " + type + " configuration for organization: " + organization + 
+                        ", rolling back transaction", e);
                 handleConnectionRollBack(connection);
                 throw e;
             }

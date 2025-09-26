@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.notification.internal;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -40,9 +42,12 @@ import org.wso2.carbon.event.stream.core.EventStreamService;
 @Component(name = "apim.notification.component", immediate = true)
 public class ApimgtNotificationServiceComponent {
 
+    private static final Log log = LogFactory.getLog(ApimgtNotificationServiceComponent.class);
+
     @Activate
     protected void activate(ComponentContext ctxt) {
 
+        log.info("Activating API Manager notification service component");
         ctxt.getBundleContext().registerService(KeyManagerEventHandler.class, new DefaultKeyManagerEventHandlerImpl(),
                 null);
         ctxt.getBundleContext().registerService(EventHandler.class, new WebhooksSubscriptionEventHandler(),
@@ -52,6 +57,7 @@ public class ApimgtNotificationServiceComponent {
         ctxt.getBundleContext().registerService(EventHandler.class, new TenantManagementEventHandler(),
                 null);
         ctxt.getBundleContext().registerService(NotificationEventService.class, new NotificationEventService(), null);
+        log.info("API Manager notification service component activated successfully");
     }
 
     @Reference(
@@ -62,12 +68,18 @@ public class ApimgtNotificationServiceComponent {
             unbind = "removeKeyManagerEventHandlers")
     protected void addKeyManagerEventHandlers(KeyManagerEventHandler keyManagerEventHandler) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Adding key manager event handler: " + keyManagerEventHandler.getType());
+        }
         ServiceReferenceHolder.getInstance().addEventHandler(keyManagerEventHandler.getType(),
                 keyManagerEventHandler);
     }
 
     protected void removeKeyManagerEventHandlers(KeyManagerEventHandler keyManagerEventHandler) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Removing key manager event handler: " + keyManagerEventHandler.getType());
+        }
         ServiceReferenceHolder.getInstance().removeEventHandlers(keyManagerEventHandler.getType());
     }
 
@@ -79,12 +91,18 @@ public class ApimgtNotificationServiceComponent {
             unbind = "removeEventHandlers")
     protected void addEventHandlers(EventHandler eventHandler) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Adding event handler: " + eventHandler.getType());
+        }
         ServiceReferenceHolder.getInstance().addEventHandler(eventHandler.getType(),
                 eventHandler);
     }
 
     protected void removeEventHandlers(EventHandler eventHandler) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Removing event handler: " + eventHandler.getType());
+        }
         ServiceReferenceHolder.getInstance().removeEventHandlers(eventHandler.getType());
     }
 

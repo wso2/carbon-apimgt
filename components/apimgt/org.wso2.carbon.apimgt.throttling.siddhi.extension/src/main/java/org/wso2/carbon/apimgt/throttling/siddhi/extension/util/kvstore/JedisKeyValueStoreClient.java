@@ -70,6 +70,10 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                 poolConfig.setTestOnBorrow(distributedConfig.isTestOnBorrow());
                 poolConfig.setTestOnReturn(distributedConfig.isTestOnReturn());
                 poolConfig.setTestWhileIdle(distributedConfig.isTestWhileIdle());
+                
+                if (log.isDebugEnabled()) {
+                    log.debug("Using DistributedThrottleConfig for connection: " + host + ":" + port);
+                }
 
             } else {
                 RedisConfig redisConfig = ServiceReferenceHolder.getInstance()
@@ -90,6 +94,10 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                     poolConfig.setTestOnBorrow(redisConfig.isTestOnBorrow());
                     poolConfig.setTestOnReturn(redisConfig.isTestOnReturn());
                     poolConfig.setTestWhileIdle(redisConfig.isTestWhileIdle());
+                    
+                    if (log.isDebugEnabled()) {
+                        log.debug("Using RedisConfig for connection: " + host + ":" + port);
+                    }
                 }
                 else {
                     log.warn("Unknown config type provided to createPoolConfig. Using default JedisPoolConfig values.");
@@ -115,6 +123,9 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                                     String.valueOf(password), sslEnabled);
                         } else {
                             jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout, sslEnabled);
+                        }
+                        if (log.isDebugEnabled()) {
+                            log.debug("Initialized JedisPool for server: " + host + ":" + port);
                         }
                         return jedisPool;
                     } catch (Exception e) {

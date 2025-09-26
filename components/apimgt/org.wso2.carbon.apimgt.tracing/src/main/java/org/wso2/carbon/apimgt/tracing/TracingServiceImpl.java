@@ -54,7 +54,15 @@ public class TracingServiceImpl implements TracingService {
                         : TracingConstants.DEFAULT_OPEN_TRACER_ENABLED);
 
         String tracerName = (openTracerName != null && remoteTracerEnabled) ? openTracerName : TracingConstants.LOG;
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing tracer: " + tracerName + ", remote tracer enabled: " + remoteTracerEnabled);
+        }
         this.tracer = ServiceReferenceHolder.getOpenTracerMap().get(tracerName);
+        if (this.tracer == null) {
+            log.warn("Tracer " + tracerName + " not found in tracer map, falling back to default");
+        } else {
+            log.info("Tracer initialized successfully: " + tracerName);
+        }
     }
 
     @Override

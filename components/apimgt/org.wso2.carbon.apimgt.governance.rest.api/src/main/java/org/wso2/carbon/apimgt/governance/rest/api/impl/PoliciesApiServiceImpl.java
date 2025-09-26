@@ -19,6 +19,8 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
@@ -48,6 +50,8 @@ import javax.ws.rs.core.Response;
  */
 public class PoliciesApiServiceImpl implements PoliciesApiService {
 
+    private static final Log log = LogFactory.getLog(PoliciesApiServiceImpl.class);
+
     /**
      * Create a new Governance Policy
      *
@@ -61,6 +65,12 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
 
         APIMGovernancePolicyDTO createdPolicyDTO;
         URI createdPolicyURI;
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Creating governance policy: " + governancePolicyDTO.getName() + " in organization: " + 
+                    organization);
+        }
 
         try {
             PolicyManager policyManager = new PolicyManager();
@@ -68,7 +78,6 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
                     PolicyMappingUtil.fromDTOtoGovernancePolicy(governancePolicyDTO);
 
             String username = APIMGovernanceAPIUtil.getLoggedInUsername();
-            String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 
             governancePolicy.setCreatedBy(username);
             governancePolicy = policyManager.createGovernancePolicy(organization,
@@ -82,9 +91,12 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
             createdPolicyURI = new URI(
                     APIMGovernanceAPIConstants.POLICY_PATH + "/" + createdPolicyDTO.getId());
 
+            log.info("Successfully created governance policy: " + createdPolicyDTO.getName() + " with ID: " + 
+                    createdPolicyDTO.getId());
         } catch (URISyntaxException e) {
             String error = String.format("Error while creating URI for new Governance Policy %s",
                     governancePolicyDTO.getName());
+            log.error("URI creation failed for policy: " + governancePolicyDTO.getName(), e);
             throw new APIMGovernanceException(error, e, APIMGovExceptionCodes.INTERNAL_SERVER_ERROR);
         }
         return Response.created(createdPolicyURI).entity(createdPolicyDTO).build();
@@ -105,6 +117,10 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
         String username = APIMGovernanceAPIUtil.getLoggedInUsername();
 
+        if (log.isDebugEnabled()) {
+            log.debug("Updating governance policy: " + policyId + " in organization: " + organization);
+        }
+
         APIMGovernancePolicy governancePolicy =
                 PolicyMappingUtil.
                         fromDTOtoGovernancePolicy(governancePolicyDTO);
@@ -119,6 +135,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         // Re-access policy compliance in the background
         new ComplianceManager().handlePolicyChangeEvent(policyId, organization);
 
+        log.info("Successfully updated governance policy: " + policyId);
         return Response.status(Response.Status.OK).entity(updatedPolicyDTO).build();
     }
 
@@ -136,7 +153,12 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
         String username = APIMGovernanceAPIUtil.getLoggedInUsername();
 
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting governance policy: " + policyId + " in organization: " + organization);
+        }
+
         policyManager.deletePolicy(policyId, username, organization);
+        log.info("Successfully deleted governance policy: " + policyId);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 

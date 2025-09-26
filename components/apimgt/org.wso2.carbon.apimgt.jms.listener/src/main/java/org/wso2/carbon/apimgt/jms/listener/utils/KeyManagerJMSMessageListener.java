@@ -60,6 +60,11 @@ public class KeyManagerJMSMessageListener implements MessageListener {
                             String action = payloadData.get(APIConstants.KeyManager.KeyManagerEvent.ACTION).asText();
                             String type = payloadData.get(APIConstants.KeyManager.KeyManagerEvent.TYPE).asText();
                             String value = payloadData.get(APIConstants.KeyManager.KeyManagerEvent.VALUE).asText();
+                            
+                            if (log.isDebugEnabled()) {
+                                log.debug("Processing key manager event - Action: " + action + ", Type: " + type
+                                        + ", Organization: " + organization);
+                            }
                             if (StringUtils.isNotEmpty(value)) {
                                 KeyManagerConfiguration keyManagerConfiguration =
                                         APIUtil.toKeyManagerConfiguration(value);
@@ -67,16 +72,19 @@ public class KeyManagerJMSMessageListener implements MessageListener {
                                     ServiceReferenceHolder.getInstance().getKeyManagerService()
                                             .addKeyManagerConfiguration(organization, name, type,
                                                     keyManagerConfiguration);
+                                    log.info("Key manager configuration added successfully for: " + name);
                                 }
                                 if (APIConstants.KeyManager.KeyManagerEvent.ACTION_UPDATE.equals(action)) {
                                     ServiceReferenceHolder.getInstance().getKeyManagerService()
                                             .updateKeyManagerConfiguration(organization, name, type,
                                                     keyManagerConfiguration);
+                                    log.info("Key manager configuration updated successfully for: " + name);
                                 }
                             }
                             if (APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE.equals(action)) {
                                 ServiceReferenceHolder.getInstance().getKeyManagerService()
                                         .removeKeyManagerConfiguration(organization, name);
+                                log.info("Key manager configuration deleted successfully for: " + name);
                             }
                         }
                     }

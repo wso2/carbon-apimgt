@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
@@ -19,6 +21,8 @@ import javax.ws.rs.core.Response;
  */
 public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiService {
 
+    private static final Log log = LogFactory.getLog(ArtifactComplianceApiServiceImpl.class);
+
     /**
      * This method retrieves compliance details for a specific API.
      *
@@ -32,9 +36,14 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
         String username = APIMGovernanceAPIUtil.getLoggedInUsername();
 
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving compliance details for API: " + apiId + " in organization: " + organization);
+        }
+
         ArtifactComplianceDetailsDTO detailsDTO = ComplianceAPIUtil.getArtifactComplianceDetailsDTO
                 (apiId, artifactType, username, organization);
 
+        log.info("Successfully retrieved compliance details for API: " + apiId);
         return Response.ok().entity(detailsDTO).build();
     }
 
@@ -55,9 +64,16 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         ArtifactType artifactType = ArtifactType.API;
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
         String username = APIMGovernanceAPIUtil.getLoggedInUsername();
+
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving compliance status list for APIs with limit: " + limit + ", offset: " + offset + 
+                    " in organization: " + organization);
+        }
+
         ArtifactComplianceListDTO complianceListDTO = ComplianceAPIUtil
                 .getArtifactComplianceListDTO(artifactType, username, organization, limit, offset);
 
+        log.info("Successfully retrieved compliance status list for APIs");
         return Response.ok().entity(complianceListDTO).build();
     }
 
@@ -74,9 +90,14 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         String username = APIMGovernanceAPIUtil.getLoggedInUsername();
         ArtifactType artifactType = ArtifactType.API;
 
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving compliance summary for APIs in organization: " + organization);
+        }
+
         ArtifactComplianceSummaryDTO summaryDTO = ComplianceAPIUtil.getArtifactComplianceSummary(artifactType,
                 username, organization);
 
+        log.info("Successfully retrieved compliance summary for APIs");
         return Response.ok().entity(summaryDTO).build();
     }
 
@@ -96,9 +117,15 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         String username = APIMGovernanceAPIUtil.getLoggedInUsername();
         ArtifactType artifactType = ArtifactType.API;
 
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving ruleset validation results for API: " + apiId + " and ruleset: " + rulesetId + 
+                    " in organization: " + organization);
+        }
+
         RulesetValidationResultDTO rulesetValidationResultDTO = ComplianceAPIUtil
                 .getRulesetValidationResultDTO(apiId, artifactType, rulesetId, username, organization);
 
+        log.info("Successfully retrieved ruleset validation results for API: " + apiId + " and ruleset: " + rulesetId);
         return Response.ok().entity(rulesetValidationResultDTO).build();
     }
 }

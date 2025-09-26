@@ -64,6 +64,7 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
     @Override
     public void completedServerStartup() {
 
+        log.info("JMS Listener startup process initiated");
         String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
         if (migrationEnabled == null) {
             APIManagerConfiguration apimConfiguration = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
@@ -71,11 +72,18 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
                 String enableKeyManagerRetrieval =
                         apimConfiguration.getFirstProperty(APIConstants.ENABLE_KEY_MANAGER_RETRIVAL);
                 if (JavaUtils.isTrueExplicitly(enableKeyManagerRetrieval)) {
+                    log.info("Key manager retrieval enabled, subscribing to JMS topics");
                     jmsTransportHandlerForEventHub
                             .subscribeForJmsEvents(JMSConstants.TOPIC_KEY_MANAGER, new KeyManagerJMSMessageListener());
                     jmsTransportHandlerForEventHub
-                            .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION, new CorrelationConfigJMSMessageListener());
+                            .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION, 
+                            new CorrelationConfigJMSMessageListener());
+                    log.info("Successfully subscribed to JMS topics for key manager and correlation config events");
+                } else {
+                    log.info("Key manager retrieval disabled, skipping JMS topic subscription");
                 }
+            } else {
+                log.warn("API Manager configuration not available, skipping JMS topic subscription");
             }
         } else {
             log.info("Running on migration enabled mode: Stopped at JMSListenerStartupShutdownListener completed");
@@ -87,8 +95,12 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
     public void invoke() {
 
         if (jmsTransportHandlerForEventHub != null) {
-            log.debug("Unsubscribe from JMS Events...");
+            if (log.isDebugEnabled()) {
+                log.debug("Unsubscribing from JMS Events during server shutdown");
+            }
+            log.info("JMS Listener shutdown process initiated");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
+            log.info("Successfully unsubscribed from JMS events");
         }
     }
 
@@ -96,8 +108,12 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
     public void shutDownListener() {
 
         if (jmsTransportHandlerForEventHub != null) {
-            log.debug("Unsubscribe from JMS Events...");
+            if (log.isDebugEnabled()) {
+                log.debug("Shutting down JMS Listener service");
+            }
+            log.info("JMS Listener service shutdown requested");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
+            log.info("JMS Listener service shutdown completed successfully");
         }
     }
 }

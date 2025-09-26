@@ -122,6 +122,9 @@ public class APIKeyValidationService {
             log.debug(logMsg);
         }
 
+        log.info("Starting key validation for API context: " + context + ", version: " + version + 
+                 ", tenant: " + tenantDomain);
+        
         TokenValidationContext validationContext = new TokenValidationContext();
         validationContext.setAccessToken(accessToken);
         validationContext.setContext(context);
@@ -142,6 +145,7 @@ public class APIKeyValidationService {
         if (infoDTO != null) {
             validationContext.setCacheHit(true);
             log.debug("APIKeyValidationInfoDTO fetched from cache. Setting cache hit to true...");
+            log.info("Token validation result retrieved from cache for context: " + context);
             validationContext.setValidationInfoDTO(infoDTO);
         }
         log.debug("Before calling Validate Token method...");
@@ -190,6 +194,7 @@ public class APIKeyValidationService {
 
         if (!validationContext.isCacheHit()) {
             APIKeyMgtUtil.writeToKeyManagerCache(cacheKey, validationContext.getValidationInfoDTO());
+            log.info("Token validation result cached for context: " + context);
         }
         if (log.isDebugEnabled() && axis2MessageContext != null) {
             logMessageDetails(axis2MessageContext, validationContext.getValidationInfoDTO());
@@ -267,12 +272,18 @@ public class APIKeyValidationService {
         if (api == null) {
             log.debug("SubscriptionDataStore didn't contains API metadata reading from rest api context: " + context +
                     " And version " + version);
+            log.warn("API metadata not found in cache, loading from REST API for context: " + context + 
+                     ", version: " + version);
             api = new SubscriptionDataLoaderImpl().getApi(context, version);
             if (api != null) {
                 store.addOrUpdateAPI(api);
+                log.info("API metadata loaded and cached for context: " + context + ", version: " + version);
                 if (log.isDebugEnabled()) {
                     log.debug("Update SubscriptionDataStore api for " + api.getCacheKey());
                 }
+            } else {
+                log.warn("Failed to load API metadata from REST API for context: " + context + 
+                         ", version: " + version);
             }
         }
         if (api == null || api.getApiId() == 0) {

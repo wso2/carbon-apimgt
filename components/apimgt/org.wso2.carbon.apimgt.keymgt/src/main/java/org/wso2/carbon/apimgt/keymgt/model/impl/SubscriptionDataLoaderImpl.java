@@ -82,6 +82,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     @Override
     public List<Subscription> loadAllSubscriptions(String tenantDomain) throws DataLoadingException {
 
+        log.info("Loading all subscriptions for tenant: " + tenantDomain);
         String subscriptionsEP = APIConstants.SubscriptionValidationResources.SUBSCRIPTIONS;
         List<Subscription> subscriptions = new ArrayList<>();
         String responseString = null;
@@ -94,6 +95,9 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         }
         if (responseString != null && !responseString.isEmpty()) {
             subscriptions = (new Gson().fromJson(responseString, SubscriptionList.class)).getList();
+            log.info("Successfully loaded " + subscriptions.size() + " subscriptions for tenant: " + tenantDomain);
+        } else {
+            log.warn("No subscriptions found for tenant: " + tenantDomain);
         }
         return subscriptions;
     }
@@ -101,6 +105,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     @Override
     public List<Application> loadAllApplications(String tenantDomain) throws DataLoadingException {
 
+        log.info("Loading all applications for tenant: " + tenantDomain);
         String applicationsEP = APIConstants.SubscriptionValidationResources.APPLICATIONS;
         List<Application> applications = new ArrayList<>();
         String responseString = null;
@@ -113,6 +118,9 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         }
         if (responseString != null && !responseString.isEmpty()) {
             applications = (new Gson().fromJson(responseString, ApplicationList.class)).getList();
+            log.info("Successfully loaded " + applications.size() + " applications for tenant: " + tenantDomain);
+        } else {
+            log.warn("No applications found for tenant: " + tenantDomain);
         }
         return applications;
     }
@@ -139,6 +147,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     @Override
     public List<API> loadAllApis(String tenantDomain) throws DataLoadingException {
 
+        log.info("Loading all APIs for tenant: " + tenantDomain);
         Set<String> gatewayLabels = gatewayArtifactSynchronizerProperties.getGatewayLabels();
         List<API> apis = new ArrayList<>();
         if (gatewayLabels != null && gatewayLabels.size() > 0) {
@@ -161,6 +170,9 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
                     log.debug("apis :" + apis.get(0).toString());
                 }
             }
+            log.info("Successfully loaded " + apis.size() + " APIs for tenant: " + tenantDomain);
+        } else {
+            log.warn("No gateway labels configured, no APIs loaded for tenant: " + tenantDomain);
         }
 
         return apis;

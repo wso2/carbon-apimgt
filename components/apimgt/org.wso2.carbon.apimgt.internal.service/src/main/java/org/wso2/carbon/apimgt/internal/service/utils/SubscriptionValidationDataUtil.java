@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.internal.service.utils;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -53,6 +55,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class SubscriptionValidationDataUtil {
+
+    private static final Log log = LogFactory.getLog(SubscriptionValidationDataUtil.class);
 
     private static APIDTO fromAPItoDTO(API model) throws APIManagementException {
 
@@ -161,6 +165,10 @@ public class SubscriptionValidationDataUtil {
 
     public static APIListDTO fromAPIToAPIListDTO(API model) throws APIManagementException {
 
+        if (log.isDebugEnabled() && model != null) {
+            log.debug("Converting API model to DTO. API UUID: " + model.getApiUUID() + ", Name: " + model.getName());
+        }
+
         APIListDTO apiListdto = new APIListDTO();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         if (model != null) {
@@ -264,6 +272,10 @@ public class SubscriptionValidationDataUtil {
 
     public static APIListDTO fromAPIListToAPIListDTO(List<API> apiList) throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Converting API list to DTO. List size: " + (apiList != null ? apiList.size() : 0));
+        }
+
         APIListDTO apiListDTO = new APIListDTO();
 
         if (apiList != null) {
@@ -279,6 +291,10 @@ public class SubscriptionValidationDataUtil {
     }
 
     public static ApplicationListDTO fromApplicationToApplicationListDTO(List<Application> model) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Converting application list to DTO. List size: " + (model != null ? model.size() : 0));
+        }
 
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
         if (model != null) {
@@ -588,6 +604,10 @@ public class SubscriptionValidationDataUtil {
     public static String validateTenantDomain(String xWSO2Tenant, MessageContext messageContext) {
 
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        if (log.isDebugEnabled()) {
+            log.debug("Validating tenant domain. Requested: " + xWSO2Tenant + ", LoggedIn: " + tenantDomain);
+        }
+        
         if (xWSO2Tenant == null) {
             return tenantDomain;
         } else {

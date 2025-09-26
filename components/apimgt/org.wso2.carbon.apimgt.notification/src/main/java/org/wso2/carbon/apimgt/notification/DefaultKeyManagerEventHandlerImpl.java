@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.notification;
 
 import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.notification.event.ConsumerAppRevocationEvent;
@@ -34,18 +36,29 @@ import java.util.Map;
  */
 public class DefaultKeyManagerEventHandlerImpl extends AbstractKeyManagerEventHandler {
 
+    private static final Log log = LogFactory.getLog(DefaultKeyManagerEventHandlerImpl.class);
+
     @Override
     public boolean handleEvent(String event, Map<String, List<String>> headers) throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Processing key manager event of type: DEFAULT_KEY_MANAGER");
+        }
+
         if (StringUtils.isNotEmpty(event)
                 && event.contains(APIConstants.NotificationEvent.CONSUMER_APP_REVOCATION_EVENT)) {
+            log.info("Handling consumer app revocation event");
             handleConsumerAppRevocationEvent(event);
         } else if (StringUtils.isNotEmpty(event)
                 && event.contains(APIConstants.NotificationEvent.SUBJECT_ENTITY_REVOCATION_EVENT)) {
+            log.info("Handling subject entity revocation event");
             handleSubjectEntityRevocationEvent(event);
         } else if (StringUtils.isNotEmpty(event)
                 && event.contains(APIConstants.NotificationEvent.TOKEN_REVOCATION_EVENT)) {
+            log.info("Handling token revocation event");
             handleTokenRevocationEvent(event);
+        } else {
+            log.warn("Received unknown event type or empty event");
         }
         return true;
     }

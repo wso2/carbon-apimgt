@@ -59,7 +59,9 @@ public class TracingServiceComponent {
     protected void activate(ComponentContext componentContext) {
 
         try {
-            log.debug("Tracing Component activated");
+            if (log.isDebugEnabled()) {
+                log.debug("Tracing Component activation started");
+            }
             BundleContext bundleContext = componentContext.getBundleContext();
             registration = bundleContext.registerService(OpenTracer.class, new JaegerTracer(), null);
             registration = bundleContext.registerService(OpenTracer.class, new ZipkinTracer(), null);
@@ -71,17 +73,23 @@ public class TracingServiceComponent {
             registration = bundleContext.registerService(APIMOpenTelemetry.class, new OTLPTelemetry(), null);
             registration = bundleContext.registerService(TelemetryService.class, TelemetryServiceImpl.getInstance(),
                     null);
+            log.info("Tracing services registered successfully");
 
         } catch (Exception e) {
-            log.error("Error occured in tracing component activation", e);
+            log.error("Error occurred in tracing component activation", e);
         }
     }
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
 
-        log.debug("Tracing Component deactivated");
-        registration.unregister();
+        if (log.isDebugEnabled()) {
+            log.debug("Tracing Component deactivation started");
+        }
+        if (registration != null) {
+            registration.unregister();
+            log.info("Tracing services unregistered successfully");
+        }
     }
 
     @Reference(

@@ -72,6 +72,17 @@ public class WebhooksDAO {
      * @param properties Subscription request properties
      * */
     public boolean addSubscription(Properties properties) throws APIManagementException {
+        if (properties == null) {
+            log.warn("Properties is null while adding webhook subscription");
+            return false;
+        }
+        
+        String callback = properties.getProperty(APIConstants.Webhooks.CALLBACK);
+        String apiUuid = properties.getProperty(APIConstants.Webhooks.API_UUID);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Adding webhook subscription for callback: " + callback + ", API: " + apiUuid);
+        }
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             try {
@@ -81,23 +92,33 @@ public class WebhooksDAO {
                     int throttleLimit = getAllowedConnectionsCount(conn, properties);
                     int currentLimit = getCurrentConnectionsCount(conn, properties);
                     if (currentLimit >= throttleLimit) {
+                        log.warn("Webhook subscription throttled for callback: " + callback + ", API: " + apiUuid + 
+                                ". Current: " + currentLimit + ", Limit: " + throttleLimit);
                         return false;
                     }
                     addSubscription(conn, properties);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Added new webhook subscription for callback: " + callback + ", API: " + apiUuid);
+                    }
                 } else {
                     updateSubscription(conn, properties, id);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Updated existing webhook subscription (ID: " + id + ") for callback: " + callback);
+                    }
                 }
                 conn.commit();
+                log.info("Successfully processed webhook subscription for callback: " + callback + ", API: " + apiUuid);
             } catch (SQLException e) {
+                log.error("Error while processing webhook subscription for callback: " + callback + 
+                        ", API: " + apiUuid + ", rolling back transaction", e);
                 handleConnectionRollBack(conn);
                 throw new APIManagementException("Error while storing webhooks unsubscription request for callback" +
-                        properties.getProperty(APIConstants.Webhooks.CALLBACK) + " for the API " +
-                        properties.getProperty(APIConstants.Webhooks.API_UUID), e);
+                        callback + " for the API " + apiUuid, e);
             }
         } catch (SQLException e) {
+            log.error("Error getting database connection for webhook subscription", e);
             throw new APIManagementException("Error while storing subscription with callback " +
-                    properties.getProperty(APIConstants.Webhooks.CALLBACK) + " for the API " +
-                    properties.getProperty(APIConstants.Webhooks.API_UUID), e);
+                    callback + " for the API " + apiUuid, e);
         }
         return true;
     }

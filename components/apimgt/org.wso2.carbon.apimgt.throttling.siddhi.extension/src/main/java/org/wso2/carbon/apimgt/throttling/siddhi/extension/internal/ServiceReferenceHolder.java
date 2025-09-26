@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.throttling.siddhi.extension.internal;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 
 /**
@@ -24,6 +26,9 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
  * This class provides access to the {@link APIManagerConfigurationService} instance.
  */
 public class ServiceReferenceHolder {
+    
+    private static final Log log = LogFactory.getLog(ServiceReferenceHolder.class);
+    
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
 
     private APIManagerConfigurationService amConfigurationService;
@@ -60,6 +65,9 @@ public class ServiceReferenceHolder {
      */
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigurationService) {
         this.amConfigurationService = amConfigurationService;
+        if (log.isDebugEnabled()) {
+            log.debug("API Manager Configuration Service " + (amConfigurationService != null ? "set" : "unset"));
+        }
     }
 
 }

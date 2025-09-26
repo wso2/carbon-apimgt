@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.impl.token;
 
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -41,6 +43,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class DefaultClaimsRetriever implements ClaimsRetriever {
     //TODO refactor caching implementation
+    
+    private static final Log log = LogFactory.getLog(DefaultClaimsRetriever.class);
 
     private String dialectURI = DEFAULT_DIALECT_URI;
 
@@ -55,14 +59,26 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
                 getAPIManagerConfiguration().getJwtConfigurationDto().getConsumerDialectUri();
         if (dialectURI == null) {
             dialectURI = DEFAULT_DIALECT_URI;
+            if (log.isDebugEnabled()) {
+                log.debug("Consumer dialect URI not configured, using default: " + DEFAULT_DIALECT_URI);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Consumer dialect URI configured as: " + dialectURI);
+            }
         }
+        log.info("DefaultClaimsRetriever initialized with dialect URI: " + dialectURI);
     }
 
     protected Cache getClaimsLocalCache() {
         String apimClaimsCacheExpiry = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.JWT_CLAIM_CACHE_EXPIRY);
-        if(!isClaimsCacheInitialized && apimClaimsCacheExpiry != null) {init();
+        if(!isClaimsCacheInitialized && apimClaimsCacheExpiry != null) {
+            init();
             isClaimsCacheInitialized = true;
+            if (log.isDebugEnabled()) {
+                log.debug("Initializing claims cache with expiry: " + apimClaimsCacheExpiry + " seconds");
+            }
            return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
                     createCacheBuilder(APIConstants.CLAIMS_APIM_CACHE)
                    .setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
@@ -70,41 +86,69 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
                    .setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
                            Long.parseLong(apimClaimsCacheExpiry))).setStoreByValue(false).build();
         }else {
+           if (log.isDebugEnabled()) {
+               log.debug("Retrieving existing claims cache instance");
+           }
            return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.CLAIMS_APIM_CACHE);
         }
     }
 
     public SortedMap<String, String> getClaims(String endUserName) throws APIManagementException {
+        if (endUserName == null) {
+            log.warn("End user name is null while retrieving claims");
+            return null;
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving claims for user: " + endUserName);
+        }
+        
         String strEnabledJWTClaimCache = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getFirstProperty(APIConstants.ENABLED_JWT_CLAIM_CACHE);
         boolean enabledJWTClaimCache = true;
         if (strEnabledJWTClaimCache != null) {
             enabledJWTClaimCache = Boolean.valueOf(strEnabledJWTClaimCache);
         }
+        
         SortedMap<String, String> claimValues;
-        if (endUserName != null) {
-            int tenantId = APIUtil.getTenantId(endUserName);
-            String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(endUserName);
-            //check in local cache
-            String key = endUserName + ':' + tenantId;
-            ClaimCacheKey cacheKey = new ClaimCacheKey(key);
-            Object result = null;
-            if (enabledJWTClaimCache) {
-                result = getClaimsLocalCache().get(cacheKey);
-            }
-            if (result != null) {
-                return ((UserClaims) result).getClaimValues();
-            } else {
-                claimValues = APIUtil.getClaims(endUserName, tenantId, dialectURI);
-                UserClaims userClaims = new UserClaims(claimValues);
-                //add to cache
-                if (enabledJWTClaimCache) {
-                    getClaimsLocalCache().put(cacheKey, userClaims);
-                }
-                return claimValues;
-            }
+        int tenantId = APIUtil.getTenantId(endUserName);
+        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(endUserName);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Processing claims for tenant aware user: " + tenantAwareUserName + " in tenant: " + tenantId);
         }
-        return null;
+        
+        //check in local cache
+        String key = endUserName + ':' + tenantId;
+        ClaimCacheKey cacheKey = new ClaimCacheKey(key);
+        Object result = null;
+        if (enabledJWTClaimCache) {
+            result = getClaimsLocalCache().get(cacheKey);
+        }
+        if (result != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Claims retrieved from cache for user: " + endUserName);
+            }
+            return ((UserClaims) result).getClaimValues();
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Claims not found in cache, retrieving from user store for user: " + endUserName);
+            }
+            claimValues = APIUtil.getClaims(endUserName, tenantId, dialectURI);
+            UserClaims userClaims = new UserClaims(claimValues);
+            //add to cache
+            if (enabledJWTClaimCache) {
+                getClaimsLocalCache().put(cacheKey, userClaims);
+                if (log.isDebugEnabled()) {
+                    log.debug("Claims cached for user: " + endUserName);
+                }
+            }
+            
+            if (log.isDebugEnabled() && claimValues != null) {
+                log.debug("Successfully retrieved " + claimValues.size() + " claims for user: " + endUserName);
+            }
+            return claimValues;
+        }
     }
 
     /**

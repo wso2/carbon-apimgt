@@ -66,7 +66,9 @@ public class CorrelationConfigJMSMessageListener implements MessageListener {
                             if (debugEnabled) {
                                 log.debug("Event received from the topic of " + jmsDestination.getTopicName());
                             }
-                            handleNotificationMessage(payloadData.get(APIConstants.EVENT_TYPE).asText(),
+                            String eventType = payloadData.get(APIConstants.EVENT_TYPE).asText();
+                            log.info("Processing notification event of type: " + eventType);
+                            handleNotificationMessage(eventType,
                                     payloadData.get(APIConstants.EVENT_PAYLOAD).asText());
                         }
                     }
@@ -92,6 +94,7 @@ public class CorrelationConfigJMSMessageListener implements MessageListener {
                     new Gson().fromJson(eventJson, CorrelationConfigEvent.class);
             CorrelationConfigManager.getInstance().updateCorrelationConfigs(
                     correlationConfigEvent.getCorrelationConfigDTOList());
+            log.info("Correlation configs updated successfully");
         }
     }
 }
