@@ -1584,6 +1584,17 @@
     </RedisConfig>
     {% endif %}
 
+    {% if apim.solace_config is defined %}
+        <SolaceConfig>
+            {% if apim.solace_config.apim_api_endpoint is defined %}
+            <SolaceApimApiEndpoint>{{apim.solace_config.apim_api_endpoint}}</SolaceApimApiEndpoint>
+            {% endif %}
+            {% if apim.solace_config.token is defined %}
+            <SolaceToken>{{apim.solace_config.token}}</SolaceToken>
+            {% endif %}
+        </SolaceConfig>
+    {% endif %}
+
     {% if apim.devportal.application_attributes is defined %}
     <ApplicationConfiguration>
         <ApplicationAttributes>

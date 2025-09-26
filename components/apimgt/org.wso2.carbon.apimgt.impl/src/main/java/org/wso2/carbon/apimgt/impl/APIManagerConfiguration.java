@@ -60,6 +60,7 @@ import org.wso2.carbon.apimgt.impl.dto.LoadingTenants;
 import org.wso2.carbon.apimgt.impl.dto.OrgAccessControl;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.dto.TenantSharingConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.dto.SolaceConfig;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TokenValidationDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
@@ -159,6 +160,7 @@ public class APIManagerConfiguration {
     private DistributedThrottleConfig distributedThrottleConfig = new DistributedThrottleConfig();
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     private RedisConfig redisConfig = new RedisConfig();
+    private SolaceConfig solaceConfig = new SolaceConfig();
     private OrgAccessControl orgAccessControl = new OrgAccessControl();
     public OrgAccessControl getOrgAccessControl() {
         return orgAccessControl;
@@ -470,7 +472,7 @@ public class APIManagerConfiguration {
                     String value = propertyElem.getText();
                     persistenceProps.put(name, value);
                 }
-                
+
                 persistenceProperties = persistenceProps;
             } else if (APIConstants.REDIS_CONFIG.equals(localName)) {
                 OMElement redisHost = element.getFirstChildWithName(new QName(APIConstants.CONFIG_REDIS_HOST));
@@ -628,6 +630,13 @@ public class APIManagerConfiguration {
                         }
                     }
                 }
+            } else if (APIConstants.SOLACE_CONFIG.equals(localName)) {
+                OMElement solaceApimApiEndpoint =
+                        element.getFirstChildWithName(new QName(APIConstants.SOLACE_APIM_API_ENDPOINT));
+                OMElement solaceToken = element.getFirstChildWithName(new QName(APIConstants.SOLACE_TOKEN));
+                solaceConfig.setEnabled(true);
+                solaceConfig.setSolaceApimApiEndpoint(solaceApimApiEndpoint.getText());
+                solaceConfig.setSolaceToken(solaceToken.getText());
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
                 String value = MiscellaneousUtil.resolve(element, secretResolver);
@@ -998,7 +1007,7 @@ public class APIManagerConfiguration {
         if (orgEnableElement != null) {
             orgAccessControl.setEnabled(Boolean.parseBoolean(orgEnableElement.getText()));
         }
-        
+
         OMElement orgNameElement =
                 element.getFirstChildWithName(new QName(APIConstants.ORG_BASED_ACCESS_CONTROL_ORG_NAME_CLAIM));
         if (orgNameElement != null) {
@@ -1010,6 +1019,7 @@ public class APIManagerConfiguration {
             orgAccessControl.setOrgIdLocalClaim(orgIdElement.getText());
         }
     }
+
     public boolean getTransactionCounterProperties() {
         return isTransactionCounterEnabled;
     }
@@ -1540,7 +1550,7 @@ public class APIManagerConfiguration {
             String dcrEPPassword = MiscellaneousUtil.resolve(dcrEPPasswordOmElement, secretResolver);
             dcrEPPassword = APIUtil.replaceSystemProperty(dcrEPPassword);
             workflowProperties.setdCREndpointPassword(dcrEPPassword);
-            
+
             OMElement listTasksElement = workflowConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.LIST_PENDING_TASKS));
             if (listTasksElement != null) {
@@ -2848,7 +2858,7 @@ public class APIManagerConfiguration {
     public static Map<String, String> getAnalyticsMaskProperties() {
         return analyticsMaskProps;
     }
-    
+
     public static Map<String, String> getPersistenceProperties() {
         return persistenceProperties;
     }
@@ -3413,5 +3423,14 @@ public class APIManagerConfiguration {
 
     public GatewayNotificationConfiguration getGatewayNotificationConfiguration() {
         return gatewayNotificationConfiguration;
+    }
+
+    /**
+     * Get Solace Config
+     *
+     * @return SolaceConfig
+     */
+    public SolaceConfig getSolaceConfig() {
+        return solaceConfig;
     }
 }

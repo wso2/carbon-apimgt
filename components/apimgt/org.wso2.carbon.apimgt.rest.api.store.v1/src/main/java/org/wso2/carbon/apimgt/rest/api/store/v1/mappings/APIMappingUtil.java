@@ -291,6 +291,12 @@ public class APIMappingUtil {
         }
         dto.setInitiatedFromGateway(model.isInitiatedFromGateway());
 
+        if (model.getGatewayType() != null) {
+            dto.setGatewayType(model.getGatewayType());
+        } else {
+            dto.setGatewayType("wso2/synapse");
+        }
+
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
@@ -489,9 +495,23 @@ public class APIMappingUtil {
         }
 
         // Set Async protocols of API based on the gateway vendor
-        if (SolaceConstants.SOLACE_ENVIRONMENT.equals(apidto.getGatewayVendor())) {
-            apidto.setAsyncTransportProtocols(AdditionalSubscriptionInfoMappingUtil.setEndpointURLsForApiDto(
-                    model.getApi(), organization));
+        if (SolaceConstants.SOLACE_ENVIRONMENT.equals(apidto.getGatewayType())) {
+            String asyncDefinition = apidto.getApiDefinition();
+            List<String> urlsStringList = new ArrayList<>();
+            JsonObject configObject = JsonParser.parseString(asyncDefinition).getAsJsonObject();
+            JsonObject servers = configObject.getAsJsonObject("servers");
+            for (Map.Entry<String, JsonElement> entry : servers.entrySet()) {
+                JsonObject server = entry.getValue().getAsJsonObject();
+                String protocol = server.get("protocol").getAsString();
+                String url = server.get("url").getAsString();
+
+                Map<String, String> asyncProtocol = new HashMap<>();
+                asyncProtocol.put("protocol", protocol);
+                asyncProtocol.put("endPointUrl", url);
+
+                urlsStringList.add(new JSONObject(asyncProtocol).toString());
+            }
+            apidto.setAsyncTransportProtocols(urlsStringList);
         }
         return apidto;
     }
@@ -1007,6 +1027,7 @@ public class APIMappingUtil {
         apiInfoDTO.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
                 subscriptionAllowedTenants));
         apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
+        apiInfoDTO.setGatewayType(api.getGatewayType());
         apiInfoDTO.setMonetizedInfo(api.isMonetizationEnabled());
         apiInfoDTO.setEgress(api.isEgress() == 1);
         apiInfoDTO.setDisplayName(api.getDisplayName());

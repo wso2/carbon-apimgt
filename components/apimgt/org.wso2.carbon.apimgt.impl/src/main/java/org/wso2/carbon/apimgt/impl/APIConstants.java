@@ -1779,6 +1779,11 @@ public final class APIConstants {
     public static final String DISTRIBUTED_THROTTLE_TIME_BETWEEN_EVICTION_RUNS_IN_MILLIS = "TimeBetweenEvictionRunsMillis";
     public static final String DISTRIBUTED_THROTTLE_NUM_TESTS_PER_EVICTION_RUNS = "NumTestsPerEvictionRun";
 
+    // Solace Configurations
+    public static final String SOLACE_CONFIG = "SolaceConfig";
+    public static final String SOLACE_APIM_API_ENDPOINT = "SolaceApimApiEndpoint";
+    public static final String SOLACE_TOKEN = "SolaceToken";
+
     // Primary/Secondary Login configuration
     public static final String USERID_LOGIN = "UserIdLogin";
     public static final String EMAIL_LOGIN = "EmailLogin";
@@ -3088,7 +3093,7 @@ public final class APIConstants {
         public static final String PASSWORD_GRANT_TYPE = "password";
         public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
         public static final String APPLICATION_GRANT_TYPE = "application";
-        public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";        
+        public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";
 
         public static class KeyManagerEvent {
 
@@ -3106,16 +3111,16 @@ public final class APIConstants {
             public static final String TOKEN_TYPE = "tokenType";
             public static final String KEY_MANAGER_STREAM_ID = "org.wso2.apimgt.keymgt.stream:1.0.0";
         }
-        
+
     }
-    
+
     public static class TenantManagementEvent {
         public static final String TENANT_MANAGEMENT_TYPE = "TENANT_MANAGEMENT";
         public static final String TYPE_ADD_TENANT = "CREATE";
         public static final String TYPE_UPDATE_TENANT = "UPDATE";
         public static final String TYPE_ACTIVATE_TENANT = "ACTIVATE";
         public static final String TYPE_DEACTIVATE_TENANT = "DEACTIVATE";
-        
+
     }
 
     public static class GlobalCacheInvalidation {
@@ -3532,6 +3537,7 @@ public final class APIConstants {
     public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
     public static final String EXTERNAL_AWS_GATEWAY = "AWS";
     public static final List<String> API_TYPES = Arrays.asList("rest", "soap", "graphql", "ws", "wh", "sse", "ai", "mcp");
+    public static final String SOLACE = "solace";
 
     public static final String PERMISSION_ALLOW = "ALLOW";
     public static final String PERMISSION_DENY = "DENY";
@@ -3742,8 +3748,8 @@ public final class APIConstants {
     }
 
     public static final String SYNAPSE_API_NAME_PREFIX = "prod";
-    
-    // Constants related to Gateway Notifications  
+
+    // Constants related to Gateway Notifications
     public static class GatewayNotification {
         public static final String PAYLOAD_TYPE = "payloadType";
         public static final String PAYLOAD_TYPE_REGISTER = "REGISTER";
@@ -3756,11 +3762,11 @@ public final class APIConstants {
         public static final String GATEWAY_NOTIFICATION_ENDPOINT = INTERNAL_WEB_APP_EP + "/notify-gateway";
         public static final String NOTIFY_API_DEPLOYMENT_STATUS_BATCH_PATH = INTERNAL_WEB_APP_EP + "/notify-api"
                 + "-deployment-status";
-        
+
         public static final String STATUS_REGISTERED = "REGISTERED";
         public static final String STATUS_ACKNOWLEDGED = "ACKNOWLEDGED";
         public static final String WSO2_ALL_TENANTS = "WSO2-ALL-TENANTS";
-        
+
         public static final String ERROR_INVALID_PAYLOAD = "Invalid payload: payloadType is required.";
         public static final String ERROR_INVALID_PAYLOAD_TYPE = "Invalid payloadType: ";
         public static final String ERROR_DATABASE_REGISTRATION = "Database error during registration: ";
