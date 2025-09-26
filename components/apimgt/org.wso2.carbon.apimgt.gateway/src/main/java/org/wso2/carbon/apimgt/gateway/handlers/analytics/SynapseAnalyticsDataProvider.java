@@ -460,6 +460,9 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                             applyMask(respHeaders, parseMaskSet(getMaskProperties().get(RESPONSE_HEADER_MASK)));
                     if (!maskedResp.isEmpty()) {
                         custom.put(RESPONSE_HEADERS, maskedResp);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Added " + maskedResp.size() + " response headers to analytics event");
+                        }
                     }
                 }
             }
