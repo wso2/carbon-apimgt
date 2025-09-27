@@ -2328,5 +2328,6 @@
         <tika.version>2.7.0</tika.version>
         <batik.version>1.17</batik.version>
         <mcp.transformer.version>0.9.0</mcp.transformer.version>
+        <netty.version>4.1.126.Final</netty.version>
     </properties>
 </project>
