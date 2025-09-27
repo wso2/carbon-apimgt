@@ -177,6 +177,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.SolaceConfig;
 import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -339,8 +340,6 @@ public final class APIUtil {
     private static final Log audit = CarbonConstants.AUDIT_LOG;
 
     private static boolean isContextCacheInitialized = false;
-
-    private static final String caseSensitiveCheckEnabled = System.getProperty(APIConstants.CASE_SENSITIVE_CHECK_PATH);
 
     public static final String DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION = "disableRoleValidationAtScopeCreation";
 
@@ -3500,6 +3499,7 @@ public final class APIUtil {
         Map<String, List<String>> apiData = new HashMap<>();
         JsonObject synapseConfigJSON = null;
         JsonObject apkConfigJSON = null;
+        JsonObject solaceConfigJSON = null;
         try (InputStream synapseInputStream = APIUtil.class.getClassLoader()
                 .getResourceAsStream("gatewayFeatureCatalog/synapse-gateway-feature-catalog.json")) {
             if (synapseInputStream == null) {
@@ -3522,24 +3522,40 @@ public final class APIUtil {
             throw new APIManagementException("Error while reading APK Gateway Feature Catalog JSON", e);
         }
 
-        if (synapseConfigJSON == null || apkConfigJSON == null) {
+        try (InputStream solaceInputStream = APIUtil.class.getClassLoader()
+                .getResourceAsStream("gatewayFeatureCatalog/solace-feature-catalog.json")) {
+            if (solaceInputStream == null) {
+                throw new APIManagementException("Solace Feature Catalog JSON not found");
+            }
+            InputStreamReader reader = new InputStreamReader(solaceInputStream, StandardCharsets.UTF_8);
+            solaceConfigJSON = JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading Solace Feature Catalog JSON", e);
+        }
+
+        if (synapseConfigJSON == null || apkConfigJSON == null || solaceConfigJSON == null) {
             throw new APIManagementException("Error while reading Gateway Feature Catalog JSON");
         }
 
         JsonObject synapseConfigsJSONValue = synapseConfigJSON.getAsJsonObject(APIConstants.WSO2_SYNAPSE_GATEWAY);
         JsonObject apkConfigsJSONValue = apkConfigJSON.getAsJsonObject(APIConstants.WSO2_APK_GATEWAY);
+        JsonObject solaceConfigsJSONValue = solaceConfigJSON.getAsJsonObject(APIConstants.SOLACE);
 
         JsonObject synapseJSON = synapseConfigsJSONValue.getAsJsonObject("gatewayFeatures");
         JsonObject apkJSON = apkConfigsJSONValue.getAsJsonObject("gatewayFeatures");
+        JsonObject solaceJSON = solaceConfigsJSONValue.getAsJsonObject("gatewayFeatures");
 
         Map<String, Object> synapseMap = gson.fromJson(synapseJSON, type);
         Map<String, Object> apkMap = gson.fromJson(apkJSON, type);
+        Map<String, Object> solaceMap = gson.fromJson(solaceJSON, type);
 
         gatewayConfigsMap.put(APIConstants.WSO2_SYNAPSE_GATEWAY, synapseMap);
         gatewayConfigsMap.put(APIConstants.WSO2_APK_GATEWAY, apkMap);
+        gatewayConfigsMap.put(APIConstants.SOLACE, solaceMap);
 
         JsonArray synapseApiTypes = synapseConfigsJSONValue.getAsJsonArray("apiTypes");
         JsonArray apkApiTypes = apkConfigsJSONValue.getAsJsonArray("apiTypes");
+        JsonArray solaceApiTypes = solaceConfigsJSONValue.getAsJsonArray("apiTypes");
         for (String key : APIConstants.API_TYPES) {
             apiData.put(key, new ArrayList<>());
         }
@@ -3574,6 +3590,13 @@ public final class APIUtil {
                     String apiType = element.getAsString();
                     if (apiData.containsKey(apiType)) {
                         apiData.get(apiType).add(APIConstants.WSO2_APK_GATEWAY);
+                    }
+                }
+            } else if (APIConstants.SOLACE.equalsIgnoreCase(gatewayType)) {
+                for (JsonElement element : solaceApiTypes) {
+                    String apiType = element.getAsString();
+                    if (apiData.containsKey(apiType)) {
+                        apiData.get(apiType).add(APIConstants.SOLACE);
                     }
                 }
             } else {
@@ -7734,16 +7757,8 @@ public final class APIUtil {
     public static boolean compareRoleList(String[] userRoleList, String accessControlRole) {
         if (userRoleList != null) {
             for (String userRole : userRoleList) {
-                if (userRole != null) {
-                    if (Boolean.parseBoolean(caseSensitiveCheckEnabled)) {
-                        if (userRole.equals(accessControlRole)) {
-                            return true;
-                        }
-                    } else {
-                        if (userRole.equalsIgnoreCase(accessControlRole)) {
-                            return true;
-                        }
-                    }
+                if (userRole != null && userRole.equalsIgnoreCase(accessControlRole)) {
+                    return true;
                 }
             }
         }
@@ -10700,7 +10715,6 @@ public final class APIUtil {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getGatewayNotificationConfiguration().isEnabled();
     }
-
     /**
      * Check whether organizations are available in the system
      *
@@ -11937,5 +11951,50 @@ public final class APIUtil {
             log.warn("Provided epoch time string: " + epochMillis + " is not valid.", e);
             return null;
         }
+    }
+
+    /**
+     * Validate and update the URI templates of an API.
+     *
+     * @param api                       API object.
+     * @param tenantId                  Tenant ID of the API.
+     * @throws APIManagementException   if an error occurs while validating or updating the URI templates.
+     */
+    public static void validateAndUpdateURITemplates(API api, int tenantId) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating and updating URI templates for API: " + api.getId().getApiName());
+        }
+        if (api.getUriTemplates() != null) {
+            for (URITemplate uriTemplate : api.getUriTemplates()) {
+                if (StringUtils.isEmpty(api.getApiLevelPolicy())) {
+                    // API level policy not attached.
+                    if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
+                        String defaultPolicy = APIUtil.getDefaultAPILevelPolicy(tenantId);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Setting default throttling tier: " + defaultPolicy + " for URI template: "
+                                    + uriTemplate.getUriTemplate());
+                        }
+                        uriTemplate.setThrottlingTier(defaultPolicy);
+                    }
+                } else {
+                    uriTemplate.setThrottlingTier(api.getApiLevelPolicy());
+                }
+                if (StringUtils.isEmpty(uriTemplate.getAuthType())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Setting default auth type 'Any' for URI template: " + uriTemplate.getUriTemplate());
+                    }
+                    uriTemplate.setAuthType("Any");
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns the Solace configuration object.
+     * @return  The Solace configuration object.
+     */
+    public static SolaceConfig getSolaceConfig() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getSolaceConfig();
     }
 }

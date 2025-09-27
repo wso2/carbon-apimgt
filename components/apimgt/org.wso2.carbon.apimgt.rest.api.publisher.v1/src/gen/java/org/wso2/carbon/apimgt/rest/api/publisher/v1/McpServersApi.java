@@ -87,8 +87,9 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add a New Document to a MCP server", notes = "This operation can be used to add a new documentation to a MCP server. This operation only adds the metadata  of a document. To add the actual content we need to use **Upload the content of an MCP server document ** MCP server once we obtain a document Id by this operation. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -105,8 +106,9 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Upload the Content of a MCP Server Document", notes = "This operation can be used to upload a file or add inline content to a MCP server document.  **IMPORTANT:** * Either **file** or **inlineContent** form data parameters should be specified at one time. * Document's source type should be **FILE** in order to upload a file to the document using **file** parameter. * Document's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -282,8 +284,9 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a Document of a MCP Server", notes = "This operation can be used to delete a document associated with a MCP server. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -560,8 +563,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Get a Document of a MCP Server", notes = "This operation can be used to retrieve a particular document's metadata associated with a MCP server. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -580,8 +583,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Get the Content of a MCP Server Document", notes = "This operation can be used to retrieve the content of a MCP server's document.  The document can be of 3 types. In each cases responses are different.  1. **Inline type**:    The content of the document will be retrieved in `text/plain` content type     _Sample cURL_ : `curl -k -H \"Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51\" -F  inlineContent=@\"docs.txt\" -X POST \"https://localhost:9443/api/am/publisher/v4/mcp-servers/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content` 2. **FILE type**:    The file will be downloaded with the related content type (eg. `application/pdf`) 3. **URL type**:     The client will recieve the URL of the document as the Location header with the response with - `303 See Other` ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -601,8 +604,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Get a List of Documents of a MCP Server", notes = "This operation can be used to retrieve a list of documents belonging to a MCP server by providing the ID of  the MCP server. ", response = DocumentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -879,8 +882,9 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update a Document of a MCP Server", notes = "This operation can be used to update metadata of an MCP server's document. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 

@@ -506,6 +506,14 @@
       <SkipCreateResidentKeyManager>{{apim.key_manager.skip_create_resident_key_manager}}</SkipCreateResidentKeyManager>
     </APIKeyValidator>
 
+    <BasicAuthValidator>
+        <ConnectionPool>
+            <MaxIdle>{{apim.basic_authenticator.max_idle}}</MaxIdle>
+            <InitIdleCapacity>{{apim.basic_authenticator.init_idle_capacity}}</InitIdleCapacity>
+            <MaxActive>{{apim.basic_authenticator.max_active}}</MaxActive>
+            <MaxWaitMillis>{{apim.basic_authenticator.max_wait_millis}}</MaxWaitMillis>
+        </ConnectionPool>
+    </BasicAuthValidator>
 
     <OAuthConfigurations>
         <!-- Remove OAuth headers from outgoing message. -->
@@ -1576,6 +1584,17 @@
     </RedisConfig>
     {% endif %}
 
+    {% if apim.solace_config is defined %}
+        <SolaceConfig>
+            {% if apim.solace_config.apim_api_endpoint is defined %}
+            <SolaceApimApiEndpoint>{{apim.solace_config.apim_api_endpoint}}</SolaceApimApiEndpoint>
+            {% endif %}
+            {% if apim.solace_config.token is defined %}
+            <SolaceToken>{{apim.solace_config.token}}</SolaceToken>
+            {% endif %}
+        </SolaceConfig>
+    {% endif %}
+
     {% if apim.devportal.application_attributes is defined %}
     <ApplicationConfiguration>
         <ApplicationAttributes>
@@ -2039,4 +2058,6 @@
               <DataRetentionPeriodSeconds>{{apim.gateway_notification.cleanup.data_retention_period}}</DataRetentionPeriodSeconds>
           </GatewayCleanup>
       </GatewayNotificationConfiguration>
+
+      <EnableFailoverInLoadbalancedEndpoints>{{apim.endpoint_config.loadbalanced.enable_failover}}</EnableFailoverInLoadbalancedEndpoints>
 </APIManager>

@@ -332,7 +332,7 @@ public class APIManagerComponent {
                     bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
                 }
             }
-            if (!configuration.isRuntimeReadOnly()) {
+            if (!configuration.isRuntimeReadOnly() && migrationEnabled == null) {
                 initializeAPIDiscoveryTasks(tenantDomain);
             }
             bundleContext.registerService(ScopeValidator.class, new SystemScopesIssuer(), null);

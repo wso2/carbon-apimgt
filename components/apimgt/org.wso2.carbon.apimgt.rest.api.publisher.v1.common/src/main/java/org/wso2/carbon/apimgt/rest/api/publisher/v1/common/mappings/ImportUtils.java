@@ -1283,9 +1283,12 @@ public class ImportUtils {
      * @throws APIManagementException If an error occurs while populating the API with endpoints
      */
     public static void populateAPIWithEndpoints(API api, APIProvider provider, String extractedFolderPath,
-                                                String organization) throws APIManagementException {
+            String organization) throws APIManagementException {
 
         String apiUUID = api.getUuid();
+        if (log.isDebugEnabled()) {
+            log.debug("Populating API: " + apiUUID + " with endpoints");
+        }
         try {
             // Retrieve endpoints from artifact
             String jsonContent = getFileContentAsJson(
@@ -1304,21 +1307,44 @@ public class ImportUtils {
                     JsonArray endpoints = endpointsJson.getAsJsonArray();
                     for (JsonElement endpointElement : endpoints) {
                         JsonObject endpointObj = endpointElement.getAsJsonObject();
-                        APIEndpointInfo apiEndpointInfo =
-                                new Gson().fromJson(endpointObj, APIEndpointInfo.class);
+                        APIEndpointInfo apiEndpointInfo = new Gson().fromJson(endpointObj, APIEndpointInfo.class);
                         String endpointUUID = apiEndpointInfo.getId();
+
+                        try {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Processing endpoint with UUID: " + endpointUUID + " for API: " + apiUUID);
+                            }
+                            Map endpointConfig = apiEndpointInfo.getEndpointConfig();
+                            if (endpointConfig != null) {
+                                // Encrypt endpoint security credentials
+                                PublisherCommonUtils.encryptApiKeyInternal(endpointConfig,
+                                        CryptoUtil.getDefaultCryptoUtil(), StringUtils.EMPTY, StringUtils.EMPTY,
+                                        apiEndpointInfo::setEndpointConfig);
+                                if (log.isDebugEnabled()) {
+                                    log.debug(
+                                            "Successfully encrypted endpoint security credentials for endpoint: " +
+                                                    endpointUUID);
+                                }
+                            }
+                        } catch (APIManagementException | CryptoException e) {
+                            throw new APIManagementException(
+                                    "Error while encrypting endpoint security credentials for endpoint: " +
+                                            endpointUUID + " of API: " + apiUUID,
+                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ENCRYPTING_ENDPOINT_SECURITY,
+                                    endpointUUID));
+                        }
+
                         try {
                             String createdEndpointUUID = provider.addAPIEndpoint(apiUUID, apiEndpointInfo,
                                     organization);
                             if (log.isDebugEnabled()) {
-                                log.debug("API Endpoint with UUID: " + createdEndpointUUID +
-                                        " has been added to the API");
+                                log.debug(
+                                        "Successfully added endpoint with UUID: " + createdEndpointUUID +
+                                                " for API: " + apiUUID);
                             }
                         } catch (APIManagementException e) {
-                            throw new APIManagementException(
-                                    "Error while adding API Endpoint with ID: " + endpointUUID,
-                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINT,
-                                    endpointUUID));
+                            throw new APIManagementException("Error while adding API Endpoint with ID: " + endpointUUID,
+                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINT, endpointUUID));
                         }
                     }
                 }
@@ -3175,26 +3201,30 @@ public class ImportUtils {
             throws APIManagementException {
 
         String jsonContent = null;
+        String foundPath = null;
+        // Need to check for certs in this path to preserve the behavior for migrating users
+        String oldPathToClientCertificatesDirectory =
+                pathToArchive + File.separator + ImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY;
         /*
          since the certificate file is named by the alias, this also need to store in two separate directories
          considering the key type, to support same alias for production and sandbox
          */
-        String pathToClientCertificatesDirectory = pathToArchive + File.separator +
-                ImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY + File.separator + keyType;
-        String pathToYamlFile = pathToClientCertificatesDirectory + ImportExportConstants.CLIENT_CERTIFICATE_FILE
-                + ImportExportConstants.YAML_EXTENSION;
-        String pathToJsonFile = pathToClientCertificatesDirectory + ImportExportConstants.CLIENT_CERTIFICATE_FILE
-                + ImportExportConstants.JSON_EXTENSION;
+        String pathToClientCertificatesDirectory = oldPathToClientCertificatesDirectory + File.separator + keyType;
+        List<String> pathsToCheck = new ArrayList<>();
+        pathsToCheck.add(pathToClientCertificatesDirectory);
+        if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(keyType)) {
+            // check the old path in the production scenario only
+            pathsToCheck.add(oldPathToClientCertificatesDirectory);
+        }
+
         try {
-            // try loading file as YAML
-            if (CommonUtil.checkFileExistence(pathToYamlFile)) {
-                log.debug("Found client certificate file " + pathToYamlFile);
-                String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
-                jsonContent = CommonUtil.yamlToJson(yamlContent);
-            } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
-                // load as a json fallback
-                log.debug("Found client certificate file " + pathToJsonFile);
-                jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
+            for (String path : pathsToCheck) {
+                String content = getCertificateData(path);
+                if (content != null) {
+                    jsonContent = content;
+                    foundPath = path;
+                    break;
+                }
             }
             if (jsonContent == null) {
                 log.debug("No client certificate file found to be added, skipping");
@@ -3202,7 +3232,7 @@ public class ImportUtils {
             }
             JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
             JsonArray modifiedCertificatesData = addFileContentToCertificates(configElement.getAsJsonArray(),
-                    pathToClientCertificatesDirectory);
+                    foundPath);
 
             Gson gson = new Gson();
             return gson.fromJson(modifiedCertificatesData, new TypeToken<ArrayList<ClientCertificateDTO>>() {
@@ -3210,6 +3240,36 @@ public class ImportUtils {
         } catch (IOException e) {
             throw new APIManagementException("Error in reading certificates file", e);
         }
+    }
+
+    /**
+     * Get certificate data from the given path
+     *
+     * @param basePath base path to look for certs
+     * @return certificate data in json format
+     * @throws IOException when error occurs while reading the file
+     */
+    private static String getCertificateData(String basePath) throws IOException {
+        String pathToYamlFile = basePath + ImportExportConstants.CLIENT_CERTIFICATE_FILE
+                + ImportExportConstants.YAML_EXTENSION;
+        String pathToJsonFile = basePath + ImportExportConstants.CLIENT_CERTIFICATE_FILE
+                + ImportExportConstants.JSON_EXTENSION;
+        String jsonContent = null;
+        // try loading file as YAML
+        if (CommonUtil.checkFileExistence(pathToYamlFile)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Found client certificate file " + pathToYamlFile);
+            }
+            String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
+            jsonContent = CommonUtil.yamlToJson(yamlContent);
+        } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
+            // load as a json fallback
+            if (log.isDebugEnabled()) {
+                log.debug("Found client certificate file " + pathToJsonFile);
+            }
+            jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
+        }
+        return jsonContent;
     }
 
     /**

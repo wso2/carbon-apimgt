@@ -1193,7 +1193,7 @@ public class PublisherCommonUtils {
      * @param cryptoUtil               encryption utility
      * @param oldProductionApiKeyValue previous production key
      * @param oldSandboxApiKeyValue    previous sandbox key
-     * @param apiDtoTypeWrapper            APIDTOWrapper to update can be aither APIDTO or MCPServerDTO
+     * @param apiDtoTypeWrapper        APIDTOWrapper to update can be either APIDTO or MCPServerDTO
      * @throws CryptoException        on encryption failure
      * @throws APIManagementException on invalid config or missing key
      */
@@ -2023,7 +2023,10 @@ public class PublisherCommonUtils {
         String[] userRoleList = APIUtil.getListOfRoles(userName);
 
         if (APIUtil.hasPermission(userName, APIConstants.Permissions.APIM_ADMIN)) {
-            isMatched = true;
+            if (log.isDebugEnabled()) {
+                log.debug("User role has admin level permissions, therefore skipping role validation.");
+            }
+            return "";
         }
         if (inputRoles != null && !inputRoles.isEmpty()) {
             if (Boolean.parseBoolean(System.getProperty(APIConstants.CASE_SENSITIVE_CHECK_PATH))) {
@@ -2035,7 +2038,7 @@ public class PublisherCommonUtils {
                             log.debug("Checking role: " + inputRole + " against user roles");
                         }
                         if (!isMatched && APIUtil.compareRoleList(userRoleList, inputRole)) {
-                            isMatched = true;
+                            return "";
                         }
                     }
                     if (!APIUtil.isRoleNameExist(userName, roleString)) {
@@ -3314,7 +3317,7 @@ public class PublisherCommonUtils {
         }
 
         PublisherCommonUtils.validateScopes(existingAPI);
-
+        APIUtil.validateAndUpdateURITemplates(existingAPI, APIUtil.getInternalOrganizationId(organization));
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
 
@@ -4277,6 +4280,14 @@ public class PublisherCommonUtils {
     public static APIEndpointDTO updateAPIEndpoint(String apiId, String endpointId, APIEndpointDTO apiEndpointDTO,
             String organization, APIProvider apiProvider)
             throws APIManagementException, CryptoException, JsonProcessingException {
+
+        // validate endpoint name
+        if (StringUtils.isBlank(apiEndpointDTO.getName())) {
+            log.error("Endpoint name cannot be empty");
+            throw new APIManagementException("Endpoint name cannot be empty",
+                    ExceptionCodes.INVALID_API_ENDPOINT_PAYLOAD);
+        }
+
         String oldApiEndpointSecret = null;
         APIEndpointDTO oldEndpointDto = getAPIEndpoint(apiId, endpointId, apiProvider, true);
         Map oldEndpointConfig = (Map) oldEndpointDto.getEndpointConfig();
@@ -4410,6 +4421,13 @@ public class PublisherCommonUtils {
         if (!APIUtil.validateEndpointURL(endpointURL)) {
             throw new APIManagementException("Invalid/Malformed endpoint URL detected",
                     ExceptionCodes.API_ENDPOINT_URL_INVALID);
+        }
+
+        // validate endpoint name
+        if (StringUtils.isBlank(apiEndpoint.getName())) {
+            log.error("Endpoint name cannot be empty");
+            throw new APIManagementException("Endpoint name cannot be empty",
+                    ExceptionCodes.INVALID_API_ENDPOINT_PAYLOAD);
         }
 
         if (APIConstants.APIEndpoint.PRODUCTION.equals(

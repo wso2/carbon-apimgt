@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityIn
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.IntegratedAPIResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
@@ -1533,6 +1534,38 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response getGraphQLPolicyComplexityTypesOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
         return delegate.getGraphQLPolicyComplexityTypesOfAPI(apiId, securityContext);
+    }
+
+    @GET
+    @Path("/integrated-apis/{vendor}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve Integrated APIs.", notes = "Retrieve Integrated APIs. ", response = IntegratedAPIResponseDTO.class, responseContainer = "List", authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "Integrated APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "List of Integrated APIs. ", response = IntegratedAPIResponseDTO.class, responseContainer = "List") })
+    public Response getIntegratedAPIs(@ApiParam(value = "",required=true) @PathParam("vendor") String vendor) throws APIManagementException{
+        return delegate.getIntegratedAPIs(vendor, securityContext);
+    }
+
+    @GET
+    @Path("/integrated-apis/{vendor}/definition")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve the definition of an integrated API.", notes = "Retrieve the definition of an integrated API. ", response = Object.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "Integrated APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "API definition of an integrated API ", response = Object.class) })
+    public Response getIntegratedApiDefinition(@ApiParam(value = "",required=true) @PathParam("vendor") String vendor,  @NotNull @ApiParam(value = "Parameters to retrieve the definition of an integrated API",required=true)  @QueryParam("params") String params) throws APIManagementException{
+        return delegate.getIntegratedApiDefinition(vendor, params, securityContext);
     }
 
     @GET

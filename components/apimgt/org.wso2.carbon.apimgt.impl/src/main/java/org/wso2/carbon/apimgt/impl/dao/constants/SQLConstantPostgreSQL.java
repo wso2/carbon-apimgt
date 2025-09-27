@@ -53,9 +53,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   APP.ORGANIZATION = ? " +
                     " And " +
                     "    LOWER (NAME) like LOWER (?)" +
-                    " ORDER BY $1 $2 " +
-                    " offset ? limit  ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) " +
+                    " ORDER BY $1 $2 offset ? limit ? ";
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITHGROUPID =
@@ -87,9 +86,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    LOWER (NAME) like LOWER (?)"+
-                    " ORDER BY $1 $2 " +
-                    " offset ? limit  ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) " +
+                    " ORDER BY $1 $2 offset ? limit ? ";
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE_WITH_MULTIGROUPID =
             "select distinct x.*,bl.ENABLED from (" +
@@ -125,9 +123,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    LOWER (NAME) like LOWER (?)" +
-                    " ORDER BY $1 $2 " +
-                    " offset ? limit  ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) " +
+                    " ORDER BY $1 $2 offset ? limit ? ";
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITH_MULTIGROUPID =
@@ -165,9 +162,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   APP.ORGANIZATION = ? " +
                     " And " +
                     "    LOWER (NAME) like LOWER (?)"+
-                    " ORDER BY $1 $2 " +
-                    " offset ? limit  ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) " +
+                    " ORDER BY $1 $2 offset ? limit ? ";
 
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE =
@@ -199,9 +195,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    LOWER (NAME) like LOWER (?)"+
-                    " ORDER BY $1 $2 " +
-                    " offset ? limit  ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) " +
+                    " ORDER BY $1 $2 offset ? limit ? ";
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE =
             "select distinct x.*,bl.ENABLED from (" +
@@ -232,9 +227,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    LOWER (NAME) like LOWER (?)"+
-                    " ORDER BY $1 $2 " +
-                    " offset ? limit  ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) " +
+                    " ORDER BY $1 $2 offset ? limit ? ";
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE_WITH_ORGSHARING =
             "select distinct x.*,bl.ENABLED from (" +
@@ -265,9 +259,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    LOWER (NAME) like LOWER (?)"+
-                    " ORDER BY $1 $2 " +
-                    " offset ? limit  ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) " +
+                    " ORDER BY $1 $2 offset ? limit ? ";
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITH_ORGSHARING =
             "select distinct x.*,bl.ENABLED from (" +
@@ -298,9 +291,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   APP.ORGANIZATION = ? " +
                     " And "+
                     "    LOWER (NAME) like LOWER (?)"+
-                    " ORDER BY $1 $2 " +
-                    " offset ? limit  ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) " +
+                    " ORDER BY $1 $2 offset ? limit ? ";
 
     public static final String GET_APPLICATIONS_BY_TENANT_ID =
                     "   SELECT " +

@@ -79,6 +79,7 @@ import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.IntegratedApiUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -97,11 +98,14 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -293,7 +297,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } else {
             // Default visibility 'none'
-            apiToReturn.setVisibleOrganizations(Collections.singletonList(APIConstants.VISIBLE_ORG_NONE)); 
+            apiToReturn.setVisibleOrganizations(Collections.singletonList(APIConstants.VISIBLE_ORG_NONE));
         }
 
         return Response.ok().entity(apiToReturn).build();
@@ -647,6 +651,28 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    @Override
+    public Response getIntegratedAPIs(String vendor, MessageContext messageContext) throws APIManagementException {
+        return IntegratedApiUtils.getIntegratedApis(vendor);
+    }
+
+    @Override
+    public Response getIntegratedApiDefinition(String vendor, String params, MessageContext messageContext)
+            throws APIManagementException {
+        try {
+            String decodedParams = URLDecoder.decode(params, StandardCharsets.UTF_8.name());
+            JSONParser jsonParser = new JSONParser();
+            Map<String, Object> parameters = (Map<String, Object>) jsonParser.parse(decodedParams);
+            return IntegratedApiUtils.getIntegratedApiDefinition(vendor, parameters);
+        } catch (ParseException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("The decoded params object is not a valid JSON").build();
+        } catch (UnsupportedEncodingException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("The encoding of the provided params object is unsupported").build();
+        }
     }
 
     @Override
@@ -1594,6 +1620,18 @@ public class ApisApiServiceImpl implements ApisApiService {
                 validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
                 try {
+
+                    List<API> mcpServers = apiProvider.getMCPServersUsedByAPI(apiId, organization);
+                    if (mcpServers != null && !mcpServers.isEmpty()) {
+                        List<String> mcpServerNames = new ArrayList<>();
+                        for (API mcpServer : mcpServers) {
+                            mcpServerNames.add(mcpServer.getId().getApiName());
+                        }
+                        String errorMsg = "Cannot remove the API as it is used by MCP server(s).";
+                        String moreInfo = "API " + apiId + " is used by MCP server(s): " + mcpServerNames;
+                        RestApiUtil.handleConflict(errorMsg, moreInfo, log);
+                    }
+
                     //check if the API has subscriptions
                     //Todo : need to optimize this check. This method seems too costly to check if subscription exists
                     List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiId, organization);

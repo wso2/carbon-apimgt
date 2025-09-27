@@ -193,7 +193,6 @@ public class APIMappingUtil {
     private static final String EMPTY_STRING = "";
 
     private static String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
-    private static String caseSensitiveCheckEnabled = System.getProperty(APIConstants.CASE_SENSITIVE_CHECK_PATH);
 
     public static API fromDTOtoAPI(APIDTO dto, String provider) throws APIManagementException {
 
@@ -396,15 +395,10 @@ public class APIMappingUtil {
             model.setAccessControl(APIConstants.NO_ACCESS_CONTROL);
             model.setAccessControlRoles("null");
         } else {
-            String roles = StringUtils.join(accessControlRoles, ',');
             if (log.isDebugEnabled()) {
                 log.debug("Setting access control roles for API: " + apiId);
             }
-            if (Boolean.parseBoolean(caseSensitiveCheckEnabled)) {
-                model.setAccessControlRoles(roles);
-            } else {
-                model.setAccessControlRoles(roles.toLowerCase());
-            }
+            model.setAccessControlRoles(StringUtils.join(accessControlRoles, ',').toLowerCase());
             model.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY);
         }
 
@@ -4847,7 +4841,7 @@ public class APIMappingUtil {
      * @param endpointSecurity JSONObject representing the endpoint security configuration.
      * @return JSONObject with decrypted values where applicable.
      */
-    private static JSONObject handleEndpointSecurityDecrypt(JSONObject endpointSecurity) {
+    private static JSONObject handleEndpointSecurityDecrypt(JSONObject endpointSecurity) throws APIManagementException {
 
         JSONObject endpointSecurityElement = new JSONObject();
         endpointSecurityElement.putAll(endpointSecurity);
@@ -4882,9 +4876,8 @@ public class APIMappingUtil {
      * @throws CryptoException if decryption fails.
      * @throws ParseException  if custom parameters cannot be parsed.
      */
-    private static void decryptSecurity(JSONObject endpointSecurityElement,
-                                        String sectionKey,
-                                        CryptoUtil cryptoUtil) throws CryptoException, ParseException {
+    private static void decryptSecurity(JSONObject endpointSecurityElement, String sectionKey, CryptoUtil cryptoUtil)
+            throws CryptoException, ParseException, APIManagementException {
 
         Object sectionObj = endpointSecurityElement.get(sectionKey);
 
@@ -4895,8 +4888,18 @@ public class APIMappingUtil {
             JSONObject deploymentStage = new JSONObject((Map<String, Object>) sectionObj);
             String apiKeyValue = (String) deploymentStage.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
             if (StringUtils.isNotEmpty(apiKeyValue)) {
-                deploymentStage.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
-                        new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
+                try {
+                    boolean isEncrypted = cryptoUtil.base64DecodeAndIsSelfContainedCipherText(apiKeyValue);
+                    String decryptedApiKeyValue;
+                    if (isEncrypted) {
+                        decryptedApiKeyValue = new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue));
+                    } else {
+                        decryptedApiKeyValue = apiKeyValue;
+                    }
+                    deploymentStage.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, decryptedApiKeyValue);
+                } catch (CryptoException e) {
+                    throw new APIManagementException("Error while decrypting value", e);
+                }
             }
             String clientSecret = (String) deploymentStage.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET);
             if (StringUtils.isNotEmpty(clientSecret)) {

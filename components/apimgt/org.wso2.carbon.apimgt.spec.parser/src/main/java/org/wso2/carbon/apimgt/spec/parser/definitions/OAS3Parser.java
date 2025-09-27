@@ -2454,8 +2454,11 @@ public class OAS3Parser extends APIDefinition {
         }
         //Setup CORSConfigurations
         CORSConfiguration corsConfiguration = OASParserUtil.getCorsConfigFromSwagger(extensions);
-        if (corsConfiguration != null) {
+        if (corsConfiguration != null && !corsConfiguration.isEmpty()) {
             api.setCorsConfiguration(corsConfiguration);
+            if (log.isDebugEnabled()) {
+                log.debug("Adding CORS Configuration to the API");
+            }
         }
         //Setup Response cache enabling
         boolean responseCacheEnable = OASParserUtil.getResponseCacheFromSwagger(extensions);
@@ -2789,7 +2792,9 @@ public class OAS3Parser extends APIDefinition {
         if (uriTemplate.getDescription() == null || uriTemplate.getDescription().isEmpty()) {
             String description = Optional.ofNullable(match.operation.getDescription())
                     .filter(desc -> !desc.isEmpty())
-                    .orElse(match.operation.getSummary());
+                    .orElse(Optional.ofNullable(match.operation.getSummary())
+                            .filter(sum -> !sum.isEmpty())
+                            .orElse(StringUtils.EMPTY));
             uriTemplate.setDescription(description);
         }
 

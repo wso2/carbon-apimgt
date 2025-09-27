@@ -114,6 +114,9 @@ public class APIConfigContext extends ConfigContext {
 
         // Set the enable retry call with new Oauth token property
         context.put(APIConstants.ENABLE_RETRY_CALL_WITH_NEW_OAUTH_TOKEN, isRetryCallWithNewOAuthTokenEnabled());
+
+        // Set the enable failover in load balanced endpoints property
+        context.put(APIConstants.FAILOVER_IN_LOADBALANCED_ENDPOINTS_PROPERTY, isFailoverEnabled());
     }
 
     private void setApiProductVelocityContext(APIProduct apiProduct, VelocityContext context) {
@@ -163,9 +166,11 @@ public class APIConfigContext extends ConfigContext {
         // API test key
         context.put("testKey", apiProduct.getTestKey());
 
-
         // Set the enable retry call with new Oauth token property
         context.put(APIConstants.ENABLE_RETRY_CALL_WITH_NEW_OAUTH_TOKEN, isRetryCallWithNewOAuthTokenEnabled());
+
+        // Set the enable failover in load balanced endpoints property
+        context.put(APIConstants.FAILOVER_IN_LOADBALANCED_ENDPOINTS_PROPERTY, isFailoverEnabled());
     }
 
     public String getAPIName(API api) {
@@ -185,6 +190,17 @@ public class APIConfigContext extends ConfigContext {
         String property = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getFirstProperty(
                 APIConstants.MEDIATOR_CONFIG + APIConstants.OAuthConstants.OAUTH_MEDIATION_CONFIG + APIConstants.
                         OAuthConstants.ENABLE_RETRY_CALL_WITH_NEW_TOKEN);
+        return Boolean.parseBoolean(property);
+    }
+
+    /**
+     * Checks whether failover is enabled in load balanced endpoints based on the configuration.
+     *
+     * @return {@code true} if fail over in load balanced endpoints is enabled; {@code false} otherwise.
+     */
+    protected boolean isFailoverEnabled() {
+        String property = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                .getFirstProperty(APIConstants.ENABLE_FAILOVER_IN_LOADBALANCED_ENDPOINTS);
         return Boolean.parseBoolean(property);
     }
 }
