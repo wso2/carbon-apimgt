@@ -27,12 +27,12 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
-import static org.wso2.carbon.apimgt.common.analytics.Constants.MASK_VALUE;
 import static org.wso2.carbon.apimgt.common.analytics.Constants.EMAIL_PROP_TYPE;
 import static org.wso2.carbon.apimgt.common.analytics.Constants.IPV4_MASK_VALUE;
 import static org.wso2.carbon.apimgt.common.analytics.Constants.IPV4_PROP_TYPE;
 import static org.wso2.carbon.apimgt.common.analytics.Constants.IPV6_MASK_VALUE;
 import static org.wso2.carbon.apimgt.common.analytics.Constants.IPV6_PROP_TYPE;
+import static org.wso2.carbon.apimgt.common.analytics.Constants.MASK_VALUE;
 import static org.wso2.carbon.apimgt.common.analytics.Constants.USERNAME_PROP_TYPE;
 
 /**
@@ -74,11 +74,11 @@ public abstract class CommonRequestDataCollector extends AbstractRequestDataColl
      * The method supports masking for IPv4, IPv6, email addresses, and usernames,
      * returning appropriately formatted and partially masked strings.
      *
-     * @param type the type of data to be masked. Supported types include:
-     *             "IPV4", "IPV6", "EMAIL", "USERNAME".
+     * @param type  the type of data to be masked. Supported types include:
+     *              "IPV4", "IPV6", "EMAIL", "USERNAME".
      * @param value the actual value to be masked. Must be of type String.
      * @return the masked string value based on the specified type.
-     *         Returns a fully masked string for unrecognized types or null if the value is not a String.
+     * Returns a fully masked string for unrecognized types or null if the value is not a String.
      */
     public String maskAnalyticsData(String type, Object value) {
         if (log.isDebugEnabled()) {
