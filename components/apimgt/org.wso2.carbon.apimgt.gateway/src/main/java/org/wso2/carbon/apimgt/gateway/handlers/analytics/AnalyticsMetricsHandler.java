@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketConstants;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -52,7 +53,7 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
         messageContext.setProperty(Constants.REQUEST_START_TIME_PROPERTY, System.currentTimeMillis());
         //Set user agent in request flow
         if (!messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
-            String userAgent = getUserAgent(messageContext);
+            String userAgent = getUserAgentAndCopyRequestHeadersToContext(messageContext);
             String userIp = DataPublisherUtil.getEndUserIP(messageContext);
             messageContext.setProperty(Constants.USER_AGENT_PROPERTY, userAgent);
             if (userIp != null) {
@@ -134,10 +135,36 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
         return true;
     }
 
-    private String getUserAgent(MessageContext messageContext) {
-        Map<?, ?> headers = (Map<?, ?>) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        return (String) headers.get(APIConstants.USER_AGENT);
+    /**
+     * Extracts the `User-Agent` header from the transport headers in the given message context
+     * and copies them (excluding sensitive headers) to the analytics metadata of the message context.
+     *
+     * @param messageContext the Synapse message context containing the headers and other message data
+     * @return the value of the `User-Agent` header if available in the transport headers, or null otherwise
+     */
+    private String getUserAgentAndCopyRequestHeadersToContext(MessageContext messageContext) {
+        log.debug("Extracting User-Agent and copying request headers to analytics metadata");
+        Axis2MessageContext axis2mc = (Axis2MessageContext) messageContext;
+
+        Object transportHeadersObj =
+                axis2mc.getAxis2MessageContext().getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+
+        if (!(transportHeadersObj instanceof Map)) {
+            log.debug("No transport headers available in message context");
+            return null; // no headers available
+        }
+
+        Map<String, Object> headers = new HashMap<>((Map<String, ?>) transportHeadersObj);
+
+        if (!headers.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Processing " + headers.size() + " request headers for analytics");
+            }
+            headers.keySet().removeIf(APIConstants.AUTHORIZATION_HEADER_DEFAULT::equalsIgnoreCase);
+            axis2mc.setAnalyticsMetadata(Constants.REQUEST_HEADERS, headers);
+            return (String) headers.get(APIConstants.USER_AGENT);
+        }
+        return null;
     }
 
 }

@@ -234,9 +234,16 @@ public class APIManagerAnalyticsConfiguration {
         this.reporterClass = reporterClass;
     }
 
+    /**
+     * Get the analytics reporter properties.
+     * @return the reporterProperties
+     */
     public Map<String, String> getReporterProperties() {
         return reporterProperties;
     }
+    /**
+     * @return the maskDataProperties
+     */
     public Map<String, String> getMaskDataProperties() {
         return maskDataProperties;
     }
