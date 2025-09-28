@@ -74,6 +74,30 @@
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.federated.gateway:${carbon.apimgt.version}
                                 </bundleDef>
                                 <bundleDef>
+                                    io.netty:netty-common:${netty.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    io.netty:netty-buffer:${netty.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    io.netty:netty-transport:${netty.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    io.netty:netty-codec:${netty.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    io.netty:netty-handler:${netty.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    io.netty:netty-resolver:${netty.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    io.netty:netty-resolver-dns:${netty.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    io.netty:netty-codec-dns:${netty.version}
+                                </bundleDef>
+                                <bundleDef>
                                     io.netty:netty-codec-http:${netty.version}
                                 </bundleDef>
                                 <bundleDef>
