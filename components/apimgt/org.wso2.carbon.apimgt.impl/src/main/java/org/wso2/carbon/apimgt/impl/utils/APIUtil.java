@@ -6007,7 +6007,6 @@ public final class APIUtil {
         String keyStorePath = System.getProperty(APIConstants.JAVAX_NET_SSL_TRUST_STORE);
         char[] keyStorePassword = System.getProperty(APIConstants.JAVAX_NET_SSL_TRUST_STORE_PASSWORD) != null ?
                 System.getProperty(APIConstants.JAVAX_NET_SSL_TRUST_STORE_PASSWORD).toCharArray() : new char[0];
-        String keyStoreType = KeyStore.getDefaultType(); // Get default JKS keystore type
 
         // Basic validation and fast-fallback
         if (StringUtils.isBlank(keyStorePath) || keyStorePassword.length == 0) {
@@ -6022,7 +6021,7 @@ public final class APIUtil {
 
         // Create SSL context dynamically to pick up certificate changes at runtime
         try {
-            KeyStore trustStore = KeyStore.getInstance(keyStoreType);
+            KeyStore trustStore = KeyStore.getInstance(APIConstants.DEFAULT_KEY_STORE_TYPE);
             try (InputStream keyStoreStream = Files.newInputStream(path)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Loading trust store for SSL context creation.");
