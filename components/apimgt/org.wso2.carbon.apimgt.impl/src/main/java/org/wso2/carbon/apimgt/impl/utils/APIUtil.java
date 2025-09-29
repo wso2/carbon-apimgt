@@ -6007,21 +6007,24 @@ public final class APIUtil {
         String keyStorePath = System.getProperty(APIConstants.JAVAX_NET_SSL_TRUST_STORE);
         char[] keyStorePassword = System.getProperty(APIConstants.JAVAX_NET_SSL_TRUST_STORE_PASSWORD) != null ?
                 System.getProperty(APIConstants.JAVAX_NET_SSL_TRUST_STORE_PASSWORD).toCharArray() : new char[0];
+        String trustStoreType = System.getProperty(APIConstants.JAVAX_NET_SSL_TRUST_STORE_TYPE,
+                APIConstants.DEFAULT_KEY_STORE_TYPE);
 
-        // Basic validation and fast-fallback
-        if (StringUtils.isBlank(keyStorePath) || keyStorePassword.length == 0) {
-            log.error("Trust store path or password is not configured. Falling back to default SSLContext.");
-            return SSLContexts.createDefault();
-        }
-        Path path = Paths.get(keyStorePath);
-        if (!Files.exists(path)) {
-            log.error("Trust store file not found at the configured path. Falling back to default SSLContext.");
-            return SSLContexts.createDefault();
-        }
-
-        // Create SSL context dynamically to pick up certificate changes at runtime
         try {
-            KeyStore trustStore = KeyStore.getInstance(APIConstants.DEFAULT_KEY_STORE_TYPE);
+            // Basic validation and fast-fallback
+            if (StringUtils.isBlank(keyStorePath) || keyStorePassword.length == 0) {
+                log.error("Trust store path or password is not configured. Falling back to default SSLContext.");
+                return SSLContexts.createDefault();
+            }
+
+            Path path = Paths.get(keyStorePath);
+            if (!Files.exists(path)) {
+                log.error("Trust store file not found at the configured path. Falling back to default SSLContext.");
+                return SSLContexts.createDefault();
+            }
+
+            // Create SSL context dynamically to pick up certificate changes at runtime
+            KeyStore trustStore = KeyStore.getInstance(trustStoreType);
             try (InputStream keyStoreStream = Files.newInputStream(path)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Loading trust store for SSL context creation.");
