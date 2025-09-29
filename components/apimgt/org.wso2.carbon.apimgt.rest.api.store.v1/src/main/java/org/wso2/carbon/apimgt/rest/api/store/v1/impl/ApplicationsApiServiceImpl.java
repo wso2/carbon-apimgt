@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretCreationRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
@@ -402,12 +403,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         //subscriber field of the body is not honored. It is taken from the context
         Application application = ApplicationMappingUtil.fromDTOtoApplication(applicationDto, username);
         application.setSubOrganization(sharedOrganization);
-        
+
         application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD); // default
         if ((applicationDto.getVisibility() != null)
                 && applicationDto.getVisibility() == VisibilityEnum.SHARED_WITH_ORG && sharedOrganization != null) {
             application.setSharedOrganization(sharedOrganization);
-        } 
+        }
 
         int applicationId = apiConsumer.addApplication(application, username, organization);
 
@@ -603,7 +604,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD);
             }
 
-        } 
+        }
         apiConsumer.updateApplication(application);
 
         // Added to use the application name as part of sp name instead of application UUID when specified
@@ -904,7 +905,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     if (StringUtils.isNotEmpty(body.getCallbackUrl())) {
                         jsonParamObj.put(APIConstants.JSON_CALLBACK_URL, body.getCallbackUrl());
                     }
-                    
+
                     String jsonParams = jsonParamObj.toString();
                     String tokenScopes = StringUtils.join(body.getScopes(), " ");
                     String keyManagerName = APIConstants.KeyManager.DEFAULT_KEY_MANAGER;
@@ -985,7 +986,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * Used to get all keys of an application
      *
      * @param applicationUUID Id of the application
-     * @param orgInfo 
+     * @param orgInfo
      * @return List of application keys
      */
     private Set<APIKey> getApplicationKeys(String applicationUUID, String tenantDomain, OrganizationInfo orgInfo) {
@@ -1244,6 +1245,30 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             RestApiUtil.handleInternalServerError("Error while re generating the consumer secret ", e, log);
         }
         return null;
+    }
+
+    @Override
+    public Response generateConsumerSecret(String applicationId, String keyType,
+                                           ConsumerSecretCreationRequestDTO consumerSecretCreationRequestDTO,
+                                           MessageContext messageContext) {
+        return Response.status(Response.Status.METHOD_NOT_ALLOWED).entity("Not Implemented").build();
+    }
+
+    @Override
+    public Response getConsumerSecrets(String applicationId, String keyType, MessageContext messageContext) {
+        return Response.status(Response.Status.METHOD_NOT_ALLOWED).entity("Not Implemented").build();
+    }
+
+    @Override
+    public Response getConsumerSecret(String applicationId, String keyType, String secretId,
+                                      MessageContext messageContext) {
+        return Response.status(Response.Status.METHOD_NOT_ALLOWED).entity("Not Implemented").build();
+    }
+
+    @Override
+    public Response deleteConsumerSecret(String applicationId, String keyType, String secretId,
+                                         MessageContext messageContext) {
+        return Response.status(Response.Status.METHOD_NOT_ALLOWED).entity("Not Implemented").build();
     }
 
     /**
