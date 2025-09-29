@@ -2167,6 +2167,12 @@ public class ImportUtils {
                     JsonElement endpointConfigElement = backends.get(ImportExportConstants.ENDPOINT_CONFIG);
                     if (endpointConfigElement != null && !endpointConfigElement.isJsonNull()) {
                         JSONObject endpointConfig = (JSONObject) parser.parse(endpointConfigElement.getAsString());
+                        if (endpointConfig.get(APIConstants.ENDPOINT_SECURITY) instanceof JSONObject) {
+                            JSONObject endpointSecurity =
+                                    (JSONObject) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                            handleCustomParams(endpointSecurity, APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                            handleCustomParams(endpointSecurity, APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                        }
                         mcpServerDTO.endpointConfig(endpointConfig);
                     } else {
                         if (log.isDebugEnabled()) {
@@ -2178,6 +2184,27 @@ public class ImportUtils {
         }
 
         return mcpServerDTO;
+    }
+
+    /**
+     * Handle the custom parameters in endpoint security
+     *
+     * @param endpointSecurity endpoint security json object
+     * @param deploymentStg    deployment stage (production/sandbox)
+     */
+    private static void handleCustomParams(JSONObject endpointSecurity, String deploymentStg) {
+
+        if (endpointSecurity.get(deploymentStg) instanceof JSONObject) {
+            JSONObject security = (JSONObject) endpointSecurity.get(deploymentStg);
+            if (security.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof JSONObject) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Handling custom parameters in endpoint security for " + deploymentStg);
+                }
+                security.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS,
+                        ((JSONObject) security.get(
+                                APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS)).toJSONString());
+            }
+        }
     }
 
     public static APIProductDTO retrieveAPIProductDto(String pathToArchive) throws IOException, APIManagementException {
