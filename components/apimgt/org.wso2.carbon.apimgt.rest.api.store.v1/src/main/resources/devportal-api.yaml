@@ -3227,6 +3227,206 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/{keyMappingId}/generate-token"'
 
+  /applications/{applicationId}/oauth-keys/{keyMappingId}/secrets:
+    post:
+      tags:
+        - Application Secrets
+      summary: |
+        Generate a New Consumer Secret
+      description: |
+        This operation can be used to generate a new consumer secret for an application for the give key type
+      operationId: generateConsumerSecret
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/keyMappingId'
+      requestBody:
+        description: |
+          Request payload containing details for creating a new consumer secret
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsumerSecretCreationRequest'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Consumer secret is generated.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).‚
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsumerSecretResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X POST "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/secrets"'
+    get:
+      tags:
+        - Application Secrets
+      summary: |
+        Retrieve Consumer Secrets
+      description: |
+        This operation can be used to retrieve consumer secrets of an application for the give key type
+      operationId: getConsumerSecrets
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/keyMappingId'
+      responses:
+        200:
+          description: |
+            OK.
+            Consumer secrets are retrieved.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).‚
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsumerSecretList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X GET "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/secrets"'
+  /applications/{applicationId}/oauth-keys/{keyMappingId}/secrets/{secretId}:
+    get:
+      tags:
+        - Application Secrets
+      summary: |
+        Retrieve a Consumer Secrets
+      description: |
+        This operation can be used to retrieve a consumer secret of an application for the give key type
+      operationId: getConsumerSecret
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/keyMappingId'
+        - $ref: '#/components/parameters/secretId'
+      responses:
+        200:
+          description: |
+            OK.
+            A consumer secrets is retrieved.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).‚
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsumerSecretResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X GET "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/secrets/4efd2684-9657-4a01-a956-16cd89e96077"'
+    delete:
+      tags:
+        - Application Secrets
+      summary: |
+        Delete a Consumer Secret
+      description: |
+        This operation can be used to delete a consumer secret for an application for the give key type
+      operationId: deleteConsumerSecret
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/keyMappingId'
+        - $ref: '#/components/parameters/secretId'
+      responses:
+        204:
+          description: |
+            OK.
+            Consumer secret deleted.
+          content: { }
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X DELETE "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/secrets/4efd2684-9657-4a01-a956-16cd89e96077"'
+
   /applications/{applicationId}/api-keys/{keyType}/generate:
     post:
       tags:
@@ -4653,7 +4853,7 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/me/organization"'
-          
+
   ######################################################
   # The "Marketplace Assistant Feature" resource APIs
   ######################################################
@@ -7278,6 +7478,58 @@ components:
           description: |
             Category of the comment
           example: general
+    #-----------------------------------------------------
+    # Consumer Secret Object
+    #-----------------------------------------------------
+    ConsumerSecretResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the secret
+          example: sec_123456
+        description:
+          type: string
+          description: Human-readable label for the secret
+          example: pizza application secret
+        consumer_secret:
+          type: string
+          description: The actual secret string
+          example: s3cr3tV@lu3
+        consumer_secret_expires_at:
+          type: integer
+          format: int64
+          description: expiry timestamp in seconds since epoch
+          example: 1755756933
+    #-----------------------------------------------------
+    # Consumer Secret Request Object
+    #-----------------------------------------------------
+    ConsumerSecretCreationRequest:
+      type: object
+      properties:
+        expires_in:
+          type: integer
+          description: Expiry time in seconds
+          example: 86400
+        description:
+          type: string
+          description: A human-readable label for this secret
+          example: pizza application secret
+    #-----------------------------------------------------
+    # Consumer Secret List Object
+    #-----------------------------------------------------
+    ConsumerSecretList:
+      title: Client Secret List
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of consumer secrets returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsumerSecretResponse'
 
   responses:
     BadRequest:
@@ -7493,6 +7745,14 @@ components:
       in: path
       description: |
         OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping.
+      required: true
+      schema:
+        type: string
+    secretId:
+      name: secretId
+      in: path
+      description: |
+        Unique identifier of the secret
       required: true
       schema:
         type: string
