@@ -224,7 +224,7 @@ public class ExportUtils {
         String exportAPIBasePath = exportFolder.toString();
         String archivePath = exportAPIBasePath
                 .concat(File.separator + apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion());
-        tenantId = APIUtil.getTenantId(userName);
+        tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
         CommonUtil.createDirectory(archivePath);
 
         if (preserveDocs) {
@@ -507,7 +507,6 @@ public class ExportUtils {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         List<Documentation> docList = apiProvider.getAllDocumentation(identifier.getUUID(), tenantDomain);
         if (!docList.isEmpty()) {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String docDirectoryPath = archivePath + File.separator + ImportExportConstants.DOCUMENT_DIRECTORY;
             CommonUtil.createDirectory(docDirectoryPath);
             try {
