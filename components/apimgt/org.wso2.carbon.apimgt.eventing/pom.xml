@@ -20,7 +20,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>9.32.99-SNAPSHOT</version>
+        <version>9.32.99</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
