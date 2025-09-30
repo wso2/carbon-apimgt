@@ -2913,8 +2913,13 @@ public class OAS3Parser extends APIDefinition {
 
         Map<String, Object> props = new LinkedHashMap<>();
         List<String> requiredFields = new ArrayList<>();
+
         if (parameters != null) {
             for (Parameter param : parameters) {
+                if (param.get$ref() != null) {
+                    param = resolveComponentRef(param.get$ref(), openAPI, new HashSet<>(), Parameter.class);
+                }
+
                 String name = param.getIn() + "_" + param.getName();
                 Map<String, Object> paramSchema = new LinkedHashMap<>();
                 Schema<?> schema = resolveSchema(param.getSchema(), openAPI);
@@ -2941,34 +2946,39 @@ public class OAS3Parser extends APIDefinition {
             }
         }
 
-        if (requestBody != null &&
-                requestBody.getContent() != null &&
-                requestBody.getContent().get(APISpecParserConstants.APPLICATION_JSON_MEDIA_TYPE) != null) {
-            Schema<?> rawSchema =
-                    requestBody.getContent().get(APISpecParserConstants.APPLICATION_JSON_MEDIA_TYPE).getSchema();
-
-            Schema<?> bodySchema = resolveSchema(rawSchema, openAPI);
-            Map<String, Object> requestBodyNode = new LinkedHashMap<>();
-            requestBodyNode.put(APISpecParserConstants.TYPE, APISpecParserConstants.OBJECT);
-            requestBodyNode.put(APISpecParserConstants.CONTENT_TYPE, APPLICATION_JSON_MEDIA_TYPE);
-
-            if (bodySchema.getProperties() != null) {
-                requestBodyNode.put(APISpecParserConstants.PROPERTIES, bodySchema.getProperties());
+        if (requestBody != null) {
+            if (requestBody.get$ref() != null) {
+                requestBody = resolveComponentRef(requestBody.get$ref(), openAPI, new HashSet<>(), RequestBody.class);
             }
+            if (requestBody != null &&
+                    requestBody.getContent() != null &&
+                    requestBody.getContent().get(APISpecParserConstants.APPLICATION_JSON_MEDIA_TYPE) != null) {
 
-            if (bodySchema.getRequired() != null) {
-                requestBodyNode.put(APISpecParserConstants.REQUIRED, bodySchema.getRequired());
+                Schema<?> rawSchema =
+                        requestBody.getContent().get(APISpecParserConstants.APPLICATION_JSON_MEDIA_TYPE).getSchema();
+
+                Schema<?> bodySchema = resolveSchema(rawSchema, openAPI);
+
+                Map<String, Object> requestBodyNode = new LinkedHashMap<>();
+                requestBodyNode.put(APISpecParserConstants.TYPE, APISpecParserConstants.OBJECT);
+                requestBodyNode.put(APISpecParserConstants.CONTENT_TYPE, APPLICATION_JSON_MEDIA_TYPE);
+
+                if (bodySchema.getProperties() != null) {
+                    requestBodyNode.put(APISpecParserConstants.PROPERTIES, bodySchema.getProperties());
+                }
+
+                if (bodySchema.getRequired() != null) {
+                    requestBodyNode.put(APISpecParserConstants.REQUIRED, bodySchema.getRequired());
+                }
+
+                props.put(APISpecParserConstants.REQUEST_BODY, requestBodyNode);
+                requiredFields.add(APISpecParserConstants.REQUEST_BODY);
             }
-
-            props.put(APISpecParserConstants.REQUEST_BODY, requestBodyNode);
-            requiredFields.add(APISpecParserConstants.REQUEST_BODY);
         }
-
         root.put(APISpecParserConstants.PROPERTIES, props);
         if (!requiredFields.isEmpty()) {
             root.put(APISpecParserConstants.REQUIRED, requiredFields);
         }
-
         return root;
     }
 
@@ -2998,17 +3008,8 @@ public class OAS3Parser extends APIDefinition {
 
         if (schema == null) return null;
 
-        // Resolve $ref
-        while (schema.get$ref() != null) {
-            String refName = schema.get$ref().replace("#/components/schemas/", "");
-            if (visitedRefs.contains(refName)) {
-                log.warn("Circular reference detected: " + refName);
-                break;
-            }
-            visitedRefs.add(refName);
-            Schema<?> refSchema = openAPI.getComponents().getSchemas().get(refName);
-            if (refSchema == null) break;
-            schema = refSchema;
+        if (schema.get$ref() != null) {
+            schema = resolveComponentRef(schema.get$ref(), openAPI, visitedRefs, Schema.class);
         }
 
         // Resolve allOf
@@ -3016,13 +3017,11 @@ public class OAS3Parser extends APIDefinition {
             Schema<?> merged = new ObjectSchema();
             Map<String, Schema> mergedProps = new LinkedHashMap<>();
             List<String> mergedRequired = new ArrayList<>();
-
             for (Schema<?> part : schema.getAllOf()) {
                 Schema<?> resolved = resolveSchema(part, openAPI);
                 if (resolved.getProperties() != null) mergedProps.putAll(resolved.getProperties());
                 if (resolved.getRequired() != null) mergedRequired.addAll(resolved.getRequired());
             }
-
             merged.setProperties(mergedProps);
             merged.setRequired(mergedRequired);
             return merged;
@@ -3040,7 +3039,6 @@ public class OAS3Parser extends APIDefinition {
                     .map(s -> resolveSchema(s, openAPI))
                     .collect(Collectors.toList()));
         }
-
         if (schema.getNot() != null) {
             schema.setNot(resolveSchema(schema.getNot(), openAPI));
         }
@@ -3065,6 +3063,62 @@ public class OAS3Parser extends APIDefinition {
         }
 
         return schema;
+    }
+
+    /**
+     * Resolves a component reference ($ref) to its actual definition in the OpenAPI components.
+     * Handles circular references by tracking visited references.
+     *
+     * @param ref          Reference string (e.g., "#/components/schemas/ComponentName")
+     * @param openAPI      OpenAPI definition containing components
+     * @param visitedRefs  Set of visited reference names to detect circular references
+     * @param expectedType Expected class type of the resolved component
+     * @param <T>          Type parameter for the expected component type
+     * @return Resolved component of type T, or null if not found or circular reference detected
+     */
+    @SuppressWarnings("unchecked")
+    private <T> T resolveComponentRef(String ref, OpenAPI openAPI, Set<String> visitedRefs, Class<T> expectedType) {
+
+        if (ref == null || !ref.startsWith("#/components/")) {
+            return null;
+        }
+        String[] parts = ref.split("/");
+        if (parts.length < 4) {
+            return null;
+        }
+        String category = parts[2];
+        String name = parts[3];
+        String refKey = category + ":" + name;
+        if (visitedRefs.contains(refKey)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Circular reference detected: " + refKey);
+            }
+            return null;
+        }
+        visitedRefs.add(refKey);
+        Object resolved = null;
+        switch (category) {
+            case APISpecParserConstants.SCHEMAS:
+                resolved = openAPI.getComponents().getSchemas().get(name);
+                break;
+            case APISpecParserConstants.REQUEST_BODIES:
+                resolved = openAPI.getComponents().getRequestBodies().get(name);
+                break;
+            case APISpecParserConstants.PARAMETERS:
+                resolved = openAPI.getComponents().getParameters().get(name);
+                break;
+            default:
+                return null;
+        }
+        if (resolved == null) return null;
+        if (resolved instanceof Schema && ((Schema<?>) resolved).get$ref() != null) {
+            return (T) resolveComponentRef(((Schema<?>) resolved).get$ref(), openAPI, visitedRefs, expectedType);
+        } else if (resolved instanceof RequestBody && ((RequestBody) resolved).get$ref() != null) {
+            return (T) resolveComponentRef(((RequestBody) resolved).get$ref(), openAPI, visitedRefs, expectedType);
+        } else if (resolved instanceof Parameter && ((Parameter) resolved).get$ref() != null) {
+            return (T) resolveComponentRef(((Parameter) resolved).get$ref(), openAPI, visitedRefs, expectedType);
+        }
+        return expectedType.cast(resolved);
     }
 
     /**
