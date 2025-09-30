@@ -909,7 +909,9 @@ public class PublisherCommonUtils {
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
         apiToUpdate.setGatewayType(apiDtoToUpdate.getGatewayType());
-        apiToUpdate.setDisplayName(apiDtoToUpdate.getDisplayName());
+        apiToUpdate.setDisplayName((apiDtoToUpdate.getDisplayName() != null
+                && !apiDtoToUpdate.getDisplayName().trim().isEmpty()) ? apiDtoToUpdate.getDisplayName()
+                : apiDtoToUpdate.getName());
 
         //validate API categories
         List<APICategory> apiCategories = apiToUpdate.getApiCategories();
@@ -1108,7 +1110,9 @@ public class PublisherCommonUtils {
         SwaggerData swaggerData = new SwaggerData(apiToUpdate);
         String definitionToAdd = new OAS3Parser().generateAPIDefinition(swaggerData);
         apiToUpdate.setSwaggerDefinition(definitionToAdd);
-        apiToUpdate.setDisplayName(apiDtoToUpdate.getDisplayName());
+        apiToUpdate.setDisplayName((apiDtoToUpdate.getDisplayName() != null
+                && !apiDtoToUpdate.getDisplayName().trim().isEmpty()) ? apiDtoToUpdate.getDisplayName()
+                : apiDtoToUpdate.getName());
 
         apiToUpdate.setOrganization(originalAPI.getOrganization());
         apiToUpdate.setSubtype(originalAPI.getSubtype());
@@ -2935,7 +2939,6 @@ public class PublisherCommonUtils {
         api.setSubtype(apiDtoTypeWrapper.getResolvedApiSubtype());
         api.setAiConfiguration(apiDtoTypeWrapper.getAiConfiguration());
         api.setInitiatedFromGateway(apiDtoTypeWrapper.getInitiatedFromGateway());
-        api.setDisplayName(apiDtoTypeWrapper.getDisplayName());
         if (apiDtoTypeWrapper.isMCPServerDTO()) {
             String protocolVersion = apiDtoTypeWrapper.getProtocolVersion();
             api.getMetadata().put(APIConstants.MCP.PROTOCOL_VERSION_KEY,
