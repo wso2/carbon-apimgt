@@ -3757,7 +3757,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
             boolean isExternalGateway = false;
             GatewayDeployer gatewayDeployer = null;
-            if (gatewayConfiguration != null && api.isInitiatedFromGateway()) {
+            if (api.isInitiatedFromGateway()) {
                 Map<String, String> extractedURLs = extractEndpointUrlsForDiscoveredApi(api);
                 if (extractedURLs == null) {
                     if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)) {
