@@ -53,4 +53,25 @@ public interface DCRClient {
     ClientInfo updateApplicationSecret(@Param("clientId") String clientId)
             throws KeyManagerClientException;
 
+    @RequestLine("POST /{clientId}/secrets")
+    @Headers("Content-Type: application/json")
+    ClientSecret generateNewApplicationSecret(@Param("clientId") String clientId,
+                                              ClientSecretRequest clientSecretRequest)
+            throws KeyManagerClientException;
+
+    @RequestLine("GET /{clientId}/secrets")
+    @Headers("Content-Type: application/json")
+    ClientInfo getApplicationSecrets(@Param("clientId") String clientId)
+            throws KeyManagerClientException;
+
+    @RequestLine("GET /{clientId}/secrets/{secretId}")
+    @Headers("Content-Type: application/json")
+    ClientSecret getApplicationSecret(@Param("clientId") String clientId, @Param("secretId") String secretId)
+            throws KeyManagerClientException;
+
+    @RequestLine("DELETE /{clientId}/secrets/{secretId}")
+    @Headers("Content-Type: application/json")
+    void deleteApplicationSecret(@Param("clientId") String clientId, @Param("secretId") String secretId)
+            throws KeyManagerClientException;
+
 }

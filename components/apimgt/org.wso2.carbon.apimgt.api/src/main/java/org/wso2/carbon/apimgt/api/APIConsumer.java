@@ -30,6 +30,8 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretInfo;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -463,7 +465,7 @@ public interface APIConsumer extends APIManager {
      * @param offset
      * @param groupingId   the groupId to which the applications must belong.
      * @param organization Identifier of an organization
-     * @param sharedOrganization 
+     * @param sharedOrganization
      * @return Applications
      * @throws APIManagementException if failed to applications for given subscriber
      */
@@ -630,6 +632,12 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException This is the custom exception class for API management.
      */
     String renewConsumerSecret(String clientId, String keyManagerName) throws APIManagementException;
+
+    default ConsumerSecretInfo generateConsumerSecret(String clientId, String keyManagerName,
+                                                      ConsumerSecretRequest consumerSecretRequest)
+            throws APIManagementException {
+        throw new UnsupportedOperationException("Generating new consumer secret is not supported");
+    }
 
     /**
      * Returns a set of scopes associated with a list of API uuids.
@@ -904,7 +912,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     boolean removalKeys(Application application, String keyMappingId, String xWSO2Tenant) throws APIManagementException;
-    
+
     /**
      * @param searchQuery search query. ex : provider:admin
      * @param organizationInfo Identifier of an organization

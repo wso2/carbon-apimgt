@@ -3248,9 +3248,9 @@ paths:
               $ref: '#/components/schemas/ConsumerSecretCreationRequest'
         required: true
       responses:
-        200:
+        201:
           description: |
-            OK.
+            Created.
             Consumer secret is generated.
           headers:
             ETag:

@@ -100,6 +100,10 @@ public interface KeyManager {
      */
     String getNewApplicationConsumerSecret(AccessTokenRequest tokenRequest) throws APIManagementException;
 
+    default ConsumerSecretInfo generateNewApplicationConsumerSecret(ConsumerSecretRequest clientSecretRequest) throws APIManagementException {
+        throw new UnsupportedOperationException("Generating new consumer secret is not supported");
+    }
+
     /**
      * Get details about an access token. As a part of the response, consumer key against which token was obtained
      * must be returned.

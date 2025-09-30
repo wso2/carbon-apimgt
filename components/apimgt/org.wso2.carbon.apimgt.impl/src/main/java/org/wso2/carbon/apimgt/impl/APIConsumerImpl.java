@@ -66,6 +66,8 @@ import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretInfo;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretRequest;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
@@ -321,6 +323,27 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
         return keyManager.getNewApplicationConsumerSecret(tokenRequest);
+    }
+
+    public ConsumerSecretInfo generateConsumerSecret(String clientId, String keyManagerName,
+                                                     ConsumerSecretRequest consumerSecretRequest)
+            throws APIManagementException {
+
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO =
+                apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+        if (keyManagerConfigurationDTO == null) {
+            keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+            if (keyManagerConfigurationDTO != null) {
+                keyManagerName = keyManagerConfigurationDTO.getName();
+            } else {
+                log.error("Key Manager: " + keyManagerName + " not found in database.");
+                throw new APIManagementException("Key Manager " + keyManagerName + " not found in database.",
+                        ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+            }
+        }
+
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+        return keyManager.generateNewApplicationConsumerSecret(consumerSecretRequest);
     }
 
     /**
@@ -2909,7 +2932,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @param sortColumn   The sort column.
      * @param sortOrder    The sort order.
      * @param organization Identifier of an Organization
-     * @param sharedOrganization 
+     * @param sharedOrganization
      * @return Application[] The Applications.
      * @throws APIManagementException
      */
@@ -4104,7 +4127,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     @Override
     public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end)
                                                  throws APIManagementException {
-    	
+
         Organization org = new Organization(organization);
         String userName = (userNameWithoutChange != null) ? userNameWithoutChange : username;
         String[] roles = APIUtil.getListOfRoles(userName);
@@ -4113,7 +4136,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
         return searchPaginatedAPIs(searchQuery, start, end, org, userCtx, null);
     }
-    
+
     @Override
     public Map<String, Object> searchPaginatedAPIs(String searchQuery, OrganizationInfo organizationInfo, int start,
                                                    int end, String sortBy, String sortOrder)

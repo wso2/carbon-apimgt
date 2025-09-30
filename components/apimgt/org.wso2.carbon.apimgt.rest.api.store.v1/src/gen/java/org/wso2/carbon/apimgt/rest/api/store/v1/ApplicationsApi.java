@@ -564,7 +564,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         })
     }, tags={ "Application Secrets",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Consumer secret is generated. ", response = ConsumerSecretResponseDTO.class),
+        @ApiResponse(code = 201, message = "Created. Consumer secret is generated. ", response = ConsumerSecretResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })

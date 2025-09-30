@@ -3235,13 +3235,22 @@ paths:
         Generate a New Consumer Secret
       description: |
         This operation can be used to generate a new consumer secret for an application for the give key type
+      operationId: generateConsumerSecret
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyMappingId'
+      requestBody:
+        description: |
+          Request payload containing details for creating a new consumer secret
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsumerSecretCreationRequest'
+        required: true
       responses:
-        200:
+        201:
           description: |
-            OK.
+            Created.
             Consumer secret is generated.
           headers:
             ETag:
@@ -3264,7 +3273,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApplicationKeyReGenerateResponse'
+                $ref: '#/components/schemas/ConsumerSecretResponse'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -3286,6 +3295,7 @@ paths:
         Retrieve Consumer Secrets
       description: |
         This operation can be used to retrieve consumer secrets of an application for the give key type
+      operationId: getConsumerSecrets
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyMappingId'
@@ -3315,7 +3325,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApplicationKeyReGenerateResponse'
+                $ref: '#/components/schemas/ConsumerSecretList'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -3338,9 +3348,11 @@ paths:
         Retrieve a Consumer Secrets
       description: |
         This operation can be used to retrieve a consumer secret of an application for the give key type
+      operationId: getConsumerSecret
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyMappingId'
+        - $ref: '#/components/parameters/secretId'
       responses:
         200:
           description: |
@@ -3367,7 +3379,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApplicationKeyReGenerateResponse'
+                $ref: '#/components/schemas/ConsumerSecretResponse'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -3389,9 +3401,11 @@ paths:
         Delete a Consumer Secret
       description: |
         This operation can be used to delete a consumer secret for an application for the give key type
+      operationId: deleteConsumerSecret
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyMappingId'
+        - $ref: '#/components/parameters/secretId'
       responses:
         204:
           description: |
@@ -4839,7 +4853,7 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/me/organization"'
-          
+
   ######################################################
   # The "Marketplace Assistant Feature" resource APIs
   ######################################################
@@ -7464,6 +7478,58 @@ components:
           description: |
             Category of the comment
           example: general
+    #-----------------------------------------------------
+    # Consumer Secret Object
+    #-----------------------------------------------------
+    ConsumerSecretResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the secret
+          example: sec_123456
+        description:
+          type: string
+          description: Human-readable label for the secret
+          example: pizza application secret
+        consumer_secret:
+          type: string
+          description: The actual secret string
+          example: s3cr3tV@lu3
+        consumer_secret_expires_at:
+          type: integer
+          format: int64
+          description: expiry timestamp in seconds since epoch
+          example: 1755756933
+    #-----------------------------------------------------
+    # Consumer Secret Request Object
+    #-----------------------------------------------------
+    ConsumerSecretCreationRequest:
+      type: object
+      properties:
+        expires_in:
+          type: integer
+          description: Expiry time in seconds
+          example: 86400
+        description:
+          type: string
+          description: A human-readable label for this secret
+          example: pizza application secret
+    #-----------------------------------------------------
+    # Consumer Secret List Object
+    #-----------------------------------------------------
+    ConsumerSecretList:
+      title: Client Secret List
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of consumer secrets returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsumerSecretResponse'
 
   responses:
     BadRequest:
@@ -7679,6 +7745,14 @@ components:
       in: path
       description: |
         OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping.
+      required: true
+      schema:
+        type: string
+    secretId:
+      name: secretId
+      in: path
+      description: |
+        Unique identifier of the secret
       required: true
       schema:
         type: string

@@ -25,10 +25,10 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretInfo;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretRequest;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 
 import java.util.Arrays;
@@ -145,5 +145,23 @@ public class ApplicationKeyMappingUtil {
         apiKeyDto.setApikey(apiKey);
         apiKeyDto.setValidityTime(validityTime);
         return apiKeyDto;
+    }
+
+    public static ConsumerSecretRequest fromDTOtoConsumerSecretRequest(String clientId,
+                                                                       ConsumerSecretCreationRequestDTO consumerSecretCreationRequestDTO) {
+        ConsumerSecretRequest consumerSecretRequest = new ConsumerSecretRequest();
+        consumerSecretRequest.setClientId(clientId);
+        consumerSecretRequest.setDescription(consumerSecretCreationRequestDTO.getDescription());
+        consumerSecretRequest.setExpiresIn(consumerSecretCreationRequestDTO.getExpiresIn());
+        return consumerSecretRequest;
+    }
+
+    public static ConsumerSecretResponseDTO fromConsumerSecretToDTO(ConsumerSecretInfo consumerSecret) {
+        ConsumerSecretResponseDTO consumerSecretResponseDTO = new ConsumerSecretResponseDTO();
+        consumerSecretResponseDTO.setId(consumerSecret.getId());
+        consumerSecretResponseDTO.setDescription(consumerSecret.getDescription());
+        consumerSecretResponseDTO.setConsumerSecret(consumerSecret.getClientSecret());
+        consumerSecretResponseDTO.setConsumerSecretExpiresAt(consumerSecret.getClientSecretExpiresAt());
+        return consumerSecretResponseDTO;
     }
 }

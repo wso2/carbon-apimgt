@@ -39,16 +39,7 @@ import org.json.JSONObject;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.dto.RevokeTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.impl.dto.UserInfoDTO;
@@ -61,6 +52,8 @@ import org.wso2.carbon.apimgt.impl.kmclient.model.AuthClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.Claim;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ClaimsList;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ClientInfo;
+import org.wso2.carbon.apimgt.impl.kmclient.model.ClientSecret;
+import org.wso2.carbon.apimgt.impl.kmclient.model.ClientSecretRequest;
 import org.wso2.carbon.apimgt.impl.kmclient.model.DCRClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectionClient;
@@ -631,6 +624,31 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     @Override
+    public ConsumerSecretInfo generateNewApplicationConsumerSecret(ConsumerSecretRequest consumerSecretRequest) throws APIManagementException {
+
+        ClientSecret clientSecret = null;
+        String encodedClientId = Base64.getUrlEncoder()
+                .encodeToString(consumerSecretRequest.getClientId().getBytes(StandardCharsets.UTF_8));
+        ClientSecretRequest clientSecretRequest = new ClientSecretRequest();
+        clientSecretRequest.setDescription(consumerSecretRequest.getDescription());
+        clientSecretRequest.setExpiresIn(consumerSecretRequest.getExpiresIn());
+        try {
+            clientSecret = dcrClient.generateNewApplicationSecret(encodedClientId, clientSecretRequest);
+        } catch (KeyManagerClientException e) {
+            handleException("Error while generating new consumer secret", e);
+        }
+        if (clientSecret == null) {
+            return null;
+        }
+        ConsumerSecretInfo clientSecretInfo = new ConsumerSecretInfo();
+        clientSecretInfo.setId(clientSecret.getId());
+        clientSecretInfo.setDescription(clientSecret.getDescription());
+        clientSecretInfo.setClientSecret(clientSecret.getClientSecret());
+        clientSecretInfo.setClientSecretExpiresAt(clientSecret.getClientSecretExpiresAt());
+        return clientSecretInfo;
+    }
+
+    @Override
     public AccessTokenInfo getTokenMetaData(String accessToken) throws APIManagementException {
 
         AccessTokenInfo tokenInfo = new AccessTokenInfo();
@@ -686,7 +704,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      *
      * @param appInfoRequest oAuth application properties will contain in this object
      * @return OAuthApplicationInfo with created oAuth application details.
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     @Override
     public OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest appInfoRequest)

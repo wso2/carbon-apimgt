@@ -43,6 +43,8 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretInfo;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -76,6 +78,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequ
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretCreationRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
@@ -1248,10 +1251,35 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response generateConsumerSecret(String applicationId, String keyType,
+    public Response generateConsumerSecret(String applicationId, String keyMappingId,
                                            ConsumerSecretCreationRequestDTO consumerSecretCreationRequestDTO,
-                                           MessageContext messageContext) {
-        return Response.status(Response.Status.METHOD_NOT_ALLOWED).entity("Not Implemented").build();
+                                           MessageContext messageContext) throws APIManagementException {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
+        if (applicationKeys == null) {
+            return null;
+        }
+        ApplicationKeyDTO applicationKeyDTO = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
+        if (applicationKeyDTO != null) {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            String clientId = applicationKeyDTO.getConsumerKey();
+            ConsumerSecretRequest consumerSecretRequest = ApplicationKeyMappingUtil.
+                    fromDTOtoConsumerSecretRequest(clientId, consumerSecretCreationRequestDTO);
+            ConsumerSecretInfo consumerSecret = apiConsumer.generateConsumerSecret(clientId,
+                    applicationKeyDTO.getKeyManager(), consumerSecretRequest);
+            ConsumerSecretResponseDTO consumerSecretResponseDTO = ApplicationKeyMappingUtil.
+                    fromConsumerSecretToDTO(consumerSecret);
+
+            try {
+                //to be set as the Location header
+                URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" + applicationId +
+                         "/oauth-keys/" + keyMappingId + "/secrets/" + consumerSecretResponseDTO.getId());
+                return Response.created(location).entity(consumerSecretResponseDTO).build();
+            } catch (URISyntaxException e) {
+                RestApiUtil.handleInternalServerError(e.getLocalizedMessage(), log);
+            }
+        }
+        return null;
     }
 
     @Override
