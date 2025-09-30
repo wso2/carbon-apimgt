@@ -106,6 +106,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -181,13 +182,17 @@ public class APIAdminImpl implements APIAdmin {
             if (env == null) {
                 //try decoding the UUID and search again
                 try {
-                    String decodedEnvId = new String(Base64.getDecoder().decode(uuid));
+                    String decodedEnvId = new String(Base64.getDecoder().decode(uuid), StandardCharsets.UTF_8);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Attempting to retrieve environment with decoded UUID: " + decodedEnvId);
+                    }
                     env = APIUtil.getReadOnlyEnvironments().get(decodedEnvId);
                     if (env == null) {
                         env = apiMgtDAO.getEnvironment(tenantDomain, decodedEnvId);
                         if (env == null) {
-                            String errorMessage = String.format("Failed to retrieve Environment with UUID %s." +
+                            String errorMessage = String.format("Failed to retrieve Environment with plain text UUID %s." +
                                     " Environment not found", uuid);
+                            log.error(errorMessage);
                             throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
                                     ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid))
                             );
