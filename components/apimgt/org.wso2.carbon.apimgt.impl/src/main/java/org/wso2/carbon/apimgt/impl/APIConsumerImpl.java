@@ -2467,6 +2467,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 throw new APIManagementException("user: " + application.getSubscriber().getName() + ", " +
                         "attempted to generate tokens for application owned by: " + userId);
             }
+            if (APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(application.getStatus())
+                    || APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(application.getStatus())) {
+                throw new APIManagementException("Cannot generate tokens for applications that are not yet approved.",
+                        APPLICATION_INACTIVE);
+            }
 
             // if its a PRODUCTION application.
             if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
@@ -2967,6 +2972,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             if (!orgWideAppUpdateEnabled && !isUserAppOwner) {
                 throw new APIManagementException("user: " + userId + ", attempted to update OAuth application " +
                         "owned by: " + subscriberName);
+            }
+            if (APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(application.getStatus())
+                    || APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(application.getStatus())) {
+                throw new APIManagementException("Cannot update OAuth applications that are not yet approved.",
+                        APPLICATION_INACTIVE);
             }
             String keyManagerName;
             KeyManagerConfigurationDTO keyManagerConfiguration =

@@ -865,6 +865,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
                 if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+                    if (APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(application.getStatus())
+                            || APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(application.getStatus())) {
+                        RestApiUtil.handleBadRequest(
+                                "Cannot generate keys for applications that are not yet approved.", log);
+                    }
                     String[] accessAllowDomainsArray = {"ALL"};
                     JSONObject jsonParamObj = new JSONObject();
                     jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
