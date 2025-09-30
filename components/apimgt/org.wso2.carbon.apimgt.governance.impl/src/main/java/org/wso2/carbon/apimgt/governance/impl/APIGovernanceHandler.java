@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -218,6 +219,10 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
             throws APIMGovernanceException {
 
         String lcStatus = getAPIStatus(apiId);
+        // If the lifecycle status is null or empty, return false
+        if (!APIStatus.contains(lcStatus)) {
+            return false;
+        }
         boolean isDeployed = isAPIDeployed(apiId);
 
         // If API is in any state we need to run created and update policies

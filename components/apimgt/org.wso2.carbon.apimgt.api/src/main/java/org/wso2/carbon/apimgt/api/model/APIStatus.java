@@ -37,4 +37,14 @@ public enum APIStatus {
     public String getStatus() {
         return status;
     }
+
+    public static boolean contains(String status) {
+        if (status == null) return false;
+        for (APIStatus s : values()) {
+            if (s.getStatus().equalsIgnoreCase(status.trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
