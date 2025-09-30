@@ -2920,6 +2920,10 @@ public class OAS3Parser extends APIDefinition {
                     param = resolveComponentRef(param.get$ref(), openAPI, new HashSet<>(), Parameter.class);
                 }
 
+                if (param == null) {
+                    continue;
+                }
+
                 String name = param.getIn() + "_" + param.getName();
                 Map<String, Object> paramSchema = new LinkedHashMap<>();
                 Schema<?> schema = resolveSchema(param.getSchema(), openAPI);
@@ -2963,16 +2967,18 @@ public class OAS3Parser extends APIDefinition {
                 requestBodyNode.put(APISpecParserConstants.TYPE, APISpecParserConstants.OBJECT);
                 requestBodyNode.put(APISpecParserConstants.CONTENT_TYPE, APPLICATION_JSON_MEDIA_TYPE);
 
-                if (bodySchema.getProperties() != null) {
-                    requestBodyNode.put(APISpecParserConstants.PROPERTIES, bodySchema.getProperties());
+                if (bodySchema != null) {
+                    if (bodySchema.getProperties() != null) {
+                        requestBodyNode.put(APISpecParserConstants.PROPERTIES, bodySchema.getProperties());
+                    }
+                    if (bodySchema.getRequired() != null) {
+                        requestBodyNode.put(APISpecParserConstants.REQUIRED, bodySchema.getRequired());
+                    }
                 }
-
-                if (bodySchema.getRequired() != null) {
-                    requestBodyNode.put(APISpecParserConstants.REQUIRED, bodySchema.getRequired());
-                }
-
                 props.put(APISpecParserConstants.REQUEST_BODY, requestBodyNode);
-                requiredFields.add(APISpecParserConstants.REQUEST_BODY);
+                if (Boolean.TRUE.equals(requestBody.getRequired())) {
+                    requiredFields.add(APISpecParserConstants.REQUEST_BODY);
+                }
             }
         }
         root.put(APISpecParserConstants.PROPERTIES, props);
@@ -3011,7 +3017,9 @@ public class OAS3Parser extends APIDefinition {
         if (schema.get$ref() != null) {
             schema = resolveComponentRef(schema.get$ref(), openAPI, visitedRefs, Schema.class);
         }
-
+        if (schema == null) {
+            return null;
+        }
         // Resolve allOf
         if (schema.getAllOf() != null && !schema.getAllOf().isEmpty()) {
             Schema<?> merged = new ObjectSchema();
@@ -3087,7 +3095,7 @@ public class OAS3Parser extends APIDefinition {
             return null;
         }
         String category = parts[2];
-        String name = parts[3];
+        String name = parts[3].replace("~1", "/").replace("~0", "~"); // JSON Pointer unescape
         String refKey = category + ":" + name;
         if (visitedRefs.contains(refKey)) {
             if (log.isDebugEnabled()) {
@@ -3097,15 +3105,21 @@ public class OAS3Parser extends APIDefinition {
         }
         visitedRefs.add(refKey);
         Object resolved = null;
+        if (openAPI == null || openAPI.getComponents() == null) {
+            return null;
+        }
         switch (category) {
             case APISpecParserConstants.SCHEMAS:
-                resolved = openAPI.getComponents().getSchemas().get(name);
+                resolved = openAPI.getComponents().getSchemas() != null ?
+                        openAPI.getComponents().getSchemas().get(name) : null;
                 break;
             case APISpecParserConstants.REQUEST_BODIES:
-                resolved = openAPI.getComponents().getRequestBodies().get(name);
+                resolved = openAPI.getComponents().getRequestBodies() != null ?
+                        openAPI.getComponents().getRequestBodies().get(name) : null;
                 break;
             case APISpecParserConstants.PARAMETERS:
-                resolved = openAPI.getComponents().getParameters().get(name);
+                resolved = openAPI.getComponents().getParameters() != null ?
+                        openAPI.getComponents().getParameters().get(name) : null;
                 break;
             default:
                 return null;
@@ -3118,7 +3132,7 @@ public class OAS3Parser extends APIDefinition {
         } else if (resolved instanceof Parameter && ((Parameter) resolved).get$ref() != null) {
             return (T) resolveComponentRef(((Parameter) resolved).get$ref(), openAPI, visitedRefs, expectedType);
         }
-        return expectedType.cast(resolved);
+        return expectedType.isInstance(resolved) ? expectedType.cast(resolved) : null;
     }
 
     /**
