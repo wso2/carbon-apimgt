@@ -915,12 +915,13 @@ public class ApisApiServiceImplUtils {
     private static Set<URITemplate> populateURITemplatesWithTools(Set<URITemplate> uriTemplates,
                                                                   Map<String, String> schemaByToolName,
                                                                   Map<String, String> descriptionByToolName,
-                                                                  String backendId) {
+                                                                  String backendId) throws APIManagementException {
 
         if (uriTemplates == null || uriTemplates.isEmpty()) {
             return Collections.emptySet();
         }
 
+        Set<String> tools = new LinkedHashSet<>();
         Set<URITemplate> matchedTemplates = new LinkedHashSet<>();
         for (URITemplate uriTemplate : uriTemplates) {
             if (uriTemplate == null) {
@@ -956,6 +957,11 @@ public class ApisApiServiceImplUtils {
                 uriTemplate.setSchemaDefinition(toolSchema);
             }
             backendMapping.setBackendId(backendId);
+            if (!tools.add(uriTemplate.getUriTemplate())) {
+                log.error("Duplicate MCP tool detected: " + uriTemplate.getUriTemplate());
+                throw new APIManagementException("Tool " + uriTemplate.getUriTemplate() + " is repeated",
+                        ExceptionCodes.DUPLICATE_MCP_TOOLS);
+            }
             matchedTemplates.add(uriTemplate);
         }
         return matchedTemplates;

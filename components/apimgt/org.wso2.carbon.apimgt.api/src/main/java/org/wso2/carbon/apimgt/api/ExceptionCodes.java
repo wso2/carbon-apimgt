@@ -850,8 +850,10 @@ public enum ExceptionCodes implements ErrorHandler {
             "Updating the MCP Server is restricted as as it is %s."),
     INVALID_MCP_SERVER_ID(904011, "Invalid MCP Server ID", 404,
             "The provided MCP SERVER ID is not found %s", false),
-    INVALID_REFERENCE_API(900806, "Invalid reference API", 400,
+    INVALID_REFERENCE_API(904012, "Invalid reference API", 400,
             "Referenced API is not supported for MCP Server."),
+    DUPLICATE_MCP_TOOLS(904013, "Duplicate MCP tools", 400,
+            "One or more MCP tools are duplicated."),
 
     // gateway notification related codes
     GATEWAY_NOTIFICATION_BAD_REQUEST(902052, "Invalid request for gateway notification", 400,
