@@ -1050,6 +1050,36 @@ public class APIMappingUtil {
     }
 
     /**
+     * Converts a List of APIOperationsDTO into URITemplates.
+     *
+     * @param operations list of APIOperationsDTO
+     * @return List of URITemplate objects
+     */
+    public static Set<URITemplate> fromOperationListToURITemplateList(List<APIOperationsDTO> operations) {
+
+        Set<URITemplate> uriTemplateList = new HashSet<>();
+        for (APIOperationsDTO operation : operations) {
+            URITemplate template = fromOperationToURITemplate(operation);
+            uriTemplateList.add(template);
+        }
+        return uriTemplateList;
+    }
+
+    /**
+     * Converts a single APIOperationsDTO to URITemplate.
+     *
+     * @param operation APIOperationsDTO
+     * @return URITemplate object
+     */
+    private static URITemplate fromOperationToURITemplate(APIOperationsDTO operation) {
+
+        URITemplate template = new URITemplate();
+        template.setHTTPVerb(operation.getVerb());
+        template.setUriTemplate(operation.getTarget());
+        return template;
+    }
+
+    /**
      * Creates a minimal DTO representation of an API object.
      *
      * @param api API object

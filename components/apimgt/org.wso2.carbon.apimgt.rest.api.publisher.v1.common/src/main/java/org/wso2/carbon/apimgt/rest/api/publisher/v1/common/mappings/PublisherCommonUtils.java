@@ -169,6 +169,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.AI_API_QUOTA_TYPE;
 import static org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.EVENT_COUNT_TYPE;
@@ -739,6 +740,23 @@ public class PublisherCommonUtils {
                             + " because they are used by one or more API Products", ExceptionCodes
                     .from(ExceptionCodes.API_PRODUCT_USED_RESOURCES, originalAPI.getId().getApiName(),
                             originalAPI.getId().getVersion()));
+        }
+
+        List<API> usedMcpServers =
+                apiProvider.getMCPServersUsedByAPI(originalAPI.getUuid(), originalAPI.getOrganization());
+        if (!usedMcpServers.isEmpty()) {
+            List<APIOperationsDTO> updatedOperations = apiDtoToUpdate.getOperations();
+            if (updatedOperations != null && !updatedOperations.isEmpty()) {
+                List<URITemplate> removedResources = getRemovedResources(
+                        APIMappingUtil.fromOperationListToURITemplateList(updatedOperations),
+                        originalAPI.getUriTemplates());
+                if (!removedResources.isEmpty()) {
+                    log.error("Cannot update API with removed resources when MCP servers are in use. API: "
+                            + originalAPI.getId().getUUID());
+                    throw new APIManagementException(
+                            ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_MCP_USAGE));
+                }
+            }
         }
 
         // Validate API Security
@@ -2010,6 +2028,31 @@ public class PublisherCommonUtils {
     }
 
     /**
+     * Finds resources that have been removed in the updated API compared to the existing API.
+     *
+     * @param updatedUriTemplates   Updated API URI templates
+     * @param existingUriTemplates  Existing API URI templates
+     * @return List of removed resources
+     */
+    public static List<URITemplate> getRemovedResources(Set<URITemplate> updatedUriTemplates,
+                                                        Set<URITemplate> existingUriTemplates) {
+
+        List<URITemplate> removedResources = new ArrayList<>();
+
+        Set<String> updatedOps = updatedUriTemplates.stream()
+                .map(op -> op.getHTTPVerb() + ":" + op.getUriTemplate())
+                .collect(Collectors.toSet());
+
+        for (URITemplate existingTemplate : existingUriTemplates) {
+            String identifier = existingTemplate.getHTTPVerb() + ":" + existingTemplate.getUriTemplate();
+            if (!updatedOps.contains(identifier)) {
+                removedResources.add(existingTemplate);
+            }
+        }
+        return removedResources;
+    }
+
+    /**
      * To validate the roles against user roles and tenant roles.
      *
      * @param inputRoles Input roles.
@@ -3210,6 +3253,17 @@ public class PublisherCommonUtils {
                             + " because they are used by one or more API Products", ExceptionCodes
                     .from(ExceptionCodes.API_PRODUCT_USED_RESOURCES, existingAPI.getId().getApiName(),
                             existingAPI.getId().getVersion()));
+        }
+
+        List<API> usedMcpServers = apiProvider.getMCPServersUsedByAPI(apiId, organization);
+        if (usedMcpServers != null && !usedMcpServers.isEmpty()) {
+            List<URITemplate> removedResources = getRemovedResources(uriTemplates, existingAPI.getUriTemplates());
+            if (!removedResources.isEmpty()) {
+                log.error("Cannot update API with removed resources when MCP servers are in use. API: "
+                        + existingAPI.getId().getUUID());
+                throw new APIManagementException(
+                        ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_MCP_USAGE));
+            }
         }
 
         //set existing operation policies to URI templates
