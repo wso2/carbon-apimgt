@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.common.analytics.Constants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -110,6 +111,8 @@ public class AnalyticsDataPublisher {
         List<String> reporterClasses = getReportersClassesOrNull(configs);
         try {
             List<MetricReporter> metricReporters = new ArrayList<>();
+            // Ensure uniqueness: one instance per concrete MetricReporter class
+            Map<String, MetricReporter> unique = new LinkedHashMap<>();
             MetricReporter metricReporter;
             if (reporterClass != null) {
                 metricReporter = MetricReporterFactory.getInstance()
@@ -120,7 +123,7 @@ public class AnalyticsDataPublisher {
                     try {
                         metricReporter = MetricReporterFactory.getInstance()
                                 .createMetricReporter(reporterClassName, configs);
-                        metricReporters.add(metricReporter);
+                        putIfAbsentByClass(unique, metricReporter);
                     } catch (MetricCreationException e) {
                         log.error("Error while creating reporter " + reporterClassName +
                                 " out of multiple metric reporters.", e);
@@ -134,14 +137,14 @@ public class AnalyticsDataPublisher {
                             throw new MetricCreationException("Analytics Config Endpoint is not provided.");
                         }
                         metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configs);
-                        metricReporters.add(metricReporter);
+                        putIfAbsentByClass(unique, metricReporter);
                     } else if (type.equals(Constants.MOESIF_REPORTER_NAME)) {
                         log.info("Initializing Moesif metric reporter");
                         metricReporter = MetricReporterFactory.getInstance().createMoesifMetricReporter(configs);
-                        metricReporters.add(metricReporter);
+                        putIfAbsentByClass(unique, metricReporter);
                     } else {
                         metricReporter = MetricReporterFactory.getInstance().createLogMetricReporter(configs);
-                        metricReporters.add(metricReporter);
+                        putIfAbsentByClass(unique, metricReporter);
                     }
 
                 }
@@ -153,9 +156,10 @@ public class AnalyticsDataPublisher {
                 }
 
                 metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configs);
-                metricReporters.add(metricReporter);
+                putIfAbsentByClass(unique, metricReporter);
             }
 
+            metricReporters.addAll(unique.values());
             if (!StringUtils.isEmpty(commonConfig.getResponseSchema())) {
 
                 this.successMetricReporters =
@@ -198,5 +202,11 @@ public class AnalyticsDataPublisher {
             throw new MetricCreationException("None of AnalyticsDataPublishers are initialized.");
         }
         return faultyMetricReporters;
+    }
+
+    /** De-dupe helper: only one instance per concrete class. */
+    private static void putIfAbsentByClass(Map<String, MetricReporter> unique, MetricReporter reporter) {
+        String key = reporter.getClass().getName();
+        unique.putIfAbsent(key, reporter);
     }
 }
