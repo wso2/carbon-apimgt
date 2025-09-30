@@ -684,10 +684,10 @@ public class APIMappingUtil {
             } else {
                 String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(apidto.getId(),
                         environment.getUuid());
-                String httpUrl = gatewayDeployer != null ?
+                String httpUrl = (gatewayDeployer != null && externalReference != null) ?
                         gatewayDeployer.getAPIExecutionURL(externalReference, GatewayDeployer.HttpScheme.HTTP) :
                         vHost.getHttpUrl();
-                String httpsUrl = gatewayDeployer != null ?
+                String httpsUrl = (gatewayDeployer != null && externalReference != null) ?
                         gatewayDeployer.getAPIExecutionURL(externalReference, GatewayDeployer.HttpScheme.HTTPS) :
                         vHost.getHttpsUrl();
                 if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {

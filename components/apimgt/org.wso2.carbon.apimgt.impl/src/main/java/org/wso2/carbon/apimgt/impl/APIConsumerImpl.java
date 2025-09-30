@@ -3757,8 +3757,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
             boolean isExternalGateway = false;
             GatewayDeployer gatewayDeployer = null;
-            if (gatewayConfiguration != null && StringUtils.isNotEmpty(
-                    gatewayConfiguration.getDiscoveryImplementation()) && api.isInitiatedFromGateway()) {
+            if (api.isInitiatedFromGateway()) {
                 Map<String, String> extractedURLs = extractEndpointUrlsForDiscoveredApi(api);
                 if (extractedURLs == null) {
                     if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)) {
@@ -3778,10 +3777,10 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 }
                 String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(),
                         environment.getUuid());
-                String httpUrl = isExternalGateway && gatewayDeployer != null ?
+                String httpUrl = (isExternalGateway && gatewayDeployer != null && externalReference != null) ?
                         gatewayDeployer.getAPIExecutionURL(externalReference, GatewayDeployer.HttpScheme.HTTP) :
                         vhost.getHttpUrl();
-                String httpsUrl = isExternalGateway && gatewayDeployer != null?
+                String httpsUrl = (isExternalGateway && gatewayDeployer != null && externalReference != null) ?
                         gatewayDeployer.getAPIExecutionURL(externalReference, GatewayDeployer.HttpScheme.HTTPS) :
                         vhost.getHttpsUrl();
                 if (StringUtils.containsIgnoreCase(api.getTransports(),
