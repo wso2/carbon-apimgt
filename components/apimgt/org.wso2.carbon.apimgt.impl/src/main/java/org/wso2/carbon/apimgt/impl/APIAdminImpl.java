@@ -109,6 +109,7 @@ import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -173,18 +174,35 @@ public class APIAdminImpl implements APIAdmin {
     public Environment getEnvironment(String tenantDomain, String uuid) throws APIManagementException {
         // priority for configured environments over dynamic environments
         // name is the UUID of environments configured in api-manager.xml
+        // for backward compatibility, support both plain text and base64 encoded UUIDs
         Environment env = APIUtil.getReadOnlyEnvironments().get(uuid);
         if (env == null) {
             env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
             if (env == null) {
-                String errorMessage = String.format("Failed to retrieve Environment with UUID %s." +
-                                " Environment not found", uuid);
-                throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
-                        ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid))
-                );
+                //try decoding the UUID and search again
+                try {
+                    String decodedEnvId = new String(Base64.getDecoder().decode(uuid));
+                    env = APIUtil.getReadOnlyEnvironments().get(decodedEnvId);
+                    if (env == null) {
+                        env = apiMgtDAO.getEnvironment(tenantDomain, decodedEnvId);
+                        if (env == null) {
+                            String errorMessage = String.format("Failed to retrieve Environment with UUID %s." +
+                                    " Environment not found", uuid);
+                            throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
+                                    ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid))
+                            );
+                        }
+                    }
+                } catch (IllegalArgumentException e) {
+                    //This catches errors if the string is not valid Base64
+                    if (log.isDebugEnabled()) {
+                        log.debug("Provided env UUID: " + uuid + " is not a valid Base64 encoded string. " +
+                                "Hence not decoding.", e);
+                    }
+                }
             }
         }
-        if (env.getProvider().equalsIgnoreCase(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+        if (env != null && env.getProvider().equalsIgnoreCase(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
             maskValues(env);
         }
         return env;
