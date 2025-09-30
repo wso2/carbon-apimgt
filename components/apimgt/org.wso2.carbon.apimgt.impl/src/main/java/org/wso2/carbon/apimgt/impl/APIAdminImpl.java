@@ -200,14 +200,17 @@ public class APIAdminImpl implements APIAdmin {
                     }
                 } catch (IllegalArgumentException e) {
                     //This catches errors if the string is not valid Base64
+                    String errorMessage = String.format("Provided env UUID: %s is not a valid Base64 encoded string. " +
+                            "Environment not found.", uuid);
                     if (log.isDebugEnabled()) {
-                        log.debug("Provided env UUID: " + uuid + " is not a valid Base64 encoded string. " +
-                                "Hence not decoding.", e);
+                        log.debug(errorMessage, e);
                     }
+                    throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
+                            ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid)));
                 }
             }
         }
-        if (env != null && env.getProvider().equalsIgnoreCase(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+        if (env.getProvider().equalsIgnoreCase(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
             maskValues(env);
         }
         return env;
