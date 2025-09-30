@@ -179,9 +179,7 @@ public class APIKeyValidator {
                     }
                     long timestampSkew = getTimeStampSkewInSeconds() * 1000;
                     ExtendedJWTConfigurationDto jwtConfigurationDto =
-                            org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder.getInstance()
-                                    .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                                    .getJwtConfigurationDto();
+                            getApiManagerConfiguration().getJwtConfigurationDto();
                     valid = JWTUtil.isJWTValid(
                             info.getEndUserToken(), jwtConfigurationDto.getJwtDecoding(), timestampSkew);
                     if (valid) {
