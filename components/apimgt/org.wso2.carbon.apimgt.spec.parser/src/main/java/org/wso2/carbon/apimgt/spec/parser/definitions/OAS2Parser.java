@@ -2588,10 +2588,18 @@ public class OAS2Parser extends APIDefinition {
             for (Parameter param : parameters) {
                 // Resolve $ref in parameter if present
                 if (param instanceof RefParameter) {
-                    param = resolveComponentRef(((RefParameter) param).getSimpleRef(), swagger, new HashSet<>(), Parameter.class);
+                    Parameter resolved =
+                            resolveComponentRef(((RefParameter) param).getSimpleRef(), swagger, new HashSet<>(),
+                                    Parameter.class);
+                    if (resolved != null) {
+                        param = resolved;
+                    }
                 }
 
                 if (param instanceof BodyParameter) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Processing BodyParameter: " + param.getName());
+                    }
                     BodyParameter bodyParam = (BodyParameter) param;
                     Model rawModel = bodyParam.getSchema();
                     Model resolvedModel = resolveModel(rawModel, swagger);
@@ -2772,11 +2780,16 @@ public class OAS2Parser extends APIDefinition {
     @SuppressWarnings("unchecked")
     private <T> T resolveComponentRef(String ref, Swagger swagger, Set<String> visitedRefs, Class<T> expectedType) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Resolving component reference:" + ref + " of type: " + expectedType.getSimpleName());
+        }
         if (ref == null) {
             return null;
         }
         if (visitedRefs.contains(ref)) {
-            log.warn("Circular reference detected: " + ref);
+            if (log.isDebugEnabled()) {
+                log.debug("Circular reference detected: " + ref);
+            }
             return null;
         }
         visitedRefs.add(ref);
@@ -2790,7 +2803,10 @@ public class OAS2Parser extends APIDefinition {
         if (resolved == null && swagger.getResponses() != null && swagger.getResponses().containsKey(ref)) {
             resolved = swagger.getResponses().get(ref);
         }
-        if (resolved == null) return null;
+        if (resolved == null) {
+            log.warn("Component not found in reference: " + ref);
+            return null;
+        }
         if (resolved instanceof RefModel) {
             return (T) resolveComponentRef(((RefModel) resolved).getSimpleRef(), swagger, visitedRefs, expectedType);
         } else if (resolved instanceof RefParameter) {

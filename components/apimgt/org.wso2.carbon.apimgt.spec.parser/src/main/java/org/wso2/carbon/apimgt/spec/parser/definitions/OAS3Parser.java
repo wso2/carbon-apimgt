@@ -3087,11 +3087,16 @@ public class OAS3Parser extends APIDefinition {
     @SuppressWarnings("unchecked")
     private <T> T resolveComponentRef(String ref, OpenAPI openAPI, Set<String> visitedRefs, Class<T> expectedType) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Resolving component reference:" + ref + " of type: " + expectedType.getSimpleName());
+        }
         if (ref == null || !ref.startsWith("#/components/")) {
+            log.warn("Invalid component reference: " + ref);
             return null;
         }
         String[] parts = ref.split("/");
         if (parts.length < 4) {
+            log.warn("Malformed component reference: " + ref);
             return null;
         }
         String category = parts[2];
@@ -3124,7 +3129,10 @@ public class OAS3Parser extends APIDefinition {
             default:
                 return null;
         }
-        if (resolved == null) return null;
+        if (resolved == null) {
+            log.warn("Unknown component category: " + category + " in reference: " + ref);
+            return null;
+        }
         if (resolved instanceof Schema && ((Schema<?>) resolved).get$ref() != null) {
             return (T) resolveComponentRef(((Schema<?>) resolved).get$ref(), openAPI, visitedRefs, expectedType);
         } else if (resolved instanceof RequestBody && ((RequestBody) resolved).get$ref() != null) {
