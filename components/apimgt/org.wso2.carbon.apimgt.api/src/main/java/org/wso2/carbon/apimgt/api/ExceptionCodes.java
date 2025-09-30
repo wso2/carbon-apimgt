@@ -184,7 +184,7 @@ public enum ExceptionCodes implements ErrorHandler {
     WORKFLOW_ALREADY_COMPLETED(900552, "Workflow error", 400,
             "Workflow is already completed"),
     WORKFLOW_PENDING(900553, "Workflow exception", 409,
-            "Pending workflow task exists for the seleted API"),
+            "Pending workflow task exists for the selected API/Application"),
     WORKFLOW_INVALID_WFTYPE(900554, "Workflow error", 500, "Invalid workflow type specified"),
     WORKFLOW_INV_STORE_WFTYPE(900555, "Workflow error", 500, "Invalid workflow type for store workflows"),
     WORKFLOW_STATE_MISSING(900556, "Workflow error", 400, "Workflow status is not defined"),

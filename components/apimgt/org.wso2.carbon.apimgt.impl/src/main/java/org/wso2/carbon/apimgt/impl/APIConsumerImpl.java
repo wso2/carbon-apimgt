@@ -180,6 +180,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.cache.Cache;
 
+import static org.wso2.carbon.apimgt.api.ExceptionCodes.APPLICATION_INACTIVE;
+import static org.wso2.carbon.apimgt.api.ExceptionCodes.WORKFLOW_PENDING;
+
 /**
  * This class provides the core API store functionality. It is implemented in a very
  * self-contained and 'pure' manner, without taking requirements like security into account,
@@ -1788,10 +1791,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         if (existingApp != null && (APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(existingApp.getStatus())
                 || APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(existingApp.getStatus()))) {
-            throw new APIManagementException("Applications that are not yet approved cannot be updated.");
+            throw new APIManagementException("Applications that are not yet approved cannot be updated.",
+                    APPLICATION_INACTIVE);
         }
         if (existingApp != null && APIConstants.ApplicationStatus.UPDATE_PENDING.equals(existingApp.getStatus())) {
-            throw new APIManagementException("Cannot update the application while an update is already PENDING");
+            throw new APIManagementException("Cannot update the application while an update is already PENDING",
+                    WORKFLOW_PENDING);
         }
         boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
