@@ -749,6 +749,8 @@ public class PublisherCommonUtils {
                     APIMappingUtil.fromOperationListToURITemplateList(apiDtoToUpdate.getOperations()),
                     originalAPI.getUriTemplates());
             if (!removedResources.isEmpty()) {
+                log.error("Cannot update API with removed resources when MCP servers are in use. API: "
+                        + originalAPI.getId().getUUID());
                 throw new APIManagementException(
                         ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_MCP_USAGE));
             }
@@ -3254,6 +3256,8 @@ public class PublisherCommonUtils {
         if (usedMcpServers != null && !usedMcpServers.isEmpty()) {
             List<URITemplate> removedResources = getRemovedResources(uriTemplates, existingAPI.getUriTemplates());
             if (!removedResources.isEmpty()) {
+                log.error("Cannot update API with removed resources when MCP servers are in use. API: "
+                        + existingAPI.getId().getUUID());
                 throw new APIManagementException(
                         ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_MCP_USAGE));
             }
