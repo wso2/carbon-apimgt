@@ -853,6 +853,10 @@ public class ImportUtils {
 
                     final String backendDefinition = backend.getDefinition();
 
+                    if (apiDtoTypeWrapper.getEndpointConfig() == null && endpointConfigMap != null) {
+                        apiDtoTypeWrapper.setEndpointConfig(endpointConfigMap);
+                    }
+
                     if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(subtype)) {
                         validationResponse = retrieveValidatedSwaggerDefinition(backendDefinition);
 
