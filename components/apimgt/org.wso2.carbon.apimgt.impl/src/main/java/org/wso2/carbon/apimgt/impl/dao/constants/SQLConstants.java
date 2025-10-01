@@ -2826,6 +2826,9 @@ public class SQLConstants {
     public static final String DELETE_API_EXTERNAL_API_MAPPINGS_SQL = "DELETE FROM AM_API_EXTERNAL_API_MAPPING WHERE " +
             "API_ID = ?";
 
+    public static final String CHECK_API_REVISION_DEPLOYMENTS_EXISTS_BY_GATEWAY_NAME_SQL = "SELECT COUNT(*) " +
+            "FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ?";
+
     public static final String ADD_GATEWAY_VISIBILITY_PERMISSION_SQL =
             " INSERT INTO" +
                     " AM_GATEWAY_PERMISSIONS (GATEWAY_UUID, PERMISSIONS_TYPE, ROLE)" +

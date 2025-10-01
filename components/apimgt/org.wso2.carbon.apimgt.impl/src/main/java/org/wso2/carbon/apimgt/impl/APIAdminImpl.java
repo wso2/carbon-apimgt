@@ -246,6 +246,16 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
+    public boolean hasExistingAPIRevisions(String tenantDomain, String uuid) throws APIManagementException {
+        Environment existingEnv = getEnvironment(tenantDomain, uuid);
+        if (existingEnv == null) {
+            throw new APIManagementException("Environment with UUID " + uuid + " not found", 
+                ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND);
+        }
+        return apiMgtDAO.hasExistingAPIRevisions(existingEnv.getName());
+    }
+
+    @Override
     public Environment updateEnvironment(String tenantDomain, Environment environment) throws APIManagementException {
         // check if the VHost exists in the tenant domain with given UUID, throw error if not found
         Environment existingEnv = getEnvironmentWithoutPropertyMasking(tenantDomain, environment.getUuid());

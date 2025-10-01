@@ -15989,6 +15989,28 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Check if there are any existing API revision deployments for the given gateway environment name.
+     *
+     * @param gatewayName name of the gateway environment
+     * @return true if there are existing API revision deployments, false otherwise
+     * @throws APIManagementException if a database access error occurs
+     */
+    public boolean hasExistingAPIRevisions(String gatewayName) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(
+                     SQLConstants.CHECK_API_REVISION_DEPLOYMENTS_EXISTS_BY_GATEWAY_NAME_SQL)) {
+            prepStmt.setString(1, gatewayName);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check existing API revisions for gateway: " + gatewayName, e);
+        }
+        return false;
+    }
+
+    /**
      * Update Gateway Environment
      *
      * @param environment Environment to be updated
