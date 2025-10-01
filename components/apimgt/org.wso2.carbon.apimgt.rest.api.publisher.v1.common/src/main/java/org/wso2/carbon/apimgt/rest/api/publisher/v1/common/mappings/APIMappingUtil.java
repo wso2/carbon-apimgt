@@ -226,7 +226,8 @@ public class APIMappingUtil {
         context = updateContextWithVersion(dto.getVersion(), originalContext, context);
         model.setContext(context);
         model.setDescription(dto.getDescription());
-        model.setDisplayName(dto.getDisplayName());
+        model.setDisplayName((dto.getDisplayName() != null && !dto.getDisplayName().trim().isEmpty())
+                ? dto.getDisplayName() : dto.getName());
 
         Object endpointConfig = dto.getEndpointConfig();
         if (endpointConfig != null) {
@@ -819,8 +820,10 @@ public class APIMappingUtil {
             model.getMetadata().put(APIConstants.MCP.PROTOCOL_VERSION_KEY, protocolVersion);
         }
         String displayName = dto.getDisplayName();
-        if (displayName != null && !displayName.isEmpty()) {
+        if (displayName != null && !displayName.trim().isEmpty()) {
             model.setDisplayName(displayName);
+        } else {
+            model.setDisplayName(dto.getName());
         }
 
         try {
@@ -1647,7 +1650,8 @@ public class APIMappingUtil {
         }
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
-        dto.setDisplayName(model.getDisplayName() != null ? model.getDisplayName() : model.getId().getApiName());
+        dto.setDisplayName((model.getDisplayName() != null && !model.getDisplayName().trim().isEmpty())
+                ? model.getDisplayName() : model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
         String providerName = model.getId().getProviderName();
         dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
@@ -3944,6 +3948,8 @@ public class APIMappingUtil {
         productDto.setName(product.getId().getName());
         productDto.setDisplayName(
                 product.getDisplayName() != null ? product.getDisplayName() : product.getId().getName());
+        productDto.setDisplayName((product.getDisplayName() != null && !product.getDisplayName().trim().isEmpty())
+                ? product.getDisplayName() : product.getId().getName());
         productDto.setProvider(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
         productDto.setId(product.getUuid());
         productDto.setVersion(product.getId().getVersion());
@@ -4209,7 +4215,8 @@ public class APIMappingUtil {
         product.setID(id);
         product.setUuid(dto.getId());
         product.setDescription(dto.getDescription());
-        product.setDisplayName(dto.getDisplayName() != null ? dto.getDisplayName() : dto.getName());
+        product.setDisplayName((dto.getDisplayName() != null && !dto.getDisplayName().trim().isEmpty())
+                ? dto.getDisplayName() : dto.getName());
 
         String context = dto.getContext();
         final String originalContext = context;

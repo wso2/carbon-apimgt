@@ -15682,7 +15682,7 @@ public class ApiMgtDAO {
                     }
                     int scheduledTime = rs.getInt("SCHEDULED_TIME");
                     if (rs.wasNull()) {
-                        scheduledTime = 60;
+                        scheduledTime = 0;
                     }
                     Map<String, String> additionalProperties = new HashMap();
                     try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
@@ -15746,7 +15746,7 @@ public class ApiMgtDAO {
                     }
                     int scheduledTime = rs.getInt("SCHEDULED_TIME");
                     if (rs.wasNull()) {
-                        scheduledTime = 60;
+                        scheduledTime = 0;
                     }
                     Map<String, String> additionalProperties = new HashMap();
                     try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
@@ -15807,8 +15807,11 @@ public class ApiMgtDAO {
                 String configurationJson = new Gson().toJson(environment.getAdditionalProperties());
                 prepStmt.setBinaryStream(8, new ByteArrayInputStream(configurationJson.getBytes()));
                 prepStmt.setString(9, tenantDomain);
-                prepStmt.setString(10, (StringUtils.isEmpty(environment.getMode()) ? GatewayMode.WRITE_ONLY.getMode() : environment.getMode()));
-                prepStmt.setInt(11, environment.getApiDiscoveryScheduledWindow());
+                prepStmt.setString(10, (StringUtils.isEmpty(environment.getMode()) ?
+                        GatewayMode.WRITE_ONLY.getMode() :
+                        environment.getMode()));
+                prepStmt.setInt(11, (StringUtils.isEmpty(environment.getMode()) || GatewayMode.WRITE_ONLY.getMode()
+                        .equals(environment.getMode())) ? 0 : environment.getApiDiscoveryScheduledWindow());
                 prepStmt.executeUpdate();
 
                 GatewayVisibilityPermissionConfigurationDTO permissionDTO = environment.getPermissions();

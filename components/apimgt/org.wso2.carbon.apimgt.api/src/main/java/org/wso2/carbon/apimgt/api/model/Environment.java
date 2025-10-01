@@ -53,7 +53,7 @@ public class Environment implements Serializable {
     private String description;
     private boolean isReadOnly;
     private String mode = GatewayMode.WRITE_ONLY.getMode();
-    private int apiDiscoveryScheduledWindow = 60;
+    private int apiDiscoveryScheduledWindow = 0;
     private List<VHost> vhosts = new ArrayList<>();
     private String provider;
     private String gatewayType;
