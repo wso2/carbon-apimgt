@@ -16007,7 +16007,10 @@ public class ApiMgtDAO {
                 stmt.setString(1, gatewayUuid);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next() && rs.getInt(1) > 0) {
-                        log.debug(String.format("Found existing external API mappings for gateway UUID: %s", gatewayUuid));
+                        if (log.isDebugEnabled()) {
+                            log.debug(String.format("Found existing external API mappings for gateway UUID: %s",
+                                    gatewayUuid));
+                        }
                         return true;
                     }
                 }
@@ -16020,7 +16023,10 @@ public class ApiMgtDAO {
                 prepStmt.setString(2, organization);
                 try (ResultSet rs = prepStmt.executeQuery()) {
                     if (rs.next() && rs.getInt(1) > 0) {
-                        log.debug(String.format("Found existing API revision deployments for gateway UUID: %s", gatewayUuid));
+                        if (log.isDebugEnabled()) {
+                            log.debug(String.format("Found existing API revision deployments for gateway UUID: %s",
+                                    gatewayUuid));
+                        }
                         return true;
                     }
                 }

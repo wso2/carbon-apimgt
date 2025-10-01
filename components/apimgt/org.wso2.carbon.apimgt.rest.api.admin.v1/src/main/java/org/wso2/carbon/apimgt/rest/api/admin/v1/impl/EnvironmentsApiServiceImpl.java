@@ -57,7 +57,6 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
                     + " as active gateway policy deployment exist", log);
         }
         if (apiAdmin.hasExistingAPIRevisionsOrExternalMappings(organization, environmentId)) {
-
             RestApiUtil.handleConflict("Cannot delete the environment with id: " + environmentId
                     + " as API revisions are deployed to it or external API mappings exist", log);
         }
