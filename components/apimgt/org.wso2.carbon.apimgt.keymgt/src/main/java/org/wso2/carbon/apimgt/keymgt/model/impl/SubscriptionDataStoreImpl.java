@@ -158,15 +158,45 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public ApplicationKeyMapping getKeyMappingByKeyAndKeyManager(String key, String keyManager,
                                                                  boolean validationDisabled) {
-        ApplicationKeyMapping applicationKeyMapping;
-        if (validationDisabled) {
-            try {
-                applicationKeyMapping = getKeyMappingByKeyAndKeyManager(key, keyManager);
-            } catch (Exception e) {
-                applicationKeyMapping = null;
+
+        APIManagerConfiguration config =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        boolean disableRetrieveKeyMappings =
+                Boolean.parseBoolean(config.getFirstProperty(APIConstants.DISABLE_RETRIEVE_KEY_MAPPING));
+        ApplicationKeyMappingCacheKey applicationKeyMappingCacheKey = new ApplicationKeyMappingCacheKey(key,
+                keyManager);
+        String synchronizeKey = "SubscriptionDataStoreImpl-KeyMapping-" + applicationKeyMappingCacheKey;
+
+        ApplicationKeyMapping applicationKeyMapping = applicationKeyMappingMap.get(applicationKeyMappingCacheKey);
+        if (applicationKeyMapping == null) {
+            synchronized (synchronizeKey.intern()) {
+                applicationKeyMapping = applicationKeyMappingMap.get(applicationKeyMappingCacheKey);
+                if (applicationKeyMapping != null) {
+                    return applicationKeyMapping;
+                }
+                try {
+                    if (!validationDisabled || !disableRetrieveKeyMappings) {
+                        applicationKeyMapping = new SubscriptionDataLoaderImpl()
+                                .getKeyMapping(key, keyManager, tenantDomain);
+                    }
+                } catch (DataLoadingException e) {
+                    log.error("Error while Loading KeyMapping Information from Internal API.", e);
+                }
+                if (applicationKeyMapping != null && !StringUtils.isEmpty(applicationKeyMapping.getConsumerKey())) {
+                    // load to the memory
+                    log.debug("Loading Keymapping to the in-memory datastore.");
+                    addOrUpdateApplicationKeyMapping(applicationKeyMapping);
+                }
             }
-        } else {
-            return getKeyMappingByKeyAndKeyManager(key, keyManager);
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving Application information with Consumer Key : " + key + " and keymanager : " + keyManager);
+            if (applicationKeyMapping != null) {
+                log.debug("Retrieved Application information with Consumer Key : " + key + " and keymanager : " + keyManager + " is " + applicationKeyMapping.toString());
+            } else {
+                log.debug("Retrieving Application information with Consumer Key : " + key + " and keymanager : " + keyManager + " is empty");
+            }
         }
         return applicationKeyMapping;
     }
