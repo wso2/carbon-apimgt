@@ -6704,6 +6704,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     mappedAPI.setTechnicalOwnerEmail(publisherAPIInfo.getTechnicalOwnerEmail());
                     mappedAPI.setMonetizationEnabled(publisherAPIInfo.getMonetizationStatus());
                     mappedAPI.setContextTemplate(publisherAPIInfo.getContext());
+                    mappedAPI.setDescription(publisherAPIInfo.getDescription());
                     mappedAPI.setCreatedTime(APIUtil.convertEpochStringToDate(publisherAPIInfo.getCreatedTime()));
                     mappedAPI.setLastUpdated(APIUtil.convertEpochStringToDate(publisherAPIInfo.getUpdatedTime()));
                     populateDefaultVersion(mappedAPI);
