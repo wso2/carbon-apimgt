@@ -4446,3 +4446,25 @@ paths:
           $ref: '#/components/responses/Error500'
         '529':
           $ref: '#/components/responses/Error529'
+x-wso2-cors:
+  corsConfigurationEnabled: false
+  accessControlAllowOrigins:
+    - '*'
+  accessControlAllowCredentials: false
+  accessControlAllowHeaders:
+    - authorization
+    - Access-Control-Allow-Origin
+    - Content-Type
+    - SOAPAction
+    - apikey
+    - Internal-Key
+    - anthropic-version
+    - anthropic-beta
+    - anthropic-dangerous-direct-browser-access
+  accessControlAllowMethods:
+    - GET
+    - PUT
+    - POST
+    - DELETE
+    - PATCH
+    - OPTIONS
