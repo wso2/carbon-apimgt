@@ -507,6 +507,9 @@ public class ExportUtils {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         List<Documentation> docList = apiProvider.getAllDocumentation(identifier.getUUID(), tenantDomain);
         if (!docList.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Found " + docList.size() + " documents for identifier: " + identifier.getUUID());
+            }
             String docDirectoryPath = archivePath + File.separator + ImportExportConstants.DOCUMENT_DIRECTORY;
             CommonUtil.createDirectory(docDirectoryPath);
             try {
