@@ -358,7 +358,7 @@ public class ExportUtils {
         String exportAPIBasePath = exportFolder.toString();
         String archivePath = exportAPIBasePath
                 .concat(File.separator + apiProductIdentifier.getName() + "-" + apiProductIdentifier.getVersion());
-        tenantId = APIUtil.getTenantId(userName);
+        tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
 
         CommonUtil.createDirectory(archivePath);
 
