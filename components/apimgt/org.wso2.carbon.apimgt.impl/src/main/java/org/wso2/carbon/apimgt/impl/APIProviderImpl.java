@@ -2889,6 +2889,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     "delete event publishing to gateways");
             isError = true;
         }
+        // Delete event publishing to gateways
+        if (api != null && apiId != -1) {
+            APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                    APIConstants.EventType.API_DELETE.name(), tenantId, organization, api.getId().getApiName(), apiId,
+                    api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
+                    APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
+                    api.getStatus(), api.getApiSecurity(), api.getStatus(), api.getVisibility(), api.getVisibleRoles());
+            APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+        } else {
+            log.debug("Event has not published to gateways due to API id has failed to retrieve from DB for API "
+                    + apiUuid + " on organization " + organization);
+        }
 
         // DB delete operations
         if (!isError && api != null) {
@@ -2986,18 +2998,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-        // Delete event publishing to gateways
-        if (api != null && apiId != -1) {
-            APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                    APIConstants.EventType.API_DELETE.name(), tenantId, organization, api.getId().getApiName(), apiId,
-                    api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
-                    APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
-                    api.getStatus(), api.getApiSecurity(), api.getStatus(), api.getVisibility(), api.getVisibleRoles());
-            APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
-        } else {
-            log.debug("Event has not published to gateways due to API id has failed to retrieve from DB for API "
-                    + apiUuid + " on organization " + organization);
-        }
 
         // Logging audit message for API delete
         if (api != null) {
