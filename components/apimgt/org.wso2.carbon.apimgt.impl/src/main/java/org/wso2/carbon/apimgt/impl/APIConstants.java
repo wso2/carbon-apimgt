@@ -3825,4 +3825,15 @@ public final class APIConstants {
             REGISTERED
         }
     }
+
+    // Constants related to Synapse Artifact Generator
+    public static class SynapseArtifactGenerator {
+        public static final String SYNAPSE_ARTIFACT_GENERATOR_CONFIG = "SynapseArtifactGenerator.";
+        public static final String THREAD_POOL_CONFIG = SYNAPSE_ARTIFACT_GENERATOR_CONFIG + "ThreadPool.";
+        public static final String CORE_POOL_SIZE = THREAD_POOL_CONFIG + "CorePoolSize";
+        public static final String MAX_POOL_SIZE = THREAD_POOL_CONFIG + "MaxPoolSize";
+        public static final String KEEP_ALIVE_TIME_MS = THREAD_POOL_CONFIG + "KeepAliveTimeMs";
+        public static final String QUEUE_CAPACITY = THREAD_POOL_CONFIG + "QueueCapacity";
+    }
+
 }
