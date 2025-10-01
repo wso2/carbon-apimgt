@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.throttling.siddhi.extension;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
@@ -47,6 +49,8 @@ import java.util.Map;
 
 public class ThrottleStreamProcessor extends StreamProcessor implements SchedulingProcessor, FindableProcessor {
 
+    private static final Log log = LogFactory.getLog(ThrottleStreamProcessor.class);
+    
     private long timeInMilliSeconds;
     private ComplexEventChunk<StreamEvent> expiredEventChunk = new ComplexEventChunk<StreamEvent>(true);
     private Scheduler scheduler;
@@ -120,6 +124,11 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
                                                        "(<int|long|time> windowTime (and <int|long> startTime), but found "
                                                        + attributeExpressionExecutors.length + " input attributes");
         }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing ThrottleStreamProcessor with timeInMilliSeconds: " + timeInMilliSeconds +
+                    ", startTime: " + startTime);
+        }
 
         List<Attribute> attributeList = new ArrayList<Attribute>();
         attributeList.add(new Attribute("expiryTimeStamp", Attribute.Type.LONG));
@@ -134,6 +143,9 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
             if (expireEventTime != -1) {
                 if (expireEventTime - timeInMilliSeconds > streamEventChunk.getLast().getTimestamp()) {
                     // if the event chunk is older than the current window, drop the chunk
+                    if (log.isDebugEnabled()) {
+                        log.debug("Dropping old event chunk with timestamp: " + streamEventChunk.getLast().getTimestamp());
+                    }
                     return;
                 }
             } else {

@@ -46,6 +46,10 @@ public class ZipkinTelemetry implements APIMOpenTelemetry {
     @Override
     public void init(String serviceName) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing Zipkin telemetry for service: " + serviceName);
+        }
+        
         String hostname = configuration.getFirstProperty(TelemetryConstants.ZIPKIN_CONFIG_HOST) != null ?
                 configuration.getFirstProperty(TelemetryConstants.ZIPKIN_CONFIG_HOST)
                 : TelemetryConstants.ZIPKIN_DEFAULT_HOST;
@@ -72,6 +76,7 @@ public class ZipkinTelemetry implements APIMOpenTelemetry {
                 .setPropagators(ContextPropagators.create(B3Propagator.injectingMultiHeaders()))
                 .build();
 
+        log.info("Zipkin telemetry initialized successfully for service: " + serviceName);
         if (log.isDebugEnabled()) {
             log.debug("OpenTelemetry instance: " + openTelemetry.toString() + " is configured.");
         }

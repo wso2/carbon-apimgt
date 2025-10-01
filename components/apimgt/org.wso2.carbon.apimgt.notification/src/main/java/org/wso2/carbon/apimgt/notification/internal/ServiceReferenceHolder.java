@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.notification.internal;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.handlers.EventHandler;
 import org.wso2.carbon.event.stream.core.EventStreamService;
@@ -30,6 +32,7 @@ import java.util.Map;
  */
 public class ServiceReferenceHolder {
 
+    private static final Log log = LogFactory.getLog(ServiceReferenceHolder.class);
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private Map<String, EventHandler> eventHandlerMap = new HashMap<>();
     private EventStreamService eventStreamService;
@@ -51,12 +54,18 @@ public class ServiceReferenceHolder {
 
     public void addEventHandler(String type, EventHandler eventHandler) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Adding event handler for type: " + type);
+        }
         eventHandlerMap.put(type, eventHandler);
 
     }
 
     public void removeEventHandlers(String type) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Removing event handler for type: " + type);
+        }
         eventHandlerMap.remove(type);
 
     }

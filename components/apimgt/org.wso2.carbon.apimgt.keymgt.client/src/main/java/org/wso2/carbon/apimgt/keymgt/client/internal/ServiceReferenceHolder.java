@@ -16,18 +16,27 @@
 package org.wso2.carbon.apimgt.keymgt.client.internal;
 
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class ServiceReferenceHolder {
 
+    private static final Log log = LogFactory.getLog(ServiceReferenceHolder.class);
     private static ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private ConfigurationContext axis2ConfigurationContext;
 
 
     public void setAxis2ConfigurationContext(ConfigurationContext axis2ConfigurationContext) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting Axis2 configuration context for API key management client");
+        }
         this.axis2ConfigurationContext = axis2ConfigurationContext;
     }
 
     public ConfigurationContext getAxis2ConfigurationContext() {
+        if (axis2ConfigurationContext == null && log.isDebugEnabled()) {
+            log.debug("Axis2 configuration context is null for API key management client");
+        }
         return axis2ConfigurationContext;
     }
 

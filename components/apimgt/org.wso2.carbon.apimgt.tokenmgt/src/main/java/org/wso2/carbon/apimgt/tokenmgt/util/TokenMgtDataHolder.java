@@ -68,24 +68,24 @@ public class TokenMgtDataHolder {
 
     public static void initData() {
         try {
-
-            APIManagerConfiguration configuration = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            log.info("Initializing Token Management data holder");
+            APIManagerConfiguration configuration = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder
+                    .getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
             if (configuration == null) {
                 log.error("API Manager configuration is not initialized");
             } else {
-
                 applicationTokenScope = configuration.getFirstProperty(APIConstants
                                                                                .APPLICATION_TOKEN_SCOPE);
                 JWTConfigurationDto jwtConfigurationDto = configuration.getJwtConfigurationDto();
                 if (log.isDebugEnabled()) {
                     log.debug("JWTGeneration enabled : " + jwtConfigurationDto.isEnabled());
                 }
-
+                log.info("Token Management data holder initialization completed successfully");
             }
         } catch (Exception e) {
-            log.error("Error occur while initializing API KeyMgt Data Holder.Default configuration will be used." + e.toString());
+            log.error("Error occurred while initializing API KeyMgt Data Holder. Default configuration will be " +
+                    "used", e);
         }
     }
 

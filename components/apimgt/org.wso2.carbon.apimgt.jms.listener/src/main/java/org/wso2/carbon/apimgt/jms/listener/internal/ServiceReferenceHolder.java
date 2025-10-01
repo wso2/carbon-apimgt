@@ -20,6 +20,8 @@
 
 package org.wso2.carbon.apimgt.jms.listener.internal;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
@@ -29,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
  */
 public class ServiceReferenceHolder {
 
+    private static final Log log = LogFactory.getLog(ServiceReferenceHolder.class);
     private static ServiceReferenceHolder instance = new ServiceReferenceHolder();
 
     private APIManagerConfiguration apimConfiguration;
@@ -49,8 +52,10 @@ public class ServiceReferenceHolder {
     public void setAPIMConfigurationService(APIManagerConfigurationService configurationService) {
         if (configurationService == null) {
             this.apimConfiguration = null;
+            log.info("API Manager configuration service has been unset");
         } else {
             this.apimConfiguration = configurationService.getAPIManagerConfiguration();
+            log.info("API Manager configuration service has been set");
         }
 
     }
@@ -59,6 +64,11 @@ public class ServiceReferenceHolder {
 
     public void setKeyManagerService(KeyManagerConfigurationService keyManagerService) {
         this.keyManagerService = keyManagerService;
+        if (keyManagerService != null) {
+            log.info("Key Manager service has been set");
+        } else {
+            log.info("Key Manager service has been unset");
+        }
     }
 
     public KeyManagerConfigurationService getKeyManagerService() {

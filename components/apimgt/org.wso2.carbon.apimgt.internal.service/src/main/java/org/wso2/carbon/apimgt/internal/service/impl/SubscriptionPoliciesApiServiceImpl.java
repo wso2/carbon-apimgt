@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
@@ -32,17 +34,25 @@ import javax.ws.rs.core.Response;
 
 public class SubscriptionPoliciesApiServiceImpl implements SubscriptionPoliciesApiService {
 
+    private static final Log log = LogFactory.getLog(SubscriptionPoliciesApiServiceImpl.class);
+
     @Override
     public Response subscriptionPoliciesGet(String xWSO2Tenant, String policyName, MessageContext messageContext) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving subscription policies. PolicyName: " + policyName + ", Tenant: " + xWSO2Tenant);
+        }
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
             if (APIConstants.CHAR_ASTERIX.equals(xWSO2Tenant) || APIConstants.ORG_ALL_QUERY_PARAM.equals(xWSO2Tenant)) {
+                log.info("Retrieving all subscription policies across all tenants");
                 return Response.ok().entity(SubscriptionValidationDataUtil.
                         fromSubscriptionPolicyToSubscriptionPolicyListDTO(subscriptionValidationDAO.
                                 getAllSubscriptionPolicies())).build();
             } else if (StringUtils.isNotEmpty(policyName)) {
+                log.info("Retrieving subscription policy by name: " + policyName + " for tenant: " + xWSO2Tenant);
                 List<SubscriptionPolicy> model = new ArrayList<>();
                 SubscriptionPolicy subscriptionPolicy = subscriptionValidationDAO.getSubscriptionPolicyByNameForTenant(
                         policyName, xWSO2Tenant);
@@ -53,16 +63,19 @@ public class SubscriptionPoliciesApiServiceImpl implements SubscriptionPoliciesA
                         fromSubscriptionPolicyToSubscriptionPolicyListDTO(model)).build();
 
             } else {
+                log.info("Retrieving all subscription policies for tenant: " + xWSO2Tenant);
                 return Response.ok().entity(SubscriptionValidationDataUtil.
                         fromSubscriptionPolicyToSubscriptionPolicyListDTO(subscriptionValidationDAO.
                                 getAllSubscriptionPolicies(xWSO2Tenant))).build();
             }
         } else {
             if (StringUtils.isNotEmpty(policyName)) {
+                log.warn("X-WSO2-Tenant header is missing for policy name request: " + policyName);
                 return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
                         "X-WSo2-Tenant header is missing.").build();
             }
         }
+        log.info("Retrieving all subscription policies for default tenant");
         return Response.ok().entity(SubscriptionValidationDataUtil.
                 fromSubscriptionPolicyToSubscriptionPolicyListDTO(subscriptionValidationDAO.
                         getAllSubscriptionPolicies())).build();

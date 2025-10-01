@@ -48,6 +48,10 @@ public class JaegerTelemetry implements APIMOpenTelemetry {
     @Override
     public void init(String serviceName) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing Jaeger telemetry for service: " + serviceName);
+        }
+        
         String hostname = configuration.getFirstProperty(TelemetryConstants.JAEGER_CONFIG_HOST) != null ?
                 configuration.getFirstProperty(TelemetryConstants.JAEGER_CONFIG_HOST)
                 : TelemetryConstants.JAEGER_DEFAULT_HOST;
@@ -75,6 +79,7 @@ public class JaegerTelemetry implements APIMOpenTelemetry {
                 setPropagators(ContextPropagators.create(JaegerPropagator.getInstance()))
                 .build();
 
+        log.info("Jaeger telemetry initialized successfully for service: " + serviceName);
         if (log.isDebugEnabled()) {
             log.debug("OpenTelemetry instance: " + openTelemetry + " is configured.");
         }

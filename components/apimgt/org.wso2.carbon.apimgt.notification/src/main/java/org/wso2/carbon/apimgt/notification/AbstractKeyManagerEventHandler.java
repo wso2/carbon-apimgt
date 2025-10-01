@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.notification;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -40,6 +42,7 @@ import java.util.Properties;
  */
 public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventHandler {
 
+    private static final Log log = LogFactory.getLog(AbstractKeyManagerEventHandler.class);
     private RevocationRequestPublisher revocationRequestPublisher;
 
     public AbstractKeyManagerEventHandler() {
@@ -48,6 +51,10 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
     }
 
     public boolean handleTokenRevocationEvent(TokenRevocationEvent tokenRevocationEvent) throws APIManagementException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Processing token revocation event for token: " + tokenRevocationEvent.getEventId());
+        }
 
         Properties properties = getRevocationEventProperties(tokenRevocationEvent);
         properties.setProperty(APIConstants.NotificationEvent.EXPIRY_TIME,
@@ -65,6 +72,11 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
         if (application != null) {
             String orgId = application.getOrganization();
             properties.put(APIConstants.NotificationEvent.ORG_ID, orgId);
+            if (log.isDebugEnabled()) {
+                log.debug("Found application for consumer key, organization: " + orgId);
+            }
+        } else {
+            log.warn("No application found for consumer key: " + tokenRevocationEvent.getConsumerKey());
         }
         revocationRequestPublisher.publishRevocationEvents(tokenRevocationEvent.getAccessToken(), properties);
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
@@ -72,6 +84,9 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
         String isRevokeTokenCleanupEnabled = config.getFirstProperty(APIConstants.ENABLE_REVOKE_TOKEN_CLEANUP);
         if (Boolean.parseBoolean(isRevokeTokenCleanupEnabled)) {
             // Cleanup expired revoked tokens from db.
+            if (log.isDebugEnabled()) {
+                log.debug("Starting cleanup of expired revoked tokens");
+            }
             Runnable expiredJWTCleaner = new ExpiredJWTCleaner();
             Thread cleanupThread = new Thread(expiredJWTCleaner);
             cleanupThread.start();
@@ -81,6 +96,11 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
 
     public boolean handleConsumerAppRevocationEvent(ConsumerAppRevocationEvent consumerKeyEvent)
             throws APIManagementException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Processing consumer app revocation event for consumer key: " 
+                    + consumerKeyEvent.getConsumerKey());
+        }
 
         ApiMgtDAO.getInstance().addRevokedConsumerKey(consumerKeyEvent.getConsumerKey(),
                 consumerKeyEvent.getRevocationTime(), consumerKeyEvent.getTenantDomain());
@@ -97,6 +117,11 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
 
     public void handleSubjectEntityRevocationEvent(SubjectEntityRevocationEvent userEvent)
             throws APIManagementException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Processing subject entity revocation event for entity: " + userEvent.getEntityId() 
+                    + " of type: " + userEvent.getEntityType());
+        }
 
         ApiMgtDAO.getInstance().addRevokedSubjectEntity(userEvent.getEntityId(), userEvent.getEntityType(),
                 userEvent.getRevocationTime(), userEvent.getTenantDomain());

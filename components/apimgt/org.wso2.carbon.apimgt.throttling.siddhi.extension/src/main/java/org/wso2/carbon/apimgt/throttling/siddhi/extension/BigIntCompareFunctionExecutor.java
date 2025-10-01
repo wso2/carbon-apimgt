@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.throttling.siddhi.extension;
 
 import java.math.BigInteger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.function.FunctionExecutor;
@@ -27,6 +29,9 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class BigIntCompareFunctionExecutor extends FunctionExecutor {
+    
+    private static final Log log = LogFactory.getLog(BigIntCompareFunctionExecutor.class);
+    
     private Attribute.Type returnType = Attribute.Type.INT;
 
     @Override
@@ -34,6 +39,9 @@ public class BigIntCompareFunctionExecutor extends FunctionExecutor {
         if (attributeExpressionExecutors.length != 2) {
             throw new ExecutionPlanValidationException("Invalid no of arguments passed to the function, "
                     + "required 2 parameters, but found " + attributeExpressionExecutors.length);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Initialized BigIntCompareFunctionExecutor with 2 parameters");
         }
     }
 

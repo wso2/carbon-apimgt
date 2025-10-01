@@ -61,6 +61,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
     @Override
     public boolean validateToken(TokenValidationContext validationContext) throws APIKeyMgtException {
+        log.info("Validating token for context: " + validationContext.getContext());
         // If validationInfoDTO is taken from cache, validity of the cached infoDTO is checked with each request.
         if (validationContext.isCacheHit()) {
             APIKeyValidationInfoDTO infoDTO = validationContext.getValidationInfoDTO();
@@ -70,9 +71,11 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             if (tokenExpired) {
                 infoDTO.setAuthorized(false);
                 infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+                log.warn("Token validation failed - token expired for context: " + validationContext.getContext());
                 log.debug("Token " + validationContext.getAccessToken() + " expired.");
                 return false;
             } else {
+                log.info("Token validation successful from cache for context: " + validationContext.getContext());
                 return true;
             }
         }
@@ -80,6 +83,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             APIKeyValidationInfoDTO infoDTO = validationContext.getValidationInfoDTO();
             infoDTO.setAuthorized(false);
             infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+            log.warn("Token validation failed - no token provided for context: " + validationContext.getContext());
             log.debug("Token Not available");
             return false;
         }
@@ -87,8 +91,11 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         try {
             AccessTokenInfo tokenInfo = getAccessTokenInfo(validationContext);
             if (tokenInfo == null) {
+                log.warn("Token validation failed - unable to retrieve token info for context: " + 
+                         validationContext.getContext());
                 return false;
             }
+            log.info("Token info retrieved successfully for context: " + validationContext.getContext());
             // Setting TokenInfo in validationContext. Methods down in the chain can use TokenInfo.
             validationContext.setTokenInfo(tokenInfo);
             //TODO: Eliminate use of APIKeyValidationInfoDTO if possible
@@ -104,6 +111,8 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                     apiKeyValidationInfoDTO.setValidationStatus(APIConstants
                             .KeyValidationStatus.API_AUTH_GENERAL_ERROR);
                 }
+                log.warn("Token validation failed - invalid token for context: " + validationContext.getContext() + 
+                         ", error code: " + tokenInfo.getErrorcode());
                 return false;
             }
             apiKeyValidationInfoDTO.setKeyManager(tokenInfo.getKeyManager());

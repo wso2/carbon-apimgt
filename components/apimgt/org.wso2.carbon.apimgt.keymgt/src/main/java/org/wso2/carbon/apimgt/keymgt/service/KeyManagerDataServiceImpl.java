@@ -55,35 +55,45 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
     @Override
     public void addOrUpdateApplication(ApplicationEvent event) {
 
+        log.info("Processing application event for tenant: " + event.getTenantDomain() + 
+                 ", application: " + event.getApplicationName());
         if (log.isDebugEnabled()) {
             log.debug("Add or Update Application in datastore in tenant " + event.getTenantDomain());
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
         if (store == null) {
+            log.warn("Subscription data store not found for tenant: " + event.getTenantDomain() + 
+                     ", ignoring application event");
             if (log.isDebugEnabled()) {
                 log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
             }
             return;
         }
         store.addOrUpdateApplication(getApplicationFromApplicationEvent(event));
+        log.info("Application event processed successfully for tenant: " + event.getTenantDomain());
     }
 
     @Override
     public void addOrUpdateAPI(APIEvent event) {
 
+        log.info("Processing API event for tenant: " + event.getTenantDomain() + 
+                 ", API: " + event.getApiName() + ", version: " + event.getApiVersion());
         if (log.isDebugEnabled()) {
             log.debug("Add or Update API in datastore in tenant " + event.getTenantDomain());
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
         if (store == null) {
+            log.warn("Subscription data store not found for tenant: " + event.getTenantDomain() + 
+                     ", ignoring API event");
             if (log.isDebugEnabled()) {
                 log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
             }
             return;
         }
         store.addOrUpdateAPIWithUrlTemplates(getAPIFromAPIEvent(event));
+        log.info("API event processed successfully for tenant: " + event.getTenantDomain());
     }
 
     @Override

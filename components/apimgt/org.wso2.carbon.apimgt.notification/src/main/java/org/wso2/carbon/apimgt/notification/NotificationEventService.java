@@ -39,15 +39,21 @@ public class NotificationEventService {
             throws APIManagementException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Type: " + type + " Content: " + content + " Headers: " + headers.toString());
+            log.debug("Processing notification event - Type: " + type + " Content length: " 
+                    + (content != null ? content.length() : 0) + " Headers count: " 
+                    + (headers != null ? headers.size() : 0));
         }
         if (StringUtils.isEmpty(type)) {
+            log.debug("Event type is empty, using default key manager type");
             type = APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE;
         }
         EventHandler eventHandlerByType =
                 ServiceReferenceHolder.getInstance().getEventHandlerByType(type);
         if (eventHandlerByType != null) {
+            log.info("Processing event with handler type: " + type);
             eventHandlerByType.handleEvent(content, headers);
+        } else {
+            log.warn("No event handler found for type: " + type);
         }
     }
 

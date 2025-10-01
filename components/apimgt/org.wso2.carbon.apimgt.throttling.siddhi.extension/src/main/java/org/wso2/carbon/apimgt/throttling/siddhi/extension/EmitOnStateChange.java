@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.throttling.siddhi.extension;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -59,6 +61,9 @@ import java.util.Map;
  * insert into AlertStream;
  */
 public class EmitOnStateChange extends StreamProcessor {
+    
+    private static final Log log = LogFactory.getLog(EmitOnStateChange.class);
+    
     private VariableExpressionExecutor keyExpressionExecutor;
     private VariableExpressionExecutor isThrottledExpressionExecutor;
     private Map<String, Boolean> throttleStateMap = new HashMap<String, Boolean>();
@@ -75,6 +80,10 @@ public class EmitOnStateChange extends StreamProcessor {
                 streamEventChunk.remove();
             } else {
                 throttleStateMap.put(key, currentThrottleState);
+                if (log.isDebugEnabled()) {
+                    log.debug("Throttle state changed for key: " + key + " from " + lastThrottleState + " to " +
+                            currentThrottleState);
+                }
             }
         }
         nextProcessor.process(streamEventChunk);
@@ -103,6 +112,9 @@ public class EmitOnStateChange extends StreamProcessor {
         }
         keyExpressionExecutor = (VariableExpressionExecutor) attributeExpressionExecutors[0];
         isThrottledExpressionExecutor = (VariableExpressionExecutor) attributeExpressionExecutors[1];
+        if (log.isDebugEnabled()) {
+            log.debug("Initialized EmitOnStateChange processor");
+        }
         return new ArrayList<Attribute>();    //this does not introduce any additional output attributes, hence returning an empty list.
     }
 
