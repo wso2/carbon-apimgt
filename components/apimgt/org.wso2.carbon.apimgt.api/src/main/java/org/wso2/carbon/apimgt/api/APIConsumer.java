@@ -639,6 +639,16 @@ public interface APIConsumer extends APIManager {
         throw new UnsupportedOperationException("Generating new consumer secret is not supported");
     }
 
+    default List<ConsumerSecretInfo> retrieveConsumerSecrets(String clientId, String keyManagerName)
+            throws APIManagementException {
+        throw new UnsupportedOperationException("Generating new consumer secret is not supported");
+    }
+
+    default void deleteConsumerSecret(String clientId, String keyManagerName, String secretId)
+            throws APIManagementException {
+        throw new UnsupportedOperationException("Deleting consumer secret is not supported");
+    }
+
     /**
      * Returns a set of scopes associated with a list of API uuids.
      *

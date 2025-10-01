@@ -346,6 +346,44 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return keyManager.generateNewApplicationConsumerSecret(consumerSecretRequest);
     }
 
+    public List<ConsumerSecretInfo> retrieveConsumerSecrets(String clientId, String keyManagerName)
+            throws APIManagementException {
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO =
+                apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+        if (keyManagerConfigurationDTO == null) {
+            keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+            if (keyManagerConfigurationDTO != null) {
+                keyManagerName = keyManagerConfigurationDTO.getName();
+            } else {
+                log.error("Key Manager: " + keyManagerName + " not found in database.");
+                throw new APIManagementException("Key Manager " + keyManagerName + " not found in database.",
+                        ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+            }
+        }
+
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+        return keyManager.retrieveApplicationConsumerSecrets(clientId);
+    }
+
+    public void deleteConsumerSecret(String clientId, String keyManagerName, String secretId)
+            throws APIManagementException {
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO =
+                apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+        if (keyManagerConfigurationDTO == null) {
+            keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+            if (keyManagerConfigurationDTO != null) {
+                keyManagerName = keyManagerConfigurationDTO.getName();
+            } else {
+                log.error("Key Manager: " + keyManagerName + " not found in database.");
+                throw new APIManagementException("Key Manager " + keyManagerName + " not found in database.",
+                        ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+            }
+        }
+
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+        keyManager.deleteApplicationConsumerSecret(clientId, secretId);
+    }
+
     /**
      * Re-generates the access token.
      *

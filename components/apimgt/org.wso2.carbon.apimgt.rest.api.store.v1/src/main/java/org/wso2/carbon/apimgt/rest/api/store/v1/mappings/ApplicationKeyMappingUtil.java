@@ -31,9 +31,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Utility class for application key generation related operations
@@ -156,12 +154,23 @@ public class ApplicationKeyMappingUtil {
         return consumerSecretRequest;
     }
 
-    public static ConsumerSecretResponseDTO fromConsumerSecretToDTO(ConsumerSecretInfo consumerSecret) {
-        ConsumerSecretResponseDTO consumerSecretResponseDTO = new ConsumerSecretResponseDTO();
-        consumerSecretResponseDTO.setId(consumerSecret.getId());
-        consumerSecretResponseDTO.setDescription(consumerSecret.getDescription());
-        consumerSecretResponseDTO.setConsumerSecret(consumerSecret.getClientSecret());
-        consumerSecretResponseDTO.setConsumerSecretExpiresAt(consumerSecret.getClientSecretExpiresAt());
-        return consumerSecretResponseDTO;
+    public static ConsumerSecretDTO fromConsumerSecretToDTO(ConsumerSecretInfo consumerSecret) {
+        ConsumerSecretDTO consumerSecretDTO = new ConsumerSecretDTO();
+        consumerSecretDTO.setId(consumerSecret.getId());
+        consumerSecretDTO.setDescription(consumerSecret.getDescription());
+        consumerSecretDTO.secretValue(consumerSecret.getClientSecret());
+        consumerSecretDTO.setExpiresAt(consumerSecret.getClientSecretExpiresAt());
+        return consumerSecretDTO;
+    }
+
+    public static ConsumerSecretListDTO fromConsumerSecretListToDTO(List<ConsumerSecretInfo> consumerSecrets) {
+        ConsumerSecretListDTO consumerSecretListDTO = new ConsumerSecretListDTO();
+        List<ConsumerSecretDTO> consumerSecretDTOs = new ArrayList<>();
+        for (ConsumerSecretInfo consumerSecret : consumerSecrets) {
+            consumerSecretDTOs.add(fromConsumerSecretToDTO(consumerSecret));
+        }
+        consumerSecretListDTO.setCount(consumerSecretDTOs.size());
+        consumerSecretListDTO.setList(consumerSecretDTOs);
+        return consumerSecretListDTO;
     }
 }

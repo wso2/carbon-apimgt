@@ -18,17 +18,17 @@ import javax.validation.Valid;
 
 
 
-public class ConsumerSecretResponseDTO   {
+public class ConsumerSecretDTO   {
   
     private String id = null;
     private String description = null;
-    private String consumerSecret = null;
-    private Long consumerSecretExpiresAt = null;
+    private String secretValue = null;
+    private Long expiresAt = null;
 
   /**
    * Unique identifier for the secret
    **/
-  public ConsumerSecretResponseDTO id(String id) {
+  public ConsumerSecretDTO id(String id) {
     this.id = id;
     return this;
   }
@@ -46,7 +46,7 @@ public class ConsumerSecretResponseDTO   {
   /**
    * Human-readable label for the secret
    **/
-  public ConsumerSecretResponseDTO description(String description) {
+  public ConsumerSecretDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -64,37 +64,37 @@ public class ConsumerSecretResponseDTO   {
   /**
    * The actual secret string
    **/
-  public ConsumerSecretResponseDTO consumerSecret(String consumerSecret) {
-    this.consumerSecret = consumerSecret;
+  public ConsumerSecretDTO secretValue(String secretValue) {
+    this.secretValue = secretValue;
     return this;
   }
 
   
   @ApiModelProperty(example = "s3cr3tV@lu3", value = "The actual secret string")
-  @JsonProperty("consumer_secret")
-  public String getConsumerSecret() {
-    return consumerSecret;
+  @JsonProperty("secretValue")
+  public String getSecretValue() {
+    return secretValue;
   }
-  public void setConsumerSecret(String consumerSecret) {
-    this.consumerSecret = consumerSecret;
+  public void setSecretValue(String secretValue) {
+    this.secretValue = secretValue;
   }
 
   /**
    * expiry timestamp in seconds since epoch
    **/
-  public ConsumerSecretResponseDTO consumerSecretExpiresAt(Long consumerSecretExpiresAt) {
-    this.consumerSecretExpiresAt = consumerSecretExpiresAt;
+  public ConsumerSecretDTO expiresAt(Long expiresAt) {
+    this.expiresAt = expiresAt;
     return this;
   }
 
   
   @ApiModelProperty(example = "1755756933", value = "expiry timestamp in seconds since epoch")
-  @JsonProperty("consumer_secret_expires_at")
-  public Long getConsumerSecretExpiresAt() {
-    return consumerSecretExpiresAt;
+  @JsonProperty("expiresAt")
+  public Long getExpiresAt() {
+    return expiresAt;
   }
-  public void setConsumerSecretExpiresAt(Long consumerSecretExpiresAt) {
-    this.consumerSecretExpiresAt = consumerSecretExpiresAt;
+  public void setExpiresAt(Long expiresAt) {
+    this.expiresAt = expiresAt;
   }
 
 
@@ -106,27 +106,27 @@ public class ConsumerSecretResponseDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ConsumerSecretResponseDTO consumerSecretResponse = (ConsumerSecretResponseDTO) o;
-    return Objects.equals(id, consumerSecretResponse.id) &&
-        Objects.equals(description, consumerSecretResponse.description) &&
-        Objects.equals(consumerSecret, consumerSecretResponse.consumerSecret) &&
-        Objects.equals(consumerSecretExpiresAt, consumerSecretResponse.consumerSecretExpiresAt);
+    ConsumerSecretDTO consumerSecret = (ConsumerSecretDTO) o;
+    return Objects.equals(id, consumerSecret.id) &&
+        Objects.equals(description, consumerSecret.description) &&
+        Objects.equals(secretValue, consumerSecret.secretValue) &&
+        Objects.equals(expiresAt, consumerSecret.expiresAt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, description, consumerSecret, consumerSecretExpiresAt);
+    return Objects.hash(id, description, secretValue, expiresAt);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ConsumerSecretResponseDTO {\n");
+    sb.append("class ConsumerSecretDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    consumerSecret: ").append(toIndentedString(consumerSecret)).append("\n");
-    sb.append("    consumerSecretExpiresAt: ").append(toIndentedString(consumerSecretExpiresAt)).append("\n");
+    sb.append("    secretValue: ").append(toIndentedString(secretValue)).append("\n");
+    sb.append("    expiresAt: ").append(toIndentedString(expiresAt)).append("\n");
     sb.append("}");
     return sb.toString();
   }

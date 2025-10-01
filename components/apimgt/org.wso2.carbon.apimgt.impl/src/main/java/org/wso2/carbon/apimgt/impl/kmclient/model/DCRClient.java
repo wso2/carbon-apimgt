@@ -61,7 +61,7 @@ public interface DCRClient {
 
     @RequestLine("GET /{clientId}/secrets")
     @Headers("Content-Type: application/json")
-    ClientInfo getApplicationSecrets(@Param("clientId") String clientId)
+    ClientSecretList getApplicationSecrets(@Param("clientId") String clientId)
             throws KeyManagerClientException;
 
     @RequestLine("GET /{clientId}/secrets/{secretId}")

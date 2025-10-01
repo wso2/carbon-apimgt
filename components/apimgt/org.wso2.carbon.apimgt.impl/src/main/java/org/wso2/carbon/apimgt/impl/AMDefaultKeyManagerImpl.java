@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.impl.kmclient.model.Claim;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ClaimsList;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ClientInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ClientSecret;
+import org.wso2.carbon.apimgt.impl.kmclient.model.ClientSecretList;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ClientSecretRequest;
 import org.wso2.carbon.apimgt.impl.kmclient.model.DCRClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectInfo;
@@ -646,6 +647,42 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         clientSecretInfo.setClientSecret(clientSecret.getClientSecret());
         clientSecretInfo.setClientSecretExpiresAt(clientSecret.getClientSecretExpiresAt());
         return clientSecretInfo;
+    }
+
+    @Override
+    public List<ConsumerSecretInfo> retrieveApplicationConsumerSecrets(String clientId) throws APIManagementException {
+
+        ClientSecretList clientSecretList = null;
+        String encodedClientId = Base64.getUrlEncoder().encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
+        try {
+            clientSecretList = dcrClient.getApplicationSecrets(encodedClientId);
+        } catch (KeyManagerClientException e) {
+            handleException("Error while generating new consumer secret", e);
+        }
+        if (clientSecretList == null) {
+            return null;
+        }
+        List<ConsumerSecretInfo> consumerSecretInfoList = new ArrayList<>();
+        for (ClientSecret clientSecret : clientSecretList.getList()) {
+            ConsumerSecretInfo clientSecretInfo = new ConsumerSecretInfo();
+            clientSecretInfo.setId(clientSecret.getId());
+            clientSecretInfo.setDescription(clientSecret.getDescription());
+            clientSecretInfo.setClientSecret(clientSecret.getClientSecret());
+            clientSecretInfo.setClientSecretExpiresAt(clientSecret.getClientSecretExpiresAt());
+            consumerSecretInfoList.add(clientSecretInfo);
+        }
+        return consumerSecretInfoList;
+    }
+
+    @Override
+    public void deleteApplicationConsumerSecret(String clientId, String secretId) throws APIManagementException {
+        String encodedClientId = Base64.getUrlEncoder().encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
+        String encodedSecretId = Base64.getUrlEncoder().encodeToString(secretId.getBytes(StandardCharsets.UTF_8));
+        try {
+            dcrClient.deleteApplicationSecret(encodedClientId, encodedSecretId);
+        } catch (KeyManagerClientException e) {
+            handleException("Error while generating new consumer secret", e);
+        }
     }
 
     @Override

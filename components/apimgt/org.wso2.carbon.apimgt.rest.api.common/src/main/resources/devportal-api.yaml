@@ -3251,18 +3251,12 @@ paths:
         201:
           description: |
             Created.
-            Consumer secret is generated.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
           headers:
-            ETag:
+            Location:
               description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).‚
+                Location to the newly created secret entity.
               schema:
                 type: string
             Content-Type:
@@ -3273,13 +3267,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConsumerSecretResponse'
+                $ref: '#/components/schemas/ConsumerSecret'
         400:
           $ref: '#/components/responses/BadRequest'
-        404:
-          $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:subscribe
@@ -3305,18 +3297,6 @@ paths:
             OK.
             Consumer secrets are retrieved.
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).‚
-              schema:
-                type: string
             Content-Type:
               description: |
                 The content type of the body.
@@ -3330,8 +3310,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:subscribe
@@ -3345,7 +3325,7 @@ paths:
       tags:
         - Application Secrets
       summary: |
-        Retrieve a Consumer Secrets
+        Retrieve a Consumer Secret
       description: |
         This operation can be used to retrieve a consumer secret of an application for the give key type
       operationId: getConsumerSecret
@@ -3359,18 +3339,6 @@ paths:
             OK.
             A consumer secrets is retrieved.
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).‚
-              schema:
-                type: string
             Content-Type:
               description: |
                 The content type of the body.
@@ -3379,13 +3347,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConsumerSecretResponse'
+                $ref: '#/components/schemas/ConsumerSecret'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:subscribe
@@ -3416,8 +3384,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:subscribe
@@ -7481,7 +7449,7 @@ components:
     #-----------------------------------------------------
     # Consumer Secret Object
     #-----------------------------------------------------
-    ConsumerSecretResponse:
+    ConsumerSecret:
       type: object
       properties:
         id:
@@ -7492,11 +7460,11 @@ components:
           type: string
           description: Human-readable label for the secret
           example: pizza application secret
-        consumer_secret:
+        secretValue:
           type: string
           description: The actual secret string
           example: s3cr3tV@lu3
-        consumer_secret_expires_at:
+        expiresAt:
           type: integer
           format: int64
           description: expiry timestamp in seconds since epoch
@@ -7507,7 +7475,7 @@ components:
     ConsumerSecretCreationRequest:
       type: object
       properties:
-        expires_in:
+        expiresIn:
           type: integer
           description: Expiry time in seconds
           example: 86400
@@ -7529,7 +7497,7 @@ components:
         list:
           type: array
           items:
-            $ref: '#/components/schemas/ConsumerSecretResponse'
+            $ref: '#/components/schemas/ConsumerSecret'
 
   responses:
     BadRequest:

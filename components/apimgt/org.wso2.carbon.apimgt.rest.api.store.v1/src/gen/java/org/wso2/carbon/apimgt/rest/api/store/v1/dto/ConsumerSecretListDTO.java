@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDTO;
 import javax.validation.constraints.*;
 
 
@@ -24,7 +24,7 @@ import javax.validation.Valid;
 public class ConsumerSecretListDTO   {
   
     private Integer count = null;
-    private List<ConsumerSecretResponseDTO> list = new ArrayList<ConsumerSecretResponseDTO>();
+    private List<ConsumerSecretDTO> list = new ArrayList<ConsumerSecretDTO>();
 
   /**
    * Number of consumer secrets returned. 
@@ -46,7 +46,7 @@ public class ConsumerSecretListDTO   {
 
   /**
    **/
-  public ConsumerSecretListDTO list(List<ConsumerSecretResponseDTO> list) {
+  public ConsumerSecretListDTO list(List<ConsumerSecretDTO> list) {
     this.list = list;
     return this;
   }
@@ -55,10 +55,10 @@ public class ConsumerSecretListDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("list")
-  public List<ConsumerSecretResponseDTO> getList() {
+  public List<ConsumerSecretDTO> getList() {
     return list;
   }
-  public void setList(List<ConsumerSecretResponseDTO> list) {
+  public void setList(List<ConsumerSecretDTO> list) {
     this.list = list;
   }
 

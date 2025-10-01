@@ -33,7 +33,7 @@ public class ConsumerSecretCreationRequestDTO   {
 
   
   @ApiModelProperty(example = "86400", value = "Expiry time in seconds")
-  @JsonProperty("expires_in")
+  @JsonProperty("expiresIn")
   public Integer getExpiresIn() {
     return expiresIn;
   }

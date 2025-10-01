@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -100,7 +101,17 @@ public interface KeyManager {
      */
     String getNewApplicationConsumerSecret(AccessTokenRequest tokenRequest) throws APIManagementException;
 
-    default ConsumerSecretInfo generateNewApplicationConsumerSecret(ConsumerSecretRequest clientSecretRequest) throws APIManagementException {
+    default ConsumerSecretInfo generateNewApplicationConsumerSecret(ConsumerSecretRequest clientSecretRequest)
+            throws APIManagementException {
+        throw new UnsupportedOperationException("Generating new consumer secret is not supported");
+    }
+
+    default List<ConsumerSecretInfo> retrieveApplicationConsumerSecrets(String clientId)
+            throws APIManagementException {
+        throw new UnsupportedOperationException("Generating new consumer secret is not supported");
+    }
+
+    default void deleteApplicationConsumerSecret(String clientId, String secretId) throws APIManagementException {
         throw new UnsupportedOperationException("Generating new consumer secret is not supported");
     }
 

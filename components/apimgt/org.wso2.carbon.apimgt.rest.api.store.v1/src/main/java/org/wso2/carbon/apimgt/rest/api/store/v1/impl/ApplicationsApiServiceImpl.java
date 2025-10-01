@@ -1267,7 +1267,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     fromDTOtoConsumerSecretRequest(clientId, consumerSecretCreationRequestDTO);
             ConsumerSecretInfo consumerSecret = apiConsumer.generateConsumerSecret(clientId,
                     applicationKeyDTO.getKeyManager(), consumerSecretRequest);
-            ConsumerSecretResponseDTO consumerSecretResponseDTO = ApplicationKeyMappingUtil.
+            ConsumerSecretDTO consumerSecretResponseDTO = ApplicationKeyMappingUtil.
                     fromConsumerSecretToDTO(consumerSecret);
 
             try {
@@ -1283,20 +1283,47 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response getConsumerSecrets(String applicationId, String keyType, MessageContext messageContext) {
-        return Response.status(Response.Status.METHOD_NOT_ALLOWED).entity("Not Implemented").build();
+    public Response getConsumerSecrets(String applicationId, String keyMappingId, MessageContext messageContext) throws APIManagementException {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
+        if (applicationKeys == null) {
+            return null;
+        }
+        ApplicationKeyDTO applicationKeyDTO = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
+        if (applicationKeyDTO != null) {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            String clientId = applicationKeyDTO.getConsumerKey();
+            List<ConsumerSecretInfo> consumerSecrets = apiConsumer.retrieveConsumerSecrets(clientId,
+                    applicationKeyDTO.getKeyManager());
+            ConsumerSecretListDTO consumerSecretListDTO = ApplicationKeyMappingUtil.
+                    fromConsumerSecretListToDTO(consumerSecrets);
+            return Response.ok().entity(consumerSecretListDTO).build();
+        }
+        return null;
     }
 
     @Override
-    public Response getConsumerSecret(String applicationId, String keyType, String secretId,
+    public Response getConsumerSecret(String applicationId, String keyMappingId, String secretId,
                                       MessageContext messageContext) {
         return Response.status(Response.Status.METHOD_NOT_ALLOWED).entity("Not Implemented").build();
     }
 
     @Override
-    public Response deleteConsumerSecret(String applicationId, String keyType, String secretId,
-                                         MessageContext messageContext) {
-        return Response.status(Response.Status.METHOD_NOT_ALLOWED).entity("Not Implemented").build();
+    public Response deleteConsumerSecret(String applicationId, String keyMappingId, String secretId,
+                                         MessageContext messageContext) throws APIManagementException {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
+        if (applicationKeys == null) {
+            return null;
+        }
+        ApplicationKeyDTO applicationKeyDTO = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
+        if (applicationKeyDTO != null) {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            String clientId = applicationKeyDTO.getConsumerKey();
+            apiConsumer.deleteConsumerSecret(clientId, applicationKeyDTO.getKeyManager(), secretId);
+            return Response.noContent().build();
+        }
+        return null;
     }
 
     /**
