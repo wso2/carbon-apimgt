@@ -51,7 +51,7 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Environment successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response environmentsEnvironmentIdDelete(@ApiParam(value = "Environment UUID (or Environment name defined in config) ",required=true) @PathParam("environmentId") String environmentId) throws APIManagementException{
+    public Response environmentsEnvironmentIdDelete(@ApiParam(value = "Environment UUID (or Environment name defined in config), in case the ID contains special characters it should  be base64 encoded ",required=true) @PathParam("environmentId") String environmentId) throws APIManagementException{
         return delegate.environmentsEnvironmentIdDelete(environmentId, securityContext);
     }
 
@@ -70,7 +70,7 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response environmentsEnvironmentIdGatewaysGet(@ApiParam(value = "Environment UUID (or Environment name defined in config) ",required=true) @PathParam("environmentId") String environmentId) throws APIManagementException{
+    public Response environmentsEnvironmentIdGatewaysGet(@ApiParam(value = "Environment UUID (or Environment name defined in config), in case the ID contains special characters it should  be base64 encoded ",required=true) @PathParam("environmentId") String environmentId) throws APIManagementException{
         return delegate.environmentsEnvironmentIdGatewaysGet(environmentId, securityContext);
     }
 
@@ -88,7 +88,7 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Gateway Environment Configuration returned ", response = EnvironmentDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response environmentsEnvironmentIdGet(@ApiParam(value = "Environment UUID (or Environment name defined in config) ",required=true) @PathParam("environmentId") String environmentId) throws APIManagementException{
+    public Response environmentsEnvironmentIdGet(@ApiParam(value = "Environment UUID (or Environment name defined in config), in case the ID contains special characters it should  be base64 encoded ",required=true) @PathParam("environmentId") String environmentId) throws APIManagementException{
         return delegate.environmentsEnvironmentIdGet(environmentId, securityContext);
     }
 
@@ -106,7 +106,7 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Environment updated. ", response = EnvironmentDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response environmentsEnvironmentIdPut(@ApiParam(value = "Environment UUID (or Environment name defined in config) ",required=true) @PathParam("environmentId") String environmentId, @ApiParam(value = "Environment object with updated information " ,required=true) EnvironmentDTO environmentDTO) throws APIManagementException{
+    public Response environmentsEnvironmentIdPut(@ApiParam(value = "Environment UUID (or Environment name defined in config), in case the ID contains special characters it should  be base64 encoded ",required=true) @PathParam("environmentId") String environmentId, @ApiParam(value = "Environment object with updated information " ,required=true) EnvironmentDTO environmentDTO) throws APIManagementException{
         return delegate.environmentsEnvironmentIdPut(environmentId, environmentDTO, securityContext);
     }
 

@@ -7228,7 +7228,8 @@ components:
       name: environmentId
       in: path
       description: |
-        Environment UUID (or Environment name defined in config)
+        Environment UUID (or Environment name defined in config), in case the ID contains special characters it should 
+        be base64 encoded
       required: true
       schema:
         type: string
