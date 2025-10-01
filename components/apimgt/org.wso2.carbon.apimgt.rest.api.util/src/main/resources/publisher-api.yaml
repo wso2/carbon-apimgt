@@ -4868,7 +4868,7 @@ paths:
                 type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time.
+                Date and time the resource has been modified the last time.
                 Used by caches, or in conditional requests (Will be supported in future).
               schema:
                 type: string
@@ -4900,7 +4900,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -F file=image.jpeg "https://127.0.0.1:9443/api/am/publisher/v3/mcp-servers/2fd14eb8-b828-4013-b448-0739d2e76bf7/thumbnail"'
+          -F file=@image.jpeg "https://127.0.0.1:9443/api/am/publisher/v3/mcp-servers/2fd14eb8-b828-4013-b448-0739d2e76bf7/thumbnail"'
       operationId: updateMCPServerThumbnail
 
   /apis/import-openapi:
