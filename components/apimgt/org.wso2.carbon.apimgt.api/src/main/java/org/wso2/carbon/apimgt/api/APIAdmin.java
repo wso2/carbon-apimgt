@@ -88,14 +88,14 @@ public interface APIAdmin  {
     boolean hasExistingDeployments(String tenantDomain, String uuid) throws APIManagementException;
 
     /**
-     * Check if there are any existing API revision deployments in the environment
+     * Check if there are any existing API revision deployments or external API mappings in the environment
      *
      * @param tenantDomain tenant domain
      * @param uuid         environment uuid
-     * @return true if there are existing API revisions deployed
-     * @throws APIManagementException If failed to check API revision deployments
+     * @return true if there are existing API revisions deployed or external mappings
+     * @throws APIManagementException If failed to check API revision deployments or external mappings
      */
-    boolean hasExistingAPIRevisions(String tenantDomain, String uuid) throws APIManagementException;
+    boolean hasExistingAPIRevisionsorExternalMappings(String tenantDomain, String uuid) throws APIManagementException;
 
     /**
      * Updates the details of the given Environment.

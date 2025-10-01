@@ -56,9 +56,10 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             RestApiUtil.handleConflict("Cannot delete the environment with id: " + environmentId
                     + " as active gateway policy deployment exist", log);
         }
-        if (apiAdmin.hasExistingAPIRevisions(organization, environmentId)) {
+        if (apiAdmin.hasExistingAPIRevisionsorExternalMappings(organization, environmentId)) {
+
             RestApiUtil.handleConflict("Cannot delete the environment with id: " + environmentId
-                    + " as API revisions are deployed to it", log);
+                    + " as API revisions are deployed to it or external API mappings exist", log);
         }
         apiAdmin.deleteEnvironment(organization, environmentId);
         String info = "{'id':'" + environmentId + "'}";

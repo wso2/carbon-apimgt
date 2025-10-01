@@ -15989,23 +15989,45 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Check if there are any existing API revision deployments for the given gateway environment name.
+     * Check if there are any existing API revision deployments or external API mappings for the given
+     * gateway environment UUID.
      *
-     * @param gatewayName name of the gateway environment
-     * @return true if there are existing API revision deployments, false otherwise
+     * @param gatewayUuid  UUID of the gateway environment
+     * @param organization organization identifier
+     * @return true if there are existing API revision deployments or external mappings, false otherwise
      * @throws APIManagementException if a database access error occurs
      */
-    public boolean hasExistingAPIRevisions(String gatewayName) throws APIManagementException {
+    public boolean hasExistingAPIRevisionsorExternalMappings(String gatewayUuid, String organization)
+            throws APIManagementException {
 
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(
-                     SQLConstants.CHECK_API_REVISION_DEPLOYMENTS_EXISTS_BY_GATEWAY_NAME_SQL)) {
-            prepStmt.setString(1, gatewayName);
-            try (ResultSet rs = prepStmt.executeQuery()) {
-                return rs.next() && rs.getInt(1) > 0;
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            // Check for external API mappings
+            try (PreparedStatement stmt = connection.prepareStatement(
+                    SQLConstants.CHECK_API_EXTERNAL_API_MAPPINGS_EXISTS_SQL)) {
+                stmt.setString(1, gatewayUuid);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        log.debug(String.format("Found existing external API mappings for gateway UUID: %s", gatewayUuid));
+                        return true;
+                    }
+                }
+            }
+
+            // Check for API revision deployments
+            try (PreparedStatement prepStmt = connection.prepareStatement(
+                    SQLConstants.CHECK_API_REVISION_DEPLOYMENTS_EXISTS_BY_GATEWAY_ENV_SQL)) {
+                prepStmt.setString(1, gatewayUuid);
+                prepStmt.setString(2, organization);
+                try (ResultSet rs = prepStmt.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        log.debug(String.format("Found existing API revision deployments for gateway UUID: %s", gatewayUuid));
+                        return true;
+                    }
+                }
             }
         } catch (SQLException e) {
-            handleException("Failed to check existing API revisions for gateway: " + gatewayName, e);
+            handleException(
+                    "Failed to check existing API revisions or external mappings for gateway UUID: " + gatewayUuid, e);
         }
         return false;
     }

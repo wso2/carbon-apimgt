@@ -246,13 +246,12 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public boolean hasExistingAPIRevisions(String tenantDomain, String uuid) throws APIManagementException {
-        Environment existingEnv = getEnvironment(tenantDomain, uuid);
-        if (existingEnv == null) {
-            throw new APIManagementException("Environment with UUID " + uuid + " not found", 
-                ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND);
-        }
-        return apiMgtDAO.hasExistingAPIRevisions(existingEnv.getName());
+    public boolean hasExistingAPIRevisionsorExternalMappings(String tenantDomain, String uuid)
+            throws APIManagementException {
+
+        log.debug(String.format("Checking for existing API revisions or external mappings for "
+                + "gateway environment with UUID '%s' in tenant '%s'", uuid, tenantDomain));
+        return apiMgtDAO.hasExistingAPIRevisionsorExternalMappings(uuid, tenantDomain);
     }
 
     @Override
