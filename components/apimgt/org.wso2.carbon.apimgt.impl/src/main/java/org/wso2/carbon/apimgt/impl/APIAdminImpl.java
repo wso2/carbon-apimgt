@@ -246,12 +246,12 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public boolean hasExistingAPIRevisionsorExternalMappings(String tenantDomain, String uuid)
+    public boolean hasExistingAPIRevisionsOrExternalMappings(String tenantDomain, String uuid)
             throws APIManagementException {
 
         log.debug(String.format("Checking for existing API revisions or external mappings for "
                 + "gateway environment with UUID '%s' in tenant '%s'", uuid, tenantDomain));
-        return apiMgtDAO.hasExistingAPIRevisionsorExternalMappings(uuid, tenantDomain);
+        return apiMgtDAO.hasExistingAPIRevisionsOrExternalMappings(uuid, tenantDomain);
     }
 
     @Override

@@ -15997,7 +15997,7 @@ public class ApiMgtDAO {
      * @return true if there are existing API revision deployments or external mappings, false otherwise
      * @throws APIManagementException if a database access error occurs
      */
-    public boolean hasExistingAPIRevisionsorExternalMappings(String gatewayUuid, String organization)
+    public boolean hasExistingAPIRevisionsOrExternalMappings(String gatewayUuid, String organization)
             throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
