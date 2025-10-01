@@ -2253,6 +2253,7 @@ public class OAS2Parser extends APIDefinition {
             log.warn("Backend API definition has no paths defined");
             return new HashSet<>();
         }
+        Set<String> tools = new LinkedHashSet<>();
         Set<URITemplate> generatedTools = new HashSet<>();
         for (URITemplate template : uriTemplates) {
             BackendOperation backendOperation = null;
@@ -2278,6 +2279,11 @@ public class OAS2Parser extends APIDefinition {
             if (match != null) {
                 URITemplate toolTemplate = populateURITemplate(template, match, backendDefinition, backendId,
                         refApiId, true);
+                if (!tools.add(toolTemplate.getUriTemplate())) {
+                    log.error("Duplicate MCP tool detected: " + toolTemplate.getUriTemplate());
+                    throw new APIManagementException("Tool " + toolTemplate.getUriTemplate() + " is repeated",
+                            ExceptionCodes.DUPLICATE_MCP_TOOLS);
+                }
                 generatedTools.add(toolTemplate);
             }
         }
@@ -2296,8 +2302,8 @@ public class OAS2Parser extends APIDefinition {
             log.warn("Backend API definition has no paths defined");
             return new HashSet<>();
         }
+        Set<String> tools = new LinkedHashSet<>();
         Set<URITemplate> updatedTools = new HashSet<>();
-
         for (URITemplate template : uriTemplates) {
             BackendOperation backendOperation = null;
             if (APISpecParserConstants.API_SUBTYPE_DIRECT_BACKEND.equals(mcpSubtype)) {
@@ -2323,8 +2329,18 @@ public class OAS2Parser extends APIDefinition {
             if (match != null) {
                 URITemplate populated = populateURITemplate(template, match, backendDefinition, backendId, refApiId,
                         false);
+                if (!tools.add(populated.getUriTemplate())) {
+                    log.error("Duplicate MCP tool detected: " + populated.getUriTemplate());
+                    throw new APIManagementException("Tool " + populated.getUriTemplate() + " is repeated",
+                            ExceptionCodes.DUPLICATE_MCP_TOOLS);
+                }
                 updatedTools.add(populated);
                 continue;
+            }
+            if (!tools.add(template.getUriTemplate())) {
+                log.error("Duplicate MCP tool detected: " + template.getUriTemplate());
+                throw new APIManagementException("Tool " + template.getUriTemplate() + " is repeated",
+                        ExceptionCodes.DUPLICATE_MCP_TOOLS);
             }
             updatedTools.add(template);
         }
