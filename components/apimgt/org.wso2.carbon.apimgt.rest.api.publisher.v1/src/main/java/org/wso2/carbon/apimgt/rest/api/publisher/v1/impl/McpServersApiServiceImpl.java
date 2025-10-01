@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -51,6 +52,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -93,6 +95,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ImportAPIResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
@@ -111,6 +114,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -720,6 +724,48 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         List<Tier> apiThrottlingPolicies = ApisApiServiceImplUtils.filterAPIThrottlingPolicies(apiPolicies,
                 availableThrottlingPolicyList);
         return Response.ok().entity(apiThrottlingPolicies).build();
+    }
+
+    /**
+     * Retrieves the thumbnail image of a specific MCP server.
+     *
+     * @param mcpServerId    UUID of the MCP server.
+     * @param ifNoneMatch    The ETag header value for conditional requests.
+     * @param messageContext Message context with request details.
+     * @return HTTP Response containing the thumbnail image or an error response.
+     * @throws APIManagementException if an error occurs while retrieving the thumbnail.
+     */
+    @Override
+    public Response getMCPServerThumbnail(String mcpServerId, String ifNoneMatch, MessageContext messageContext)
+            throws APIManagementException {
+
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Received request to get the thumbnail of MCP Server: " + mcpServerId);
+            }
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            ResourceFile thumbnailResource = apiProvider.getIcon(mcpServerId, organization);
+
+            if (thumbnailResource != null) {
+                return Response
+                        .ok(thumbnailResource.getContent(), MediaType.valueOf(thumbnailResource.getContentType()))
+                        .build();
+            } else {
+                return Response.noContent().build();
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving thumbnail of MCP Server: " + mcpServerId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving thumbnail of MCP Server : " + mcpServerId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
 
     /**
@@ -2167,6 +2213,72 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                         "Error while updating the document " + documentId + " for MCP Server : " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        }
+        return null;
+    }
+
+    /**
+     * Updates the thumbnail image of an MCP server.
+     * Validates the API existence and updates the thumbnail image.
+     *
+     * @param mcpServerId     UUID of the MCP Server.
+     * @param fileInputStream InputStream of the thumbnail image file.
+     * @param fileDetail      Attachment containing details of the thumbnail image file.
+     * @param ifMatch         ETag value for optimistic concurrency control.
+     * @param messageContext  Message context of the request.
+     * @return HTTP Response containing the FileInfoDTO of the updated thumbnail or an error response.
+     * @throws APIManagementException if an error occurs while updating the thumbnail image.
+     */
+    @Override
+    public Response updateMCPServerThumbnail(String mcpServerId, InputStream fileInputStream, Attachment fileDetail,
+                                             String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
+
+        ByteArrayInputStream inputStream = null;
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Updating thumbnail of MCP Server: " + mcpServerId);
+            }
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIInfo apiInfo = CommonUtils.validateMCPServerExistence(mcpServerId);
+            validateAPIOperationsPerLC(apiInfo.getStatus().toString());
+
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            String fileName = fileDetail.getDataHandler().getName();
+            String extension = FilenameUtils.getExtension(fileName);
+            if (!RestApiConstants.ALLOWED_THUMBNAIL_EXTENSIONS.contains(extension.toLowerCase())) {
+                RestApiUtil.handleBadRequest(
+                        "Unsupported Thumbnail File Extension. Supported extensions are .jpg, .png, .jpeg, .svg "
+                                + "and .gif", log);
+            }
+            inputStream = (ByteArrayInputStream) RestApiPublisherUtils.validateThumbnailContent(fileInputStream);
+            String fileMediaType = RestApiPublisherUtils.getMediaType(inputStream, fileDetail);
+            PublisherCommonUtils.updateThumbnail(inputStream, fileMediaType, apiProvider, mcpServerId, organization);
+            String uriString =
+                    RestApiConstants.RESOURCE_PATH_MCP_SERVER_THUMBNAIL.replace(RestApiConstants.MCP_SERVER_ID_PARAM,
+                            mcpServerId);
+            URI uri = new URI(uriString);
+            FileInfoDTO infoDTO = new FileInfoDTO();
+            infoDTO.setRelativePath(uriString);
+            infoDTO.setMediaType(fileMediaType);
+            return Response.created(uri).entity(infoDTO).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while adding thumbnail for " +
+                                "MCP Server: " + mcpServerId, e, log);
+            } else {
+                String errorMessage = "Error while updating thumbnail of MCP Server : " + mcpServerId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (URISyntaxException | IOException e) {
+            String errorMessage = "Error while updating thumbnail of MCP Server: " + mcpServerId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } finally {
+            IOUtils.closeQuietly(fileInputStream);
+            IOUtils.closeQuietly(inputStream);
         }
         return null;
     }
