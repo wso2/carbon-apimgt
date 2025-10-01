@@ -2602,14 +2602,20 @@ public class OAS2Parser extends APIDefinition {
 
         if (parameters != null) {
             for (Parameter param : parameters) {
+                // Resolve $ref in parameter if present
                 if (param instanceof RefParameter) {
-                    RefParameter refParam = (RefParameter) param;
-                    Parameter resolved = swagger.getParameter(refParam.getSimpleRef());
+                    Parameter resolved =
+                            resolveComponentRef(((RefParameter) param).getSimpleRef(), swagger, new HashSet<>(),
+                                    Parameter.class);
                     if (resolved != null) {
                         param = resolved;
                     }
                 }
+
                 if (param instanceof BodyParameter) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Processing BodyParameter: " + param.getName());
+                    }
                     BodyParameter bodyParam = (BodyParameter) param;
                     Model rawModel = bodyParam.getSchema();
                     Model resolvedModel = resolveModel(rawModel, swagger);
@@ -2638,14 +2644,10 @@ public class OAS2Parser extends APIDefinition {
                     Map<String, Object> paramSchema = new LinkedHashMap<>();
 
                     paramSchema.put(APISpecParserConstants.TYPE, serialParam.getType());
-                    if (serialParam.getFormat() != null) paramSchema.put(APISpecParserConstants.FORMAT,
-                            serialParam.getFormat());
-                    if (serialParam.getEnum() != null) paramSchema.put(APISpecParserConstants.ENUM,
-                            serialParam.getEnum());
-                    if (serialParam.getDefault() != null) paramSchema.put(APISpecParserConstants.DEFAULT,
-                            serialParam.getDefault());
-                    if (param.getDescription() != null) paramSchema.put(APISpecParserConstants.DESCRIPTION,
-                            param.getDescription());
+                    if (serialParam.getFormat() != null) paramSchema.put(APISpecParserConstants.FORMAT, serialParam.getFormat());
+                    if (serialParam.getEnum() != null) paramSchema.put(APISpecParserConstants.ENUM, serialParam.getEnum());
+                    if (serialParam.getDefault() != null) paramSchema.put(APISpecParserConstants.DEFAULT, serialParam.getDefault());
+                    if (param.getDescription() != null) paramSchema.put(APISpecParserConstants.DESCRIPTION, param.getDescription());
 
                     props.put(name, paramSchema);
                     if (Boolean.TRUE.equals(serialParam.getRequired())) {
@@ -2680,6 +2682,8 @@ public class OAS2Parser extends APIDefinition {
 
         while (model instanceof RefModel) {
             String ref = ((RefModel) model).getSimpleRef();
+            model = resolveComponentRef(ref, swagger, visitedRefs, Model.class);
+            if (model == null) break;
             if (visitedRefs.contains(ref)) {
                 log.warn("Circular reference detected for model: " + ref);
                 break;
@@ -2776,6 +2780,59 @@ public class OAS2Parser extends APIDefinition {
         }
 
         return property;
+    }
+
+    /**
+     * Resolves a component reference (model, parameter, or response) in the Swagger definition.
+     * It follows references recursively and handles circular references.
+     *
+     * @param ref          the reference string (without the #/components/ prefix)
+     * @param swagger      the Swagger definition containing components
+     * @param visitedRefs  a set of already visited references to detect cycles
+     * @param expectedType the expected type of the resolved component
+     * @param <T>          the type parameter for the expected component type
+     * @return the resolved component of type T, or null if not found or circular reference detected
+     */
+    @SuppressWarnings("unchecked")
+    private <T> T resolveComponentRef(String ref, Swagger swagger, Set<String> visitedRefs, Class<T> expectedType) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Resolving component reference:" + ref + " of type: " + expectedType.getSimpleName());
+        }
+        if (ref == null) {
+            return null;
+        }
+        if (visitedRefs.contains(ref)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Circular reference detected: " + ref);
+            }
+            return null;
+        }
+        visitedRefs.add(ref);
+        Object resolved = null;
+        if (swagger.getDefinitions() != null && swagger.getDefinitions().containsKey(ref)) {
+            resolved = swagger.getDefinitions().get(ref);
+        }
+        if (resolved == null && swagger.getParameters() != null && swagger.getParameters().containsKey(ref)) {
+            resolved = swagger.getParameters().get(ref);
+        }
+        if (resolved == null && swagger.getResponses() != null && swagger.getResponses().containsKey(ref)) {
+            resolved = swagger.getResponses().get(ref);
+        }
+        if (resolved == null) {
+            log.warn("Component not found in reference: " + ref);
+            return null;
+        }
+        if (resolved instanceof RefModel) {
+            return (T) resolveComponentRef(((RefModel) resolved).getSimpleRef(), swagger, visitedRefs, expectedType);
+        } else if (resolved instanceof RefParameter) {
+            return (T) resolveComponentRef(((RefParameter) resolved).getSimpleRef(), swagger, visitedRefs,
+                    expectedType);
+        } else if (resolved instanceof Response && ((Response) resolved).getSchema() instanceof RefModel) {
+            return (T) resolveComponentRef(((RefModel) ((Response) resolved).getSchema()).getSimpleRef(), swagger,
+                    visitedRefs, expectedType);
+        }
+        return expectedType.cast(resolved);
     }
 
     /**
