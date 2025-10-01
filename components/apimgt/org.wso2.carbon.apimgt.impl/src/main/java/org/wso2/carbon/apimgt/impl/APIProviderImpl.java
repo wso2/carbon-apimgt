@@ -7235,9 +7235,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             Set<String> targetEnvironments = Collections.singleton(environment);
             Map<String, String> gatewayVhosts = Collections.singletonMap(environment, newDeployment.getVhost());
+            apiMgtDAO.removeAPIRevisionDeployment(apiId, deploymentsToRemove);
 
             if (!deploymentsToRemove.isEmpty() && !skipDeployToGateway) {
-                apiMgtDAO.removeAPIRevisionDeployment(apiId, deploymentsToRemove);
                 removeFromGateway(api, deploymentsToRemove, targetEnvironments, false);
             }
 
@@ -7247,9 +7247,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // Skip deployToGateway only if explicitly called from the gateway
             if (!skipDeployToGateway) {
                 gatewayManager.deployToGateway(api, organization, targetEnvironments);
-                updatePublishedDefaultVersionIfRequired(apiIdentifier, api, organization);
             }
-
+            updatePublishedDefaultVersionIfRequired(apiIdentifier, api, organization);
         } catch (APIManagementException e) {
             log.error("Error while resuming API revision deployment for API ID: " + apiId, e);
         }
