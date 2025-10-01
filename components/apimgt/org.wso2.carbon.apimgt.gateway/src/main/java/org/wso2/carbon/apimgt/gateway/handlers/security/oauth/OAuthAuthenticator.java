@@ -352,7 +352,7 @@ public class OAuthAuthenticator implements Authenticator {
                     if (matchedAPI != null) {
                         isExistingApiSubtype = APIConstants.API_SUBTYPE_EXISTING_API.equals(matchedAPI.getSubtype());
                         if (isExistingApiSubtype && matchedAPI.getUrlMappings() != null) {
-                            HashSet<String> refs = new LinkedHashSet<>();
+                            Set<String> refs = new LinkedHashSet<>();
                             for (URLMapping mapping : matchedAPI.getUrlMappings()) {
                                 if (mapping != null && mapping.getApiOperationMapping() != null) {
                                     String id = mapping.getApiOperationMapping().getApiUuid();

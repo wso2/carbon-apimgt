@@ -512,7 +512,7 @@ public class JWTValidator {
         }
         dto.setCustomClaims(custom);
 
-        LinkedHashSet<String> refs = new LinkedHashSet<>();
+        Set<String> refs = new LinkedHashSet<>();
         if (matchedAPI != null && matchedAPI.getUrlMappings() != null) {
             for (URLMapping mapping : matchedAPI.getUrlMappings()) {
                 if (mapping != null && mapping.getApiOperationMapping() != null) {
