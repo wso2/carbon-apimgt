@@ -71,8 +71,14 @@ public class PublisherCommonServiceComponent {
     protected void deactivate(ComponentContext context) {
 
         log.debug("Deactivating PublisherCommonService Component");
-        gatewayArtifactGenerator.shutdown();
-        serviceRegistration.unregister();
+        if (serviceRegistration != null) {
+            log.debug("Unregistering PublisherCommonService...");
+            serviceRegistration.unregister();
+        }
+        if (gatewayArtifactGenerator != null) {
+            gatewayArtifactGenerator.shutdown();
+
+        }
     }
 
     /**
