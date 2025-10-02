@@ -71,6 +71,8 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String webHookFaultSequenceName = "webhooksFaultSequence";
     private String webSocketOutDispatchSeq = "outDispatchSeq";
     private String webSocketDispatchSeq = "dispatchSeq";
+    private final String mcpPolicyFailureHandlerSequenceName = "_mcp_failure_handler_";
+    private final String guardRailPolicyFailureHandlerSequenceName = "guardrail_fault";
     private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
@@ -173,6 +175,28 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                         new File(synapseConfigDir.getAbsolutePath() + File.separator +
                                 MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
                                 opaPolicyFailureHandlerSequenceName + ".xml"));
+            }
+            String mcpPolicyFailureSequence = synapseConfigsDir.getAbsolutePath() + File.separator +
+                    manger.getTracker().getCurrentConfigurationName() + File.separator +
+                    MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator + mcpPolicyFailureHandlerSequenceName
+                    + ".xml";
+            File mcpPolicyFailureSequenceXml = new File(mcpPolicyFailureSequence);
+            if (!mcpPolicyFailureSequenceXml.exists()) {
+                FileUtils.copyFile(new File(synapseConfigRootPath + mcpPolicyFailureHandlerSequenceName + ".xml"),
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator +
+                                MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
+                                mcpPolicyFailureHandlerSequenceName + ".xml"));
+            }
+            String guardRailPolicyFailureSequence = synapseConfigsDir.getAbsolutePath() + File.separator +
+                    manger.getTracker().getCurrentConfigurationName() + File.separator +
+                    MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator + guardRailPolicyFailureHandlerSequenceName
+                    + ".xml";
+            File guardRailPolicyFailureSequenceXml = new File(guardRailPolicyFailureSequence);
+            if (!guardRailPolicyFailureSequenceXml.exists()) {
+                FileUtils.copyFile(new File(synapseConfigRootPath + guardRailPolicyFailureHandlerSequenceName + ".xml"),
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator +
+                                MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
+                                guardRailPolicyFailureHandlerSequenceName + ".xml"));
             }
         } catch (RemoteException e) {
             log.error("Failed to create Tenant's synapse sequences.", e);
