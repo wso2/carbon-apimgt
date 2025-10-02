@@ -218,7 +218,6 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
         return runtimeArtifactDto;
     }
 
-
     private ProcessingResult processSingleArtifact(APIRuntimeArtifactDto runTimeArtifact,
                                                    Map<String, Environment> environments) {
 
