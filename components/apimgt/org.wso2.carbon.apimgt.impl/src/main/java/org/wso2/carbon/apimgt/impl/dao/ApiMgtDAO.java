@@ -15992,6 +15992,40 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Check if there are any existing API revision deployments for the given gateway environment UUID.
+     *
+     * @param gatewayUuid  UUID of the gateway environment
+     * @param organization organization identifier
+     * @return true if there are existing API revision deployments, false otherwise
+     * @throws APIManagementException if a database access error occurs
+     */
+    public boolean hasExistingAPIRevisions(String gatewayUuid, String organization)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            // Check for API revision deployments
+            try (PreparedStatement prepStmt = connection.prepareStatement(
+                    SQLConstants.CHECK_API_REVISION_DEPLOYMENTS_EXISTS_BY_GATEWAY_ENV_SQL)) {
+                prepStmt.setString(1, gatewayUuid);
+                prepStmt.setString(2, organization);
+                try (ResultSet rs = prepStmt.executeQuery()) {
+                    if (rs.next() && rs.getInt("REVISION_COUNT") > 0) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(String.format("Found existing API revision deployments for gateway UUID: %s",
+                                    gatewayUuid));
+                        }
+                        return true;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException(
+                    "Failed to check existing API revisions for gateway UUID: " + gatewayUuid, e);
+        }
+        return false;
+    }
+
+    /**
      * Update Gateway Environment
      *
      * @param environment Environment to be updated
