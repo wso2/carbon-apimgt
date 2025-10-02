@@ -23,7 +23,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jetbrains.annotations.NotNull;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
@@ -115,7 +114,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                     private final AtomicInteger count = new AtomicInteger(1);
 
                     @Override
-                    public Thread newThread(@NotNull Runnable r) {
+                    public Thread newThread(Runnable r) {
                         Thread t = new Thread(r, "SynapseArtifact-" + count.getAndIncrement());
                         t.setDaemon(false);
                         return t;
