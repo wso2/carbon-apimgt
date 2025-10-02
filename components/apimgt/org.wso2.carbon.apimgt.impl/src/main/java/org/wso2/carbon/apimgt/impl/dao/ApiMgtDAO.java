@@ -15989,40 +15989,24 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Check if there are any existing API revision deployments or external API mappings for the given
-     * gateway environment UUID.
+     * Check if there are any existing API revision deployments for the given gateway environment UUID.
      *
      * @param gatewayUuid  UUID of the gateway environment
      * @param organization organization identifier
-     * @return true if there are existing API revision deployments or external mappings, false otherwise
+     * @return true if there are existing API revision deployments, false otherwise
      * @throws APIManagementException if a database access error occurs
      */
-    public boolean hasExistingAPIRevisionsOrExternalMappings(String gatewayUuid, String organization)
+    public boolean hasExistingAPIRevisions(String gatewayUuid, String organization)
             throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            // Check for external API mappings
-            try (PreparedStatement stmt = connection.prepareStatement(
-                    SQLConstants.CHECK_API_EXTERNAL_API_MAPPINGS_EXISTS_SQL)) {
-                stmt.setString(1, gatewayUuid);
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next() && rs.getInt(1) > 0) {
-                        if (log.isDebugEnabled()) {
-                            log.debug(String.format("Found existing external API mappings for gateway UUID: %s",
-                                    gatewayUuid));
-                        }
-                        return true;
-                    }
-                }
-            }
-
             // Check for API revision deployments
             try (PreparedStatement prepStmt = connection.prepareStatement(
                     SQLConstants.CHECK_API_REVISION_DEPLOYMENTS_EXISTS_BY_GATEWAY_ENV_SQL)) {
                 prepStmt.setString(1, gatewayUuid);
                 prepStmt.setString(2, organization);
                 try (ResultSet rs = prepStmt.executeQuery()) {
-                    if (rs.next() && rs.getInt(1) > 0) {
+                    if (rs.next() && rs.getInt("REVISION_COUNT") > 0) {
                         if (log.isDebugEnabled()) {
                             log.debug(String.format("Found existing API revision deployments for gateway UUID: %s",
                                     gatewayUuid));
@@ -16033,7 +16017,7 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException(
-                    "Failed to check existing API revisions or external mappings for gateway UUID: " + gatewayUuid, e);
+                    "Failed to check existing API revisions for gateway UUID: " + gatewayUuid, e);
         }
         return false;
     }
