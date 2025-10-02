@@ -176,6 +176,9 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 }
                 try {
                     if (!validationDisabled || !disableRetrieveKeyMappings) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Attempting to load key mapping from internal API");
+                        }
                         applicationKeyMapping = new SubscriptionDataLoaderImpl()
                                 .getKeyMapping(key, keyManager, tenantDomain);
                     }
