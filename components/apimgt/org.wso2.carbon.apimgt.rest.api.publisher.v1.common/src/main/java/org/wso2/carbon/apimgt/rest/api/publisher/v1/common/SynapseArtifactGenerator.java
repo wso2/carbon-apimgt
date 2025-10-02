@@ -148,7 +148,9 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                     if (artifactThreadPoolExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
                         log.debug("SynapseArtifactGenerator thread pool shutdown completed after forcing.");
                     } else {
-                        log.error("Thread pool did not terminate even after forced shutdown.");
+                        log.error("Thread pool did not terminate even after forced shutdown. Active: "
+                                + artifactThreadPoolExecutor.getActiveCount() + ", Queue: "
+                                + artifactThreadPoolExecutor.getQueue().size());
                     }
                 }
             } catch (InterruptedException ie) {
@@ -235,6 +237,10 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
             result.success = false;
             result.errorMessage = "Environment not found for label: " + label;
             return result;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Processing artifact for API: " + result.name + " (" + result.apiId + ") with label: "
+                    + label);
         }
         try (InputStream artifact = (InputStream) runTimeArtifact.getArtifact()) {
             GatewayAPIDTO gatewayAPIDTO = null;
