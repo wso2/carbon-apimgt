@@ -424,6 +424,7 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Generate internal API Key to invoke MCP Server.", notes = "This operation can be used to generate internal api key which used to invoke MCP Server. ", response = APIKeyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_generate_key", description = "Generate Internal Key"),
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
         })
     }, tags={ "MCP Servers",  })
@@ -1016,8 +1017,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Validate a third-party MCP Server", notes = "This operation can be used to validate a `url` of a third party mcp server ", response = MCPServerValidationResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
         })
     }, tags={ "Validation" })
     @ApiResponses(value = { 

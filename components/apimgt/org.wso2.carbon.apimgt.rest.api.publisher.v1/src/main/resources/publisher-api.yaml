@@ -2576,8 +2576,8 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/validate-mcp-server" \
@@ -4724,6 +4724,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_generate_key
+            - apim:mcp_server_create
             - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
@@ -6951,6 +6952,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_generate_key
+            - apim:api_create
             - apim:api_manage
       x-code-samples:
         - lang: Curl
@@ -7209,6 +7211,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
             - apim:subscription_view
             - apim:subscription_manage
       x-code-samples:
@@ -7269,6 +7272,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
             - apim:subscription_view
             - apim:subscription_manage
       x-code-samples:
@@ -7300,6 +7304,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
             - apim:subscription_view
             - apim:subscription_manage
       x-code-samples:
@@ -7498,6 +7503,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
             - apim:tier_view
             - apim:tier_manage
       x-code-samples:
@@ -7550,6 +7556,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
             - apim:tier_view
             - apim:tier_manage
       x-code-samples:
@@ -7611,6 +7618,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
             - apim:tier_view
             - apim:tier_manage
       x-code-samples:
@@ -8324,6 +8332,8 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
             - apim:ep_certificates_view
             - apim:ep_certificates_manage
       x-code-samples:
@@ -8388,6 +8398,8 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
             - apim:ep_certificates_add
             - apim:ep_certificates_manage
       x-code-samples:
@@ -8434,6 +8446,8 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
             - apim:ep_certificates_view
             - apim:ep_certificates_manage
       x-code-samples:
@@ -8499,6 +8513,8 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
             - apim:ep_certificates_update
             - apim:ep_certificates_manage
       x-code-samples:
@@ -8543,6 +8559,8 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
             - apim:ep_certificates_update
             - apim:ep_certificates_manage
       x-code-samples:
@@ -8585,6 +8603,8 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
             - apim:ep_certificates_view
             - apim:ep_certificates_manage
       x-code-samples:
@@ -8633,6 +8653,8 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
             - apim:ep_certificates_view
             - apim:ep_certificates_manage
       x-code-samples:
@@ -8695,6 +8717,9 @@ paths:
             - apim:api_view
             - apim:api_manage
             - apim:api_import_export
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
+            - apim:mcp_server_import_export
             - apim:api_product_import_export
       x-code-samples:
         - lang: Curl
@@ -10242,6 +10267,9 @@ paths:
             - apim:api_create
             - apim:api_publish
             - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_publish
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -10408,6 +10436,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -10462,6 +10491,8 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -10487,6 +10518,8 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -10515,6 +10548,8 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -10555,6 +10590,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
             - apim:shared_scope_manage
       x-code-samples:
         - lang: Curl
@@ -10632,6 +10668,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
             - apim:shared_scope_manage
       x-code-samples:
         - lang: Curl
@@ -10726,6 +10763,9 @@ paths:
             - apim:api_create
             - apim:api_publish
             - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_publish
+            - apim:mcp_server_manage
             - apim:shared_scope_manage
       x-code-samples:
         - lang: Curl
@@ -10793,6 +10833,9 @@ paths:
             - apim:api_view
             - apim:api_create
             - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
