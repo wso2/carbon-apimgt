@@ -165,6 +165,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "A Gateway Environment with %s already exists"),
     READONLY_GATEWAY_ENVIRONMENT(900508, "Gateway Environment is read only", 400,
             "A Gateway Environment with %s is read only"),
+    READ_ONLY_MODE_GATEWAY_ENVIRONMENT(900515, "Gateway environment mode is read only", 400,
+            "Cannot deploy revision in gateway environment %s with read only mode."),
     GATEWAY_ENVIRONMENT_DUPLICATE_VHOST_FOUND(900509, "Gateway Environment with duplicate virtual hosts",
             400, "A Gateway Environment cannot exists with duplicate virtual hosts"),
     READONLY_GATEWAY_ENVIRONMENT_NAME(900510, "Names of Gateway Environment cannot be changed",

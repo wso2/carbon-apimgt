@@ -59,6 +59,7 @@ import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayMode;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -1109,10 +1110,19 @@ public class ApisApiServiceImplUtils {
                                                                                String vhost, boolean mandatoryVHOST)
             throws APIManagementException {
 
-        if (environments.get(environment) == null) {
+        Environment env = environments.get(environment);
+        if (env == null) {
             final String errorMessage = "Gateway environment not found: " + environment;
             throw new APIManagementException(errorMessage, ExceptionCodes.from(
                     ExceptionCodes.INVALID_GATEWAY_ENVIRONMENT, String.format("name '%s'", environment)));
+        } else {
+            if (GatewayMode.READ_ONLY.getMode().equals(env.getMode())) {
+                final String errorMessage = "The mode of gateway environment : " + environment
+                        + " is READ_ONLY. Cannot deploy revision";
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.READ_ONLY_MODE_GATEWAY_ENVIRONMENT,
+                                String.format("name '%s'", environment)));
+            }
         }
 
         if (mandatoryVHOST && StringUtils.isEmpty(vhost)) {
