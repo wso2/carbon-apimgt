@@ -230,6 +230,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         scopesToCheck.put("apim:mcp_server_import_export", "admin,Internal/devops");
         scopesToCheck.put("apim:mcp_server_publish", "admin,Internal/publisher");
         scopesToCheck.put("apim:mcp_server_delete", "admin,Internal/creator");
+        scopesToCheck.put("apim:mcp_server_generate_key", "admin,Internal/creator,Internal/publisher");
 
         scopesToCheck.put(SUBSCRIPTION_APPROVAL_VIEW_SCOPE, "admin,Internal/publisher");
         scopesToCheck.put(SUBSCRIPTION_APPROVAL_MANAGE_SCOPE, "admin,Internal/publisher");
