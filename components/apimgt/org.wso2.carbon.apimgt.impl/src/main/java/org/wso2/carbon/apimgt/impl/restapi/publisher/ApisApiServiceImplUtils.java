@@ -18,10 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
-import org.wso2.carbon.apimgt.api.model.Backend;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.apache.http.client.HttpClient;
-import org.wso2.carbon.apimgt.api.model.BackendOperation;
-import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.impl.MCPInitializerAndToolFetcher;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -53,19 +51,6 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.APIEndpointValidationDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.ServiceEntry;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
@@ -1103,10 +1088,19 @@ public class ApisApiServiceImplUtils {
                                                                                String vhost, boolean mandatoryVHOST)
             throws APIManagementException {
 
-        if (environments.get(environment) == null) {
+        Environment env = environments.get(environment);
+        if (env == null) {
             final String errorMessage = "Gateway environment not found: " + environment;
             throw new APIManagementException(errorMessage, ExceptionCodes.from(
                     ExceptionCodes.INVALID_GATEWAY_ENVIRONMENT, String.format("name '%s'", environment)));
+        } else {
+            if (GatewayMode.READ_ONLY.getMode().equals(env.getMode())) {
+                final String errorMessage = "The mode of gateway environment : " + environment
+                        + " is READ_ONLY. Cannot deploy revision";
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.READ_ONLY_MODE_GATEWAY_ENVIRONMENT,
+                                String.format("name '%s'", environment)));
+            }
         }
 
         if (mandatoryVHOST && StringUtils.isEmpty(vhost)) {
