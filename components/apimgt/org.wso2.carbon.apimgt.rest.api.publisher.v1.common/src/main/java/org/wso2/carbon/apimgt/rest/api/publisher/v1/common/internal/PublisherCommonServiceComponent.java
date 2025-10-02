@@ -72,11 +72,19 @@ public class PublisherCommonServiceComponent {
 
         log.debug("Deactivating PublisherCommonService Component");
         if (serviceRegistration != null) {
-            log.debug("Unregistering PublisherCommonService...");
-            serviceRegistration.unregister();
+            try {
+                log.debug("Unregistering PublisherCommonService...");
+                serviceRegistration.unregister();
+            } catch (IllegalStateException exception) {
+                log.warn("Service already unregistered", exception);
+            }
         }
         if (gatewayArtifactGenerator != null) {
-            gatewayArtifactGenerator.shutdown();
+            try {
+                gatewayArtifactGenerator.shutdown();
+            } catch (Exception e) {
+                log.error("Error shutting down gateway artifact generator", e);
+            }
         }
     }
 
