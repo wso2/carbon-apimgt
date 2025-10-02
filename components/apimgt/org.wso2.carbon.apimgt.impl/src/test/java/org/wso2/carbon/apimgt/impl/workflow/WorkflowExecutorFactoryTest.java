@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
@@ -44,7 +45,7 @@ import static org.wso2.carbon.h2.osgi.utils.CarbonConstants.CARBON_HOME;
  * WorkflowExecutorFactory test cases
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({PrivilegedCarbonContext.class, Caching.class, WorkflowExecutorFactory.class})
+@PrepareForTest({PrivilegedCarbonContext.class, Caching.class, WorkflowExecutorFactory.class, APIUtil.class})
 public class WorkflowExecutorFactoryTest {
 
     private WorkflowExecutorFactory workflowExecutorFactory;
@@ -91,6 +92,25 @@ public class WorkflowExecutorFactoryTest {
             Assert.assertNotNull(workflowExecutorFactory.getWorkflowConfigurations());
         } catch (WorkflowException e) {
             Assert.fail("Unexpected WorkflowException has occurred while retrieving workflow configuration");
+        }
+    }
+
+    /**
+     * Test getWorkflowConfigurations for a given tenant
+     */
+    @Test public void testInitialisingWorkflowConfigwithTenant() throws Exception {
+        String tenant = "abc.com";
+        String errorMessage = "Error occurred while creating workflow configurations for tenant " + tenant;
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.getTenantIdFromTenantDomain(Mockito.anyString())).thenReturn(1);
+        Mockito.when(cache.get(Mockito.anyString())).thenReturn(null);
+        PowerMockito.whenNew(TenantWorkflowConfigHolder.class).withAnyArguments()
+                .thenReturn(tenantWorkflowConfigHolder);
+
+        try {
+            Assert.assertNotNull(workflowExecutorFactory.getWorkflowConfigurations(tenant));
+        } catch (WorkflowException e) {
+            Assert.assertEquals(e.getMessage(), errorMessage);
         }
     }
 
