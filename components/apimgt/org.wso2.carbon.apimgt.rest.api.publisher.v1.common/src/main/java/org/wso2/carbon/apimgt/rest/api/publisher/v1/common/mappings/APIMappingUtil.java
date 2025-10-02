@@ -226,7 +226,8 @@ public class APIMappingUtil {
         context = updateContextWithVersion(dto.getVersion(), originalContext, context);
         model.setContext(context);
         model.setDescription(dto.getDescription());
-        model.setDisplayName(dto.getDisplayName());
+        model.setDisplayName((dto.getDisplayName() != null && !dto.getDisplayName().trim().isEmpty())
+                ? dto.getDisplayName() : dto.getName());
 
         Object endpointConfig = dto.getEndpointConfig();
         if (endpointConfig != null) {
@@ -819,8 +820,10 @@ public class APIMappingUtil {
             model.getMetadata().put(APIConstants.MCP.PROTOCOL_VERSION_KEY, protocolVersion);
         }
         String displayName = dto.getDisplayName();
-        if (displayName != null && !displayName.isEmpty()) {
+        if (displayName != null && !displayName.trim().isEmpty()) {
             model.setDisplayName(displayName);
+        } else {
+            model.setDisplayName(dto.getName());
         }
 
         try {
@@ -1047,6 +1050,36 @@ public class APIMappingUtil {
         operation.setVerb(uriTemplate.getHTTPVerb());
         operation.setTarget(uriTemplate.getUriTemplate());
         return operation;
+    }
+
+    /**
+     * Converts a List of APIOperationsDTO into URITemplates.
+     *
+     * @param operations list of APIOperationsDTO
+     * @return List of URITemplate objects
+     */
+    public static Set<URITemplate> fromOperationListToURITemplateList(List<APIOperationsDTO> operations) {
+
+        Set<URITemplate> uriTemplateList = new HashSet<>();
+        for (APIOperationsDTO operation : operations) {
+            URITemplate template = fromOperationToURITemplate(operation);
+            uriTemplateList.add(template);
+        }
+        return uriTemplateList;
+    }
+
+    /**
+     * Converts a single APIOperationsDTO to URITemplate.
+     *
+     * @param operation APIOperationsDTO
+     * @return URITemplate object
+     */
+    private static URITemplate fromOperationToURITemplate(APIOperationsDTO operation) {
+
+        URITemplate template = new URITemplate();
+        template.setHTTPVerb(operation.getVerb());
+        template.setUriTemplate(operation.getTarget());
+        return template;
     }
 
     /**
@@ -1617,7 +1650,8 @@ public class APIMappingUtil {
         }
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
-        dto.setDisplayName(model.getDisplayName() != null ? model.getDisplayName() : model.getId().getApiName());
+        dto.setDisplayName((model.getDisplayName() != null && !model.getDisplayName().trim().isEmpty())
+                ? model.getDisplayName() : model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
         String providerName = model.getId().getProviderName();
         dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
@@ -3914,6 +3948,8 @@ public class APIMappingUtil {
         productDto.setName(product.getId().getName());
         productDto.setDisplayName(
                 product.getDisplayName() != null ? product.getDisplayName() : product.getId().getName());
+        productDto.setDisplayName((product.getDisplayName() != null && !product.getDisplayName().trim().isEmpty())
+                ? product.getDisplayName() : product.getId().getName());
         productDto.setProvider(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
         productDto.setId(product.getUuid());
         productDto.setVersion(product.getId().getVersion());
@@ -4179,7 +4215,8 @@ public class APIMappingUtil {
         product.setID(id);
         product.setUuid(dto.getId());
         product.setDescription(dto.getDescription());
-        product.setDisplayName(dto.getDisplayName() != null ? dto.getDisplayName() : dto.getName());
+        product.setDisplayName((dto.getDisplayName() != null && !dto.getDisplayName().trim().isEmpty())
+                ? dto.getDisplayName() : dto.getName());
 
         String context = dto.getContext();
         final String originalContext = context;
@@ -4841,7 +4878,7 @@ public class APIMappingUtil {
      * @param endpointSecurity JSONObject representing the endpoint security configuration.
      * @return JSONObject with decrypted values where applicable.
      */
-    private static JSONObject handleEndpointSecurityDecrypt(JSONObject endpointSecurity) {
+    private static JSONObject handleEndpointSecurityDecrypt(JSONObject endpointSecurity) throws APIManagementException {
 
         JSONObject endpointSecurityElement = new JSONObject();
         endpointSecurityElement.putAll(endpointSecurity);
@@ -4876,9 +4913,8 @@ public class APIMappingUtil {
      * @throws CryptoException if decryption fails.
      * @throws ParseException  if custom parameters cannot be parsed.
      */
-    private static void decryptSecurity(JSONObject endpointSecurityElement,
-                                        String sectionKey,
-                                        CryptoUtil cryptoUtil) throws CryptoException, ParseException {
+    private static void decryptSecurity(JSONObject endpointSecurityElement, String sectionKey, CryptoUtil cryptoUtil)
+            throws CryptoException, ParseException, APIManagementException {
 
         Object sectionObj = endpointSecurityElement.get(sectionKey);
 
@@ -4889,8 +4925,18 @@ public class APIMappingUtil {
             JSONObject deploymentStage = new JSONObject((Map<String, Object>) sectionObj);
             String apiKeyValue = (String) deploymentStage.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
             if (StringUtils.isNotEmpty(apiKeyValue)) {
-                deploymentStage.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
-                        new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
+                try {
+                    boolean isEncrypted = cryptoUtil.base64DecodeAndIsSelfContainedCipherText(apiKeyValue);
+                    String decryptedApiKeyValue;
+                    if (isEncrypted) {
+                        decryptedApiKeyValue = new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue));
+                    } else {
+                        decryptedApiKeyValue = apiKeyValue;
+                    }
+                    deploymentStage.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, decryptedApiKeyValue);
+                } catch (CryptoException e) {
+                    throw new APIManagementException("Error while decrypting value", e);
+                }
             }
             String clientSecret = (String) deploymentStage.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET);
             if (StringUtils.isNotEmpty(clientSecret)) {

@@ -180,6 +180,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.cache.Cache;
 
+import static org.wso2.carbon.apimgt.api.ExceptionCodes.APPLICATION_INACTIVE;
+import static org.wso2.carbon.apimgt.api.ExceptionCodes.WORKFLOW_PENDING;
+
 /**
  * This class provides the core API store functionality. It is implemented in a very
  * self-contained and 'pure' manner, without taking requirements like security into account,
@@ -1786,8 +1789,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             existingApp = apiMgtDAO.getApplicationById(application.getId());
         }
 
-        if (existingApp != null && APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(existingApp.getStatus())) {
-            throw new APIManagementException("Cannot update the application while it is INACTIVE");
+        if (existingApp != null && (APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(existingApp.getStatus())
+                || APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(existingApp.getStatus()))) {
+            throw new APIManagementException("Applications that are not yet approved cannot be updated.",
+                    APPLICATION_INACTIVE);
+        }
+        if (existingApp != null && APIConstants.ApplicationStatus.UPDATE_PENDING.equals(existingApp.getStatus())) {
+            throw new APIManagementException("Cannot update the application while an update is already PENDING",
+                    WORKFLOW_PENDING);
         }
         boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
@@ -2458,6 +2467,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 throw new APIManagementException("user: " + application.getSubscriber().getName() + ", " +
                         "attempted to generate tokens for application owned by: " + userId);
             }
+            if (APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(application.getStatus())
+                    || APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(application.getStatus())) {
+                throw new APIManagementException("Cannot generate tokens for applications that are not yet approved.",
+                        APPLICATION_INACTIVE);
+            }
 
             // if its a PRODUCTION application.
             if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
@@ -2958,6 +2972,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             if (!orgWideAppUpdateEnabled && !isUserAppOwner) {
                 throw new APIManagementException("user: " + userId + ", attempted to update OAuth application " +
                         "owned by: " + subscriberName);
+            }
+            if (APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(application.getStatus())
+                    || APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(application.getStatus())) {
+                throw new APIManagementException("Cannot update OAuth applications that are not yet approved.",
+                        APPLICATION_INACTIVE);
             }
             String keyManagerName;
             KeyManagerConfigurationDTO keyManagerConfiguration =
@@ -3757,8 +3776,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
             boolean isExternalGateway = false;
             GatewayDeployer gatewayDeployer = null;
-            if (gatewayConfiguration != null && StringUtils.isNotEmpty(
-                    gatewayConfiguration.getDiscoveryImplementation()) && api.isInitiatedFromGateway()) {
+            if (api.isInitiatedFromGateway()) {
                 Map<String, String> extractedURLs = extractEndpointUrlsForDiscoveredApi(api);
                 if (extractedURLs == null) {
                     if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)) {
@@ -3778,10 +3796,10 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 }
                 String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(),
                         environment.getUuid());
-                String httpUrl = isExternalGateway && gatewayDeployer != null ?
+                String httpUrl = (isExternalGateway && gatewayDeployer != null && externalReference != null) ?
                         gatewayDeployer.getAPIExecutionURL(externalReference, GatewayDeployer.HttpScheme.HTTP) :
                         vhost.getHttpUrl();
-                String httpsUrl = isExternalGateway && gatewayDeployer != null?
+                String httpsUrl = (isExternalGateway && gatewayDeployer != null && externalReference != null) ?
                         gatewayDeployer.getAPIExecutionURL(externalReference, GatewayDeployer.HttpScheme.HTTPS) :
                         vhost.getHttpsUrl();
                 if (StringUtils.containsIgnoreCase(api.getTransports(),

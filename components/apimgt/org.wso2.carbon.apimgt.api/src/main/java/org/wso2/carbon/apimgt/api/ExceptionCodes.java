@@ -184,7 +184,7 @@ public enum ExceptionCodes implements ErrorHandler {
     WORKFLOW_ALREADY_COMPLETED(900552, "Workflow error", 400,
             "Workflow is already completed"),
     WORKFLOW_PENDING(900553, "Workflow exception", 409,
-            "Pending workflow task exists for the seleted API"),
+            "Pending workflow task exists for the selected API/Application"),
     WORKFLOW_INVALID_WFTYPE(900554, "Workflow error", 500, "Invalid workflow type specified"),
     WORKFLOW_INV_STORE_WFTYPE(900555, "Workflow error", 500, "Invalid workflow type for store workflows"),
     WORKFLOW_STATE_MISSING(900556, "Workflow error", 400, "Workflow status is not defined"),
@@ -815,6 +815,10 @@ public enum ExceptionCodes implements ErrorHandler {
             "Endpoint URL is invalid"),
     INVALID_MEDIA_TYPE_VALIDATION(902050, "Invalid or mismatched media type detected.", 415,
             "File extension '%s' does not match detected MIME type '%s'"),
+    ERROR_ENCRYPTING_ENDPOINT_SECURITY(902055, "Error while encrypting the endpoint security details", 500,
+            "Error while encrypting the endpoint security details. %s", true),
+    INVALID_API_ENDPOINT_PAYLOAD(902056, "Invalid API endpoint request payload", 400,
+            "The API endpoint request payload is malformed or missing required fields."),
 
     // Guardrail related codes
     GUARDRAIL_VIOLATION(900514, "Guardrail intervened.", 446,
@@ -846,8 +850,10 @@ public enum ExceptionCodes implements ErrorHandler {
             "Updating the MCP Server is restricted as as it is %s."),
     INVALID_MCP_SERVER_ID(904011, "Invalid MCP Server ID", 404,
             "The provided MCP SERVER ID is not found %s", false),
-    INVALID_REFERENCE_API(900806, "Invalid reference API", 400,
+    INVALID_REFERENCE_API(904012, "Invalid reference API", 400,
             "Referenced API is not supported for MCP Server."),
+    DUPLICATE_MCP_TOOLS(904013, "Duplicate MCP tools", 400,
+            "One or more MCP tools are duplicated."),
 
     // gateway notification related codes
     GATEWAY_NOTIFICATION_BAD_REQUEST(902052, "Invalid request for gateway notification", 400,

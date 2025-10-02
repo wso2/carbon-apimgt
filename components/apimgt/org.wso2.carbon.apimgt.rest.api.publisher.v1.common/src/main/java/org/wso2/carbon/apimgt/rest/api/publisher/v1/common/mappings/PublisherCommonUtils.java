@@ -169,6 +169,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.AI_API_QUOTA_TYPE;
 import static org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.EVENT_COUNT_TYPE;
@@ -741,6 +742,23 @@ public class PublisherCommonUtils {
                             originalAPI.getId().getVersion()));
         }
 
+        List<API> usedMcpServers =
+                apiProvider.getMCPServersUsedByAPI(originalAPI.getUuid(), originalAPI.getOrganization());
+        if (!usedMcpServers.isEmpty()) {
+            List<APIOperationsDTO> updatedOperations = apiDtoToUpdate.getOperations();
+            if (updatedOperations != null && !updatedOperations.isEmpty()) {
+                List<URITemplate> removedResources = getRemovedResources(
+                        APIMappingUtil.fromOperationListToURITemplateList(updatedOperations),
+                        originalAPI.getUriTemplates());
+                if (!removedResources.isEmpty()) {
+                    log.error("Cannot update API with removed resources when MCP servers are in use. API: "
+                            + originalAPI.getId().getUUID());
+                    throw new APIManagementException(
+                            ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_MCP_USAGE));
+                }
+            }
+        }
+
         // Validate API Security
         List<String> apiSecurity = apiDtoToUpdate.getSecurityScheme();
         //validation for tiers
@@ -909,7 +927,9 @@ public class PublisherCommonUtils {
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
         apiToUpdate.setGatewayType(apiDtoToUpdate.getGatewayType());
-        apiToUpdate.setDisplayName(apiDtoToUpdate.getDisplayName());
+        apiToUpdate.setDisplayName((apiDtoToUpdate.getDisplayName() != null
+                && !apiDtoToUpdate.getDisplayName().trim().isEmpty()) ? apiDtoToUpdate.getDisplayName()
+                : apiDtoToUpdate.getName());
 
         //validate API categories
         List<APICategory> apiCategories = apiToUpdate.getApiCategories();
@@ -1108,7 +1128,9 @@ public class PublisherCommonUtils {
         SwaggerData swaggerData = new SwaggerData(apiToUpdate);
         String definitionToAdd = new OAS3Parser().generateAPIDefinition(swaggerData);
         apiToUpdate.setSwaggerDefinition(definitionToAdd);
-        apiToUpdate.setDisplayName(apiDtoToUpdate.getDisplayName());
+        apiToUpdate.setDisplayName((apiDtoToUpdate.getDisplayName() != null
+                && !apiDtoToUpdate.getDisplayName().trim().isEmpty()) ? apiDtoToUpdate.getDisplayName()
+                : apiDtoToUpdate.getName());
 
         apiToUpdate.setOrganization(originalAPI.getOrganization());
         apiToUpdate.setSubtype(originalAPI.getSubtype());
@@ -1193,7 +1215,7 @@ public class PublisherCommonUtils {
      * @param cryptoUtil               encryption utility
      * @param oldProductionApiKeyValue previous production key
      * @param oldSandboxApiKeyValue    previous sandbox key
-     * @param apiDtoTypeWrapper            APIDTOWrapper to update can be aither APIDTO or MCPServerDTO
+     * @param apiDtoTypeWrapper        APIDTOWrapper to update can be either APIDTO or MCPServerDTO
      * @throws CryptoException        on encryption failure
      * @throws APIManagementException on invalid config or missing key
      */
@@ -2007,6 +2029,31 @@ public class PublisherCommonUtils {
         }
 
         return removedReusedResources;
+    }
+
+    /**
+     * Finds resources that have been removed in the updated API compared to the existing API.
+     *
+     * @param updatedUriTemplates   Updated API URI templates
+     * @param existingUriTemplates  Existing API URI templates
+     * @return List of removed resources
+     */
+    public static List<URITemplate> getRemovedResources(Set<URITemplate> updatedUriTemplates,
+                                                        Set<URITemplate> existingUriTemplates) {
+
+        List<URITemplate> removedResources = new ArrayList<>();
+
+        Set<String> updatedOps = updatedUriTemplates.stream()
+                .map(op -> op.getHTTPVerb() + ":" + op.getUriTemplate())
+                .collect(Collectors.toSet());
+
+        for (URITemplate existingTemplate : existingUriTemplates) {
+            String identifier = existingTemplate.getHTTPVerb() + ":" + existingTemplate.getUriTemplate();
+            if (!updatedOps.contains(identifier)) {
+                removedResources.add(existingTemplate);
+            }
+        }
+        return removedResources;
     }
 
     /**
@@ -2935,7 +2982,6 @@ public class PublisherCommonUtils {
         api.setSubtype(apiDtoTypeWrapper.getResolvedApiSubtype());
         api.setAiConfiguration(apiDtoTypeWrapper.getAiConfiguration());
         api.setInitiatedFromGateway(apiDtoTypeWrapper.getInitiatedFromGateway());
-        api.setDisplayName(apiDtoTypeWrapper.getDisplayName());
         if (apiDtoTypeWrapper.isMCPServerDTO()) {
             String protocolVersion = apiDtoTypeWrapper.getProtocolVersion();
             api.getMetadata().put(APIConstants.MCP.PROTOCOL_VERSION_KEY,
@@ -3210,6 +3256,17 @@ public class PublisherCommonUtils {
                             + " because they are used by one or more API Products", ExceptionCodes
                     .from(ExceptionCodes.API_PRODUCT_USED_RESOURCES, existingAPI.getId().getApiName(),
                             existingAPI.getId().getVersion()));
+        }
+
+        List<API> usedMcpServers = apiProvider.getMCPServersUsedByAPI(apiId, organization);
+        if (usedMcpServers != null && !usedMcpServers.isEmpty()) {
+            List<URITemplate> removedResources = getRemovedResources(uriTemplates, existingAPI.getUriTemplates());
+            if (!removedResources.isEmpty()) {
+                log.error("Cannot update API with removed resources when MCP servers are in use. API: "
+                        + existingAPI.getId().getUUID());
+                throw new APIManagementException(
+                        ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_MCP_USAGE));
+            }
         }
 
         //set existing operation policies to URI templates
@@ -4280,6 +4337,14 @@ public class PublisherCommonUtils {
     public static APIEndpointDTO updateAPIEndpoint(String apiId, String endpointId, APIEndpointDTO apiEndpointDTO,
             String organization, APIProvider apiProvider)
             throws APIManagementException, CryptoException, JsonProcessingException {
+
+        // validate endpoint name
+        if (StringUtils.isBlank(apiEndpointDTO.getName())) {
+            log.error("Endpoint name cannot be empty");
+            throw new APIManagementException("Endpoint name cannot be empty",
+                    ExceptionCodes.INVALID_API_ENDPOINT_PAYLOAD);
+        }
+
         String oldApiEndpointSecret = null;
         APIEndpointDTO oldEndpointDto = getAPIEndpoint(apiId, endpointId, apiProvider, true);
         Map oldEndpointConfig = (Map) oldEndpointDto.getEndpointConfig();
@@ -4413,6 +4478,13 @@ public class PublisherCommonUtils {
         if (!APIUtil.validateEndpointURL(endpointURL)) {
             throw new APIManagementException("Invalid/Malformed endpoint URL detected",
                     ExceptionCodes.API_ENDPOINT_URL_INVALID);
+        }
+
+        // validate endpoint name
+        if (StringUtils.isBlank(apiEndpoint.getName())) {
+            log.error("Endpoint name cannot be empty");
+            throw new APIManagementException("Endpoint name cannot be empty",
+                    ExceptionCodes.INVALID_API_ENDPOINT_PAYLOAD);
         }
 
         if (APIConstants.APIEndpoint.PRODUCTION.equals(

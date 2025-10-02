@@ -72,10 +72,10 @@ public class GovernanceComponent {
                 .registerService(JMSListenerShutDownService.class, startupShutdownListener, null);
 
         APIMGovernanceDBUtil.initialize();
-        ComplianceEvaluationScheduler.initialize();
 
         String migrationEnabled = System.getProperty(APIMGovernanceConstants.MIGRATE);
         if (migrationEnabled == null) {
+            ComplianceEvaluationScheduler.initialize();
             APIMGovernanceConfigDeployer configDeployer = new APIMGovernanceConfigDeployer();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
         }

@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -63,6 +64,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS;
 import static org.wso2.carbon.apimgt.impl.APIConstants.DELEM_COLON;
 import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil.fromAPItoDTO;
 import static org.wso2.carbon.federated.gateway.util.FederatedGatewayConstants.DISCOVERED_API_LIST;
@@ -210,6 +212,9 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     continue;
                 }
                 APIDTO apidto = fromAPItoDTO(discoveredAPI.getApi());
+                if (apidto.getPolicies() == null || apidto.getPolicies().isEmpty()) {
+                    apidto.setPolicies(Collections.singletonList(DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
+                }
                 API api = discoveredAPI.getApi();
                 try {
                     String apiKey = apidto.getName() + DELEM_COLON + apidto.getVersion();

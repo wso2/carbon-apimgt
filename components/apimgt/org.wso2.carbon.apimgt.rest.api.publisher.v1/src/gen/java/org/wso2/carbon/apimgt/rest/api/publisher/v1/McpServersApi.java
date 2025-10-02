@@ -16,6 +16,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import java.util.List;
@@ -87,8 +88,9 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add a New Document to a MCP server", notes = "This operation can be used to add a new documentation to a MCP server. This operation only adds the metadata  of a document. To add the actual content we need to use **Upload the content of an MCP server document ** MCP server once we obtain a document Id by this operation. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -105,8 +107,9 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Upload the Content of a MCP Server Document", notes = "This operation can be used to upload a file or add inline content to a MCP server document.  **IMPORTANT:** * Either **file** or **inlineContent** form data parameters should be specified at one time. * Document's source type should be **FILE** in order to upload a file to the document using **file** parameter. * Document's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -282,8 +285,9 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a Document of a MCP Server", notes = "This operation can be used to delete a document associated with a MCP server. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -560,8 +564,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Get a Document of a MCP Server", notes = "This operation can be used to retrieve a particular document's metadata associated with a MCP server. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -580,8 +584,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Get the Content of a MCP Server Document", notes = "This operation can be used to retrieve the content of a MCP server's document.  The document can be of 3 types. In each cases responses are different.  1. **Inline type**:    The content of the document will be retrieved in `text/plain` content type     _Sample cURL_ : `curl -k -H \"Authorization:Bearer 579f0af4-37be-35c7-81a4-f1f1e9ee7c51\" -F  inlineContent=@\"docs.txt\" -X POST \"https://localhost:9443/api/am/publisher/v4/mcp-servers/995a4972-3178-4b17-a374-756e0e19127c/documents/43c2bcce-60e7-405f-bc36-e39c0c5e189e/content` 2. **FILE type**:    The file will be downloaded with the related content type (eg. `application/pdf`) 3. **URL type**:     The client will recieve the URL of the document as the Location header with the response with - `303 See Other` ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -601,8 +605,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @ApiOperation(value = "Get a List of Documents of a MCP Server", notes = "This operation can be used to retrieve a list of documents belonging to a MCP server by providing the ID of  the MCP server. ", response = DocumentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -729,6 +733,25 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
     public Response getMCPServerSubscriptionPolicies(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Indicates the quota policy type to be AI API quota or not. ", defaultValue="false") @DefaultValue("false") @QueryParam("isAiApi") Boolean isAiApi,  @ApiParam(value = "Indicates the organization ID ")  @QueryParam("organizationID") String organizationID) throws APIManagementException{
         return delegate.getMCPServerSubscriptionPolicies(mcpServerId, xWSO2Tenant, ifNoneMatch, isAiApi, organizationID, securityContext);
+    }
+
+    @GET
+    @Path("/{mcpServerId}/thumbnail")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get Thumbnail Image of a MCP Server", notes = "This operation can be used to download a thumbnail image of a MCP Server ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+        })
+    }, tags={ "MCP Servers",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Thumbnail image returned ", response = Void.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response getMCPServerThumbnail(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.getMCPServerThumbnail(mcpServerId, ifNoneMatch, securityContext);
     }
 
     @GET
@@ -879,8 +902,9 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update a Document of a MCP Server", notes = "This operation can be used to update metadata of an MCP server's document. ", response = DocumentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:document_manage", description = "Create, update and delete API documents")
         })
     }, tags={ "MCP Server Documents",  })
     @ApiResponses(value = { 
@@ -890,6 +914,26 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
     public Response updateMCPServerDocument(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId, @ApiParam(value = "Document object that needs to be added" ,required=true) DocumentDTO documentDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.updateMCPServerDocument(mcpServerId, documentId, documentDTO, ifMatch, securityContext);
+    }
+
+    @PUT
+    @Path("/{mcpServerId}/thumbnail")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Upload a Thumbnail Image for a MCP Server", notes = "This operation can be used to upload a thumbnail image of a MCP server. The thumbnail to be uploaded should be  given as a form data parameter `file`. ", response = FileInfoDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server")
+        })
+    }, tags={ "MCP Servers",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Image updated ", response = FileInfoDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response updateMCPServerThumbnail(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.updateMCPServerThumbnail(mcpServerId, fileInputStream, fileDetail, ifMatch, securityContext);
     }
 
     @POST

@@ -260,6 +260,14 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     && update) {
                 int appId = APIUtil.getApplicationId(applicationDTO.getName(), ownerId);
                 Application oldApplication = apiConsumer.getApplicationById(appId);
+                if (APIConstants.ApplicationStatus.UPDATE_PENDING.equals(oldApplication.getStatus())) {
+                    RestApiUtil.handleConflict("Application is in UPDATE PENDING state " +
+                            "and cannot be updated until the pending update is resolved.", log);
+                }
+                if (APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(oldApplication.getStatus()) ||
+                        APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(oldApplication.getStatus())) {
+                    RestApiUtil.handleBadRequest("Applications that are not yet approved cannot be updated.", log);
+                }
                 application = preProcessAndUpdateApplication(ownerId, applicationDTO, oldApplication,
                         oldApplication.getUUID(), orgInfo);
             } else {
@@ -481,12 +489,16 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (oldApplication == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
-            if (Objects.equals(oldApplication.getStatus(), APIConstants.ApplicationStatus.UPDATE_PENDING)) {
+            if (!orgWideAppUpdateEnabled && !RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+            if (APIConstants.ApplicationStatus.UPDATE_PENDING.equals(oldApplication.getStatus())) {
                 RestApiUtil.handleConflict("Application is in UPDATE PENDING state " +
                         "and cannot be updated until the pending update is resolved.", log);
             }
-            if (!orgWideAppUpdateEnabled && !RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            if (APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(oldApplication.getStatus()) ||
+                    APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(oldApplication.getStatus())) {
+                RestApiUtil.handleBadRequest("Applications that are not yet approved cannot be updated.", log);
             }
             if (body.getName() != null && !body.getName().equalsIgnoreCase(oldApplication.getName())) {
                 if (APIUtil.isApplicationExist(username, body.getName(),
@@ -853,6 +865,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
                 if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+                    if (APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(application.getStatus())
+                            || APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(application.getStatus())) {
+                        RestApiUtil.handleBadRequest(
+                                "Cannot generate keys for applications that are not yet approved.", log);
+                    }
                     String[] accessAllowDomainsArray = {"ALL"};
                     JSONObject jsonParamObj = new JSONObject();
                     jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);

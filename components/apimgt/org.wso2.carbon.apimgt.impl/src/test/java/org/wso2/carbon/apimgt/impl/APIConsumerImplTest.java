@@ -637,7 +637,7 @@ public class APIConsumerImplTest {
             apiConsumer.updateApplication(newApplication);
             Assert.fail("API management exception not thrown for error scenario");
         } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Cannot update the application while it is INACTIVE"));
+            Assert.assertTrue(e.getMessage().contains("Applications that are not yet approved cannot be updated."));
         }
     }
 

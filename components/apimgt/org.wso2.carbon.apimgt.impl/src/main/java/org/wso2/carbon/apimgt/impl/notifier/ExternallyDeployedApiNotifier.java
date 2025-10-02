@@ -79,9 +79,6 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
      * @throws NotifierException if error occurs when undeploying APIs from external gateway
      */
     private void undeployApiWhenRetiring(APIEvent apiEvent) throws NotifierException {
-
-        apiMgtDAO = ApiMgtDAO.getInstance();
-        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
         boolean deleted;
         String apiId = apiEvent.getUuid();
 
@@ -90,6 +87,8 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
         }
 
         try {
+            apiMgtDAO = ApiMgtDAO.getInstance();
+            Map<String, Environment> gatewayEnvironments = APIUtil.getEnvironments(apiEvent.getTenantDomain());
             List<APIRevisionDeployment> test = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
 
             for (APIRevisionDeployment deployment : test) {
@@ -130,35 +129,31 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
      * @throws NotifierException if error occurs when undeploying APIs from external gateway
      */
     private void undeployWhenDeleting(APIEvent apiEvent) throws NotifierException {
-
-        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
         boolean deleted;
         String apiId = apiEvent.getUuid();
 
         try {
-            List<APIRevisionDeployment> test = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
-            for (APIRevisionDeployment deployment : test) {
-                String deploymentEnv = deployment.getDeployment();
-                if (gatewayEnvironments.containsKey(deploymentEnv)) {
-                    GatewayDeployer deployer = GatewayHolder.getTenantGatewayInstance(apiEvent.tenantDomain,
-                            deploymentEnv);
+            Map<String, Environment> gatewayEnvironments = APIUtil.getEnvironments(apiEvent.getTenantDomain());
+            Map<String, String> references = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId);
+            for (Map.Entry<String, String> entry : references.entrySet()) {
+                String envName = entry.getKey();
+                String reference = entry.getValue();
+                if (gatewayEnvironments.containsKey(envName)) {
+                    GatewayDeployer deployer = GatewayHolder.getTenantGatewayInstance(apiEvent.tenantDomain, envName);
                     if (deployer != null) {
                         try {
-                            String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
-                                    gatewayEnvironments.get(deploymentEnv).getUuid());
-                            if (referenceArtifact == null) {
-                                throw new APIManagementException("API is not mapped with an External API");
+                            if (log.isDebugEnabled()) {
+                                log.debug("Undeploy API from external gateway: " + reference + " in environment: " +
+                                        envName);
                             }
-                            if (log.isDebugEnabled()){
-                                log.debug("Undeploy API from external gateway: " + referenceArtifact +
-                                        " in environment: " + deploymentEnv);
-                            }
-                            deleted = deployer.undeploy(referenceArtifact, true);
+                            deleted = deployer.undeploy(reference, true);
                             if (!deleted) {
-                                throw new NotifierException("Error while deleting externally deployed API");
+                                log.error("Error while deleting externally deployed API. API ID: " + apiId
+                                        + ", Environment: " + envName + ", Reference: " + reference);
                             }
                         } catch (APIManagementException e) {
-                            throw new NotifierException(e.getMessage());
+                            // make the process continue since this is API Deletion.
+                            log.error("Error while deleting externally deployed API", e);
                         }
                     }
                 }

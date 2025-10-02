@@ -1251,11 +1251,15 @@
                 <java.naming.factory.initial>{{apim.throttling.jms.java_naming_factory_initial}}</java.naming.factory.initial>
                 {% if apim.throttling.jms.topic_connection_factory is defined %}
                 <connectionfactory.TopicConnectionFactory>{{apim.throttling.jms.topic_connection_factory}}</connectionfactory.TopicConnectionFactory>
-                {% elif apim.throttling.throttle_decision_endpoints is defined %}
+                {% elif apim.throttling.throttle_decision_endpoints is defined and (apim.throttling.jms.ssl is not defined) %}
                 <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?{% if apim.throttling.jms.ssl is defined %}ssl='{{apim.throttling.jms.ssl}}'{% endif %}%26retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
                 {% elif apim.throttling.jms.username is defined %}
                 {% if apim.throttling.jms.password is defined %}
+                {% if apim.throttling.throttle_decision_endpoints is not defined %}
                 <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
+                {% else %}
+                <connectionfactory.TopicConnectionFactory>amqp://<![CDATA[{{apim.throttling.jms.username}}]]>:<![CDATA[{{apim.throttling.jms.password}}]]>@clientid/carbon?brokerlist='{% for url in apim.throttling.throttle_decision_endpoints %}{{url}}?{% if apim.throttling.jms.ssl is defined %}ssl='{{apim.throttling.jms.ssl}}'{% endif %}%26retries='5'%26connectdelay='50';{% endfor %}'</connectionfactory.TopicConnectionFactory>
+                {% endif %}
                 {% endif %}
                 {% else %}
                 <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
@@ -1582,6 +1586,17 @@
             {% endif %}
         </Properties>
     </RedisConfig>
+    {% endif %}
+
+    {% if apim.solace_config is defined %}
+        <SolaceConfig>
+            {% if apim.solace_config.apim_api_endpoint is defined %}
+            <SolaceApimApiEndpoint>{{apim.solace_config.apim_api_endpoint}}</SolaceApimApiEndpoint>
+            {% endif %}
+            {% if apim.solace_config.token is defined %}
+            <SolaceToken>{{apim.solace_config.token}}</SolaceToken>
+            {% endif %}
+        </SolaceConfig>
     {% endif %}
 
     {% if apim.devportal.application_attributes is defined %}
@@ -2047,6 +2062,17 @@
               <DataRetentionPeriodSeconds>{{apim.gateway_notification.cleanup.data_retention_period}}</DataRetentionPeriodSeconds>
           </GatewayCleanup>
       </GatewayNotificationConfiguration>
+
+      <!-- SynapseArtifactGenerator thread pool configuration -->
+      <SynapseArtifactGenerator>
+          <ThreadPool>
+              <CorePoolSize>{{apim.synapse_artifact_generator.thread_pool.core_pool_size}}</CorePoolSize>
+              <MaxPoolSize>{{apim.synapse_artifact_generator.thread_pool.max_pool_size}}</MaxPoolSize>
+              <KeepAliveTimeMs>{{apim.synapse_artifact_generator.thread_pool.keep_alive_time_ms}}</KeepAliveTimeMs>
+              <QueueCapacity>{{apim.synapse_artifact_generator.thread_pool.queue_capacity}}</QueueCapacity>
+          </ThreadPool>
+      </SynapseArtifactGenerator>
+
       <EnableFailoverInLoadbalancedEndpoints>{{apim.endpoint_config.loadbalanced.enable_failover}}</EnableFailoverInLoadbalancedEndpoints>
       <EnableCertificateManagementEventListening>{{apim.certificate_manager.events_enabled}}</EnableCertificateManagementEventListening>
 </APIManager>
