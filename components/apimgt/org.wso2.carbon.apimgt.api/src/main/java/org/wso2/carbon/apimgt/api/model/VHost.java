@@ -173,9 +173,46 @@ public class VHost implements Serializable {
         return String.format("%s://%s%s%s", protocol, hostName, port, context);
     }
 
+    private void findAndDisableMissingProtocols(String[] endpoints) {
+        boolean wsFound = false;
+        boolean websubhttpFound = false;
+        for (String endpoint : endpoints) {
+            if (StringUtils.isEmpty(endpoint)) {
+                continue;
+            }
+            String[] elem = endpoint.split(PROTOCOL_SEPARATOR);
+            if (elem.length != 2) {
+                continue;
+            }
+            switch (elem[0]) {
+            case WEBSUB_HTTP_PROTOCOL:
+                websubhttpFound = true;
+                break;
+            case WS_PROTOCOL:
+                wsFound = true;
+                break;
+            }
+        }
+        if (!wsFound) {
+            this.disableWs();
+        }
+        if (!websubhttpFound) {
+            this.disableWebsubHttp();
+        }
+    }
+    
+    public void disableWs() {
+        this.wsPort = -1;
+    }
+
+    public void disableWebsubHttp() {
+        this.websubHttpPort = -1;
+    }
+
     @UsedByMigrationClient
     public static VHost fromEndpointUrls(String[] endpoints) throws APIManagementException {
         VHost vhost = new VHost();
+        vhost.findAndDisableMissingProtocols(endpoints);
 
         for (String endpoint : endpoints) {
             if (StringUtils.isEmpty(endpoint)) {
