@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.ssl.SSLContexts;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -131,7 +130,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -143,7 +141,6 @@ import java.util.List;
 import java.util.Map;
 import javax.cache.Cache;
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 
 import static org.wso2.carbon.apimgt.common.gateway.util.CommonAPIUtil.ALLOW_ALL;
@@ -1049,19 +1046,6 @@ public class APIManagerComponent {
                     nonProxyHosts);
         }
 
-        SSLContext sslContext = null;
-        try {
-            KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
-            sslContext = SSLContexts.custom().loadTrustMaterial(trustStore, null).build();
-        } catch ( KeyStoreException e) {
-            log.error("Failed to read from Key Store", e);
-        } catch (
-                NoSuchAlgorithmException e) {
-            log.error("Failed to load Key Store.", e);
-        } catch (
-                KeyManagementException e) {
-            log.error("Failed to load key from Key Store" , e);
-        }
         String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
         HostnameVerifier hostnameVerifier;
         switch(hostnameVerifierOption) {
@@ -1086,7 +1070,7 @@ public class APIManagerComponent {
         }
         configuration.setHttpClientConfiguration(builder
                 .withConnectionParams(maxTotal, defaultMaxPerRoute, connectionTimeout)
-                .withSSLContext(sslContext, hostnameVerifier).build());
+                .withHostnameVerifier(hostnameVerifier).build());
     }
 
     void initializeAPIDiscoveryTasks(String organization) {

@@ -2881,6 +2881,15 @@ public final class APIConstants {
      */
     public static final String TRUST_STORE_PASSWORD = "Security.TrustStore.Password";
     public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
+    
+    /**
+     * Constants related to HTTP client creation
+     */
+    public static final String JAVAX_NET_SSL_TRUST_STORE = "javax.net.ssl.trustStore";
+    public static final String JAVAX_NET_SSL_TRUST_STORE_PASSWORD = "javax.net.ssl.trustStorePassword";
+    public static final String JAVAX_NET_SSL_TRUST_STORE_TYPE = "javax.net.ssl.trustStoreType";
+    public static final String DEFAULT_KEY_STORE_TYPE = "JKS";
+
     public static final String INTERNAL_WEB_APP_EP = "/internal/data/v1";
     public static final String API_KEY_REVOKE_PATH = "/key/revoke";
 

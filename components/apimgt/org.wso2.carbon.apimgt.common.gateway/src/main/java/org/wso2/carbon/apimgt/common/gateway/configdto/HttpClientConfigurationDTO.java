@@ -17,11 +17,8 @@
  */
 package org.wso2.carbon.apimgt.common.gateway.configdto;
 
-import org.apache.http.ssl.SSLContexts;
-
 import java.util.Arrays;
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
 
 /**
  * Configuration related to Http Clients within gateway.
@@ -38,7 +35,6 @@ public class HttpClientConfigurationDTO {
     private char[] proxyPassword = new char[]{};
     private String[] nonProxyHosts = new String[]{};
     private String proxyProtocol;
-    private SSLContext sslContext;
     private HostnameVerifier hostnameVerifier;
 
     public HostnameVerifier getHostnameVerifier() {
@@ -84,10 +80,6 @@ public class HttpClientConfigurationDTO {
         return proxyProtocol;
     }
 
-    public SSLContext getSslContext() {
-        return sslContext;
-    }
-
     public int getConnectionTimeout() {
         return connectionTimeout;
     }
@@ -107,7 +99,6 @@ public class HttpClientConfigurationDTO {
         private char[] proxyPassword = new char[]{};
         private String[] nonProxyHosts = new String[]{};
         private String proxyProtocol;
-        private SSLContext sslContext;
         private HostnameVerifier hostnameVerifier;
 
         public Builder withConnectionParams(int connectionLimit, int maximumConnectionsPerRoute,
@@ -131,13 +122,7 @@ public class HttpClientConfigurationDTO {
             return this;
         }
 
-        public Builder withSSLContext(SSLContext sslContext) {
-            this.sslContext = sslContext;
-            return this;
-        }
-
-        public Builder withSSLContext(SSLContext sslContext, HostnameVerifier hostnameVerifier) {
-            this.sslContext = sslContext;
+        public Builder withHostnameVerifier(HostnameVerifier hostnameVerifier) {
             this.hostnameVerifier = hostnameVerifier;
             return this;
         }
@@ -155,11 +140,6 @@ public class HttpClientConfigurationDTO {
             configuration.proxyProtocol = this.proxyProtocol;
             configuration.nonProxyHosts = this.nonProxyHosts;
             configuration.hostnameVerifier = this.hostnameVerifier;
-            if (this.sslContext != null) {
-                configuration.sslContext = this.sslContext;
-            } else {
-                configuration.sslContext = SSLContexts.createDefault();
-            }
             return configuration;
         }
     }
