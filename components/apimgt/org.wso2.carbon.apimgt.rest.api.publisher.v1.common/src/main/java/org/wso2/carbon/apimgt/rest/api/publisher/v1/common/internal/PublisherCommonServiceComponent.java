@@ -77,7 +77,6 @@ public class PublisherCommonServiceComponent {
         }
         if (gatewayArtifactGenerator != null) {
             gatewayArtifactGenerator.shutdown();
-
         }
     }
 
