@@ -332,8 +332,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
         }
         return result;
     }
-
-
+    
     /**
      * Generate gateway policy artifact.
      *
