@@ -45,6 +45,7 @@ ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
     @ApiOperation(value = "Get All Throttling Policies for the Given Type", notes = "This operation can be used to list the available policies for a given policy level. Tier level should be specified as a path parameter and should be one of `subscription` and `api`. `subscription` is for Subscription Level policies and `api` is for Resource Level policies ", response = ThrottlingPolicyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies"),
             @AuthorizationScope(scope = "apim:tier_manage", description = "View, update and delete throttling policies")
         })
@@ -64,6 +65,7 @@ ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
     @ApiOperation(value = "Get streaming throttling policies", notes = "This operation can be used to list the available streaming subscription policies ", response = SubscriptionPolicyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies"),
             @AuthorizationScope(scope = "apim:tier_manage", description = "View, update and delete throttling policies")
         })
@@ -83,6 +85,7 @@ ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
     @ApiOperation(value = "Get Details of a Policy", notes = "This operation can be used to retrieve details of a single policy by specifying the policy level and policy name. ", response = ThrottlingPolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:tier_view", description = "View throttling policies"),
             @AuthorizationScope(scope = "apim:tier_manage", description = "View, update and delete throttling policies")
         })

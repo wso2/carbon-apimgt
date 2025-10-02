@@ -379,6 +379,10 @@
             {
               "Name": "apim:comment_write",
               "Roles": "admin,Internal/creator,Internal/publisher"
+            },
+            {
+              "Name": "apim:mcp_server_generate_key",
+              "Roles": "admin,Internal/creator,Internal/publisher"
             }
           ]
         }
