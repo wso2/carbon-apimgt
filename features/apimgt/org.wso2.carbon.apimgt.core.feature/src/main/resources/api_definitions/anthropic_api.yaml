@@ -4447,7 +4447,7 @@ paths:
         '529':
           $ref: '#/components/responses/Error529'
 x-wso2-cors:
-  corsConfigurationEnabled: false
+  corsConfigurationEnabled: true
   accessControlAllowOrigins:
     - '*'
   accessControlAllowCredentials: false
