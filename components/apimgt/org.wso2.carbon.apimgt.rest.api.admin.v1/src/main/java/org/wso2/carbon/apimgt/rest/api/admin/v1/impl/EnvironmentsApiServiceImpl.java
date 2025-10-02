@@ -49,17 +49,10 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
      * @throws APIManagementException if failed to delete
      */
     public Response environmentsEnvironmentIdDelete(String environmentId, MessageContext messageContext) throws APIManagementException {
+
         APIAdmin apiAdmin = new APIAdminImpl();
-        //String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        if (apiAdmin.hasExistingDeployments(organization, environmentId)) {
-            RestApiUtil.handleConflict("Cannot delete the environment with id: " + environmentId
-                    + " as active gateway policy deployment exist", log);
-        }
-        if (apiAdmin.hasExistingAPIRevisions(organization, environmentId)) {
-            RestApiUtil.handleConflict("Cannot delete the environment with id: " + environmentId
-                    + " as API revisions are deployed to it", log);
-        }
+
         apiAdmin.deleteEnvironment(organization, environmentId);
         String info = "{'id':'" + environmentId + "'}";
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.GATEWAY_ENVIRONMENTS, info,

@@ -216,6 +216,17 @@ public class APIAdminImpl implements APIAdmin {
             throw new APIMgtResourceNotFoundException(errorMessage,
                     ExceptionCodes.from(ExceptionCodes.READONLY_GATEWAY_ENVIRONMENT, String.format("UUID '%s'", uuid)));
         }
+        if (hasExistingDeployments(tenantDomain, uuid)) {
+            throw new APIManagementException("Cannot delete the environment with id: " + uuid
+                    + " as active gateway policy deployment exist",
+                    ExceptionCodes.from(ExceptionCodes.GATEWAY_ENVIRONMENT_ACTIVE_DEPLOYMENTS_EXIST,
+                            String.format("UUID '%s'", uuid)));
+        }
+        if (hasExistingAPIRevisions(tenantDomain, uuid)) {
+            throw new APIManagementException("Cannot delete the environment with id: " + uuid
+                    + " as API revisions are deployed to it", ExceptionCodes.from(
+                    ExceptionCodes.GATEWAY_ENVIRONMENT_API_REVISIONS_EXIST, String.format("UUID '%s'", uuid)));
+        }
         apiMgtDAO.deleteEnvironment(uuid);
     }
 
@@ -245,9 +256,7 @@ public class APIAdminImpl implements APIAdmin {
                 apiMgtDAO.getGatewayPolicyMappingByGatewayLabel(existingEnv.getDisplayName(), tenantDomain));
     }
 
-    @Override
-    public boolean hasExistingAPIRevisions(String tenantDomain, String uuid) throws APIManagementException {
-
+    private boolean hasExistingAPIRevisions(String tenantDomain, String uuid) throws APIManagementException {
         if (log.isDebugEnabled()) {
             log.debug(String.format("Checking for existing API revisions for "
                     + "gateway environment with UUID '%s' in tenant '%s'", uuid, tenantDomain));
