@@ -57,9 +57,9 @@ public class PublisherCommonServiceComponent {
 
         log.debug("PublisherCommonService Component activated");
         gatewayArtifactGenerator = new SynapseArtifactGenerator();
+        gatewayArtifactGenerator.initialize();
         serviceRegistration = context.getBundleContext().registerService(GatewayArtifactGenerator.class.getName(),
                 gatewayArtifactGenerator, null);
-        gatewayArtifactGenerator.initialize();
     }
 
     /**
