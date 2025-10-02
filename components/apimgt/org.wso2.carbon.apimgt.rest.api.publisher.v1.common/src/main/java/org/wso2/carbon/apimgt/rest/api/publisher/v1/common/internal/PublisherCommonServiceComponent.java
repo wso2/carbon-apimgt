@@ -20,13 +20,18 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.SynapseArtifactGenerator;
 import org.wso2.carbon.user.core.service.RealmService;
 
 /**
@@ -39,6 +44,8 @@ import org.wso2.carbon.user.core.service.RealmService;
 public class PublisherCommonServiceComponent {
 
     private static final Log log = LogFactory.getLog(PublisherCommonServiceComponent.class);
+    private SynapseArtifactGenerator gatewayArtifactGenerator;
+    private ServiceRegistration serviceRegistration;
 
     /**
      * Activates the component.
@@ -46,7 +53,26 @@ public class PublisherCommonServiceComponent {
      * @param context The component context.
      */
     @Activate
-    protected void activate(org.osgi.service.component.ComponentContext context) {
+    protected void activate(ComponentContext context) {
+
+        log.debug("PublisherCommonService Component activated");
+        gatewayArtifactGenerator = new SynapseArtifactGenerator();
+        serviceRegistration = context.getBundleContext().registerService(GatewayArtifactGenerator.class.getName(),
+                gatewayArtifactGenerator, null);
+        gatewayArtifactGenerator.initialize();
+    }
+
+    /**
+     * Deactivate publisher common component.
+     *
+     * @param context OSGI Component Context
+     */
+    @Deactivate
+    protected void deactivate(ComponentContext context) {
+
+        log.debug("Deactivating PublisherCommonService Component");
+        gatewayArtifactGenerator.shutdown();
+        serviceRegistration.unregister();
     }
 
     /**
