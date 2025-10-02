@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -196,7 +197,9 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                     } finally {
                         PrivilegedCarbonContext.endTenantFlow();
                     }
-                }, artifactThreadPoolExecutor)).collect(Collectors.toList());
+                }, artifactThreadPoolExecutor != null ? artifactThreadPoolExecutor : ForkJoinPool.commonPool())).
+                        collect(Collectors.toList());
+
         // Wait for all tasks to complete
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         for (CompletableFuture<ProcessingResult> future : futures) {
