@@ -5988,9 +5988,7 @@ public final class APIUtil {
 
         // Avoid unnecessary truststore work for plain HTTP
         if (!APIConstants.HTTPS_PROTOCOL.equalsIgnoreCase(protocol)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Using default SSL context for HTTP protocol");
-            }
+            log.debug("Using default SSL context for HTTP protocol");
             return CommonAPIUtil.getHttpClient(protocol, configuration, SSLContexts.createDefault());
         }
 
@@ -6026,9 +6024,7 @@ public final class APIUtil {
             // Create SSL context dynamically to pick up certificate changes at runtime
             KeyStore trustStore = KeyStore.getInstance(trustStoreType);
             try (InputStream keyStoreStream = Files.newInputStream(path)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Loading trust store for SSL context creation.");
-                }
+                log.debug("Loading trust store for SSL context creation.");
                 trustStore.load(keyStoreStream, keyStorePassword);
             }
             return SSLContexts.custom().loadTrustMaterial(trustStore, null).build();
