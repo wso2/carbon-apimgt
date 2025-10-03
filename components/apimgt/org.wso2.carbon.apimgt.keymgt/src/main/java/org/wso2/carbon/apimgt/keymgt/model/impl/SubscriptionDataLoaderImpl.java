@@ -463,6 +463,10 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         // Remove the deployed property from the API object before sending to the internal API
         // as this is not there in the internal DTO
         apiJsonObject.remove("deployed");
+        apiJsonObject.remove("apiProperties");
+        if (log.isDebugEnabled()) {
+            log.debug("Removed 'deployed' and 'apiProperties' fields from API object before internal subscription");
+        }
         String modifiedApiJson = gson.toJson(apiJsonObject);
 
         try {
