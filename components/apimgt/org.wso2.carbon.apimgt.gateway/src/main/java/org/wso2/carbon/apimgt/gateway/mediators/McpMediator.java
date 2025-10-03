@@ -113,7 +113,14 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             }
             if (path.startsWith(APIMgtGatewayConstants.MCP_RESOURCE) && httpMethod.equals(APIConstants.HTTP_POST)) {
                 handleMcpRequest(messageContext, matchedAPI);
-            } else if (path.startsWith(APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE) && httpMethod.equals(APIConstants.HTTP_GET)) {
+            } else if (path.startsWith(APIMgtGatewayConstants.MCP_RESOURCE) &&
+                    httpMethod.equals(APIConstants.HTTP_GET)) {
+                McpResponseDto errorResponse = new McpResponseDto("Server-Sent Events (SSE) not supported",
+                        405, null);
+                MCPUtils.handleMCPFailure(messageContext, errorResponse);
+                return false;
+            } else if (path.startsWith(APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE) &&
+                    httpMethod.equals(APIConstants.HTTP_GET)) {
                 return handleProtectedResourceMetadataResponse(messageContext, matchedAPI);
             }
         } else if (OUT_FLOW.equals(mcpDirection)) {
