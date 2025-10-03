@@ -36,6 +36,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
@@ -54,6 +55,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -471,9 +473,26 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
                 String authenticationScheme;
                 String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
-                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) && (APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod))) {
-                    // todo: iterate tools and set auth scheme
+                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) &&
+                        ((APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod)) || isMCPGetRequest(messageContext))) {
+                    // in case of tool listing and /mcp GET requests, if at least one of the tools
+                    // is protected with a scheme other than "None", we should not treat
+                    // this as a no authentication request
                     authenticationScheme = APIConstants.AUTH_NO_AUTHENTICATION;
+                    API mathedAPI = GatewayUtils.getAPI(messageContext);
+                    if (mathedAPI != null) {
+                        List<URLMapping> urlMappings = mathedAPI.getUrlMappings();
+                        if (urlMappings != null) {
+                            for (URLMapping urlMapping : urlMappings) {
+                                if (!urlMapping.getAuthScheme().equalsIgnoreCase(APIConstants.AUTH_NO_AUTHENTICATION)) {
+                                    authenticationScheme = urlMapping.getAuthScheme();
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        log.warn("No matching API found for the request");
+                    }
                 } else {
                     authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(messageContext);
                 }
@@ -947,5 +966,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     public void setKeyManagers(String keyManagers) {
         this.keyManagers = keyManagers;
+    }
+
+    public boolean isMCPGetRequest(MessageContext messageContext) {
+        String path = (String) messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
+        String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
+        return (APIConstants.MCP.MCP_RESOURCES_MCP.equals(path) && APIConstants.HTTP_GET.equalsIgnoreCase(httpMethod));
     }
 }
