@@ -249,7 +249,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             String contentType = (String) axis2MessageContext.getProperty(Constants.Configuration.CONTENT_TYPE);
-            if (APIConstants.APPLICATION_JSON_MEDIA_TYPE.contains(contentType)) {
+            if (contentType != null && contentType.contains(APIConstants.APPLICATION_JSON_MEDIA_TYPE)) {
                 buildMCPResponse(messageContext);
             } else {
                 if (log.isDebugEnabled()) {
