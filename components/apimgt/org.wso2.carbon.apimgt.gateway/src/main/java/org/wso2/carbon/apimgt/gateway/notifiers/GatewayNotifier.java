@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -31,7 +32,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -80,7 +80,7 @@ public class GatewayNotifier {
     private String gatewayID;
 
     /**
-     * Initializes the scheduler, loads configuration settings, and sets up heartbeat parameters
+     * Initializes the scheduler, loads configuration settings, and sets up heartbeat parameters.
      */
     private GatewayNotifier() {
         heartbeatScheduler = Executors.newSingleThreadScheduledExecutor(
@@ -276,8 +276,15 @@ public class GatewayNotifier {
                     log.debug("/notify-gateway called. Status: " + statusCode + ", Response: " + responseBody);
                 }
                 if (statusCode != HttpStatus.SC_OK) {
-                    log.error("Failed to send heartbeat notification. Status: " + statusCode + ", Response: "
-                                      + responseBody);
+                    // Log authentication, authorization, and server errors at error level
+                    if (statusCode == HttpStatus.SC_UNAUTHORIZED || statusCode == HttpStatus.SC_FORBIDDEN ||
+                            +statusCode >= HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+                        log.error("Failed to send heartbeat notification. Status: " + statusCode + ", Response: "
+                                + responseBody);
+                    } else if (log.isDebugEnabled()) {
+                        log.debug("Failed to send heartbeat notification. Status: " + statusCode + ", Response: "
+                                + responseBody);
+                    }
                 }
             } catch (IOException e) {
                 log.error("Error occurred while executing Gateway Heartbeat notifier", e);
