@@ -662,6 +662,7 @@ public class OAS3Parser extends APIDefinition {
             modifyGraphQLSwagger(openAPI);
         } else if (APISpecParserConstants.MCP_API.equals(swaggerData.getTransportType())) {
             addDefaultPostPathToSwagger(openAPI, APISpecParserConstants.MCP_RESOURCES_MCP);
+            addDefaultGetPathToSwagger(openAPI, APISpecParserConstants.MCP_RESOURCES_MCP);
             addAuthServerMetaEndpointPathToSwagger(openAPI, APISpecParserConstants.MCP_RESOURCES_WELL_KNOWN);
         } else {
             for (SwaggerData.Resource resource : swaggerData.getResources()) {
@@ -3203,7 +3204,12 @@ public class OAS3Parser extends APIDefinition {
             operation.addExtension(APISpecParserConstants.X_WSO2_DISABLE_SECURITY, true);
         }
 
-        PathItem pathItem = new PathItem();
+        Paths paths = openAPI.getPaths();
+        PathItem pathItem = (paths != null) ? paths.get(resource.getPath()) : null;
+        if (pathItem == null) {
+            pathItem = new PathItem();
+        }
+
         switch (resource.getVerb()) {
             case APISpecParserConstants.HTTP_POST:
                 pathItem.setPost(operation);
@@ -3234,6 +3240,24 @@ public class OAS3Parser extends APIDefinition {
         resource.setPath(path);
         resource.setVerb(APISpecParserConstants.HTTP_POST);
         addResourceToSwagger(openAPI, resource, true);
+    }
+
+    /**
+     * Adds a default HTTP GET resource to the given {@link OpenAPI} definition.
+     * This resource is configured with application or user-level token authentication and unlimited subscription
+     * policy.
+     *
+     * @param openAPI the {@link OpenAPI} object to which the resource will be added
+     * @param path    the resource path to add
+     */
+    private void addDefaultGetPathToSwagger(OpenAPI openAPI, String path) {
+
+        SwaggerData.Resource resource = new SwaggerData.Resource();
+        resource.setAuthType(APISpecParserConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+        resource.setPolicy(APISpecParserConstants.DEFAULT_SUB_POLICY_UNLIMITED);
+        resource.setPath(path);
+        resource.setVerb(APISpecParserConstants.HTTP_GET);
+        addResourceToSwagger(openAPI, resource, false);
     }
 
     /**
