@@ -276,8 +276,10 @@ public class GatewayNotifier {
                     log.debug("/notify-gateway called. Status: " + statusCode + ", Response: " + responseBody);
                 }
                 if (statusCode != HttpStatus.SC_OK) {
-                    log.error("Failed to send heartbeat notification. Status: " + statusCode + ", Response: "
-                                      + responseBody);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Failed to send heartbeat notification. Status: " + statusCode + ", Response: "
+                                + responseBody);
+                    }
                 }
             } catch (IOException e) {
                 log.error("Error occurred while executing Gateway Heartbeat notifier", e);
