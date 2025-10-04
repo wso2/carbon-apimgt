@@ -2482,7 +2482,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 existingAPI.getUriTemplates());
         List<OperationPolicy> apiLevelPolicies = extractAndDropAPILevelPoliciesFromAPI(existingAPI);
         updateMCPServerBackends(existingAPI, existingApiId, organization);
-
+        //update swagger definition with version
+        APIUtil.updateAPISwaggerWithVersion(existingAPI);
         API newAPI = addAPI(existingAPI);
         String newAPIId = newAPI.getUuid();
         cloneAPIPoliciesForNewAPIVersion(existingApiId, newAPI, operationPoliciesMap, apiLevelPolicies);
@@ -2493,7 +2494,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             for (Documentation documentation : existingDocs) {
                 Documentation newDoc = addDocumentation(newAPIId, documentation, organization);
                 DocumentationContent content = getDocumentationContent(existingApiId, documentation.getId(),
-                        organization); // TODO see whether we can optimize this
+                        organization);
                 if (content != null) {
                     addDocumentationContent(newAPIId, newDoc.getId(), organization, content);
                 }
@@ -2539,7 +2540,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             existingAPI.setDefaultVersion(isExsitingAPIdefaultVersion);
         }
-
         try {
             apiPersistenceInstance.updateAPI(new Organization(organization),
                     APIMapper.INSTANCE.toPublisherApi(existingAPI));
