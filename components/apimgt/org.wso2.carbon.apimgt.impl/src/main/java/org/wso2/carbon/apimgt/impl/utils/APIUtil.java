@@ -333,6 +333,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.SHA_256;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_INFO;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_NAME;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_VER;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -12073,5 +12076,31 @@ public final class APIUtil {
     public static SolaceConfig getSolaceConfig() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getSolaceConfig();
+    }
+
+    /**
+     * Update the Swagger definition of an API with its version.
+     *
+     * @param api The API object whose Swagger definition needs to be updated.
+     */
+    public static void updateAPISwaggerWithVersion(API api) {
+        String swaggerDefinition = api.getSwaggerDefinition();
+
+        if (swaggerDefinition != null) {
+            JsonObject apiSpec = JsonParser.parseString(swaggerDefinition).getAsJsonObject();
+            JsonObject infoObject = apiSpec.has(SWAGGER_INFO) && apiSpec.get(SWAGGER_INFO).isJsonObject() ?
+                    apiSpec.getAsJsonObject(SWAGGER_INFO) : null;
+            if (infoObject != null) {
+                infoObject.addProperty(SWAGGER_VER, api.getId().getVersion());
+            } else {
+                JsonObject newInfoObject = new JsonObject();
+                newInfoObject.addProperty(SWAGGER_NAME, api.getId().getApiName());
+                newInfoObject.addProperty(SWAGGER_VER, api.getId().getVersion());
+                apiSpec.add(SWAGGER_INFO, newInfoObject);
+            }
+            api.setSwaggerDefinition(apiSpec.toString());
+        } else {
+            log.error("Swagger definition is null for API: " + api.getId().getApiName());
+        }
     }
 }
