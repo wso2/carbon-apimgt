@@ -12088,7 +12088,8 @@ public final class APIUtil {
 
         if (swaggerDefinition != null) {
             JsonObject apiSpec = JsonParser.parseString(swaggerDefinition).getAsJsonObject();
-            JsonObject infoObject = apiSpec.get(SWAGGER_INFO).getAsJsonObject();
+            JsonObject infoObject = apiSpec.has(SWAGGER_INFO) && apiSpec.get(SWAGGER_INFO).isJsonObject() ?
+                    apiSpec.getAsJsonObject(SWAGGER_INFO) : null;
             if (infoObject != null) {
                 infoObject.addProperty(SWAGGER_VER, api.getId().getVersion());
             } else {
