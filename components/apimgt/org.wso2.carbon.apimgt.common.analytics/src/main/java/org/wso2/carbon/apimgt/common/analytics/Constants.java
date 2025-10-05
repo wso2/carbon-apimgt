@@ -32,6 +32,7 @@ public class Constants {
     public static final String IPV6_PROP_TYPE = "IPV6";
     public static final String EMAIL_PROP_TYPE = "EMAIL";
     public static final String USERNAME_PROP_TYPE = "USERNAME";
+    public static  final String STRING_PROP = "STRING";
 
     public static final String IPV4_MASK_VALUE = "***";
     public static final String IPV6_MASK_VALUE = "**";

@@ -94,29 +94,36 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
 
         // Mask UserName if configured
         if (userName != null) {
-            if (maskData.containsKey("api.ut.userName")) {
+            if (maskData.containsKey("api.ut.userName") || maskData.containsKey("userName")) {
                 userName = maskAnalyticsData(maskData.get("api.ut.userName"), userName);
-            } else if (maskData.containsKey("api.ut.userId")) {
+            } else if (maskData.containsKey("api.ut.userId") || maskData.containsKey("userId")) {
                 userName = maskAnalyticsData(maskData.get("api.ut.userId"), userName);
             }
+        } else {
+            userName = Constants.UNKNOWN_VALUE;
+        }
+
+        // Mask Application Owner if configured
+        if (application.getApplicationOwner() != null && maskData.containsKey("applicationOwner")) {
+            String appOwner = application.getApplicationOwner();
+            appOwner = maskAnalyticsData(maskData.get("applicationOwner"), appOwner);
+            application.setApplicationOwner(appOwner);
         }
 
         String userIp = provider.getEndUserIP();
-        if (userName == null) {
-            userName = Constants.UNKNOWN_VALUE;
-        }
+
         if (userIp == null) {
             userIp = Constants.UNKNOWN_VALUE;
         } else {
             // Mask User IP if configured
-            if (maskData.containsKey("api.analytics.user.ip")) {
+            if (maskData.containsKey("api.analytics.user.ip") || maskData.containsKey("userIp")) {
                 userIp = maskAnalyticsData(maskData.get("api.analytics.user.ip"), userIp);
             }
         }
         if (userAgent == null) {
             userAgent = Constants.UNKNOWN_VALUE;
         } else {
-            if (maskData.containsKey("api.analytics.user.agent")) {
+            if (maskData.containsKey("api.analytics.user.agent") || maskData.containsKey("userAgent")) {
                 userAgent = maskAnalyticsData(maskData.get("api.analytics.user.agent"), userAgent);
             }
         }
