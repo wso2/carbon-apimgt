@@ -148,7 +148,7 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
                     .orElse(null);
 
             if (maskType != null) {
-                userAgent = maskAnalyticsData(maskType, userIp);
+                userAgent = maskAnalyticsData(maskType, userAgent);
             }
 
         }
