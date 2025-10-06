@@ -34,6 +34,8 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.impl.SuccessRequestDat
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Success request data collector.
@@ -42,6 +44,7 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
     private static final Log log = LogFactory.getLog(SuccessRequestDataCollector.class);
     private RequestDataPublisher processor;
     private AnalyticsDataProvider provider;
+
     public SuccessRequestDataCollector(AnalyticsDataProvider provider, RequestDataPublisher processor) {
         super(provider);
         this.processor = processor;
@@ -94,10 +97,19 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
 
         // Mask UserName if configured
         if (userName != null) {
-            if (maskData.containsKey("api.ut.userName") || maskData.containsKey("userName")) {
-                userName = maskAnalyticsData(maskData.get("api.ut.userName"), userName);
-            } else if (maskData.containsKey("api.ut.userId") || maskData.containsKey("userId")) {
-                userName = maskAnalyticsData(maskData.get("api.ut.userId"), userName);
+            String maskType = Stream.of(
+                            "api.ut.userName",
+                            "userName",
+                            "api.ut.userId",
+                            "userId"
+                    )
+                    .map(maskData::get)
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
+
+            if (maskType != null) {
+                userName = maskAnalyticsData(maskType, userName);
             }
         } else {
             userName = Constants.UNKNOWN_VALUE;
@@ -116,16 +128,29 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
             userIp = Constants.UNKNOWN_VALUE;
         } else {
             // Mask User IP if configured
-            if (maskData.containsKey("api.analytics.user.ip") || maskData.containsKey("userIp")) {
-                userIp = maskAnalyticsData(maskData.get("api.analytics.user.ip"), userIp);
+            String maskType = Stream.of("api.analytics.user.ip", "userIp")
+                    .map(maskData::get)
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
+
+            if (maskType != null) {
+                userIp = maskAnalyticsData(maskType, userIp);
             }
         }
         if (userAgent == null) {
             userAgent = Constants.UNKNOWN_VALUE;
         } else {
-            if (maskData.containsKey("api.analytics.user.agent") || maskData.containsKey("userAgent")) {
-                userAgent = maskAnalyticsData(maskData.get("api.analytics.user.agent"), userAgent);
+            String maskType = Stream.of("api.analytics.user.agent", "userAgent")
+                    .map(maskData::get)
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
+
+            if (maskType != null) {
+                userIp = maskAnalyticsData(maskType, userIp);
             }
+
         }
 
         event.setApi(api);
