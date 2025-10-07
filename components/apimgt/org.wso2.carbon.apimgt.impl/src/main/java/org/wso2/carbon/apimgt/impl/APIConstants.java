@@ -2958,6 +2958,7 @@ public final class APIConstants {
     public static final String RECOMMENDATIONS_CACHE_NAME = "APIRecommendationsCache";
     public static final String RECOMMENDATIONS_CACHE_KEY = "Recommendations";
     public static final String LAST_UPDATED_CACHE_KEY = "LastUpdated";
+    public static final String SYNAPSE_ARTIFACT_CACHE = "synapseArtifactCache";
 
     public static final String TOPIC_VALIDITY = "TOPIC_VALIDITY";
     public static final String CLONED_ITERATION_INDEX_PROPERTY = "CLONED_ITERATION_INDEX";

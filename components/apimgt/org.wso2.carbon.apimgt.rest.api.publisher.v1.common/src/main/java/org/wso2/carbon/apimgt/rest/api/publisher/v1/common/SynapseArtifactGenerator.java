@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayPolicyArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
@@ -69,6 +70,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import javax.cache.Cache;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -176,6 +178,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
         RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
         List<String> synapseArtifacts = new ArrayList<>();
         List<String> failedApis = new ArrayList<>();
+        Cache synapseCache = CacheProvider.getSynapseArtifactCache();
         Map<String, Environment> environments = APIUtil.getEnvironments();
 
         // Capture the tenant context
@@ -192,7 +195,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                         carbonContext.setTenantDomain(currentTenantDomain);
                         carbonContext.setUsername(currentUsername);
                         carbonContext.setTenantId(currentTenantId);
-                        return processSingleArtifact(runTimeArtifact, environments);
+                        return processSingleArtifact(runTimeArtifact, environments, synapseCache);
                     } finally {
                         PrivilegedCarbonContext.endTenantFlow();
                     }
@@ -223,7 +226,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
     }
 
     private ProcessingResult processSingleArtifact(APIRuntimeArtifactDto runTimeArtifact,
-                                                   Map<String, Environment> environments) {
+                                                   Map<String, Environment> environments, Cache synapseCache) {
 
         ProcessingResult result = new ProcessingResult();
         result.apiId = runTimeArtifact.getApiId();
@@ -240,11 +243,25 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
             result.errorMessage = "Environment not found for label: " + label;
             return result;
         }
+        String cacheKey = runTimeArtifact.getApiId() + ":" + runTimeArtifact.getRevision() + ":" + label;
+        Object cachedArtifact = synapseCache.get(cacheKey);
+        if (cachedArtifact != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cache HIT for Synapse artifact with key: " + cacheKey);
+            }
+            result.content = (String) cachedArtifact;
+            result.success = true;
+            return result;
+        }
+        // Cache Miss: Proceed with the generation process.
         if (log.isDebugEnabled()) {
-            log.debug("Processing artifact for API: " + result.name + " (" + result.apiId + ") with label: "
-                    + label);
+            log.debug("Cache MISS for Synapse artifact with key: " + cacheKey + ". Generating now.");
         }
         try (InputStream artifact = (InputStream) runTimeArtifact.getArtifact()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Processing artifact for API: " + result.name + " (" + result.apiId + ") with label: "
+                        + label);
+            }
             GatewayAPIDTO gatewayAPIDTO = null;
             File baseDirectory = CommonUtil.createTempDirectory(null);
             try {
@@ -323,6 +340,11 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                     gatewayAPIDTO.setRevision(runTimeArtifact.getRevision());
                     result.content = new Gson().toJson(gatewayAPIDTO);
                     result.success = true;
+                    // Populate cache on successful generation.
+                    synapseCache.put(cacheKey, result.content);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Stored Synapse artifact in cache with key: " + cacheKey);
+                    }
                 } else {
                     result.success = false;
                     result.errorMessage = "Generated GatewayAPIDTO was null";
@@ -331,7 +353,6 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                 FileUtils.deleteQuietly(baseDirectory);
             }
         } catch (Exception e) {
-            // only do error since we need to continue for other apis
             // only do error since we need to continue for other apis.
             log.error("Error creating Synapse configurations for API: " + result.name + " ("
                     + result.apiId + ")", e);
