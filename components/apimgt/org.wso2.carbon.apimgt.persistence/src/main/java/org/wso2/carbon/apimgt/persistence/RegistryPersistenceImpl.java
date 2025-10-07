@@ -2769,8 +2769,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String visibleOrgs = getOrganizationVisibilityForApiArtifact(registry, apiId);
             if (DocumentContent.ContentSourceType.FILE.equals(content.getSourceType())) {
                 ResourceFile resource = content.getResourceFile();
-                String filePath = RegistryPersistenceDocUtil.getDocumentFilePath(apiProviderName, apiName, apiVersion,
-                        resource.getName());
+                String filePath = RegistryPersistenceDocUtil.getDocumentPath(apiProviderName, apiName, apiVersion)
+                        + APIConstants.DOCUMENT_FILE_DIR + RegistryConstants.PATH_SEPARATOR
+                        + docId + RegistryConstants.PATH_SEPARATOR + resource.getName();
                 String visibility = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
                 String visibleRolesList = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
                 String[] visibleRoles = new String[0];
