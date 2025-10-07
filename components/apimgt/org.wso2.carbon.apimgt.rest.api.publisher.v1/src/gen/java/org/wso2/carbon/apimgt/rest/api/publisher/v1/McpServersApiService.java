@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import java.util.List;
@@ -79,6 +80,7 @@ public interface McpServersApiService {
       public Response getMCPServerRevisionDeployments(String mcpServerId, MessageContext messageContext) throws APIManagementException;
       public Response getMCPServerRevisions(String mcpServerId, String query, MessageContext messageContext) throws APIManagementException;
       public Response getMCPServerSubscriptionPolicies(String mcpServerId, String xWSO2Tenant, String ifNoneMatch, Boolean isAiApi, String organizationID, MessageContext messageContext) throws APIManagementException;
+      public Response getMCPServerThumbnail(String mcpServerId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getRepliesOfCommentOfMCPServer(String commentId, String mcpServerId, String xWSO2Tenant, Integer limit, Integer offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException;
       public Response importMCPServer(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite, Boolean preservePortalConfigurations, Boolean dryRun, String accept, MessageContext messageContext) throws APIManagementException;
       public Response restoreMCPServerRevision(String mcpServerId, String revisionId, MessageContext messageContext) throws APIManagementException;
@@ -87,6 +89,7 @@ public interface McpServersApiService {
       public Response updateMCPServerBackend(String mcpServerId, String backendId, BackendDTO backendDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateMCPServerDeployment(String mcpServerId, String deploymentId, APIRevisionDeploymentDTO apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateMCPServerDocument(String mcpServerId, String documentId, DocumentDTO documentDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response updateMCPServerThumbnail(String mcpServerId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response validateMCPServer(String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response validateMCPServerDocument(String mcpServerId, String name, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response validateMCPServerEndpoint(String endpointUrl, String apiId, MessageContext messageContext) throws APIManagementException;

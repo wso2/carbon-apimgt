@@ -176,36 +176,35 @@ public class PolicyUtil {
         PolicyRetriever policyRetriever = new PolicyRetriever();
         try {
             // Deploy all the policies retrieved from the database
-            SubscriptionPolicyList subscriptionPolicies = new SubscriptionPolicyList();
             if (migrationEnabled == null) {
-                subscriptionPolicies = policyRetriever.getAllSubscriptionPolicies();
-            }
-            ApplicationPolicyList applicationPolicies = policyRetriever.getAllApplicationPolicies();
-            ApiPolicyList apiPolicies = policyRetriever.getAllApiPolicies();
-            GlobalPolicyList globalPolicies = policyRetriever.getAllGlobalPolicies();
-            // Undeploy all existing policies
-            undeployAllPolicies();
-            for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies.getList()) {
-                if (!(APIConstants.UNLIMITED_TIER.equalsIgnoreCase(subscriptionPolicy.getName())
-                        || APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED.
-                        equalsIgnoreCase(subscriptionPolicy.getName())
-                        || APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED.
-                        equalsIgnoreCase(subscriptionPolicy.getName()))) {
-                    deployPolicy(subscriptionPolicy, null);
+                SubscriptionPolicyList subscriptionPolicies = policyRetriever.getAllSubscriptionPolicies();
+                ApplicationPolicyList applicationPolicies = policyRetriever.getAllApplicationPolicies();
+                ApiPolicyList apiPolicies = policyRetriever.getAllApiPolicies();
+                GlobalPolicyList globalPolicies = policyRetriever.getAllGlobalPolicies();
+                // Undeploy all existing policies
+                undeployAllPolicies();
+                for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies.getList()) {
+                    if (!(APIConstants.UNLIMITED_TIER.equalsIgnoreCase(subscriptionPolicy.getName())
+                            || APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED.
+                            equalsIgnoreCase(subscriptionPolicy.getName())
+                            || APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED.
+                            equalsIgnoreCase(subscriptionPolicy.getName()))) {
+                        deployPolicy(subscriptionPolicy, null);
+                    }
                 }
-            }
-            for (ApplicationPolicy applicationPolicy : applicationPolicies.getList()) {
-                if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(applicationPolicy.getName())) {
-                    deployPolicy(applicationPolicy, null);
+                for (ApplicationPolicy applicationPolicy : applicationPolicies.getList()) {
+                    if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(applicationPolicy.getName())) {
+                        deployPolicy(applicationPolicy, null);
+                    }
                 }
-            }
-            for (ApiPolicy apiPolicy : apiPolicies.getList()) {
-                if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiPolicy.getName())) {
-                    deployPolicy(apiPolicy, null);
+                for (ApiPolicy apiPolicy : apiPolicies.getList()) {
+                    if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiPolicy.getName())) {
+                        deployPolicy(apiPolicy, null);
+                    }
                 }
-            }
-            for (GlobalPolicy globalPolicy : globalPolicies.getList()) {
-                deployPolicy(globalPolicy, null);
+                for (GlobalPolicy globalPolicy : globalPolicies.getList()) {
+                    deployPolicy(globalPolicy, null);
+                }
             }
         } catch (ThrottlePolicyDeployerException e) {
             log.error("Error in retrieving throttle policies", e);

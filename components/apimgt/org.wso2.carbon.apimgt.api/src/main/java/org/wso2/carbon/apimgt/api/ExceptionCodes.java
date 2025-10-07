@@ -165,6 +165,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "A Gateway Environment with %s already exists"),
     READONLY_GATEWAY_ENVIRONMENT(900508, "Gateway Environment is read only", 400,
             "A Gateway Environment with %s is read only"),
+    READ_ONLY_MODE_GATEWAY_ENVIRONMENT(900515, "Gateway environment mode is read only", 400,
+            "Cannot deploy revision in gateway environment %s with read only mode."),
     GATEWAY_ENVIRONMENT_DUPLICATE_VHOST_FOUND(900509, "Gateway Environment with duplicate virtual hosts",
             400, "A Gateway Environment cannot exists with duplicate virtual hosts"),
     READONLY_GATEWAY_ENVIRONMENT_NAME(900510, "Names of Gateway Environment cannot be changed",
@@ -175,6 +177,10 @@ public enum ExceptionCodes implements ErrorHandler {
             400, "Virtual host with provided vhost name does not exist"),
     FEDERATED_GATEWAY_VALIDATION_FAILED(900513, "API Validation Failed with Federated Gateway",
             400, "API Validation Failed with %s Gateway. %s", false),
+    GATEWAY_ENVIRONMENT_ACTIVE_DEPLOYMENTS_EXIST(900516, "Active Gateway Policy Deployments Exist", 409,
+            "Cannot delete the environment with UUID %s as active gateway policy deployment exist"),
+    GATEWAY_ENVIRONMENT_API_REVISIONS_EXIST(900515, "API Revisions Deployed to Gateway Environment Exist", 409,
+            "Cannot delete the environment with UUID %s as API revisions are deployed to it"),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -184,7 +190,7 @@ public enum ExceptionCodes implements ErrorHandler {
     WORKFLOW_ALREADY_COMPLETED(900552, "Workflow error", 400,
             "Workflow is already completed"),
     WORKFLOW_PENDING(900553, "Workflow exception", 409,
-            "Pending workflow task exists for the seleted API"),
+            "Pending workflow task exists for the selected API/Application"),
     WORKFLOW_INVALID_WFTYPE(900554, "Workflow error", 500, "Invalid workflow type specified"),
     WORKFLOW_INV_STORE_WFTYPE(900555, "Workflow error", 500, "Invalid workflow type for store workflows"),
     WORKFLOW_STATE_MISSING(900556, "Workflow error", 400, "Workflow status is not defined"),
@@ -850,8 +856,10 @@ public enum ExceptionCodes implements ErrorHandler {
             "Updating the MCP Server is restricted as as it is %s."),
     INVALID_MCP_SERVER_ID(904011, "Invalid MCP Server ID", 404,
             "The provided MCP SERVER ID is not found %s", false),
-    INVALID_REFERENCE_API(900806, "Invalid reference API", 400,
+    INVALID_REFERENCE_API(904012, "Invalid reference API", 400,
             "Referenced API is not supported for MCP Server."),
+    DUPLICATE_MCP_TOOLS(904013, "Duplicate MCP tools", 400,
+            "One or more MCP tools are duplicated."),
 
     // gateway notification related codes
     GATEWAY_NOTIFICATION_BAD_REQUEST(902052, "Invalid request for gateway notification", 400,

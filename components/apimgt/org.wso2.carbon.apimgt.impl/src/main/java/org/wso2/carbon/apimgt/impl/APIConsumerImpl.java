@@ -180,6 +180,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.cache.Cache;
 
+import static org.wso2.carbon.apimgt.api.ExceptionCodes.APPLICATION_INACTIVE;
+import static org.wso2.carbon.apimgt.api.ExceptionCodes.WORKFLOW_PENDING;
+
 /**
  * This class provides the core API store functionality. It is implemented in a very
  * self-contained and 'pure' manner, without taking requirements like security into account,
@@ -887,16 +890,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             String applicationName = application.getName();
-
+            String requestedDomain = MultitenantUtils.getTenantDomain(
+                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             try {
-                WorkflowExecutor addSubscriptionWFExecutor =
-                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+                String workflowDomain = APIUtil.isCrossTenantSubscriptionsEnabled() && requestedDomain != null ?
+                        requestedDomain : tenantDomain;
+                WorkflowExecutor addSubscriptionWFExecutor = getWorkflowExecutor(
+                        WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION, workflowDomain);
 
                 SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
                 workflowDTO.setStatus(WorkflowStatus.CREATED);
                 workflowDTO.setCreatedTime(System.currentTimeMillis());
-                workflowDTO.setTenantDomain(tenantDomain);
-                workflowDTO.setTenantId(tenantId);
+                workflowDTO.setTenantDomain(workflowDomain);
+                workflowDTO.setTenantId(APIUtil.getTenantIdFromTenantDomain(workflowDomain));
                 workflowDTO.setExternalWorkflowReference(addSubscriptionWFExecutor.generateUUID());
                 workflowDTO.setWorkflowReference(String.valueOf(subscriptionId));
                 workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
@@ -1077,16 +1083,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
             }
-
+            String requestedDomain = MultitenantUtils.getTenantDomain(
+                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             try {
-                WorkflowExecutor updateSubscriptionWFExecutor =
-                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
+                String workflowDomain = APIUtil.isCrossTenantSubscriptionsEnabled() && requestedDomain != null ?
+                        requestedDomain : tenantDomain;
+                WorkflowExecutor updateSubscriptionWFExecutor = getWorkflowExecutor(
+                        WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE, workflowDomain);
 
                 SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
                 workflowDTO.setStatus(WorkflowStatus.CREATED);
                 workflowDTO.setCreatedTime(System.currentTimeMillis());
-                workflowDTO.setTenantDomain(tenantDomain);
-                workflowDTO.setTenantId(tenantId);
+                workflowDTO.setTenantDomain(workflowDomain);
+                workflowDTO.setTenantId(APIUtil.getTenantIdFromTenantDomain(workflowDomain));
                 workflowDTO.setExternalWorkflowReference(updateSubscriptionWFExecutor.generateUUID());
                 workflowDTO.setWorkflowReference(String.valueOf(subscriptionId));
                 workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE);
@@ -1252,12 +1261,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         String applicationName = apiMgtDAO.getApplicationNameFromId(applicationId);
 
+        String providerTenantDomain = MultitenantUtils.getTenantDomain(
+                APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
         try {
+            String workflowDomain = APIUtil.isCrossTenantSubscriptionsEnabled() && providerTenantDomain != null ?
+                    providerTenantDomain : tenantDomain;
             SubscriptionWorkflowDTO workflowDTO;
             WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(
-                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION, workflowDomain);
             WorkflowExecutor removeSubscriptionWFExecutor = getWorkflowExecutor(
-                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+                    WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION, workflowDomain);
             String workflowExtRef = apiMgtDAO
                     .getExternalWorkflowReferenceForSubscription(identifier, applicationId, organization);
 
@@ -1294,8 +1307,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setApiName(identifier.getName());
             workflowDTO.setApiVersion(identifier.getVersion());
             workflowDTO.setApplicationName(applicationName);
-            workflowDTO.setTenantDomain(tenantDomain);
-            workflowDTO.setTenantId(tenantId);
+            workflowDTO.setTenantDomain(workflowDomain);
+            workflowDTO.setTenantId(APIUtil.getTenantIdFromTenantDomain(workflowDomain));
             workflowDTO.setExternalWorkflowReference(workflowExtRef);
             workflowDTO.setSubscriber(userId);
             workflowDTO.setCallbackUrl(removeSubscriptionWFExecutor.getCallbackURL());
@@ -1786,8 +1799,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             existingApp = apiMgtDAO.getApplicationById(application.getId());
         }
 
-        if (existingApp != null && APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(existingApp.getStatus())) {
-            throw new APIManagementException("Cannot update the application while it is INACTIVE");
+        if (existingApp != null && (APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(existingApp.getStatus())
+                || APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(existingApp.getStatus()))) {
+            throw new APIManagementException("Applications that are not yet approved cannot be updated.",
+                    APPLICATION_INACTIVE);
+        }
+        if (existingApp != null && APIConstants.ApplicationStatus.UPDATE_PENDING.equals(existingApp.getStatus())) {
+            throw new APIManagementException("Cannot update the application while an update is already PENDING",
+                    WORKFLOW_PENDING);
         }
         boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
@@ -2458,6 +2477,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 throw new APIManagementException("user: " + application.getSubscriber().getName() + ", " +
                         "attempted to generate tokens for application owned by: " + userId);
             }
+            if (APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(application.getStatus())
+                    || APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(application.getStatus())) {
+                throw new APIManagementException("Cannot generate tokens for applications that are not yet approved.",
+                        APPLICATION_INACTIVE);
+            }
 
             // if its a PRODUCTION application.
             if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
@@ -2959,6 +2983,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 throw new APIManagementException("user: " + userId + ", attempted to update OAuth application " +
                         "owned by: " + subscriberName);
             }
+            if (APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(application.getStatus())
+                    || APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(application.getStatus())) {
+                throw new APIManagementException("Cannot update OAuth applications that are not yet approved.",
+                        APPLICATION_INACTIVE);
+            }
             String keyManagerName;
             KeyManagerConfigurationDTO keyManagerConfiguration =
                     apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerID);
@@ -3208,6 +3237,18 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         return isTenantFlowStarted;
+    }
+
+    /**
+     * Returns a workflow executor given the tenant domain and the workflow type
+     *
+     * @param workflowType Workflow executor type
+     * @param tenant tenant domain
+     * @return WorkflowExecutor of given type
+     * @throws WorkflowException if an error occurred while getting WorkflowExecutor
+     */
+    protected WorkflowExecutor getWorkflowExecutor(String workflowType, String tenant) throws WorkflowException {
+        return WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType, tenant);
     }
 
     /**

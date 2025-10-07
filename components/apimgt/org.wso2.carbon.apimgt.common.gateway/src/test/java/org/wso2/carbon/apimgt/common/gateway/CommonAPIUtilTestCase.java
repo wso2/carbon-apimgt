@@ -93,13 +93,12 @@ public class CommonAPIUtilTestCase {
         HttpGet httpGetWithTLS = new HttpGet("http://localhost:" + mockServer.getPort() + "/hello");
         HttpClientConfigurationDTO nonProxyHostBasedProxyConfig = builder
                 .withConnectionParams(connectionLimit, maximumConnectionsPerRoute, connectionTimeout)
-                .withSSLContext(sslContext)
                 // proxyProtocol here is https (due to existing limitation)
                 .withProxy(proxyHost, proxyServer.getPort(), proxyUsername, "random", proxyProtocol,
                         new String[]{"localhost"})
                 .build();
         HttpClient clientForNonProxyHost = null;
-        clientForNonProxyHost = CommonAPIUtil.getHttpClient("https", nonProxyHostBasedProxyConfig);
+        clientForNonProxyHost = CommonAPIUtil.getHttpClient("https", nonProxyHostBasedProxyConfig, sslContext);
 
         Assert.assertNotNull(clientForNonProxyHost);
         HttpResponse nonProxyHostResponse = getHttpResponseFromClient(clientForNonProxyHost, httpGetWithTLS);
@@ -111,12 +110,11 @@ public class CommonAPIUtilTestCase {
         // Given the proxy configuration, checks if the call is successfully routed via the proxy server.
         HttpClientConfigurationDTO configuration = builder
                 .withConnectionParams(connectionLimit, maximumConnectionsPerRoute, connectionTimeout)
-                .withSSLContext(sslContext)
                 .withProxy(proxyHost, proxyServer.getPort(), proxyUsername, proxyPassword, proxyProtocol, nonProxyHosts)
                 .build();
 
         HttpClient client = null;
-        client = CommonAPIUtil.getHttpClient("https", configuration);
+        client = CommonAPIUtil.getHttpClient("https", configuration, sslContext);
         Assert.assertNotNull(client);
         HttpResponse httpResponse = getHttpResponseFromClient(client, httpGet);
         Assert.assertNotNull(httpResponse);
@@ -131,11 +129,10 @@ public class CommonAPIUtilTestCase {
         // Given the proxy configuration with wrong credentials, checks if the call fails at the proxy server.
         HttpClientConfigurationDTO configWithWrongProxyCredentials = builder
                 .withConnectionParams(connectionLimit, maximumConnectionsPerRoute, connectionTimeout)
-                .withSSLContext(sslContext)
                 .withProxy(proxyHost, proxyServer.getPort(), proxyUsername, "random", proxyProtocol, nonProxyHosts)
                 .build();
         HttpClient clientWithWrongProxyCreds = null;
-        clientWithWrongProxyCreds = CommonAPIUtil.getHttpClient("https", configWithWrongProxyCredentials);
+        clientWithWrongProxyCreds = CommonAPIUtil.getHttpClient("https", configWithWrongProxyCredentials, sslContext);
         Assert.assertNotNull(clientWithWrongProxyCreds);
 
         HttpResponse failedResponse = getHttpResponseFromClient(clientWithWrongProxyCreds, httpGet);
@@ -150,11 +147,10 @@ public class CommonAPIUtilTestCase {
         HttpClientConfigurationDTO.Builder builder = new HttpClientConfigurationDTO.Builder();
         HttpClientConfigurationDTO configuration = builder
                 .withConnectionParams(connectionLimit, maximumConnectionsPerRoute, connectionTimeout)
-                .withSSLContext(sslContext)
                 .build();
 
         HttpClient securedClient = null;
-        securedClient = CommonAPIUtil.getHttpClient("https", configuration);
+        securedClient = CommonAPIUtil.getHttpClient("https", configuration, sslContext);
         Assert.assertNotNull(securedClient);
         HttpResponse httpsResponse = getHttpResponseFromClient(securedClient, httpsGet);
         Assert.assertNotNull(httpsResponse);
@@ -169,7 +165,7 @@ public class CommonAPIUtilTestCase {
         // Checks http request without a proxy server
         HttpGet httpGet = new HttpGet("http://localhost:" + mockServer.getPort() + "/hello");
         HttpClient client = null;
-        client = CommonAPIUtil.getHttpClient("http", configuration);
+        client = CommonAPIUtil.getHttpClient("http", configuration, sslContext);
         Assert.assertNotNull(client);
         HttpResponse httpResponse = getHttpResponseFromClient(client, httpGet);
         Assert.assertNotNull(httpResponse);

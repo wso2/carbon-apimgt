@@ -1,21 +1,21 @@
 /*
-*  Copyright (c) 2005-2008, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing,
-*  software distributed under the License is distributed on an
-*  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-*  KIND, either express or implied.  See the License for the
-*  specific language governing permissions and limitations
-*  under the License.
-*
-*/
+ *  Copyright (c) 2005-2008, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
@@ -71,7 +71,10 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String webHookFaultSequenceName = "webhooksFaultSequence";
     private String webSocketOutDispatchSeq = "outDispatchSeq";
     private String webSocketDispatchSeq = "dispatchSeq";
-    private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
+    private final String mcpPolicyFailureHandlerSequenceName = "_mcp_failure_handler_";
+    private final String guardRailPolicyFailureHandlerSequenceName = "guardrail_fault";
+    private String synapseConfigRootPath =
+            CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -82,7 +85,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
             org.wso2.carbon.registry.core.Registry registry =
                     (org.wso2.carbon.registry.core.Registry) PrivilegedCarbonContext
                             .getThreadLocalCarbonContext().
-                                    getRegistry(RegistryType.SYSTEM_CONFIGURATION);
+                            getRegistry(RegistryType.SYSTEM_CONFIGURATION);
 
             AxisConfiguration axisConfig = configurationContext.getAxisConfiguration();
 
@@ -115,13 +118,21 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
 
             File synapseConfigDir = new File(synapseConfigsDir, manger.getTracker().getCurrentConfigurationName());
             StringBuilder filepath = new StringBuilder();
-            filepath.append(synapseConfigsDir).append('/').append(manger.getTracker().getCurrentConfigurationName()).append('/').
-                    append(MultiXMLConfigurationBuilder.SEQUENCES_DIR).append('/').append(authFailureHandlerSequenceName).
+            filepath.append(synapseConfigsDir).append('/').append(manger.getTracker().getCurrentConfigurationName())
+                    .append('/').
+                    append(MultiXMLConfigurationBuilder.SEQUENCES_DIR).append('/')
+                    .append(authFailureHandlerSequenceName).
                     append(".xml");
-             File authFailureHandlerSequenceNameFile = new File(filepath.toString());
-            //Here we will check authfailurehandler sequence exist in synapse artifact. If it is not available we will create
+            File authFailureHandlerSequenceNameFile = new File(filepath.toString());
+            //Here we will check authfailurehandler sequence exist in synapse artifact. If it is not available we
+            // will create
             //sequence synapse configurations by using resource artifacts
             if (!authFailureHandlerSequenceNameFile.exists()) {
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "Auth failure handler sequence not found. Creating synapse config hierarchy for tenant: " +
+                                    tenantDomain);
+                }
                 createTenantSynapseConfigHierarchy(synapseConfigDir, tenantDomain);
             }
 
@@ -174,6 +185,30 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                                 MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
                                 opaPolicyFailureHandlerSequenceName + ".xml"));
             }
+            String mcpPolicyFailureSequence = synapseConfigsDir.getAbsolutePath() + File.separator +
+                    manger.getTracker().getCurrentConfigurationName() + File.separator +
+                    MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator + mcpPolicyFailureHandlerSequenceName
+                    + ".xml";
+            File mcpPolicyFailureSequenceXml = new File(mcpPolicyFailureSequence);
+            if (!mcpPolicyFailureSequenceXml.exists()) {
+                log.debug("MCP policy failure sequence not found. Copying from template.");
+                FileUtils.copyFile(new File(synapseConfigRootPath + mcpPolicyFailureHandlerSequenceName + ".xml"),
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator +
+                                MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
+                                mcpPolicyFailureHandlerSequenceName + ".xml"));
+            }
+            String guardRailPolicyFailureSequence = synapseConfigsDir.getAbsolutePath() + File.separator +
+                    manger.getTracker().getCurrentConfigurationName() + File.separator +
+                    MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
+                    guardRailPolicyFailureHandlerSequenceName + ".xml";
+            File guardRailPolicyFailureSequenceXml = new File(guardRailPolicyFailureSequence);
+            if (!guardRailPolicyFailureSequenceXml.exists()) {
+                log.debug("Guard rail policy failure sequence not found. Copying from template.");
+                FileUtils.copyFile(new File(synapseConfigRootPath + guardRailPolicyFailureHandlerSequenceName + ".xml"),
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator +
+                                MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
+                                guardRailPolicyFailureHandlerSequenceName + ".xml"));
+            }
         } catch (RemoteException e) {
             log.error("Failed to create Tenant's synapse sequences.", e);
         } catch (Exception e) {
@@ -221,11 +256,11 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
         return true;
     }
 
-    private class TenantSynapseConfigHierarchyCreator implements Runnable{
+    private class TenantSynapseConfigHierarchyCreator implements Runnable {
 
         private File synapseConfigDir;
         private String tenantDomain;
-        final private int timeoutInSeconds = 60;
+        private final int timeoutInSeconds = 60;
 
         public TenantSynapseConfigHierarchyCreator(File synapseConfigDir, String tenantDomain) {
             this.synapseConfigDir = synapseConfigDir;
@@ -237,48 +272,48 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
             final long startTime = System.currentTimeMillis();
 
             //wait until the synpase config directory structure is created by carbon-mediation
-            while(!synapseConfigDir.exists()){
-                if((System.currentTimeMillis() - startTime) / 1000 > timeoutInSeconds ){
+            while (!synapseConfigDir.exists()) {
+                if ((System.currentTimeMillis() - startTime) / 1000 > timeoutInSeconds) {
                     log.error("Waiting for Synapse Configuration hierarchy of tenant " + tenantDomain +
-                              " timed out. Copying custom sequence files failed!");
+                            " timed out. Copying custom sequence files failed!");
                     return;
                 }
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     log.error("Error occurred while waiting for Synapse Configuration hierarchy of tenant "
-                              + tenantDomain, e);
+                            + tenantDomain, e);
                 }
             }
 
             try {
                 FileUtils.copyFile(new File(synapseConfigRootPath + mainSequenceName + ".xml"),
-                                   new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
-                                            + File.separator + mainSequenceName + ".xml"));
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                + File.separator + mainSequenceName + ".xml"));
                 FileUtils.copyFile(new File(synapseConfigRootPath + faultSequenceName + ".xml"),
-                                   new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
-                                            + File.separator + faultSequenceName + ".xml"));
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                + File.separator + faultSequenceName + ".xml"));
                 FileUtils.copyFile(new File(synapseConfigRootPath + authFailureHandlerSequenceName + ".xml"),
-                                   new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
-                                            + File.separator + authFailureHandlerSequenceName + ".xml"));
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                + File.separator + authFailureHandlerSequenceName + ".xml"));
                 FileUtils.copyFile(new File(synapseConfigRootPath + graphqlAuthFailureHandlerSequenceName + ".xml"),
                         new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
                                 + File.separator + graphqlAuthFailureHandlerSequenceName + ".xml"));
                 FileUtils.copyFile(new File(synapseConfigRootPath + resourceMisMatchSequenceName + ".xml"),
-                                   new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
-                                            + File.separator + resourceMisMatchSequenceName + ".xml"));
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                + File.separator + resourceMisMatchSequenceName + ".xml"));
                 FileUtils.copyFile(new File(synapseConfigRootPath + throttleOutSequenceName + ".xml"),
-                                   new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
-                                            + File.separator + throttleOutSequenceName + ".xml"));
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                + File.separator + throttleOutSequenceName + ".xml"));
                 FileUtils.copyFile(new File(synapseConfigRootPath + sandboxKeyErrorSequenceName + ".xml"),
-                                   new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
-                                            + File.separator + sandboxKeyErrorSequenceName + ".xml"));
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                + File.separator + sandboxKeyErrorSequenceName + ".xml"));
                 FileUtils.copyFile(new File(synapseConfigRootPath + productionKeyErrorSequenceName + ".xml"),
-                                   new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
-                                            + File.separator + productionKeyErrorSequenceName + ".xml"));
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                + File.separator + productionKeyErrorSequenceName + ".xml"));
                 FileUtils.copyFile(new File(synapseConfigRootPath + corsSequenceName + ".xml"),
-                                   new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
-                                            + File.separator + corsSequenceName + ".xml"));
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                + File.separator + corsSequenceName + ".xml"));
                 FileUtils.copyFile(new File(synapseConfigRootPath + threatFaultSequenceName + ".xml"),
                         new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
                                 + File.separator + threatFaultSequenceName + ".xml"));
