@@ -18091,7 +18091,7 @@ public class ApiMgtDAO {
                                                                       String tenantDomain) throws APIManagementException {
 
         ResultSet rs = null;
-        Workflow workflow = new Workflow();
+        Workflow workflow = null;
         String sqlQuery = SQLConstants.GET_ALL_WORKFLOW_DETAILS_BY_EXTERNAL_WORKFLOW_REFERENCE;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
@@ -18102,6 +18102,7 @@ public class ApiMgtDAO {
                 rs = prepStmt.executeQuery();
 
                 while (rs.next()) {
+                    workflow = new Workflow();
                     workflow.setWorkflowId(rs.getInt("WF_ID"));
                     workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
                     workflow.setWorkflowType(rs.getString("WF_TYPE"));

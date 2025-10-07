@@ -75,8 +75,12 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIAdmin apiAdmin = new APIAdminImpl();
             workflow = apiAdmin.getworkflowReferenceByExternalWorkflowReferenceID(externalWorkflowRef, status, tenantDomain);
-            workflowinfoDTO = WorkflowMappingUtil.fromWorkflowsToInfoDTO(workflow);
-            return Response.ok().entity(workflowinfoDTO).build();
+            if (workflow == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_WORKFLOW, externalWorkflowRef);
+            } else {
+                workflowinfoDTO = WorkflowMappingUtil.fromWorkflowsToInfoDTO(workflow);
+                return Response.ok().entity(workflowinfoDTO).build();
+            }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving workflow request by the " +
                     "external workflow reference. ", e, log);
@@ -90,7 +94,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
      * @param limit        maximum number of workflow returns
      * @param offset       starting index
      * @param accept       accept header value
-     * @param workflowType is the the type of the workflow request. (e.g: Application Creation, Application Subscription etc.)
+     * @param workflowType type of the workflow request. (e.g: Application Creation, Application Subscription etc.)
      * @return
      */
     @Override
@@ -105,22 +109,31 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             String status = "CREATED";
             APIAdmin apiAdmin = new APIAdminImpl();
             if(workflowType != null) {
-                if (workflowType.equals("APPLICATION_CREATION")) {
-                    workflowType = "AM_APPLICATION_CREATION";
-                } else if (workflowType.equals("SUBSCRIPTION_CREATION")) {
-                    workflowType = "AM_SUBSCRIPTION_CREATION";
-                } else if (workflowType.equals("USER_SIGNUP")) {
-                    workflowType = "AM_USER_SIGNUP";
-                } else if (workflowType.equals("APPLICATION_REGISTRATION_PRODUCTION")) {
-                    workflowType = "AM_APPLICATION_REGISTRATION_PRODUCTION";
-                } else if (workflowType.equals("APPLICATION_REGISTRATION_SANDBOX")) {
-                    workflowType = "AM_APPLICATION_REGISTRATION_SANDBOX";
-                } else if (workflowType.equals("API_STATE")) {
-                    workflowType = "AM_API_STATE";
-                } else if (workflowType.equals("API_PRODUCT_STATE")) {
-                    workflowType = "AM_API_PRODUCT_STATE";
-                } else if (workflowType.equals("AM_REVISION_DEPLOYMENT")) {
-                    workflowType = "AM_REVISION_DEPLOYMENT";
+                switch (workflowType) {
+                    case "APPLICATION_CREATION":
+                        workflowType = "AM_APPLICATION_CREATION";
+                        break;
+                    case "SUBSCRIPTION_CREATION":
+                        workflowType = "AM_SUBSCRIPTION_CREATION";
+                        break;
+                    case "USER_SIGNUP":
+                        workflowType = "AM_USER_SIGNUP";
+                        break;
+                    case "APPLICATION_REGISTRATION_PRODUCTION":
+                        workflowType = "AM_APPLICATION_REGISTRATION_PRODUCTION";
+                        break;
+                    case "APPLICATION_REGISTRATION_SANDBOX":
+                        workflowType = "AM_APPLICATION_REGISTRATION_SANDBOX";
+                        break;
+                    case "API_STATE":
+                        workflowType = "AM_API_STATE";
+                        break;
+                    case "API_PRODUCT_STATE":
+                        workflowType = "AM_API_PRODUCT_STATE";
+                        break;
+                    case "AM_REVISION_DEPLOYMENT":
+                        workflowType = "AM_REVISION_DEPLOYMENT";
+                        break;
                 }
             }
             workflows = apiAdmin.getworkflows(workflowType, status, tenantDomain);
