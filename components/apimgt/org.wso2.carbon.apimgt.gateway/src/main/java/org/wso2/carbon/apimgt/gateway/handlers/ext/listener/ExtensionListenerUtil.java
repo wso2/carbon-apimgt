@@ -377,12 +377,14 @@ public class ExtensionListenerUtil {
             // Mediate fault sequence (this was originally added to address the behaviour of not engaging CORS
             // headers in the response for RETURN_ERROR and RETURN_RESPONSE flows (This is enabled by a config)
             if (mediateExtensionFaultSequence) {
-                Mediator extensionFaultSequence = messageContext.getSequence(APIConstants.EXTENSION_FAULT_SEQUENCE_NAME);
+                Mediator extensionFaultSequence = messageContext
+                        .getSequence(APIConstants.ExtensionListenerConstants.EXTENSION_FAULT_SEQUENCE_NAME);
                 if (extensionFaultSequence != null) {
                     extensionFaultSequence.mediate(messageContext);
                 } else {
                     if (log.isDebugEnabled()) {
-                        log.debug("Extension fault sequence not found: " + APIConstants.EXTENSION_FAULT_SEQUENCE_NAME);
+                        log.debug("Extension fault sequence not found: " +
+                                APIConstants.ExtensionListenerConstants.EXTENSION_FAULT_SEQUENCE_NAME);
                     }
                 }
             }
