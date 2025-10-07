@@ -63,6 +63,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
@@ -279,6 +280,9 @@ import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -315,6 +319,7 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.net.ssl.SSLContext;
 import java.security.cert.X509Certificate;
 import java.text.Normalizer;
 
@@ -6033,9 +6038,68 @@ public final class APIUtil {
 
         HttpClientConfigurationDTO configuration = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration().getHttpClientConfiguration();
-        return CommonAPIUtil.getHttpClient(protocol, configuration);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Creating HTTP client with protocol: " + protocol + " port: " + port);
+        }
+
+        // Avoid unnecessary truststore work for plain HTTP
+        if (!APIConstants.HTTPS_PROTOCOL.equalsIgnoreCase(protocol)) {
+            log.debug("Using default SSL context for HTTP protocol");
+            return CommonAPIUtil.getHttpClient(protocol, configuration, SSLContexts.createDefault());
+        }
+
+        return CommonAPIUtil.getHttpClient(protocol, configuration, getSSLContext());
     }
 
+    /**
+     * Creates an SSLContext using the configured trust store. Falls back to the default SSLContext if the trust store
+     * path, password, or file is invalid, or if an error occurs while loading.
+     *
+     * @return SSLContext based on the trust store or the default SSLContext
+     */
+    private static SSLContext getSSLContext() {
+        String keyStorePath = System.getProperty(APIConstants.JAVAX_NET_SSL_TRUST_STORE);
+        char[] keyStorePassword = System.getProperty(APIConstants.JAVAX_NET_SSL_TRUST_STORE_PASSWORD) != null ?
+                System.getProperty(APIConstants.JAVAX_NET_SSL_TRUST_STORE_PASSWORD).toCharArray() : new char[0];
+        String trustStoreType = System.getProperty(APIConstants.JAVAX_NET_SSL_TRUST_STORE_TYPE,
+                APIConstants.DEFAULT_KEY_STORE_TYPE);
+
+        try {
+            // Basic validation and fast-fallback
+            if (StringUtils.isBlank(keyStorePath) || keyStorePassword.length == 0) {
+                log.error("Trust store path or password is not configured. Falling back to default SSLContext.");
+                return SSLContexts.createDefault();
+            }
+
+            Path path = Paths.get(keyStorePath);
+            if (!Files.exists(path)) {
+                log.error("Trust store file not found at the configured path. Falling back to default SSLContext.");
+                return SSLContexts.createDefault();
+            }
+
+            // Create SSL context dynamically to pick up certificate changes at runtime
+            KeyStore trustStore = KeyStore.getInstance(trustStoreType);
+            try (InputStream keyStoreStream = Files.newInputStream(path)) {
+                log.debug("Loading trust store for SSL context creation.");
+                trustStore.load(keyStoreStream, keyStorePassword);
+            }
+            return SSLContexts.custom().loadTrustMaterial(trustStore, null).build();
+        } catch (KeyStoreException e) {
+            log.error("Failed to create or access the trust store instance: " + e.getMessage());
+        } catch (IOException e) {
+            log.error("Unable to read the trust store file: " + e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            log.error("The specified algorithm for trust store loading is not available: " + e.getMessage());
+        } catch (CertificateException e) {
+            log.error("Failed to read Certificate: " + e.getMessage());
+        } catch (KeyManagementException e) {
+            log.error("Failed to initialize SSLContext from the trust store: " + e.getMessage());
+        } finally {
+            Arrays.fill(keyStorePassword, '\0');
+        }
+        return SSLContexts.createDefault();
+    }
 
     /**
      * This method will return a relative URL for given registry resource which we can used to retrieve the resource
@@ -8625,6 +8689,19 @@ public final class APIUtil {
             throws APIManagementException {
 
         return ApiMgtDAO.getInstance().getApiExternalApiMappingReference(apiId, environmentId);
+    }
+
+    /**
+     * Get all the external api mapping references of an API
+     *
+     * @param apiId UUID of the API
+     * @return Map of environmentId and referenceArtifact
+     * @throws APIManagementException if an error occurs while getting the mapping references
+     */
+    public static Map<String, String> getApiExternalApiMappingReferenceByApiId(String apiId)
+            throws APIManagementException {
+
+        return ApiMgtDAO.getInstance().getApiExternalApiMappingReferences(apiId);
     }
 
     public static void deleteApiExternalApiMapping(String apiId, String environmentId)

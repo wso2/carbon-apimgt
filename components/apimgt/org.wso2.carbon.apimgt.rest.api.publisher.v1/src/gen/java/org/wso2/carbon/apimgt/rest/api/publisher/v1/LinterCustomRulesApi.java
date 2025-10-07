@@ -41,7 +41,8 @@ LinterCustomRulesApiService delegate = new LinterCustomRulesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get linter custom rules.", notes = "This operation can be used to get linter custom rules from tenant-config. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server")
         })
     }, tags={ "Linter Custom Rules" })
     @ApiResponses(value = { 

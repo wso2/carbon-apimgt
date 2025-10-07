@@ -2576,8 +2576,8 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/validate-mcp-server" \
@@ -4723,7 +4723,8 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_generate_key
+            - apim:mcp_server_generate_key
+            - apim:mcp_server_create
             - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
@@ -5067,6 +5068,130 @@ paths:
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/cancel-revision-workflow/e0824883-3e86-403a-aec1-22bbc454eb7c/Default"'
       operationId: deleteMCPServerRevisionDeploymentPendingTask
+
+  /mcp-servers/{mcpServerId}/thumbnail:
+    get:
+      tags:
+        - MCP Servers
+      summary: Get Thumbnail Image of a MCP Server
+      description: |
+        This operation can be used to download a thumbnail image of a MCP Server
+      parameters:
+        - $ref: '#/components/parameters/mcpServerId'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Thumbnail image returned
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modified the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content: { }
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: { }
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v3/mcp-servers/2fd14eb8-b828-4013-b448-0739d2e76bf7/thumbnail"'
+      operationId: getMCPServerThumbnail
+
+    put:
+      tags:
+        - MCP Servers
+      summary: Upload a Thumbnail Image for a MCP Server
+      description: |
+        This operation can be used to upload a thumbnail image of a MCP server. The thumbnail to be uploaded should be 
+        given as a form data parameter `file`.
+      parameters:
+        - $ref: '#/components/parameters/mcpServerId'
+        - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  description: Image to upload
+                  format: binary
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Image updated
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modified the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Location:
+              description: |
+                The URL of the uploaded thumbnail image of the MCP server.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileInfo'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+            - apim:mcp_server_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -F file=@image.jpeg "https://127.0.0.1:9443/api/am/publisher/v3/mcp-servers/2fd14eb8-b828-4013-b448-0739d2e76bf7/thumbnail"'
+      operationId: updateMCPServerThumbnail
 
   /apis/import-openapi:
     post:
@@ -6827,6 +6952,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_generate_key
+            - apim:api_create
             - apim:api_manage
       x-code-samples:
         - lang: Curl
@@ -7085,6 +7211,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
             - apim:subscription_view
             - apim:subscription_manage
       x-code-samples:
@@ -7145,6 +7272,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
             - apim:subscription_view
             - apim:subscription_manage
       x-code-samples:
@@ -7176,6 +7304,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
             - apim:subscription_view
             - apim:subscription_manage
       x-code-samples:
@@ -7374,6 +7503,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
             - apim:tier_view
             - apim:tier_manage
       x-code-samples:
@@ -7426,6 +7556,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
             - apim:tier_view
             - apim:tier_manage
       x-code-samples:
@@ -7487,6 +7618,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
             - apim:tier_view
             - apim:tier_manage
       x-code-samples:
@@ -8200,6 +8332,8 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
             - apim:ep_certificates_view
             - apim:ep_certificates_manage
       x-code-samples:
@@ -8264,6 +8398,8 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
             - apim:ep_certificates_add
             - apim:ep_certificates_manage
       x-code-samples:
@@ -8310,6 +8446,8 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
             - apim:ep_certificates_view
             - apim:ep_certificates_manage
       x-code-samples:
@@ -8375,6 +8513,8 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
             - apim:ep_certificates_update
             - apim:ep_certificates_manage
       x-code-samples:
@@ -8419,6 +8559,8 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
             - apim:ep_certificates_update
             - apim:ep_certificates_manage
       x-code-samples:
@@ -8461,6 +8603,8 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
             - apim:ep_certificates_view
             - apim:ep_certificates_manage
       x-code-samples:
@@ -8509,6 +8653,8 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
             - apim:ep_certificates_view
             - apim:ep_certificates_manage
       x-code-samples:
@@ -8571,6 +8717,9 @@ paths:
             - apim:api_view
             - apim:api_manage
             - apim:api_import_export
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
+            - apim:mcp_server_import_export
             - apim:api_product_import_export
       x-code-samples:
         - lang: Curl
@@ -10118,6 +10267,9 @@ paths:
             - apim:api_create
             - apim:api_publish
             - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_publish
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -10284,6 +10436,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -10338,6 +10491,8 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -10363,6 +10518,8 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -10391,6 +10548,8 @@ paths:
         - OAuth2Security:
             - apim:api_view
             - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -10431,6 +10590,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
             - apim:shared_scope_manage
       x-code-samples:
         - lang: Curl
@@ -10508,6 +10668,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:mcp_server_view
             - apim:shared_scope_manage
       x-code-samples:
         - lang: Curl
@@ -10602,6 +10763,9 @@ paths:
             - apim:api_create
             - apim:api_publish
             - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_publish
+            - apim:mcp_server_manage
             - apim:shared_scope_manage
       x-code-samples:
         - lang: Curl
@@ -10669,6 +10833,9 @@ paths:
             - apim:api_view
             - apim:api_create
             - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -19223,6 +19390,7 @@ components:
             apim:api_import_export: Import and export APIs related operations
             apim:api_product_import_export: Import and export API Products related operations
             apim:api_generate_key: Generate Internal Key
+            apim:mcp_server_generate_key: Generate MCP Server Internal Key
             apim:admin: Manage all admin operations
             apim:comment_view: Read permission to comments
             apim:comment_write: Write permission to comments

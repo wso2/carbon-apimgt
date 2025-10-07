@@ -43,7 +43,9 @@ TenantsApiService delegate = new TenantsApiServiceImpl();
     @ApiOperation(value = "Check Whether the Given Tenant already Exists", notes = "Using this operation, user can check whether a given tenant exists or not. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
         })
     }, tags={ "Tenants",  })
     @ApiResponses(value = { 
@@ -60,7 +62,9 @@ TenantsApiService delegate = new TenantsApiServiceImpl();
     @ApiOperation(value = "Get Tenants by State ", notes = "This operation is to get tenants by state ", response = TenantListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
         })
     }, tags={ "Tenants" })
     @ApiResponses(value = { 

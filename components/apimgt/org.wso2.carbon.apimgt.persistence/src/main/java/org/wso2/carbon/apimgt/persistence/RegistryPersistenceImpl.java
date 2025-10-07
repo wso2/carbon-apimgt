@@ -436,23 +436,22 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 newAPIArtifact.setUUID(apiUUID);
                 registry.put(apiPath, newAPIArtifact);
                 GenericArtifact artifact = getAPIArtifact(apiUUID, registry);
-                artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, lifecycleStatus);
-                // Update with the modified artifact
-                artifactManager.updateGenericArtifact(artifact);
+                if (artifact != null) {
+                    if (artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE) == null) {
+                        if (existingVersionComparable != null) {
+                            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE, existingVersionComparable);
+                        } else {
+                            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE,
+                                    String.valueOf(System.currentTimeMillis()));
+                        }
+                    }
+                    artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, lifecycleStatus);
+                    artifactManager.updateGenericArtifact(artifact);
+                }
                 RegistryPersistenceUtil.clearResourcePermissions(apiPath, api.getId(),
                         ((UserRegistry) registry).getTenantId());
                 RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                         visibleRoles, apiPath);
-                GenericArtifact newArtifact = artifactManager.getGenericArtifact(apiUUID);
-                if (newArtifact != null && newArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE) == null) {
-                    if (existingVersionComparable != null) {
-                        newArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE, existingVersionComparable);
-                    } else {
-                        newArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_COMPARABLE,
-                                String.valueOf(System.currentTimeMillis()));
-                    }
-                    artifactManager.updateGenericArtifact(newArtifact);
-                }
             }
             registry.commitTransaction();
             transactionCommitted = true;
@@ -3726,6 +3725,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 info.setState(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
                 info.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
                 info.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+                info.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
                 info.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
                 info.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
                 String audiences = artifact.getAttribute(APIConstants.API_OVERVIEW_AUDIENCES);

@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.common.gateway.util;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -46,6 +48,7 @@ import javax.net.ssl.SSLContext;
  * Utility Functions for Common gateway component.
  */
 public class CommonAPIUtil {
+    private static final Log log = LogFactory.getLog(CommonAPIUtil.class);
     public static final String STRICT = "Strict";
     public static final String ALLOW_ALL = "AllowAll";
     public static final String DEFAULT_AND_LOCALHOST = "DefaultAndLocalhost";
@@ -57,10 +60,9 @@ public class CommonAPIUtil {
     private static final HostnameVerifier browserHostNameVerifier = new BrowserHostnameVerifier();
 
     private static PoolingHttpClientConnectionManager getPoolingHttpClientConnectionManager(
-            HttpClientConfigurationDTO clientConfiguration) {
+            SSLContext sslContext, HostnameVerifier hostnameVerifier) {
 
-        SSLConnectionSocketFactory socketFactory = createSocketFactory(clientConfiguration.getSslContext(),
-                clientConfiguration.getHostnameVerifier());
+        SSLConnectionSocketFactory socketFactory = createSocketFactory(sslContext, hostnameVerifier);
         Registry<ConnectionSocketFactory> socketFactoryRegistry =
                     RegistryBuilder.<ConnectionSocketFactory>create()
                             .register(HTTP_PROTOCOL, PlainConnectionSocketFactory.getSocketFactory())
@@ -78,10 +80,16 @@ public class CommonAPIUtil {
      * Return a http client instance
      *
      * @param protocol - service endpoint protocol http/https
+     * @param clientConfiguration HTTP client configuration for connection pooling, proxy, timeouts
+     * @param sslContext SSL context to be used for HTTPS connections
      * @return {@link HttpClient} with all proxy, TLS, ConnectionPooling related configurations
      */
-    public static HttpClient getHttpClient(String protocol, HttpClientConfigurationDTO clientConfiguration) {
+    public static HttpClient getHttpClient(String protocol, HttpClientConfigurationDTO clientConfiguration,
+                                          SSLContext sslContext) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Creating HTTP client with protocol: " + protocol);
+        }
         int maxTotal = clientConfiguration.getConnectionLimit();
         int defaultMaxPerRoute = clientConfiguration.getMaximumConnectionsPerRoute();
         int connectionTimeout = clientConfiguration.getConnectionTimeout();
@@ -98,7 +106,8 @@ public class CommonAPIUtil {
             protocol = proxyProtocol;
         }
 
-        PoolingHttpClientConnectionManager pool = getPoolingHttpClientConnectionManager(clientConfiguration);
+        PoolingHttpClientConnectionManager pool = getPoolingHttpClientConnectionManager(sslContext,
+                clientConfiguration.getHostnameVerifier());
 
         pool.setMaxTotal(maxTotal);
         pool.setDefaultMaxPerRoute(defaultMaxPerRoute);

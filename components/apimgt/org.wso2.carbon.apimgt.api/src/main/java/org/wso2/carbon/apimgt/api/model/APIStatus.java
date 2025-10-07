@@ -37,4 +37,20 @@ public enum APIStatus {
     public String getStatus() {
         return status;
     }
+
+    /**
+     * Check whether the given status is valid or not.
+     *
+     * @param status API status
+     * @return true if the status is valid, false otherwise
+     */
+    public static boolean contains(String status) {
+        if (status == null) return false;
+        for (APIStatus s : values()) {
+            if (s.getStatus().equalsIgnoreCase(status.trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

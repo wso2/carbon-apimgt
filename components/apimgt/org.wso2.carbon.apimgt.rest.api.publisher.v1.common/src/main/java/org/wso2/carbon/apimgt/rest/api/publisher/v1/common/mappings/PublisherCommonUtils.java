@@ -980,7 +980,7 @@ public class PublisherCommonUtils {
                     ExceptionCodes.USER_ROLES_CANNOT_BE_NULL);
         }
 
-        Scope[] apiDtoClassAnnotatedScopes = APIDTO.class.getAnnotationsByType(Scope.class);
+        Scope[] apiDtoClassAnnotatedScopes = MCPServerDTO.class.getAnnotationsByType(Scope.class);
         boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
         if (!hasClassLevelScope) {
             // Validate per-field scopes

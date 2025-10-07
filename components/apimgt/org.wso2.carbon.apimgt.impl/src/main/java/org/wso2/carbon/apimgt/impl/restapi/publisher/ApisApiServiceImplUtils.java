@@ -59,6 +59,7 @@ import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayMode;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -915,12 +916,13 @@ public class ApisApiServiceImplUtils {
     private static Set<URITemplate> populateURITemplatesWithTools(Set<URITemplate> uriTemplates,
                                                                   Map<String, String> schemaByToolName,
                                                                   Map<String, String> descriptionByToolName,
-                                                                  String backendId) {
+                                                                  String backendId) throws APIManagementException {
 
         if (uriTemplates == null || uriTemplates.isEmpty()) {
             return Collections.emptySet();
         }
 
+        Set<String> tools = new LinkedHashSet<>();
         Set<URITemplate> matchedTemplates = new LinkedHashSet<>();
         for (URITemplate uriTemplate : uriTemplates) {
             if (uriTemplate == null) {
@@ -956,6 +958,11 @@ public class ApisApiServiceImplUtils {
                 uriTemplate.setSchemaDefinition(toolSchema);
             }
             backendMapping.setBackendId(backendId);
+            if (!tools.add(uriTemplate.getUriTemplate())) {
+                log.error("Duplicate MCP tool detected: " + uriTemplate.getUriTemplate());
+                throw new APIManagementException("Tool " + uriTemplate.getUriTemplate() + " is repeated",
+                        ExceptionCodes.DUPLICATE_MCP_TOOLS);
+            }
             matchedTemplates.add(uriTemplate);
         }
         return matchedTemplates;
@@ -1103,10 +1110,19 @@ public class ApisApiServiceImplUtils {
                                                                                String vhost, boolean mandatoryVHOST)
             throws APIManagementException {
 
-        if (environments.get(environment) == null) {
+        Environment env = environments.get(environment);
+        if (env == null) {
             final String errorMessage = "Gateway environment not found: " + environment;
             throw new APIManagementException(errorMessage, ExceptionCodes.from(
                     ExceptionCodes.INVALID_GATEWAY_ENVIRONMENT, String.format("name '%s'", environment)));
+        } else {
+            if (GatewayMode.READ_ONLY.getMode().equals(env.getMode())) {
+                final String errorMessage = "The mode of gateway environment : " + environment
+                        + " is READ_ONLY. Cannot deploy revision";
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.READ_ONLY_MODE_GATEWAY_ENVIRONMENT,
+                                String.format("name '%s'", environment)));
+            }
         }
 
         if (mandatoryVHOST && StringUtils.isEmpty(vhost)) {

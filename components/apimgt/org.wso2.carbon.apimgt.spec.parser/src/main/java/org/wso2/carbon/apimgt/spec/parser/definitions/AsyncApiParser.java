@@ -1948,19 +1948,22 @@ public class AsyncApiParser extends APIDefinition {
         aaiDocument.info.title = api.getId().getName();
         aaiDocument.info.version = api.getId().getVersion();
         if (!APISpecParserConstants.API_TYPE_WEBSUB.equals(api.getType()) && !APISpecParserConstants.API_TYPE_WS.equals(api.getType())) {
-            JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
+            String endpointConfigString = api.getEndpointConfig();
+            if (StringUtils.isNotEmpty(endpointConfigString)) {
+                JSONObject endpointConfig = new JSONObject(endpointConfigString);
 
-            if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
-                AaiServer prodServer = getAaiServer(api, aaiDocument, endpointConfig,
-                                                    APISpecParserConstants.GATEWAY_ENV_TYPE_PRODUCTION,
-                                                    APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
-                aaiDocument.addServer(APISpecParserConstants.GATEWAY_ENV_TYPE_PRODUCTION, prodServer);
-            }
-            if (endpointConfig.has(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
-                AaiServer sandboxServer = getAaiServer(api, aaiDocument, endpointConfig,
-                                                    APISpecParserConstants.GATEWAY_ENV_TYPE_SANDBOX,
-                                                    APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS);
-                aaiDocument.addServer(APISpecParserConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxServer);
+                if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+                    AaiServer prodServer = getAaiServer(api, aaiDocument, endpointConfig,
+                                                        APISpecParserConstants.GATEWAY_ENV_TYPE_PRODUCTION,
+                                                        APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+                    aaiDocument.addServer(APISpecParserConstants.GATEWAY_ENV_TYPE_PRODUCTION, prodServer);
+                }
+                if (endpointConfig.has(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+                    AaiServer sandboxServer = getAaiServer(api, aaiDocument, endpointConfig,
+                                                        APISpecParserConstants.GATEWAY_ENV_TYPE_SANDBOX,
+                                                        APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+                    aaiDocument.addServer(APISpecParserConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxServer);
+                }
             }
         }
 

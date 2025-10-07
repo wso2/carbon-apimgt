@@ -305,18 +305,19 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             if (body.getStatus() != null && subscribedAPI != null) {
                 String bodyStatus = body.getStatus().value();
                 String subscribedStatus = subscribedAPI.getSubStatus();
-                if (APIConstants.SubscriptionStatus.BLOCKED.equals(bodyStatus) || APIConstants.SubscriptionStatus.ON_HOLD.equals(bodyStatus)
-                        || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(bodyStatus) || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subscribedStatus)
-                        || APIConstants.SubscriptionStatus.REJECTED.equals(bodyStatus) || APIConstants.SubscriptionStatus.BLOCKED.equals(subscribedStatus)
-                        || APIConstants.SubscriptionStatus.ON_HOLD.equals(subscribedStatus)
-                        || APIConstants.SubscriptionStatus.REJECTED.equals(subscribedStatus)) {
-                    RestApiUtil.handleBadRequest(
-                            "Cannot update subscriptions with provided or existing status", log);
+                if (APIConstants.SubscriptionStatus.BLOCKED.equals(
+                        bodyStatus) || APIConstants.SubscriptionStatus.ON_HOLD.equals(
+                        bodyStatus) || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(
+                        bodyStatus) || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(
+                        subscribedStatus) || APIConstants.SubscriptionStatus.REJECTED.equals(
+                        bodyStatus) || APIConstants.SubscriptionStatus.BLOCKED.equals(
+                        subscribedStatus) || APIConstants.SubscriptionStatus.ON_HOLD.equals(
+                        subscribedStatus) || APIConstants.SubscriptionStatus.REJECTED.equals(subscribedStatus)) {
+                    RestApiUtil.handleBadRequest("Cannot update subscriptions with provided or existing status", log);
                     return null;
                 }
             } else {
-                RestApiUtil.handleBadRequest(
-                        "Request must contain status of the subscription", log);
+                RestApiUtil.handleBadRequest("Request must contain status of the subscription", log);
                 return null;
             }
 

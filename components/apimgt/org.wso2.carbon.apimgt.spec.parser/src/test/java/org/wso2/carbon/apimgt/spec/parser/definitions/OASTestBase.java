@@ -300,7 +300,8 @@ public class OASTestBase {
 
     public String testGenerateAPIDefinitionWithoutInfoTag(APIDefinition parser, String content) throws Exception {
         JSONObject jsonObject = new JSONObject(content);
-        String equalNoOfResourcesWithoutInfoTag = jsonObject.getJSONObject("equalNoOfResourcesWithoutInfoTag").toString();
+        String equalNoOfResourcesWithoutInfoTag = jsonObject.getJSONObject("equalNoOfResourcesWithoutInfoTag")
+                .toString();
 
         APIIdentifier identifier = new APIIdentifier("admin", "simple", "1.0.0");
         API api = new API(identifier);

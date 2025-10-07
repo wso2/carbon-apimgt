@@ -2889,6 +2889,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     "delete event publishing to gateways");
             isError = true;
         }
+        // Delete event publishing to gateways
+        if (api != null && apiId != -1) {
+            APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                    APIConstants.EventType.API_DELETE.name(), tenantId, organization, api.getId().getApiName(), apiId,
+                    api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
+                    APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
+                    api.getStatus(), api.getApiSecurity(), api.getStatus(), api.getVisibility(), api.getVisibleRoles());
+            APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+        } else {
+            log.debug("Event has not published to gateways due to API id has failed to retrieve from DB for API "
+                    + apiUuid + " on organization " + organization);
+        }
 
         // DB delete operations
         if (!isError && api != null) {
@@ -2986,18 +2998,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-        // Delete event publishing to gateways
-        if (api != null && apiId != -1) {
-            APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                    APIConstants.EventType.API_DELETE.name(), tenantId, organization, api.getId().getApiName(), apiId,
-                    api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
-                    APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
-                    api.getStatus(), api.getApiSecurity(), api.getStatus(), api.getVisibility(), api.getVisibleRoles());
-            APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
-        } else {
-            log.debug("Event has not published to gateways due to API id has failed to retrieve from DB for API "
-                    + apiUuid + " on organization " + organization);
-        }
 
         // Logging audit message for API delete
         if (api != null) {
@@ -4536,7 +4536,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             CertificateEvent certificateEvent = new CertificateEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.ENDPOINT_CERTIFICATE_ADD.toString(),
                     tenantDomain, alias, endpoint);
+            certificateEvent.setTenantId(tenantId);
             APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
+            if (log.isDebugEnabled()) {
+                log.debug("Certificate event sent for alias: " + alias + " in tenant: " + tenantDomain);
+            }
         } catch (UserStoreException e) {
             handleException("Error while reading tenant information", e);
         }
@@ -6704,6 +6708,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     mappedAPI.setTechnicalOwnerEmail(publisherAPIInfo.getTechnicalOwnerEmail());
                     mappedAPI.setMonetizationEnabled(publisherAPIInfo.getMonetizationStatus());
                     mappedAPI.setContextTemplate(publisherAPIInfo.getContext());
+                    mappedAPI.setDescription(publisherAPIInfo.getDescription());
                     mappedAPI.setCreatedTime(APIUtil.convertEpochStringToDate(publisherAPIInfo.getCreatedTime()));
                     mappedAPI.setLastUpdated(APIUtil.convertEpochStringToDate(publisherAPIInfo.getUpdatedTime()));
                     populateDefaultVersion(mappedAPI);
@@ -7235,9 +7240,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             Set<String> targetEnvironments = Collections.singleton(environment);
             Map<String, String> gatewayVhosts = Collections.singletonMap(environment, newDeployment.getVhost());
+            apiMgtDAO.removeAPIRevisionDeployment(apiId, deploymentsToRemove);
 
             if (!deploymentsToRemove.isEmpty() && !skipDeployToGateway) {
-                apiMgtDAO.removeAPIRevisionDeployment(apiId, deploymentsToRemove);
                 removeFromGateway(api, deploymentsToRemove, targetEnvironments, false);
             }
 
@@ -7247,9 +7252,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // Skip deployToGateway only if explicitly called from the gateway
             if (!skipDeployToGateway) {
                 gatewayManager.deployToGateway(api, organization, targetEnvironments);
-                updatePublishedDefaultVersionIfRequired(apiIdentifier, api, organization);
             }
-
+            updatePublishedDefaultVersionIfRequired(apiIdentifier, api, organization);
         } catch (APIManagementException e) {
             log.error("Error while resuming API revision deployment for API ID: " + apiId, e);
         }

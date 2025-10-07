@@ -368,7 +368,7 @@ public class ApiMgtDAO {
         // only check if using CEP based throttling.
         ResultSet resultSet = null;
         PreparedStatement ps = null;
-        String sqlQuery = SQLConstants.ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
+        String sqlQuery = ThrottleSQLConstants.IS_ANY_POLICY_CONTENT_AWARE_SQL;
 
         try {
             String dbProdName = conn.getMetaData().getDatabaseProductName();
@@ -654,7 +654,7 @@ public class ApiMgtDAO {
                 subscriber.setId(subscriberId);
                 subscriber.setTenantId(rs.getInt("TENANT_ID"));
                 subscriber.setEmail(rs.getString("EMAIL_ADDRESS"));
-                subscriber.setSubscribedDate(new java.util.Date(rs.getTimestamp("DATE_SUBSCRIBED").getTime()));
+                subscriber.setSubscribedDate(new Date(rs.getTimestamp("DATE_SUBSCRIBED").getTime()));
                 return subscriber;
             }
         } catch (SQLException e) {
@@ -2825,7 +2825,7 @@ public class ApiMgtDAO {
      * @param apiUUID      UUID of the API
      * @param organization Organization of the API
      * @return All subscriptions of a given API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public long getNoOfSubscriptionsOfAPI(String apiUUID, String organization)
             throws APIManagementException {
@@ -14642,7 +14642,7 @@ public class ApiMgtDAO {
                 query = ThrottleSQLConstants.GET_BLOCK_CONDITIONS_BY_TYPE_AND_EXACT_VALUE_SQL;
                 conditionValue = conditionValue.substring(1, conditionValue.length() - 1);
             } else {
-                query = SQLConstants.ThrottleSQLConstants.GET_BLOCK_CONDITIONS_BY_TYPE_AND_VALUE_SQL;
+                query = ThrottleSQLConstants.GET_BLOCK_CONDITIONS_BY_TYPE_AND_VALUE_SQL;
             }
             connection = APIMgtDBUtil.getConnection();
             selectPreparedStatement = connection.prepareStatement(query);
@@ -15989,6 +15989,40 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to delete Environment", e);
         }
+    }
+
+    /**
+     * Check if there are any existing API revision deployments for the given gateway environment UUID.
+     *
+     * @param gatewayUuid  UUID of the gateway environment
+     * @param organization organization identifier
+     * @return true if there are existing API revision deployments, false otherwise
+     * @throws APIManagementException if a database access error occurs
+     */
+    public boolean hasExistingAPIRevisions(String gatewayUuid, String organization)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            // Check for API revision deployments
+            try (PreparedStatement prepStmt = connection.prepareStatement(
+                    SQLConstants.CHECK_API_REVISION_DEPLOYMENTS_EXISTS_BY_GATEWAY_ENV_SQL)) {
+                prepStmt.setString(1, gatewayUuid);
+                prepStmt.setString(2, organization);
+                try (ResultSet rs = prepStmt.executeQuery()) {
+                    if (rs.next() && rs.getInt("REVISION_COUNT") > 0) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(String.format("Found existing API revision deployments for gateway UUID: %s",
+                                    gatewayUuid));
+                        }
+                        return true;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException(
+                    "Failed to check existing API revisions for gateway UUID: " + gatewayUuid, e);
+        }
+        return false;
     }
 
     /**
@@ -23167,6 +23201,31 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to delete all metadata (incl. revisions) for API: " + apiUuid, e);
         }
+    }
+
+    public Map<String, String> getApiExternalApiMappingReferences(String apiId) throws APIManagementException {
+        Map<String, String> references = new HashMap<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(SQLConstants.GET_REFERENCE_ARTIFACTS_SQL)) {
+            statement.setString(1, apiId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    String reference = "";
+                    try (InputStream referenceArtifactStream = resultSet.getBinaryStream("REFERENCE_ARTIFACT")) {
+                        if (referenceArtifactStream != null) {
+                            reference = IOUtils.toString(referenceArtifactStream, StandardCharsets.UTF_8);
+                        }
+                    }
+                    String environmentName = resultSet.getString("NAME");
+                    references.put(environmentName, reference);
+                }
+            }
+        } catch (SQLException | IOException e) {
+            handleException("Failed to fetch API - External API mapping for the API ID: " + apiId, e);
+        }
+        return references;
     }
 
     private class SubscriptionInfo {

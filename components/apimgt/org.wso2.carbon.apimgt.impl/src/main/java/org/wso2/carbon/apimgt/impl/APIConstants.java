@@ -2883,6 +2883,15 @@ public final class APIConstants {
      */
     public static final String TRUST_STORE_PASSWORD = "Security.TrustStore.Password";
     public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
+    
+    /**
+     * Constants related to HTTP client creation
+     */
+    public static final String JAVAX_NET_SSL_TRUST_STORE = "javax.net.ssl.trustStore";
+    public static final String JAVAX_NET_SSL_TRUST_STORE_PASSWORD = "javax.net.ssl.trustStorePassword";
+    public static final String JAVAX_NET_SSL_TRUST_STORE_TYPE = "javax.net.ssl.trustStoreType";
+    public static final String DEFAULT_KEY_STORE_TYPE = "JKS";
+
     public static final String INTERNAL_WEB_APP_EP = "/internal/data/v1";
     public static final String API_KEY_REVOKE_PATH = "/key/revoke";
 
@@ -3601,6 +3610,9 @@ public final class APIConstants {
         public static final String TOKEN_VALIDATION_CONFIG = "TokenValidation";
         public static final String ENFORCE_JWT_TYPE_HEADER_VALIDATION = "EnforceTypeHeaderValidation";
     }
+
+    // Constants related to the Certificate Management
+    public static final String ENABLE_CERTIFICATE_MANAGEMENT_EVENT_LISTENING = "EnableCertificateManagementEventListening";
     
     // For Organization access control Configuration
     public static final String ORG_BASED_ACCESS_CONTROL = "OrganizationBasedAccessControl";
@@ -3827,4 +3839,15 @@ public final class APIConstants {
             REGISTERED
         }
     }
+
+    // Constants related to Synapse Artifact Generator
+    public static class SynapseArtifactGenerator {
+        public static final String SYNAPSE_ARTIFACT_GENERATOR_CONFIG = "SynapseArtifactGenerator.";
+        public static final String THREAD_POOL_CONFIG = SYNAPSE_ARTIFACT_GENERATOR_CONFIG + "ThreadPool.";
+        public static final String CORE_POOL_SIZE = THREAD_POOL_CONFIG + "CorePoolSize";
+        public static final String MAX_POOL_SIZE = THREAD_POOL_CONFIG + "MaxPoolSize";
+        public static final String KEEP_ALIVE_TIME_MS = THREAD_POOL_CONFIG + "KeepAliveTimeMs";
+        public static final String QUEUE_CAPACITY = THREAD_POOL_CONFIG + "QueueCapacity";
+    }
+
 }
