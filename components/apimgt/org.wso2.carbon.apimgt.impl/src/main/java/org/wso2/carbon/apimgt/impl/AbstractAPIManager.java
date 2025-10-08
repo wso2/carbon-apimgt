@@ -572,7 +572,6 @@ public abstract class AbstractAPIManager implements APIManager {
                 log.warn("Key Manager instance is null for: " + keyManagerDtoEntry.getKey());
                 continue;
             }
-            }
             boolean scopeExistsInKeyManager = false;
 
             try {
@@ -597,11 +596,11 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
                 return true;
 
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Scope key '" + scopeKey + "' does not exist in any Key Manager for tenant: " + tenantDomain);
+            }
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Scope key '" + scopeKey + "' does not exist in any Key Manager for tenant: " + tenantDomain);
-        }
-        return false;
         return false;
     }
 
