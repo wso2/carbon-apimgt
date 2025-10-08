@@ -76,7 +76,9 @@ public class ScopesApiServiceImpl implements ScopesApiService {
                 }
             }
             // Check whether the scope is already registered in KeyManager even if it is allowed/not allowed scope.
-            log.debug("Checking if scope exists in KeyManager for tenant: {}", tenantDomain);
+            if (log.isDebugEnabled()) {
+                log.debug("Checking if scope exists in KeyManager for tenant: " + tenantDomain);
+            }
             isScopeExist = isScopeExist || apiProvider.isScopeKeyExistInKeyManager(scopeName, tenantDomain);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error occurred while checking scope name", e, log);
