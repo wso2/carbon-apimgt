@@ -9725,7 +9725,7 @@ public final class APIUtil {
                 endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX, productionEndpointSecurity);
             } else if (!api.isAdvertiseOnly()) {
                 String endpointConfig = api.getEndpointConfig();
-                if (endpointConfig != null) {
+                if (StringUtils.isNotBlank(endpointConfig) && !"null".equals(endpointConfig)) {
                     JSONObject endpointConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
                     if (endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null) {
                         JSONObject endpointSecurity =
@@ -9747,8 +9747,8 @@ public final class APIUtil {
             }
             return endpointSecurityMap;
         } catch (ParseException e) {
-            String errorMessage = "Error while parsing Endpoint Config json";
-            throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_PARSING_ENDPOINT_CONFIG);
+            String errorMessage = "Error while parsing Endpoint Config json. Value is missing or invalid.";
+            throw new APIManagementException(errorMessage, e, ExceptionCodes.INVALID_ENDPOINT_CONFIG);
         }
     }
 
