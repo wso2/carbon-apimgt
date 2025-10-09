@@ -1316,8 +1316,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiMgtDAO.removeApiOperationMapping(oldURITemplates);
             }
         }
-        List<API> mcpServers = getMCPServersUsedByAPI(api.getUuid(), api.getOrganization());
-        if (mcpServers == null || mcpServers.isEmpty()) {
+        List<API> mcpServersAssociatedWithApi = getMCPServersUsedByAPI(api.getUuid(), api.getOrganization());
+        if (mcpServersAssociatedWithApi == null || mcpServersAssociatedWithApi.isEmpty()) {
             APIUtil.validateAndUpdateURITemplates(api, tenantId);
             apiMgtDAO.updateURITemplates(api, tenantId);
             if (log.isDebugEnabled()) {
@@ -1325,7 +1325,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Skipping URI template update for API: " + apiIdentifier + " as it is used by MCP server(s)");
+                log.debug(
+                        "Skipping URI template update for API: " + apiIdentifier + " as it is associated with MCP server(s)");
             }
         }
         // Update the resource scopes of the API in KM.
@@ -9039,6 +9040,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public List<API> getMCPServersUsedByAPI(String apiUuid, String organization) throws APIManagementException{
 
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving MCP Servers associated with API: " + apiUuid + " in organization: " + organization);
+        }
         int apiId = apiMgtDAO.getAPIID(apiUuid);
         return apiMgtDAO.getMCPServersUsedByAPI(apiId, organization);
     }
