@@ -29,7 +29,6 @@ import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -53,7 +52,7 @@ import javax.ws.rs.core.Response;
 import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
 /**
- * This class is contains rest apis related to workflows
+ * This class contains rest apis related to workflows
  */
 public class WorkflowsApiServiceImpl implements WorkflowsApiService {
 
@@ -111,28 +110,40 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             if(workflowType != null) {
                 switch (workflowType) {
                     case "APPLICATION_CREATION":
-                        workflowType = "AM_APPLICATION_CREATION";
+                        workflowType = WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION;
                         break;
                     case "SUBSCRIPTION_CREATION":
-                        workflowType = "AM_SUBSCRIPTION_CREATION";
+                        workflowType = WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION;
                         break;
                     case "USER_SIGNUP":
-                        workflowType = "AM_USER_SIGNUP";
+                        workflowType = WorkflowConstants.WF_TYPE_AM_USER_SIGNUP;
                         break;
                     case "APPLICATION_REGISTRATION_PRODUCTION":
-                        workflowType = "AM_APPLICATION_REGISTRATION_PRODUCTION";
+                        workflowType = WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION;
                         break;
                     case "APPLICATION_REGISTRATION_SANDBOX":
-                        workflowType = "AM_APPLICATION_REGISTRATION_SANDBOX";
+                        workflowType = WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX;
                         break;
                     case "API_STATE":
-                        workflowType = "AM_API_STATE";
+                        workflowType = WorkflowConstants.WF_TYPE_AM_API_STATE;
                         break;
                     case "API_PRODUCT_STATE":
-                        workflowType = "AM_API_PRODUCT_STATE";
+                        workflowType = WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE;
                         break;
-                    case "AM_REVISION_DEPLOYMENT":
-                        workflowType = "AM_REVISION_DEPLOYMENT";
+                    case "REVISION_DEPLOYMENT":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT;
+                        break;
+                    case "APPLICATION_DELETION":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION;
+                        break;
+                    case "APPLICATION_UPDATE":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE;
+                        break;
+                    case "SUBSCRIPTION_DELETION":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION;
+                        break;
+                    case "SUBSCRIPTION_UPDATE":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE;
                         break;
                 }
             }
