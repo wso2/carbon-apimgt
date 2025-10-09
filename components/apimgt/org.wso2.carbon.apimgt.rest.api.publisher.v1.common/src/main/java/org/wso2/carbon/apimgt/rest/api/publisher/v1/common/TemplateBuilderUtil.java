@@ -240,6 +240,7 @@ public class TemplateBuilderUtil {
         authProperties.put(APIConstants.API_SECURITY, apiSecurity);
         authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
         authProperties.put(APIConstants.API_TYPE, api.getType());
+        authProperties.put(APIConstants.SUB_TYPE, api.getSubtype());
         if (!clientCertificateObject.isEmpty()) {
             authProperties.put(APIConstants.CERTIFICATE_INFORMATION, clientCertificateObject.toString());
         }

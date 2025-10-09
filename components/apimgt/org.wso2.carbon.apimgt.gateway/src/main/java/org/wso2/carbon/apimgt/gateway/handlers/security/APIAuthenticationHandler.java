@@ -107,6 +107,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private String certificateInformation;
     private String apiUUID;
     private String apiType = String.valueOf(APIConstants.ApiTypes.API); // Default API Type
+    private String subType;
     private OpenAPI openAPI;
     private String keyManagers;
     private final String type = ExtensionType.AUTHENTICATION.toString();
@@ -179,6 +180,22 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)){
             this.apiType = apiType;
         }
+    }
+
+    /**
+     * Get subtype of the API
+     * @return API Subtype
+     */
+    public String getSubType() {
+        return subType;
+    }
+
+    /**
+     * Set subtype of the API
+     * @param subType API Subtype
+     */
+    public void setSubType(String subType) {
+        this.subType = subType;
     }
 
     private boolean removeOAuthHeadersFromOutMessage = true;
@@ -445,6 +462,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
 
             messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
+            messageContext.setProperty(APIMgtGatewayConstants.SUB_TYPE, subType);
             if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Setting API type for MCP internal key authentication: " + apiType);
