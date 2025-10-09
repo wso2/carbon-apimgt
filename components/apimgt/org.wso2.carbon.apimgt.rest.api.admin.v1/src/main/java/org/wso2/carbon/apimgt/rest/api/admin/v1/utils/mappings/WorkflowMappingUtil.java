@@ -31,14 +31,6 @@ import java.util.Map;
  */
 public class WorkflowMappingUtil {
 
-    private static Object WorkflowTypeEnum;
-
-    public enum WorkflowTypeEnum {
-        AM_APPLICATION_CREATION, AM_SUBSCRIPTION_CREATION, AM_USER_SIGNUP, AM_APPLICATION_REGISTRATION_PRODUCTION, AM_APPLICATION_REGISTRATION_SANDBOX, AM_APPLICATION_DELETION, AM_API_STATE, AM_SUBSCRIPTION_DELETION,
-    };
-
-    private WorkflowInfoDTO.WorkflowTypeEnum workflowType = null;
-
     public static WorkflowListDTO fromWorkflowsToDTO(Workflow[] workflows, int limit, int offset) {
         WorkflowListDTO workflowListDTO = new WorkflowListDTO();
         List<WorkflowInfoDTO> workflowInfoDTOs = workflowListDTO.getList();
@@ -50,7 +42,7 @@ public class WorkflowMappingUtil {
 
         //identifying the proper start and end indexes
         int start = offset < workflows.length && offset >= 0 ? offset : Integer.MAX_VALUE;
-        int end = offset + limit - 1 <= workflows.length - 1 ? offset + limit - 1 : workflows.length - 1;
+        int end = Math.min(offset + limit - 1, workflows.length - 1);
 
         for (int i = start; i <= end; i++) {
             workflowInfoDTOs.add(fromWorkflowsToInfoDTO(workflows[i]));
@@ -62,30 +54,43 @@ public class WorkflowMappingUtil {
     public static WorkflowInfoDTO fromWorkflowsToInfoDTO(Workflow workflow) {
 
         WorkflowInfoDTO workflowInfoDTO = new WorkflowInfoDTO();
-        if (workflow.getWorkflowType().equals("AM_APPLICATION_CREATION")) {
-            workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.APPLICATION_CREATION);
-        } else if (workflow.getWorkflowType().equals("AM_APPLICATION_DELETION")) {
-            workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.APPLICATION_DELETION);
-        } else if (workflow.getWorkflowType().equals("AM_APPLICATION_UPDATE")) {
-            workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.APPLICATION_UPDATE);
-        } else if (workflow.getWorkflowType().equals("AM_SUBSCRIPTION_CREATION")) {
-            workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.SUBSCRIPTION_CREATION);
-        } else if (workflow.getWorkflowType().equals("AM_SUBSCRIPTION_DELETION")) {
-            workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.SUBSCRIPTION_DELETION);
-        } else if (workflow.getWorkflowType().equals("AM_USER_SIGNUP")) {
-            workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.USER_SIGNUP);
-        } else if (workflow.getWorkflowType().equals("AM_APPLICATION_REGISTRATION_PRODUCTION")) {
-            workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.APPLICATION_REGISTRATION_PRODUCTION);
-        } else if (workflow.getWorkflowType().equals("AM_APPLICATION_REGISTRATION_SANDBOX")) {
-            workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.APPLICATION_REGISTRATION_SANDBOX);
-        } else if (workflow.getWorkflowType().equals("AM_API_STATE")) {
-            workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.API_STATE);
-        } else if (workflow.getWorkflowType().equals("AM_API_PRODUCT_STATE")) {
-            workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.API_PRODUCT_STATE);
-        } else if (workflow.getWorkflowType().equals("AM_REVISION_DEPLOYMENT")) {
-            workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.REVISION_DEPLOYMENT);
-        } else if (workflow.getWorkflowType().equals("AM_SUBSCRIPTION_UPDATE")) {
-            workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.SUBSCRIPTION_UPDATE);
+        switch (workflow.getWorkflowType()) {
+            case "AM_APPLICATION_CREATION":
+                workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.APPLICATION_CREATION);
+                break;
+            case "AM_APPLICATION_DELETION":
+                workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.APPLICATION_DELETION);
+                break;
+            case "AM_APPLICATION_UPDATE":
+                workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.APPLICATION_UPDATE);
+                break;
+            case "AM_SUBSCRIPTION_CREATION":
+                workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.SUBSCRIPTION_CREATION);
+                break;
+            case "AM_SUBSCRIPTION_DELETION":
+                workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.SUBSCRIPTION_DELETION);
+                break;
+            case "AM_USER_SIGNUP":
+                workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.USER_SIGNUP);
+                break;
+            case "AM_APPLICATION_REGISTRATION_PRODUCTION":
+                workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.APPLICATION_REGISTRATION_PRODUCTION);
+                break;
+            case "AM_APPLICATION_REGISTRATION_SANDBOX":
+                workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.APPLICATION_REGISTRATION_SANDBOX);
+                break;
+            case "AM_API_STATE":
+                workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.API_STATE);
+                break;
+            case "AM_API_PRODUCT_STATE":
+                workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.API_PRODUCT_STATE);
+                break;
+            case "AM_REVISION_DEPLOYMENT":
+                workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.REVISION_DEPLOYMENT);
+                break;
+            case "AM_SUBSCRIPTION_UPDATE":
+                workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.SUBSCRIPTION_UPDATE);
+                break;
         }
         workflowInfoDTO.setWorkflowStatus(WorkflowInfoDTO.WorkflowStatusEnum.valueOf(workflow.getStatus().toString()));
         workflowInfoDTO.setCreatedTime(workflow.getCreatedTime());

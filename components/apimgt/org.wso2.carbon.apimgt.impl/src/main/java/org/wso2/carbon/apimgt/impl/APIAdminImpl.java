@@ -1844,10 +1844,6 @@ public class APIAdminImpl implements APIAdmin {
                     status, tenantDomain);
         }
 
-        if (workflow == null) {
-            String msg = "External workflow Reference: " + externelWorkflowRef + " was not found.";
-            throw new APIMgtResourceNotFoundException(msg);
-        }
         return workflow;
     }
 
