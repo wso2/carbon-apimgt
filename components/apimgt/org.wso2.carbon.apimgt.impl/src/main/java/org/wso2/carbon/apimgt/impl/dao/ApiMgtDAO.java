@@ -191,6 +191,7 @@ import org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.SUPER_TENANT_DOMAIN;
 import static org.wso2.carbon.apimgt.impl.APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+import static org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.APIRevisionSqlConstants.*;
 
 /**
  * This class represent the ApiMgtDAO.
@@ -10518,7 +10519,7 @@ public class ApiMgtDAO {
     private APIRevision getRevisionByRevisionUUID(Connection connection, String revisionUUID) throws SQLException {
 
         try (PreparedStatement statement = connection
-                .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_BY_REVISION_UUID)) {
+                .prepareStatement(GET_REVISION_BY_REVISION_UUID)) {
             statement.setString(1, revisionUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -16662,8 +16663,7 @@ public class ApiMgtDAO {
                 int urlMappingId = uriTemplateOriginal.getId();
                 // Adding to AM_API_URL_MAPPING table
                 PreparedStatement getURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.
-                                GET_URL_MAPPINGS_WITH_SCOPE_BY_URL_MAPPING_ID);
+                        .prepareStatement(GET_URL_MAPPINGS_WITH_SCOPE_BY_URL_MAPPING_ID);
                 getURLMappingsStatement.setInt(1, urlMappingId);
                 List<URITemplate> urlMappingList = new ArrayList<>();
                 try (ResultSet rs = getURLMappingsStatement.executeQuery()) {
@@ -16729,7 +16729,7 @@ public class ApiMgtDAO {
                 }
 
                 PreparedStatement insertURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
+                        .prepareStatement(INSERT_URL_MAPPINGS);
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
                     insertURLMappingsStatement.setInt(1, urlMapping.getId());
                     insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
@@ -16758,9 +16758,9 @@ public class ApiMgtDAO {
 
                 // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
                 PreparedStatement getRevisionedURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_URL_MAPPINGS_ID);
+                        .prepareStatement(GET_URL_MAPPINGS_ID);
                 PreparedStatement insertScopeResourceMappingStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
+                        .prepareStatement(INSERT_SCOPE_RESOURCE_MAPPING);
                 PreparedStatement insertProductResourceMappingStatement = connection
                         .prepareStatement(addProductResourceMappingSql);
                 String dbProductName = connection.getMetaData().getDatabaseProductName();
@@ -16853,8 +16853,8 @@ public class ApiMgtDAO {
         PreparedStatement removeURLMappingsStatement = null;
         try {
             // Retrieve Product Resources
-            PreparedStatement getProductMappingsStatement = connection.prepareStatement(SQLConstants.
-                    APIRevisionSqlConstants.GET_CUURENT_API_PRODUCT_RESOURCES);
+            PreparedStatement getProductMappingsStatement = connection.prepareStatement(
+                    GET_CUURENT_API_PRODUCT_RESOURCES);
             getProductMappingsStatement.setInt(1, productId);
             List<Integer> urlMappingIds = new ArrayList<>();
             try (ResultSet rs = getProductMappingsStatement.executeQuery()) {
@@ -16864,8 +16864,8 @@ public class ApiMgtDAO {
             }
             // Removing related revision entries from AM_API_URL_MAPPING table
             // This will cascade remove entries from AM_API_RESOURCE_SCOPE_MAPPING and AM_API_PRODUCT_MAPPING tables
-            removeURLMappingsStatement = connection.prepareStatement(SQLConstants
-                    .APIRevisionSqlConstants.REMOVE_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING_BY_URL_MAPPING_ID);
+            removeURLMappingsStatement = connection.prepareStatement(
+                    REMOVE_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING_BY_URL_MAPPING_ID);
             for (int id : urlMappingIds) {
                 removeURLMappingsStatement.setInt(1, id);
                 removeURLMappingsStatement.addBatch();
@@ -19408,7 +19408,7 @@ public class ApiMgtDAO {
         int count = 0;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_COUNT_BY_API_UUID)) {
+                     .prepareStatement(GET_REVISION_COUNT_BY_API_UUID)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -19433,7 +19433,7 @@ public class ApiMgtDAO {
         int revisionId = 0;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_MOST_RECENT_REVISION_ID)) {
+                     .prepareStatement(GET_MOST_RECENT_REVISION_ID)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -19484,11 +19484,11 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = (connection.getMetaData().getDriverName().contains("MS SQL") ||
                      connection.getMetaData().getDriverName().contains("Microsoft") ?
-                     connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_MOST_RECENT_REVISION_UUID_MSSQL) :
+                     connection.prepareStatement(GET_MOST_RECENT_REVISION_UUID_MSSQL) :
                      (connection.getMetaData().getDriverName().contains("MySQL") || connection.getMetaData().getDriverName()
                              .contains("H2")) ?
-                             connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_MOST_RECENT_REVISION_UUID_MYSQL) :
-                             connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_MOST_RECENT_REVISION_UUID))) {
+                             connection.prepareStatement(GET_MOST_RECENT_REVISION_UUID_MYSQL) :
+                             connection.prepareStatement(GET_MOST_RECENT_REVISION_UUID))) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -19516,7 +19516,7 @@ public class ApiMgtDAO {
                 connection.setAutoCommit(false);
                 // Adding to AM_REVISION table
                 PreparedStatement statement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.ADD_API_REVISION);
+                        .prepareStatement(ADD_API_REVISION);
                 statement.setInt(1, apiRevision.getId());
                 statement.setString(2, apiRevision.getApiUUID());
                 statement.setString(3, apiRevision.getRevisionUUID());
@@ -19682,7 +19682,7 @@ public class ApiMgtDAO {
                 }
 
                 PreparedStatement insertURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
+                        .prepareStatement(INSERT_URL_MAPPINGS);
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
                     insertURLMappingsStatement.setInt(1, apiId);
                     insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
@@ -19711,19 +19711,19 @@ public class ApiMgtDAO {
 
                 // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
                 PreparedStatement getRevisionedURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID);
+                        .prepareStatement(GET_REVISIONED_URL_MAPPINGS_ID);
                 if (connection.getMetaData().getDriverName().contains("MySQL")) {
                     getRevisionedURLMappingsStatement = connection.prepareStatement(
-                            SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MYSQL);
+                            GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MYSQL);
                 } else if ((connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData()
                         .getDriverName().contains("Microsoft"))) {
                     getRevisionedURLMappingsStatement = connection.prepareStatement(
-                            SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MSSQL);
+                            GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MSSQL);
                 }
                 PreparedStatement insertScopeResourceMappingStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
+                        .prepareStatement(INSERT_SCOPE_RESOURCE_MAPPING);
                 PreparedStatement insertProductResourceMappingStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_RESOURCE_MAPPING);
+                        .prepareStatement(INSERT_PRODUCT_RESOURCE_MAPPING);
                 PreparedStatement addBackendOperationMappingPrepStmt =
                         connection.prepareStatement(SQLConstants.ADD_AM_BACKEND_OPERATION_MAPPING_SQL);
                 PreparedStatement addApiOperationMappingPrepStmt =
@@ -19798,12 +19798,12 @@ public class ApiMgtDAO {
                 }
 
                 // Adding to AM_API_CLIENT_CERTIFICATE
-                String getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE;
+                String getClientCertificatesQuery = GET_CLIENT_CERTIFICATES_OF_KEY_TYPE;
                 String driverName = connection.getMetaData().getDriverName();
                 if (driverName.contains("Oracle")) {
-                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE_ORACLE_SQL;
+                    getClientCertificatesQuery = GET_CLIENT_CERTIFICATES_OF_KEY_TYPE_ORACLE_SQL;
                 } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
-                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE_MSSQL;
+                    getClientCertificatesQuery = GET_CLIENT_CERTIFICATES_OF_KEY_TYPE_MSSQL;
                 }
 
                 //get production and sandbox certificates lists separately
@@ -19822,7 +19822,7 @@ public class ApiMgtDAO {
                         }
                     }
                     PreparedStatement insertClientCertificateStatement = connection
-                            .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES);
+                            .prepareStatement(INSERT_CLIENT_CERTIFICATES);
                     for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
                         insertClientCertificateStatement.setInt(1, tenantId);
                         insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
@@ -19840,7 +19840,7 @@ public class ApiMgtDAO {
 
                 // Adding to AM_GRAPHQL_COMPLEXITY table
                 PreparedStatement getGraphQLComplexityStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_GRAPHQL_COMPLEXITY);
+                        .prepareStatement(GET_GRAPHQL_COMPLEXITY);
                 List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<>();
                 getGraphQLComplexityStatement.setInt(1, apiId);
                 try (ResultSet rs1 = getGraphQLComplexityStatement.executeQuery()) {
@@ -19854,7 +19854,7 @@ public class ApiMgtDAO {
                 }
 
                 PreparedStatement insertGraphQLComplexityStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_GRAPHQL_COMPLEXITY);
+                        .prepareStatement(INSERT_GRAPHQL_COMPLEXITY);
                 for (CustomComplexityDetails customComplexityDetails : customComplexityDetailsList) {
                     insertGraphQLComplexityStatement.setString(1, UUID.randomUUID().toString());
                     insertGraphQLComplexityStatement.setInt(2, apiId);
@@ -19922,7 +19922,7 @@ public class ApiMgtDAO {
         String revisionUUID = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID)) {
+                     .prepareStatement(GET_REVISION_UUID)) {
             statement.setString(1, apiUUID);
             statement.setInt(2, Integer.parseInt(revisionNum));
             try (ResultSet rs = statement.executeQuery()) {
@@ -19948,7 +19948,7 @@ public class ApiMgtDAO {
     public String getRevisionUUIDByOrganization(String revisionNum, String apiUUID, String organization) throws APIManagementException {
 
         String revisionUUID = null;
-        String sql = SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID_BY_ORGANIZATION;
+        String sql = GET_REVISION_UUID_BY_ORGANIZATION;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(sql)) {
@@ -19980,13 +19980,13 @@ public class ApiMgtDAO {
                      connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData()
                              .getDriverName().contains("Microsoft") ?
                              connection.prepareStatement(
-                                     SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID_MSSQL) :
+                                     GET_EARLIEST_REVISION_ID_MSSQL) :
                              (connection.getMetaData().getDriverName().contains("MySQL") || connection.getMetaData()
                                      .getDriverName().contains("H2")) ?
                                      connection.prepareStatement(
-                                             SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID_MYSQL) :
+                                             GET_EARLIEST_REVISION_ID_MYSQL) :
                                      connection.prepareStatement(
-                                             SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID))) {
+                                             GET_EARLIEST_REVISION_ID))) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -20010,7 +20010,7 @@ public class ApiMgtDAO {
         List<APIRevision> revisionList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISIONS_BY_API_UUID)) {
+                     .prepareStatement(GET_REVISIONS_BY_API_UUID)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -20054,7 +20054,7 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_APIID_BY_REVISION_UUID)) {
+                     .prepareStatement(GET_REVISION_APIID_BY_REVISION_UUID)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
@@ -20086,7 +20086,7 @@ public class ApiMgtDAO {
                 connection.setAutoCommit(false);
                 // Adding to AM_DEPLOYMENT_REVISION_MAPPING table
                 PreparedStatement statement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.ADD_API_REVISION_DEPLOYMENT_MAPPING);
+                        .prepareStatement(ADD_API_REVISION_DEPLOYMENT_MAPPING);
                 for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
                     String envName = apiRevisionDeployment.getDeployment();
                     String vhost = apiRevisionDeployment.getVhost();
@@ -20124,7 +20124,7 @@ public class ApiMgtDAO {
                 connection.setAutoCommit(false);
                 // Adding to AM_DEPLOYED_REVISION table
                 try (PreparedStatement statement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.ADD_DEPLOYED_API_REVISION)) {
+                        .prepareStatement(ADD_DEPLOYED_API_REVISION)) {
                     for (DeployedAPIRevision deployedAPIRevision : deployedAPIRevisionList) {
                         String envName = deployedAPIRevision.getDeployment();
                         String vhost = deployedAPIRevision.getVhost();
@@ -20173,7 +20173,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement statement = connection
-                    .prepareStatement(SQLConstants.APIRevisionSqlConstants.UPDATE_API_REVISION_STATUS_SQL)) {
+                    .prepareStatement(UPDATE_API_REVISION_STATUS_SQL)) {
                 statement.setString(1, status);
                 statement.setString(2, revisionUUID);
                 statement.setString(3, environment);
@@ -20201,8 +20201,7 @@ public class ApiMgtDAO {
         APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.
-                             APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPING_BY_NAME_AND_REVISION_UUID)) {
+                     .prepareStatement(GET_API_REVISION_DEPLOYMENT_MAPPING_BY_NAME_AND_REVISION_UUID)) {
             statement.setString(1, name);
             statement.setString(2, revisionId);
             try (ResultSet rs = statement.executeQuery()) {
@@ -20234,8 +20233,7 @@ public class ApiMgtDAO {
         List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.
-                             APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPING_BY_REVISION_UUID)) {
+                     .prepareStatement(GET_API_REVISION_DEPLOYMENT_MAPPING_BY_REVISION_UUID)) {
             statement.setString(1, revisionUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -20272,9 +20270,7 @@ public class ApiMgtDAO {
         List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(
-                     SQLConstants
-                             .APIRevisionSqlConstants
-                             .GET_API_REVISION_DEPLOYMENT_MAPPINGS_BY_REVISION_STATUS_AND_API_UUID)) {
+                     GET_API_REVISION_DEPLOYMENT_MAPPINGS_BY_REVISION_STATUS_AND_API_UUID)) {
             statement.setString(1, workflowStatus);
             statement.setString(2, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
@@ -20304,12 +20300,10 @@ public class ApiMgtDAO {
             PreparedStatement statement;
             if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
                 statement = connection
-                        .prepareStatement(SQLConstants.
-                                APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENTS_BY_API_UUID_POSTGRES);
+                        .prepareStatement(GET_API_REVISION_DEPLOYMENTS_BY_API_UUID_POSTGRES);
             } else {
                 statement = connection
-                        .prepareStatement(SQLConstants.
-                                APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENTS_BY_API_UUID);
+                        .prepareStatement(GET_API_REVISION_DEPLOYMENTS_BY_API_UUID);
             }
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
@@ -20332,8 +20326,7 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
         try (PreparedStatement statement =
-                     connection.prepareStatement(SQLConstants.APIRevisionSqlConstants
-                             .CHECK_API_REVISION_DEPLOYMENT_AVAILABILITY_BY_API_UUID)) {
+                     connection.prepareStatement(CHECK_API_REVISION_DEPLOYMENT_AVAILABILITY_BY_API_UUID)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
@@ -20359,8 +20352,7 @@ public class ApiMgtDAO {
         List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.
-                             APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPING_BY_API_UUID)) {
+                     .prepareStatement(GET_API_REVISION_DEPLOYMENT_MAPPING_BY_API_UUID)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -20393,8 +20385,7 @@ public class ApiMgtDAO {
         List<DeployedAPIRevision> deployedAPIRevisionList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.
-                             APIRevisionSqlConstants.GET_DEPLOYED_REVISION_BY_API_UUID)) {
+                     .prepareStatement(GET_DEPLOYED_REVISION_BY_API_UUID)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -20430,8 +20421,7 @@ public class ApiMgtDAO {
                 connection.setAutoCommit(false);
                 // Remove an entry from AM_DEPLOYMENT_REVISION_MAPPING table
                 try (PreparedStatement statement = connection
-                        .prepareStatement(SQLConstants
-                                .APIRevisionSqlConstants.REMOVE_API_REVISION_DEPLOYMENT_MAPPING)) {
+                        .prepareStatement(REMOVE_API_REVISION_DEPLOYMENT_MAPPING)) {
                     for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
                         statement.setString(1, apiRevisionDeployment.getDeployment());
                         statement.setString(2, apiRevisionId);
@@ -20466,7 +20456,7 @@ public class ApiMgtDAO {
                 connection.setAutoCommit(false);
                 // Remove an entry from AM_DEPLOYMENT_REVISION_MAPPING table
                 PreparedStatement statement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.REMOVE_API_REVISION_DEPLOYMENT_MAPPING);
+                        .prepareStatement(REMOVE_API_REVISION_DEPLOYMENT_MAPPING);
                 for (APIRevisionDeployment deployment : deployments) {
                     statement.setString(1, deployment.getDeployment());
                     statement.setString(2, deployment.getRevisionUUID());
@@ -20498,7 +20488,7 @@ public class ApiMgtDAO {
                 connection.setAutoCommit(false);
                 // Remove an entry from AM_DEPLOYED_REVISION table
                 try (PreparedStatement statement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.REMOVE_DEPLOYED_API_REVISION)) {
+                        .prepareStatement(REMOVE_DEPLOYED_API_REVISION)) {
                     for (DeployedAPIRevision deployment : deployments) {
                         statement.setString(1, deployment.getDeployment());
                         statement.setString(2, deployment.getRevisionUUID());
@@ -20532,7 +20522,7 @@ public class ApiMgtDAO {
                 connection.setAutoCommit(false);
                 // Remove an entry from AM_DEPLOYED_REVISION table
                 try (PreparedStatement statement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.SET_UN_DEPLOYED_API_REVISION)) {
+                        .prepareStatement(SET_UN_DEPLOYED_API_REVISION)) {
                     for (DeployedAPIRevision deployment : deployments) {
                         statement.setString(1, deployment.getDeployment());
                         statement.setString(2, deployment.getRevisionUUID());
@@ -20566,7 +20556,7 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             // Update an entry from AM_DEPLOYMENT_REVISION_MAPPING table
             try (PreparedStatement statement = connection
-                    .prepareStatement(SQLConstants.APIRevisionSqlConstants.UPDATE_API_REVISION_DEPLOYMENT_MAPPING)) {
+                    .prepareStatement(UPDATE_API_REVISION_DEPLOYMENT_MAPPING)) {
                 for (APIRevisionDeployment deployment : deployments) {
                     statement.setBoolean(1, deployment.isDisplayOnDevportal());
                     statement.setString(2, deployment.getDeployment());
@@ -20644,8 +20634,8 @@ public class ApiMgtDAO {
                 removeApiOperationMapping(connection, uriTemplates);
 
                 // Removing related Current API entries from AM_API_URL_MAPPING table
-                PreparedStatement removeURLMappingsStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_API_URL_MAPPING_BY_API_ID);
+                PreparedStatement removeURLMappingsStatement = connection.prepareStatement(
+                        REMOVE_CURRENT_API_ENTRIES_IN_AM_API_URL_MAPPING_BY_API_ID);
                 removeURLMappingsStatement.setInt(1, apiId);
                 removeURLMappingsStatement.executeUpdate();
 
@@ -20820,7 +20810,7 @@ public class ApiMgtDAO {
                 setOperationPoliciesToURITemplatesMap(connection, apiRevision.getRevisionUUID(), uriTemplateMap);
 
                 PreparedStatement insertURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS_CURRENT_API);
+                        .prepareStatement(INSERT_URL_MAPPINGS_CURRENT_API);
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
                     insertURLMappingsStatement.setInt(1, apiId);
                     insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
@@ -20848,11 +20838,11 @@ public class ApiMgtDAO {
 
                 // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
                 PreparedStatement getCurrentAPIURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CURRENT_API_URL_MAPPINGS_ID);
+                        .prepareStatement(GET_CURRENT_API_URL_MAPPINGS_ID);
                 PreparedStatement insertScopeResourceMappingStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
+                        .prepareStatement(INSERT_SCOPE_RESOURCE_MAPPING);
                 PreparedStatement insertProductResourceMappingStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_RESOURCE_MAPPING);
+                        .prepareStatement(INSERT_PRODUCT_RESOURCE_MAPPING);
                 PreparedStatement insertOperationPolicyMappingStatement = connection
                         .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING);
                 PreparedStatement deleteOutdatedOperationPolicyStatement = connection
@@ -20928,12 +20918,12 @@ public class ApiMgtDAO {
                 addApiOperationMappingPrepStmt.executeBatch();
 
                 // Restoring AM_API_CLIENT_CERTIFICATE table entries
-                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_API_ID);
+                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(
+                        REMOVE_CURRENT_API_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_API_ID);
                 removeClientCertificatesStatement.setInt(1, apiId);
                 removeClientCertificatesStatement.executeUpdate();
-                PreparedStatement getClientCertificatesStatement = connection.prepareStatement(SQLConstants.
-                        APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_BY_REVISION_UUID_AND_KEY_TYPE);
+                PreparedStatement getClientCertificatesStatement = connection.prepareStatement(
+                        GET_CLIENT_CERTIFICATES_BY_REVISION_UUID_AND_KEY_TYPE);
 
                 //get production and sandbox certificates lists separately
                 for (String keyType : keyTypes) {
@@ -20951,8 +20941,7 @@ public class ApiMgtDAO {
                         }
                     }
                     PreparedStatement insertClientCertificateStatement = connection
-                            .prepareStatement(SQLConstants
-                                    .APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES_AS_CURRENT_API);
+                            .prepareStatement(INSERT_CLIENT_CERTIFICATES_AS_CURRENT_API);
                     for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
                         insertClientCertificateStatement.setInt(1, tenantId);
                         insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
@@ -20969,13 +20958,13 @@ public class ApiMgtDAO {
                 }
 
                 // Restoring AM_GRAPHQL_COMPLEXITY table
-                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_API_ID);
+                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(
+                        REMOVE_CURRENT_API_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_API_ID);
                 removeGraphQLComplexityStatement.setInt(1, apiId);
                 removeGraphQLComplexityStatement.executeUpdate();
 
                 PreparedStatement getGraphQLComplexityStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
+                        .prepareStatement(GET_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
                 List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<>();
                 getGraphQLComplexityStatement.setInt(1, apiId);
                 getGraphQLComplexityStatement.setString(2, apiRevision.getRevisionUUID());
@@ -20990,7 +20979,7 @@ public class ApiMgtDAO {
                 }
 
                 PreparedStatement insertGraphQLComplexityStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_GRAPHQL_COMPLEXITY_AS_CURRENT_API);
+                        .prepareStatement(INSERT_GRAPHQL_COMPLEXITY_AS_CURRENT_API);
                 for (CustomComplexityDetails customComplexityDetails : customComplexityDetailsList) {
                     insertGraphQLComplexityStatement.setString(1, UUID.randomUUID().toString());
                     insertGraphQLComplexityStatement.setInt(2, apiId);
@@ -21030,8 +21019,7 @@ public class ApiMgtDAO {
                 int apiId = getAPIID(apiRevision.getApiUUID(), connection);
 
                 // Removing related revision entries from AM_REVISION table
-                PreparedStatement removeAMRevisionStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.DELETE_API_REVISION);
+                PreparedStatement removeAMRevisionStatement = connection.prepareStatement(DELETE_API_REVISION);
                 removeAMRevisionStatement.setString(1, apiRevision.getRevisionUUID());
                 removeAMRevisionStatement.executeUpdate();
 
@@ -21043,22 +21031,22 @@ public class ApiMgtDAO {
                 deleteAllAPIMetadataRevision(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
                 // Removing related revision entries from AM_API_URL_MAPPING table
                 // This will cascade remove entries from AM_API_RESOURCE_SCOPE_MAPPING and AM_API_PRODUCT_MAPPING tables
-                PreparedStatement removeURLMappingsStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_API_URL_MAPPING_BY_REVISION_UUID);
+                PreparedStatement removeURLMappingsStatement = connection.prepareStatement(
+                        REMOVE_REVISION_ENTRIES_IN_AM_API_URL_MAPPING_BY_REVISION_UUID);
                 removeURLMappingsStatement.setInt(1, apiId);
                 removeURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
                 removeURLMappingsStatement.executeUpdate();
 
                 // Removing related revision entries from AM_API_CLIENT_CERTIFICATE table
-                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_REVISION_UUID);
+                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(
+                        REMOVE_REVISION_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_REVISION_UUID);
                 removeClientCertificatesStatement.setInt(1, apiId);
                 removeClientCertificatesStatement.setString(2, apiRevision.getRevisionUUID());
                 removeClientCertificatesStatement.executeUpdate();
 
                 // Removing related revision entries from AM_GRAPHQL_COMPLEXITY table
-                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
+                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(
+                        REMOVE_REVISION_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
                 removeGraphQLComplexityStatement.setInt(1, apiId);
                 removeGraphQLComplexityStatement.setString(2, apiRevision.getRevisionUUID());
                 removeGraphQLComplexityStatement.executeUpdate();
@@ -21148,7 +21136,7 @@ public class ApiMgtDAO {
                 connection.setAutoCommit(false);
                 // Adding to AM_REVISION table
                 PreparedStatement statement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.ADD_API_REVISION);
+                        .prepareStatement(ADD_API_REVISION);
                 statement.setInt(1, apiRevision.getId());
                 statement.setString(2, apiRevision.getApiUUID());
                 statement.setString(3, apiRevision.getRevisionUUID());
@@ -21167,8 +21155,7 @@ public class ApiMgtDAO {
 
                 // Adding to AM_API_URL_MAPPING table
                 PreparedStatement getURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.
-                                GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID_BY_PRODUCT_ID);
+                        .prepareStatement(GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID_BY_PRODUCT_ID);
                 getURLMappingsStatement.setInt(1, apiId);
                 List<URITemplate> urlMappingList = new ArrayList<>();
                 try (ResultSet rs = getURLMappingsStatement.executeQuery()) {
@@ -21228,7 +21215,7 @@ public class ApiMgtDAO {
                 setAPIProductOperationPoliciesToURITemplatesMap(connection, new Integer(apiId).toString(), uriTemplateMap);
 
                 PreparedStatement insertURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
+                        .prepareStatement(INSERT_URL_MAPPINGS);
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
                     insertURLMappingsStatement.setInt(1, urlMapping.getId());
                     insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
@@ -21257,19 +21244,19 @@ public class ApiMgtDAO {
 
                 // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
                 PreparedStatement getRevisionedURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID);
+                        .prepareStatement(GET_REVISIONED_URL_MAPPINGS_ID);
                 if (connection.getMetaData().getDriverName().contains("MySQL")) {
                     getRevisionedURLMappingsStatement = connection.prepareStatement(
-                            SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MYSQL);
+                            GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MYSQL);
                 } else if ((connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData()
                         .getDriverName().contains("Microsoft"))) {
                     getRevisionedURLMappingsStatement = connection.prepareStatement(
-                            SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MSSQL);
+                            GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MSSQL);
                 }
                 PreparedStatement insertScopeResourceMappingStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
+                        .prepareStatement(INSERT_SCOPE_RESOURCE_MAPPING);
                 PreparedStatement insertProductResourceMappingStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_REVISION_RESOURCE_MAPPING);
+                        .prepareStatement(INSERT_PRODUCT_REVISION_RESOURCE_MAPPING);
                 String dbProductName = connection.getMetaData().getDatabaseProductName();
                 PreparedStatement insertOperationPolicyMappingStatement = connection
                         .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING, new String[]{
@@ -21340,12 +21327,12 @@ public class ApiMgtDAO {
                 insertOperationPolicyMappingStatement.executeBatch();
 
                 // Adding to AM_API_CLIENT_CERTIFICATE
-                String getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE;
+                String getClientCertificatesQuery = GET_CLIENT_CERTIFICATES_OF_KEY_TYPE;
                 String driverName = connection.getMetaData().getDriverName();
                 if (driverName.contains("Oracle")) {
-                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE_ORACLE_SQL;
+                    getClientCertificatesQuery = GET_CLIENT_CERTIFICATES_OF_KEY_TYPE_ORACLE_SQL;
                 } else if (driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
-                    getClientCertificatesQuery = SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_OF_KEY_TYPE_MSSQL;
+                    getClientCertificatesQuery = GET_CLIENT_CERTIFICATES_OF_KEY_TYPE_MSSQL;
                 }
 
                 PreparedStatement getClientCertificatesStatement = connection.prepareStatement(getClientCertificatesQuery);
@@ -21367,7 +21354,7 @@ public class ApiMgtDAO {
                         }
                     }
                     PreparedStatement insertClientCertificateStatement = connection
-                            .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES);
+                            .prepareStatement(INSERT_CLIENT_CERTIFICATES);
                     for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
                         insertClientCertificateStatement.setInt(1, tenantId);
                         insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
@@ -21385,7 +21372,7 @@ public class ApiMgtDAO {
 
                 // Adding to AM_GRAPHQL_COMPLEXITY table
                 PreparedStatement getGraphQLComplexityStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_GRAPHQL_COMPLEXITY);
+                        .prepareStatement(GET_GRAPHQL_COMPLEXITY);
                 List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<>();
                 getGraphQLComplexityStatement.setInt(1, apiId);
                 try (ResultSet rs1 = getGraphQLComplexityStatement.executeQuery()) {
@@ -21399,7 +21386,7 @@ public class ApiMgtDAO {
                 }
 
                 PreparedStatement insertGraphQLComplexityStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_GRAPHQL_COMPLEXITY);
+                        .prepareStatement(INSERT_GRAPHQL_COMPLEXITY);
                 for (CustomComplexityDetails customComplexityDetails : customComplexityDetailsList) {
                     insertGraphQLComplexityStatement.setString(1, UUID.randomUUID().toString());
                     insertGraphQLComplexityStatement.setInt(2, apiId);
@@ -21445,13 +21432,13 @@ public class ApiMgtDAO {
 
                 //Remove Current API Product entries from AM_API_URL_MAPPING table
                 PreparedStatement removeURLMappingsFromCurrentAPIProduct = connection.prepareStatement(
-                        SQLConstants.APIRevisionSqlConstants.REMOVE_CURRENT_API_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING);
+                        REMOVE_CURRENT_API_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING);
                 removeURLMappingsFromCurrentAPIProduct.setString(1, Integer.toString(apiId));
                 removeURLMappingsFromCurrentAPIProduct.executeUpdate();
 
                 //Copy Revision resources
                 PreparedStatement getURLMappingsFromRevisionedAPIProduct = connection.prepareStatement(
-                        SQLConstants.APIRevisionSqlConstants.GET_API_PRODUCT_REVISION_URL_MAPPINGS_BY_REVISION_UUID);
+                        GET_API_PRODUCT_REVISION_URL_MAPPINGS_BY_REVISION_UUID);
                 getURLMappingsFromRevisionedAPIProduct.setString(1, apiRevision.getRevisionUUID());
                 Map<String, URITemplate> urlMappingList = new HashMap<>();
                 try (ResultSet rs = getURLMappingsFromRevisionedAPIProduct.executeQuery()) {
@@ -21485,7 +21472,7 @@ public class ApiMgtDAO {
 
                 //Populate Scope Mappings
                 PreparedStatement getScopeMappingsFromRevisionedAPIProduct = connection.prepareStatement(
-                        SQLConstants.APIRevisionSqlConstants.GET_API_PRODUCT_REVISION_SCOPE_MAPPINGS_BY_REVISION_UUID);
+                        GET_API_PRODUCT_REVISION_SCOPE_MAPPINGS_BY_REVISION_UUID);
                 getScopeMappingsFromRevisionedAPIProduct.setString(1, apiRevision.getRevisionUUID());
                 try (ResultSet rs = getScopeMappingsFromRevisionedAPIProduct.executeQuery()) {
                     while (rs.next()) {
@@ -21505,7 +21492,7 @@ public class ApiMgtDAO {
                 setAPIProductOperationPoliciesToURITemplatesMap(connection, apiRevision.getRevisionUUID(), urlMappingList);
 
                 PreparedStatement insertURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
+                        .prepareStatement(INSERT_URL_MAPPINGS);
                 for (URITemplate urlMapping : urlMappingList.values()) {
                     insertURLMappingsStatement.setInt(1, urlMapping.getId());
                     insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
@@ -21534,14 +21521,14 @@ public class ApiMgtDAO {
 
                 //Insert Scope Mappings and operation policy mappings
                 PreparedStatement getRevisionedURLMappingsStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID);
+                        .prepareStatement(GET_REVISIONED_URL_MAPPINGS_ID);
                 if (connection.getMetaData().getDriverName().contains("MySQL")) {
                     getRevisionedURLMappingsStatement = connection.prepareStatement(
-                            SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MYSQL);
+                            GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MYSQL);
                 } else if ((connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData()
                         .getDriverName().contains("Microsoft"))) {
                     getRevisionedURLMappingsStatement = connection.prepareStatement(
-                            SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MSSQL);
+                            GET_REVISIONED_URL_MAPPINGS_ID_CASE_SENSITIVE_MSSQL);
                 }
                 PreparedStatement addResourceScopeMapping = connection.prepareStatement(
                         SQLConstants.ADD_API_RESOURCE_SCOPE_MAPPING);
@@ -21639,7 +21626,7 @@ public class ApiMgtDAO {
                 PreparedStatement getURLMappingOfAPIProduct = connection.prepareStatement(
                         SQLConstants.GET_URL_MAPPING_IDS_OF_API_PRODUCT_SQL);
                 PreparedStatement insertProductResourceMappingStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_REVISION_RESOURCE_MAPPING);
+                        .prepareStatement(INSERT_PRODUCT_REVISION_RESOURCE_MAPPING);
                 getURLMappingOfAPIProduct.setString(1, Integer.toString(apiId));
                 try (ResultSet rs = getURLMappingOfAPIProduct.executeQuery()) {
                     while (rs.next()) {
@@ -21652,13 +21639,13 @@ public class ApiMgtDAO {
                 }
 
                 // Restoring AM_API_CLIENT_CERTIFICATE table entries
-                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_API_ID);
+                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(
+                        REMOVE_CURRENT_API_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_API_ID);
                 removeClientCertificatesStatement.setInt(1, apiId);
                 removeClientCertificatesStatement.executeUpdate();
 
-                PreparedStatement getClientCertificatesStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_BY_REVISION_UUID_AND_KEY_TYPE);
+                PreparedStatement getClientCertificatesStatement = connection.prepareStatement(
+                        GET_CLIENT_CERTIFICATES_BY_REVISION_UUID_AND_KEY_TYPE);
 
                 //get production and sandbox certificates lists separately
                 for (String keyType : keyTypes) {
@@ -21676,7 +21663,7 @@ public class ApiMgtDAO {
                         }
                     }
                     PreparedStatement insertClientCertificateStatement = connection
-                            .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES_AS_CURRENT_API);
+                            .prepareStatement(INSERT_CLIENT_CERTIFICATES_AS_CURRENT_API);
                     for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
                         insertClientCertificateStatement.setInt(1, tenantId);
                         insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
@@ -21693,13 +21680,13 @@ public class ApiMgtDAO {
                 }
 
                 // Restoring AM_GRAPHQL_COMPLEXITY table
-                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_API_ID);
+                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(
+                        REMOVE_CURRENT_API_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_API_ID);
                 removeGraphQLComplexityStatement.setInt(1, apiId);
                 removeGraphQLComplexityStatement.executeUpdate();
 
                 PreparedStatement getGraphQLComplexityStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
+                        .prepareStatement(GET_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
                 List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<>();
                 getGraphQLComplexityStatement.setInt(1, apiId);
                 getGraphQLComplexityStatement.setString(2, apiRevision.getRevisionUUID());
@@ -21714,7 +21701,7 @@ public class ApiMgtDAO {
                 }
 
                 PreparedStatement insertGraphQLComplexityStatement = connection
-                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_GRAPHQL_COMPLEXITY_AS_CURRENT_API);
+                        .prepareStatement(INSERT_GRAPHQL_COMPLEXITY_AS_CURRENT_API);
                 for (CustomComplexityDetails customComplexityDetails : customComplexityDetailsList) {
                     insertGraphQLComplexityStatement.setString(1, UUID.randomUUID().toString());
                     insertGraphQLComplexityStatement.setInt(2, apiId);
@@ -21756,34 +21743,33 @@ public class ApiMgtDAO {
                         APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName()));
 
                 // Removing related revision entries from AM_REVISION table
-                PreparedStatement removeAMRevisionStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.DELETE_API_REVISION);
+                PreparedStatement removeAMRevisionStatement = connection.prepareStatement(DELETE_API_REVISION);
                 removeAMRevisionStatement.setString(1, apiRevision.getRevisionUUID());
                 removeAMRevisionStatement.executeUpdate();
 
                 // Removing related revision entries from AM_API_PRODUCT_MAPPING table
-                PreparedStatement removeProductMappingsStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_API_PRODUCT_MAPPING_BY_REVISION_UUID);
+                PreparedStatement removeProductMappingsStatement = connection.prepareStatement(
+                        REMOVE_REVISION_ENTRIES_IN_AM_API_PRODUCT_MAPPING_BY_REVISION_UUID);
                 removeProductMappingsStatement.setInt(1, apiId);
                 removeProductMappingsStatement.setString(2, apiRevision.getRevisionUUID());
                 removeProductMappingsStatement.executeUpdate();
 
                 // Removing related revision entries from AM_API_URL_MAPPING table
-                PreparedStatement removeURLMappingsStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.REMOVE_PRODUCT_REVISION_ENTRIES_IN_AM_API_URL_MAPPING_BY_REVISION_UUID);
+                PreparedStatement removeURLMappingsStatement = connection.prepareStatement(
+                        REMOVE_PRODUCT_REVISION_ENTRIES_IN_AM_API_URL_MAPPING_BY_REVISION_UUID);
                 removeURLMappingsStatement.setString(1, apiRevision.getRevisionUUID());
                 removeURLMappingsStatement.executeUpdate();
 
                 // Removing related revision entries from AM_API_CLIENT_CERTIFICATE table
-                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_REVISION_UUID);
+                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(
+                        REMOVE_REVISION_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_REVISION_UUID);
                 removeClientCertificatesStatement.setInt(1, apiId);
                 removeClientCertificatesStatement.setString(2, apiRevision.getRevisionUUID());
                 removeClientCertificatesStatement.executeUpdate();
 
                 // Removing related revision entries from AM_GRAPHQL_COMPLEXITY table
-                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(SQLConstants
-                        .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
+                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(
+                        REMOVE_REVISION_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
                 removeGraphQLComplexityStatement.setInt(1, apiId);
                 removeGraphQLComplexityStatement.setString(2, apiRevision.getRevisionUUID());
                 removeGraphQLComplexityStatement.executeUpdate();
@@ -23226,6 +23212,59 @@ public class ApiMgtDAO {
             handleException("Failed to fetch API - External API mapping for the API ID: " + apiId, e);
         }
         return references;
+    }
+
+    /**
+     * Remove API Revision deployments for specific API.
+     * @param apiId uuid of API.
+     * @throws APIManagementException if fails to remove revision entries.
+     */
+    public void removeAPIRevisionDeployment(String apiId) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Remove an entry from AM_DEPLOYMENT_REVISION_MAPPING table
+                try (PreparedStatement statement = connection.prepareStatement(
+                        REMOVE_API_REVISION_DEPLOYMENT_MAPPING_BY_API_ID)) {
+                    statement.setString(1, apiId);
+                    statement.executeUpdate();
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to remove api revision deployments for api " + apiId, e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to remove api revision deployments for api " + apiId, e);
+        }
+    }
+
+    /**
+     *  Remove API Revision deployment for specific API and environment name.
+     * @param apiId uuid of API.
+     * @param environmentName name of environment.
+     * @throws APIManagementException if fails to remove revision deployment.
+     */
+    public void removeAPIRevisionDeployment(String apiId, String environmentName) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Remove an entry from AM_DEPLOYMENT_REVISION_MAPPING table
+                try (PreparedStatement statement = connection.prepareStatement(
+                        REMOVE_API_REVISION_DEPLOYMENT_MAPPING_BY_ENVIRONMENT_AND_ID)) {
+                    statement.setString(1, environmentName);
+                    statement.setString(2, apiId);
+                    statement.executeUpdate();
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to remove api revision deployments for api " + apiId, e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to remove api revision deployments for api " + apiId, e);
+        }
+
     }
 
     private class SubscriptionInfo {

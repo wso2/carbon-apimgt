@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.RuntimeArtifactGeneratorUtil;
@@ -161,6 +162,7 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
         boolean deleted;
         Set<String> gateways = deployAPIInGatewayEvent.getGatewayLabels();
         String apiId = deployAPIInGatewayEvent.getUuid();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
             Map<String, Environment> environments = APIUtil.getEnvironments(deployAPIInGatewayEvent.getTenantDomain());
 
@@ -182,6 +184,11 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
                         }
                         if (!deleted) {
                             throw new NotifierException("Error while deleting externally deployed API");
+                        } else {
+                            if (deployAPIInGatewayEvent.isDeleted()) {
+                                APIUtil.deleteApiExternalApiMapping(apiId, environments.get(deploymentEnv).getUuid());
+                                apiMgtDAO.removeAPIRevisionDeployment(apiId, deploymentEnv);
+                            }
                         }
                     }
                 }
