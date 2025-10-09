@@ -1418,6 +1418,9 @@
              {% if apim.monetization.analytics_password is defined %}
                     <AnalyticsPassword>{{apim.monetization.analytics_password}}</AnalyticsPassword>
              {% endif %}
+             {% if apim.monetization.analytics_protocol is defined %}
+                    <AnalyticsProtocol>{{apim.monetization.analytics_protocol}}</AnalyticsProtocol>
+             {% endif %}
         </UsagePublisher>
         {% if apim.monetization.additional_attributes is defined %}
             <AdditionalAttributes>
