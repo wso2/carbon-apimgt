@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -57,6 +58,7 @@ import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENA
 public class WorkflowsApiServiceImpl implements WorkflowsApiService {
 
     private static final Log log = LogFactory.getLog(WorkflowsApiService.class);
+    private final String CREATED_STATUS = "CREATED";
 
     /**
      * This is used to get the workflow pending request according to ExternalWorkflowReference
@@ -68,23 +70,22 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
     public Response workflowsExternalWorkflowRefGet(String externalWorkflowRef, MessageContext messageContext)
             throws APIManagementException {
         WorkflowInfoDTO workflowinfoDTO;
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        Workflow workflow = null;
+        APIAdmin apiAdmin = new APIAdminImpl();
         try {
-            Workflow workflow;
-            String status = "CREATED";
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIAdmin apiAdmin = new APIAdminImpl();
-            workflow = apiAdmin.getworkflowReferenceByExternalWorkflowReferenceID(externalWorkflowRef, status, tenantDomain);
-            if (workflow == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_WORKFLOW, externalWorkflowRef);
-            } else {
-                workflowinfoDTO = WorkflowMappingUtil.fromWorkflowsToInfoDTO(workflow);
-                return Response.ok().entity(workflowinfoDTO).build();
-            }
+            workflow = apiAdmin.getworkflowReferenceByExternalWorkflowReferenceID(externalWorkflowRef, CREATED_STATUS,
+                    tenantDomain);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving workflow request by the " +
                     "external workflow reference. ", e, log);
         }
-        return null;
+        if (workflow == null) {
+            throw new APIManagementException("Workflow not found for : " + externalWorkflowRef,
+                    ExceptionCodes.WORKFLOW_NOT_FOUND);
+        }
+        workflowinfoDTO = WorkflowMappingUtil.fromWorkflowsToInfoDTO(workflow);
+        return Response.ok().entity(workflowinfoDTO).build();
     }
 
     /**
@@ -105,7 +106,6 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
         WorkflowListDTO workflowListDTO;
         try {
             Workflow[] workflows;
-            String status = "CREATED";
             APIAdmin apiAdmin = new APIAdminImpl();
             if(workflowType != null) {
                 switch (workflowType) {
@@ -147,7 +147,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
                         break;
                 }
             }
-            workflows = apiAdmin.getworkflows(workflowType, status, tenantDomain);
+            workflows = apiAdmin.getworkflows(workflowType, CREATED_STATUS, tenantDomain);
             workflowListDTO = WorkflowMappingUtil.fromWorkflowsToDTO(workflows, limit, offset);
             WorkflowMappingUtil.setPaginationParams(workflowListDTO, limit, offset,
                     workflows.length);
