@@ -77,8 +77,8 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             workflow = apiAdmin.getworkflowReferenceByExternalWorkflowReferenceID(externalWorkflowRef, CREATED_STATUS,
                     tenantDomain);
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving workflow request by the " +
-                    "external workflow reference. ", e, log);
+            throw new APIManagementException("Error while retrieving workflow request by the external workflow " +
+                    "reference.", ExceptionCodes.FAILED_TO_RETRIEVE_WORKFLOW_BY_EXTERNAL_REFERENCE_ID);
         }
         if (workflow == null) {
             throw new APIManagementException("Workflow not found for : " + externalWorkflowRef,
