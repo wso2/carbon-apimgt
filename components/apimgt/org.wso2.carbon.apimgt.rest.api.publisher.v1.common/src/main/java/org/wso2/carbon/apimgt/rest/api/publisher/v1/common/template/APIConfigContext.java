@@ -177,6 +177,12 @@ public class APIConfigContext extends ConfigContext {
         return APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + api.getId().getApiName();
     }
 
+    /**
+     * Returns the API product name prefixed with the Synapse API name prefix.
+     *
+     * @param product API product
+     * @return prefixed name in the format {prefix}--{productName}
+     */
     public String getAPIProductName(APIProduct product) {
         return APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + product.getId().getName();
     }

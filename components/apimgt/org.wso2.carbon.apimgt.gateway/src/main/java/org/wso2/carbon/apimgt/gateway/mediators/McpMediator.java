@@ -249,8 +249,12 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             String contentType = (String) axis2MessageContext.getProperty(Constants.Configuration.CONTENT_TYPE);
-            if (APIConstants.APPLICATION_JSON_MEDIA_TYPE.equals(contentType)) {
+            if (contentType != null && contentType.toLowerCase().contains(APIConstants.APPLICATION_JSON_MEDIA_TYPE)) {
                 buildMCPResponse(messageContext);
+            } else {
+                throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
+                        APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE,
+                        "Unsupported content type in the response. Expected: application/json, Found: " + contentType);
             }
         }
     }
