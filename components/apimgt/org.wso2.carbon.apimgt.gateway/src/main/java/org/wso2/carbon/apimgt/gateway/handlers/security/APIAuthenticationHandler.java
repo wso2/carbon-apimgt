@@ -475,24 +475,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
                 if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) &&
                         ((APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod)) || isMCPGetRequest(messageContext))) {
-                    // in case of tool listing and /mcp GET requests, if at least one of the tools
-                    // is protected with a scheme other than "None", we should not treat
-                    // this as a no authentication request
                     authenticationScheme = APIConstants.AUTH_NO_AUTHENTICATION;
-                    API mathedAPI = GatewayUtils.getAPI(messageContext);
-                    if (mathedAPI != null) {
-                        List<URLMapping> urlMappings = mathedAPI.getUrlMappings();
-                        if (urlMappings != null) {
-                            for (URLMapping urlMapping : urlMappings) {
-                                if (!urlMapping.getAuthScheme().equalsIgnoreCase(APIConstants.AUTH_NO_AUTHENTICATION)) {
-                                    authenticationScheme = urlMapping.getAuthScheme();
-                                    break;
-                                }
-                            }
-                        }
-                    } else {
-                        log.warn("No matching API found for the request");
-                    }
                 } else {
                     authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(messageContext);
                 }
