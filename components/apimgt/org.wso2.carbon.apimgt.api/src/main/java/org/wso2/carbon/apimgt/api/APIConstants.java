@@ -87,6 +87,7 @@ public class APIConstants {
         public static final String AWS_AUTHENTICATION_SECRET_KEY = "secretKey";
         public static final String AWS_AUTHENTICATION_REGION = "region";
         public static final String AWS_AUTHENTICATION_SERVICE_NAME = "service";
+        public static final String AI_API_SUB_TYPE = "AIAPI";
         public static final int MILLISECONDS_IN_SECOND = 1000;
         public static final String LLM_PROVIDERS = "llmProviders";
         public static final String API_KEY_IDENTIFIER_TYPE_HEADER = "HEADER";
