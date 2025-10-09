@@ -951,6 +951,18 @@ public class APIAdminImpl implements APIAdmin {
         }
     }
 
+    /**
+     * Masks or encrypts gateway configuration values.
+     * <p>
+     * If a value is the default masked password, it restores the original value from the
+     * retrieved configuration. Otherwise, it encrypts non-empty values.
+     * The same process is applied to any nested configurations.
+     *
+     * @param configurationDto The configuration to process.
+     * @param additionalProperties The map of configuration name-value pairs.
+     * @param retrievedGatewayConfigurationDTO The existing configuration for restoring values.
+     * @throws APIManagementException If an error occurs during processing.
+     */
     private void applyGatewayConfigMaskingAndEncryption(ConfigurationDto configurationDto,
             Map<String, String> additionalProperties, Environment retrievedGatewayConfigurationDTO)
             throws APIManagementException {
@@ -1766,6 +1778,16 @@ public class APIAdminImpl implements APIAdmin {
         }
     }
 
+    /**
+     * Applies masking to nested gateway configuration fields.
+     * <p>
+     * For each masked configuration, the actual value in {@code additionalProperties}
+     * is replaced with the default masked password. The method is applied recursively
+     * to handle nested configurations.
+     *
+     * @param connectorConfigurations The list of gateway configurations to process.
+     * @param additionalProperties The map of configuration name-value pairs to update.
+     */
     private void applyMaskToNestedGatewayFields(List<Object> connectorConfigurations,
             Map<String, String> additionalProperties) {
         if (connectorConfigurations == null || connectorConfigurations.isEmpty()) {
