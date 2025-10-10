@@ -2798,6 +2798,7 @@ public final class APIConstants {
         public static final String ANALYTICS_USERNAME = "AnalyticsUsername";
         public static final String ANALYTICS_PASSWORD = "AnalyticsPassword";
         public static final String ANALYTICS_INDEX_NAME = "AnalyticsIndexName";
+        public static final String ANALYTICS_PROTOCOL = "AnalyticsProtocol";
         public static final String IS_ATTRIBITE_REQUIRED = "Required";
         public static final String IS_ATTRIBUTE_HIDDEN = "Hidden";
         public static final String ATTRIBUTE_DESCRIPTION = "Description";

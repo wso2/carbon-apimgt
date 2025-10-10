@@ -2261,7 +2261,8 @@ public class APIManagerConfiguration {
         OMElement usagePublisherElement =
                 element.getFirstChildWithName(new QName(APIConstants.Monetization.USAGE_PUBLISHER_CONFIG));
         if (usagePublisherElement != null) {
-            if (analyticsProperties.get("type") != null && !analyticsProperties.get("type").trim().equals("")) {
+            if (analyticsProperties.get("type") != null && !analyticsProperties.get("type").trim().equals("")
+                    && !analyticsProperties.get("type").equals("choreo")) {
                 OMElement analyticsHost = usagePublisherElement.getFirstChildWithName(
                         new QName(APIConstants.Monetization.ANALYTICS_HOST));
 
@@ -2296,6 +2297,13 @@ public class APIManagerConfiguration {
 
                 if (analyticsIndexName != null) {
                     monetizationConfigurationDto.setAnalyticsIndexName(analyticsIndexName.getText());
+                }
+
+                OMElement analyticsProtocol = usagePublisherElement.getFirstChildWithName(
+                        new QName(APIConstants.Monetization.ANALYTICS_PROTOCOL));
+
+                if (analyticsProtocol != null) {
+                    monetizationConfigurationDto.setAnalyticsProtocol(analyticsProtocol.getText());
                 }
             } else {
                 OMElement choreoInsightAPIEndpointElement = usagePublisherElement.getFirstChildWithName(
