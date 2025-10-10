@@ -458,12 +458,11 @@ public class APIKeyValidationService {
                 if (APIKeyMgtDataHolder.isJwtGenerationEnabled() &&
                         validationContext.getValidationInfoDTO().getEndUserName() != null
                         && !validationContext.isCacheHit()) {
-                    Application application = APIUtil.getApplicationByClientId(validationContext.getValidationInfoDTO()
-                            .getConsumerKey());
-                    validationContext.getValidationInfoDTO().setApplicationId(String.valueOf(application.getId()));
-                    validationContext.getValidationInfoDTO().setApplicationTier(application.getTier());
                     keyValidationHandler.generateConsumerToken(validationContext);
                     info.setEndUserToken(validationContext.getValidationInfoDTO().getEndUserToken());
+                    if (log.isDebugEnabled()) {
+                        log.debug("JWT generation completed for websocket handshake");
+                    }
                 }
             }
             return validationContext.getValidationInfoDTO();
