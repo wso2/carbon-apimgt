@@ -1175,10 +1175,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.debug("Checking if scope: " + scope + " exists in Key Manager for tenant: " + tenantDomain);
             }
             if (isScopeKeyExistInKeyManager(scope, tenantDomain)) {
-                log.error("Scope: " + scope + " is already registered in Key Manager.");
                 if (!isCreateNewVersion) {
+                    log.error("Scope: " + scope + " is already registered in Key Manager.");
                     throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.SCOPE_ALREADY_REGISTERED,
                             scope));
+                } else if (log.isDebugEnabled()) {
+                   log.debug("Scope: " + scope + " is already registered in Key Manager; skipping validation" +
+                            " because we are creating a new API version.");
                 }
             }
         }
