@@ -318,6 +318,7 @@ public class APIManagerComponent {
             if(configuration.isJWTClaimCacheEnabled()){
                 CacheProvider.createJWTClaimCache();
             }
+            CacheProvider.createSynapseArtifactCache();
             //Initialize Recommendation wso2event output publisher
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();

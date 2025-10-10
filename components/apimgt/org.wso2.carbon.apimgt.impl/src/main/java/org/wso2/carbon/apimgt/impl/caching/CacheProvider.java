@@ -183,6 +183,13 @@ public class CacheProvider {
     }
 
     /**
+     * @return Synapse Artifact Cache.
+     */
+    public static Cache getSynapseArtifactCache() {
+        return getCache(APIConstants.SYNAPSE_ARTIFACT_CACHE);
+    }
+
+    /**
      * @return APIManagerConfiguration
      */
     private static APIManagerConfiguration getApiManagerConfiguration() {
@@ -561,6 +568,24 @@ public class CacheProvider {
         } else {
             long defaultCacheTimeout = getDefaultCacheTimeout();
             return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.RECOMMENDATIONS_CACHE_NAME,
+                    defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
+     * Creates and returns the Synapse Artifact Cache with configured expiry.
+     *
+     * @return Synapse Artifact Cache
+     */
+    public static Cache createSynapseArtifactCache() {
+        String synapseArtifactCacheExpiry = getApiManagerConfiguration()
+                .getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if (synapseArtifactCacheExpiry != null) {
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.SYNAPSE_ARTIFACT_CACHE,
+                    Long.parseLong(synapseArtifactCacheExpiry), Long.parseLong(synapseArtifactCacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.SYNAPSE_ARTIFACT_CACHE,
                     defaultCacheTimeout, defaultCacheTimeout);
         }
     }

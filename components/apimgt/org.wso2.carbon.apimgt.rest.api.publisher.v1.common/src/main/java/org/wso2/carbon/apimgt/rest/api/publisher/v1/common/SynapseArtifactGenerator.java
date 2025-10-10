@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayPolicyArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
@@ -62,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -79,6 +81,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
 
     private static final Log log = LogFactory.getLog(SynapseArtifactGenerator.class);
     private static final String GATEWAY_EXT_SEQUENCE_PREFIX = "WSO2AMGW--Ext";
+    private final ConcurrentHashMap<String, Object> lockMap = new ConcurrentHashMap<>();
     private ThreadPoolExecutor artifactThreadPoolExecutor;
     private int corePoolSize;
     private int maxPoolSize;
@@ -240,105 +243,136 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
             result.errorMessage = "Environment not found for label: " + label;
             return result;
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Processing artifact for API: " + result.name + " (" + result.apiId + ") with label: "
-                    + label);
-        }
-        try (InputStream artifact = (InputStream) runTimeArtifact.getArtifact()) {
-            GatewayAPIDTO gatewayAPIDTO = null;
-            File baseDirectory = CommonUtil.createTempDirectory(null);
-            try {
-                String extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(
-                        baseDirectory.getAbsolutePath(), artifact);
-                String tenantDomain = runTimeArtifact.getTenantDomain();
-                if (APIConstants.API_PRODUCT.equals(runTimeArtifact.getType())) {
-                    APIProductDTO apiProductDTO = ImportUtils.retrieveAPIProductDto(
-                            extractedFolderPath);
-                    apiProductDTO.setId(runTimeArtifact.getApiId());
-                    APIProduct apiProduct = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO,
-                            apiProductDTO.getProvider());
-                    String openApiDefinition = ImportUtils.loadSwaggerFile(extractedFolderPath);
-                    apiProduct.setDefinition(openApiDefinition);
-                    gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(apiProduct,
-                            environment, tenantDomain, extractedFolderPath, openApiDefinition);
-                } else if (APIConstants.API_TYPE_MCP.equals(runTimeArtifact.getType())) {
-                    MCPServerDTO mcpServerDTO = ImportUtils.retrievedMCPDto(
-                            extractedFolderPath);
-                    API api = APIMappingUtil.fromMCPServerDTOtoAPI(mcpServerDTO,
-                            mcpServerDTO.getProvider());
-                    String openApiDefinition = ImportUtils.loadSwaggerFile(extractedFolderPath);
-                    api.setSwaggerDefinition(openApiDefinition);
-                    gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,
-                            tenantDomain, null, extractedFolderPath, openApiDefinition);
-                } else {
-                    APIDTO apidto = ImportUtils.retrievedAPIDto(extractedFolderPath);
-                    API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
-                    api.setUUID(apidto.getId());
-                    if (APIConstants.APITransportType.GRAPHQL.toString()
-                            .equals(api.getType())) {
-                        APIDefinition parser = new OAS3Parser();
-                        SwaggerData swaggerData = new SwaggerData(api);
-                        String apiDefinition = parser.generateAPIDefinition(swaggerData);
-                        api.setSwaggerDefinition(apiDefinition);
-                        GraphqlComplexityInfo graphqlComplexityInfo = APIUtil
-                                .getComplexityDetails(api);
-                        String graphqlSchema = ImportUtils.loadGraphqlSDLFile(
-                                extractedFolderPath);
-                        api.setGraphQLSchema(graphqlSchema);
-                        GraphQLSchemaDefinition graphQLSchemaDefinition = new
-                                GraphQLSchemaDefinition();
-                        graphqlSchema = graphQLSchemaDefinition.buildSchemaWithAdditionalInfo(
-                                api, graphqlComplexityInfo);
-                        api.setGraphQLSchema(graphqlSchema);
-                        gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api,
-                                environment, tenantDomain, apidto, extractedFolderPath);
-                    } else if (api.getType() != null && (APIConstants.APITransportType.HTTP
-                            .toString().equals(api.getType()) || APIConstants.API_TYPE_SOAP
-                            .equals(api.getType()) || APIConstants.API_TYPE_SOAPTOREST
-                            .equals(api.getType()) || APIConstants.APITransportType.WEBHOOK
-                            .toString().equals(api.getType()) || APIConstants.API_TYPE_MCP
-                            .equals(api.getType()))) {
-                        String openApiDefinition = ImportUtils.loadSwaggerFile(
-                                extractedFolderPath);
-                        api.setSwaggerDefinition(openApiDefinition);
-                        gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api,
-                                environment, tenantDomain, apidto, extractedFolderPath,
-                                openApiDefinition);
-                    } else if (api.getType() != null
-                            && (APIConstants.APITransportType.WS.toString().equals(
-                            api.getType())
-                            || APIConstants.APITransportType.SSE.toString().equals(
-                            api.getType())
-                            || APIConstants.APITransportType.WEBSUB.toString().equals(
-                            api.getType()))) {
-                        String asyncApiDefinition = ImportUtils.loadAsyncApiDefinitionFromFile(
-                                extractedFolderPath);
-                        api.setAsyncApiDefinition(asyncApiDefinition);
-                        gatewayAPIDTO = TemplateBuilderUtil
-                                .retrieveGatewayAPIDtoForStreamingAPI(api, environment,
-                                        tenantDomain, apidto, extractedFolderPath);
-                    }
-                }
-                if (gatewayAPIDTO != null) {
-                    gatewayAPIDTO.setRevision(runTimeArtifact.getRevision());
-                    result.content = new Gson().toJson(gatewayAPIDTO);
-                    result.success = true;
-                } else {
-                    result.success = false;
-                    result.errorMessage = "Generated GatewayAPIDTO was null";
-                }
-            } finally {
-                FileUtils.deleteQuietly(baseDirectory);
+        String cacheKey = runTimeArtifact.getApiId() + ":" + runTimeArtifact.getRevision() + ":" + label;
+        Object cachedArtifact = CacheProvider.getSynapseArtifactCache().get(cacheKey);
+        if (cachedArtifact != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cache HIT for Synapse artifact with key: " + cacheKey);
             }
-        } catch (Exception e) {
-            // only do error since we need to continue for other apis
-            // only do error since we need to continue for other apis.
-            log.error("Error creating Synapse configurations for API: " + result.name + " ("
-                    + result.apiId + ")", e);
-            result.success = false;
-            result.errorMessage = e.getMessage();
+            result.content = (String) cachedArtifact;
+            result.success = true;
+            return result;
         }
-        return result;
+        // Cache Miss: Proceed with the generation process.
+        Object lock = lockMap.computeIfAbsent(cacheKey, k -> new Object());
+        synchronized (lock) {
+            // Double-check if another thread has populated the cache while waiting for the lock.
+            cachedArtifact = CacheProvider.getSynapseArtifactCache().get(cacheKey);
+            if (cachedArtifact != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Cache HIT after lock for Synapse artifact with key: " + cacheKey);
+                }
+                result.content = (String) cachedArtifact;
+                result.success = true;
+                return result;
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Cache MISS for Synapse artifact with key: " + cacheKey + ". Generating now.");
+            }
+            try (InputStream artifact = (InputStream) runTimeArtifact.getArtifact()) {
+                GatewayAPIDTO gatewayAPIDTO = null;
+                File baseDirectory = CommonUtil.createTempDirectory(null);
+                if (log.isDebugEnabled()) {
+                    log.debug("Processing artifact for API: " + result.name + " (" + result.apiId + ") with label: "
+                            + label);
+                }
+                try {
+                    String extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(
+                            baseDirectory.getAbsolutePath(), artifact);
+                    String tenantDomain = runTimeArtifact.getTenantDomain();
+                    if (APIConstants.API_PRODUCT.equals(runTimeArtifact.getType())) {
+                        APIProductDTO apiProductDTO = ImportUtils.retrieveAPIProductDto(
+                                extractedFolderPath);
+                        apiProductDTO.setId(runTimeArtifact.getApiId());
+                        APIProduct apiProduct = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO,
+                                apiProductDTO.getProvider());
+                        String openApiDefinition = ImportUtils.loadSwaggerFile(extractedFolderPath);
+                        apiProduct.setDefinition(openApiDefinition);
+                        gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(apiProduct,
+                                environment, tenantDomain, extractedFolderPath, openApiDefinition);
+                    } else if (APIConstants.API_TYPE_MCP.equals(runTimeArtifact.getType())) {
+                        MCPServerDTO mcpServerDTO = ImportUtils.retrievedMCPDto(
+                                extractedFolderPath);
+                        API api = APIMappingUtil.fromMCPServerDTOtoAPI(mcpServerDTO,
+                                mcpServerDTO.getProvider());
+                        String openApiDefinition = ImportUtils.loadSwaggerFile(extractedFolderPath);
+                        api.setSwaggerDefinition(openApiDefinition);
+                        gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,
+                                tenantDomain, null, extractedFolderPath, openApiDefinition);
+                    } else {
+                        APIDTO apidto = ImportUtils.retrievedAPIDto(extractedFolderPath);
+                        API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
+                        api.setUUID(apidto.getId());
+                        if (APIConstants.APITransportType.GRAPHQL.toString()
+                                .equals(api.getType())) {
+                            APIDefinition parser = new OAS3Parser();
+                            SwaggerData swaggerData = new SwaggerData(api);
+                            String apiDefinition = parser.generateAPIDefinition(swaggerData);
+                            api.setSwaggerDefinition(apiDefinition);
+                            GraphqlComplexityInfo graphqlComplexityInfo = APIUtil
+                                    .getComplexityDetails(api);
+                            String graphqlSchema = ImportUtils.loadGraphqlSDLFile(
+                                    extractedFolderPath);
+                            api.setGraphQLSchema(graphqlSchema);
+                            GraphQLSchemaDefinition graphQLSchemaDefinition = new
+                                    GraphQLSchemaDefinition();
+                            graphqlSchema = graphQLSchemaDefinition.buildSchemaWithAdditionalInfo(
+                                    api, graphqlComplexityInfo);
+                            api.setGraphQLSchema(graphqlSchema);
+                            gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api,
+                                    environment, tenantDomain, apidto, extractedFolderPath);
+                        } else if (api.getType() != null && (APIConstants.APITransportType.HTTP
+                                .toString().equals(api.getType()) || APIConstants.API_TYPE_SOAP
+                                .equals(api.getType()) || APIConstants.API_TYPE_SOAPTOREST
+                                .equals(api.getType()) || APIConstants.APITransportType.WEBHOOK
+                                .toString().equals(api.getType()) || APIConstants.API_TYPE_MCP
+                                .equals(api.getType()))) {
+                            String openApiDefinition = ImportUtils.loadSwaggerFile(
+                                    extractedFolderPath);
+                            api.setSwaggerDefinition(openApiDefinition);
+                            gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api,
+                                    environment, tenantDomain, apidto, extractedFolderPath,
+                                    openApiDefinition);
+                        } else if (api.getType() != null
+                                && (APIConstants.APITransportType.WS.toString().equals(
+                                api.getType())
+                                || APIConstants.APITransportType.SSE.toString().equals(
+                                api.getType())
+                                || APIConstants.APITransportType.WEBSUB.toString().equals(
+                                api.getType()))) {
+                            String asyncApiDefinition = ImportUtils.loadAsyncApiDefinitionFromFile(
+                                    extractedFolderPath);
+                            api.setAsyncApiDefinition(asyncApiDefinition);
+                            gatewayAPIDTO = TemplateBuilderUtil
+                                    .retrieveGatewayAPIDtoForStreamingAPI(api, environment,
+                                            tenantDomain, apidto, extractedFolderPath);
+                        }
+                    }
+                    if (gatewayAPIDTO != null) {
+                        gatewayAPIDTO.setRevision(runTimeArtifact.getRevision());
+                        result.content = new Gson().toJson(gatewayAPIDTO);
+                        result.success = true;
+                        // Populate cache on successful generation.
+                        CacheProvider.getSynapseArtifactCache().put(cacheKey, result.content);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Stored Synapse artifact in cache with key: " + cacheKey);
+                        }
+                    } else {
+                        result.success = false;
+                        result.errorMessage = "Generated GatewayAPIDTO was null";
+                    }
+                } finally {
+                    FileUtils.deleteQuietly(baseDirectory);
+                }
+            } catch (Exception e) {
+                // only do error since we need to continue for other apis.
+                log.error("Error creating Synapse configurations for API: " + result.name + " ("
+                        + result.apiId + ")", e);
+                result.success = false;
+                result.errorMessage = e.getMessage();
+            }
+            return result;
+        }
     }
     
     /**
