@@ -1963,7 +1963,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if an error occurs while validating policies
      */
     private List<OperationPolicy> validateAndProcessPolicies(List<OperationPolicy> apiPoliciesList, API api,
-                                                             List<OperationPolicy> existingPoliciesList, String tenantDomain) throws APIManagementException {
+                                                             List<OperationPolicy> existingPoliciesList,
+                                                             String tenantDomain) throws APIManagementException {
         List<OperationPolicy> validatedPolicies = new ArrayList<>();
         for (OperationPolicy policy : apiPoliciesList) {
             String policyId = policy.getPolicyId();
@@ -2893,6 +2894,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         // Delete event publishing to gateways
         if (api != null && api.isInitiatedFromGateway()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Deleting discovered API " + apiUuid + " from external gateway mapping for organization "
+                        + organization);
+            }
             try {
                 Map<String, Environment> gatewaysToRemove = APIUtil.getEnvironments(api.getOrganization());
                 if (!gatewaysToRemove.isEmpty()) {

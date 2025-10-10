@@ -556,7 +556,8 @@ public class ExportUtils {
                         // the content if does not exist
                         if (log.isDebugEnabled()) {
                             log.debug("Documentation resource for API/API Product: " + identifier.getName()
-                                    + " not found in ");
+                                    + " document name: " + individualDocument.getName()
+                                    + " does not exist in the registry." + " Document type: " + sourceType);
                         }
                     }
                 }
