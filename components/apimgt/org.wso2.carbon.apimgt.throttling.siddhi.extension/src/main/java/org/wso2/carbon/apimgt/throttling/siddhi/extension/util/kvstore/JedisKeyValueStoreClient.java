@@ -117,7 +117,8 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                             jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout,
                                     String.valueOf(password), databaseId, sslEnabled);
                         } else {
-                            jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout, sslEnabled);
+                            jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout, null,
+                                    databaseId, sslEnabled);
                         }
                         return jedisPool;
                     } catch (Exception e) {

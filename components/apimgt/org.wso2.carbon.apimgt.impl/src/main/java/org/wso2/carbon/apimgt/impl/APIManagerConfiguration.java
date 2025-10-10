@@ -603,8 +603,12 @@ public class APIManagerConfiguration {
                         distributedThrottleConfig.setPassword(MiscellaneousUtil.resolve(password, secretResolver).toCharArray());
                     }
 
-                    if (databaseId != null) {
-                        distributedThrottleConfig.setDatabaseId(Integer.parseInt(databaseId.getText()));
+                    if (databaseId != null && StringUtils.isNotBlank(databaseId.getText())) {
+                        try {
+                            distributedThrottleConfig.setDatabaseId(Integer.parseInt(databaseId.getText().trim()));
+                        } catch (NumberFormatException e) {
+                            log.warn("DistributedThrottleConfig: invalid DatabaseId value: " + databaseId.getText(), e);
+                        }
                     }
 
                     Iterator<OMElement> properties = propertiesElement.getChildElements();

@@ -634,7 +634,7 @@ public class APIHandlerServiceComponent {
                     redisConfig.getDatabaseId(), redisConfig.isSslEnabled());
         } else {
             jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
-                    redisConfig.getConnectionTimeout(), redisConfig.isSslEnabled());
+                    redisConfig.getConnectionTimeout(), null, redisConfig.getDatabaseId(), redisConfig.isSslEnabled());
         }
         return jedisPool;
     }
