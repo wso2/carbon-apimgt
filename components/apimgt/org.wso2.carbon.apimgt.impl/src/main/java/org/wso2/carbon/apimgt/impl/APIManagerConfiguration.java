@@ -579,6 +579,7 @@ public class APIManagerConfiguration {
                     OMElement port = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PORT));
                     OMElement user = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_USER));
                     OMElement password = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PASSWORD));
+                    OMElement databaseId = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_DATABASE_ID));
 
                     if (host != null && StringUtils.isNotBlank(host.getText())) {
                         distributedThrottleConfig.setHost(host.getText());
@@ -600,6 +601,10 @@ public class APIManagerConfiguration {
                     }
                     if (password != null) {
                         distributedThrottleConfig.setPassword(MiscellaneousUtil.resolve(password, secretResolver).toCharArray());
+                    }
+
+                    if (databaseId != null) {
+                        distributedThrottleConfig.setDatabaseId(Integer.parseInt(databaseId.getText()));
                     }
 
                     Iterator<OMElement> properties = propertiesElement.getChildElements();

@@ -45,6 +45,7 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
     private static volatile int port = ThrottlingConstants.DEFAULT_PORT;
     private static volatile String user;
     private static volatile char[] password;
+    private static volatile int databaseId;
     private static volatile int connectionTimeout;
     private static volatile boolean sslEnabled;
     private static volatile JedisPoolConfig poolConfig = new JedisPoolConfig();
@@ -61,6 +62,7 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                 port = distributedConfig.getPort();
                 user = distributedConfig.getUser();
                 password = distributedConfig.getPassword();
+                databaseId = distributedConfig.getDatabaseId();
                 connectionTimeout = distributedConfig.getConnectionTimeout();
                 sslEnabled = distributedConfig.isSslEnabled();
                 poolConfig.setMaxTotal(distributedConfig.getMaxTotal());
@@ -81,6 +83,7 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                     port = redisConfig.getPort();
                     user = redisConfig.getUser();
                     password = redisConfig.getPassword();
+                    databaseId = redisConfig.getDatabaseId();
                     connectionTimeout = redisConfig.getConnectionTimeout();
                     sslEnabled = redisConfig.isSslEnabled();
                     poolConfig.setMaxTotal(redisConfig.getMaxTotal());
@@ -109,10 +112,10 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                     try {
                         if (StringUtils.isNotEmpty(user) && password != null) {
                             jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout, user,
-                                    String.valueOf(password), sslEnabled);
+                                    String.valueOf(password), databaseId, sslEnabled);
                         } else if (password != null) {
                             jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout,
-                                    String.valueOf(password), sslEnabled);
+                                    String.valueOf(password), databaseId, sslEnabled);
                         } else {
                             jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout, sslEnabled);
                         }
