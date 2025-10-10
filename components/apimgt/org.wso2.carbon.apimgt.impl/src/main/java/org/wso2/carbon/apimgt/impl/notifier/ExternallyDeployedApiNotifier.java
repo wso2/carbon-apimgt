@@ -89,26 +89,29 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
         try {
             apiMgtDAO = ApiMgtDAO.getInstance();
             Map<String, Environment> gatewayEnvironments = APIUtil.getEnvironments(apiEvent.getTenantDomain());
-            List<APIRevisionDeployment> test = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
+            List<APIRevisionDeployment> apiRevisionDeployments = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
 
-            for (APIRevisionDeployment deployment : test) {
+            for (APIRevisionDeployment deployment : apiRevisionDeployments) {
                 String deploymentEnv = deployment.getDeployment();
                 if (gatewayEnvironments.containsKey(deploymentEnv)) {
                     GatewayDeployer deployer = GatewayHolder.getTenantGatewayInstance(apiEvent.tenantDomain, deploymentEnv);
                     if (deployer != null) {
                         try {
-                            String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
-                                    gatewayEnvironments.get(deploymentEnv).getUuid());
+                            String environmentUUId = gatewayEnvironments.get(deploymentEnv).getUuid();
+                            String referenceArtifact =
+                                    APIUtil.getApiExternalApiMappingReferenceByApiId(apiId, environmentUUId);
                             if (referenceArtifact == null) {
                                 throw new DeployerException("API is not mapped with an External API");
                             }
-                            if (log.isDebugEnabled()){
+                            if (log.isDebugEnabled()) {
                                 log.debug("Undeploy API from external gateway: " + referenceArtifact +
                                         " in environment: " + deploymentEnv);
                             }
                             deleted = deployer.undeploy(referenceArtifact, true);
                             if (!deleted) {
                                 throw new NotifierException("Error while deleting externally deployed API");
+                            } else {
+                                APIUtil.deleteApiExternalApiMapping(apiId, environmentUUId);
                             }
                         } catch (DeployerException e) {
                             throw new NotifierException(e.getMessage());
@@ -116,6 +119,7 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                     }
                 }
             }
+            apiMgtDAO.removeAPIRevisionDeployment(apiId);
         } catch (APIManagementException e) {
             throw new NotifierException(e.getMessage());
         }
@@ -150,6 +154,9 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                             if (!deleted) {
                                 log.error("Error while deleting externally deployed API. API ID: " + apiId
                                         + ", Environment: " + envName + ", Reference: " + reference);
+                            } else {
+                                apiMgtDAO.deleteApiExternalApiMapping(apiId,
+                                        gatewayEnvironments.get(envName).getUuid());
                             }
                         } catch (APIManagementException e) {
                             // make the process continue since this is API Deletion.
