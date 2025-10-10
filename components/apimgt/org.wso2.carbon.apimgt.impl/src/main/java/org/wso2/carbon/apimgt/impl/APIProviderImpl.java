@@ -1963,7 +1963,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if an error occurs while validating policies
      */
     private List<OperationPolicy> validateAndProcessPolicies(List<OperationPolicy> apiPoliciesList, API api,
-            List<OperationPolicy> existingPoliciesList, String tenantDomain) throws APIManagementException {
+                                                             List<OperationPolicy> existingPoliciesList, String tenantDomain) throws APIManagementException {
         List<OperationPolicy> validatedPolicies = new ArrayList<>();
         for (OperationPolicy policy : apiPoliciesList) {
             String policyId = policy.getPolicyId();
@@ -2892,7 +2892,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             isError = true;
         }
         // Delete event publishing to gateways
-        if (api != null && apiId != -1) {
+        if (api != null && api.isInitiatedFromGateway()) {
+            try {
+                Map<String, Environment> gatewaysToRemove = APIUtil.getEnvironments(api.getOrganization());
+                if (!gatewaysToRemove.isEmpty()) {
+                    for (Map.Entry<String, Environment> entry : gatewaysToRemove.entrySet()) {
+                        String envName = entry.getKey();
+                        Environment env = entry.getValue();
+                        try {
+                            apiMgtDAO.deleteApiExternalApiMapping(apiUuid, env.getUuid());
+                        } catch (APIManagementException e) {
+                            log.error("Error deleting external API mapping for API " + apiUuid
+                                    + " on environment " + envName, e);
+                        }
+                    }
+                }
+            } catch (APIManagementException e) {
+                log.error("Error while executing API delete operation on gateway for API " + apiUuid +
+                        " on organization " + organization, e);
+                isError = true;
+            }
+        } else if (api != null && apiId != -1) {
             APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.API_DELETE.name(), tenantId, organization, api.getId().getApiName(), apiId,
                     api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -3141,7 +3161,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public void deleteAPIRevisions(String apiUUID, String organization) throws APIManagementException {
-        if (log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug("Deleting API revisions for API: " + apiUUID + " in organization: " + organization);
         }
         boolean isAPIInitiatedFromGateway = apiMgtDAO.getIsAPIInitiatedFromGateway(apiUUID);
@@ -7085,9 +7105,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Handles pending deployments by removing existing ones and updating new deployments.
      *
-     * @param apiId              API UUID
-     * @param apiRevisionUUID    API Revision UUID
-     * @param newDeployments     List of new APIRevisionDeployment objects
+     * @param apiId           API UUID
+     * @param apiRevisionUUID API Revision UUID
+     * @param newDeployments  List of new APIRevisionDeployment objects
      * @throws APIManagementException if an error occurs while handling pending deployments
      */
     private void handlePendingDeployments(String apiId, String apiRevisionUUID,
@@ -7131,12 +7151,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Execute the revision deployment workflow.
      *
-     * @param apiIdentifier      API Identifier
-     * @param apiRevisionUUID    API Revision UUID
-     * @param revisionId         Revision ID
-     * @param organization       Organization identifier
-     * @param apiRevision        API Revision object
-     * @param deployment         API Revision Deployment object
+     * @param apiIdentifier   API Identifier
+     * @param apiRevisionUUID API Revision UUID
+     * @param revisionId      Revision ID
+     * @param organization    Organization identifier
+     * @param apiRevision     API Revision object
+     * @param deployment      API Revision Deployment object
      * @throws APIManagementException if workflow execution fails
      */
     private void executeRevisionWorkflow(APIIdentifier apiIdentifier, String apiRevisionUUID, int revisionId,
@@ -7199,11 +7219,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Resume API revision deployment process, with flag to indicate if it's initiated from gateway.
      *
-     * @param apiId                 API Id used for the revision deployment
-     * @param organization          Organization identifier
-     * @param revisionUUID          Revision UUID
-     * @param revisionId            Revision number
-     * @param environment           Deployment environment
+     * @param apiId                  API Id used for the revision deployment
+     * @param organization           Organization identifier
+     * @param revisionUUID           Revision UUID
+     * @param revisionId             Revision number
+     * @param environment            Deployment environment
      * @param isInitiatedFromGateway Whether the call originated from a gateway
      */
     @Override
@@ -7216,12 +7236,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Internal method to resume API revision deployment.
      *
-     * @param apiId                 API Id used for the revision deployment
-     * @param organization          Organization identifier
-     * @param revisionUUID          Revision UUID
-     * @param revisionId            Revision number
-     * @param environment           Deployment environment
-     * @param skipDeployToGateway   Flag to skip deployment to gateway
+     * @param apiId               API Id used for the revision deployment
+     * @param organization        Organization identifier
+     * @param revisionUUID        Revision UUID
+     * @param revisionId          Revision number
+     * @param environment         Deployment environment
+     * @param skipDeployToGateway Flag to skip deployment to gateway
      */
     private void resumeDeployedAPIRevisionInternal(String apiId, String organization, String revisionUUID,
                                                    String revisionId, String environment, boolean skipDeployToGateway) {
@@ -7263,6 +7283,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     /**
      * Updates the published default version of an API if required.
+     *
      * @param apiIdentifier
      * @param api
      * @param organization
@@ -7455,7 +7476,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param apiRevisionId          API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
      * @param organization           organization
-     * @param onDeleteOrRetire    flag to indicate if the undeploy is happening due to API delete or retire action
+     * @param onDeleteOrRetire       flag to indicate if the undeploy is happening due to API delete or retire action
      * @throws APIManagementException if failed to add APIRevision
      */
     @Override
@@ -7870,7 +7891,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         subscribedApiDTOList.add(subscribedApiInfo);
 
         if (StringUtils.equals(apiInfo.getApiType(), APIConstants.API_TYPE_MCP) &&
-                StringUtils.equals(apiInfo.getApiSubtype(), APIConstants.API_SUBTYPE_EXISTING_API) ) {
+                StringUtils.equals(apiInfo.getApiSubtype(), APIConstants.API_SUBTYPE_EXISTING_API)) {
             API mcpAPI = getAPIbyUUID(apiId, organization);
             Set<URITemplate> uriTemplates = mcpAPI.getUriTemplates();
             if (uriTemplates != null && !uriTemplates.isEmpty()) {
@@ -9029,7 +9050,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public List<API> getMCPServersUsedByAPI(String apiUuid, String organization) throws APIManagementException{
+    public List<API> getMCPServersUsedByAPI(String apiUuid, String organization) throws APIManagementException {
 
         int apiId = apiMgtDAO.getAPIID(apiUuid);
         return apiMgtDAO.getMCPServersUsedByAPI(apiId, organization);

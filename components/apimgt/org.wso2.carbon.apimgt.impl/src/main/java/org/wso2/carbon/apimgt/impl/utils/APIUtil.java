@@ -333,8 +333,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.SHA_256;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_DESCRIPTION;
 import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_INFO;
-import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_NAME;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_TITLE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_VER;
 
 /**
@@ -12094,8 +12095,9 @@ public final class APIUtil {
                 infoObject.addProperty(SWAGGER_VER, api.getId().getVersion());
             } else {
                 JsonObject newInfoObject = new JsonObject();
-                newInfoObject.addProperty(SWAGGER_NAME, api.getId().getApiName());
+                newInfoObject.addProperty(SWAGGER_TITLE, api.getId().getApiName());
                 newInfoObject.addProperty(SWAGGER_VER, api.getId().getVersion());
+                newInfoObject.addProperty(SWAGGER_DESCRIPTION, api.getDescription());
                 apiSpec.add(SWAGGER_INFO, newInfoObject);
             }
             api.setSwaggerDefinition(apiSpec.toString());
