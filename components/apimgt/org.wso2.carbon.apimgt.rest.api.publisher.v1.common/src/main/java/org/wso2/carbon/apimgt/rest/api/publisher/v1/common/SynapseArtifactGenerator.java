@@ -372,9 +372,8 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                 result.errorMessage = e.getMessage();
             }
             return result;
-
         }
-
+        lockMap.remove(cacheKey, lock);
     }
     
     /**
