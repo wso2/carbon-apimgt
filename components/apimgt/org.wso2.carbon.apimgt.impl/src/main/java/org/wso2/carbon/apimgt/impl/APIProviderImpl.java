@@ -252,6 +252,7 @@ import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_SUBTYPE_AI_API;
 import static org.wso2.carbon.apimgt.impl.APIConstants.COMMERCIAL_TIER_PLAN;
+import static org.wso2.carbon.apimgt.impl.APIConstants.LC_RETIRE_LC_STATE;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -3709,6 +3710,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiOrApiProductId = apiMgtDAO.getAPIProductId(apiTypeWrapper.getApiProduct().getId());
                 workflowType = WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE;
             } else {
+                if (StringUtils.equals(action, LC_RETIRE_LC_STATE)
+                        && apiTypeWrapper.getApi().isInitiatedFromGateway()) {
+                    throw new APIManagementException("Retire action is not allowed for the API which is initiated from "
+                            + "the Gateway",
+                            ExceptionCodes.from(ExceptionCodes.ACTION_NOT_ALLOWED_FOR_API_INITIATED_FROM_GATEWAY));
+                }
                 // validate mandatory API properties
                 if (StringUtils.equals(action, APIConstants.LC_PUBLISH_LC_STATE)) {
                     org.json.simple.JSONArray customProperties = APIUtil.getCustomProperties(this.tenantDomain);

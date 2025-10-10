@@ -797,6 +797,7 @@ public final class APIConstants {
     public static final String LC_CHECK_ITEM_VALUE = "value:";
     public static final String LC_CHECK_ITEM_ORDER = "order:";
     public static final String LC_PUBLISH_LC_STATE = "Publish";
+    public static final String LC_RETIRE_LC_STATE = "Retire";
 
     public static final String SUPER_TENANT_DOMAIN = "carbon.super";
     public static final String TENANT_PREFIX = "/t/";
