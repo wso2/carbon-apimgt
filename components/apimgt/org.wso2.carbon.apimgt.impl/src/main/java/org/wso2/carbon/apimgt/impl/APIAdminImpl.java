@@ -953,7 +953,6 @@ public class APIAdminImpl implements APIAdmin {
 
     /**
      * Masks or encrypts gateway configuration values.
-     * <p>
      * If a value is the default masked password, it restores the original value from the
      * retrieved configuration. Otherwise, it encrypts non-empty values.
      * The same process is applied to any nested configurations.
@@ -1780,7 +1779,6 @@ public class APIAdminImpl implements APIAdmin {
 
     /**
      * Applies masking to nested gateway configuration fields.
-     * <p>
      * For each masked configuration, the actual value in {@code additionalProperties}
      * is replaced with the default masked password. The method is applied recursively
      * to handle nested configurations.
