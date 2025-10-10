@@ -82,7 +82,11 @@ public class MarketplaceAssistantApiPublisherNotifier extends ApisNotifier{
 
             if (APIConstants.EventType.API_LIFECYCLE_CHANGE.name().equals(event.getType())) {
                 String lifecycleEvent = apiEvent.getLifecycleEvent();
-                String currentStatus = apiEvent.getCurrentStatus().toUpperCase();
+                String currentStatus = apiEvent.getCurrentStatus();
+                if (lifecycleEvent == null || currentStatus == null) {
+                    return;
+                }
+                currentStatus = currentStatus.toUpperCase();
                 switch (lifecycleEvent) {
                     case APIConstants.DEMOTE_TO_CREATED:
                     case APIConstants.BLOCK:
