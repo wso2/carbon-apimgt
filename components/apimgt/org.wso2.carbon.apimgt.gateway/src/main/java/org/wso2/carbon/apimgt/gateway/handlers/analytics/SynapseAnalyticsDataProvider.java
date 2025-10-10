@@ -500,8 +500,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     private void getAiAnalyticsData(Map aiApiResponseMetadata, int requestStartHour,
-                                    Map<String, Object> customProperties
-    ) {
+                                    Map<String, Object> customProperties) {
         Map<String, String> aiMetadata = new HashMap<>();
         Map<String, Integer> aiTokenUsage = new HashMap<>();
         aiMetadata.put(

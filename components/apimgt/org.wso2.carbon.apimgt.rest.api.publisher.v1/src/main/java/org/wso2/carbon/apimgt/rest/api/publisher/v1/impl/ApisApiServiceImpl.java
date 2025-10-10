@@ -3804,7 +3804,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                             null, service, organization);
                 }
             } else {
-                //todo : need to verify
                 API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, organization);
                 if (APIConstants.API_TYPE_SOAPTOREST.equals(versionedAPI.getType())) {
                     updateSwagger(versionedAPI.getUuid(), versionedAPI.getSwaggerDefinition(), organization);
