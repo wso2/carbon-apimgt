@@ -27,6 +27,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.CorrelationConstants;
@@ -85,10 +86,11 @@ public class ExtensionListenerUtil {
     public static boolean preProcessRequest(MessageContext messageContext, String type) {
 
         ExtensionListener extensionListener = getExtensionListener(type);
+        boolean mediateExtensionFaultSequence = doMediateExtensionFaultSequence(type);
         if (extensionListener != null) {
             RequestContextDTO requestContextDTO = generateRequestContextDTO(messageContext);
             ExtensionResponseDTO responseDTO = extensionListener.preProcessRequest(requestContextDTO);
-            return handleExtensionResponse(messageContext, responseDTO);
+            return handleExtensionResponse(messageContext, responseDTO, mediateExtensionFaultSequence);
         }
         return true;
     }
@@ -104,10 +106,11 @@ public class ExtensionListenerUtil {
     public static boolean postProcessRequest(MessageContext messageContext, String type) {
 
         ExtensionListener extensionListener = getExtensionListener(type);
+        boolean mediateExtensionFaultSequence = doMediateExtensionFaultSequence(type);
         if (extensionListener != null) {
             RequestContextDTO requestContextDTO = generateRequestContextDTO(messageContext);
             ExtensionResponseDTO responseDTO = extensionListener.postProcessRequest(requestContextDTO);
-            return handleExtensionResponse(messageContext, responseDTO);
+            return handleExtensionResponse(messageContext, responseDTO, mediateExtensionFaultSequence);
         }
         return true;
     }
@@ -123,10 +126,11 @@ public class ExtensionListenerUtil {
     public static boolean preProcessResponse(MessageContext messageContext, String type) {
 
         ExtensionListener extensionListener = getExtensionListener(type);
+        boolean mediateExtensionFaultSequence = doMediateExtensionFaultSequence(type);
         if (extensionListener != null) {
             ResponseContextDTO responseContextDTO = generateResponseContextDTO(messageContext);
             ExtensionResponseDTO responseDTO = extensionListener.preProcessResponse(responseContextDTO);
-            return handleExtensionResponse(messageContext, responseDTO);
+            return handleExtensionResponse(messageContext, responseDTO, mediateExtensionFaultSequence);
         }
         return true;
     }
@@ -142,10 +146,11 @@ public class ExtensionListenerUtil {
     public static boolean postProcessResponse(MessageContext messageContext, String type) {
 
         ExtensionListener extensionListener = getExtensionListener(type);
+        boolean mediateExtensionFaultSequence = doMediateExtensionFaultSequence(type);
         if (extensionListener != null) {
             ResponseContextDTO responseContextDTO = generateResponseContextDTO(messageContext);
             ExtensionResponseDTO responseDTO = extensionListener.postProcessResponse(responseContextDTO);
-            return handleExtensionResponse(messageContext, responseDTO);
+            return handleExtensionResponse(messageContext, responseDTO, mediateExtensionFaultSequence);
         }
         return true;
     }
@@ -251,7 +256,8 @@ public class ExtensionListenerUtil {
      * @return true or false indicating continue or return response
      */
     private static boolean handleExtensionResponse(MessageContext messageContext,
-                                                   ExtensionResponseDTO extensionResponseDTO) {
+                                                   ExtensionResponseDTO extensionResponseDTO,
+                                                   boolean mediateExtensionFaultSequence) {
 
         if (extensionResponseDTO == null) {
             return true;    // if responseDTO is null, nothing to do hence continuing the normal flow
@@ -280,7 +286,7 @@ public class ExtensionListenerUtil {
         // set Http Response status code
         messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE,
                 extensionResponseDTO.getStatusCode());
-        return evaluateExtensionResponseStatus(extensionResponseDTO, messageContext);
+        return evaluateExtensionResponseStatus(extensionResponseDTO, messageContext, mediateExtensionFaultSequence);
     }
 
     /**
@@ -332,7 +338,8 @@ public class ExtensionListenerUtil {
      * @return true or false indicating continue or return response
      */
     private static boolean evaluateExtensionResponseStatus(ExtensionResponseDTO extensionResponseDTO,
-                                                           MessageContext messageContext) {
+                                                           MessageContext messageContext,
+                                                           boolean mediateExtensionFaultSequence) {
 
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
@@ -367,6 +374,20 @@ public class ExtensionListenerUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Exiting the handler flow and returning response back. " + axis2MC.getLogIDString());
             }
+            // Mediate fault sequence (this was originally added to address the behaviour of not engaging CORS
+            // headers in the response for RETURN_ERROR and RETURN_RESPONSE flows (This is enabled by a config)
+            if (mediateExtensionFaultSequence) {
+                Mediator extensionFaultSequence = messageContext
+                        .getSequence(APIConstants.ExtensionListenerConstants.EXTENSION_FAULT_SEQUENCE_NAME);
+                if (extensionFaultSequence != null) {
+                    extensionFaultSequence.mediate(messageContext);
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Extension fault sequence not found: " +
+                                APIConstants.ExtensionListenerConstants.EXTENSION_FAULT_SEQUENCE_NAME);
+                    }
+                }
+            }
             Utils.send(messageContext, extensionResponseDTO.getStatusCode());
             return false;
         } else {
@@ -388,6 +409,13 @@ public class ExtensionListenerUtil {
         Map<String, ExtensionListener> extensionListeners = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getExtensionListenerMap();
         return extensionListeners.get(type);
+    }
+
+    private static boolean doMediateExtensionFaultSequence(String type) {
+        Map<String, Boolean> doMediateExtensionFaultSequenceMap = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getDoMediateExtensionFaultSequenceMap();
+        return Boolean.TRUE.equals(doMediateExtensionFaultSequenceMap.get(type));
     }
 
     @SuppressWarnings("unchecked")

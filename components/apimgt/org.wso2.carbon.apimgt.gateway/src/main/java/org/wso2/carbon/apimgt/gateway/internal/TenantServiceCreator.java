@@ -62,6 +62,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String faultSequenceName = "fault";
     private String mainSequenceName = "main";
     private String corsSequenceName = "_cors_request_handler_";
+    private String extensionFaultSequenceName = "_extension_fault_handler_";
     private String threatFaultSequenceName = "_threat_fault_";
     private String backendFailureSequenceName = "_backend_failure_handler_";
     private String webSocketInboundEp = "WebSocketInboundEndpoint";
@@ -314,6 +315,9 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 FileUtils.copyFile(new File(synapseConfigRootPath + corsSequenceName + ".xml"),
                         new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
                                 + File.separator + corsSequenceName + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + extensionFaultSequenceName + ".xml"),
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                + File.separator + extensionFaultSequenceName + ".xml"));
                 FileUtils.copyFile(new File(synapseConfigRootPath + threatFaultSequenceName + ".xml"),
                         new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
                                 + File.separator + threatFaultSequenceName + ".xml"));

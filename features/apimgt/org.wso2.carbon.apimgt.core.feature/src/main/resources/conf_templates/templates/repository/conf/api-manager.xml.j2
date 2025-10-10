@@ -1882,6 +1882,7 @@
             <Sequence>_auth_failure_handler_.xml</Sequence>
             <Sequence>_build_.xml</Sequence>
             <Sequence>_cors_request_handler_.xml</Sequence>
+            <Sequence>_extension_fault_handler_.xml</Sequence>
             <Sequence>dispatchSeq.xml</Sequence>
             <Sequence>fault.xml</Sequence>
             <Sequence>guardrail_fault.xml</Sequence>
@@ -1947,6 +1948,7 @@
         <ExtensionListener>
             <Type>{{listener.type}}</Type>
             <ClassName>{{listener.class}}</ClassName>
+            <EnableExtensionFaultSequenceMediation>{{listener.enable_extension_fault_sequence_mediation}}</EnableExtensionFaultSequenceMediation>
         </ExtensionListener>
         {% endfor %}
     </ExtensionListeners>
