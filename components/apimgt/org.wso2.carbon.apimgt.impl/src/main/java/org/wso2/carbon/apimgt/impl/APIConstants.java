@@ -1654,6 +1654,7 @@ public final class APIConstants {
 
     public static final String US_ASCII = "US-ASCII";
     public static final String HASH = "hash";
+    public static final String SUB_TYPE = "SubType";
 
     public static class DigestAuthConstants {
 
