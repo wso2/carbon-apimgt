@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -80,6 +81,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
 
     private static final Log log = LogFactory.getLog(SynapseArtifactGenerator.class);
     private static final String GATEWAY_EXT_SEQUENCE_PREFIX = "WSO2AMGW--Ext";
+    private final ConcurrentHashMap<String, Object> lockMap = new ConcurrentHashMap<>();
     private ThreadPoolExecutor artifactThreadPoolExecutor;
     private int corePoolSize;
     private int maxPoolSize;
@@ -252,7 +254,8 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
             return result;
         }
         // Cache Miss: Proceed with the generation process.
-        synchronized (this.getClass().getName().concat(cacheKey).intern()) {
+        Object lock = lockMap.computeIfAbsent(cacheKey, k -> new Object());
+        synchronized (lock) {
             // Double-check if another thread has populated the cache while waiting for the lock.
             cachedArtifact = CacheProvider.getSynapseArtifactCache().get(cacheKey);
             if (cachedArtifact != null) {
