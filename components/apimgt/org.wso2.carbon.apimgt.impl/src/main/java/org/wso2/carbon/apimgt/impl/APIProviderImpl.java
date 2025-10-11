@@ -7612,7 +7612,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = getAPIRevisionDeploymentList(apiRevisionId);
-        if (apiRevisionDeploymentsResponse.size() != 0) {
+        boolean isInitiatedFromGW = APIUtil.isAPIDiscoveredFromGW(apiId, organization);
+        if (!isInitiatedFromGW && !apiRevisionDeploymentsResponse.isEmpty()) {
             String errorMessage = "Couldn't delete API revision since API revision is currently deployed to a gateway" +
                     "." +
                     "You need to undeploy the API Revision from the gateway before attempting deleting API Revision: "

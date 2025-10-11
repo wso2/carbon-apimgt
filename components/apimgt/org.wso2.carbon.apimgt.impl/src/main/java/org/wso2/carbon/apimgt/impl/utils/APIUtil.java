@@ -10599,6 +10599,18 @@ public final class APIUtil {
         return id;
     }
 
+    /**
+     * Checks if the API with the given UUID and organization has been discovered from the gateway.
+     *
+     * @param uuid The unique identifier of the API.
+     * @param organization The organization associated with the API.
+     * @return true if the API is discovered from the gateway, false otherwise.
+     * @throws APIManagementException if an error occurs while fetching the information.
+     */
+    public static boolean isAPIDiscoveredFromGW(String uuid, String organization) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getIsAPIInitiatedFromGateway(uuid, organization);
+    }
+
     public static String[] getFilteredUserRoles(String username) throws APIManagementException {
         String[] userRoles = APIUtil.getListOfRoles(username);
         String skipRolesByRegex = APIUtil.getSkipRolesByRegex();
