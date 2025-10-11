@@ -7613,7 +7613,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = getAPIRevisionDeploymentList(apiRevisionId);
         boolean isInitiatedFromGW = APIUtil.isAPIDiscoveredFromGW(apiId, organization);
-        if (!isInitiatedFromGW && !apiRevisionDeploymentsResponse.isEmpty()) {
+        if (isInitiatedFromGW && !apiRevisionDeploymentsResponse.isEmpty()) {
+            apiMgtDAO.removeAPIRevisionDeployment(apiRevision.getRevisionUUID(), apiRevisionDeploymentsResponse);
+            Set<String> envsToRemove = apiRevisionDeploymentsResponse.stream()
+                    .map(APIRevisionDeployment::getDeployment).collect(Collectors.toSet());
+            if (!envsToRemove.isEmpty()) {
+                GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevision.getRevisionUUID(),
+                        envsToRemove);
+            }
+        } else if (!apiRevisionDeploymentsResponse.isEmpty()) {
             String errorMessage = "Couldn't delete API revision since API revision is currently deployed to a gateway" +
                     "." +
                     "You need to undeploy the API Revision from the gateway before attempting deleting API Revision: "

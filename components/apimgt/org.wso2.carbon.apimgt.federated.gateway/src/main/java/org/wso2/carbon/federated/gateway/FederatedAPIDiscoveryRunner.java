@@ -218,7 +218,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                 API api = discoveredAPI.getApi();
                 try {
                     String apiKey = apidto.getName() + DELEM_COLON + apidto.getVersion();
-                    String envScopedKey = apidto.getName() + APIConstants.DELEM_UNDERSCORE
+                    String envScopedKey = apidto.getName() + APIConstants.KEY_SEPARATOR
                             + environment.getName() + DELEM_COLON + apidto.getVersion();
 
                     // Determine import mode
@@ -230,7 +230,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             alreadyDiscoveredAPIsList.contains(envScopedKey);
                     boolean alreadyExistsWithEnvScope = alreadyDiscoveredAPIsList.contains(envScopedKey);
                     if (!update && !alreadyExistsWithEnvScope) {
-                        String envPathName = apidto.getName() + APIConstants.DELEM_UNDERSCORE
+                        String envPathName = apidto.getName() + APIConstants.KEY_SEPARATOR
                                 + environment.getName();
                         Optional<String> existingApiOpt = alreadyDiscoveredAPIsList.stream()
                                 .map(String::trim)
@@ -274,7 +274,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                         if (api.getDisplayName() == null) {
                             apidto.displayName(apidto.getName());
                         }
-                        apidto.setName(apidto.getName() + APIConstants.DELEM_UNDERSCORE + environment.getName());
+                        apidto.setName(apidto.getName() + APIConstants.KEY_SEPARATOR + environment.getName());
                     }
                     //if the discovered API is a new version, we need to create a new API version in the system
                     API newAPI = null;
