@@ -627,13 +627,14 @@ public class APIHandlerServiceComponent {
         if (StringUtils.isNotEmpty(redisConfig.getUser()) && redisConfig.getPassword() != null) {
             jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
                     redisConfig.getConnectionTimeout(), redisConfig.getUser(),
-                    String.valueOf(redisConfig.getPassword()), redisConfig.isSslEnabled());
+                    String.valueOf(redisConfig.getPassword()), redisConfig.getDatabaseId(), redisConfig.isSslEnabled());
         } else if (redisConfig.getPassword() != null) {
             jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
-                    redisConfig.getConnectionTimeout(), String.valueOf(redisConfig.getPassword()), redisConfig.isSslEnabled());
+                    redisConfig.getConnectionTimeout(), String.valueOf(redisConfig.getPassword()),
+                    redisConfig.getDatabaseId(), redisConfig.isSslEnabled());
         } else {
             jedisPool = new JedisPool(jedisPoolConfig, redisConfig.getHost(), redisConfig.getPort(),
-                    redisConfig.getConnectionTimeout(), redisConfig.isSslEnabled());
+                    redisConfig.getConnectionTimeout(), null, redisConfig.getDatabaseId(), redisConfig.isSslEnabled());
         }
         return jedisPool;
     }

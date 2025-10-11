@@ -1324,6 +1324,9 @@
                 {% if apim.distributed_throttling.keyvalue_store.password is defined %}
                 <Password>{{apim.distributed_throttling.keyvalue_store.password}}</Password>
                 {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.database_id is defined %}
+                <DatabaseId>{{apim.distributed_throttling.keyvalue_store.database_id}}</DatabaseId>
+                {% endif %}
                 {% if apim.distributed_throttling.keyvalue_store.max_total is defined %}
                 <MaxTotal>{{apim.distributed_throttling.keyvalue_store.max_total}}</MaxTotal>
                 {% endif %}
