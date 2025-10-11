@@ -119,7 +119,6 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                     }
                 }
             }
-            apiMgtDAO.removeAPIRevisionDeployment(apiId);
         } catch (APIManagementException e) {
             throw new NotifierException(e.getMessage());
         }
