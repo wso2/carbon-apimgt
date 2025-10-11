@@ -43,6 +43,6 @@ public interface ScopeClient {
     @RequestLine("DELETE /name/{name}")
     Response deleteScope(@Param("name") String name) throws KeyManagerClientException;
 
-    @RequestLine("HEAD /name/{name}")
+    @RequestLine("HEAD /name/{name}?includeOIDCScopes=true")
     Response isScopeExist(@Param("name") String name) throws KeyManagerClientException;
 }
