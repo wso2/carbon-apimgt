@@ -201,7 +201,6 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new CertificateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(),new GoogleAnalyticsNotifier(),null);
             bundleContext.registerService(Notifier.class.getName(),new ExternalGatewayNotifier(),null);
-            bundleContext.registerService(Notifier.class.getName(),new ExternallyDeployedApiNotifier(),null);
             bundleContext.registerService(Notifier.class.getName(),new KeyTemplateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);

@@ -8706,6 +8706,32 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Checks whether the API was initiated from the gateway for a given API UUID and organization.
+     *
+     * @param uuid The unique identifier of the API.
+     * @param org The organization associated with the API.
+     * @return true if the API was initiated from the gateway, false otherwise.
+     * @throws APIManagementException If an error occurs while retrieving the information from the database.
+     */
+    public boolean getIsAPIInitiatedFromGateway(String uuid, String org) throws APIManagementException {
+        String sql = SQLConstants.GET_IS_INITIATED_FROM_GW_BY_UUID_AND_ORG_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sql)) {
+            prepStmt.setString(1, uuid);
+            prepStmt.setString(2, org);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) == 1;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve the whether the API depoloyed from CP or discovered from GW for API: "
+            + uuid, e);
+        }
+        return false;
+    }
+
+    /**
      * Get API Product Identifier by the product's UUID.
      *
      * @param uuid uuid of the API

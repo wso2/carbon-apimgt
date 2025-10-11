@@ -7359,15 +7359,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Map<String, String> gatewayVhosts = Collections.singletonMap(environment, newDeployment.getVhost());
             apiMgtDAO.removeAPIRevisionDeployment(apiId, deploymentsToRemove);
 
-            if (!deploymentsToRemove.isEmpty() && !skipDeployToGateway) {
-                removeFromGateway(api, deploymentsToRemove, targetEnvironments, false);
-            }
-
-            GatewayArtifactsMgtDAO.getInstance().addAndRemovePublishedGatewayLabels(
-                    apiId, revisionUUID, targetEnvironments, gatewayVhosts, deploymentsToRemove);
-
-            // Skip deployToGateway only if explicitly called from the gateway
             if (!skipDeployToGateway) {
+                if (!deploymentsToRemove.isEmpty()) {
+                    removeFromGateway(api, deploymentsToRemove, targetEnvironments, false);
+                }
+
+                GatewayArtifactsMgtDAO.getInstance()
+                        .addAndRemovePublishedGatewayLabels(apiId, revisionUUID,
+                                targetEnvironments, gatewayVhosts, deploymentsToRemove);
                 gatewayManager.deployToGateway(api, organization, targetEnvironments);
             }
             updatePublishedDefaultVersionIfRequired(apiIdentifier, api, organization);
@@ -7684,7 +7683,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = getAPIRevisionDeploymentList(apiRevisionId);
-        if (apiRevisionDeploymentsResponse.size() != 0) {
+        boolean isInitiatedFromGW = APIUtil.isAPIDiscoveredFromGW(apiId, organization);
+        if (isInitiatedFromGW && !apiRevisionDeploymentsResponse.isEmpty()) {
+            apiMgtDAO.removeAPIRevisionDeployment(apiRevision.getRevisionUUID(), apiRevisionDeploymentsResponse);
+            Set<String> envsToRemove = apiRevisionDeploymentsResponse.stream()
+                    .map(APIRevisionDeployment::getDeployment).collect(Collectors.toSet());
+        } else if (!apiRevisionDeploymentsResponse.isEmpty()) {
             String errorMessage = "Couldn't delete API revision since API revision is currently deployed to a gateway" +
                     "." +
                     "You need to undeploy the API Revision from the gateway before attempting deleting API Revision: "
