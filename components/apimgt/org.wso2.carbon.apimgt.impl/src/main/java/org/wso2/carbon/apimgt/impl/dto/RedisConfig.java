@@ -28,7 +28,7 @@ public class RedisConfig {
     private int port;
     private String user;
     private char[] password;
-    private int databaseId;
+    private int databaseId = 0;
     private int connectionTimeout;
     private boolean isSslEnabled;
     private int maxTotal = 8;

@@ -1772,6 +1772,7 @@ public final class APIConstants {
     public static final String DISTRIBUTED_THROTTLE_PORT =  "Port";
     public static final String DISTRIBUTED_THROTTLE_USER =  "User";
     public static final String DISTRIBUTED_THROTTLE_PASSWORD =  "Password";
+    public static final String DISTRIBUTED_THROTTLE_DATABASE_ID =  "DatabaseId";
     public static final String DISTRIBUTED_THROTTLE_MAX_TOTAL = "MaxTotal";
     public static final String DISTRIBUTED_THROTTLE_MAX_IDLE = "MaxIdle";
     public static final String DISTRIBUTED_THROTTLE_MIN_IDLE = "MinIdle";
