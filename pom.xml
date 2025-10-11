@@ -2067,7 +2067,7 @@
         <carbon.analytics.common.version>5.3.27</carbon.analytics.common.version>
 
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.9.30</carbon.kernel.version>
+        <carbon.kernel.version>4.9.31</carbon.kernel.version>
         <carbon.kernel.feature.version>${carbon.kernel.version}</carbon.kernel.feature.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
@@ -2079,7 +2079,7 @@
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
 
         <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.25.734</carbon.identity.version>
+        <carbon.identity.version>5.25.735</carbon.identity.version>
         <carbon.identity.governance.version>1.8.111</carbon.identity.governance.version>
         <carbon.identity-inbound-auth-oauth.version>6.13.40</carbon.identity-inbound-auth-oauth.version>
         <carbon.identity-oauth2-grant-jwt.version>2.2.4</carbon.identity-oauth2-grant-jwt.version>
@@ -2130,7 +2130,7 @@
         <axis2-java2wsdl-maven-plugin.version>1.6.3</axis2-java2wsdl-maven-plugin.version>
 
         <!-- Axis2 Version -->
-        <axis2.wso2.version>1.6.1-wso2v108</axis2.wso2.version>
+        <axis2.wso2.version>1.6.1-wso2v111</axis2.wso2.version>
         <axis2.osgi.version.range>[1.6.1, 1.7.0)</axis2.osgi.version.range>
 
         <!-- Apache Axiom -->
@@ -2154,7 +2154,7 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-        <synapse.version>4.0.0-wso2v256</synapse.version>
+        <synapse.version>4.0.0-wso2v262</synapse.version>
         <orbit.version.json>3.0.0.wso2v7</orbit.version.json>
 
         <!-- orbit httpmime versions-->
@@ -2322,7 +2322,7 @@
         <damnhandy.version>${com.damnhandy.version}.wso2v2</damnhandy.version>
         <javax.annotation.verion>1.3.2</javax.annotation.verion>
         <log4j2.version>2.24.3</log4j2.version>
-        <jinjava.version>2.7.2</jinjava.version>
+        <jinjava.version>2.7.5</jinjava.version>
         <h2.orbit.version>2.3.232.wso2v1</h2.orbit.version>
         <tomcat.version>9.0.108</tomcat.version>
         <tika.version>2.7.0</tika.version>
