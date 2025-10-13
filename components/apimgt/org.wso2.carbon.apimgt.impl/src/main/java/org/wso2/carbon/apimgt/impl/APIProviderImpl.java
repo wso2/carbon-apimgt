@@ -1260,9 +1260,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     configuredMissingKeyManagers.add(keyManager);
                 } else if (!disabledKeyManagers.contains(keyManager)) {
                     validKeyManagers.add(keyManager);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Added valid key manager: " + keyManager + " for API: " + api.getId().getApiName());
+                    }
                 }
             } else {
-                validKeyManagers.add(keyManager);
+                // Treat ALL as "any enabled tenant KM"; include only enabled ones
+                tenantKeyManagers.values().stream()
+                        .map(KeyManagerDto::getName)
+                        .filter(kmName -> !disabledKeyManagers.contains(kmName))
+                        .forEach(validKeyManagers::add);
             }
         }
         configuredMissingKeyManagers.removeAll(disabledKeyManagers);
@@ -1272,9 +1279,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
         }
         if (validKeyManagers.isEmpty()) {
+            log.error("No valid and enabled key managers found for API: " + api.getId().getApiName());
+            String disabledMsg = "";
+            List<String> apiKeyManagers = api.getKeyManagers();
+            List<String> foundButDisabled = apiKeyManagers.stream().filter(disabledKeyManagers::contains)
+                    .collect(Collectors.toList());
+            if (!foundButDisabled.isEmpty()) {
+                disabledMsg = " The following key managers are configured but disabled: "
+                        + String.join(", ", foundButDisabled) + ".";
+            }
             throw new APIManagementException(
-                    "API must have at least one valid and enabled key manager configured",
-                    ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                    "API must have at least one key manager that is both configured (registered) and enabled."
+                            + disabledMsg, ExceptionCodes.KEY_MANAGER_NOT_FOUND);
         }
     }
 
