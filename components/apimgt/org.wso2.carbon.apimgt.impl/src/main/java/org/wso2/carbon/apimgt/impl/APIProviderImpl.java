@@ -1245,6 +1245,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("Validating key managers for API: " + api.getId().getApiName());
         }
         List<String> configuredMissingKeyManagers = new ArrayList<>();
+        List<String> validKeyManagers = new ArrayList<>();
         for (String keyManager : api.getKeyManagers()) {
             if (!APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManager)) {
                 KeyManagerDto selectedKeyManager = null;
@@ -1257,7 +1258,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 if (selectedKeyManager == null) {
                     configuredMissingKeyManagers.add(keyManager);
+                } else if (!disabledKeyManagers.contains(keyManager)) {
+                    validKeyManagers.add(keyManager);
                 }
+            } else {
+                validKeyManagers.add(keyManager);
             }
         }
         configuredMissingKeyManagers.removeAll(disabledKeyManagers);
