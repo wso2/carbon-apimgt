@@ -556,7 +556,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetAPISecurity(api);
 
         //Validate API with Federated Gateway
-        APIUtil.validateApiWithFederatedGateway(api);
+        if (!api.isInitiatedFromGateway()) {
+            APIUtil.validateApiWithFederatedGateway(api);
+        }
 
         //Set version timestamp to the API
         String latestTimestamp = calculateVersionTimestamp(provider, apiName,

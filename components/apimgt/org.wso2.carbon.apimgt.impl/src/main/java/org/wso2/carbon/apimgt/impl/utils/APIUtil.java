@@ -11944,7 +11944,7 @@ public final class APIUtil {
             GatewayAgentConfiguration gatewayConfiguration = org.wso2.carbon.apimgt.impl.internal.
                     ServiceReferenceHolder.getInstance().
                     getExternalGatewayConnectorConfiguration(api.getGatewayType());
-            if (gatewayConfiguration != null) {
+            if (gatewayConfiguration != null && gatewayConfiguration.getGatewayDeployerImplementation() != null) {
                 GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration
                         .getGatewayDeployerImplementation()).getDeclaredConstructor().newInstance();
                 if (deployer != null) {
