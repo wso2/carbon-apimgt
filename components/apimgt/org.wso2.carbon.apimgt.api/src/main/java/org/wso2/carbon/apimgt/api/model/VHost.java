@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Objects;
 
 /**
  * This class represent an Virtual Host
@@ -158,10 +159,12 @@ public class VHost implements Serializable {
     }
 
     public String getWsUrl() {
+        if (wsHost == null) return null;
         return getUrl("ws", wsHost, wsPort == DEFAULT_HTTP_PORT ? ""  : ":" + wsPort, "");
     }
 
     public String getWssUrl() {
+        if (wssHost == null) return null;
         return getUrl("wss", wssHost, wssPort == DEFAULT_HTTPS_PORT ? "" : ":" + wssPort, "");
     }
 
@@ -293,10 +296,10 @@ public class VHost implements Serializable {
                 && StringUtils.equals(vHost.httpContext, this.httpContext)
                 && vHost.httpPort.equals(this.httpPort)
                 && vHost.httpsPort.equals(this.httpsPort)
-                && StringUtils.equals(vHost.wsHost, this.wsHost)
-                && StringUtils.equals(vHost.wssHost, this.wssHost)
-                && vHost.wsPort.equals(this.wsPort)
-                && vHost.wssPort.equals(this.wssPort);
+                && Objects.equals(vHost.wsHost, this.wsHost)
+                && Objects.equals(vHost.wssHost, this.wssHost)
+                && Objects.equals(vHost.wsPort, this.wsPort)
+                && Objects.equals(vHost.wssPort, this.wssPort);
     }
 
     @Override
@@ -313,8 +316,8 @@ public class VHost implements Serializable {
                 + ((wsHost == null) ? 0 : wsHost.hashCode());
         result = prime * result
                 + ((wssHost == null) ? 0 : wssHost.hashCode());
-        result = prime * result + wsPort;
-        result = prime * result + wssPort;
+        result = prime * result + ((wsPort == null) ? 0 : wsPort);
+        result = prime * result + ((wssPort == null) ? 0 : wssPort);
         return result;
     }
 }

@@ -202,6 +202,8 @@ public class EnvironmentMappingUtil {
         vHostDTO.setHttpsPort(vHost.getHttpsPort());
         vHostDTO.setWsPort(vHost.getWsPort());
         vHostDTO.setWssPort(vHost.getWssPort());
+        vHostDTO.setWsHost(vHost.getWsHost());
+        vHostDTO.setWssHost(vHost.getWssHost());
         return vHostDTO;
     }
 
