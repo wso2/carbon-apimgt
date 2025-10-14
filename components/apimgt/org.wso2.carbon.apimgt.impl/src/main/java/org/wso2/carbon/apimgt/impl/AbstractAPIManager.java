@@ -49,7 +49,6 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.EnvironmentSpecificAPIPropertyDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
-import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -551,57 +550,6 @@ public abstract class AbstractAPIManager implements APIManager {
     public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException {
 
         return scopesDAO.isScopeExist(scopeKey, tenantid);
-    }
-
-    /**
-     * Check whether the given scope key is already available in any of the Key Managers
-     *
-     * @param scopeKey candidate scope key
-     * @param tenantDomain tenant domain
-     * @return true if the scope key is already available
-     */
-    @Override
-    public boolean isScopeKeyExistInKeyManager(String scopeKey, String tenantDomain) {
-        if (log.isDebugEnabled()) {
-            log.debug("Checking if scope key '" + scopeKey + "' exists in any Key Manager for tenant: " + tenantDomain);
-        }
-        Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getGlobalAndTenantKeyManagers(tenantDomain);
-        for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
-            KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
-            if (keyManager == null) {
-                log.warn("Key Manager instance is null for: " + keyManagerDtoEntry.getKey());
-                continue;
-            }
-            boolean scopeExistsInKeyManager = false;
-
-            try {
-                scopeExistsInKeyManager = keyManager.isScopeExists(scopeKey);
-            } catch (APIManagementException e) {
-                log.error("Error while checking for scope key in Key Manager: "
-                        + keyManagerDtoEntry.getKey(), e);
-            }
-
-            if (!scopeExistsInKeyManager) {
-                try {
-                    Map<String, Scope> allScopes = keyManager.getAllScopes();
-                    scopeExistsInKeyManager = allScopes != null && allScopes.containsKey(scopeKey);
-                } catch (APIManagementException e) {
-                    log.warn("Error while listing scopes from Key Manager: " + keyManagerDtoEntry.getKey(), e);
-                }
-            }
-            if (scopeExistsInKeyManager) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Scope key '" + scopeKey + "' is already defined in Key Manager: "
-                            + keyManagerDtoEntry.getKey());
-                }
-                return true;
-
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Scope key '" + scopeKey + "' does not exist in any Key Manager for tenant: " + tenantDomain);
-            }
-        }
-        return false;
     }
 
     /**
