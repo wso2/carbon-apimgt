@@ -173,9 +173,38 @@ public class VHost implements Serializable {
         return String.format("%s://%s%s%s", protocol, hostName, port, context);
     }
 
+    private void findAndDisableMissingProtocols(String[] endpoints) {
+        boolean wsFound = false;
+        boolean wssFound = false;
+        for (String endpoint : endpoints) {
+            if (StringUtils.isEmpty(endpoint)) {
+                continue;
+            }
+            String[] elem = endpoint.split(PROTOCOL_SEPARATOR);
+            if (elem.length != 2) {
+                continue;
+            }
+            switch (elem[0]) {
+            case WS_PROTOCOL:
+                wsFound = true;
+                break;
+            case WSS_PROTOCOL:
+                wssFound = true;
+                break;
+            }
+        }
+        if (!wsFound) {
+            this.disableWs();
+        }
+        if (!wssFound) {
+            this.disableWss();
+        }
+    }
+
     @UsedByMigrationClient
     public static VHost fromEndpointUrls(String[] endpoints) throws APIManagementException {
         VHost vhost = new VHost();
+        vhost.findAndDisableMissingProtocols(endpoints);
 
         for (String endpoint : endpoints) {
             if (StringUtils.isEmpty(endpoint)) {
@@ -235,16 +264,18 @@ public class VHost implements Serializable {
         if (StringUtils.isEmpty(vhost.getHost())) {
             throw new APIManagementException("Error while building VHost, missing required HTTP or HTTPS endpoint");
         }
-
-        // If WebSocket host name of Vhost is empty, use HTTP/HTTPS endpoint hostname
-        if ((vhost.getWsHost() == null) || (StringUtils.isEmpty(vhost.getWsHost()))) {
-            vhost.setWsHost(vhost.getHost());
-        }
-        if ((vhost.getWssHost() == null) || (StringUtils.isEmpty(vhost.getWssHost()))) {
-            vhost.setWssHost(vhost.getHost());
-        }
-
+        
         return vhost;
+    }
+
+    public void disableWs() {
+        this.wsPort = null;
+        this.wsHost = null;
+    }
+
+    public void disableWss() {
+        this.wssPort = null;
+        this.wssHost = null;
     }
 
     @Override
@@ -262,6 +293,8 @@ public class VHost implements Serializable {
                 && StringUtils.equals(vHost.httpContext, this.httpContext)
                 && vHost.httpPort.equals(this.httpPort)
                 && vHost.httpsPort.equals(this.httpsPort)
+                && StringUtils.equals(vHost.wsHost, this.wsHost)
+                && StringUtils.equals(vHost.wssHost, this.wssHost)
                 && vHost.wsPort.equals(this.wsPort)
                 && vHost.wssPort.equals(this.wssPort);
     }
@@ -276,6 +309,10 @@ public class VHost implements Serializable {
                 + ((httpContext == null) ? 0 : httpContext.hashCode());
         result = prime * result + httpPort;
         result = prime * result + httpsPort;
+        result = prime * result
+                + ((wsHost == null) ? 0 : wsHost.hashCode());
+        result = prime * result
+                + ((wssHost == null) ? 0 : wssHost.hashCode());
         result = prime * result + wsPort;
         result = prime * result + wssPort;
         return result;
