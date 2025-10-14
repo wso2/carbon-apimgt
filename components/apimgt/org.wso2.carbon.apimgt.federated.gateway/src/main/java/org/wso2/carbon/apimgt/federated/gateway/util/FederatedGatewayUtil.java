@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.federated.gateway.util;
+package org.wso2.carbon.apimgt.federated.gateway.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,8 +58,8 @@ import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.DEP
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.SWAGGER_YAML_FILE_NAME;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.TYPE_DEPLOYMENT_ENVIRONMENTS;
-import static org.wso2.carbon.federated.gateway.util.FederatedGatewayConstants.DISCOVERED_API_LIST;
-import static org.wso2.carbon.federated.gateway.util.FederatedGatewayConstants.PUBLISHED_API_LIST;
+import static org.wso2.carbon.apimgt.federated.gateway.util.FederatedGatewayConstants.DISCOVERED_API_LIST;
+import static org.wso2.carbon.apimgt.federated.gateway.util.FederatedGatewayConstants.PUBLISHED_API_LIST;
 
 public class FederatedGatewayUtil {
     private static Log log = LogFactory.getLog(FederatedGatewayUtil.class);
