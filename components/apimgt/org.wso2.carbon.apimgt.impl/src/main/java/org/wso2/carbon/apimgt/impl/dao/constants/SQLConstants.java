@@ -4658,6 +4658,14 @@ public class SQLConstants {
                         " (API_UUID, REVISION_UUID, POLICY_UUID, DIRECTION, PARAMETERS, POLICY_ORDER) " +
                         " VALUES (?,?,?,?,?,?)";
 
+        public static final String ADD_API_OPERATION_POLICY_MAPPING_GIVEN_TEMPLATE_RESOURCES =
+                "INSERT INTO AM_API_OPERATION_POLICY_MAPPING (URL_MAPPING_ID, POLICY_UUID, DIRECTION, PARAMETERS, POLICY_ORDER) " +
+                        "SELECT M.URL_MAPPING_ID, ?, ?, ?, ? " +
+                        "FROM AM_API_URL_MAPPING M " +
+                        "JOIN AM_API A ON M.API_ID = A.API_ID " +
+                        "WHERE A.API_UUID = ? AND M.URL_PATTERN = ? AND M.HTTP_METHOD = ? " +
+                        "AND M.REVISION_UUID IS NULL";
+
         public static final String DELETE_API_POLICY_MAPPING =
                 "DELETE FROM AM_API_POLICY_MAPPING WHERE API_UUID = ? AND REVISION_UUID IS null";
 
