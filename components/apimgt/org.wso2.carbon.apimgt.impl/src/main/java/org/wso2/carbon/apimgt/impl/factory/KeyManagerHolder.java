@@ -74,7 +74,9 @@ public class KeyManagerHolder {
             organizationKeyManagerDto = new OrganizationKeyManagerDto();
         }
         if (organizationKeyManagerDto.getKeyManagerByName(name) != null) {
-            log.warn("Key Manager " + name + " already initialized in tenant " + organization);
+            if (log.isDebugEnabled()) {
+                log.debug("Key Manager " + name + " already initialized in tenant " + organization);
+            }
         }
         if (keyManagerConfiguration.isEnabled() && !KeyManagerConfiguration.TokenType.EXCHANGED
                 .equals(keyManagerConfiguration.getTokenType())) {
@@ -321,7 +323,8 @@ public class KeyManagerHolder {
         if (tenantKeyManagerDto != null) {
             keyManagerMap.putAll(tenantKeyManagerDto.getKeyManagerMap());
         }
-        OrganizationKeyManagerDto globalKeyManagerDto = getTenantKeyManagerDto(APIConstants.GLOBAL_KEY_MANAGER_TENANT_DOMAIN);
+        OrganizationKeyManagerDto globalKeyManagerDto = getTenantKeyManagerDto(APIConstants
+                .GLOBAL_KEY_MANAGER_TENANT_DOMAIN);
         if (globalKeyManagerDto != null) {
             keyManagerMap.putAll(globalKeyManagerDto.getKeyManagerMap());
         }
