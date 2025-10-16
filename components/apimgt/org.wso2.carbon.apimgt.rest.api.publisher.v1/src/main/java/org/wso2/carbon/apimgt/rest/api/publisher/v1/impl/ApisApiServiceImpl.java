@@ -2868,7 +2868,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                                 .entity(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE)).build();
                     }
                     provider.updateAPI(api, originalAPI);
-                    SequenceUtils.updateResourcePolicyFromRegistryResourceId(api.getId(), resourcePolicyId,
+                    provider.updateResourcePolicyFromRegistryResourceId(api.getId(), resourcePolicyId,
                             body.getContent());
                     String updatedPolicyContent = SequenceUtils
                             .getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);

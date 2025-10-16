@@ -2068,14 +2068,21 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
 
-            String apiSourcePath = RegistryPersistenceUtil.getAPIBasePath(apiProviderName, apiName, apiVersion);
+            // Retrieve the working API path from registry
+            String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
+            String apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(apiPath);
+
+            // Parse the original provider name directly from the working API path
+            String originalProvider = RegistryPersistenceUtil.extractProvider(apiPath,
+                    apiArtifact.getQName().getLocalPart());
+
             String wsdlResourcePath = null;
             boolean isZip = false;
             String wsdlResourcePathArchive = apiSourcePath + RegistryConstants.PATH_SEPARATOR
-                    + APIConstants.API_WSDL_ARCHIVE_LOCATION + apiProviderName + APIConstants.WSDL_PROVIDER_SEPERATOR
+                    + APIConstants.API_WSDL_ARCHIVE_LOCATION + originalProvider + APIConstants.WSDL_PROVIDER_SEPERATOR
                     + apiName + apiVersion + APIConstants.ZIP_FILE_EXTENSION;
             String wsdlResourcePathFile = apiSourcePath + RegistryConstants.PATH_SEPARATOR
-                    + RegistryPersistenceUtil.createWsdlFileName(apiProviderName, apiName, apiVersion);
+                    + RegistryPersistenceUtil.createWsdlFileName(originalProvider, apiName, apiVersion);
             if (APIConstants.APPLICATION_ZIP.equals(wsdlResourceFile.getContentType())) {
                 wsdlResourcePath = wsdlResourcePathArchive;
                 isZip = true;
@@ -2152,19 +2159,25 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (apiArtifact == null) {
                 return null;
             }
-            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-            apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
 
+            // Retrieve the working API path from registry
             String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
-            int prependIndex = apiPath.lastIndexOf("/api");
-            String apiSourcePath = apiPath.substring(0, prependIndex);
+            String apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(apiPath);
+
+            // Parse the original provider name directly from the working API path
+            String originalProvider = RegistryPersistenceUtil.extractProvider(apiPath,
+                    apiArtifact.getQName().getLocalPart());
+
+            // Construct WSDL resource paths
             String wsdlResourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
-                    + RegistryPersistenceUtil.createWsdlFileName(apiProviderName, apiName, apiVersion);
+                    + RegistryPersistenceUtil.createWsdlFileName(originalProvider, apiName, apiVersion);
             String wsdlResourcePathOld = APIConstants.API_WSDL_RESOURCE_LOCATION
-                    + RegistryPersistenceUtil.createWsdlFileName(apiProviderName, apiName, apiVersion);
-            String resourceFileName = apiProviderName + "-" + apiName + "-" + apiVersion;
+                    + RegistryPersistenceUtil.createWsdlFileName(originalProvider, apiName, apiVersion);
+            String resourceFileName = originalProvider + "-" + apiName + "-" + apiVersion;
+
+            // Retrieve WSDL from registry
             if (registry.resourceExists(wsdlResourcePath)) {
                 Resource resource = registry.get(wsdlResourcePath);
                 ResourceFile returnResource = new ResourceFile(resource.getContentStream(), resource.getMediaType());
@@ -2177,10 +2190,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 return returnResource;
             } else {
                 wsdlResourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
-                        + APIConstants.API_WSDL_ARCHIVE_LOCATION + apiProviderName
+                        + APIConstants.API_WSDL_ARCHIVE_LOCATION + originalProvider
                         + APIConstants.WSDL_PROVIDER_SEPERATOR + apiName + apiVersion + APIConstants.ZIP_FILE_EXTENSION;
                 wsdlResourcePathOld = APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION
-                        + apiProviderName + APIConstants.WSDL_PROVIDER_SEPERATOR + apiName + apiVersion
+                        + originalProvider + APIConstants.WSDL_PROVIDER_SEPERATOR + apiName + apiVersion
                         + APIConstants.ZIP_FILE_EXTENSION;
                 if (registry.resourceExists(wsdlResourcePath)) {
                     Resource resource = registry.get(wsdlResourcePath);
@@ -3985,10 +3998,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     protected List<SOAPToRestSequence> getSoapToRestSequences(Registry registry, API api, Direction direction)
             throws RegistryException, APIPersistenceException {
-        String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
-                + RegistryPersistenceUtil.replaceEmailDomain(api.getId().getProviderName())
-                + RegistryConstants.PATH_SEPARATOR + api.getId().getName() + RegistryConstants.PATH_SEPARATOR
-                + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR + "soap_to_rest"
+        String apiPath = GovernanceUtils.getArtifactPath(registry, api.getUuid());
+        String apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(apiPath);
+        String resourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR + "soap_to_rest"
                 + RegistryConstants.PATH_SEPARATOR;
         if (direction == Direction.IN) {
             resourcePath = resourcePath + "in";
@@ -4022,8 +4034,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return sequences;
     }
 
-    protected void setSoapToRestSequences(PublisherAPI publisherAPI, Registry registry) throws RegistryException {
+    protected void setSoapToRestSequences(PublisherAPI publisherAPI, Registry registry)
+            throws RegistryException, APIPersistenceException {
         if (publisherAPI.getSoapToRestSequences() != null && !publisherAPI.getSoapToRestSequences().isEmpty()) {
+            String apiPath = GovernanceUtils.getArtifactPath(registry, publisherAPI.getId());
+            String apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(apiPath);
+            apiSourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR;
             List<SOAPToRestSequence> sequence = publisherAPI.getSoapToRestSequences();
             for (SOAPToRestSequence soapToRestSequence : sequence) {
 
@@ -4031,16 +4047,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 if (apiResourceName.startsWith("/")) {
                     apiResourceName = apiResourceName.substring(1);
                 }
-                String resourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
-                        + RegistryPersistenceUtil.replaceEmailDomain(publisherAPI.getProviderName())
-                        + RegistryConstants.PATH_SEPARATOR + publisherAPI.getApiName()
-                        + RegistryConstants.PATH_SEPARATOR + publisherAPI.getVersion()
-                        + RegistryConstants.PATH_SEPARATOR;
+                String resourcePath;
                 if (soapToRestSequence.getDirection() == Direction.OUT) {
-                    resourcePath = resourcePath + "soap_to_rest" + RegistryConstants.PATH_SEPARATOR + "out"
+                    resourcePath = apiSourcePath + "soap_to_rest" + RegistryConstants.PATH_SEPARATOR + "out"
                             + RegistryConstants.PATH_SEPARATOR;
                 } else {
-                    resourcePath = resourcePath + "soap_to_rest" + RegistryConstants.PATH_SEPARATOR + "in"
+                    resourcePath = apiSourcePath + "soap_to_rest" + RegistryConstants.PATH_SEPARATOR + "in"
                             + RegistryConstants.PATH_SEPARATOR;
                 }
 
@@ -4062,6 +4074,76 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
         }
 
+    }
+
+    /**
+     * Updates resource policy resource for the given resource id from the registry.
+     *
+     * @param identifier API identifier
+     * @param resourceId Resource identifier
+     * @param content    resource policy content
+     * @throws APIPersistenceException
+     */
+    public void updateResourcePolicyFromRegistryResourceId(APIIdentifier identifier, String resourceId, String content)
+            throws APIPersistenceException {
+
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(RegistryPersistenceUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            RegistryPersistenceUtil.loadTenantRegistry(tenantId);
+            UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
+            String apiPath = GovernanceUtils.getArtifactPath(registry, identifier.getUUID());
+            String apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(apiPath);
+            String resourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                    + APIConstants.SOAP_TO_REST_RESOURCE;
+            Collection collection = (Collection) registry.get(resourcePath);
+            String[] resources = collection.getChildren();
+
+            if (resources == null) {
+                throw new APIPersistenceException("Cannot find any resource policies at the path: " + resourcePath);
+            }
+            for (String path : resources) {
+                Collection resourcePolicyCollection = (Collection) registry.get(path);
+                String[] resourcePolicies = resourcePolicyCollection.getChildren();
+                if (resourcePolicies == null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Cannot find resource policies under path: " + path);
+                    }
+                    continue;
+                }
+                for (String resourcePolicyPath : resourcePolicies) {
+                    org.wso2.carbon.registry.api.Resource resource = registry.get(resourcePolicyPath);
+                    if (StringUtils.isNotEmpty(resourceId) && resourceId.equals(((ResourceImpl) resource).getUUID())) {
+                        resource.setContent(content);
+                        resource.setMediaType(APIConstants.TEXT_XML);
+                        registry.put(resourcePolicyPath, resource);
+                        break;
+                    }
+                }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Number of REST resources for " + resourcePath + " is: " + resources.length);
+            }
+        } catch (UserStoreException e) {
+            throw new APIPersistenceException("Error while reading tenant information", e);
+        } catch (RegistryException e) {
+            throw new APIPersistenceException("Error when create registry instance", e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            throw new APIPersistenceException("Error while setting the resource policy content for the registry resource", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
     }
 
     @Override
@@ -4313,9 +4395,14 @@ public class RegistryPersistenceImpl implements APIPersistence {
         try {
             RegistryHolder holder = getRegistry(org.getName());
             registry = holder.getRegistry();
+
+            // Retrieve the working API path from registry
+            String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
+            String apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(apiPath);
+            apiSourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR;
+
             tenantFlowStarted = holder.isTenantFlowStarted();
             registry.beginTransaction();
-            GenericArtifact artifact = getAPIArtifact(apiId, registry);
 
             for (SOAPToRestSequence soapToRestSequence : sequences) {
 
@@ -4323,17 +4410,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 if (apiResourceName.startsWith("/")) {
                     apiResourceName = apiResourceName.substring(1);
                 }
-                String resourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
-                        + RegistryPersistenceUtil
-                        .replaceEmailDomain(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER))
-                        + RegistryConstants.PATH_SEPARATOR + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)
-                        + RegistryConstants.PATH_SEPARATOR + artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)
-                        + RegistryConstants.PATH_SEPARATOR;
+                String resourcePath;
                 if (soapToRestSequence.getDirection() == Direction.OUT) {
-                    resourcePath = resourcePath + "soap_to_rest" + RegistryConstants.PATH_SEPARATOR + "out"
+                    resourcePath = apiSourcePath + "soap_to_rest" + RegistryConstants.PATH_SEPARATOR + "out"
                             + RegistryConstants.PATH_SEPARATOR;
                 } else {
-                    resourcePath = resourcePath + "soap_to_rest" + RegistryConstants.PATH_SEPARATOR + "in"
+                    resourcePath = apiSourcePath + "soap_to_rest" + RegistryConstants.PATH_SEPARATOR + "in"
                             + RegistryConstants.PATH_SEPARATOR;
                 }
                 resourcePath = resourcePath + apiResourceName + "_" + soapToRestSequence.getMethod() + ".xml";
