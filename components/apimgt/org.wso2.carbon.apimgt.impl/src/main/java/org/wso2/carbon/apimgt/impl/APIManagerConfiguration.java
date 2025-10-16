@@ -623,7 +623,7 @@ public class APIManagerConfiguration {
                         try {
                             distributedThrottleConfig.setConnectionTimeout(Integer.parseInt(connectionTimeout.getText().trim()));
                         } catch (NumberFormatException e) {
-                            log.warn("Invalid connectionTimeout value: " + connectionTimeout.getText());
+                            log.warn("Invalid connectionTimeout value: " + connectionTimeout.getText(), e);
                         }                    }
                     if (isSslEnabled != null) {
                         distributedThrottleConfig.setSslEnabled(Boolean.parseBoolean(isSslEnabled.getText().trim()));
