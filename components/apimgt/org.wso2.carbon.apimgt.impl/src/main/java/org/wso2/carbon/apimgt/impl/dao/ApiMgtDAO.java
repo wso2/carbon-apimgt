@@ -24939,10 +24939,11 @@ public class ApiMgtDAO {
     private void addAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate, List<OperationPolicy> apiPolicies,
                                        String tenantDomain, Connection connection) throws APIManagementException {
 
-        try (PreparedStatement operationPolicyMappingStatement = connection
-                .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING);
-             PreparedStatement apiLevelPolicyMappingStatement = connection
-                     .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_POLICY_MAPPING)) {
+        try (PreparedStatement apiLevelPolicyMappingStatement = connection
+                    .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_POLICY_MAPPING);
+             PreparedStatement operationPolicyMappingStatement = connection.prepareStatement(
+                     SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING_GIVEN_TEMPLATE_RESOURCES)) {
+
             connection.setAutoCommit(false);
 
             Map<String, String> updatedPoliciesMap = new HashMap<>();
@@ -24962,19 +24963,22 @@ public class ApiMgtDAO {
                                     + apiUUID + " to URL mapping Id " + template.getId());
                         }
 
-                        operationPolicyMappingStatement.setInt(1, template.getId());
-                        operationPolicyMappingStatement.setString(2, updatedPoliciesMap.get(policy.getPolicyId()));
-                        operationPolicyMappingStatement.setString(3, policy.getDirection());
+                        operationPolicyMappingStatement.setString(1, updatedPoliciesMap.get(policy.getPolicyId()));
+                        operationPolicyMappingStatement.setString(2, policy.getDirection());
 
                         try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
-                            operationPolicyMappingStatement.setBinaryStream(4, paramInputStream, paramJSON.length());
+                            operationPolicyMappingStatement.setBinaryStream(3, paramInputStream, paramJSON.length());
                         } catch (IOException e) {
                             log.error("Error creating or reading InputStream for operation policy");
                             throw new APIManagementException("Error processing operation policy parameters for policy ID: " +
                                     policy.getPolicyId(), e);
                         }
 
-                        operationPolicyMappingStatement.setInt(5, policy.getOrder());
+                        operationPolicyMappingStatement.setInt(4, policy.getOrder());
+                        operationPolicyMappingStatement.setString(5, apiUUID);
+                        operationPolicyMappingStatement.setString(6, template.getUriTemplate());
+                        operationPolicyMappingStatement.setString(7, template.getHTTPVerb());
+
                         operationPolicyMappingStatement.addBatch();
                     }
                 }
