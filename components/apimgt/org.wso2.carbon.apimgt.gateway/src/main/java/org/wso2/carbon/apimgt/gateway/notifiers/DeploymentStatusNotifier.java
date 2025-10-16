@@ -185,16 +185,19 @@ public class DeploymentStatusNotifier {
         }
         if (gatewayAPIDTO == null || gatewayAPIDTO.getApiId() == null || action == null || 
                 gatewayAPIDTO.getTenantDomain() == null) {
-            log.warn("Invalid deployment status submission: gatewayAPIDTO, apiId, action, and tenantDomain cannot be null");
+            if (log.isDebugEnabled()) {
+                log.debug("Invalid deployment status submission: gatewayAPIDTO, apiId, action," +
+                        " and tenantDomain cannot be null");
+            }
             return;
         }
         DeploymentStatusJob job = new DeploymentStatusJob(gatewayAPIDTO.getApiId(), gatewayAPIDTO.getRevision(), 
                                                           success, action, errorCode, errorMessage,
                                                           gatewayAPIDTO.getTenantDomain());
         if (!currentBatch.offer(job)) {
-            log.error(String.format("Deployment status notification queue is full. "
-                                            + "Cannot accept new job for API: %s. Current queue size: %d, Max capacity: %d",
-                                    job.apiId, currentBatch.size(), Integer.MAX_VALUE));
+            log.error(String.format("Deployment status notification queue is full. Cannot accept new job for API:" +
+                            " %s. Current queue size: %d, Max capacity: %d",
+                    job.apiId, currentBatch.size(), Integer.MAX_VALUE));
             return;
         }
         if (currentBatch.size() >= batchSize && DataHolder.getInstance().isGatewayRegistered()) {

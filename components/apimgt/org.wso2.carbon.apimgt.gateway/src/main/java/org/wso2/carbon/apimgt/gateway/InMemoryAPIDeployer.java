@@ -252,8 +252,6 @@ public class InMemoryAPIDeployer {
                             .retrieveAllArtifacts(encodedString, tenantDomain);
                     log.info("Retrieved " + gatewayRuntimeArtifacts.size() + " artifacts for deployment");
                     if (gatewayRuntimeArtifacts.isEmpty()) {
-                        log.warn("No artifacts found for gateway labels: " + labelString +
-                                " in tenant: " + tenantDomain);
                         return true;
                     }
                     if (redeployChangedAPIs) {
