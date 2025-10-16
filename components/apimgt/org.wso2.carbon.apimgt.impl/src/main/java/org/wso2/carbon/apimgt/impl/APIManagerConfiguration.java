@@ -587,6 +587,8 @@ public class APIManagerConfiguration {
                     OMElement user = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_USER));
                     OMElement password = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PASSWORD));
                     OMElement databaseId = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_DATABASE_ID));
+                    OMElement connectionTimeout = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_CONNECTION_TIMEOUT));
+                    OMElement isSslEnabled = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_IS_SSL_ENABLED));
 
                     if (host != null && StringUtils.isNotBlank(host.getText())) {
                         distributedThrottleConfig.setHost(host.getText());
@@ -614,8 +616,17 @@ public class APIManagerConfiguration {
                         try {
                             distributedThrottleConfig.setDatabaseId(Integer.parseInt(databaseId.getText().trim()));
                         } catch (NumberFormatException e) {
-                            log.warn("DistributedThrottleConfig: invalid DatabaseId value: " + databaseId.getText(), e);
+                            log.warn("Invalid DatabaseId value: " + databaseId.getText(), e);
                         }
+                    }
+                    if (connectionTimeout != null) {
+                        try {
+                            distributedThrottleConfig.setConnectionTimeout(Integer.parseInt(connectionTimeout.getText().trim()));
+                        } catch (NumberFormatException e) {
+                            log.warn("Invalid connectionTimeout value: " + connectionTimeout.getText(), e);
+                        }                    }
+                    if (isSslEnabled != null) {
+                        distributedThrottleConfig.setSslEnabled(Boolean.parseBoolean(isSslEnabled.getText().trim()));
                     }
 
                     Iterator<OMElement> properties = propertiesElement.getChildElements();

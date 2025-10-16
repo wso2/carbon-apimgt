@@ -1327,6 +1327,12 @@
                 {% if apim.distributed_throttling.keyvalue_store.database_id is defined %}
                 <DatabaseId>{{apim.distributed_throttling.keyvalue_store.database_id}}</DatabaseId>
                 {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.connection_timeout is defined %}
+                <ConnectionTimeout>{{apim.distributed_throttling.keyvalue_store.connection_timeout}}</ConnectionTimeout>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.ssl is defined %}
+                <IsSslEnabled>{{apim.distributed_throttling.keyvalue_store.ssl}}</IsSslEnabled>
+                {% endif %}
                 {% if apim.distributed_throttling.keyvalue_store.max_total is defined %}
                 <MaxTotal>{{apim.distributed_throttling.keyvalue_store.max_total}}</MaxTotal>
                 {% endif %}
