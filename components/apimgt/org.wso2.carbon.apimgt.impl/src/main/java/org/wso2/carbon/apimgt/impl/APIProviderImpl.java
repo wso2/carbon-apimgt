@@ -1188,6 +1188,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
     public void updateResourcePolicyFromRegistryResourceId(APIIdentifier identifier, String resourceId, String content)
             throws APIManagementException {
         try {

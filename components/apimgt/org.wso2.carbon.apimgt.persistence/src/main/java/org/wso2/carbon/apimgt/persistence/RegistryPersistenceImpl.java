@@ -4076,14 +4076,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     }
 
-    /**
-     * Updates resource policy resource for the given resource id from the registry.
-     *
-     * @param identifier API identifier
-     * @param resourceId Resource identifier
-     * @param content    resource policy content
-     * @throws APIPersistenceException
-     */
+    @Override
     public void updateResourcePolicyFromRegistryResourceId(APIIdentifier identifier, String resourceId, String content)
             throws APIPersistenceException {
 
@@ -4099,7 +4092,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
-            RegistryPersistenceUtil.loadTenantRegistry(tenantId);
+            loadTenantRegistry(tenantId);
             UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
             String apiPath = GovernanceUtils.getArtifactPath(registry, identifier.getUUID());
             String apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(apiPath);
