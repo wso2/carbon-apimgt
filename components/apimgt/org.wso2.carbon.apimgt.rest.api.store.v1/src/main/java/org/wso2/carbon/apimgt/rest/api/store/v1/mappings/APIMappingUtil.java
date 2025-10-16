@@ -664,10 +664,6 @@ public class APIMappingUtil {
         boolean isGQLSubscription = StringUtils.equalsIgnoreCase(APIConstants.GRAPHQL_API, apidto.getType())
                 && isGraphQLSubscriptionsAvailable(apidto);
         if (!isWs) {
-            //prevent context appending in case the gateway is an external one
-            GatewayDeployer gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain,
-                    environment.getName());
-            context = gatewayDeployer != null ? "" : context;
             if (apidto.isInitiatedFromGateway()) {
                 APIURLsDTO extractedURLs;
                 extractedURLs = extractEndpointUrlsForDiscoveredApi(apidto);
@@ -682,6 +678,9 @@ public class APIMappingUtil {
                     apiurLsDTO = extractedURLs;
                 }
             } else {
+                //prevent context appending in case the gateway is an external one
+                GatewayDeployer gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain,
+                        environment.getName());
                 String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(apidto.getId(),
                         environment.getUuid());
                 String httpUrl = (gatewayDeployer != null && externalReference != null) ?
