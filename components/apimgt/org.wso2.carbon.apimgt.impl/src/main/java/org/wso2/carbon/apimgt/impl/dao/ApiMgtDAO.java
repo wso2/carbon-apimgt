@@ -20934,7 +20934,7 @@ public class ApiMgtDAO {
                             }
                         }
                     }
-
+                    urlMapping.setId(restoredUrlMappingID);
                 }
 
                 restoreAPIPolicies(apiRevision, tenantDomain, uriTemplateMap, connection);
