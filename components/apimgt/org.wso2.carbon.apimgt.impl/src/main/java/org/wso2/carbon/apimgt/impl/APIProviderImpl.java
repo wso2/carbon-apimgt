@@ -1188,6 +1188,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public void updateResourcePolicyFromRegistryResourceId(APIIdentifier identifier, String resourceId, String content)
+            throws APIManagementException {
+        try {
+            apiPersistenceInstance.updateResourcePolicyFromRegistryResourceId(identifier, resourceId, content);
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while updating the resource policy for API: " + identifier
+                    + " with resource ID: " + resourceId, e);
+        }
+    }
+
     /**
      * This method is used to validate and update API level and Operation level policy mappings.
      *
