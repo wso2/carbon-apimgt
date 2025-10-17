@@ -137,8 +137,14 @@ public class ExportUtils {
             List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
             for (APIKey apiKey : application.getKeys()) {
                 // Encode the consumer secret and set it
-                apiKey.setConsumerSecret(
-                        new String(Base64.encodeBase64(apiKey.getConsumerSecret().getBytes(Charset.defaultCharset()))));
+                if (apiKey.getConsumerSecret() != null) {
+                    // Encode the consumer secret and set it
+                    apiKey.setConsumerSecret(new String(
+                            Base64.encodeBase64(apiKey.getConsumerSecret().getBytes(Charset.defaultCharset()))));
+                } else {
+                    // Set an empty string when ConsumerSecret is not available
+                    apiKey.setConsumerSecret("");
+                }
                 ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
                 applicationKeyDTOs.add(applicationKeyDTO);
             }
