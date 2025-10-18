@@ -49,20 +49,36 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
 
     @Override
     public void init(String serviceName) {
+        String headerKey = null;
+        String headerValue = null;
+
 
         String headerProperty = getHeaderKeyProperty();
         String endPointURL = configuration.getFirstProperty(TelemetryConstants.OTLP_CONFIG_URL) != null ?
                 configuration.getFirstProperty(TelemetryConstants.OTLP_CONFIG_URL) : null;
-        String headerKey = headerProperty.substring(TelemetryConstants.OPENTELEMETRY_PROPERTIES_PREFIX.length());
+        if (headerProperty != null) {
+            headerKey = headerProperty.substring(TelemetryConstants.OPENTELEMETRY_PROPERTIES_PREFIX.length());
 
-        String headerValue = configuration.getFirstProperty(headerProperty) != null ?
-                configuration.getFirstProperty(headerProperty) : null;
+            headerValue = configuration.getFirstProperty(headerProperty) != null ?
+                    configuration.getFirstProperty(headerProperty) : null;
+        }
 
-        if (StringUtils.isNotEmpty(endPointURL) && StringUtils.isNotEmpty(headerValue)) {
-            OtlpGrpcSpanExporterBuilder otlpGrpcSpanExporterBuilder = OtlpGrpcSpanExporter.builder()
-                    .setEndpoint(endPointURL)
-                    .setCompression("gzip")
-                    .addHeader(headerKey, headerValue);
+        if (StringUtils.isNotEmpty(endPointURL)) {
+            OtlpGrpcSpanExporterBuilder otlpGrpcSpanExporterBuilder = null;
+            if (headerKey != null && headerValue != null) {
+                otlpGrpcSpanExporterBuilder = OtlpGrpcSpanExporter.builder()
+                        .setEndpoint(endPointURL)
+                        .setCompression("gzip")
+                        .addHeader(headerKey, headerValue);
+            } else {
+                otlpGrpcSpanExporterBuilder = OtlpGrpcSpanExporter.builder()
+                        .setEndpoint(endPointURL)
+                        .setCompression("gzip");
+                if (log.isDebugEnabled()) {
+                    log.debug("OTLP exporter: " + otlpGrpcSpanExporterBuilder + " is configured at " + endPointURL +
+                            " without headers.");
+                }
+            }
 
             if (log.isDebugEnabled()) {
                 log.debug("OTLP exporter: " + otlpGrpcSpanExporterBuilder + " is configured at " + endPointURL);
@@ -82,7 +98,8 @@ public class OTLPTelemetry implements APIMOpenTelemetry {
                 log.debug("OpenTelemetry instance: " + openTelemetry + " is configured.");
             }
         } else {
-            log.error("Either endpoint url or the header key value is null or empty");
+            log.error("The OTLP endpoint URL is not configured properly. Hence, the OTLP tracer " +
+                    "initialization failed.");
         }
     }
 

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -177,7 +178,7 @@ public final class APIMgtDBUtil {
     public static String getStringFromInputStream(InputStream is) {
         String str = null;
         try {
-            str = IOUtils.toString(is, "UTF-8");
+            str = IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (IOException e) {
             log.error("Error occurred while converting input stream to string.", e);
         }
