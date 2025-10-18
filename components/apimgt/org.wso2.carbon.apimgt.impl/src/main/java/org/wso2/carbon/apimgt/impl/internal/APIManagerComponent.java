@@ -1078,19 +1078,22 @@ public class APIManagerComponent {
             Map<String, List<Environment>> environmentMap = APIUtil.getAllEnvironments();
             FederatedAPIDiscoveryService federatedAPIDiscoveryService = ServiceReferenceHolder
                     .getInstance().getFederatedAPIDiscoveryService();
+            if (federatedAPIDiscoveryService == null) {
+                return;
+            }
             APIAdminImpl apiAdmin = new APIAdminImpl();
 
-            environmentMap.forEach((name, environments) -> {
+            environmentMap.forEach((organization, environments) -> {
                 for (Environment env : environments) {
-                    if (env.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+                    if (env.getProvider() != null && env.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
                         try {
-                            Environment resolvedEnvironment = apiAdmin.getEnvironmentWithoutPropertyMasking(name,
-                                    env.getUuid());
+                            Environment resolvedEnvironment = apiAdmin
+                                    .getEnvironmentWithoutPropertyMasking(organization, env.getUuid());
                             resolvedEnvironment = apiAdmin.decryptGatewayConfigurationValues(resolvedEnvironment);
-                            federatedAPIDiscoveryService.scheduleDiscovery(resolvedEnvironment, name);
+                            federatedAPIDiscoveryService.scheduleDiscovery(resolvedEnvironment, organization);
                         } catch (APIManagementException e) {
                             log.error("Error while scheduling API Discovery for environment: "
-                                    + name + " in organization: " + name, e);
+                                    + env.getName() + " in organization: " + organization, e);
                         }
                     }
                 }

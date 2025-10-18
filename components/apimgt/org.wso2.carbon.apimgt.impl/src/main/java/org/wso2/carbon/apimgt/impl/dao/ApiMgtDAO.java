@@ -15781,7 +15781,7 @@ public class ApiMgtDAO {
                     Map<String, String> additionalProperties = new HashMap();
                     try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
                         if (configuration != null) {
-                            String configurationContent = IOUtils.toString(configuration);
+                            String configurationContent = APIMgtDBUtil.getStringFromInputStream(configuration);
                             additionalProperties = new Gson().fromJson(configurationContent, Map.class);
                         }
                     } catch (IOException e) {
@@ -15803,15 +15803,9 @@ public class ApiMgtDAO {
                     env.setPermissions(getGatewayVisibilityPermissions(uuid));
                     env.setAdditionalProperties(additionalProperties);
 
-                    if (envMap.containsKey(organization)) {
-                        List<Environment> environments = envMap.get(envMap);
-                        environments.add(env);
-                        envMap.put(organization, environments);
-                    } else {
-                        List<Environment> environments = new ArrayList<>();
-                        environments.add(env);
-                        envMap.put(organization, environments);
-                    }
+                    List<Environment> environments = envMap.computeIfAbsent(organization, k -> new ArrayList<>());
+                    environments.add(env);
+                    envMap.put(organization, environments);
                 }
             }
         } catch (SQLException e) {
