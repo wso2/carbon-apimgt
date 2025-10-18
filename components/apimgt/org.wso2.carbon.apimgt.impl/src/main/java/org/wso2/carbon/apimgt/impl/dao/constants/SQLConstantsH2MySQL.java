@@ -50,7 +50,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "   (GROUP_ID= ?  OR  (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER(?)))" +
+            "   (GROUP_ID= ?  OR  (GROUP_ID='' AND SUB.USER_ID = ?))" +
                     " AND " +
                     "   APP.ORGANIZATION = ? " +
             " And " +
@@ -193,7 +193,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "    LOWER(SUB.USER_ID) = LOWER(?)"+
+            "    SUB.USER_ID = ?"+
                     " AND " +
                     "   APP.ORGANIZATION = ? " +
             " And "+
@@ -256,7 +256,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   AM_SUBSCRIBER SUB  " +
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
-            " AND (LOWER(SUB.USER_ID) = LOWER(?) OR APP.SHARED_ORGANIZATION = ? )" +
+            " AND (SUB.USER_ID = ? OR APP.SHARED_ORGANIZATION = ?)" +
             " AND " +
              "   APP.ORGANIZATION = ? " +
             " And "+
