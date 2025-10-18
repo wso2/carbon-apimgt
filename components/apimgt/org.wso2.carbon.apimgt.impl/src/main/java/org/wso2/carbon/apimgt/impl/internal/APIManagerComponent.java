@@ -199,9 +199,9 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new DeployAPIInGatewayNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new ScopesNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CertificateNotifier(), null);
-            bundleContext.registerService(Notifier.class.getName(),new GoogleAnalyticsNotifier(),null);
-            bundleContext.registerService(Notifier.class.getName(),new ExternalGatewayNotifier(),null);
-            bundleContext.registerService(Notifier.class.getName(),new KeyTemplateNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new GoogleAnalyticsNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new ExternalGatewayNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new KeyTemplateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new LLMProviderNotifier(), null);
@@ -314,7 +314,7 @@ public class APIManagerComponent {
             CacheProvider.createGatewayBasicAuthResourceCache();
             CacheProvider.createGatewayUsernameCache();
             CacheProvider.createIntrospectionCache();
-            if(configuration.isJWTClaimCacheEnabled()){
+            if (configuration.isJWTClaimCacheEnabled()) {
                 CacheProvider.createJWTClaimCache();
             }
             CacheProvider.createSynapseArtifactCache();
@@ -330,7 +330,7 @@ public class APIManagerComponent {
                 }
             }
             if (!configuration.isRuntimeReadOnly() && migrationEnabled == null) {
-                initializeAPIDiscoveryTasks(tenantDomain);
+                initializeAPIDiscoveryTasks();
             }
             bundleContext.registerService(ScopeValidator.class, new SystemScopesIssuer(), null);
             /* The service registration was moved to the end because the HTTP client configuration was not available
@@ -1050,7 +1050,7 @@ public class APIManagerComponent {
         HostnameVerifier hostnameVerifier;
         switch(hostnameVerifierOption) {
             case ALLOW_ALL:
-                hostnameVerifier = NoopHostnameVerifier.INSTANCE;;
+                hostnameVerifier = NoopHostnameVerifier.INSTANCE;
                 break;
             case STRICT:
                 hostnameVerifier = new DefaultHostnameVerifier();
@@ -1073,30 +1073,31 @@ public class APIManagerComponent {
                 .withHostnameVerifier(hostnameVerifier).build());
     }
 
-    void initializeAPIDiscoveryTasks(String organization) {
+    void initializeAPIDiscoveryTasks() {
         try {
-            Map<String, Environment> environments = APIUtil.getEnvironments(organization);
+            Map<String, List<Environment>> environmentMap = APIUtil.getAllEnvironments();
             FederatedAPIDiscoveryService federatedAPIDiscoveryService = ServiceReferenceHolder
                     .getInstance().getFederatedAPIDiscoveryService();
             APIAdminImpl apiAdmin = new APIAdminImpl();
 
-            environments.forEach((name, environment) -> {
-                if (environment.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
-                    try {
-                        Environment resolvedEnvironment = apiAdmin.getEnvironmentWithoutPropertyMasking(organization,
-                                environment.getUuid());
-                        resolvedEnvironment = apiAdmin.decryptGatewayConfigurationValues(resolvedEnvironment);
-                        federatedAPIDiscoveryService.scheduleDiscovery(resolvedEnvironment, organization);
-                    } catch (APIManagementException e) {
-                        log.error("Error while scheduling API Discovery for environment: "
-                                + name + " in organization: " + organization, e);
+            environmentMap.forEach((name, environments) -> {
+                for (Environment env : environments) {
+                    if (env.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+                        try {
+                            Environment resolvedEnvironment = apiAdmin.getEnvironmentWithoutPropertyMasking(name,
+                                    env.getUuid());
+                            resolvedEnvironment = apiAdmin.decryptGatewayConfigurationValues(resolvedEnvironment);
+                            federatedAPIDiscoveryService.scheduleDiscovery(resolvedEnvironment, name);
+                        } catch (APIManagementException e) {
+                            log.error("Error while scheduling API Discovery for environment: "
+                                    + name + " in organization: " + name, e);
+                        }
                     }
                 }
             });
 
-            ServiceReferenceHolder.getInstance().getFederatedAPIDiscoveryService();
         } catch (APIManagementException e) {
-            log.error("Error while initializing API Discovery tasks for tenant " + organization, e);
+            log.error("Error while initializing API Discovery tasks: ", e);
         }
     }
 
