@@ -15753,7 +15753,8 @@ public class ApiMgtDAO {
      * display name, description, gateway information, permissions, and additional properties.
      *
      * @return A map where the key is the name of the organization and the value is a list of
-     *         {@link Environment} objects associated*/
+     *         {@link Environment} objects representing the environments in that organization.
+     */
     public Map<String, List<Environment>> getAllEnvironments() throws APIManagementException {
         Map<String, List<Environment>> envMap =  new HashMap<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
