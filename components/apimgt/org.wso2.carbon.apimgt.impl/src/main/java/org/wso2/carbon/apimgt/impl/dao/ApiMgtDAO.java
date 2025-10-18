@@ -157,6 +157,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -15779,11 +15780,19 @@ public class ApiMgtDAO {
                     if (rs.wasNull()) {
                         scheduledTime = 0;
                     }
-                    Map<String, String> additionalProperties = new HashMap();
+                    Map<String, String> additionalProperties = new HashMap<>();
                     try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
                         if (configuration != null) {
                             String configurationContent = APIMgtDBUtil.getStringFromInputStream(configuration);
-                            additionalProperties = new Gson().fromJson(configurationContent, Map.class);
+                           Type mapType =
+                                    new TypeToken<Map<String, Object>>() {}.getType();
+                            Map<String, Object> parsedMap = new Gson().fromJson(configurationContent, mapType);
+                            if (parsedMap != null) {
+                                for (Map.Entry<String, Object> entry : parsedMap.entrySet()) {
+                                    additionalProperties.put(entry.getKey(),
+                                            entry.getValue() != null ? entry.getValue().toString() : null);
+                                }
+                            }
                         }
                     } catch (IOException e) {
                         log.error("Error while converting configurations in " + uuid, e);
@@ -15806,7 +15815,6 @@ public class ApiMgtDAO {
 
                     List<Environment> environments = envMap.computeIfAbsent(organization, k -> new ArrayList<>());
                     environments.add(env);
-                    envMap.put(organization, environments);
                 }
             }
         } catch (SQLException e) {
