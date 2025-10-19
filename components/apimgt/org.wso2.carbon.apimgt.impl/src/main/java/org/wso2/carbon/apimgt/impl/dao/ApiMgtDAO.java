@@ -157,6 +157,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -15742,6 +15743,84 @@ public class ApiMgtDAO {
             handleException("Failed to get Environments in tenant domain: " + tenantDomain, e);
         }
         return envList;
+    }
+
+    /**
+     * Retrieves all environments from the database and organizes them by organization.
+     *
+     * This method connects to the database, runs a query to fetch environment information,
+     * and processes the results to create a mapping of organization names to their corresponding
+     * list of environments. Each environment includes various properties such as its name, type,
+     * display name, description, gateway information, permissions, and additional properties.
+     *
+     * @return A map where the key is the name of the organization and the value is a list of
+     *         {@link Environment} objects representing the environments in that organization.
+     */
+    public Map<String, List<Environment>> getAllEnvironments() throws APIManagementException {
+        Map<String, List<Environment>> envMap =  new HashMap<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ALL_ENVIRONMENTS_SQL)) {
+
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    Integer id = rs.getInt("ID");
+                    String uuid = rs.getString("UUID");
+                    String name = rs.getString("NAME");
+                    String type = rs.getString("TYPE");
+                    String displayName = rs.getString("DISPLAY_NAME");
+                    String description = rs.getString("DESCRIPTION");
+                    String provider = rs.getString("PROVIDER");
+                    String gatewayType = rs.getString("GATEWAY_TYPE");
+                    String mode = rs.getString("ENV_MODE");
+                    String organization = rs.getString("ORGANIZATION");
+                    if (StringUtils.isEmpty(mode)) {
+                        mode = GatewayMode.WRITE_ONLY.getMode();
+                    }
+                    int scheduledTime = rs.getInt("SCHEDULED_TIME");
+                    if (rs.wasNull()) {
+                        scheduledTime = 0;
+                    }
+                    Map<String, String> additionalProperties = new HashMap<>();
+                    try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
+                        if (configuration != null) {
+                            String configurationContent = APIMgtDBUtil.getStringFromInputStream(configuration);
+                           Type mapType =
+                                    new TypeToken<Map<String, Object>>() {}.getType();
+                            Map<String, Object> parsedMap = new Gson().fromJson(configurationContent, mapType);
+                            if (parsedMap != null) {
+                                for (Map.Entry<String, Object> entry : parsedMap.entrySet()) {
+                                    additionalProperties.put(entry.getKey(),
+                                            entry.getValue() != null ? entry.getValue().toString() : null);
+                                }
+                            }
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while converting configurations in " + uuid, e);
+                    }
+
+                    Environment env = new Environment();
+                    env.setId(id);
+                    env.setUuid(uuid);
+                    env.setName(name);
+                    env.setType(type);
+                    env.setDisplayName(displayName);
+                    env.setDescription(description);
+                    env.setProvider(provider);
+                    env.setGatewayType(gatewayType);
+                    env.setMode(mode);
+                    env.setApiDiscoveryScheduledWindow(scheduledTime);
+                    env.setVhosts(getVhostGatewayEnvironments(connection, id));
+                    env.setPermissions(getGatewayVisibilityPermissions(uuid));
+                    env.setAdditionalProperties(additionalProperties);
+
+                    List<Environment> environments = envMap.computeIfAbsent(organization, k -> new ArrayList<>());
+                    environments.add(env);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Environments: ", e);
+        }
+        return envMap;
     }
 
     /**

@@ -8664,6 +8664,17 @@ public final class APIUtil {
         return allEnvironments;
     }
 
+    /**
+     * Retrieves all available environments along with their respective details.
+     *
+     * @return A map where the key is the organization and the value is a list of Environment objects
+     *         associated with that organization.
+     * @throws APIManagementException If an error occurs while fetching the environments from the data source.
+     */
+    public static Map<String, List<Environment>> getAllEnvironments() throws APIManagementException {
+        return ApiMgtDAO.getInstance().getAllEnvironments();
+    }
+
     // Take organization as a parameter
     public static Map<String, Environment> getEnvironments(String organization) throws APIManagementException {
         // get dynamic gateway environments read from database
