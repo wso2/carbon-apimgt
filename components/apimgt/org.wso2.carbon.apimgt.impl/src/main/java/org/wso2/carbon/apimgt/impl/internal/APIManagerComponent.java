@@ -1085,7 +1085,7 @@ public class APIManagerComponent {
 
             environmentMap.forEach((organization, environments) -> {
                 for (Environment env : environments) {
-                    if (env.getProvider() != null && env.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+                    if (env.getProvider() != null && APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(env.getProvider())) {
                         try {
                             Environment resolvedEnvironment = apiAdmin
                                     .getEnvironmentWithoutPropertyMasking(organization, env.getUuid());
