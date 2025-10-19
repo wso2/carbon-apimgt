@@ -21,31 +21,25 @@ package org.wso2.carbon.apimgt.impl.indexing.indexer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.common.SolrException;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.IndexerUtil;
-import org.wso2.carbon.governance.api.exception.GovernanceException;
-import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.registry.extensions.indexers.RXTIndexer;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.AsyncIndexer;
 import org.wso2.carbon.registry.indexing.IndexingConstants;
 import org.wso2.carbon.registry.indexing.IndexingManager;
 import org.wso2.carbon.registry.indexing.solr.IndexDocument;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.ArrayList;
 
-import static org.wso2.carbon.apimgt.impl.APIConstants.CUSTOM_API_INDEXER_PROPERTY;
 import static org.wso2.carbon.apimgt.impl.APIConstants.OVERVIEW_PREFIX;
 import static org.wso2.carbon.apimgt.impl.APIConstants.VISIBLE_ORGANIZATION_PROPERTY;
 
@@ -54,7 +48,7 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.VISIBLE_ORGANIZATION_PROP
  */
 @SuppressWarnings("unused")
 public class CustomAPIIndexer extends RXTIndexer {
-    public static final Log log = LogFactory.getLog(CustomAPIIndexer.class);
+    public static final Log LOG = LogFactory.getLog(CustomAPIIndexer.class);
     private static final int FIVE_MINUTES_TO_MILLI_SECONDS = 300000;
 
     public IndexDocument getIndexedDocument(AsyncIndexer.File2Index fileData) throws SolrException, RegistryException {
@@ -69,8 +63,8 @@ public class CustomAPIIndexer extends RXTIndexer {
         if (registry.resourceExists(resourcePath)) {
             resource = registry.get(resourcePath);
         }
-        if (log.isDebugEnabled()) {
-            log.debug("CustomAPIIndexer is currently indexing the api at path " + resourcePath);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("CustomAPIIndexer is currently indexing the api at path " + resourcePath);
         }
         // Here we are adding properties as fields, so that we can search the properties as we do for attributes.
         IndexDocument indexDocument = super.getIndexedDocument(fileData);
@@ -81,24 +75,34 @@ public class CustomAPIIndexer extends RXTIndexer {
             boolean hasOrganizationProperty = false;
             while (propertyNames.hasMoreElements()) {
                 String property = (String) propertyNames.nextElement();
-                if (log.isDebugEnabled()) {
-                    log.debug("API at " + resourcePath + " has " + property + " property");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("API at " + resourcePath + " has " + property + " property");
                 }
                 if (VISIBLE_ORGANIZATION_PROPERTY.equals(property)) {
                     hasOrganizationProperty = true;
                 }
                 if (property.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
                     fields.put((OVERVIEW_PREFIX + property), getLowerCaseList(resource.getPropertyValues(property)));
-                    if (log.isDebugEnabled()) {
-                        log.debug(property + " is added as " + (OVERVIEW_PREFIX + property) + " field for indexing");
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(property + " is added as " + (OVERVIEW_PREFIX + property) + " field for indexing");
                     }
                 }
             }
             if (!hasOrganizationProperty) {
-                log.debug("Organization visibilty property missing. adding " + fileData.tenantDomain);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Organization visibility property missing. adding " + fileData.tenantDomain);
+                }
                 List<String> orgProperties = new ArrayList<>();
-                orgProperties.add(VISIBLE_ORGANIZATION_PROPERTY + "," + fileData.tenantDomain );
+                orgProperties.add(VISIBLE_ORGANIZATION_PROPERTY + "," + fileData.tenantDomain);
                 fields.put(IndexingConstants.FIELD_PROPERTY_VALUES, orgProperties);
+            }
+            List<String> vendors = fields.get(APIConstants.API_OVERVIEW_GATEWAY_VENDOR);
+            if (vendors == null || vendors.isEmpty()) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Gateway vendor property missing. adding default WSO2");
+                }
+                fields.put(APIConstants.API_OVERVIEW_GATEWAY_VENDOR,
+                        Arrays.asList(APIConstants.WSO2_GATEWAY_ENVIRONMENT));
             }
             indexDocument.setFields(fields);
         }
