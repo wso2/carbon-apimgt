@@ -126,8 +126,10 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                 new ThreadPoolExecutor.CallerRunsPolicy() { // Handle rejection gracefully
                     @Override
                     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                        log.warn("Thread pool queue full, executing task in caller thread. Active threads: "
-                                + executor.getActiveCount() + ", Queue size: " + executor.getQueue().size());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Thread pool queue full, executing task in caller thread. Active threads: "
+                                    + executor.getActiveCount() + ", Queue size: " + executor.getQueue().size());
+                        }
                         super.rejectedExecution(r, executor);
                     }
                 }
