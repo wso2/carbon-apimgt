@@ -106,16 +106,10 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
         if (gatewayConfiguration != null && gatewayConfiguration.getDiscoveryImplementation() != null) {
             if (StringUtils.isNotEmpty(gatewayConfiguration.getDiscoveryImplementation())) {
                 try {
-                    FederatedAPIDiscovery federatedAPIDiscovery = (FederatedAPIDiscovery)
-                            Class.forName(gatewayConfiguration.getDiscoveryImplementation())
-                                    .getDeclaredConstructor().newInstance();
-                    log.info("Initializing federated API discovery for environment: " + environment.getName()
-                            + " and organization: " + organization);
-                    federatedAPIDiscovery.init(environment, organization);
                     String taskKey = "FederatedAPIDiscovery" + DELEM_COLON + environment.getName() + DELEM_COLON
                             + organization;
                     ScheduledFuture<?> scheduledFuture = scheduledDiscoveryTasks.get(taskKey);
-                    // Cancel existing task if one exists
+                    // Cancel an existing task if one exists
                     if (scheduledFuture != null) {
                         if (log.isDebugEnabled()) {
                             log.debug("Cancelling existing discovery task for: " + taskKey + " to reschedule.");
@@ -127,6 +121,12 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     if (GatewayMode.WRITE_ONLY.getMode().equals(environment.getMode()) || scheduleWindow <= 0) {
                         log.info("Federated API discovery is disabled for environment: " + environment.getName());
                     } else {
+                        log.info("Initializing federated API discovery for environment: " + environment.getName()
+                                + " and organization: " + organization);
+                        FederatedAPIDiscovery federatedAPIDiscovery = (FederatedAPIDiscovery)
+                                Class.forName(gatewayConfiguration.getDiscoveryImplementation())
+                                        .getDeclaredConstructor().newInstance();
+                        federatedAPIDiscovery.init(environment, organization);
                         long ttl = TimeUnit.MINUTES.toMillis(scheduleWindow) / 2;
                         ScheduledFuture<?> newTask = executor.scheduleAtFixedRate(() -> {
                             boolean acquired = false;
