@@ -3139,6 +3139,8 @@ paths:
                 $ref: '#/components/schemas/ApplicationKeyReGenerateResponse'
         400:
           $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
         412:
@@ -3227,7 +3229,7 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/{keyMappingId}/generate-token"'
 
-  /applications/{applicationId}/oauth-keys/{keyMappingId}/secrets:
+  /applications/{applicationId}/oauth-keys/{keyMappingId}/generate-secret:
     post:
       tags:
         - Application Secrets
@@ -3270,6 +3272,10 @@ paths:
                 $ref: '#/components/schemas/ConsumerSecret'
         400:
           $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
@@ -3279,7 +3285,8 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -X POST "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/secrets"'
+          -H "Content-Type: application/json" -X POST "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/generate-secret"'
+  /applications/{applicationId}/oauth-keys/{keyMappingId}/secrets:
     get:
       tags:
         - Application Secrets
@@ -3308,6 +3315,10 @@ paths:
                 $ref: '#/components/schemas/ConsumerSecretList'
         400:
           $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
         500:
@@ -3350,6 +3361,10 @@ paths:
                 $ref: '#/components/schemas/ConsumerSecret'
         400:
           $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
         500:
@@ -3362,7 +3377,8 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X GET "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/secrets/4efd2684-9657-4a01-a956-16cd89e96077"'
-    delete:
+  /applications/{applicationId}/oauth-keys/{keyMappingId}/delete-secret:
+    post:
       tags:
         - Application Secrets
       summary: |
@@ -3373,7 +3389,14 @@ paths:
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyMappingId'
-        - $ref: '#/components/parameters/secretId'
+      requestBody:
+        description: |
+          Request payload containing details for deleting a new consumer secret
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsumerSecretDeletionRequest'
+        required: true
       responses:
         204:
           description: |
@@ -3382,6 +3405,10 @@ paths:
           content: { }
         400:
           $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
         500:
@@ -7452,37 +7479,65 @@ components:
     ConsumerSecret:
       type: object
       properties:
-        id:
+        referenceId:
           type: string
-          description: Unique identifier for the secret
+          description: Reference identifier for the secret
           example: sec_123456
-        description:
-          type: string
-          description: Human-readable label for the secret
-          example: pizza application secret
         secretValue:
           type: string
           description: The actual secret string
           example: s3cr3tV@lu3
-        expiresAt:
-          type: integer
-          format: int64
-          description: expiry timestamp in seconds since epoch
-          example: 1755756933
+        additionalProperties:
+          type: object
+          description: Additional dynamic properties for the secret creation request.
+          additionalProperties:
+            type: object
+          example:
+            expiresIn: 86400
+            description: "pizza application secret"
+#          type: object
+#          properties: { }
+#          description: Additional properties needed.
+#          example:
+#            description: pizza application secret
+#            expiresAt: 1755756933
     #-----------------------------------------------------
     # Consumer Secret Request Object
     #-----------------------------------------------------
     ConsumerSecretCreationRequest:
       type: object
       properties:
-        expiresIn:
-          type: integer
-          description: Expiry time in seconds
-          example: 86400
-        description:
+        additionalProperties:
+          type: object
+          description: Additional dynamic properties for the secret creation request.
+          additionalProperties:
+            type: object
+          example:
+            expiresIn: 86400
+            description: "pizza application secret"
+      example:
+        additionalProperties:
+          expiresIn: 86400
+          description: "pizza application secret"
+#      type: object
+#      properties:
+#        additionalProperties:
+#          type: object
+#          properties: { }
+#          description: Additional properties needed.
+#          example:
+#            expiresIn: 86400
+#            description: pizza application secret
+    #-----------------------------------------------------
+    # Consumer Secret Deletion Object
+    #-----------------------------------------------------
+    ConsumerSecretDeletionRequest:
+      type: object
+      properties:
+        referenceId:
           type: string
-          description: A human-readable label for this secret
-          example: pizza application secret
+          description: Reference identifier for the secret
+          example: sec_123456
     #-----------------------------------------------------
     # Consumer Secret List Object
     #-----------------------------------------------------
@@ -7587,6 +7642,18 @@ components:
             description: The user is not authorized
             moreInfo: ""
             error: []
+    Forbidden:
+      description: Forbidden. The user do not have permission to perform this action.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            message: Forbidden
+            description: The user do not have permission to perform this action
+            moreInfo: ""
+            error: [ ]
     UnsupportedMediaType:
       description: Unsupported Media Type. The entity of the request was not in a
         supported format.

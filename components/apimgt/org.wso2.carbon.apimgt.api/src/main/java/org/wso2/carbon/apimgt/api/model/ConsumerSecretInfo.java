@@ -17,26 +17,20 @@
  */
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ConsumerSecretInfo {
-    private String id;
-    private String description;
+    private String referenceId;
     private String clientSecret;
-    private Long clientSecretExpiresAt;
+    private Map<String, Object> parameters = new HashMap<String, Object>();
 
-    public String getId() {
-        return id;
+    public String getReferenceId() {
+        return referenceId;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public void setReferenceId(String referenceId) {
+        this.referenceId = referenceId;
     }
 
     public String getClientSecret() {
@@ -47,11 +41,11 @@ public class ConsumerSecretInfo {
         this.clientSecret = clientSecret;
     }
 
-    public Long getClientSecretExpiresAt() {
-        return clientSecretExpiresAt;
+    public Map<String, Object> getParameters() {
+        return parameters;
     }
 
-    public void setClientSecretExpiresAt(Long clientSecretExpiresAt) {
-        this.clientSecretExpiresAt = clientSecretExpiresAt;
+    public void setParameters(Map<String, Object> parameters) {
+        this.parameters = parameters;
     }
 }

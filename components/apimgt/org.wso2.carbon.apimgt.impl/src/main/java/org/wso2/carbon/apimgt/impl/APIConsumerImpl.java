@@ -325,8 +325,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return keyManager.getNewApplicationConsumerSecret(tokenRequest);
     }
 
-    public ConsumerSecretInfo generateConsumerSecret(String clientId, String keyManagerName,
-                                                     ConsumerSecretRequest consumerSecretRequest)
+    public ConsumerSecretInfo generateConsumerSecret(String keyManagerName, ConsumerSecretRequest consumerSecretRequest)
             throws APIManagementException {
 
         KeyManagerConfigurationDTO keyManagerConfigurationDTO =

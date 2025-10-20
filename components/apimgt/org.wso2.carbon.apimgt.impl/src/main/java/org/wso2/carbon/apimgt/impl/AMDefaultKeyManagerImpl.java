@@ -34,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.CarbonConstants;
@@ -625,27 +626,40 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     @Override
-    public ConsumerSecretInfo generateNewApplicationConsumerSecret(ConsumerSecretRequest consumerSecretRequest) throws APIManagementException {
+    public ConsumerSecretInfo generateNewApplicationConsumerSecret(ConsumerSecretRequest consumerSecretRequest)
+            throws APIManagementException {
 
-        ClientSecret clientSecret = null;
+        ClientSecret clientSecret;
         String encodedClientId = Base64.getUrlEncoder()
                 .encodeToString(consumerSecretRequest.getClientId().getBytes(StandardCharsets.UTF_8));
         ClientSecretRequest clientSecretRequest = new ClientSecretRequest();
-        clientSecretRequest.setDescription(consumerSecretRequest.getDescription());
-        clientSecretRequest.setExpiresIn(consumerSecretRequest.getExpiresIn());
+        clientSecretRequest.setDescription((String) consumerSecretRequest
+                .getParameter(ApplicationConstants.SECRET_DESCRIPTION));
+        clientSecretRequest.setExpiresIn((Integer) consumerSecretRequest
+                .getParameter(ApplicationConstants.SECRET_EXPIRES_IN));
         try {
             clientSecret = dcrClient.generateNewApplicationSecret(encodedClientId, clientSecretRequest);
         } catch (KeyManagerClientException e) {
-            handleException("Error while generating new consumer secret", e);
+            throw new APIManagementException("Error while generating new consumer secret for clientId : " +
+                    consumerSecretRequest.getClientId(), ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
         }
         if (clientSecret == null) {
             return null;
         }
+        return getConsumerSecretInfo(clientSecret);
+    }
+
+    @NotNull
+    private static ConsumerSecretInfo getConsumerSecretInfo(ClientSecret clientSecret) {
         ConsumerSecretInfo clientSecretInfo = new ConsumerSecretInfo();
-        clientSecretInfo.setId(clientSecret.getId());
-        clientSecretInfo.setDescription(clientSecret.getDescription());
+        clientSecretInfo.setReferenceId(clientSecret.getReferenceId());
         clientSecretInfo.setClientSecret(clientSecret.getClientSecret());
-        clientSecretInfo.setClientSecretExpiresAt(clientSecret.getClientSecretExpiresAt());
+        Map<String, Object> additionalProperties = new HashMap<>();
+        if (clientSecret.getDescription() != null) {
+            additionalProperties.put(ApplicationConstants.SECRET_DESCRIPTION, clientSecret.getDescription());
+        }
+        additionalProperties.put(ApplicationConstants.SECRET_EXPIRES_AT, clientSecret.getClientSecretExpiresAt());
+        clientSecretInfo.setParameters(additionalProperties);
         return clientSecretInfo;
     }
 
@@ -664,12 +678,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
         List<ConsumerSecretInfo> consumerSecretInfoList = new ArrayList<>();
         for (ClientSecret clientSecret : clientSecretList.getList()) {
-            ConsumerSecretInfo clientSecretInfo = new ConsumerSecretInfo();
-            clientSecretInfo.setId(clientSecret.getId());
-            clientSecretInfo.setDescription(clientSecret.getDescription());
-            clientSecretInfo.setClientSecret(clientSecret.getClientSecret());
-            clientSecretInfo.setClientSecretExpiresAt(clientSecret.getClientSecretExpiresAt());
-            consumerSecretInfoList.add(clientSecretInfo);
+            consumerSecretInfoList.add(getConsumerSecretInfo(clientSecret));
         }
         return consumerSecretInfoList;
     }

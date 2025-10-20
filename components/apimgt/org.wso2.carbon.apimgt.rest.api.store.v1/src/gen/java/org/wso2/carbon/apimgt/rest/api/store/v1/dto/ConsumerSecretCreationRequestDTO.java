@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.validation.constraints.*;
 
 
@@ -20,43 +23,24 @@ import javax.validation.Valid;
 
 public class ConsumerSecretCreationRequestDTO   {
   
-    private Integer expiresIn = null;
-    private String description = null;
+    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
   /**
-   * Expiry time in seconds
+   * Additional dynamic properties for the secret creation request.
    **/
-  public ConsumerSecretCreationRequestDTO expiresIn(Integer expiresIn) {
-    this.expiresIn = expiresIn;
+  public ConsumerSecretCreationRequestDTO additionalProperties(Map<String, Object> additionalProperties) {
+    this.additionalProperties = additionalProperties;
     return this;
   }
 
   
-  @ApiModelProperty(example = "86400", value = "Expiry time in seconds")
-  @JsonProperty("expiresIn")
-  public Integer getExpiresIn() {
-    return expiresIn;
+  @ApiModelProperty(example = "{\"expiresIn\":86400,\"description\":\"pizza application secret\"}", value = "Additional dynamic properties for the secret creation request.")
+  @JsonProperty("additionalProperties")
+  public Map<String, Object> getAdditionalProperties() {
+    return additionalProperties;
   }
-  public void setExpiresIn(Integer expiresIn) {
-    this.expiresIn = expiresIn;
-  }
-
-  /**
-   * A human-readable label for this secret
-   **/
-  public ConsumerSecretCreationRequestDTO description(String description) {
-    this.description = description;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "pizza application secret", value = "A human-readable label for this secret")
-  @JsonProperty("description")
-  public String getDescription() {
-    return description;
-  }
-  public void setDescription(String description) {
-    this.description = description;
+  public void setAdditionalProperties(Map<String, Object> additionalProperties) {
+    this.additionalProperties = additionalProperties;
   }
 
 
@@ -69,13 +53,12 @@ public class ConsumerSecretCreationRequestDTO   {
       return false;
     }
     ConsumerSecretCreationRequestDTO consumerSecretCreationRequest = (ConsumerSecretCreationRequestDTO) o;
-    return Objects.equals(expiresIn, consumerSecretCreationRequest.expiresIn) &&
-        Objects.equals(description, consumerSecretCreationRequest.description);
+    return Objects.equals(additionalProperties, consumerSecretCreationRequest.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(expiresIn, description);
+    return Objects.hash(additionalProperties);
   }
 
   @Override
@@ -83,8 +66,7 @@ public class ConsumerSecretCreationRequestDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ConsumerSecretCreationRequestDTO {\n");
     
-    sb.append("    expiresIn: ").append(toIndentedString(expiresIn)).append("\n");
-    sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }

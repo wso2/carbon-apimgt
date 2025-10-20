@@ -149,17 +149,18 @@ public class ApplicationKeyMappingUtil {
                                                                        ConsumerSecretCreationRequestDTO consumerSecretCreationRequestDTO) {
         ConsumerSecretRequest consumerSecretRequest = new ConsumerSecretRequest();
         consumerSecretRequest.setClientId(clientId);
-        consumerSecretRequest.setDescription(consumerSecretCreationRequestDTO.getDescription());
-        consumerSecretRequest.setExpiresIn(consumerSecretCreationRequestDTO.getExpiresIn());
+        if (consumerSecretCreationRequestDTO.getAdditionalProperties() != null) {
+            consumerSecretRequest.putAll(consumerSecretCreationRequestDTO.getAdditionalProperties());
+        }
+        consumerSecretRequest.putAll(consumerSecretCreationRequestDTO.getAdditionalProperties());
         return consumerSecretRequest;
     }
 
     public static ConsumerSecretDTO fromConsumerSecretToDTO(ConsumerSecretInfo consumerSecret) {
         ConsumerSecretDTO consumerSecretDTO = new ConsumerSecretDTO();
-        consumerSecretDTO.setId(consumerSecret.getId());
-        consumerSecretDTO.setDescription(consumerSecret.getDescription());
+        consumerSecretDTO.setReferenceId(consumerSecret.getReferenceId());
         consumerSecretDTO.secretValue(consumerSecret.getClientSecret());
-        consumerSecretDTO.setExpiresAt(consumerSecret.getClientSecretExpiresAt());
+        consumerSecretDTO.setAdditionalProperties(consumerSecret.getParameters());
         return consumerSecretDTO;
     }
 

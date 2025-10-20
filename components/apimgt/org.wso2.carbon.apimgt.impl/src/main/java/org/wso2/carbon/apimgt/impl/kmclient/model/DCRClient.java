@@ -53,7 +53,7 @@ public interface DCRClient {
     ClientInfo updateApplicationSecret(@Param("clientId") String clientId)
             throws KeyManagerClientException;
 
-    @RequestLine("POST /{clientId}/secrets")
+    @RequestLine("POST /{clientId}/generate-secret")
     @Headers("Content-Type: application/json")
     ClientSecret generateNewApplicationSecret(@Param("clientId") String clientId,
                                               ClientSecretRequest clientSecretRequest)

@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class ClientSecret {
     @SerializedName("id")
-    private String id;
+    private String referenceId;
     @SerializedName("description")
     private String description;
     @SerializedName("client_secret")
@@ -12,12 +12,12 @@ public class ClientSecret {
     @SerializedName("client_secret_expires_at")
     private Long clientSecretExpiresAt;
 
-    public String getId() {
-        return id;
+    public String getReferenceId() {
+        return referenceId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setReferenceId(String referenceId) {
+        this.referenceId = referenceId;
     }
 
     public String getDescription() {

@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.validation.constraints.*;
 
 
@@ -20,45 +23,26 @@ import javax.validation.Valid;
 
 public class ConsumerSecretDTO   {
   
-    private String id = null;
-    private String description = null;
+    private String referenceId = null;
     private String secretValue = null;
-    private Long expiresAt = null;
+    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
   /**
-   * Unique identifier for the secret
+   * Reference identifier for the secret
    **/
-  public ConsumerSecretDTO id(String id) {
-    this.id = id;
+  public ConsumerSecretDTO referenceId(String referenceId) {
+    this.referenceId = referenceId;
     return this;
   }
 
   
-  @ApiModelProperty(example = "sec_123456", value = "Unique identifier for the secret")
-  @JsonProperty("id")
-  public String getId() {
-    return id;
+  @ApiModelProperty(example = "sec_123456", value = "Reference identifier for the secret")
+  @JsonProperty("referenceId")
+  public String getReferenceId() {
+    return referenceId;
   }
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  /**
-   * Human-readable label for the secret
-   **/
-  public ConsumerSecretDTO description(String description) {
-    this.description = description;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "pizza application secret", value = "Human-readable label for the secret")
-  @JsonProperty("description")
-  public String getDescription() {
-    return description;
-  }
-  public void setDescription(String description) {
-    this.description = description;
+  public void setReferenceId(String referenceId) {
+    this.referenceId = referenceId;
   }
 
   /**
@@ -80,21 +64,21 @@ public class ConsumerSecretDTO   {
   }
 
   /**
-   * expiry timestamp in seconds since epoch
+   * Additional dynamic properties for the secret creation request.
    **/
-  public ConsumerSecretDTO expiresAt(Long expiresAt) {
-    this.expiresAt = expiresAt;
+  public ConsumerSecretDTO additionalProperties(Map<String, Object> additionalProperties) {
+    this.additionalProperties = additionalProperties;
     return this;
   }
 
   
-  @ApiModelProperty(example = "1755756933", value = "expiry timestamp in seconds since epoch")
-  @JsonProperty("expiresAt")
-  public Long getExpiresAt() {
-    return expiresAt;
+  @ApiModelProperty(example = "{\"expiresIn\":86400,\"description\":\"pizza application secret\"}", value = "Additional dynamic properties for the secret creation request.")
+  @JsonProperty("additionalProperties")
+  public Map<String, Object> getAdditionalProperties() {
+    return additionalProperties;
   }
-  public void setExpiresAt(Long expiresAt) {
-    this.expiresAt = expiresAt;
+  public void setAdditionalProperties(Map<String, Object> additionalProperties) {
+    this.additionalProperties = additionalProperties;
   }
 
 
@@ -107,15 +91,14 @@ public class ConsumerSecretDTO   {
       return false;
     }
     ConsumerSecretDTO consumerSecret = (ConsumerSecretDTO) o;
-    return Objects.equals(id, consumerSecret.id) &&
-        Objects.equals(description, consumerSecret.description) &&
+    return Objects.equals(referenceId, consumerSecret.referenceId) &&
         Objects.equals(secretValue, consumerSecret.secretValue) &&
-        Objects.equals(expiresAt, consumerSecret.expiresAt);
+        Objects.equals(additionalProperties, consumerSecret.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, description, secretValue, expiresAt);
+    return Objects.hash(referenceId, secretValue, additionalProperties);
   }
 
   @Override
@@ -123,10 +106,9 @@ public class ConsumerSecretDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ConsumerSecretDTO {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    referenceId: ").append(toIndentedString(referenceId)).append("\n");
     sb.append("    secretValue: ").append(toIndentedString(secretValue)).append("\n");
-    sb.append("    expiresAt: ").append(toIndentedString(expiresAt)).append("\n");
+    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }

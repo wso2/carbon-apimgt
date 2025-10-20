@@ -633,7 +633,7 @@ public interface APIConsumer extends APIManager {
      */
     String renewConsumerSecret(String clientId, String keyManagerName) throws APIManagementException;
 
-    default ConsumerSecretInfo generateConsumerSecret(String clientId, String keyManagerName,
+    default ConsumerSecretInfo generateConsumerSecret(String keyManagerName,
                                                       ConsumerSecretRequest consumerSecretRequest)
             throws APIManagementException {
         throw new UnsupportedOperationException("Generating new consumer secret is not supported");

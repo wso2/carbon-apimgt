@@ -17,10 +17,12 @@
  */
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ConsumerSecretRequest {
     private String clientId;
-    private Integer expiresIn;
-    private String description;
+    private Map<String, Object> parameters = new HashMap<String, Object>();
 
     public String getClientId() {
         return clientId;
@@ -30,19 +32,15 @@ public class ConsumerSecretRequest {
         this.clientId = clientId;
     }
 
-    public Integer getExpiresIn() {
-        return expiresIn;
+    public void addParameter(String name,Object value){
+        parameters.put(name,value);
     }
 
-    public void setExpiresIn(Integer expiresIn) {
-        this.expiresIn = expiresIn;
+    public Object getParameter(String name){
+        return parameters.get(name);
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public void putAll(Map<String,Object> parameters){
+        this.parameters.putAll(parameters);
     }
 }

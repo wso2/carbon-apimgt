@@ -1265,15 +1265,15 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             String clientId = applicationKeyDTO.getConsumerKey();
             ConsumerSecretRequest consumerSecretRequest = ApplicationKeyMappingUtil.
                     fromDTOtoConsumerSecretRequest(clientId, consumerSecretCreationRequestDTO);
-            ConsumerSecretInfo consumerSecret = apiConsumer.generateConsumerSecret(clientId,
-                    applicationKeyDTO.getKeyManager(), consumerSecretRequest);
+            ConsumerSecretInfo consumerSecret = apiConsumer.generateConsumerSecret(applicationKeyDTO.getKeyManager(),
+                    consumerSecretRequest);
             ConsumerSecretDTO consumerSecretResponseDTO = ApplicationKeyMappingUtil.
                     fromConsumerSecretToDTO(consumerSecret);
 
             try {
                 //to be set as the Location header
                 URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" + applicationId +
-                         "/oauth-keys/" + keyMappingId + "/secrets/" + consumerSecretResponseDTO.getId());
+                         "/oauth-keys/" + keyMappingId + "/secrets/" + consumerSecretResponseDTO.getReferenceId());
                 return Response.created(location).entity(consumerSecretResponseDTO).build();
             } catch (URISyntaxException e) {
                 RestApiUtil.handleInternalServerError(e.getLocalizedMessage(), log);
@@ -1309,7 +1309,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response deleteConsumerSecret(String applicationId, String keyMappingId, String secretId,
+    public Response deleteConsumerSecret(String applicationId, String keyMappingId,
+                                         ConsumerSecretDeletionRequestDTO consumerSecretDeletionRequestDTO,
                                          MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
@@ -1320,7 +1321,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         if (applicationKeyDTO != null) {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             String clientId = applicationKeyDTO.getConsumerKey();
-            apiConsumer.deleteConsumerSecret(clientId, applicationKeyDTO.getKeyManager(), secretId);
+            apiConsumer.deleteConsumerSecret(clientId, applicationKeyDTO.getKeyManager(),
+                    consumerSecretDeletionRequestDTO.getReferenceId());
             return Response.noContent().build();
         }
         return null;
