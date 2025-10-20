@@ -4764,6 +4764,10 @@ public class SQLConstants {
                         "   AND AUM.URL_MAPPING_ID = ? " +
                         "   AND AUM.REVISION_UUID = ? " +
                         "ORDER BY AUM.URL_MAPPING_ID ASC";
+        public static final String DELETE_OPERATION_POLICY_MAPPING_BY_API =
+                "DELETE FROM AM_API_OPERATION_POLICY_MAPPING WHERE URL_MAPPING_ID IN (SELECT URL_MAPPING_ID FROM " +
+                        "AM_API_URL_MAPPING WHERE API_ID = (SELECT API_ID FROM AM_API WHERE API_UUID = ?) AND " +
+                        "REVISION_UUID IS NULL)";
     }
 
     public static final String ADD_AM_BACKEND_SQL =
