@@ -4917,7 +4917,8 @@ public class ApiMgtDAO {
 
         String grants = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.SQL_GET_GRANTS)) {
+                PreparedStatement preparedStatement = connection.prepareStatement(
+                        SQLConstants.GET_GRANT_TYPES_BY_CONSUMER_KEY_SQL)) {
             preparedStatement.setString(1, consumerKey);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
