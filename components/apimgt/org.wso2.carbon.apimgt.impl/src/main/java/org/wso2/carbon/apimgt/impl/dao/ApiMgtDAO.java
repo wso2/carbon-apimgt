@@ -4906,6 +4906,30 @@ public class ApiMgtDAO {
         return null;
     }
 
+    /**
+     * Get GRANT_TYPES configured for a given OAuth consumer key.
+     *
+     * @param consumerKey OAuth consumer key (client_id)
+     * @return space or comma separated grant types string, or null if not found
+     * @throws APIManagementException if a database error occurs
+     */
+    public String getGrantTypes(String consumerKey) throws APIManagementException {
+
+        String grants = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.SQL_GET_GRANTS)) {
+            preparedStatement.setString(1, consumerKey);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    grants = resultSet.getString("GRANT_TYPES");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while retrieving grant types for consumer key: " + consumerKey, e);
+        }
+        return grants;
+    }
+
     /*
     Delete mapping record by given consumer key
  */

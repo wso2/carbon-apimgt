@@ -3107,6 +3107,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     /* retrieving OAuth application information for specific consumer key */
                     if (!APIConstants.OAuthAppMode.MAPPED.name().equalsIgnoreCase(apiKey.getCreateMode())) {
                         consumerKey = apiKey.getConsumerKey();
+                        ValidateGrantTypes(consumerKey);
                         OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
                         Object oauthClientName =
                                 oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME);
@@ -3151,6 +3152,33 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         return isAppUpdated;
     }
 
+    private void ValidateGrantTypes(String consumerKey) throws APIManagementException {
+        String requested = apiMgtDAO.getGrantTypes(consumerKey);
+
+        if (requested == null || requested.trim().isEmpty()) {
+            return; // nothing to validate
+        }
+
+        Set<String> allowedGrantSet = ServiceReferenceHolder.getInstance().getOauthServerConfiguration()
+                .getSupportedGrantTypes().keySet();
+
+        Set<String> unsupported = new LinkedHashSet<>();
+        String[] tokens = requested.split(",|\\s+");
+        for (String token : tokens) {
+            String grant = token == null ? null : token.trim();
+            if (grant == null || grant.isEmpty()) {
+                continue;
+            }
+            if (!allowedGrantSet.contains(grant)) {
+                unsupported.add(grant);
+            }
+        }
+
+        if (!unsupported.isEmpty()) {
+            throw new APIManagementException(
+                    "Unsupported OAuth grant type(s) in existing client (" + consumerKey + "): " + unsupported + ". Remove or enable them in the Key Manager before changing ownership.");
+        }
+    }
     public JSONObject resumeWorkflow(Object[] args) {
 
         JSONObject row = new JSONObject();
