@@ -103,7 +103,11 @@ public abstract class CommonRequestDataCollector extends AbstractRequestDataColl
                     String[] email = value.toString().split("@");
 
                     // Sample output: *****@gmail.com
-                    return MASK_VALUE + "@" + email[1];
+                    if (email.length == 2) {
+                        return MASK_VALUE + "@" + email[1];
+                    } else {
+                        return MASK_VALUE;
+                    }
                 case USERNAME_PROP_TYPE:
                 case STRING_PROP:
                 default:
