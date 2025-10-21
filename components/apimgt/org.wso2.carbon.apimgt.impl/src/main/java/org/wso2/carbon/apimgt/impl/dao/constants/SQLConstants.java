@@ -360,14 +360,6 @@ public class SQLConstants {
             "   API.API_ID = SUBS.API_ID " +
             "   AND UUID = ?";
 
-    public static final String GET_GRANT_TYPES_BY_CONSUMER_KEY_SQL =
-            "SELECT " +
-            "   GRANT_TYPES " +
-            "   FROM " +
-            "   IDN_OAUTH_CONSUMER_APPS " +
-            "   WHERE " +
-            "   CONSUMER_KEY = ?";
-    
     public static final String GET_TENANT_SUBSCRIBER_SQL =
             " SELECT " +
             "   SUBSCRIBER_ID, " +

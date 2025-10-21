@@ -161,6 +161,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.stream.Collectors;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -3107,8 +3108,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     /* retrieving OAuth application information for specific consumer key */
                     if (!APIConstants.OAuthAppMode.MAPPED.name().equalsIgnoreCase(apiKey.getCreateMode())) {
                         consumerKey = apiKey.getConsumerKey();
-                        ValidateGrantTypes(consumerKey);
                         OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                        ValidateGrantTypes(oAuthApplicationInfo);
                         Object oauthClientName =
                                 oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME);
                         if (oauthClientName != null) {
@@ -3152,31 +3153,40 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         return isAppUpdated;
     }
 
-    private void ValidateGrantTypes(String consumerKey) throws APIManagementException {
-        String requested = apiMgtDAO.getGrantTypes(consumerKey);
-
+    /**
+     * Validate the existing grant types of the OAuth client belong to the supported grant types of the Key Manager.
+     * @throws APIManagementException If there are unsupported grant types
+     */
+    private void ValidateGrantTypes(OAuthApplicationInfo oAuthApplicationInfo) throws APIManagementException {
+        String requested = null;
+    
+        // Retrieve the grants parameter safely
+        if (oAuthApplicationInfo != null) {
+            Object grantsParam = oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT);
+            if (grantsParam != null) {
+                requested = String.valueOf(grantsParam);
+            }
+        }
+    
         if (requested == null || requested.trim().isEmpty()) {
             return; // nothing to validate
         }
-
+    
         Set<String> allowedGrantSet = ServiceReferenceHolder.getInstance().getOauthServerConfiguration()
                 .getSupportedGrantTypes().keySet();
-
-        Set<String> unsupported = new LinkedHashSet<>();
-        String[] tokens = requested.split(",|\\s+");
-        for (String token : tokens) {
-            String grant = token == null ? null : token.trim();
-            if (grant == null || grant.isEmpty()) {
-                continue;
-            }
-            if (!allowedGrantSet.contains(grant)) {
-                unsupported.add(grant);
-            }
-        }
-
+    
+        // Use streams to find unsupported grants
+        Set<String> unsupported = Arrays.stream(requested.split("[,\\s]+"))
+                .map(String::trim)
+                .filter(grant -> !grant.isEmpty()) // Skips empty tokens after splitting/trimming
+                .filter(grant -> !allowedGrantSet.contains(grant))
+                .collect(Collectors.toSet()); 
+    
         if (!unsupported.isEmpty()) {
+            String clientId = oAuthApplicationInfo != null ? oAuthApplicationInfo.getClientId() : null;
             throw new APIManagementException(
-                    "Unsupported OAuth grant type(s) in existing client (" + consumerKey + "): " + unsupported + ". Remove or enable them in the Key Manager before changing ownership.");
+                    "Unsupported OAuth grant type(s) in existing client (" + clientId + "): " + unsupported +
+                            ". Delete or update the keys before changing ownership.");
         }
     }
     public JSONObject resumeWorkflow(Object[] args) {
