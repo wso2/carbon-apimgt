@@ -1704,8 +1704,8 @@ public class APIMappingUtil {
                 JSONParser parser = new JSONParser();
                 JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfig);
                 // AWS Lambda: set secret key based on preserveCredentials
-                if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA
-                        .equals(endpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA.equalsIgnoreCase(
+                        (String) endpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                     handleAWSCredentials(endpointConfigJson, preserveCredentials);
                 }
                 CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
@@ -2204,8 +2204,8 @@ public class APIMappingUtil {
                 JSONParser parser = new JSONParser();
                 JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfig);
                 // AWS Lambda: set secret key based on preserveCredentials
-                if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA
-                        .equals(endpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA.equalsIgnoreCase(
+                        (String) endpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                     handleAWSCredentials(endpointConfigJson, preserveCredentials);
                 }
                 CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();

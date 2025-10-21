@@ -3090,8 +3090,8 @@ public final class APIUtil {
             @SuppressWarnings("unchecked")
             Map<String, Object> endpointConfigMap = (Map<String, Object>) endpointConfigObject;
             if (endpointConfigMap != null && endpointConfigMap.containsKey("endpoint_type")
-                    && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                    endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))
+                    && APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
+                    (String) endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))
                     && !APIConstants.API_TYPE_HTTP.equalsIgnoreCase(apiType)) {
                 throw new APIManagementException("Invalid endpoint configuration provided for the API " + apiName);
             }

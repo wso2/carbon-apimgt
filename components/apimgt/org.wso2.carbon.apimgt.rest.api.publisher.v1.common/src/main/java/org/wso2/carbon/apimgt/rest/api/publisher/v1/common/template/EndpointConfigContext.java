@@ -76,8 +76,8 @@ public class EndpointConfigContext extends ConfigContextDecorator {
             if (configJson != null && !configJson.isEmpty()) {
                 try {
                     this.endpointConfig = (JSONObject) parser.parse(configJson);
-                    if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA.equals(
-                            endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA.equalsIgnoreCase(
+                            (String) endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                         processLambdaConfig(api, endpointConfig);
                     }
                 } catch (ParseException e) {
