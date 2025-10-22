@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,16 +37,26 @@ public class SearchApiServiceImplUtil {
      */
     public static List<Object> getAPIListFromAPISearchResult(Map<String, Object> resultsMap) {
 
-        List<Object> apis;
+        if (resultsMap == null || !resultsMap.containsKey("apis"))
+            return new ArrayList<>();
+
         Object apiSearchResults = resultsMap.get("apis");
+
+        if (apiSearchResults == null) {
+            return new ArrayList<>();
+        }
+
+        List<Object> apis = new ArrayList<>();
+
         if (apiSearchResults instanceof List<?>) {
-            apis = (ArrayList<Object>) apiSearchResults;
-        } else if (apiSearchResults instanceof HashMap) {
-            Collection<String> values = ((HashMap) apiSearchResults).values();
-            apis = new ArrayList<>(values);
-        } else {
-            apis = new ArrayList<>();
+            apis.addAll((List<?>) apiSearchResults);
+        } else if (apiSearchResults instanceof Map<?, ?>) {
+            Map<?, ?> resultMap = (Map<?, ?>) apiSearchResults;
+            apis.addAll(resultMap.values());
+        } else if (apiSearchResults instanceof Collection<?>) {
             apis.addAll((Collection<?>) apiSearchResults);
+        } else {
+            apis.add(apiSearchResults);
         }
         return apis;
     }
