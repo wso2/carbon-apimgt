@@ -40,7 +40,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SearchResultListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.SearchApiServiceImplUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APIInfoMappingUtil;
-// import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -48,7 +47,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
-    // private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
+    private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
 
     /**
      * This method gets all the APIs in the admin portal.
@@ -63,6 +62,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     public Response getAllAPIs(Integer limit, Integer offset, String query, String ifNoneMatch,
             MessageContext messageContext) throws APIManagementException {
+
         SearchResultListDTO resultListDTO = new SearchResultListDTO();
 
         // Set default values for limit and offset if not provided
@@ -80,7 +80,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         List<Object> apis = SearchApiServiceImplUtil.getAPIListFromAPISearchResult(result);
         List<ApiResultDTO> allMatchedResults = getAllMatchedResults(apis);
 
-        // Populate the resultListDTO with the results
         resultListDTO.setApis(allMatchedResults);
         resultListDTO.setCount(allMatchedResults.size());
 
@@ -88,23 +87,39 @@ public class ApisApiServiceImpl implements ApisApiService {
         PaginationDTO paginationDTO = new PaginationDTO();
         paginationDTO.setLimit(limit);
         paginationDTO.setOffset(offset);
-        if (result.containsKey("length")) {
-            paginationDTO.setTotal((Integer) result.get("length"));
-
-            if (offset + limit < paginationDTO.getTotal()) {
-                paginationDTO.setNext(String.valueOf(offset + limit));
-            } else {
-                paginationDTO.setNext(null);
-            }
-
-            if (offset > 0) {
-                paginationDTO.setPrevious(String.valueOf(Math.max(offset - limit, 0)));
-            } else {
-                paginationDTO.setPrevious(null);
-            }
-        } else {
-            paginationDTO.setTotal(0);
+        
+        int total = 0;
+        Object len = result.get("length");
+        if (len instanceof Number) {
+            total = ((Number) len).intValue();
         }
+        paginationDTO.setTotal(total);
+        
+        // Use RestApiCommonUtil to calculate pagination parameters
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, total);
+        
+        // Build full URLs for next and previous
+        String nextUrl = null;
+        String previousUrl = null;
+        
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            nextUrl = RestApiCommonUtil.getAPIPaginatedURL(
+                paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT),
+                query
+            );
+        }
+        
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            previousUrl = RestApiCommonUtil.getAPIPaginatedURL(
+                paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT),
+                query
+            );
+        }
+        
+        paginationDTO.setNext(nextUrl);
+        paginationDTO.setPrevious(previousUrl);
         resultListDTO.setPagination(paginationDTO);
 
         return Response.ok().entity(resultListDTO).build();
