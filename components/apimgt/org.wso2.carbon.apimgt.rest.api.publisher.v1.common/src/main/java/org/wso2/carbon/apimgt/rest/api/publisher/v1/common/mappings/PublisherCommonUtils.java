@@ -109,6 +109,7 @@ import org.wso2.carbon.apimgt.impl.MCPInitializerAndToolFetcher;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
+import org.wso2.carbon.apimgt.impl.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -747,15 +748,10 @@ public class PublisherCommonUtils {
         if (!usedMcpServers.isEmpty()) {
             List<APIOperationsDTO> updatedOperations = apiDtoToUpdate.getOperations();
             if (updatedOperations != null && !updatedOperations.isEmpty()) {
-                List<URITemplate> removedResources = getRemovedResources(
-                        APIMappingUtil.fromOperationListToURITemplateList(updatedOperations),
-                        originalAPI.getUriTemplates());
-                if (!removedResources.isEmpty()) {
-                    log.error("Cannot update API with removed resources when MCP servers are in use. API: "
-                            + originalAPI.getId().getUUID());
-                    throw new APIManagementException(
-                            ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_MCP_USAGE));
-                }
+                Set<URITemplate> updatedUriTemplates =
+                        APIMappingUtil.fromOperationListToURITemplateList(updatedOperations);
+                MCPUtils.validateMCPResources(originalAPI.getId().getUUID(), originalAPI.getOrganization(),
+                        updatedUriTemplates);
             }
         }
 
@@ -3258,17 +3254,7 @@ public class PublisherCommonUtils {
                             existingAPI.getId().getVersion()));
         }
 
-        List<API> usedMcpServers = apiProvider.getMCPServersUsedByAPI(apiId, organization);
-        if (usedMcpServers != null && !usedMcpServers.isEmpty()) {
-            List<URITemplate> removedResources = getRemovedResources(uriTemplates, existingAPI.getUriTemplates());
-            if (!removedResources.isEmpty()) {
-                log.error("Cannot update API with removed resources when MCP servers are in use. API: "
-                        + existingAPI.getId().getUUID());
-                throw new APIManagementException(
-                        ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_MCP_USAGE));
-            }
-        }
-
+        MCPUtils.validateMCPResources(apiId, organization, uriTemplates);
         //set existing operation policies to URI templates
         apiProvider.setOperationPoliciesToURITemplates(apiId, uriTemplates);
 
