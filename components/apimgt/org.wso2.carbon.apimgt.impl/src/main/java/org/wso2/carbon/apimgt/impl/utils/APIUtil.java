@@ -9747,8 +9747,8 @@ public final class APIUtil {
             }
             return endpointSecurityMap;
         } catch (ParseException e) {
-            String errorMessage = "Error while parsing Endpoint Config json. Value is missing or invalid.";
-            throw new APIManagementException(errorMessage, e, ExceptionCodes.INVALID_ENDPOINT_CONFIG);
+            String errorMessage = "Error while parsing Endpoint Config json";
+            throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_PARSING_ENDPOINT_CONFIG);
         }
     }
 
