@@ -598,8 +598,9 @@ public class TemplateBuilderUtil {
                     JSONParser parser = new JSONParser();
                     ObjectMapper objectMapper = new ObjectMapper();
                     JSONObject endpointConfig = (JSONObject) parser.parse(endpointConfigString);
-                    if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
-                            (String) endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    Object protocolType = endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE);
+                    if (protocolType instanceof String && APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
+                            (String) protocolType)) {
                         String policyDirectory =
                                 extractedFolderPath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
                         String seqName = APIUtil.getCustomBackendName(api.getUuid(), APIConstants.API_KEY_TYPE_SANDBOX);
