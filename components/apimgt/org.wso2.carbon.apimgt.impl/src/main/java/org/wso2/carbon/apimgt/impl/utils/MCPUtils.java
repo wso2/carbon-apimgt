@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -30,6 +32,7 @@ import java.util.Set;
  * Utility class for MCP related operations
  */
 public class MCPUtils {
+    private static final Log log = LogFactory.getLog(MCPUtils.class);
     /**
      * Validate whether MCP assigned resources are being removed from the API
      * @param apiUUID UUID of the API
@@ -39,6 +42,9 @@ public class MCPUtils {
      */
     public static void validateMCPResources(String apiUUID, String organization, Set<URITemplate> uriTemplates)
             throws APIManagementException {
+        if (log.isDebugEnabled()){
+            log.debug("Validating MCP assigned resources for API: " + apiUUID);
+        }
         if (uriTemplates == null) {
             return;
         }

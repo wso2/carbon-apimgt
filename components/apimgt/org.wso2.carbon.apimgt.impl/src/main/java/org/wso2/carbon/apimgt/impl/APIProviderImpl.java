@@ -7645,6 +7645,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
         apiIdentifier.setUuid(apiId);
+        Set<URITemplate> uriTemplatesOfAPIRevision = apiMgtDAO.getURITemplatesOfAPIRevision(apiRevision);
+        MCPUtils.validateMCPResources(apiId, organization, uriTemplatesOfAPIRevision);
+        API api = getAPIbyUUID(apiRevisionId, organization);
         try {
             apiPersistenceInstance.restoreAPIRevision(new Organization(organization),
                     apiIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
@@ -7653,7 +7656,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
                     ERROR_RESTORING_API_REVISION, apiRevision.getApiUUID()));
         }
-        apiMgtDAO.restoreAPIRevision(apiRevision, organization);
+        apiMgtDAO.restoreAPIRevision(api, apiRevision, organization);
     }
 
     /**

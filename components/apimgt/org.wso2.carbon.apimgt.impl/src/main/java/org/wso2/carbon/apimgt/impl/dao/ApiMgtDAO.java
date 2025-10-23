@@ -206,7 +206,7 @@ public class ApiMgtDAO {
     private boolean multiGroupAppSharingEnabled = false;
     private String PublicAccessPermission = "PUBLIC";
     private static final String[] keyTypes =
-            new String[]{APIConstants.API_KEY_TYPE_PRODUCTION, APIConstants.API_KEY_TYPE_SANDBOX};
+            new String[] {APIConstants.API_KEY_TYPE_PRODUCTION, APIConstants.API_KEY_TYPE_SANDBOX};
     String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
 
     private ApiMgtDAO() {
@@ -288,7 +288,8 @@ public class ApiMgtDAO {
                 appRegPs.setLong(6, dto.getValidityTime());
                 appRegPs.setString(7, (String) dto.getAppInfoDTO().getOAuthApplicationInfo().getParameter("tokenScope"
                 ));
-                try (InputStream jsonStringStream = new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8))) {
+                try (InputStream jsonStringStream = new ByteArrayInputStream(
+                        jsonString.getBytes(StandardCharsets.UTF_8))) {
                     appRegPs.setBinaryStream(8, jsonStringStream);
                 } catch (IOException e) {
                     handleException("Error occurred while creating input stream from JSON string for Application : "
@@ -364,7 +365,8 @@ public class ApiMgtDAO {
     }
 
     private boolean isAnyPolicyContentAware(Connection conn, String apiPolicy, String appPolicy,
-                                            String subPolicy, int subscriptionTenantId, int appTenantId, int apiId) throws APIManagementException {
+                                            String subPolicy, int subscriptionTenantId, int appTenantId, int apiId)
+            throws APIManagementException {
 
         boolean isAnyContentAware = false;
         // only check if using CEP based throttling.
@@ -417,7 +419,7 @@ public class ApiMgtDAO {
             conn.setAutoCommit(false);
 
             String query = SQLConstants.ADD_SUBSCRIBER_SQL;
-            ps = conn.prepareStatement(query, new String[]{"subscriber_id"});
+            ps = conn.prepareStatement(query, new String[] {"subscriber_id"});
 
             ps.setString(1, subscriber.getName());
             ps.setInt(2, subscriber.getTenantId());
@@ -1194,7 +1196,8 @@ public class ApiMgtDAO {
      * @return set of web hook topic subscriptions
      * @throws APIManagementException
      */
-    public Set<Subscription> getTopicSubscriptionsByApiUUID(String applicationId, String apiId) throws APIManagementException {
+    public Set<Subscription> getTopicSubscriptionsByApiUUID(String applicationId, String apiId)
+            throws APIManagementException {
 
         Connection conn = null;
         ResultSet resultSet = null;
@@ -1635,7 +1638,8 @@ public class ApiMgtDAO {
         return statement.executeQuery();
     }
 
-    private void initSubscribedAPIDetailed(Connection connection, SubscribedAPI subscribedAPI, Subscriber subscriber, ResultSet result)
+    private void initSubscribedAPIDetailed(Connection connection, SubscribedAPI subscribedAPI, Subscriber subscriber,
+                                           ResultSet result)
             throws SQLException, APIManagementException {
 
         subscribedAPI.setSubscriptionId(result.getInt("SUBS_ID"));
@@ -2765,13 +2769,14 @@ public class ApiMgtDAO {
                     apiSubscription.setApplication(applicationObj);
                     usage.addApiSubscriptions(apiSubscription);
                 }
-                return userApplicationUsages.values().toArray(new UserApplicationAPIUsage[userApplicationUsages.size()]);
+                return userApplicationUsages.values()
+                        .toArray(new UserApplicationAPIUsage[userApplicationUsages.size()]);
             }
         } catch (SQLException e) {
             handleException("Failed to find API Product Usage for :" + providerName, e);
         }
 
-        return new UserApplicationAPIUsage[]{};
+        return new UserApplicationAPIUsage[] {};
     }
 
     /**
@@ -3498,9 +3503,9 @@ public class ApiMgtDAO {
             String sqlQuery = SQLConstants.APP_APPLICATION_SQL;
             // Adding data to the AM_APPLICATION  table
             //ps = conn.prepareStatement(sqlQuery);
-            ps = conn.prepareStatement(sqlQuery, new String[]{"APPLICATION_ID"});
+            ps = conn.prepareStatement(sqlQuery, new String[] {"APPLICATION_ID"});
             if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
-                ps = conn.prepareStatement(sqlQuery, new String[]{"application_id"});
+                ps = conn.prepareStatement(sqlQuery, new String[] {"application_id"});
             }
 
             ps.setString(1, application.getName());
@@ -5399,8 +5404,9 @@ public class ApiMgtDAO {
                                                   List<APIProduct> oldAPIProductVersions) {
         int count = 0;
         if (!apiTypeWrapper.isAPIProduct()) {
-            if (oldAPIVersions != null && !oldAPIVersions.isEmpty())
+            if (oldAPIVersions != null && !oldAPIVersions.isEmpty()) {
                 count = oldAPIVersions.size();
+            }
         } else {
             if (oldAPIProductVersions != null && !oldAPIProductVersions.isEmpty()) {
                 count = oldAPIProductVersions.size();
@@ -5495,7 +5501,7 @@ public class ApiMgtDAO {
             subscriptionIDColumn = "subscription_id";
         }
         try (PreparedStatement preparedStForInsert = connection.prepareStatement(sqlQuery,
-                new String[]{subscriptionIDColumn})) {
+                new String[] {subscriptionIDColumn})) {
             if (!isProduct) {
                 tier = apiTypeWrapper.getApi().getId().getTier();
                 preparedStForInsert.setString(1, tier);
@@ -5699,7 +5705,7 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
 
-            prepStmt = connection.prepareStatement(query, new String[]{"api_id"});
+            prepStmt = connection.prepareStatement(query, new String[] {"api_id"});
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             prepStmt.setString(2, api.getId().getApiName());
             prepStmt.setString(3, api.getId().getVersion());
@@ -6265,7 +6271,9 @@ public class ApiMgtDAO {
      * @throws APIManagementException If an error occurs while adding URI templates.
      */
     public void addURITemplates(int apiId, API api, int tenantId) throws APIManagementException {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Adding URI templates for API: " + api.getId().getApiName() + " with ID: " + apiId);
+        }
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
@@ -6279,20 +6287,6 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while adding URL template(s) to the database for API : " + api.getId(), e);
         }
-    }
-
-    /**
-     * Add URI Templates to database with resource scope mappings by passing the DB connection.
-     *
-     * @param apiId      API Id
-     * @param api        API
-     * @param tenantId   tenant Id
-     * @param connection Existing DB Connection
-     * @throws SQLException If a SQL error occurs while adding URI Templates
-     */
-    private void addURITemplates(int apiId, API api, int tenantId, Connection connection)
-            throws SQLException, APIManagementException {
-        addURITemplates(api, api.getUriTemplates(), tenantId, connection);
     }
 
     /**
@@ -6484,7 +6478,8 @@ public class ApiMgtDAO {
                 }
                 if (application != null) {
                     Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
-                    application.setSubOrganization(applicationAttributes.get(APIConstants.ApplicationAttributes.USER_ORGANIZATION));
+                    application.setSubOrganization(
+                            applicationAttributes.get(APIConstants.ApplicationAttributes.USER_ORGANIZATION));
                     applicationAttributes.remove(APIConstants.ApplicationAttributes.USER_ORGANIZATION);
                     application.setApplicationAttributes(applicationAttributes);
                 }
@@ -6566,7 +6561,8 @@ public class ApiMgtDAO {
             }
             if (application != null) {
                 Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
-                application.setSubOrganization(applicationAttributes.get(APIConstants.ApplicationAttributes.USER_ORGANIZATION));
+                application.setSubOrganization(
+                        applicationAttributes.get(APIConstants.ApplicationAttributes.USER_ORGANIZATION));
                 applicationAttributes.remove(APIConstants.ApplicationAttributes.USER_ORGANIZATION);
                 application.setApplicationAttributes(applicationAttributes);
             }
@@ -6626,7 +6622,8 @@ public class ApiMgtDAO {
         return application;
     }
 
-    public Application getApplicationById(int applicationId, String userId, String groupId) throws APIManagementException {
+    public Application getApplicationById(int applicationId, String userId, String groupId)
+            throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -6724,7 +6721,8 @@ public class ApiMgtDAO {
 
             if (application != null) {
                 Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
-                application.setSubOrganization(applicationAttributes.get(APIConstants.ApplicationAttributes.USER_ORGANIZATION));
+                application.setSubOrganization(
+                        applicationAttributes.get(APIConstants.ApplicationAttributes.USER_ORGANIZATION));
                 applicationAttributes.remove(APIConstants.ApplicationAttributes.USER_ORGANIZATION);
                 application.setApplicationAttributes(applicationAttributes);
             }
@@ -6804,7 +6802,8 @@ public class ApiMgtDAO {
             // Get custom attributes of application
             if (application != null) {
                 Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
-                application.setSubOrganization(applicationAttributes.get(APIConstants.ApplicationAttributes.USER_ORGANIZATION));
+                application.setSubOrganization(
+                        applicationAttributes.get(APIConstants.ApplicationAttributes.USER_ORGANIZATION));
                 applicationAttributes.remove(APIConstants.ApplicationAttributes.USER_ORGANIZATION);
                 application.setApplicationAttributes(applicationAttributes);
             }
@@ -6846,15 +6845,10 @@ public class ApiMgtDAO {
         }
     }
 
-    /**
-     * Update URI templates define for an API.
-     *
-     * @param api      API to update
-     * @param tenantId tenant Id
-     * @throws APIManagementException if fails to update URI template of the API.
-     */
-    public void updateURITemplates(API api, Set<URITemplate> oldUriTemplate, int tenantId)
-            throws APIManagementException {
+
+
+    private void updateURITemplates(API api, Set<URITemplate> oldUriTemplate, int tenantId, Connection connection)
+            throws SQLException {
         // Create sets to store the different categories of URI templates
         Set<URITemplate> newlyAddedUriTemplates = new HashSet<>();
         Set<URITemplate> modifiedUriTemplates = new HashSet<>();
@@ -6885,16 +6879,28 @@ public class ApiMgtDAO {
         // Any remaining templates in old map were removed in new set
         removedUriTemplates.addAll(oldTemplateMap.values());
         // Add newly added templates to db.
+        if (api.getId().getId() <= 0) {
+            int apiId = getInternalAPIId(api.getUuid(), connection);
+            api.getId().setId(apiId);
+        }
+        deleteURITemplates(connection, api, removedUriTemplates, tenantId);
+        addURITemplates(api, newlyAddedUriTemplates, tenantId, connection);
+        updateURITemplatesInToDatabase(api, modifiedUriTemplates, tenantId, connection);
+}
+    /**
+     * Update URI templates define for an API.
+     *
+     * @param api      API to update
+     * @param oldUriTemplate uriTemplates from old API.
+     * @param tenantId tenant Id
+     * @throws APIManagementException if fails to update URI template of the API.
+     */
+    public void updateURITemplates(API api, Set<URITemplate> oldUriTemplate, int tenantId)
+            throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
-                if (api.getId().getId() <= 0) {
-                    int apiId = getInternalAPIId(api.getUuid(), connection);
-                    api.getId().setId(apiId);
-                }
-                deleteUriTemplates(connection, api, removedUriTemplates, tenantId);
-                addURITemplates(api, newlyAddedUriTemplates, tenantId, connection);
-                updateUriTemplates(api, modifiedUriTemplates, tenantId, connection);
+                updateURITemplates(api, oldUriTemplate, tenantId, connection);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -6905,7 +6911,7 @@ public class ApiMgtDAO {
         }
     }
 
-    private void deleteUriTemplates(Connection connection, API api, Set<URITemplate> deleteUriTemplates, int tenantId)
+    private void deleteURITemplates(Connection connection, API api, Set<URITemplate> deleteUriTemplates, int tenantId)
             throws SQLException {
         if (deleteUriTemplates != null && !deleteUriTemplates.isEmpty()) {
             String deleteOldMappingsQuery = SQLConstants.REMOVE_FROM_URI_TEMPLATES_BY_URITEMPLATE_AND_VERB_SQL;
@@ -6921,14 +6927,6 @@ public class ApiMgtDAO {
         }
     }
 
-    /**
-     *
-     * @param uriTemplates
-     * @param tenantId
-     * @param connection
-     * @throws SQLException
-     * @throws APIManagementException
-     */
     private void addURITemplates(API api, Set<URITemplate> uriTemplates,
                                  int tenantId, Connection connection) throws SQLException {
 
@@ -7064,7 +7062,7 @@ public class ApiMgtDAO {
         }
     }
 
-    private void updateUriTemplates(API api, Set<URITemplate> uriTemplatesToUpdate, int tenantId, Connection connection)
+    private void updateURITemplatesInToDatabase(API api, Set<URITemplate> uriTemplatesToUpdate, int tenantId, Connection connection)
             throws SQLException {
         Set<URITemplate> refUriTemplates = null;
         if (APIConstants.API_TYPE_MCP.equals(api.getType()) &&
@@ -20969,33 +20967,26 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Restore API revision database records as the Current API of an API
+     *Restore API revision.
      *
-     * @param apiRevision  content of the revision
-     * @param organization organization
-     * @throws APIManagementException if an error occurs when restoring an API revision
+     * @param api API Object
+     * @param apiRevision API revision
+     * @param organization API organization
+     * @throws APIManagementException if restore fails.
      */
-    public void restoreAPIRevision(APIRevision apiRevision, String organization) throws APIManagementException {
+    public void restoreAPIRevision(API api, APIRevision apiRevision, String organization)
+            throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
                 // Retrieve API ID
-                APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
-                int apiId = getInternalAPIId(apiRevision.getApiUUID(), connection);
-                int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
-                String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-
+                int apiId = api.getId().getId();
+                int tenantId = APIUtil.getTenantId(organization);
                 Set<URITemplate> uriTemplates = getURITemplatesOfCurrentAPI(apiRevision.getApiUUID(), connection);
                 removeBackendOperationMapping(connection, uriTemplates);
                 removeApiOperationMapping(connection, uriTemplates);
-
-                // Removing related Current API entries from AM_API_URL_MAPPING table
-                PreparedStatement removeURLMappingsStatement = connection.prepareStatement(
-                        REMOVE_CURRENT_API_ENTRIES_IN_AM_API_URL_MAPPING_BY_API_ID);
-                removeURLMappingsStatement.setInt(1, apiId);
-                removeURLMappingsStatement.executeUpdate();
-
+                updateURITemplates(api, uriTemplates, tenantId, connection);
                 removeBackendOfCurrentAPI(connection, apiRevision.getApiUUID());
                 deleteCurrentAPIMetadata(connection, apiRevision.getApiUUID());
 
@@ -21051,8 +21042,8 @@ public class ApiMgtDAO {
                 // Restoring to AM_API_PRIMARY_EP_MAPPING
                 try (PreparedStatement getPrimaryEndpoints = connection.prepareStatement(
                         SQLConstants.APIEndpointsSQLConstants.GET_PRIMARY_ENDPOINT_MAPPINGS);
-                        PreparedStatement insertPrimaryEndpointMappingsStatement = connection.prepareStatement(
-                                SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING)) {
+                     PreparedStatement insertPrimaryEndpointMappingsStatement = connection.prepareStatement(
+                             SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING)) {
                     getPrimaryEndpoints.setString(1, apiRevision.getApiUUID());
                     getPrimaryEndpoints.setString(2, apiRevision.getRevisionUUID());
                     List<String> primaryEndpoints = new ArrayList<>();
@@ -21200,8 +21191,6 @@ public class ApiMgtDAO {
                         .prepareStatement(INSERT_SCOPE_RESOURCE_MAPPING);
                 PreparedStatement insertProductResourceMappingStatement = connection
                         .prepareStatement(INSERT_PRODUCT_RESOURCE_MAPPING);
-                PreparedStatement insertOperationPolicyMappingStatement = connection
-                        .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING);
                 PreparedStatement deleteOutdatedOperationPolicyStatement = connection
                         .prepareStatement(SQLConstants.OperationPolicyConstants.DELETE_OPERATION_POLICY_BY_POLICY_ID);
                 PreparedStatement addBackendOperationMappingPrepStmt =
@@ -21209,8 +21198,6 @@ public class ApiMgtDAO {
                 PreparedStatement addApiOperationMappingPrepStmt =
                         connection.prepareStatement(SQLConstants.ADD_AM_API_OPERATION_MAPPING_SQL);
 
-                Map<String, String> restoredPolicyMap = new HashMap<>();
-                Set<String> usedClonedPolicies = new HashSet<String>();
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
                     int restoredUrlMappingID = 0;
                     if (urlMapping.getScopes() != null || urlMapping.getBackendOperationMapping() != null) {
@@ -21243,7 +21230,8 @@ public class ApiMgtDAO {
                                     addApiOperationMappingPrepStmt.setInt(1,
                                             restoredUrlMappingID);
                                     addApiOperationMappingPrepStmt.setInt(2,
-                                            urlMapping.getAPIOperationMapping().getBackendOperation().getRefUriMappingId());
+                                            urlMapping.getAPIOperationMapping().getBackendOperation()
+                                                    .getRefUriMappingId());
                                     addApiOperationMappingPrepStmt.addBatch();
                                 }
                             }
@@ -21267,7 +21255,7 @@ public class ApiMgtDAO {
                     urlMapping.setId(restoredUrlMappingID);
                 }
 
-                restoreAPIPolicies(apiRevision, tenantDomain, uriTemplateMap, connection);
+                restoreAPIPolicies(apiRevision, organization, uriTemplateMap, connection);
                 restoreCustomBackend(apiRevision, connection);
                 insertScopeResourceMappingStatement.executeBatch();
                 insertProductResourceMappingStatement.executeBatch();
@@ -21292,7 +21280,8 @@ public class ApiMgtDAO {
                         while (rs.next()) {
                             ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
                             clientCertificateDTO.setAlias(rs.getString(1));
-                            clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
+                            clientCertificateDTO.setCertificate(
+                                    APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
                             clientCertificateDTO.setTierName(rs.getString(3));
                             clientCertificateDTOS.add(clientCertificateDTO);
                         }
@@ -23192,11 +23181,11 @@ public class ApiMgtDAO {
     }
 
     /**
-     *
-     * @param apiUUId
-     * @param organization
-     * @return
-     * @throws APIManagementException
+     * Get API resources attached to MCP.
+     * @param apiUUId uuid of API.
+     * @param organization organization of API.
+     * @return list of resources attached to mcp.
+     * @throws APIManagementException if fails to retrieve.
      */
     public Map<String, Boolean> getAPIResourcesAssignedToMCP(String apiUUId, String organization)
             throws APIManagementException {
@@ -23211,7 +23200,14 @@ public class ApiMgtDAO {
                     String operation = resultSet.getString("URL_PATTERN");
                     String method = resultSet.getString("HTTP_METHOD");
                     int count = resultSet.getInt("OPERATION_MAPPING_COUNT");
-                    resourceMCPMap.put(operation.concat(":").concat(method), count > 0);
+                    String resourceKey = operation.concat(":").concat(method);
+                    if (resourceMCPMap.containsKey(resourceKey)) {
+                        if (!resourceMCPMap.get(resourceKey)) {
+                            resourceMCPMap.put(resourceKey, count > 0);
+                        }
+                    } else {
+                        resourceMCPMap.put(resourceKey, count > 0);
+                    }
                 }
             }
         } catch (SQLException e) {

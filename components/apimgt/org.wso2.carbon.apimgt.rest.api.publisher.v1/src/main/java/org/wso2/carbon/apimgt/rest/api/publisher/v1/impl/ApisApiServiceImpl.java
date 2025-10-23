@@ -2982,6 +2982,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                                      InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext)
             throws APIManagementException {
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Updating swagger definition of API : " + apiId);
+            }
             String updatedSwagger;
             //validate if api exists
             APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
