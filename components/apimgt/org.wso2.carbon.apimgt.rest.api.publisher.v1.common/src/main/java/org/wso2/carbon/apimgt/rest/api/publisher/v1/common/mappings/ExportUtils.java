@@ -262,14 +262,14 @@ public class ExportUtils {
             JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
             if (endpointConfig != null &&
                     APIConstants.ENDPOINT_TYPE_SEQUENCE
-                            .equals(endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())
+                            .equalsIgnoreCase(endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())
                     && apiDtoToReturn.isAPIDTO() && apiDtoToReturn.getType() != null
                     && APIConstants.API_TYPE_HTTP.equalsIgnoreCase(apiDtoToReturn.getType().toString())) {
 
                 Map endpointConf = (Map) apiDtoToReturn.getEndpointConfig();
                 if (endpointConf != null &&
                         APIConstants.ENDPOINT_TYPE_SEQUENCE
-                                .equals(endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                                .equalsIgnoreCase((String) endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
 
                     SequenceBackendData sqData = apiProvider.getCustomBackendByAPIUUID(currentApiUuid,
                             APIConstants.API_KEY_TYPE_SANDBOX);

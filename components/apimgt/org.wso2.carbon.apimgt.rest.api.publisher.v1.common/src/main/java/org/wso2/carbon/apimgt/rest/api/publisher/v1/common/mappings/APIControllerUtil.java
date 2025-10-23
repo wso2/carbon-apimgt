@@ -603,15 +603,15 @@ public class APIControllerUtil {
         }
 
         // if endpoint type is HTTP/REST
-        if (StringUtils.equals(endpointType, ImportExportConstants.HTTP_TYPE_ENDPOINT) || StringUtils
-                .equals(endpointType, ImportExportConstants.REST_TYPE_ENDPOINT)) {
+        if (StringUtils.equalsIgnoreCase(endpointType, ImportExportConstants.HTTP_TYPE_ENDPOINT) || StringUtils
+                .equalsIgnoreCase(endpointType, ImportExportConstants.REST_TYPE_ENDPOINT)) {
             //add REST endpoint configs as endpoint configs
             multipleEndpointsConfig = handleRestEndpoints(routingPolicy, envParams, defaultProductionEndpoint,
                     defaultSandboxEndpoint);
         }
 
         // if endpoint type is HTTP/SOAP
-        if (ImportExportConstants.SOAP_TYPE_ENDPOINT.equals(endpointType)) {
+        if (ImportExportConstants.SOAP_TYPE_ENDPOINT.equalsIgnoreCase(endpointType)) {
             //add SOAP endpoint configs as endpoint configs
             multipleEndpointsConfig = handleSoapEndpoints(routingPolicy, envParams, defaultProductionEndpoint,
                     defaultSandboxEndpoint);
@@ -638,12 +638,13 @@ public class APIControllerUtil {
             endpointsObject = envParams.get(ImportExportConstants.ENDPOINTS_FIELD).getAsJsonObject();
         }
         // if the endpoint type is REST or SOAP return null
-        if (ImportExportConstants.REST_TYPE_ENDPOINT.equals(endpointType) || ImportExportConstants.SOAP_TYPE_ENDPOINT
-                .equals(endpointType) || ImportExportConstants.HTTP_TYPE_ENDPOINT.equals(endpointType)) {
+        if (ImportExportConstants.REST_TYPE_ENDPOINT.equalsIgnoreCase(endpointType) ||
+                ImportExportConstants.SOAP_TYPE_ENDPOINT.equalsIgnoreCase(endpointType) ||
+                ImportExportConstants.HTTP_TYPE_ENDPOINT.equalsIgnoreCase(endpointType)) {
             return null;
         }
         // if endpoint type is Dynamic
-        if (ImportExportConstants.DYNAMIC_TYPE_ENDPOINT.equals(endpointType)) {
+        if (ImportExportConstants.DYNAMIC_TYPE_ENDPOINT.equalsIgnoreCase(endpointType)) {
             JsonObject updatedDynamicEndpointParams = new JsonObject();
             //replace url property in dynamic endpoints
             defaultProductionEndpoint.addProperty(ImportExportConstants.ENDPOINT_URL,
@@ -660,7 +661,7 @@ public class APIControllerUtil {
             return updatedDynamicEndpointParams;
 
             // if endpoint type is AWS Lambda
-        } else if (ImportExportConstants.AWS_TYPE_ENDPOINT.equals(endpointType)) {
+        } else if (ImportExportConstants.AWS_TYPE_ENDPOINT.equalsIgnoreCase(endpointType)) {
             //if aws config is not provided
             if (envParams.get(ImportExportConstants.AWS_LAMBDA_ENDPOINT_JSON_PROPERTY) == null) {
                 throw new APIManagementException(
