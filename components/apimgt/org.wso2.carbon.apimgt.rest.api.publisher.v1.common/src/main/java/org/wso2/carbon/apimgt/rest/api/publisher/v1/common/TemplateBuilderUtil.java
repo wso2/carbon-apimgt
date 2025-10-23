@@ -590,48 +590,46 @@ public class TemplateBuilderUtil {
             try {
                 // Avoid number format issues in Endpoint Configuration
                 JsonObject endpointConf = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
-                if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
-                        endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && StringUtils.equals(
-                        api.getType().toLowerCase(), APIConstants.API_TYPE_HTTP.toLowerCase())) {
+                String protocolType = (endpointConf != null && endpointConf.has(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                        && !endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).isJsonNull())
+                        ? endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString() : null;
+                if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(protocolType)
+                        && StringUtils.equals(api.getType().toLowerCase(), APIConstants.API_TYPE_HTTP.toLowerCase())) {
                     ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
                     // To modify the endpoint config string
                     JSONParser parser = new JSONParser();
                     ObjectMapper objectMapper = new ObjectMapper();
                     JSONObject endpointConfig = (JSONObject) parser.parse(endpointConfigString);
-                    Object protocolType = endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE);
-                    if (protocolType instanceof String && APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
-                            (String) protocolType)) {
-                        String policyDirectory =
-                                extractedFolderPath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
-                        String seqName = APIUtil.getCustomBackendName(api.getUuid(), APIConstants.API_KEY_TYPE_SANDBOX);
-                        SequenceBackendData seqData = apiMgtDAO.getCustomBackendByAPIUUID(api.getUuid(),
-                                APIConstants.API_KEY_TYPE_SANDBOX);
-                        if (seqData != null) {
-                            String name = seqData.getName();
-                            if (!StringUtils.isEmpty(name) && !name.contains(
-                                    APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
-                                name = name + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
-                            }
-                            if (APIUtil.checkFileExistence(policyDirectory + File.separator + name)) {
-                                endpointConfig.put("sandbox", seqName);
-                            }
+                    String policyDirectory =
+                            extractedFolderPath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
+                    String seqName = APIUtil.getCustomBackendName(api.getUuid(), APIConstants.API_KEY_TYPE_SANDBOX);
+                    SequenceBackendData seqData = apiMgtDAO.getCustomBackendByAPIUUID(api.getUuid(),
+                            APIConstants.API_KEY_TYPE_SANDBOX);
+                    if (seqData != null) {
+                        String name = seqData.getName();
+                        if (!StringUtils.isEmpty(name) && !name.contains(
+                                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
+                            name = name + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
                         }
-
-                        seqName = APIUtil.getCustomBackendName(api.getUuid(), APIConstants.API_KEY_TYPE_PRODUCTION);
-                        seqData = apiMgtDAO.getCustomBackendByAPIUUID(api.getUuid(),
-                                APIConstants.API_KEY_TYPE_PRODUCTION);
-                        if (seqData != null) {
-                            String name = seqData.getName();
-                            if (!StringUtils.isEmpty(name) && !name.contains(
-                                    APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
-                                name = name + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
-                            }
-                            if (APIUtil.checkFileExistence(policyDirectory + File.separator + name)) {
-                                endpointConfig.put("production", seqName);
-                            }
+                        if (APIUtil.checkFileExistence(policyDirectory + File.separator + name)) {
+                            endpointConfig.put("sandbox", seqName);
                         }
-                        api.setEndpointConfig(objectMapper.writeValueAsString(endpointConfig));
                     }
+
+                    seqName = APIUtil.getCustomBackendName(api.getUuid(), APIConstants.API_KEY_TYPE_PRODUCTION);
+                    seqData = apiMgtDAO.getCustomBackendByAPIUUID(api.getUuid(),
+                            APIConstants.API_KEY_TYPE_PRODUCTION);
+                    if (seqData != null) {
+                        String name = seqData.getName();
+                        if (!StringUtils.isEmpty(name) && !name.contains(
+                                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
+                            name = name + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+                        }
+                        if (APIUtil.checkFileExistence(policyDirectory + File.separator + name)) {
+                            endpointConfig.put("production", seqName);
+                        }
+                    }
+                    api.setEndpointConfig(objectMapper.writeValueAsString(endpointConfig));
                 }
             } catch (IOException | ParseException ex) {
                 throw new APIManagementException("Error when updating Endpoint Configuration of API: " + api.getUuid(),
@@ -883,8 +881,10 @@ public class TemplateBuilderUtil {
             // check the endpoint type
             if (!StringUtils.isEmpty(api.getEndpointConfig())) {
                 JsonObject endpointConfObj = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
-                if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
-                        endpointConfObj.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) &&
+                String protocolType = (endpointConfObj.has(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                        && !endpointConfObj.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).isJsonNull()) ?
+                        endpointConfObj.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString() : null;
+                if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(protocolType) &&
                         !APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
                     addEndpoints(api, apiTemplateBuilder, productAPIDto, null);
                 }
@@ -937,8 +937,10 @@ public class TemplateBuilderUtil {
             }
 
             JsonObject endpointConfigMap = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
-            if (endpointConfigMap != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
-                    endpointConfigMap.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())
+            String protocolType = (endpointConfigMap != null && endpointConfigMap.has(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                    && !endpointConfigMap.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).isJsonNull()) ?
+                    endpointConfigMap.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString() : null;
+            if (endpointConfigMap != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(protocolType)
                     && APIConstants.API_TYPE_HTTP.equals(api.getType())) {
                 GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveSequenceBackendForAPIProduct(api,
                         apiProduct, APIConstants.API_KEY_TYPE_SANDBOX, extractedPath);
@@ -1570,8 +1572,10 @@ public class TemplateBuilderUtil {
                                              APIConstants.ENDPOINT_SECURITY_SANDBOX);
                     }
                 }
-            } else if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA
-                    .equalsIgnoreCase(endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
+            } else if (endpointConfig.has(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                    && !endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).isJsonNull()
+                    && APIConstants.ENDPOINT_TYPE_AWSLAMBDA.equalsIgnoreCase(
+                            endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
                 addAWSCredentialsToList(prefix, api, gatewayAPIDTO, endpointConfig);
             }
         }
