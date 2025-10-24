@@ -2112,4 +2112,18 @@ public class RegistryPersistenceUtil {
         }
         return query.substring(startIndex, endIndex);
     }
+
+    public static String extractApiSourcePath(String apiPath) throws APIPersistenceException {
+        if (apiPath == null) {
+            throw new APIPersistenceException("API path cannot be null");
+        }
+
+        int prependIndex = apiPath.lastIndexOf(APIConstants.API_RESOURCE_NAME);
+        if (prependIndex == -1) {
+            throw new APIPersistenceException("API resource name '" + APIConstants.API_RESOURCE_NAME
+                    + "' not found in API path: " + apiPath);
+        }
+
+        return apiPath.substring(0, prependIndex);
+    }
 }
