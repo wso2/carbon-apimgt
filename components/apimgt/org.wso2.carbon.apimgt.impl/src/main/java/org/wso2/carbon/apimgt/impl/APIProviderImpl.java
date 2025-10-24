@@ -6419,7 +6419,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
-                api.getId().setId(apiMgtDAO.getAPIID(uuid));
+                APIRevision apiRevision = apiMgtDAO.checkAPIUUIDIsARevisionUUID(uuid);
+                String canonicalUuid =
+                        (apiRevision != null && apiRevision.getApiUUID() != null) ? apiRevision.getApiUUID() : uuid;
+                api.getId().setId(apiMgtDAO.getAPIID(canonicalUuid));
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(),
                         api.getAccessControlRoles());
                 // populate relevant external info environment
