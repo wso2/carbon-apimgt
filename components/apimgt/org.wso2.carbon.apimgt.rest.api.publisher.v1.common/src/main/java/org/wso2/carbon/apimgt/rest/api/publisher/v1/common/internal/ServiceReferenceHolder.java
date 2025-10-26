@@ -61,10 +61,6 @@ public class ServiceReferenceHolder {
     private ServiceReferenceHolder() {
     }
 
-    public static ServiceReferenceHolder getInstance() {
-        return instance;
-    }
-
     /**
      * Returns the current {@link APIManagerConfiguration} instance.
      *

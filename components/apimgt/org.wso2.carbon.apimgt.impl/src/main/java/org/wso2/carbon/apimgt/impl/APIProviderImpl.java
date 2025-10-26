@@ -175,7 +175,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.LifeCycleUtils;
-import org.wso2.carbon.apimgt.impl.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.utils.SimpleContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
@@ -1030,7 +1029,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.setMonetizationEnabled(existingAPI.isMonetizationEnabled());
         Gson gson = new Gson();
         String organization = api.getOrganization();
-        MCPUtils.validateMCPResources(api.getUuid(), api.getOrganization(), api.getUriTemplates());
         Map<String, String> oldMonetizationProperties =
                 gson.fromJson(existingAPI.getMonetizationProperties().toString(),
                         HashMap.class);
@@ -1279,7 +1277,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException If fails to update API.
      */
     private void updateAPI(API api, int tenantId, String username) throws APIManagementException {
-        MCPUtils.validateMCPResources(api.getUuid(), api.getOrganization(), api.getUriTemplates());
+
         apiMgtDAO.updateAPI(api, username);
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
@@ -1391,10 +1389,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiMgtDAO.removeApiOperationMapping(oldURITemplates);
             }
         }
-        APIUtil.validateAndUpdateURITemplates(api, tenantId);
-        apiMgtDAO.updateURITemplates(api, oldURITemplates, tenantId);
-        if (log.isDebugEnabled()) {
-            log.debug("Successfully updated the URI templates of API: " + apiIdentifier + " in the database");
+        List<API> mcpServersAssociatedWithApi = getMCPServersUsedByAPI(api.getUuid(), api.getOrganization());
+        if (mcpServersAssociatedWithApi == null || mcpServersAssociatedWithApi.isEmpty()) {
+            APIUtil.validateAndUpdateURITemplates(api, tenantId);
+            apiMgtDAO.updateURITemplates(api, tenantId);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated the URI templates of API: " + apiIdentifier + " in the database");
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "Skipping URI template update for API: " + apiIdentifier + " as it is associated with MCP server(s)");
+            }
         }
         // Update the resource scopes of the API in KM.
         // Need to remove the old local scopes and register new local scopes and, update the resource scope mappings
@@ -6419,10 +6425,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
-                APIRevision apiRevision = apiMgtDAO.checkAPIUUIDIsARevisionUUID(uuid);
-                String canonicalUuid =
-                        (apiRevision != null && apiRevision.getApiUUID() != null) ? apiRevision.getApiUUID() : uuid;
-                api.getId().setId(apiMgtDAO.getAPIID(canonicalUuid));
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(),
                         api.getAccessControlRoles());
                 // populate relevant external info environment
@@ -7648,9 +7650,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
         apiIdentifier.setUuid(apiId);
-        Set<URITemplate> uriTemplatesOfAPIRevision = apiMgtDAO.getURITemplatesOfAPIRevision(apiRevision);
-        MCPUtils.validateMCPResources(apiId, organization, uriTemplatesOfAPIRevision);
-        API api = getAPIbyUUID(apiRevisionId, organization);
         try {
             apiPersistenceInstance.restoreAPIRevision(new Organization(organization),
                     apiIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
@@ -7659,7 +7658,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
                     ERROR_RESTORING_API_REVISION, apiRevision.getApiUUID()));
         }
-        apiMgtDAO.restoreAPIRevision(api, apiRevision, organization);
+        apiMgtDAO.restoreAPIRevision(apiRevision, organization);
     }
 
     /**
