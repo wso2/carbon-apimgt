@@ -439,6 +439,14 @@ public interface APIManager {
     boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException;
 
     /**
+     * Check whether the given scope key is already available in the Key Manager.
+     * @param scopeKey candidate scope key
+     * @param tenantDomain tenant domain
+     * @return true if the scope key is already available in KM
+     */
+    boolean isScopeKeyExistInKeyManager(String scopeKey, String tenantDomain);
+
+    /**
      * Check whether the given scope key is already assigned to any API under given tenant.
      *
      * @param scopeKey     Scope

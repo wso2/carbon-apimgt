@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.federated.gateway;
+package org.wso2.carbon.apimgt.federated.gateway;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -45,7 +45,7 @@ import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.federated.gateway.util.FederatedGatewayUtil;
+import org.wso2.carbon.apimgt.federated.gateway.util.FederatedGatewayUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.IOException;
@@ -67,8 +67,8 @@ import java.util.concurrent.TimeUnit;
 import static org.wso2.carbon.apimgt.impl.APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS;
 import static org.wso2.carbon.apimgt.impl.APIConstants.DELEM_COLON;
 import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil.fromAPItoDTO;
-import static org.wso2.carbon.federated.gateway.util.FederatedGatewayConstants.DISCOVERED_API_LIST;
-import static org.wso2.carbon.federated.gateway.util.FederatedGatewayConstants.PUBLISHED_API_LIST;
+import static org.wso2.carbon.apimgt.federated.gateway.util.FederatedGatewayConstants.DISCOVERED_API_LIST;
+import static org.wso2.carbon.apimgt.federated.gateway.util.FederatedGatewayConstants.PUBLISHED_API_LIST;
 
 /**
  * This class is responsible for scheduling and executing the discovery of APIs in a federated gateway environment.
@@ -106,16 +106,10 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
         if (gatewayConfiguration != null && gatewayConfiguration.getDiscoveryImplementation() != null) {
             if (StringUtils.isNotEmpty(gatewayConfiguration.getDiscoveryImplementation())) {
                 try {
-                    FederatedAPIDiscovery federatedAPIDiscovery = (FederatedAPIDiscovery)
-                            Class.forName(gatewayConfiguration.getDiscoveryImplementation())
-                                    .getDeclaredConstructor().newInstance();
-                    log.info("Initializing federated API discovery for environment: " + environment.getName()
-                            + " and organization: " + organization);
-                    federatedAPIDiscovery.init(environment, organization);
                     String taskKey = "FederatedAPIDiscovery" + DELEM_COLON + environment.getName() + DELEM_COLON
                             + organization;
                     ScheduledFuture<?> scheduledFuture = scheduledDiscoveryTasks.get(taskKey);
-                    // Cancel existing task if one exists
+                    // Cancel an existing task if one exists
                     if (scheduledFuture != null) {
                         if (log.isDebugEnabled()) {
                             log.debug("Cancelling existing discovery task for: " + taskKey + " to reschedule.");
@@ -127,6 +121,12 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     if (GatewayMode.WRITE_ONLY.getMode().equals(environment.getMode()) || scheduleWindow <= 0) {
                         log.info("Federated API discovery is disabled for environment: " + environment.getName());
                     } else {
+                        log.info("Initializing federated API discovery for environment: " + environment.getName()
+                                + " and organization: " + organization);
+                        FederatedAPIDiscovery federatedAPIDiscovery = (FederatedAPIDiscovery)
+                                Class.forName(gatewayConfiguration.getDiscoveryImplementation())
+                                        .getDeclaredConstructor().newInstance();
+                        federatedAPIDiscovery.init(environment, organization);
                         long ttl = TimeUnit.MINUTES.toMillis(scheduleWindow) / 2;
                         ScheduledFuture<?> newTask = executor.scheduleAtFixedRate(() -> {
                             boolean acquired = false;
@@ -218,7 +218,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                 API api = discoveredAPI.getApi();
                 try {
                     String apiKey = apidto.getName() + DELEM_COLON + apidto.getVersion();
-                    String envScopedKey = apidto.getName() + APIConstants.DELEM_UNDERSCORE
+                    String envScopedKey = apidto.getName() + APIConstants.KEY_SEPARATOR
                             + environment.getName() + DELEM_COLON + apidto.getVersion();
 
                     // Determine import mode
@@ -230,7 +230,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             alreadyDiscoveredAPIsList.contains(envScopedKey);
                     boolean alreadyExistsWithEnvScope = alreadyDiscoveredAPIsList.contains(envScopedKey);
                     if (!update && !alreadyExistsWithEnvScope) {
-                        String envPathName = apidto.getName() + APIConstants.DELEM_UNDERSCORE
+                        String envPathName = apidto.getName() + APIConstants.KEY_SEPARATOR
                                 + environment.getName();
                         Optional<String> existingApiOpt = alreadyDiscoveredAPIsList.stream()
                                 .map(String::trim)
@@ -274,7 +274,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                         if (api.getDisplayName() == null) {
                             apidto.displayName(apidto.getName());
                         }
-                        apidto.setName(apidto.getName() + APIConstants.DELEM_UNDERSCORE + environment.getName());
+                        apidto.setName(apidto.getName() + APIConstants.KEY_SEPARATOR + environment.getName());
                     }
                     //if the discovered API is a new version, we need to create a new API version in the system
                     API newAPI = null;

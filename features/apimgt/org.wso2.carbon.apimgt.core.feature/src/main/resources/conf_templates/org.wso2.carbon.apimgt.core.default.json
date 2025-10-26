@@ -76,6 +76,7 @@
   "apim.key_manager.enable_application_scopes_for_resident_km": false,
   "apim.key_manager.allow_subscription_validation_disabling": true,
   "apim.key_manager.skip_create_resident_key_manager": false,
+  "apim.key_manager.disable_retrieve_key_mapping": false,
   "apim.monetization.publish_duration": "1d",
   "apim.monetization.granularity": "days",
   "apim.monetization.monetization_impl": "org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl",
@@ -258,9 +259,9 @@
       "http_method": "GET,DELETE,PUT,POST"
     }
   ],
-  "apim.synapse_artifact_generator.thread_pool.core_pool_size": "10",
-  "apim.synapse_artifact_generator.thread_pool.max_pool_size": "50",
+  "apim.synapse_artifact_generator.thread_pool.core_pool_size": "4",
+  "apim.synapse_artifact_generator.thread_pool.max_pool_size": "4",
   "apim.synapse_artifact_generator.thread_pool.keep_alive_time_ms": "60000",
-  "apim.synapse_artifact_generator.thread_pool.queue_capacity": "1000",
+  "apim.synapse_artifact_generator.thread_pool.queue_capacity": "50",
   "apim.certificate_manager.events_enabled": true
 }

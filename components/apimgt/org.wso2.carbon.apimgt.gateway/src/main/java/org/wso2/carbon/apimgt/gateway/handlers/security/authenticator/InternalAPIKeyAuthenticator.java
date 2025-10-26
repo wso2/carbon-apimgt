@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.JWTTokenPayloadInfo;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
@@ -166,17 +167,27 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                         getProperty(Constants.Configuration.HTTP_METHOD);
                 String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
 
-                String resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
-                        matchingResource, httpMethod);
-                VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
-                verbInfoDTO.setHttpVerb(httpMethod);
-                //Not doing resource level authentication
-                verbInfoDTO.setAuthType(APIConstants.AUTH_NO_AUTHENTICATION);
-                verbInfoDTO.setRequestKey(resourceCacheKey);
-                verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
-                List<VerbInfoDTO> verbInfoList = new ArrayList<>();
-                verbInfoList.add(verbInfoDTO);
-                synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoList);
+                if (Utils.isMCPRequest(synCtx)) {
+                    List<VerbInfoDTO> existingInfoDTOList = (List<VerbInfoDTO>) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
+                    if (existingInfoDTOList != null) {
+                        for (VerbInfoDTO verbInfo : existingInfoDTOList) {
+                            verbInfo.setAuthType(APIConstants.AUTH_NO_AUTHENTICATION);
+                        }
+                        synCtx.setProperty(APIConstants.VERB_INFO_DTO, existingInfoDTOList);
+                    }
+                } else {
+                    String resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
+                            matchingResource, httpMethod);
+                    VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+                    verbInfoDTO.setHttpVerb(httpMethod);
+                    //Not doing resource level authentication
+                    verbInfoDTO.setAuthType(APIConstants.AUTH_NO_AUTHENTICATION);
+                    verbInfoDTO.setRequestKey(resourceCacheKey);
+                    verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
+                    List<VerbInfoDTO> verbInfoList = new ArrayList<>();
+                    verbInfoList.add(verbInfoDTO);
+                    synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoList);
+                }
 
                 String cacheKey = GatewayUtils.getAccessTokenCacheKey(tokenIdentifier, apiContext, apiVersion,
                         matchingResource, httpMethod);

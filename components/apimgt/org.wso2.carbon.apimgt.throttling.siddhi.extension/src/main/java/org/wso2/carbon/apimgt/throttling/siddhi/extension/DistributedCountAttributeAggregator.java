@@ -52,6 +52,10 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
             new ConcurrentHashMap<>();
     private final Object kvStoreLock = new Object();
 
+    // Track the error logging status of syncing with key-value store
+    private final AtomicLong lastErrorLogTimestamp = new AtomicLong(0L);
+    private static final long ERROR_LOG_INTERVAL_MS = 30000L; // 30 seconds
+
     // Distributed throttling configs
     private static volatile DistributedThrottleConfig DISTRIBUTED_THROTTLE_CONFIG = null;
     private static boolean distributedThrottlingEnabled = false;
@@ -139,18 +143,20 @@ public class DistributedCountAttributeAggregator extends AttributeAggregator {
                 return;
             }
             long currentUnsyncedCount = unsyncedCounter.getAndSet(0L);
-            if (currentUnsyncedCount == 0) {
-                localCounter.set(Long.parseLong(kvStoreClient.get(key)));
-                return;
-            }
             try {
-                if (currentUnsyncedCount > 0) {
+                if (currentUnsyncedCount == 0) {
+                    localCounter.set(Long.parseLong(kvStoreClient.get(key)));
+                } else if (currentUnsyncedCount > 0) {
                     localCounter.set(kvStoreClient.incrementBy(key, currentUnsyncedCount));
                 } else {
                     localCounter.set(kvStoreClient.decrementBy(key, Math.abs(currentUnsyncedCount)));
                 }
             } catch (KeyValueStoreException e) {
-                log.error("Error syncing with key-value store for the key " + key, e);
+                long currentTimeMillis = System.currentTimeMillis();
+                if (currentTimeMillis - lastErrorLogTimestamp.get() > ERROR_LOG_INTERVAL_MS) {
+                    log.error("Error syncing with key-value store for the key " + key, e);
+                    lastErrorLogTimestamp.set(currentTimeMillis);
+                }
                 unsyncedCounter.addAndGet(currentUnsyncedCount);
             }
         }

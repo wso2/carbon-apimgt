@@ -200,6 +200,13 @@ public class APIManagerConfiguration {
 
     private Map<String, ExtensionListener> extensionListenerMap = new HashMap<>();
 
+    public Map<String, Boolean> getDoMediateExtensionFaultSequenceMap() {
+
+        return doMediateExtensionFaultSequenceMap;
+    }
+
+    private Map<String, Boolean> doMediateExtensionFaultSequenceMap = new HashMap<>();
+
     public static Properties getRealtimeTokenRevocationNotifierProperties() {
 
         return realtimeNotifierProperties;
@@ -579,6 +586,9 @@ public class APIManagerConfiguration {
                     OMElement port = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PORT));
                     OMElement user = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_USER));
                     OMElement password = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PASSWORD));
+                    OMElement databaseId = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_DATABASE_ID));
+                    OMElement connectionTimeout = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_CONNECTION_TIMEOUT));
+                    OMElement isSslEnabled = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_IS_SSL_ENABLED));
 
                     if (host != null && StringUtils.isNotBlank(host.getText())) {
                         distributedThrottleConfig.setHost(host.getText());
@@ -600,6 +610,23 @@ public class APIManagerConfiguration {
                     }
                     if (password != null) {
                         distributedThrottleConfig.setPassword(MiscellaneousUtil.resolve(password, secretResolver).toCharArray());
+                    }
+
+                    if (databaseId != null && StringUtils.isNotBlank(databaseId.getText())) {
+                        try {
+                            distributedThrottleConfig.setDatabaseId(Integer.parseInt(databaseId.getText().trim()));
+                        } catch (NumberFormatException e) {
+                            log.warn("Invalid DatabaseId value: " + databaseId.getText(), e);
+                        }
+                    }
+                    if (connectionTimeout != null) {
+                        try {
+                            distributedThrottleConfig.setConnectionTimeout(Integer.parseInt(connectionTimeout.getText().trim()));
+                        } catch (NumberFormatException e) {
+                            log.warn("Invalid connectionTimeout value: " + connectionTimeout.getText(), e);
+                        }                    }
+                    if (isSslEnabled != null) {
+                        distributedThrottleConfig.setSslEnabled(Boolean.parseBoolean(isSslEnabled.getText().trim()));
                     }
 
                     Iterator<OMElement> properties = propertiesElement.getChildElements();
@@ -2254,7 +2281,8 @@ public class APIManagerConfiguration {
         OMElement usagePublisherElement =
                 element.getFirstChildWithName(new QName(APIConstants.Monetization.USAGE_PUBLISHER_CONFIG));
         if (usagePublisherElement != null) {
-            if (analyticsProperties.get("type") != null && !analyticsProperties.get("type").trim().equals("")) {
+            if (analyticsProperties.get("type") != null && !analyticsProperties.get("type").trim().equals("")
+                    && !analyticsProperties.get("type").equals("choreo")) {
                 OMElement analyticsHost = usagePublisherElement.getFirstChildWithName(
                         new QName(APIConstants.Monetization.ANALYTICS_HOST));
 
@@ -2289,6 +2317,13 @@ public class APIManagerConfiguration {
 
                 if (analyticsIndexName != null) {
                     monetizationConfigurationDto.setAnalyticsIndexName(analyticsIndexName.getText());
+                }
+
+                OMElement analyticsProtocol = usagePublisherElement.getFirstChildWithName(
+                        new QName(APIConstants.Monetization.ANALYTICS_PROTOCOL));
+
+                if (analyticsProtocol != null) {
+                    monetizationConfigurationDto.setAnalyticsProtocol(analyticsProtocol.getText());
                 }
             } else {
                 OMElement choreoInsightAPIEndpointElement = usagePublisherElement.getFirstChildWithName(
@@ -2881,11 +2916,22 @@ public class APIManagerConfiguration {
                     listenerElement
                             .getFirstChildWithName(new QName(
                                     APIConstants.ExtensionListenerConstants.EXTENSION_LISTENER_CLASS_NAME));
+            OMElement enableExtensionFaultSequenceMediationElement =
+                    listenerElement
+                            .getFirstChildWithName(new QName(APIConstants
+                                    .ExtensionListenerConstants.EXTENSION_LISTENER_DO_MEDIATE_EXTENSION_FAULT_SEQUENCE));
             if (listenerTypeElement != null && listenerClassElement != null) {
                 String listenerClass = listenerClassElement.getText();
+                boolean enableExtensionFaultSequenceMediation = false;
+                if (enableExtensionFaultSequenceMediationElement != null) {
+                    enableExtensionFaultSequenceMediation =
+                            Boolean.parseBoolean(enableExtensionFaultSequenceMediationElement.getText());
+                }
                 try {
                     ExtensionListener extensionListener = (ExtensionListener) APIUtil.getClassInstance(listenerClass);
                     extensionListenerMap.put(listenerTypeElement.getText().toUpperCase(), extensionListener);
+                    doMediateExtensionFaultSequenceMap.put(listenerTypeElement.getText().toUpperCase(),
+                            enableExtensionFaultSequenceMediation);
                 } catch (InstantiationException e) {
                     log.error("Error while instantiating class " + listenerClass, e);
                 } catch (IllegalAccessException e) {

@@ -716,6 +716,9 @@ public enum ExceptionCodes implements ErrorHandler {
 
     RETIRED_API_REVISION_DEPLOYMENT_UNSUPPORTED(903227, "Deploying API Revisions is not supported for retired APIs",
             400, "Deploying API Revisions is not supported for retired APIs. ApiId: %s"),
+    ACTION_NOT_ALLOWED_FOR_API_INITIATED_FROM_GATEWAY(900517, "Retire action is not allowed for the API " +
+            "which is initiated from the Gateway", 400,
+            "Retire action is not allowed for the API which is initiated from the Gateway. ApiId: %s", false ),
 
     REVISION_NOT_FOUND_FOR_REVISION_NUMBER(903228, "No revision found", 404,
             "No revision found for revision number %s"),
@@ -834,7 +837,8 @@ public enum ExceptionCodes implements ErrorHandler {
     MCP_SERVER_TOOL_LIST_GENERATION_FAILED(904000, "Failed to generate tool list", 400,
             "The MCP server returned an invalid or empty response when generating the tool list."),
     API_UPDATE_FORBIDDEN_PER_MCP_USAGE(904001, "API update not allowed due to MCP server usage", 403,
-            "Updating this API's resources is forbidden because it is used to generate one or more MCP servers."),
+            "Updating this API's resources is forbidden because it is used to generate one or more MCP servers.",
+            false),
     MCP_REQUEST_BODY_CANNOT_BE_NULL(904002, "MCP request body cannot be null", 400,
             "The request body is required and cannot be null or empty."),
     MCP_REQUEST_URL_CANNOT_BE_NULL(904003, "Server URL cannot be null", 400,

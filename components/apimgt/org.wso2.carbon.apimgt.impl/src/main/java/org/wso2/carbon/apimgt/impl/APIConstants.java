@@ -797,6 +797,7 @@ public final class APIConstants {
     public static final String LC_CHECK_ITEM_VALUE = "value:";
     public static final String LC_CHECK_ITEM_ORDER = "order:";
     public static final String LC_PUBLISH_LC_STATE = "Publish";
+    public static final String LC_RETIRE_LC_STATE = "Retire";
 
     public static final String SUPER_TENANT_DOMAIN = "carbon.super";
     public static final String TENANT_PREFIX = "/t/";
@@ -1046,6 +1047,8 @@ public final class APIConstants {
             API_KEY_VALIDATOR + "EnableLightWeightAPIKeyGeneration";
     public static final String ALLOW_SUBSCRIPTION_VALIDATION_DISABLING = API_KEY_VALIDATOR +
             "AllowSubscriptionValidationDisabling";
+    public static final String DISABLE_RETRIEVE_KEY_MAPPING = API_KEY_VALIDATOR + "DisableRetrieveKeyMapping";
+
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH = "/api/identity/oauth2/v1.0/scopes";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
@@ -1652,6 +1655,7 @@ public final class APIConstants {
 
     public static final String US_ASCII = "US-ASCII";
     public static final String HASH = "hash";
+    public static final String SUB_TYPE = "SubType";
 
     public static class DigestAuthConstants {
 
@@ -1768,6 +1772,9 @@ public final class APIConstants {
     public static final String DISTRIBUTED_THROTTLE_PORT =  "Port";
     public static final String DISTRIBUTED_THROTTLE_USER =  "User";
     public static final String DISTRIBUTED_THROTTLE_PASSWORD =  "Password";
+    public static final String DISTRIBUTED_THROTTLE_DATABASE_ID =  "DatabaseId";
+    public static final String DISTRIBUTED_THROTTLE_CONNECTION_TIMEOUT =  "ConnectionTimeout";
+    public static final String DISTRIBUTED_THROTTLE_IS_SSL_ENABLED =  "IsSslEnabled";
     public static final String DISTRIBUTED_THROTTLE_MAX_TOTAL = "MaxTotal";
     public static final String DISTRIBUTED_THROTTLE_MAX_IDLE = "MaxIdle";
     public static final String DISTRIBUTED_THROTTLE_MIN_IDLE = "MinIdle";
@@ -2796,6 +2803,7 @@ public final class APIConstants {
         public static final String ANALYTICS_USERNAME = "AnalyticsUsername";
         public static final String ANALYTICS_PASSWORD = "AnalyticsPassword";
         public static final String ANALYTICS_INDEX_NAME = "AnalyticsIndexName";
+        public static final String ANALYTICS_PROTOCOL = "AnalyticsProtocol";
         public static final String IS_ATTRIBITE_REQUIRED = "Required";
         public static final String IS_ATTRIBUTE_HIDDEN = "Hidden";
         public static final String ATTRIBUTE_DESCRIPTION = "Description";
@@ -2958,6 +2966,7 @@ public final class APIConstants {
     public static final String RECOMMENDATIONS_CACHE_NAME = "APIRecommendationsCache";
     public static final String RECOMMENDATIONS_CACHE_KEY = "Recommendations";
     public static final String LAST_UPDATED_CACHE_KEY = "LastUpdated";
+    public static final String SYNAPSE_ARTIFACT_CACHE = "synapseArtifactCache";
 
     public static final String TOPIC_VALIDITY = "TOPIC_VALIDITY";
     public static final String CLONED_ITERATION_INDEX_PROPERTY = "CLONED_ITERATION_INDEX";
@@ -3442,6 +3451,9 @@ public final class APIConstants {
         public static final String EXTENSION_LISTENER = "ExtensionListener";
         public static final String EXTENSION_TYPE = "Type";
         public static final String EXTENSION_LISTENER_CLASS_NAME = "ClassName";
+        public static final String EXTENSION_LISTENER_DO_MEDIATE_EXTENSION_FAULT_SEQUENCE =
+                "EnableExtensionFaultSequenceMediation";
+        public static final String EXTENSION_FAULT_SEQUENCE_NAME = "_extension_fault_handler_";
         public static final int API_EXTENSION_LISTENER_ERROR = 900300;
         public static final String API_EXTENSION_LISTENER_ERROR_MESSAGE = "API Extension Listener Error";
     }
@@ -3751,11 +3763,13 @@ public final class APIConstants {
             public static final int METHOD_NOT_FOUND_CODE = -32601;
             public static final int INVALID_PARAMS_CODE = -32602;
             public static final int INTERNAL_ERROR_CODE = -32603;
+            public static final int CONNECTION_CLOSED = -32000;
             public static final String PARSE_ERROR_MESSAGE = "Parse error";
             public static final String INVALID_REQUEST_MESSAGE = "Invalid Request";
             public static final String METHOD_NOT_FOUND_MESSAGE = "Method not found";
             public static final String INVALID_PARAMS_MESSAGE = "Invalid params";
             public static final String INTERNAL_ERROR_MESSAGE = "Internal error";
+            public static final String CONNECTION_CLOSED_MESSAGE = "Connection closed";
         }
     }
 

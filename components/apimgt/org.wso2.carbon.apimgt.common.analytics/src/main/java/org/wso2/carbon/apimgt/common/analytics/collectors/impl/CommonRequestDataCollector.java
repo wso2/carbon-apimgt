@@ -33,6 +33,7 @@ import static org.wso2.carbon.apimgt.common.analytics.Constants.IPV4_PROP_TYPE;
 import static org.wso2.carbon.apimgt.common.analytics.Constants.IPV6_MASK_VALUE;
 import static org.wso2.carbon.apimgt.common.analytics.Constants.IPV6_PROP_TYPE;
 import static org.wso2.carbon.apimgt.common.analytics.Constants.MASK_VALUE;
+import static org.wso2.carbon.apimgt.common.analytics.Constants.STRING_PROP;
 import static org.wso2.carbon.apimgt.common.analytics.Constants.USERNAME_PROP_TYPE;
 
 /**
@@ -84,10 +85,11 @@ public abstract class CommonRequestDataCollector extends AbstractRequestDataColl
         if (log.isDebugEnabled()) {
             log.debug("Masking analytics data of type: " + type);
         }
+        String[] octets;
         if (value instanceof String) {
             switch (type) {
                 case IPV4_PROP_TYPE:
-                    String[] octets = value.toString().split("\\.");
+                    octets = value.toString().split("\\.");
 
                     // Sample output: 192.168.***.98
                     return octets[0] + "." + octets[1] + "." + IPV4_MASK_VALUE + "." + octets[3];
@@ -101,9 +103,13 @@ public abstract class CommonRequestDataCollector extends AbstractRequestDataColl
                     String[] email = value.toString().split("@");
 
                     // Sample output: *****@gmail.com
-                    return MASK_VALUE + "@" + email[1];
+                    if (email.length >= 2) {
+                        return MASK_VALUE + "@" + email[1];
+                    } else {
+                        return MASK_VALUE;
+                    }
                 case USERNAME_PROP_TYPE:
-                    return MASK_VALUE;
+                case STRING_PROP:
                 default:
                     // Sample output: ********
                     return MASK_VALUE;

@@ -71,16 +71,21 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
     @Override
     public Response workflowsExternalWorkflowRefGet(String externalWorkflowRef, MessageContext messageContext)
             throws APIManagementException {
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        Workflow workflow;
+        APIAdmin apiAdmin = new APIAdminImpl();
         try {
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIAdmin apiAdmin = new APIAdminImpl();
-            Workflow workflow = apiAdmin.getworkflowReferenceByExternalWorkflowReferenceID(externalWorkflowRef,
+            workflow = apiAdmin.getworkflowReferenceByExternalWorkflowReferenceID(externalWorkflowRef,
                     createdStatus, tenantDomain);
-            return Response.ok().entity(WorkflowMappingUtil.fromWorkflowsToInfoDTO(workflow)).build();
         } catch (APIManagementException e) {
-            throw new APIManagementException("Error while retrieving workflow request by the " +
-                    "external workflow reference.", ExceptionCodes.FAILED_TO_RETRIEVE_WORKFLOW_BY_EXTERNAL_REFERENCE_ID);
+            throw new APIManagementException("Error while retrieving workflow request by the external workflow " +
+                    "reference.", ExceptionCodes.FAILED_TO_RETRIEVE_WORKFLOW_BY_EXTERNAL_REFERENCE_ID);
         }
+        if (workflow == null) {
+            throw new APIManagementException("Workflow not found for : " + externalWorkflowRef,
+                    ExceptionCodes.WORKFLOW_NOT_FOUND);
+        }
+        return Response.ok().entity(WorkflowMappingUtil.fromWorkflowsToInfoDTO(workflow)).build();
     }
 
     /*

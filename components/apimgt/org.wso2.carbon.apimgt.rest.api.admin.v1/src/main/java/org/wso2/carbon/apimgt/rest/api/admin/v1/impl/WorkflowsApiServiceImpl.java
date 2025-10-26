@@ -24,12 +24,12 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -53,11 +53,12 @@ import javax.ws.rs.core.Response;
 import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
 /**
- * This class is contains rest apis related to workflows
+ * This class contains rest apis related to workflows
  */
 public class WorkflowsApiServiceImpl implements WorkflowsApiService {
 
     private static final Log log = LogFactory.getLog(WorkflowsApiService.class);
+    private final String CREATED_STATUS = "CREATED";
 
     /**
      * This is used to get the workflow pending request according to ExternalWorkflowReference
@@ -69,19 +70,22 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
     public Response workflowsExternalWorkflowRefGet(String externalWorkflowRef, MessageContext messageContext)
             throws APIManagementException {
         WorkflowInfoDTO workflowinfoDTO;
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        Workflow workflow = null;
+        APIAdmin apiAdmin = new APIAdminImpl();
         try {
-            Workflow workflow;
-            String status = "CREATED";
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIAdmin apiAdmin = new APIAdminImpl();
-            workflow = apiAdmin.getworkflowReferenceByExternalWorkflowReferenceID(externalWorkflowRef, status, tenantDomain);
-            workflowinfoDTO = WorkflowMappingUtil.fromWorkflowsToInfoDTO(workflow);
-            return Response.ok().entity(workflowinfoDTO).build();
+            workflow = apiAdmin.getworkflowReferenceByExternalWorkflowReferenceID(externalWorkflowRef, CREATED_STATUS,
+                    tenantDomain);
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving workflow request by the " +
-                    "external workflow reference. ", e, log);
+            throw new APIManagementException("Error while retrieving workflow request by the external workflow " +
+                    "reference.", ExceptionCodes.FAILED_TO_RETRIEVE_WORKFLOW_BY_EXTERNAL_REFERENCE_ID);
         }
-        return null;
+        if (workflow == null) {
+            throw new APIManagementException("Workflow not found for : " + externalWorkflowRef,
+                    ExceptionCodes.WORKFLOW_NOT_FOUND);
+        }
+        workflowinfoDTO = WorkflowMappingUtil.fromWorkflowsToInfoDTO(workflow);
+        return Response.ok().entity(workflowinfoDTO).build();
     }
 
     /**
@@ -90,7 +94,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
      * @param limit        maximum number of workflow returns
      * @param offset       starting index
      * @param accept       accept header value
-     * @param workflowType is the the type of the workflow request. (e.g: Application Creation, Application Subscription etc.)
+     * @param workflowType type of the workflow request. (e.g: Application Creation, Application Subscription etc.)
      * @return
      */
     @Override
@@ -102,28 +106,48 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
         WorkflowListDTO workflowListDTO;
         try {
             Workflow[] workflows;
-            String status = "CREATED";
             APIAdmin apiAdmin = new APIAdminImpl();
             if(workflowType != null) {
-                if (workflowType.equals("APPLICATION_CREATION")) {
-                    workflowType = "AM_APPLICATION_CREATION";
-                } else if (workflowType.equals("SUBSCRIPTION_CREATION")) {
-                    workflowType = "AM_SUBSCRIPTION_CREATION";
-                } else if (workflowType.equals("USER_SIGNUP")) {
-                    workflowType = "AM_USER_SIGNUP";
-                } else if (workflowType.equals("APPLICATION_REGISTRATION_PRODUCTION")) {
-                    workflowType = "AM_APPLICATION_REGISTRATION_PRODUCTION";
-                } else if (workflowType.equals("APPLICATION_REGISTRATION_SANDBOX")) {
-                    workflowType = "AM_APPLICATION_REGISTRATION_SANDBOX";
-                } else if (workflowType.equals("API_STATE")) {
-                    workflowType = "AM_API_STATE";
-                } else if (workflowType.equals("API_PRODUCT_STATE")) {
-                    workflowType = "AM_API_PRODUCT_STATE";
-                } else if (workflowType.equals("AM_REVISION_DEPLOYMENT")) {
-                    workflowType = "AM_REVISION_DEPLOYMENT";
+                switch (workflowType) {
+                    case "APPLICATION_CREATION":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION;
+                        break;
+                    case "SUBSCRIPTION_CREATION":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION;
+                        break;
+                    case "USER_SIGNUP":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_USER_SIGNUP;
+                        break;
+                    case "APPLICATION_REGISTRATION_PRODUCTION":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION;
+                        break;
+                    case "APPLICATION_REGISTRATION_SANDBOX":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX;
+                        break;
+                    case "API_STATE":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_API_STATE;
+                        break;
+                    case "API_PRODUCT_STATE":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE;
+                        break;
+                    case "REVISION_DEPLOYMENT":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT;
+                        break;
+                    case "APPLICATION_DELETION":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION;
+                        break;
+                    case "APPLICATION_UPDATE":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE;
+                        break;
+                    case "SUBSCRIPTION_DELETION":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION;
+                        break;
+                    case "SUBSCRIPTION_UPDATE":
+                        workflowType = WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE;
+                        break;
                 }
             }
-            workflows = apiAdmin.getworkflows(workflowType, status, tenantDomain);
+            workflows = apiAdmin.getworkflows(workflowType, CREATED_STATUS, tenantDomain);
             workflowListDTO = WorkflowMappingUtil.fromWorkflowsToDTO(workflows, limit, offset);
             WorkflowMappingUtil.setPaginationParams(workflowListDTO, limit, offset,
                     workflows.length);

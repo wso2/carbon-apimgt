@@ -2979,8 +2979,12 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response updateAPISwagger(String apiId, String ifMatch, String apiDefinition, String url,
-                                     InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
+                                     InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext)
+            throws APIManagementException {
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Updating swagger definition of API : " + apiId);
+            }
             String updatedSwagger;
             //validate if api exists
             APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
@@ -3016,11 +3020,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while updating swagger definition of API: " + apiId, e, log);
-            } else {
-                String errorMessage = "Error while updating the swagger definition of the API: " + apiId + " - "
-                        + e.getMessage();
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+            throw e;
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -3804,7 +3805,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                             null, service, organization);
                 }
             } else {
-                //todo : need to verify
                 API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, organization);
                 if (APIConstants.API_TYPE_SOAPTOREST.equals(versionedAPI.getType())) {
                     updateSwagger(versionedAPI.getUuid(), versionedAPI.getSwaggerDefinition(), organization);

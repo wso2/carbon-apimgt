@@ -333,6 +333,10 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.SHA_256;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_DESCRIPTION;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_INFO;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_TITLE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_VER;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -8660,6 +8664,17 @@ public final class APIUtil {
         return allEnvironments;
     }
 
+    /**
+     * Retrieves all available environments along with their respective details.
+     *
+     * @return A map where the key is the organization and the value is a list of Environment objects
+     *         associated with that organization.
+     * @throws APIManagementException If an error occurs while fetching the environments from the data source.
+     */
+    public static Map<String, List<Environment>> getAllEnvironments() throws APIManagementException {
+        return ApiMgtDAO.getInstance().getAllEnvironments();
+    }
+
     // Take organization as a parameter
     public static Map<String, Environment> getEnvironments(String organization) throws APIManagementException {
         // get dynamic gateway environments read from database
@@ -10595,6 +10610,18 @@ public final class APIUtil {
         return id;
     }
 
+    /**
+     * Checks if the API with the given UUID and organization has been discovered from the gateway.
+     *
+     * @param uuid The unique identifier of the API.
+     * @param organization The organization associated with the API.
+     * @return true if the API is discovered from the gateway, false otherwise.
+     * @throws APIManagementException if an error occurs while fetching the information.
+     */
+    public static boolean isAPIDiscoveredFromGW(String uuid, String organization) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getIsAPIInitiatedFromGateway(uuid, organization);
+    }
+
     public static String[] getFilteredUserRoles(String username) throws APIManagementException {
         String[] userRoles = APIUtil.getListOfRoles(username);
         String skipRolesByRegex = APIUtil.getSkipRolesByRegex();
@@ -11928,7 +11955,7 @@ public final class APIUtil {
             GatewayAgentConfiguration gatewayConfiguration = org.wso2.carbon.apimgt.impl.internal.
                     ServiceReferenceHolder.getInstance().
                     getExternalGatewayConnectorConfiguration(api.getGatewayType());
-            if (gatewayConfiguration != null) {
+            if (gatewayConfiguration != null && gatewayConfiguration.getGatewayDeployerImplementation() != null) {
                 GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration
                         .getGatewayDeployerImplementation()).getDeclaredConstructor().newInstance();
                 if (deployer != null) {
@@ -12073,5 +12100,32 @@ public final class APIUtil {
     public static SolaceConfig getSolaceConfig() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getSolaceConfig();
+    }
+
+    /**
+     * Update the Swagger definition of an API with its version.
+     *
+     * @param api The API object whose Swagger definition needs to be updated.
+     */
+    public static void updateAPISwaggerWithVersion(API api) {
+        String swaggerDefinition = api.getSwaggerDefinition();
+
+        if (swaggerDefinition != null) {
+            JsonObject apiSpec = JsonParser.parseString(swaggerDefinition).getAsJsonObject();
+            JsonObject infoObject = apiSpec.has(SWAGGER_INFO) && apiSpec.get(SWAGGER_INFO).isJsonObject() ?
+                    apiSpec.getAsJsonObject(SWAGGER_INFO) : null;
+            if (infoObject != null) {
+                infoObject.addProperty(SWAGGER_VER, api.getId().getVersion());
+            } else {
+                JsonObject newInfoObject = new JsonObject();
+                newInfoObject.addProperty(SWAGGER_TITLE, api.getId().getApiName());
+                newInfoObject.addProperty(SWAGGER_VER, api.getId().getVersion());
+                newInfoObject.addProperty(SWAGGER_DESCRIPTION, api.getDescription());
+                apiSpec.add(SWAGGER_INFO, newInfoObject);
+            }
+            api.setSwaggerDefinition(apiSpec.toString());
+        } else {
+            log.error("Swagger definition is null for API: " + api.getId().getApiName());
+        }
     }
 }

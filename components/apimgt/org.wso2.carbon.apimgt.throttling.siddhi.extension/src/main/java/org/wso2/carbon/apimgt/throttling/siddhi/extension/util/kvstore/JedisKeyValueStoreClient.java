@@ -28,6 +28,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.exceptions.JedisException;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Implementation for key-value store client that combines
@@ -45,10 +46,14 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
     private static volatile int port = ThrottlingConstants.DEFAULT_PORT;
     private static volatile String user;
     private static volatile char[] password;
+    private static volatile int databaseId;
     private static volatile int connectionTimeout;
     private static volatile boolean sslEnabled;
     private static volatile JedisPoolConfig poolConfig = new JedisPoolConfig();
 
+    // Track the error logging status of syncing with key-value store
+    private static final AtomicLong lastErrorLogTimestamp = new AtomicLong(0L);
+    private static final long ERROR_LOG_INTERVAL_MS = 30000L; // 30 seconds
 
     private static void populateKeyValueStoreConfigs() {
         try {
@@ -61,6 +66,7 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                 port = distributedConfig.getPort();
                 user = distributedConfig.getUser();
                 password = distributedConfig.getPassword();
+                databaseId = distributedConfig.getDatabaseId();
                 connectionTimeout = distributedConfig.getConnectionTimeout();
                 sslEnabled = distributedConfig.isSslEnabled();
                 poolConfig.setMaxTotal(distributedConfig.getMaxTotal());
@@ -81,6 +87,7 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                     port = redisConfig.getPort();
                     user = redisConfig.getUser();
                     password = redisConfig.getPassword();
+                    databaseId = redisConfig.getDatabaseId();
                     connectionTimeout = redisConfig.getConnectionTimeout();
                     sslEnabled = redisConfig.isSslEnabled();
                     poolConfig.setMaxTotal(redisConfig.getMaxTotal());
@@ -109,12 +116,13 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                     try {
                         if (StringUtils.isNotEmpty(user) && password != null) {
                             jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout, user,
-                                    String.valueOf(password), sslEnabled);
+                                    String.valueOf(password), databaseId, sslEnabled);
                         } else if (password != null) {
                             jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout,
-                                    String.valueOf(password), sslEnabled);
+                                    String.valueOf(password), databaseId, sslEnabled);
                         } else {
-                            jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout, sslEnabled);
+                            jedisPool = new JedisPool(poolConfig, host, port, connectionTimeout, null,
+                                    databaseId, sslEnabled);
                         }
                         return jedisPool;
                     } catch (Exception e) {
@@ -132,11 +140,19 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
             try {
                 return pool.getResource();
             } catch (JedisException e) {
-                log.error("Failed to get Jedis resource from pool. Check whether the server is running and accessible.", e);
+                long currentTimeMillis = System.currentTimeMillis();
+                if (currentTimeMillis - lastErrorLogTimestamp.get() > ERROR_LOG_INTERVAL_MS) {
+                    log.error("Failed to get Jedis resource from pool. Check whether the server is running and accessible.", e);
+                    lastErrorLogTimestamp.set(currentTimeMillis);
+                }
                 return null;
             }
         }
-        log.error("JedisPool is not initialized. Cannot get Jedis resource.");
+        long currentTimeMillis = System.currentTimeMillis();
+        if (currentTimeMillis - lastErrorLogTimestamp.get() > ERROR_LOG_INTERVAL_MS) {
+            log.error("JedisPool is not initialized. Cannot get Jedis resource.");
+            lastErrorLogTimestamp.set(currentTimeMillis);
+        }
         return null;
     }
 

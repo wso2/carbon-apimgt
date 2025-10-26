@@ -664,10 +664,6 @@ public class APIMappingUtil {
         boolean isGQLSubscription = StringUtils.equalsIgnoreCase(APIConstants.GRAPHQL_API, apidto.getType())
                 && isGraphQLSubscriptionsAvailable(apidto);
         if (!isWs) {
-            //prevent context appending in case the gateway is an external one
-            GatewayDeployer gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain,
-                    environment.getName());
-            context = gatewayDeployer != null ? "" : context;
             if (apidto.isInitiatedFromGateway()) {
                 APIURLsDTO extractedURLs;
                 extractedURLs = extractEndpointUrlsForDiscoveredApi(apidto);
@@ -684,6 +680,11 @@ public class APIMappingUtil {
             } else {
                 String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(apidto.getId(),
                         environment.getUuid());
+                // Retrieve gateway deployer to determine if this is an external gateway deployment
+                GatewayDeployer gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain,
+                        environment.getName());
+                // Only append context if not using external gateway (execution URLs already include full path)
+                String contextToAppend = (gatewayDeployer != null && externalReference != null) ? "" : context;
                 String httpUrl = (gatewayDeployer != null && externalReference != null) ?
                         gatewayDeployer.getAPIExecutionURL(externalReference, GatewayDeployer.HttpScheme.HTTP) :
                         vHost.getHttpUrl();
@@ -691,10 +692,10 @@ public class APIMappingUtil {
                         gatewayDeployer.getAPIExecutionURL(externalReference, GatewayDeployer.HttpScheme.HTTPS) :
                         vHost.getHttpsUrl();
                 if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
-                    apiurLsDTO.setHttp(httpUrl + context);
+                    apiurLsDTO.setHttp(httpUrl + contextToAppend);
                 }
                 if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
-                    apiurLsDTO.setHttps(httpsUrl + context);
+                    apiurLsDTO.setHttps(httpsUrl + contextToAppend);
                 }
             }
         }

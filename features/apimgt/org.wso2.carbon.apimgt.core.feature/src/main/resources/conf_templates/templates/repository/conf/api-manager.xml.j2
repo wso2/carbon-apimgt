@@ -500,6 +500,7 @@
       <EnableLightWeightAPIKeyGeneration>{{apim.key_manager.enable_lightweight_apikey_generation}}</EnableLightWeightAPIKeyGeneration>
       {% endif %}
       <AllowSubscriptionValidationDisabling>{{apim.key_manager.allow_subscription_validation_disabling}}</AllowSubscriptionValidationDisabling>
+      <DisableRetrieveKeyMapping>{{apim.key_manager.disable_retrieve_key_mapping}}</DisableRetrieveKeyMapping>
       {% if apim.key_manager.enable_application_scopes_for_resident_km is defined %}
       <EnableApplicationScopesForResidentKM>{{apim.key_manager.enable_application_scopes_for_resident_km}}</EnableApplicationScopesForResidentKM>
       {% endif %}
@@ -1323,6 +1324,15 @@
                 {% if apim.distributed_throttling.keyvalue_store.password is defined %}
                 <Password>{{apim.distributed_throttling.keyvalue_store.password}}</Password>
                 {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.database_id is defined %}
+                <DatabaseId>{{apim.distributed_throttling.keyvalue_store.database_id}}</DatabaseId>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.connection_timeout is defined %}
+                <ConnectionTimeout>{{apim.distributed_throttling.keyvalue_store.connection_timeout}}</ConnectionTimeout>
+                {% endif %}
+                {% if apim.distributed_throttling.keyvalue_store.ssl is defined %}
+                <IsSslEnabled>{{apim.distributed_throttling.keyvalue_store.ssl}}</IsSslEnabled>
+                {% endif %}
                 {% if apim.distributed_throttling.keyvalue_store.max_total is defined %}
                 <MaxTotal>{{apim.distributed_throttling.keyvalue_store.max_total}}</MaxTotal>
                 {% endif %}
@@ -1416,6 +1426,9 @@
              {% endif %}
              {% if apim.monetization.analytics_password is defined %}
                     <AnalyticsPassword>{{apim.monetization.analytics_password}}</AnalyticsPassword>
+             {% endif %}
+             {% if apim.monetization.analytics_protocol is defined %}
+                    <AnalyticsProtocol>{{apim.monetization.analytics_protocol}}</AnalyticsProtocol>
              {% endif %}
         </UsagePublisher>
         {% if apim.monetization.additional_attributes is defined %}
@@ -1881,6 +1894,7 @@
             <Sequence>_auth_failure_handler_.xml</Sequence>
             <Sequence>_build_.xml</Sequence>
             <Sequence>_cors_request_handler_.xml</Sequence>
+            <Sequence>_extension_fault_handler_.xml</Sequence>
             <Sequence>dispatchSeq.xml</Sequence>
             <Sequence>fault.xml</Sequence>
             <Sequence>guardrail_fault.xml</Sequence>
@@ -1946,6 +1960,7 @@
         <ExtensionListener>
             <Type>{{listener.type}}</Type>
             <ClassName>{{listener.class}}</ClassName>
+            <EnableExtensionFaultSequenceMediation>{{listener.enable_extension_fault_sequence_mediation}}</EnableExtensionFaultSequenceMediation>
         </ExtensionListener>
         {% endfor %}
     </ExtensionListeners>

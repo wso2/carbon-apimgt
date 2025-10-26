@@ -415,16 +415,15 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                             if (isHardLimitThrottled(synCtx, authContext, apiContext, apiVersion)) {
                                                 isThrottled = true;
 
-                                            } else if (((Axis2MessageContext)synCtx).getAxis2MessageContext()
-                                                    .getProperty(AI_API_REQUEST_METADATA) == null) {
-                                                ServiceReferenceHolder.getInstance().getThrottleDataPublisher().
-                                                        publishNonThrottledEvent(applicationLevelThrottleKey,
+                                            } else if (!AI_API_SUB_TYPE.equals(
+                                                    synCtx.getProperty(APIMgtGatewayConstants.SUB_TYPE))) {
+                                                ServiceReferenceHolder.getInstance().getThrottleDataPublisher()
+                                                        .publishNonThrottledEvent(applicationLevelThrottleKey,
                                                                 applicationLevelTier, apiLevelThrottleKey, apiLevelTier,
                                                                 subscriptionLevelThrottleKey, subscriptionLevelTier,
                                                                 resourceLevelThrottleKey, resourceLevelTier,
-                                                                authorizedUser, apiContext,
-                                                                apiVersion, subscriberTenantDomain, apiTenantDomain,
-                                                                applicationId,
+                                                                authorizedUser, apiContext, apiVersion,
+                                                                subscriberTenantDomain, apiTenantDomain, applicationId,
                                                                 synCtx, authContext);
                                             }
                                         } else {

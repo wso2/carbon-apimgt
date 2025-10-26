@@ -50,6 +50,8 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -111,7 +113,14 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             }
             if (path.startsWith(APIMgtGatewayConstants.MCP_RESOURCE) && httpMethod.equals(APIConstants.HTTP_POST)) {
                 handleMcpRequest(messageContext, matchedAPI);
-            } else if (path.startsWith(APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE) && httpMethod.equals(APIConstants.HTTP_GET)) {
+            } else if (path.startsWith(APIMgtGatewayConstants.MCP_RESOURCE) &&
+                    httpMethod.equals(APIConstants.HTTP_GET)) {
+                McpResponseDto errorResponse = new McpResponseDto("Server-Sent Events (SSE) not supported",
+                        405, null);
+                MCPUtils.handleMCPFailure(messageContext, errorResponse);
+                return false;
+            } else if (path.startsWith(APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE) &&
+                    httpMethod.equals(APIConstants.HTTP_GET)) {
                 return handleProtectedResourceMetadataResponse(messageContext, matchedAPI);
             }
         } else if (OUT_FLOW.equals(mcpDirection)) {
@@ -249,38 +258,68 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             String contentType = (String) axis2MessageContext.getProperty(Constants.Configuration.CONTENT_TYPE);
-            if (APIConstants.APPLICATION_JSON_MEDIA_TYPE.equals(contentType)) {
-                buildMCPResponse(messageContext);
+            if (contentType != null && contentType.toLowerCase().contains(APIConstants.APPLICATION_JSON_MEDIA_TYPE)) {
+                Object statusCodeObject = axis2MessageContext.getProperty(APIMgtGatewayConstants.HTTP_SC);
+                int statusCode = 0;
+                if (statusCodeObject instanceof String) {
+                    String scString = ((String) statusCodeObject).trim();
+                    if (StringUtils.isNumeric(scString)) {
+                        statusCode = Integer.parseInt(scString);
+                    } else {
+                        log.warn("Skipping non-numeric HTTP status in axis2 context: " + scString);
+                    }
+                } else if (null != statusCodeObject) {
+                    statusCode = (Integer) statusCodeObject;
+                }
+                Object id = messageContext.getProperty(APIConstants.MCP.RECEIVED_MCP_ID);
+
+                try {
+                    RelayUtils.buildMessage(axis2MessageContext);
+                } catch (XMLStreamException | IOException  e) {
+                    throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE, "Error while building " +
+                            "message from the axis2 message context", e);
+                }
+
+                boolean isError = !isSuccessResponse(statusCode);
+                String messageBody;
+                if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
+                    messageBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
+                } else {
+                    messageBody = isError ? "Error occurred during tool call. HTTP Status Code: " + statusCode : "";
+                }
+
+                buildMCPResponse(messageContext, id, isError, messageBody);
+            } else {
+                throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
+                        APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE,
+                        "Unsupported content type in the response. Expected: application/json, Found: " + contentType);
             }
         }
     }
 
-    private void buildMCPResponse(MessageContext messageContext) throws McpException {
-        if (log.isDebugEnabled()) {
-            log.debug("Handling MCP response");
-        }
+    private boolean isSuccessResponse(int statusCode) {
+        return (statusCode >= 200 && statusCode < 300);
+    }
 
-        //Set received id to mcp response, Responses MUST include the same ID as the request they correspond to
-        Object id = messageContext.getProperty(APIConstants.MCP.RECEIVED_MCP_ID);
-
-        String messageBody;
+    private void buildMCPResponse(MessageContext messageContext, Object id, boolean isError, String messageBody)
+            throws McpException {
+        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
         try {
-            org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
-                    .getAxis2MessageContext();
-            RelayUtils.buildMessage(axis2MC);
-            if (JsonUtil.hasAJsonPayload(axis2MC)) {
-                messageBody = JsonUtil.jsonPayloadToString(axis2MC);
-                String mcpResponse = MCPPayloadGenerator.generateMCPResponsePayload(id, false, messageBody);
+            String mcpResponse = MCPPayloadGenerator.generateMCPResponsePayload(id, isError, messageBody);
+            JsonUtil.removeJsonPayload(axis2MessageContext);
+            JsonUtil.getNewJsonPayload(axis2MessageContext, mcpResponse, true, true);
+            axis2MessageContext.setProperty(Constants.Configuration.MESSAGE_TYPE,
+                    APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            axis2MessageContext.setProperty(Constants.Configuration.CONTENT_TYPE,
+                    APIConstants.APPLICATION_JSON_MEDIA_TYPE);
 
-                JsonUtil.removeJsonPayload(axis2MC);
-                JsonUtil.getNewJsonPayload(axis2MC, mcpResponse, true, true);
-            } else {
-                throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE,
-                        APIConstants.MCP.RpcConstants.INTERNAL_ERROR_MESSAGE, "No Json Payload found in the response");
-            }
+            // for JSON-RPC compliance, set HTTP_SC to 200 for all MCP responses
+            axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, 200);
+            axis2MessageContext.removeProperty(APIConstants.NO_ENTITY_BODY);
         } catch (Exception e) {
-            throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE,
-                    APIConstants.MCP.RpcConstants.INTERNAL_ERROR_MESSAGE, "Internal error while processing response");
+            throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE, APIConstants.MCP.RpcConstants.
+                    INTERNAL_ERROR_MESSAGE, e);
         }
     }
 

@@ -34,6 +34,7 @@ public class DistributedThrottleConfig {
     private int port;
     private String user;
     private char[] password;
+    private int databaseId = 0;
     private int maxTotal = 8;
     private int maxIdle = 8;
     private int minIdle = 0;
@@ -212,6 +213,14 @@ public class DistributedThrottleConfig {
 
     public void setCorePoolSize(int corePoolSize) {
         this.corePoolSize = corePoolSize;
+    }
+
+    public int getDatabaseId() {
+        return databaseId;
+    }
+
+    public void setDatabaseId(int databaseId) {
+        this.databaseId = databaseId;
     }
 
 }

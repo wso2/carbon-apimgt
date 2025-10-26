@@ -518,7 +518,6 @@ public class ExportUtils {
                     Documentation individualDocument = apiProvider.getDocumentation(identifier.getUUID(), doc.getId(),
                             tenantDomain);
                     String sourceType = individualDocument.getSourceType().name();
-                    String resourcePath = null;
                     InputStream inputStream = null;
                     String localFileName = null;
                     String individualDocDirectoryPath =
@@ -553,10 +552,13 @@ public class ExportUtils {
                             IOUtils.copy(inputStream, outputStream);
                         }
                     } else {
-                        // Log error and avoid throwing as we give capability to export document artifact without
-                        // the content if does not exists
-                        log.error("Documentation resource for API/API Product: " + identifier.getName()
-                                + " not found in " + resourcePath);
+                        // Log error and avoid throwing as we give the capability to export document artifact without
+                        // the content if does not exist
+                        if (log.isDebugEnabled()) {
+                            log.debug("Documentation resource for API/API Product: " + identifier.getName()
+                                    + " document name: " + individualDocument.getName()
+                                    + " does not exist in the registry." + " Document type: " + sourceType);
+                        }
                     }
                 }
                 if (log.isDebugEnabled()) {
