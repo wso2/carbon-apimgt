@@ -107,7 +107,13 @@ public class RestApiCommonUtil {
         String version = (String) message.get(RestApiConstants.API_VERSION);
 
         String[] segments = basePath.split("/");
-        String lastSegment = segments.length > 0 ? segments[segments.length - 1] : StringUtils.EMPTY;
+        String lastSegment = StringUtils.EMPTY;
+        for (int i = segments.length - 1; i >= 0; i--) {
+            if (StringUtils.isNotEmpty(segments[i])) {
+                lastSegment = segments[i];
+                break;
+            }
+        }
 
         String derivedBasePath;
         if (lastSegment.equals(version)) {
