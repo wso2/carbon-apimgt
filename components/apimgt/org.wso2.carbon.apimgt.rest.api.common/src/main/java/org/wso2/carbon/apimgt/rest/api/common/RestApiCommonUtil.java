@@ -120,8 +120,8 @@ public class RestApiCommonUtil {
         Set<URITemplate> uriTemplates = RestApiCommonUtil.getURITemplatesForBasePath(derivedBasePath);
         if (uriTemplates.isEmpty()) {
             if (log.isDebugEnabled()) {
-                log.debug("No matching scopes found for request with path: " + basePath
-                        + ". Skipping scope validation.");
+                log.debug("No matching scopes found for request with path: " + derivedBasePath
+                        + ". Hence, failing the scope validation.");
             }
             return false;
         }
