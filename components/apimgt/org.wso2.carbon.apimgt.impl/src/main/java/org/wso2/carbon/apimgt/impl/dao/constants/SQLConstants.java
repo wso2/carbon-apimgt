@@ -3855,6 +3855,29 @@ public class SQLConstants {
                     + "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID IS NULL AND ARSM.TENANT_ID = ? AND "
                     + "ARSM.SCOPE_NAME NOT IN (SELECT GS.NAME FROM AM_SHARED_SCOPE GS WHERE GS.TENANT_ID = ?)";
 
+    public static final String GET_ALL_UNATTACHED_VERSIONED_LOCAL_SCOPES_FOR_API_SQL =
+            "SELECT DISTINCT ARSM.SCOPE_NAME "
+                    + "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM "
+                    + "INNER JOIN AM_API_URL_MAPPING AUM ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID "
+                    + "INNER JOIN AM_API API ON API.API_ID = AUM.API_ID "
+                    + "WHERE API.API_NAME = ? "
+                    + "  AND AUM.REVISION_UUID IS NULL "
+                    + "  AND ARSM.TENANT_ID = ? "
+                    + "  AND ARSM.SCOPE_NAME NOT IN ( "
+                    + "        SELECT GS.NAME "
+                    + "        FROM AM_SHARED_SCOPE GS "
+                    + "        WHERE GS.TENANT_ID = ? "
+                    + "  ) "
+                    + "  AND ARSM.SCOPE_NAME NOT IN ( "
+                    + "        SELECT ARSM.SCOPE_NAME "
+                    + "        FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM "
+                    + "        INNER JOIN AM_API_URL_MAPPING AUM ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID "
+                    + "        INNER JOIN AM_API API ON API.API_ID = AUM.API_ID "
+                    + "        WHERE API.API_NAME = ? "
+                    + "          AND API.API_VERSION = ? "
+                    + "          AND ARSM.TENANT_ID = ? "
+                    + "  )";
+
     public static final String GET_URL_TEMPLATES_WITH_SCOPES_FOR_API_SQL =
             " SELECT AUM.URL_MAPPING_ID, "
                     + "AUM.URL_PATTERN, "

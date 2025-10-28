@@ -11368,6 +11368,39 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Gets local scope keys from versioned APIs which are not yet attached to the given API.
+     *
+     * @param uuid API uuid
+     * @param tenantId      Tenant Id
+     * @return Local Scope keys set
+     * @throws APIManagementException if fails to get local scope keys for API
+     */
+    public Set<String> getAllUnattachedLocalScopeKeysFromVersionedAPIs(String uuid, int tenantId)
+            throws APIManagementException {
+        Set<String> localScopes = new HashSet<>();
+        String getAllLocalScopesStmt = SQLConstants.GET_ALL_UNATTACHED_VERSIONED_LOCAL_SCOPES_FOR_API_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(getAllLocalScopesStmt)) {
+            APIIdentifier apiIdentifier = getAPIIdentifierFromUUID(uuid);
+            preparedStatement.setString(1, apiIdentifier.getApiName());
+            preparedStatement.setInt(2, tenantId);
+            preparedStatement.setInt(3, tenantId);
+            preparedStatement.setString(4, apiIdentifier.getApiName());
+            preparedStatement.setString(5, apiIdentifier.getVersion());
+            preparedStatement.setInt(6, tenantId);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                while (rs.next()) {
+                    localScopes.add(rs.getString("SCOPE_NAME"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed while getting unattached and versioned local scopes for API:" + uuid + " tenant: "
+                    + tenantId, e);
+        }
+        return localScopes;
+    }
+
+    /**
      * Delete a user subscription based on API_ID, APP_ID, TIER_ID
      *
      * @param apiId - subscriber API ID
