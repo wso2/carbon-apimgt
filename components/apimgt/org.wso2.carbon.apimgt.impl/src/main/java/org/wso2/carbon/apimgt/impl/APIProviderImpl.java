@@ -2615,7 +2615,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Copy labels
         List<Label> labels = getAllLabelsOfApi(existingApiId);
         if (labels != null && !labels.isEmpty()) {
-            log.info("Copying " + labels.size() + " labels from API: " + existingApiId + " to new API version: " + newAPIId);
             List<String> labelIds = labels.stream().map(Label::getLabelId).collect(Collectors.toList());
             attachApiLabels(newAPIId, labelIds, organization);
         }
