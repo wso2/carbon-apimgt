@@ -1125,6 +1125,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void validateKeyManagerScopes(API api, String tenantDomain) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating key manager scopes for API: " + api.getId().getApiName());
+        }
+
         Set<String> oldLocalScopeKeys;
         Set<String> oldVersionedLocalScopeKeys;
         Set<String> oldVersionedUnattachedLocalScopeKeys;
