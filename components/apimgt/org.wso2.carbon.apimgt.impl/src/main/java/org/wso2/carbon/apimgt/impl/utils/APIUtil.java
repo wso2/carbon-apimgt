@@ -12043,6 +12043,21 @@ public final class APIUtil {
     }
 
     /**
+     * Stops the federated gateway API discovery for the given environment and organization.
+     *
+     * @param environment   The environment for which to stop the discovery.
+     * @param organization  The organization to which the environment belongs.
+     */
+    public static void stopFederatedGatewayAPIDiscovery(Environment environment, String organization) {
+        FederatedAPIDiscoveryService federatedAPIDiscoveryService = ServiceReferenceHolder
+                .getInstance().getFederatedAPIDiscoveryService();
+        if (environment.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR) &&
+                federatedAPIDiscoveryService != null) {
+            federatedAPIDiscoveryService.stopDiscovery(environment, organization);
+        }
+    }
+
+    /**
      * Converts an epoch time string to a Date object.
      *
      * @param epochMillis The epoch time in milliseconds as a string.
