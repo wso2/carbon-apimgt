@@ -2621,7 +2621,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 List<String> labelIds = labels.stream().map(Label::getLabelId).collect(Collectors.toList());
                 attachApiLabels(newAPIId, labelIds, organization);
             }
-        } catch (APIManagementException e) {
+        } catch (Exception e) {
             log.error("Error occurred while copying labels from API " + existingApiId + " to " + newAPIId, e);
         }
 
