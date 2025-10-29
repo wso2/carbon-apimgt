@@ -2890,7 +2890,7 @@ public final class APIConstants {
      */
     public static final String TRUST_STORE_PASSWORD = "Security.TrustStore.Password";
     public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
-    
+
     /**
      * Constants related to HTTP client creation
      */
@@ -3113,6 +3113,7 @@ public final class APIConstants {
         public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
         public static final String APPLICATION_GRANT_TYPE = "application";
         public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";
+        public static final String CLIENT_SECRET_COUNT = "clientSecretCount";
 
         public static class KeyManagerEvent {
 
@@ -3624,7 +3625,7 @@ public final class APIConstants {
 
     // Constants related to the Certificate Management
     public static final String ENABLE_CERTIFICATE_MANAGEMENT_EVENT_LISTENING = "EnableCertificateManagementEventListening";
-    
+
     // For Organization access control Configuration
     public static final String ORG_BASED_ACCESS_CONTROL = "OrganizationBasedAccessControl";
     public static final String ORG_BASED_ACCESS_CONTROL_ENABLE = "Enable";

@@ -10047,6 +10047,12 @@ public final class APIUtil {
             if (StringUtils.isNotEmpty(defaultKeyManagerType)) {
                 keyManagerConfigurationDTO.setType(defaultKeyManagerType);
             }
+            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())) {
+                int clientSecretCount =
+                        ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getClientSecretCount();
+                keyManagerConfigurationDTO
+                        .addProperty(APIConstants.KeyManager.CLIENT_SECRET_COUNT, clientSecretCount);
+            }
         }
         return keyManagerConfigurationDTO;
     }
