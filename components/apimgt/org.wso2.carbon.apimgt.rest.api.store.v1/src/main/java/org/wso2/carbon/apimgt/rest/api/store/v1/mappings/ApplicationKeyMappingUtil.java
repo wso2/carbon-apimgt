@@ -147,12 +147,21 @@ public class ApplicationKeyMappingUtil {
 
     public static ConsumerSecretRequest fromDTOtoConsumerSecretRequest(String clientId,
                                                                        ConsumerSecretCreationRequestDTO consumerSecretCreationRequestDTO) {
+        return buildConsumerSecretRequest(clientId, consumerSecretCreationRequestDTO.getAdditionalProperties());
+    }
+
+    public static ConsumerSecretRequest fromDTOtoConsumerSecretRequest(String clientId,
+                                                                       ConsumerSecretDeletionRequestDTO consumerSecretDeletionRequestDTO) {
+        return buildConsumerSecretRequest(clientId, consumerSecretDeletionRequestDTO.getAdditionalProperties());
+    }
+
+    public static ConsumerSecretRequest buildConsumerSecretRequest(String clientId,
+                                                                       Map<String, Object> additionalProperties) {
         ConsumerSecretRequest consumerSecretRequest = new ConsumerSecretRequest();
         consumerSecretRequest.setClientId(clientId);
-        if (consumerSecretCreationRequestDTO.getAdditionalProperties() != null) {
-            consumerSecretRequest.putAll(consumerSecretCreationRequestDTO.getAdditionalProperties());
+        if (additionalProperties != null) {
+            consumerSecretRequest.putAll(additionalProperties);
         }
-        consumerSecretRequest.putAll(consumerSecretCreationRequestDTO.getAdditionalProperties());
         return consumerSecretRequest;
     }
 

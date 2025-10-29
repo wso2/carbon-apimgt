@@ -690,8 +690,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
 
     @Override
-    public void deleteApplicationConsumerSecret(String clientId, String secretId) throws APIManagementException {
-        String encodedClientId = Base64.getUrlEncoder().encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
+    public void deleteApplicationConsumerSecret(String secretId, ConsumerSecretRequest consumerSecretRequest)
+            throws APIManagementException {
+        String encodedClientId = Base64.getUrlEncoder()
+                .encodeToString(consumerSecretRequest.getClientId().getBytes(StandardCharsets.UTF_8));
         String encodedSecretId = Base64.getUrlEncoder().encodeToString(secretId.getBytes(StandardCharsets.UTF_8));
         try {
             dcrClient.deleteApplicationSecret(encodedClientId, encodedSecretId);

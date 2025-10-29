@@ -101,7 +101,7 @@ public interface KeyManager {
      */
     String getNewApplicationConsumerSecret(AccessTokenRequest tokenRequest) throws APIManagementException;
 
-    default ConsumerSecretInfo generateNewApplicationConsumerSecret(ConsumerSecretRequest clientSecretRequest)
+    default ConsumerSecretInfo generateNewApplicationConsumerSecret(ConsumerSecretRequest consumerSecretRequest)
             throws APIManagementException {
         throw new UnsupportedOperationException("Generating new consumer secret is not supported");
     }
@@ -111,7 +111,8 @@ public interface KeyManager {
         throw new UnsupportedOperationException("Generating new consumer secret is not supported");
     }
 
-    default void deleteApplicationConsumerSecret(String clientId, String secretId) throws APIManagementException {
+    default void deleteApplicationConsumerSecret(String secretId, ConsumerSecretRequest consumerSecretRequest)
+            throws APIManagementException {
         throw new UnsupportedOperationException("Generating new consumer secret is not supported");
     }
 

@@ -1308,8 +1308,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         if (applicationKeyDTO != null) {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             String clientId = applicationKeyDTO.getConsumerKey();
-            apiConsumer.deleteConsumerSecret(clientId, applicationKeyDTO.getKeyManager(),
-                    consumerSecretDeletionRequestDTO.getSecretId());
+            ConsumerSecretRequest consumerSecretRequest = ApplicationKeyMappingUtil.
+                    fromDTOtoConsumerSecretRequest(clientId, consumerSecretDeletionRequestDTO);
+            apiConsumer.deleteConsumerSecret(consumerSecretDeletionRequestDTO.getSecretId(),
+                    applicationKeyDTO.getKeyManager(), consumerSecretRequest);
             return Response.noContent().build();
         }
         return null;

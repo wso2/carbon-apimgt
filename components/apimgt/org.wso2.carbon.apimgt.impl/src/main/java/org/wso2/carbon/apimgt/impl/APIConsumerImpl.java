@@ -364,7 +364,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return keyManager.retrieveApplicationConsumerSecrets(clientId);
     }
 
-    public void deleteConsumerSecret(String clientId, String keyManagerName, String secretId)
+    public void deleteConsumerSecret(String secretId, String keyManagerName,
+                                     ConsumerSecretRequest consumerSecretRequest)
             throws APIManagementException {
         KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                 apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
@@ -380,7 +381,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
-        keyManager.deleteApplicationConsumerSecret(clientId, secretId);
+        keyManager.deleteApplicationConsumerSecret(secretId, consumerSecretRequest);
     }
 
     /**

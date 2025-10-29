@@ -644,7 +644,8 @@ public interface APIConsumer extends APIManager {
         throw new UnsupportedOperationException("Generating new consumer secret is not supported");
     }
 
-    default void deleteConsumerSecret(String clientId, String keyManagerName, String secretId)
+    default void deleteConsumerSecret(String secretId, String keyManagerName,
+                                      ConsumerSecretRequest consumerSecretRequest)
             throws APIManagementException {
         throw new UnsupportedOperationException("Deleting consumer secret is not supported");
     }
