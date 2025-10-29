@@ -158,7 +158,7 @@ public class ApplicationKeyMappingUtil {
 
     public static ConsumerSecretDTO fromConsumerSecretToDTO(ConsumerSecretInfo consumerSecret) {
         ConsumerSecretDTO consumerSecretDTO = new ConsumerSecretDTO();
-        consumerSecretDTO.setReferenceId(consumerSecret.getReferenceId());
+        consumerSecretDTO.setSecretId(consumerSecret.getSecretId());
         consumerSecretDTO.secretValue(consumerSecret.getClientSecret());
         consumerSecretDTO.setAdditionalProperties(consumerSecret.getParameters());
         return consumerSecretDTO;

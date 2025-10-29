@@ -4889,6 +4889,33 @@ public final class APIUtil {
         return object.toString();
     }
 
+    public static String maskSecret(String secret, boolean isHashingEnabled) {
+        if (secret == null || secret.isEmpty()) {
+            return null;
+        }
+        final String MASK = generateMask();
+
+        if (isHashingEnabled) {
+            // Fully masked if hashing is enabled
+            return MASK;
+        }
+
+        // Show first 3 characters, then mask
+        int visibleChars = Math.min(3, secret.length());
+        String visiblePart = secret.substring(0, visibleChars);
+        return visiblePart + MASK;
+    }
+
+    private static String generateMask() {
+        // Define fixed mask length
+        final int MASK_LENGTH = 12;
+        StringBuilder sb = new StringBuilder(MASK_LENGTH);
+        for (int i = 0; i < MASK_LENGTH; i++) {
+            sb.append('*');
+        }
+        return sb.toString();
+    }
+
     private static String bytesToHex(byte[] bytes) {
 
         StringBuilder result = new StringBuilder();

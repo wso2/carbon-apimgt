@@ -66,6 +66,7 @@ import org.wso2.carbon.apimgt.impl.kmclient.model.TokenInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.UserClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -646,14 +647,19 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (clientSecret == null) {
             return null;
         }
-        return getConsumerSecretInfo(clientSecret);
+        return getConsumerSecretInfo(clientSecret, false);
     }
 
     @NotNull
-    private static ConsumerSecretInfo getConsumerSecretInfo(ClientSecret clientSecret) {
+    private static ConsumerSecretInfo getConsumerSecretInfo(ClientSecret clientSecret, boolean shouldMaskSecret) {
         ConsumerSecretInfo clientSecretInfo = new ConsumerSecretInfo();
-        clientSecretInfo.setReferenceId(clientSecret.getReferenceId());
-        clientSecretInfo.setClientSecret(clientSecret.getClientSecret());
+        clientSecretInfo.setSecretId(clientSecret.getSecretId());
+        String secretValue = clientSecret.getClientSecret();
+        if (shouldMaskSecret) {
+            boolean isHashingEnabled = OAuthServerConfiguration.getInstance().isClientSecretHashEnabled();
+            secretValue = APIUtil.maskSecret(secretValue, isHashingEnabled);
+        }
+        clientSecretInfo.setClientSecret(secretValue);
         Map<String, Object> additionalProperties = new HashMap<>();
         if (clientSecret.getDescription() != null) {
             additionalProperties.put(ApplicationConstants.SECRET_DESCRIPTION, clientSecret.getDescription());
@@ -678,7 +684,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
         List<ConsumerSecretInfo> consumerSecretInfoList = new ArrayList<>();
         for (ClientSecret clientSecret : clientSecretList.getList()) {
-            consumerSecretInfoList.add(getConsumerSecretInfo(clientSecret));
+            consumerSecretInfoList.add(getConsumerSecretInfo(clientSecret, true));
         }
         return consumerSecretInfoList;
     }

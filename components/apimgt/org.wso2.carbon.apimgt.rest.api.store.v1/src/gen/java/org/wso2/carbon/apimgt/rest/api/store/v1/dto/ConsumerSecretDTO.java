@@ -23,26 +23,26 @@ import javax.validation.Valid;
 
 public class ConsumerSecretDTO   {
   
-    private String referenceId = null;
+    private String secretId = null;
     private String secretValue = null;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
   /**
-   * Reference identifier for the secret
+   * Unique identifier for the secret
    **/
-  public ConsumerSecretDTO referenceId(String referenceId) {
-    this.referenceId = referenceId;
+  public ConsumerSecretDTO secretId(String secretId) {
+    this.secretId = secretId;
     return this;
   }
 
   
-  @ApiModelProperty(example = "sec_123456", value = "Reference identifier for the secret")
-  @JsonProperty("referenceId")
-  public String getReferenceId() {
-    return referenceId;
+  @ApiModelProperty(example = "sec_123456", value = "Unique identifier for the secret")
+  @JsonProperty("secretId")
+  public String getSecretId() {
+    return secretId;
   }
-  public void setReferenceId(String referenceId) {
-    this.referenceId = referenceId;
+  public void setSecretId(String secretId) {
+    this.secretId = secretId;
   }
 
   /**
@@ -72,7 +72,7 @@ public class ConsumerSecretDTO   {
   }
 
   
-  @ApiModelProperty(example = "{\"expiresIn\":86400,\"description\":\"pizza application secret\"}", value = "Additional dynamic properties for the secret creation request.")
+  @ApiModelProperty(example = "{\"expiresAt\":1761568483853,\"description\":\"pizza application secret\"}", value = "Additional dynamic properties for the secret creation request.")
   @JsonProperty("additionalProperties")
   public Map<String, Object> getAdditionalProperties() {
     return additionalProperties;
@@ -91,14 +91,14 @@ public class ConsumerSecretDTO   {
       return false;
     }
     ConsumerSecretDTO consumerSecret = (ConsumerSecretDTO) o;
-    return Objects.equals(referenceId, consumerSecret.referenceId) &&
+    return Objects.equals(secretId, consumerSecret.secretId) &&
         Objects.equals(secretValue, consumerSecret.secretValue) &&
         Objects.equals(additionalProperties, consumerSecret.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(referenceId, secretValue, additionalProperties);
+    return Objects.hash(secretId, secretValue, additionalProperties);
   }
 
   @Override
@@ -106,7 +106,7 @@ public class ConsumerSecretDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ConsumerSecretDTO {\n");
     
-    sb.append("    referenceId: ").append(toIndentedString(referenceId)).append("\n");
+    sb.append("    secretId: ").append(toIndentedString(secretId)).append("\n");
     sb.append("    secretValue: ").append(toIndentedString(secretValue)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");

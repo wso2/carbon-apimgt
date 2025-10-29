@@ -3331,67 +3331,21 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X GET "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/secrets"'
-  /applications/{applicationId}/oauth-keys/{keyMappingId}/secrets/{secretId}:
-    get:
-      tags:
-        - Application Secrets
-      summary: |
-        Retrieve a Consumer Secret
-      description: |
-        This operation can be used to retrieve a consumer secret of an application for the give key type
-      operationId: getConsumerSecret
-      parameters:
-        - $ref: '#/components/parameters/applicationId'
-        - $ref: '#/components/parameters/keyMappingId'
-        - $ref: '#/components/parameters/secretId'
-      responses:
-        200:
-          description: |
-            OK.
-            A consumer secrets is retrieved.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ConsumerSecret'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        403:
-          $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - OAuth2Security:
-            - apim:subscribe
-            - apim:app_manage
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -X GET "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/secrets/4efd2684-9657-4a01-a956-16cd89e96077"'
-  /applications/{applicationId}/oauth-keys/{keyMappingId}/delete-secret:
+  /applications/{applicationId}/oauth-keys/{keyMappingId}/revoke-secret:
     post:
       tags:
         - Application Secrets
       summary: |
-        Delete a Consumer Secret
+        Revoke a Consumer Secret
       description: |
-        This operation can be used to delete a consumer secret for an application for the give key type
-      operationId: deleteConsumerSecret
+        This operation can be used to revoke a consumer secret for an application for the give key type
+      operationId: revokeConsumerSecret
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyMappingId'
       requestBody:
         description: |
-          Request payload containing details for deleting a new consumer secret
+          Request payload containing details for revoking a new consumer secret
         content:
           application/json:
             schema:
@@ -7479,9 +7433,9 @@ components:
     ConsumerSecret:
       type: object
       properties:
-        referenceId:
+        secretId:
           type: string
-          description: Reference identifier for the secret
+          description: Unique identifier for the secret
           example: sec_123456
         secretValue:
           type: string
@@ -7493,14 +7447,8 @@ components:
           additionalProperties:
             type: object
           example:
-            expiresIn: 86400
+            expiresAt: 1761568483853
             description: "pizza application secret"
-#          type: object
-#          properties: { }
-#          description: Additional properties needed.
-#          example:
-#            description: pizza application secret
-#            expiresAt: 1755756933
     #-----------------------------------------------------
     # Consumer Secret Request Object
     #-----------------------------------------------------
@@ -7509,7 +7457,7 @@ components:
       properties:
         additionalProperties:
           type: object
-          description: Additional dynamic properties for the secret creation request.
+          description: Additional properties for the secret creation request.
           additionalProperties:
             type: object
           example:
@@ -7519,25 +7467,21 @@ components:
         additionalProperties:
           expiresIn: 86400
           description: "pizza application secret"
-#      type: object
-#      properties:
-#        additionalProperties:
-#          type: object
-#          properties: { }
-#          description: Additional properties needed.
-#          example:
-#            expiresIn: 86400
-#            description: pizza application secret
     #-----------------------------------------------------
     # Consumer Secret Deletion Object
     #-----------------------------------------------------
     ConsumerSecretDeletionRequest:
       type: object
       properties:
-        referenceId:
+        secretId:
           type: string
-          description: Reference identifier for the secret
+          description: Unique identifier for the secret
           example: sec_123456
+        additionalProperties:
+          type: object
+          description: Additional properties for the secret deletion request.
+          additionalProperties:
+            type: object
     #-----------------------------------------------------
     # Consumer Secret List Object
     #-----------------------------------------------------

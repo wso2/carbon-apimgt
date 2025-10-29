@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.validation.constraints.*;
 
 
@@ -20,24 +23,43 @@ import javax.validation.Valid;
 
 public class ConsumerSecretDeletionRequestDTO   {
   
-    private String referenceId = null;
+    private String secretId = null;
+    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
   /**
-   * Reference identifier for the secret
+   * Unique identifier for the secret
    **/
-  public ConsumerSecretDeletionRequestDTO referenceId(String referenceId) {
-    this.referenceId = referenceId;
+  public ConsumerSecretDeletionRequestDTO secretId(String secretId) {
+    this.secretId = secretId;
     return this;
   }
 
   
-  @ApiModelProperty(example = "sec_123456", value = "Reference identifier for the secret")
-  @JsonProperty("referenceId")
-  public String getReferenceId() {
-    return referenceId;
+  @ApiModelProperty(example = "sec_123456", value = "Unique identifier for the secret")
+  @JsonProperty("secretId")
+  public String getSecretId() {
+    return secretId;
   }
-  public void setReferenceId(String referenceId) {
-    this.referenceId = referenceId;
+  public void setSecretId(String secretId) {
+    this.secretId = secretId;
+  }
+
+  /**
+   * Additional properties for the secret deletion request.
+   **/
+  public ConsumerSecretDeletionRequestDTO additionalProperties(Map<String, Object> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Additional properties for the secret deletion request.")
+  @JsonProperty("additionalProperties")
+  public Map<String, Object> getAdditionalProperties() {
+    return additionalProperties;
+  }
+  public void setAdditionalProperties(Map<String, Object> additionalProperties) {
+    this.additionalProperties = additionalProperties;
   }
 
 
@@ -50,12 +72,13 @@ public class ConsumerSecretDeletionRequestDTO   {
       return false;
     }
     ConsumerSecretDeletionRequestDTO consumerSecretDeletionRequest = (ConsumerSecretDeletionRequestDTO) o;
-    return Objects.equals(referenceId, consumerSecretDeletionRequest.referenceId);
+    return Objects.equals(secretId, consumerSecretDeletionRequest.secretId) &&
+        Objects.equals(additionalProperties, consumerSecretDeletionRequest.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(referenceId);
+    return Objects.hash(secretId, additionalProperties);
   }
 
   @Override
@@ -63,7 +86,8 @@ public class ConsumerSecretDeletionRequestDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ConsumerSecretDeletionRequestDTO {\n");
     
-    sb.append("    referenceId: ").append(toIndentedString(referenceId)).append("\n");
+    sb.append("    secretId: ").append(toIndentedString(secretId)).append("\n");
+    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }

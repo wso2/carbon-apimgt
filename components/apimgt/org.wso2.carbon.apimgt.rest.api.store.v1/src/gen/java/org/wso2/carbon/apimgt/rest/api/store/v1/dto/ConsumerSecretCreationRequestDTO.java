@@ -26,7 +26,7 @@ public class ConsumerSecretCreationRequestDTO   {
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
   /**
-   * Additional dynamic properties for the secret creation request.
+   * Additional properties for the secret creation request.
    **/
   public ConsumerSecretCreationRequestDTO additionalProperties(Map<String, Object> additionalProperties) {
     this.additionalProperties = additionalProperties;
@@ -34,7 +34,7 @@ public class ConsumerSecretCreationRequestDTO   {
   }
 
   
-  @ApiModelProperty(example = "{\"expiresIn\":86400,\"description\":\"pizza application secret\"}", value = "Additional dynamic properties for the secret creation request.")
+  @ApiModelProperty(example = "{\"expiresIn\":86400,\"description\":\"pizza application secret\"}", value = "Additional properties for the secret creation request.")
   @JsonProperty("additionalProperties")
   public Map<String, Object> getAdditionalProperties() {
     return additionalProperties;

@@ -21,16 +21,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ConsumerSecretInfo {
-    private String referenceId;
+    private String secretId;
     private String clientSecret;
     private Map<String, Object> parameters = new HashMap<String, Object>();
 
-    public String getReferenceId() {
-        return referenceId;
+    public String getSecretId() {
+        return secretId;
     }
 
-    public void setReferenceId(String referenceId) {
-        this.referenceId = referenceId;
+    public void setSecretId(String secretId) {
+        this.secretId = secretId;
     }
 
     public String getClientSecret() {
