@@ -10048,10 +10048,16 @@ public final class APIUtil {
                 keyManagerConfigurationDTO.setType(defaultKeyManagerType);
             }
             if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())) {
-                int clientSecretCount =
-                        ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getClientSecretCount();
-                keyManagerConfigurationDTO
-                        .addProperty(APIConstants.KeyManager.CLIENT_SECRET_COUNT, clientSecretCount);
+                boolean isMultipleClientSecretsEnabled = isMultipleClientSecretsEnabled();
+                if (isMultipleClientSecretsEnabled) {
+                    keyManagerConfigurationDTO
+                            .addProperty(APIConstants.KeyManager.ENABLE_MULTIPLE_CLIENT_SECRETS, true);
+                    int clientSecretCount =
+                            ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getClientSecretCount();
+                    keyManagerConfigurationDTO
+                            .addProperty(APIConstants.KeyManager.CLIENT_SECRET_COUNT, clientSecretCount);
+                }
+
             }
         }
         return keyManagerConfigurationDTO;
@@ -12050,6 +12056,16 @@ public final class APIUtil {
             }
         }
         return errorPropertyNames;
+    }
+
+    /**
+     * Check whether multiple client secret support is enabled or not.
+     *
+     * @return Whether multiple client secret support is enabled or not.
+     */
+    public static boolean isMultipleClientSecretsEnabled() {
+
+        return ServiceReferenceHolder.getInstance().getOauthServerConfiguration().isMultipleClientSecretsEnabled();
     }
 
     /**

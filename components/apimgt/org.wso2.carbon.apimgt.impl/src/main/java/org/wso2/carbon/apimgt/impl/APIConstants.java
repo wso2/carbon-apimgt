@@ -3113,7 +3113,8 @@ public final class APIConstants {
         public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
         public static final String APPLICATION_GRANT_TYPE = "application";
         public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";
-        public static final String CLIENT_SECRET_COUNT = "clientSecretCount";
+        public static final String ENABLE_MULTIPLE_CLIENT_SECRETS = "enable_multiple_client_secrets";
+        public static final String CLIENT_SECRET_COUNT = "client_secret_count";
 
         public static class KeyManagerEvent {
 
