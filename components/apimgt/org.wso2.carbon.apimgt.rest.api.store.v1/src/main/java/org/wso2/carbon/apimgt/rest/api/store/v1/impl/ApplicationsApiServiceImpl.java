@@ -1221,7 +1221,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdKeysKeyTypeRegenerateSecretPost(String applicationId,
-            String keyType, MessageContext messageContext) {
+            String keyType, MessageContext messageContext) throws APIManagementException {
+        if (APIUtil.isMultipleClientSecretsEnabled()) {
+            throw new APIManagementException("The requested operation is not supported",
+                    ExceptionCodes.OPERATION_NOT_SUPPORTED_FOR_MULTIPLE_CLIENT_SECRET_MODE);
+        }
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
@@ -1254,6 +1258,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     public Response generateConsumerSecret(String applicationId, String keyMappingId,
                                            ConsumerSecretCreationRequestDTO consumerSecretCreationRequestDTO,
                                            MessageContext messageContext) throws APIManagementException {
+        if (!APIUtil.isMultipleClientSecretsEnabled()) {
+            throw new APIManagementException("The requested operation is not supported",
+                    ExceptionCodes.OPERATION_NOT_SUPPORTED_FOR_SINGLE_CLIENT_SECRET_MODE);
+        }
         String username = RestApiCommonUtil.getLoggedInUsername();
         Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
         if (applicationKeys == null) {
@@ -1269,7 +1277,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     consumerSecretRequest);
             ConsumerSecretDTO consumerSecretResponseDTO = ApplicationKeyMappingUtil.
                     fromConsumerSecretToDTO(consumerSecret);
-            return Response.created(null).entity(consumerSecretResponseDTO).build();
+            return Response.status(Response.Status.CREATED).entity(consumerSecretResponseDTO).build();
         }
         return null;
     }
@@ -1277,6 +1285,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     @Override
     public Response getConsumerSecrets(String applicationId, String keyMappingId, MessageContext messageContext)
             throws APIManagementException {
+        if (!APIUtil.isMultipleClientSecretsEnabled()) {
+            throw new APIManagementException("The requested operation is not supported",
+                    ExceptionCodes.OPERATION_NOT_SUPPORTED_FOR_SINGLE_CLIENT_SECRET_MODE);
+        }
         String username = RestApiCommonUtil.getLoggedInUsername();
         Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
         if (applicationKeys == null) {
@@ -1299,6 +1311,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     public Response revokeConsumerSecret(String applicationId, String keyMappingId,
                                          ConsumerSecretDeletionRequestDTO consumerSecretDeletionRequestDTO,
                                          MessageContext messageContext) throws APIManagementException {
+        if (!APIUtil.isMultipleClientSecretsEnabled()) {
+            throw new APIManagementException("The requested operation is not supported",
+                    ExceptionCodes.OPERATION_NOT_SUPPORTED_FOR_SINGLE_CLIENT_SECRET_MODE);
+        }
         String username = RestApiCommonUtil.getLoggedInUsername();
         Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
         if (applicationKeys == null) {
@@ -1575,6 +1591,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                                                                        String keyMappingId,
                                                                                        MessageContext messageContext)
             throws APIManagementException {
+        if (APIUtil.isMultipleClientSecretsEnabled()) {
+            throw new APIManagementException("The requested operation is not supported",
+                    ExceptionCodes.OPERATION_NOT_SUPPORTED_FOR_MULTIPLE_CLIENT_SECRET_MODE);
+        }
 
         String username = RestApiCommonUtil.getLoggedInUsername();
             Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
