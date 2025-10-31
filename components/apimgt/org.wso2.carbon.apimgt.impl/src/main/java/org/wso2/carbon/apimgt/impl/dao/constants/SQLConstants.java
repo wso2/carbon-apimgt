@@ -3566,7 +3566,6 @@ public class SQLConstants {
         public static final String GET_BLOCK_CONDITIONS_BY_TYPE_AND_EXACT_VALUE_SQL =
                 "SELECT CONDITION_ID, TYPE, BLOCK_CONDITION, ENABLED, DOMAIN, UUID FROM AM_BLOCK_CONDITIONS WHERE "
                         + "(TYPE = ? OR ? IS NULL) AND (BLOCK_CONDITION = ?) AND DOMAIN = ?";
-
         public static final String TIER_HAS_SUBSCRIPTION = " select count(sub.TIER_ID) as c from AM_SUBSCRIPTION sub, AM_API api "
         		+ " where sub.TIER_ID = ? and api.API_PROVIDER like ? and sub.API_ID = api.API_ID ";
 
