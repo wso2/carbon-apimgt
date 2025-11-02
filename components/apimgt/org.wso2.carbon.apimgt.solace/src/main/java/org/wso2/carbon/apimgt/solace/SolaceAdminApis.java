@@ -21,9 +21,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
-import io.apicurio.datamodels.asyncapi.models.AaiParameter;
-import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiChannelItem;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiDocument;
 import org.apache.axis2.util.URL;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,7 +43,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
-import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -53,7 +52,6 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * This class consists the internal Admin REST API requests to communicate with Solace broker
@@ -148,18 +146,19 @@ public class SolaceAdminApis {
      * @param environment            name of the Environment
      * @param apiProductName         name of the API product
      * @param apiNameForRegistration name of the Solace API product
-     * @param aai20Document          Async definition of the Solace API
+     * @param asyncAPIDocument          Async definition of the Solace API
      * @return CloseableHttpResponse of the POST call
      */
-    public CloseableHttpResponse createAPIProduct(String organization, String environment, Aai20Document aai20Document,
-                                         String apiProductName, String apiNameForRegistration) {
+    public CloseableHttpResponse createAPIProduct(String organization, String environment,
+                                                  AsyncApiDocument asyncAPIDocument, String apiProductName,
+                                                  String apiNameForRegistration) {
         URL serviceEndpointURL = new URL(baseUrl);
         HttpClient httpClient = APIUtil.getHttpClient(serviceEndpointURL.getPort(), serviceEndpointURL.getProtocol());
         HttpPost httpPost = new HttpPost(baseUrl + "/" + organization + "/apiProducts");
         httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + getBase64EncodedCredentials());
         httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         //setRequestBody
-        org.json.JSONObject requestBody = buildAPIProductRequestBody(aai20Document, environment, apiProductName,
+        org.json.JSONObject requestBody = buildAPIProductRequestBody(asyncAPIDocument, environment, apiProductName,
                 apiNameForRegistration);
         try {
             StringEntity params2;
@@ -499,13 +498,13 @@ public class SolaceAdminApis {
     /**
      * Build the request body for API product creation request
      *
-     * @param aai20Document      Async definition of the Solace API
+     * @param asyncDocument      Async definition of the Solace API
      * @param environment        name of the Environment in Solace
      * @param apiNameWithContext name of the API with context
      * @param registeredApiName  name of the API in Solace
      * @return org.json.JSON Object of request body
      */
-    private org.json.JSONObject buildAPIProductRequestBody(Aai20Document aai20Document, String environment,
+    private org.json.JSONObject buildAPIProductRequestBody(AsyncApiDocument asyncDocument, String environment,
                                                            String apiNameWithContext, String registeredApiName) {
         org.json.JSONObject requestBody = new org.json.JSONObject();
 
@@ -514,8 +513,8 @@ public class SolaceAdminApis {
         requestBody.put("apis", apiName);
 
         requestBody.put("approvalType", "auto");
-        if (aai20Document.info.description != null) {
-            requestBody.put("description", aai20Document.info.description);
+        if (asyncDocument.getInfo().getDescription() != null) {
+            requestBody.put("description", asyncDocument.getInfo().getDescription());
         } else {
             requestBody.put("description", apiNameWithContext);
         }
@@ -530,28 +529,38 @@ public class SolaceAdminApis {
 
         HashSet<String> parameters1 = new HashSet<>();
         org.json.JSONArray attributes1 = new org.json.JSONArray();
-        for (AaiChannelItem channel : aai20Document.getChannels()) {
-            if (channel.parameters != null) {
-                Set<String> parameterKeySet = channel.parameters.keySet();
+        for (AsyncApiChannelItem channel : AsyncApiParserUtil.getAllChannels(asyncDocument)) {
+            if (channel.getParameters() != null) {
+                List<String> parameterKeySet = channel.getParameters().getItemNames();
                 for (String parameterName : parameterKeySet) {
                     if (!parameters1.contains(parameterName)) {
-                        AaiParameter parameterObject = channel.parameters.get(parameterName);
-                        if (parameterObject.schema != null) {
+//                        AsyncApi22Parameter parameterObject = (AsyncApi22Parameter)
+//                        channel.getParameters().getItem(parameterName);
+                        Object parameterObject = channel.getParameters().getItem(parameterName);
+                        Object paramObjSchema = AsyncApiParserUtil.getSchemaFromParameter(parameterObject);
+                        if (paramObjSchema != null) {
                             org.json.JSONObject attributeObj = getAttributesFromParameterSchema(parameterName,
                                     parameterObject);
                             if (attributeObj != null) {
                                 attributes1.put(attributeObj);
                                 parameters1.add(parameterName);
                             }
-                        } else if (parameterObject.$ref != null) {
-                            if (aai20Document.components.parameters != null) {
-                                AaiParameter parameterObject1 = aai20Document.components.parameters.get(parameterName);
-                                if (parameterObject1.schema != null) {
-                                    org.json.JSONObject attributeObj = getAttributesFromParameterSchema(parameterName,
-                                            parameterObject1);
-                                    if (attributeObj != null) {
-                                        attributes1.put(attributeObj);
-                                        parameters1.add(parameterName);
+                        } else {
+                            String parameterObjectRef = AsyncApiParserUtil.getRefFromParameter(parameterObject);
+                            if (parameterObjectRef != null) {
+                                if (asyncDocument.getComponents().getParameters() != null) {
+//                                AsyncApi22Parameter parameterObject1 = (AsyncApi22Parameter)
+//                                asyncDocument.getComponents().getParameters().get(parameterName);
+                                    Object parameterObject1 = channel.getParameters().getItem(parameterName);
+                                    Object paramObjSchema1 = AsyncApiParserUtil.
+                                            getSchemaFromParameter(parameterObject1);
+                                    if (paramObjSchema1 != null) {
+                                        org.json.JSONObject attributeObj =
+                                                getAttributesFromParameterSchema(parameterName, parameterObject1);
+                                        if (attributeObj != null) {
+                                            attributes1.put(attributeObj);
+                                            parameters1.add(parameterName);
+                                        }
                                     }
                                 }
                             }
@@ -563,8 +572,8 @@ public class SolaceAdminApis {
         requestBody.put("attributes", attributes1);
 
         HashSet<String> protocolsHashSet = new HashSet<>();
-        for (AaiChannelItem channel : aai20Document.getChannels()) {
-            protocolsHashSet.addAll(AsyncApiParser.getProtocols(channel));
+        for (AsyncApiChannelItem channel : AsyncApiParserUtil.getAllChannels(asyncDocument)) {
+            protocolsHashSet.addAll(AsyncApiParserUtil.getProtocols(channel));
         }
         org.json.JSONArray protocols = new org.json.JSONArray();
         for (String protocol : protocolsHashSet) {
@@ -585,8 +594,10 @@ public class SolaceAdminApis {
      * @param parameterName name of the parameter
      * @return org.json.JSON Object of request body
      */
-    private org.json.JSONObject getAttributesFromParameterSchema(String parameterName, AaiParameter parameterObj) {
-        ObjectNode schemaNode = (ObjectNode) parameterObj.schema;
+    private org.json.JSONObject getAttributesFromParameterSchema(String parameterName,
+                                                                 Object parameterObj) {
+        ObjectNode schemaNode = (ObjectNode) AsyncApiParserUtil.getSchemaFromParameter(parameterObj);
+//        ObjectNode schemaNode = (ObjectNode) parameterObj.getSchema();
         org.json.JSONObject schemaJson = new org.json.JSONObject(schemaNode.toString());
         String enumString = "";
         if (schemaJson.has("enum")) {

@@ -20,10 +20,6 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import io.apicurio.datamodels.Library;
-import io.apicurio.datamodels.asyncapi.models.AaiSecurityScheme;
-import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
-import io.apicurio.datamodels.core.models.Extension;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -149,7 +145,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWs
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParserFactory;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -2498,36 +2496,19 @@ public class APIMappingUtil {
         return dto;
     }
 
-    private static List<ScopeDTO> getScopesFromAsyncAPI(String asyncAPIDefinition) {
-        Aai20Document document = (Aai20Document) Library.readDocumentFromJSONString(asyncAPIDefinition);
+    private static List<ScopeDTO> getScopesFromAsyncAPI(String asyncAPIDefinition) throws APIManagementException {
+
+        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+                AsyncApiParserUtil.getAsyncApiVersion(asyncAPIDefinition));
+        Set<Scope> scopes = asyncApiParser.getScopes(asyncAPIDefinition);
+
         List<ScopeDTO> scopeDTOS = new ArrayList<>();
-
-        if (document.components == null
-                || document.components.securitySchemes == null
-                || document.components.securitySchemes.get("oauth2") == null) {
-            return scopeDTOS;
-        }
-        AaiSecurityScheme securityScheme = document.components.securitySchemes.get("oauth2");
-
-        if (securityScheme.flows == null
-                || securityScheme.flows.implicit == null
-                || securityScheme.flows.implicit.scopes == null) {
-            return scopeDTOS;
-        }
-        Map<String, String> scopes = securityScheme.flows.implicit.scopes;
-        Map<String, String> scopeBindings = new HashMap<>();
-        Extension xScopesBindings = securityScheme.flows.implicit.getExtension("x-scopes-bindings");
-        if (xScopesBindings != null) {
-            scopeBindings = (Map<String, String>) xScopesBindings.value;
-        }
-
-        for (Map.Entry<String, String> aScope : scopes.entrySet()) {
+        for (Scope aScope : scopes) {
             ScopeDTO scopeDTO = new ScopeDTO();
             scopeDTO.setName(aScope.getKey());
-            scopeDTO.setDisplayName(aScope.getKey());
-            scopeDTO.setDescription(aScope.getValue());
-
-            String roles = scopeBindings.get(aScope.getKey());
+            scopeDTO.setDisplayName(aScope.getName());
+            scopeDTO.setDescription(aScope.getDescription());
+            String roles = aScope.getRoles();
             if (roles == null || roles.isEmpty()) {
                 scopeDTO.setBindings(Collections.emptyList());
             } else {
@@ -3440,7 +3421,7 @@ public class APIMappingUtil {
                             break;
                         }
                     }
-                    infoDTO.asyncTransportProtocols(AsyncApiParser.getTransportProtocolsForAsyncAPI
+                    infoDTO.asyncTransportProtocols(AsyncApiParserUtil.getTransportProtocolsForAsyncAPI
                             (model.getContent()));
                 }
                 // Set default value
