@@ -677,7 +677,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             clientSecretList = dcrClient.getApplicationSecrets(encodedClientId);
         } catch (KeyManagerClientException e) {
-            handleException("Error while generating new consumer secret", e);
+            handleException("Error while retrieving consumer secrets of clientId : " + clientId, e);
         }
         if (clientSecretList == null) {
             return null;
@@ -698,7 +698,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             dcrClient.deleteApplicationSecret(encodedClientId, encodedSecretId);
         } catch (KeyManagerClientException e) {
-            handleException("Error while generating new consumer secret", e);
+            handleException("Error while deleting consumer secret of clientId : " +
+                    consumerSecretRequest.getClientId(), e);
         }
     }
 
