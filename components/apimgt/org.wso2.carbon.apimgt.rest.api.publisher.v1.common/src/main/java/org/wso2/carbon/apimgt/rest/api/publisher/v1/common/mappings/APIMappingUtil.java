@@ -1718,9 +1718,14 @@ public class APIMappingUtil {
                                 .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
                         if (productionEndpointSecurity
                                 .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) != null) {
-                            String customParametersString = productionEndpointSecurity
-                                    .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS).toString();
-                            JSONObject customParameters = (JSONObject) parser.parse(customParametersString);
+                            Object customParametersObject = productionEndpointSecurity
+                                    .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                            JSONObject customParameters;
+                            if (customParametersObject instanceof JSONObject) {
+                                customParameters = (JSONObject) customParametersObject;
+                            } else {
+                                customParameters = (JSONObject) parser.parse(customParametersObject.toString());
+                            }
                             decryptCustomOauthParameters(customParameters, cryptoUtil);
                             productionEndpointSecurity.put(
                                     APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParameters);
@@ -1762,9 +1767,14 @@ public class APIMappingUtil {
                                 .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
                         if (sandboxEndpointSecurity
                                 .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) != null) {
-                            String customParametersString = sandboxEndpointSecurity
-                                    .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS).toString();
-                            JSONObject customParameters = (JSONObject) parser.parse(customParametersString);
+                            Object customParametersObject = sandboxEndpointSecurity
+                                    .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                            JSONObject customParameters;
+                            if (customParametersObject instanceof JSONObject)
+                                customParameters = (JSONObject) customParametersObject;
+                            else {
+                                customParameters = (JSONObject) parser.parse(customParametersObject.toString());
+                            }
                             decryptCustomOauthParameters(customParameters, cryptoUtil);
                             sandboxEndpointSecurity.put(
                                     APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParameters);
