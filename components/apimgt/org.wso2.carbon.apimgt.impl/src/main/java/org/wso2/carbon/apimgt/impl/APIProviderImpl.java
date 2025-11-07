@@ -2612,6 +2612,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             saveGraphqlSchemaDefinition(newAPIId, graphQLSchema, organization);
         }
 
+        // Copy labels
+        List<Label> labels = getAllLabelsOfApi(existingApiId);
+        if (labels != null && !labels.isEmpty()) {
+            List<String> labelIds = labels.stream().map(Label::getLabelId).collect(Collectors.toList());
+            attachApiLabels(newAPIId, labelIds, organization);
+        }
+
         // update old api
         // revert back to old values before update.
         existingAPI.setUuid(existingApiId);
