@@ -4889,31 +4889,31 @@ public final class APIUtil {
         return object.toString();
     }
 
-    public static String maskSecret(String secret, boolean isHashingEnabled) {
-        if (secret == null || secret.isEmpty()) {
-            return null;
-        }
-        final String MASK = generateMask();
-
-        if (isHashingEnabled) {
-            // Fully masked if hashing is enabled
-            return MASK;
+    public static String maskSecret(String secret) {
+        boolean isHashingEnabled = OAuthServerConfiguration.getInstance().isClientSecretHashEnabled();
+        if (secret == null || secret.isEmpty() || isHashingEnabled) {
+            // Always return a fixed 16-character mask if secret is null or empty or if hashing is enabled
+            return generateMask(16);
         }
 
-        // Show first 3 characters, then mask
+        // Show first 3 characters, mask the rest so total = 16
         int visibleChars = Math.min(3, secret.length());
+        int maskedPartLength = Math.max(16 - visibleChars, 0);
         String visiblePart = secret.substring(0, visibleChars);
-        return visiblePart + MASK;
+        return visiblePart + generateMask(maskedPartLength);
     }
 
-    private static String generateMask() {
-        // Define fixed mask length
-        final int MASK_LENGTH = 12;
-        StringBuilder sb = new StringBuilder(MASK_LENGTH);
-        for (int i = 0; i < MASK_LENGTH; i++) {
+    private static String generateMask(int length) {
+        // Generate mask dynamically for given length
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
             sb.append('*');
         }
         return sb.toString();
+    }
+
+    public static String getEffectiveSecret(String secret) {
+        return isMultipleClientSecretsEnabled() ? maskSecret(secret) : secret;
     }
 
     private static String bytesToHex(byte[] bytes) {
