@@ -822,7 +822,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
         String secret = appResponse.getClientSecret();
         if (shouldMaskSecret) {
-            secret = APIUtil.maskSecret(secret);
+            secret = APIUtil.getEffectiveSecret(secret);
         }
         oAuthApplicationInfo.setClientSecret(secret);
         if (appResponse.getGrantTypes() != null) {
