@@ -25021,13 +25021,18 @@ public class ApiMgtDAO {
         try (PreparedStatement apiLevelPolicyMappingStatement = connection
                     .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_POLICY_MAPPING);
              PreparedStatement operationPolicyMappingStatement = connection.prepareStatement(
-                     SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING_GIVEN_TEMPLATE_RESOURCES)) {
+                     SQLConstants.OperationPolicyConstants.ADD_API_OPERATION_POLICY_MAPPING_GIVEN_TEMPLATE_RESOURCES);
+             PreparedStatement deleteOperationPolicyMappingStatement =
+                     connection.prepareStatement(
+                             SQLConstants.OperationPolicyConstants.DELETE_OPERATION_POLICY_MAPPING_BY_API)) {
 
             connection.setAutoCommit(false);
 
             Map<String, String> updatedPoliciesMap = new HashMap<>();
             Set<String> usedClonedPolicies = new HashSet<>();
             List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails = new ArrayList<>();
+            deleteOperationPolicyMappingStatement.setString(1, apiUUID);
+            deleteOperationPolicyMappingStatement.executeUpdate();
 
             // Handle Operation policies
             for (URITemplate template : uriTemplate) {
@@ -25121,14 +25126,18 @@ public class ApiMgtDAO {
         // No need to delete the Operation policy mapping as they will be removed from the db when the url template
         // rows are deleted.
         String deleteOldAPILevelMappingsQuery = SQLConstants.OperationPolicyConstants.DELETE_API_POLICY_MAPPING;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(deleteOldAPILevelMappingsQuery)) {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            prepStmt.setString(1, apiUUID);
-            prepStmt.execute();
+            try (PreparedStatement prepStmt = connection.prepareStatement(deleteOldAPILevelMappingsQuery)) {
+                prepStmt.setString(1, apiUUID);
+                prepStmt.execute();
 
-            addAPIPoliciesMapping(apiUUID, uriTemplate, apiLevelPolicies, tenantDomain, connection);
-            connection.commit();
+                addAPIPoliciesMapping(apiUUID, uriTemplate, apiLevelPolicies, tenantDomain, connection);
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
             handleException("Error while adding api level policies for API : " + apiUUID, e);
         }

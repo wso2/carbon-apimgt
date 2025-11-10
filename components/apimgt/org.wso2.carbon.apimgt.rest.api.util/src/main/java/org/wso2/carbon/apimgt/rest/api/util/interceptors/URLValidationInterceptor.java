@@ -72,6 +72,7 @@ public class URLValidationInterceptor extends AbstractPhaseInterceptor<Message> 
                     .replace(majorVersion + pathSeparator, ""));
             message.put(RestApiConstants.API_VERSION, majorVersion);
         }
+        message.putIfAbsent(RestApiConstants.API_VERSION, majorVersion);
     }
 
     public void setMajorVersion(String majorVersion) {

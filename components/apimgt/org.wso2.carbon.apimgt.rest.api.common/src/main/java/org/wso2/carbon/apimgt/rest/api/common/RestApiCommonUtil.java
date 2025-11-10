@@ -106,14 +106,30 @@ public class RestApiCommonUtil {
 
         String version = (String) message.get(RestApiConstants.API_VERSION);
 
+        String[] segments = basePath.split("/");
+        String lastSegment = StringUtils.EMPTY;
+        for (int i = segments.length - 1; i >= 0; i--) {
+            if (StringUtils.isNotEmpty(segments[i])) {
+                lastSegment = segments[i];
+                break;
+            }
+        }
+
+        String derivedBasePath;
+        if (lastSegment.equals(version)) {
+            derivedBasePath = basePath;
+        } else {
+            derivedBasePath = basePath + version;
+        }
+
         //get all the URI templates of the REST API from the base path
-        Set<URITemplate> uriTemplates = RestApiCommonUtil.getURITemplatesForBasePath(basePath + version);
+        Set<URITemplate> uriTemplates = RestApiCommonUtil.getURITemplatesForBasePath(derivedBasePath);
         if (uriTemplates.isEmpty()) {
             if (log.isDebugEnabled()) {
-                log.debug("No matching scopes found for request with path: " + basePath
-                        + ". Skipping scope validation.");
+                log.debug("No matching scopes found for request with path: " + derivedBasePath
+                        + ". Hence, failing the scope validation.");
             }
-            return true;
+            return false;
         }
 
         for (Object template : uriTemplates.toArray()) {

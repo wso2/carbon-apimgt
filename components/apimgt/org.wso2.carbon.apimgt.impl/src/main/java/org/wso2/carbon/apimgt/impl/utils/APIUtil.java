@@ -9740,7 +9740,7 @@ public final class APIUtil {
                 endpointSecurityMap.replace(APIConstants.ENDPOINT_SECURITY_SANDBOX, productionEndpointSecurity);
             } else if (!api.isAdvertiseOnly()) {
                 String endpointConfig = api.getEndpointConfig();
-                if (endpointConfig != null) {
+                if (StringUtils.isNotBlank(endpointConfig) && !"null".equals(endpointConfig)) {
                     JSONObject endpointConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
                     if (endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null) {
                         JSONObject endpointSecurity =

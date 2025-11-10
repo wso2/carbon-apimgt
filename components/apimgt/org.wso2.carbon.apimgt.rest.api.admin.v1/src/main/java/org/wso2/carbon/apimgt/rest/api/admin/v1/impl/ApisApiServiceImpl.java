@@ -17,6 +17,12 @@
  */
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -27,22 +33,17 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.restapi.publisher.SearchApiServiceImplUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApiResultDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SearchResultListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.SearchApiServiceImplUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APIInfoMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import javax.ws.rs.core.Response;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
@@ -60,18 +61,67 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException If there is any when getting the all apis
      */
     public Response getAllAPIs(Integer limit, Integer offset, String query, String ifNoneMatch,
-                               MessageContext messageContext) throws APIManagementException {
+            MessageContext messageContext) throws APIManagementException {
+
         SearchResultListDTO resultListDTO = new SearchResultListDTO();
+
+        // Set default values for limit and offset if not provided
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? APIConstants.CHAR_ASTERIX : query;
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getOrganization(messageContext);
+
+        // Perform the paginated API search
         Map<String, Object> result = apiProvider.searchPaginatedAPIs(query, organization, offset, limit);
+
+        // Extract the list of APIs and convert them to DTOs
         List<Object> apis = SearchApiServiceImplUtil.getAPIListFromAPISearchResult(result);
         List<ApiResultDTO> allMatchedResults = getAllMatchedResults(apis);
+
         resultListDTO.setApis(allMatchedResults);
         resultListDTO.setCount(allMatchedResults.size());
+
+        // Create and set the PaginationDTO
+        PaginationDTO paginationDTO = new PaginationDTO();
+        paginationDTO.setLimit(limit);
+        paginationDTO.setOffset(offset);
+        
+        int total = 0;
+        Object len = result.get("length");
+        if (len instanceof Number) {
+            total = ((Number) len).intValue();
+        }
+        paginationDTO.setTotal(total);
+        
+        // Use RestApiCommonUtil to calculate pagination parameters
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, total);
+        
+        // Build full URLs for next and previous
+        String nextUrl = null;
+        String previousUrl = null;
+        
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            nextUrl = RestApiCommonUtil.getAPIPaginatedURL(
+                paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT),
+                query
+            );
+        }
+        
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            previousUrl = RestApiCommonUtil.getAPIPaginatedURL(
+                paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT),
+                query
+            );
+        }
+        
+        paginationDTO.setNext(nextUrl);
+        paginationDTO.setPrevious(previousUrl);
+        resultListDTO.setPagination(paginationDTO);
+
         return Response.ok().entity(resultListDTO).build();
     }
 
@@ -89,8 +139,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
             if (!APIUtil.isUserExist(provider)) {
-                throw new APIManagementException("User " + provider + " not found.",
-                        ExceptionCodes.USER_NOT_FOUND);
+                throw new APIManagementException("User " + provider + " not found.", ExceptionCodes.USER_NOT_FOUND);
             }
             // Check if the user tenant domain matches with the API's tenant domain
             if (organization != null && !organization.equals(MultitenantUtils.getTenantDomain(provider))) {
