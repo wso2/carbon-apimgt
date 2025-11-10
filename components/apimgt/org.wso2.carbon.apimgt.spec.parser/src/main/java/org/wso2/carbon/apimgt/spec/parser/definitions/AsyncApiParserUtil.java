@@ -329,15 +329,12 @@ public class AsyncApiParserUtil {
 
     /**
      * This method will extract the extension data from the Async Api Document based on the version
-     *
      * @param definition String
      * @return Map<String, JsonNode>
      */
     public static Map<String, JsonNode> getExtensionFromAsyncApiDoc(String definition) {
 
         AsyncApiDocument asyncApiDocument = getFromAsyncApiDocument(getAsyncApiVersion(definition), definition);
-//        AsyncApiExtensible asyncApiExtensible = (AsyncApiExtensible) asyncApiDocument;
-//        asyncApiExtensible.getExtensions();
         Map<String, JsonNode> extensions = null;
         if (asyncApiDocument instanceof AsyncApi20Document) {
             return extensions = ((AsyncApi20Document) asyncApiDocument).getExtensions();
@@ -583,7 +580,6 @@ public class AsyncApiParserUtil {
      *
      * @param url String
      * @param server AsyncApiServer
-     * @return AsyncApiDocument
      */
     public static void setAsyncApiServer(String url, AsyncApiServer server){
         String host;

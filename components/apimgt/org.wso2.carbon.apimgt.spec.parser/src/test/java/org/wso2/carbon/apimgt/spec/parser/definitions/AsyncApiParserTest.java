@@ -22,7 +22,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models.AsyncApi22Parser;
 
 import java.io.File;
 import java.util.HashMap;

@@ -348,8 +348,6 @@ public class AsyncApiV2Parser extends AsyncApiParser {
 
     @Override
     public String generateAsyncAPIDefinition(API api) throws APIManagementException {
-//        AsyncApiDocument asyncApiDocument = AsyncApiParserUtil.createAsyncApiDocument(api.getId().getVersion());
-//        AsyncApi20Document aaiDocument = new AsyncApi20DocumentImpl();
         AsyncApiDocument asyncApiDocument = AsyncApiParserUtil.createAsyncApiDocument(
                 APISpecParserConstants.AsyncApi.ASYNC_API_V20);
         asyncApiDocument.setAsyncapi("2.0.0");

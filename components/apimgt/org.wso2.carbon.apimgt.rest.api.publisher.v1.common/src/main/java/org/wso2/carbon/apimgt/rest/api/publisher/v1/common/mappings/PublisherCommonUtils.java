@@ -142,7 +142,7 @@ import org.wso2.carbon.apimgt.spec.parser.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParserFactory;
-import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models.AsyncApiV2Parser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models.AsyncApiV3Parser;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -2415,10 +2415,12 @@ public class PublisherCommonUtils {
             }
             apiToAdd.setSwaggerDefinition(apiDefinition);
         } else {
-            log.debug("[AsyncAPI][PublisherCommonUtils.addAPIWithGeneratedSwaggerDefinition] " +
-                    "apiToAdd: " + apiToAdd.getAsyncApiDefinition());
-            AsyncApiParser asyncApiParser = new AsyncApiV2Parser();
-//            AsyncApiParser asyncApiParser = new AsyncApiV3Parser();
+            // Note: By default, AsyncAPI version 3.0 will be used when creating new streaming APIs
+            // by defining the AsyncApiParser as AsyncApiV3Parser.
+            // If you need to use AsyncAPI version 2.x instead, uncomment the following line
+            // and comment out the next one.
+            // AsyncApiParser asyncApiParser = new AsyncApiV2Parser();
+            AsyncApiParser asyncApiParser = new AsyncApiV3Parser();
             String asyncApiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
             log.debug("[AsyncAPI][PublisherCommonUtils.addAPIWithGeneratedSwaggerDefinition] " +
                     "asyncApiDefinition: " + asyncApiDefinition);
