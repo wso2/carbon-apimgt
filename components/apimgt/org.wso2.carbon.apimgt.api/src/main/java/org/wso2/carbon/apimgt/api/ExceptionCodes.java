@@ -375,6 +375,18 @@ public enum ExceptionCodes implements ErrorHandler {
                     " by server configuration. Use the client secret creation API" +
                     " (POST /applications/{applicationId}/oauth-keys/{keyMappingId}/generate-secret) to generate" +
                     " new client secrets."),
+    CLIENT_SECRET_GENERATION_FAILED(900918,
+            "Client secret generation failed", 500,
+            "Error occurred while generating a new client secret for the application with " +
+                    "consumer key %s."),
+    CLIENT_SECRET_DELETION_FAILED(900919,
+            "Client secret deletion failed", 500,
+            "Error occurred while deleting the client secret for the application with " +
+                    "consumer key %s."),
+    CLIENT_SECRET_RETRIEVAL_FAILED(900920,
+            "Client secret retrieval failed", 500,
+            "Error occurred while retrieving the client secret for the application with " +
+                    "consumer key %s."),
 
     //Throttle related codes
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),

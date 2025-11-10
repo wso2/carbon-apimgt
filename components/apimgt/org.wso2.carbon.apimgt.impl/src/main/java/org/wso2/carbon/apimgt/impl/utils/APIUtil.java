@@ -12063,7 +12063,7 @@ public final class APIUtil {
      */
     public static int getClientSecretCount() {
 
-        return ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getClientSecretCount();;
+        return ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getClientSecretCount();
     }
 
     /**

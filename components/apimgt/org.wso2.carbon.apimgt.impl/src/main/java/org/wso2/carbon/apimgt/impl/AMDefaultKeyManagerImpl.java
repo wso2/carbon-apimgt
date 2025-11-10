@@ -630,9 +630,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public ConsumerSecretInfo generateNewApplicationConsumerSecret(ConsumerSecretRequest consumerSecretRequest)
             throws APIManagementException {
 
-        ClientSecret clientSecret;
+        ClientSecret clientSecret = null;
+        String clientId = consumerSecretRequest.getClientId();
         String encodedClientId = Base64.getUrlEncoder()
-                .encodeToString(consumerSecretRequest.getClientId().getBytes(StandardCharsets.UTF_8));
+                .encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
         ClientSecretRequest clientSecretRequest = new ClientSecretRequest();
         clientSecretRequest.setDescription((String) consumerSecretRequest
                 .getParameter(ApplicationConstants.SECRET_DESCRIPTION));
@@ -641,8 +642,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             clientSecret = dcrClient.generateNewApplicationSecret(encodedClientId, clientSecretRequest);
         } catch (KeyManagerClientException e) {
-            throw new APIManagementException("Error while generating new consumer secret for clientId : " +
-                    consumerSecretRequest.getClientId(), ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
+            String errMsg = "Error while generating new consumer secret for clientId : " + clientId;
+            throw new APIManagementException(errMsg, e, ExceptionCodes
+                    .from(ExceptionCodes.CLIENT_SECRET_GENERATION_FAILED, clientId));
         }
         if (clientSecret == null) {
             return null;
@@ -676,7 +678,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             clientSecretList = dcrClient.getApplicationSecrets(encodedClientId);
         } catch (KeyManagerClientException e) {
-            handleException("Error while retrieving consumer secrets of clientId : " + clientId, e);
+            String errMsg = "Error while retrieving consumer secrets of clientId : " + clientId;
+            throw new APIManagementException(errMsg, e, ExceptionCodes
+                    .from(ExceptionCodes.CLIENT_SECRET_RETRIEVAL_FAILED, clientId));
         }
         if (clientSecretList == null) {
             return null;
@@ -691,14 +695,16 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public void deleteApplicationConsumerSecret(String secretId, ConsumerSecretRequest consumerSecretRequest)
             throws APIManagementException {
+        String clientId = consumerSecretRequest.getClientId();
         String encodedClientId = Base64.getUrlEncoder()
-                .encodeToString(consumerSecretRequest.getClientId().getBytes(StandardCharsets.UTF_8));
+                .encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
         String encodedSecretId = Base64.getUrlEncoder().encodeToString(secretId.getBytes(StandardCharsets.UTF_8));
         try {
             dcrClient.deleteApplicationSecret(encodedClientId, encodedSecretId);
         } catch (KeyManagerClientException e) {
-            handleException("Error while deleting consumer secret of clientId : " +
-                    consumerSecretRequest.getClientId(), e);
+            String errMsg = "Error while deleting consumer secret of clientId : " + clientId;
+            throw new APIManagementException(errMsg, e, ExceptionCodes
+                    .from(ExceptionCodes.CLIENT_SECRET_RETRIEVAL_FAILED, clientId));
         }
     }
 
