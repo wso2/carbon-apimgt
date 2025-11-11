@@ -582,8 +582,6 @@ public class AsyncApiParserUtil {
      * @param server AsyncApiServer
      */
     public static void setAsyncApiServer(String url, AsyncApiServer server){
-        String host;
-        String pathname = "/";
         if (server instanceof AsyncApi20Server) {
             ((AsyncApi20Server) server).setUrl(url);
         } else if (server instanceof AsyncApi21Server) {
@@ -599,13 +597,37 @@ public class AsyncApiParserUtil {
         } else if (server instanceof AsyncApi26Server) {
             ((AsyncApi26Server) server).setUrl(url);
         } else if (server instanceof AsyncApi30Server) {
-            if (url.contains("/")) {
-                int idx = url.indexOf("/");
-                host = url.substring(0, idx);
-                pathname = url.substring(idx);
+            String host = null;
+            String pathname = "/";
+
+            if (url != null && !url.isEmpty()) {
+                int schemeIdx = url.indexOf("://");
+                int start = schemeIdx >= 0 ? schemeIdx + 3 : 0;
+                int slashIdx = url.indexOf('/', start);
+
+                if (slashIdx >= 0) {
+                    host = url.substring(start, slashIdx).trim();
+                    pathname = url.substring(slashIdx).trim();
+                    if (pathname.isEmpty()) {
+                        pathname = "/";
+                    }
+                } else {
+                    host = url.substring(start).trim();
+                    pathname = "/";
+                }
+
+                // If host ends up empty (e.g. "file:///path" or malformed input), fall back to the raw url
+                if (host == null || host.isEmpty()) {
+                    host = url.trim();
+                }
             } else {
-                host = url;
+                host = "";
+                pathname = "/";
             }
+
+            log.debug("[AsyncAPI][setAsyncApiServer] host: " + host);
+            log.debug("[AsyncAPI][setAsyncApiServer] pathname: " + pathname);
+
             ((AsyncApi30Server) server).setHost(host);
             ((AsyncApi30Server) server).setPathname(pathname);
         } else {

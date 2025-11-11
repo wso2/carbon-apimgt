@@ -28,7 +28,7 @@ public class AsyncApiV3ParserUtil {
     }
 
     /**
-     * This method was creaet to parse YAML/JSON into JsonNode (YAMLFactory handles JSON too)
+     * This method was created to parse YAML/JSON into JsonNode (YAMLFactory handles JSON too)
      */
     public static JsonNode parseToJsonNode(String apiDefinition) throws APIManagementException {
         if (apiDefinition == null || apiDefinition.trim().isEmpty()) {

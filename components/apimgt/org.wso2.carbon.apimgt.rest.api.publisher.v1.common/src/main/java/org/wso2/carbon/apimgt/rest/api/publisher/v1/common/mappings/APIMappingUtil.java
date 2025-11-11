@@ -2498,8 +2498,15 @@ public class APIMappingUtil {
 
     private static List<ScopeDTO> getScopesFromAsyncAPI(String asyncAPIDefinition) throws APIManagementException {
 
-        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
-                AsyncApiParserUtil.getAsyncApiVersion(asyncAPIDefinition));
+//        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+//        AsyncApiParserUtil.getAsyncApiVersion(asyncAPIDefinition));
+        String asyncApiVersion = AsyncApiParserUtil.getAsyncApiVersion(asyncAPIDefinition);
+        AsyncApiParser asyncApiParser;
+        try {
+            asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(asyncApiVersion);
+        } catch (IllegalArgumentException | UnsupportedOperationException e) {
+            throw new APIManagementException("Unsupported AsyncAPI version: " + asyncApiVersion, e);
+        }
         Set<Scope> scopes = asyncApiParser.getScopes(asyncAPIDefinition);
 
         List<ScopeDTO> scopeDTOS = new ArrayList<>();

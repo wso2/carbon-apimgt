@@ -38,7 +38,7 @@ import java.util.*;
 )
 public class AsyncApiV3Parser extends AsyncApiParser {
 
-    private static final Log log = LogFactory.getLog(AsyncApiParserUtil.class);
+    private static final Log log = LogFactory.getLog(AsyncApiV3Parser.class);
 
     @Override
     public Set<URITemplate> getURITemplates(String apiDefinition, boolean includePublish)
@@ -126,91 +126,6 @@ public class AsyncApiV3Parser extends AsyncApiParser {
         }
         return uriTemplates;
     }
-
-    /**
-     * This method might no long required - Need to confirm
-     * This method was created to explicitly define the endpoints with topic/channels
-     */
-    public Map<String, Map<String, String>> getTopicMappings(String apiDefinition) throws APIManagementException {
-        Map<String, Map<String, String>> topicMappings = new HashMap<>();
-
-        if (apiDefinition == null || apiDefinition.trim().isEmpty()) {
-            throw new APIManagementException("AsyncAPI definition is empty or null.");
-        }
-
-        AsyncApi30Document document = (AsyncApi30Document) Library.readDocumentFromJSONString(apiDefinition);
-        if (document == null) {
-            throw new APIManagementException("Failed to parse AsyncAPI document.");
-        }
-
-        AsyncApi30Components components = (AsyncApi30Components) document.getComponents();
-        Map<String, AsyncApi30Channel> channels = null;
-        Map<String, AsyncApi30Server> servers = null;
-
-        if (components != null && components.getChannels() != null) {
-            channels = components.getChannels();
-        }
-
-        if (components != null && components.getServers() != null) {
-            servers = components.getServers();
-        }
-
-        if (channels != null) {
-            for (Map.Entry<String, AsyncApi30Channel> channelEntry : channels.entrySet()) {
-                String channelName = channelEntry.getKey();
-                Map<String, String> endpoints = new HashMap<>();
-
-                if (servers != null) {
-                    for (Map.Entry<String, AsyncApi30Server> serverEntry : servers.entrySet()) {
-                        String serverKey = serverEntry.getKey(); // e.g., "production" or "sandbox"
-                        AsyncApi30Server server = serverEntry.getValue();
-
-                        if (server != null) {
-                            String protocol = server.getProtocol();
-                            String host = server.getHost();
-                            String pathname = server.getPathname();
-                            String url = buildUrl(protocol, host, pathname);
-
-                            if ("sandbox".equalsIgnoreCase(serverKey)) {
-                                endpoints.put("sandbox", url);
-                            } else {
-                                endpoints.put("production", url);
-                            }
-                        }
-                    }
-                }
-
-                if (endpoints.isEmpty()) {
-                    endpoints.put("production", "");
-                }
-
-                topicMappings.put(channelName, endpoints);
-            }
-        }
-
-        return topicMappings;
-    }
-
-    /**
-     * Builds a full URL string from AsyncAPI v3 Server components.
-     */
-    private String buildUrl(String protocol, String host, String pathname) {
-        StringBuilder sb = new StringBuilder();
-        if (protocol != null && !protocol.isEmpty()) {
-            sb.append(protocol).append("://");
-        }
-        if (host != null && !host.isEmpty()) {
-            sb.append(host);
-        }
-        if (pathname != null && !pathname.isEmpty()) {
-            if (!pathname.startsWith("/")) {
-                sb.append("/");
-            }
-            sb.append(pathname);
-        }
-        return sb.toString();
-    }
-
 
     private List<String> getScopeOfOperations(AsyncApiOperation operation) {
         return getScopeOfOperationsFromExtensions(operation);
@@ -341,7 +256,7 @@ public class AsyncApiV3Parser extends AsyncApiParser {
                         String formatted = formatProblems(problems);
                         log.debug("[AsyncAPI][validateAPIDefinition] Validation Problems:\n" + formatted);
 
-                        // Determine if there are any ERROR-level problems
+                        // Determine if there are any high or medium severity problems
                         // This can also include ValidationProblemSeverity low as well
                         boolean hasErrors = problems.stream()
                                 .anyMatch(p -> p.severity == ValidationProblemSeverity.high
@@ -439,7 +354,7 @@ public class AsyncApiV3Parser extends AsyncApiParser {
         // Create an empty AsyncApiDocument and populate basic info
         AsyncApiDocument asyncApiDocument = AsyncApiParserUtil.createAsyncApiDocument(
                 APISpecParserConstants.AsyncApi.ASYNC_API_V30);
-        asyncApiDocument.setAsyncapi("3.0.0");
+        asyncApiDocument.setAsyncapi(APISpecParserConstants.AsyncApi.ASYNC_API_V3);
         asyncApiDocument.setInfo(asyncApiDocument.createInfo());
         asyncApiDocument.getInfo().setTitle(api.getId().getName());
         asyncApiDocument.getInfo().setVersion(api.getId().getVersion());
@@ -582,7 +497,9 @@ public class AsyncApiV3Parser extends AsyncApiParser {
             channelDetails = (AsyncApiChannelItem) channels.getItem((String) x);
             channels.removeItem((String) x);
         }
-        assert channelDetails != null;
+        if (channelDetails == null) {
+            throw new APIManagementException("No channel details found in AsyncAPI definition");
+        }
         channels.addItem(channelName, channelDetails);
         asyncApiDocument.setChannels((AsyncApiChannels) channels);
 

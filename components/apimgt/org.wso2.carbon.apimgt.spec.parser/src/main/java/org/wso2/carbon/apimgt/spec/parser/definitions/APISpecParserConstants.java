@@ -235,6 +235,8 @@ public final class APISpecParserConstants {
         public static final String ASYNC_API_V25 = "2.5";
         public static final String ASYNC_API_V26 = "2.6";
         public static final String ASYNC_API_V30 = "3.0";
+        public static final String ASYNC_API_V2 = "2.0.0";
+        public static final String ASYNC_API_V3 = "3.0.0";
     }
 
     public static class AsyncApiSchemas {

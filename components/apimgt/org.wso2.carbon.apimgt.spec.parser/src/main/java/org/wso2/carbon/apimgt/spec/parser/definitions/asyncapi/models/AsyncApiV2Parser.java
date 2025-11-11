@@ -41,7 +41,7 @@ import java.util.*;
 )
 public class AsyncApiV2Parser extends AsyncApiParser {
 
-    private static final Log log = LogFactory.getLog(AsyncApiParserUtil.class);
+    private static final Log log = LogFactory.getLog(AsyncApiV2Parser.class);
 
     @Override
     public Set<URITemplate> getURITemplates(String apiDefinition, boolean includePublish)
@@ -433,7 +433,7 @@ public class AsyncApiV2Parser extends AsyncApiParser {
             url = hostsWithSchemes.get(APISpecParserConstants.WSS_PROTOCOL).trim()
                     .replace(APISpecParserConstants.WSS_PROTOCOL_URL_PREFIX, "");
         }
-        if (ArrayUtils.contains(apiTransports, APISpecParserConstants.WSS_PROTOCOL)
+        if (ArrayUtils.contains(apiTransports, APISpecParserConstants.WS_PROTOCOL)
                 && hostsWithSchemes.get(APISpecParserConstants.WS_PROTOCOL) != null) {
             if (StringUtils.isEmpty(url)) {
                 url = hostsWithSchemes.get(APISpecParserConstants.WS_PROTOCOL).trim()

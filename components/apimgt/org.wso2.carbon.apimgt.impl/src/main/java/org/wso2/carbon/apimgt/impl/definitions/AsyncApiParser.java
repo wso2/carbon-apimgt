@@ -29,7 +29,9 @@ public class AsyncApiParser extends org.wso2.carbon.apimgt.spec.parser.definitio
     @Override
     public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
             throws APIManagementException {
-        return null;
+        throw new UnsupportedOperationException(
+                "AsyncApiParser is deprecated. Use org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser " +
+                        "instead to get version-specific parser.");
     }
 
     @Override

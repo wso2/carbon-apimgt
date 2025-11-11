@@ -1470,36 +1470,42 @@ public class TemplateBuilderUtil {
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         Map<String, Map<String, String>> topicMappings = api.getWebSocketTopicMappingConfiguration().getMappings();
         List<GatewayContentDTO> endpointsToAdd = new ArrayList<>();
-        for (URITemplate resource : uriTemplates) {
-            String topic = resource.getUriTemplate();
-            Map<String, String> endpoints = topicMappings.get(topic);
-            // Production and Sandbox endpoints
-            if (endpoints != null) {
-                for (Map.Entry<String, String> endpointData : endpoints.entrySet()) {
-                    if (!"resourceKey".equals(endpointData.getKey())) {
-                        String endpointType = endpointData.getKey();
-                        String endpointUrl = endpointData.getValue();
+        if (topicMappings != null) {
+            for (URITemplate resource : uriTemplates) {
+                String topic = resource.getUriTemplate();
+                Map<String, String> endpoints = topicMappings.get(topic);
+                // Production and Sandbox endpoints
+                if (endpoints != null) {
+                    for (Map.Entry<String, String> endpointData : endpoints.entrySet()) {
+                        if (!"resourceKey".equals(endpointData.getKey())) {
+                            String endpointType = endpointData.getKey();
+                            String endpointUrl = endpointData.getValue();
 
-                        String endpointConfigContext = builder.getConfigStringForWebSocketEndpointTemplate(
-                                endpointType, getWebsocketResourceKey(topic), endpointUrl);
-                        GatewayContentDTO endpoint = new GatewayContentDTO();
-                        // For WS APIs, resource type is not applicable,
-                        // so we can just use the uriTemplate/uriMapping to identify the resource
-                        endpoint.setName(getEndpointName(endpointConfigContext));
-                        endpoint.setContent(endpointConfigContext);
-                        endpointsToAdd.add(endpoint);
+                            String endpointConfigContext = builder.getConfigStringForWebSocketEndpointTemplate(
+                                    endpointType, getWebsocketResourceKey(topic), endpointUrl);
+                            GatewayContentDTO endpoint = new GatewayContentDTO();
+                            // For WS APIs, resource type is not applicable,
+                            // so we can just use the uriTemplate/uriMapping to identify the resource
+                            endpoint.setName(getEndpointName(endpointConfigContext));
+                            endpoint.setContent(endpointConfigContext);
+                            endpointsToAdd.add(endpoint);
+                        }
                     }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("No endpoints found for topic: " + topic);
+                    }
+                    continue;
                 }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("No endpoints found for topic: " + topic);
+                // Graphql APIs with subscriptions has only one wild card resource mapping to WS endpoints.
+                // Hence, iterating once through resources is enough.
+                if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                    break;
                 }
-                continue;
             }
-            // Graphql APIs with subscriptions has only one wild card resource mapping to WS endpoints. Hence, iterating
-            // once through resources is enough.
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                break;
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("No Topic Mapping Configuration found for WebSocket API: " + api.getDisplayName());
             }
         }
         gatewayAPIDTO.setEndpointEntriesToBeAdd(addGatewayContentsToList(endpointsToAdd,

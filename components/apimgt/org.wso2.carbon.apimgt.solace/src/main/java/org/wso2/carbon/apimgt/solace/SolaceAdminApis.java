@@ -534,8 +534,6 @@ public class SolaceAdminApis {
                 List<String> parameterKeySet = channel.getParameters().getItemNames();
                 for (String parameterName : parameterKeySet) {
                     if (!parameters1.contains(parameterName)) {
-//                        AsyncApi22Parameter parameterObject = (AsyncApi22Parameter)
-//                        channel.getParameters().getItem(parameterName);
                         Object parameterObject = channel.getParameters().getItem(parameterName);
                         Object paramObjSchema = AsyncApiParserUtil.getSchemaFromParameter(parameterObject);
                         if (paramObjSchema != null) {
@@ -549,8 +547,6 @@ public class SolaceAdminApis {
                             String parameterObjectRef = AsyncApiParserUtil.getRefFromParameter(parameterObject);
                             if (parameterObjectRef != null) {
                                 if (asyncDocument.getComponents().getParameters() != null) {
-//                                AsyncApi22Parameter parameterObject1 = (AsyncApi22Parameter)
-//                                asyncDocument.getComponents().getParameters().get(parameterName);
                                     Object parameterObject1 = channel.getParameters().getItem(parameterName);
                                     Object paramObjSchema1 = AsyncApiParserUtil.
                                             getSchemaFromParameter(parameterObject1);

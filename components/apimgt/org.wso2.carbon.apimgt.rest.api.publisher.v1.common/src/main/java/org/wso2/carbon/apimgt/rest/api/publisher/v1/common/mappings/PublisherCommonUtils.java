@@ -135,6 +135,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationRespo
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationResponseToolInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityInfoDTO;
+import org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserConstants;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
@@ -142,7 +143,6 @@ import org.wso2.carbon.apimgt.spec.parser.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParserFactory;
-import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models.AsyncApiV3Parser;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -2419,11 +2419,17 @@ public class PublisherCommonUtils {
             // by defining the AsyncApiParser as AsyncApiV3Parser.
             // If you need to use AsyncAPI version 2.x instead, uncomment the following line
             // and comment out the next one.
-            // AsyncApiParser asyncApiParser = new AsyncApiV2Parser();
-            AsyncApiParser asyncApiParser = new AsyncApiV3Parser();
+            // AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+            //                    APISpecParserConstants.AsyncApi.ASYNC_API_V2);
+            AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+                    APISpecParserConstants.AsyncApi.ASYNC_API_V3);
             String asyncApiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
-            log.debug("[AsyncAPI][PublisherCommonUtils.addAPIWithGeneratedSwaggerDefinition] " +
-                    "asyncApiDefinition: " + asyncApiDefinition);
+            if (log.isDebugEnabled()) {
+                String preview = asyncApiDefinition.length() > 1000 ? asyncApiDefinition.substring(0, 1000)
+                        + "...(truncated)" : asyncApiDefinition;
+                log.debug("[AsyncAPI][PublisherCommonUtils.addAPIWithGeneratedSwaggerDefinition] " +
+                        "asyncApiDefinition content: " + preview);
+            }
             apiToAdd.setAsyncApiDefinition(asyncApiDefinition);
         }
         apiToAdd.setOrganization(organization);
