@@ -125,11 +125,29 @@ public class DefaultApiKeyGenerator implements ApiKeyGenerator {
     }
 
     protected String buildHeader() throws APIManagementException {
-        Certificate publicCert;
+        Certificate publicCert = null;
         JSONObject headerWithKid;
         try {
             KeyStoreManager tenantKSM = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
-            publicCert = tenantKSM.getDefaultPrimaryCertificate();
+            KeyStore apiKeySignKeyStore = getApiKeySignKeyStore(tenantKSM);
+            String apiKeySignKeyStoreName = APIUtil.getApiKeySignKeyStoreName();
+            if (apiKeySignKeyStore != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Using API key sign keystore: " + apiKeySignKeyStoreName);
+                }
+                ServerConfigurationService config =  tenantKSM.getServerConfigService();
+                String apiKeySignAlias = config.getFirstProperty(APIConstants.KeyStoreManagement
+                        .SERVER_APIKEYSIGN_KEYSTORE_KEY_ALIAS.replaceFirst(APIConstants.KeyStoreManagement.KeyStoreName,
+                                apiKeySignKeyStoreName));
+                publicCert = apiKeySignKeyStore.getCertificate(apiKeySignAlias);
+            }
+            if (publicCert == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Using default primary certificate as no specific certificate found" +
+                            "in the API key sign keystore: " + apiKeySignKeyStoreName);
+                }
+                publicCert = tenantKSM.getDefaultPrimaryCertificate();
+            }
             headerWithKid = generateHeader(publicCert, APIConstants.SIGNATURE_ALGORITHM_SHA256_WITH_RSA);
             headerWithKid.put("kid", APIUtil.getApiKeyAlias());
         } catch (Exception e) {
