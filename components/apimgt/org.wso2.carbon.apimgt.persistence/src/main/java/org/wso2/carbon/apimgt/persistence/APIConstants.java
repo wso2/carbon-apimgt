@@ -417,4 +417,7 @@ public final class APIConstants {
     public static final String DEFAULT_VISIBLE_ORG = "all";
     
     public static final String VISIBLE_ORG_ALL = "all";
+
+    public static final String SOAP_TO_REST_RESOURCE = "soap_to_rest";
+    public static final String TEXT_XML = "text/xml";
 }
