@@ -108,10 +108,9 @@ public class KeyManagerMappingUtil {
         }
         if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())) {
             if (APIUtil.isMultipleClientSecretsEnabled()) {
-                keyManagerConfigurationDTO
-                        .addProperty(APIConstants.KeyManager.ENABLE_MULTIPLE_CLIENT_SECRETS, true);
-                keyManagerConfigurationDTO
-                        .addProperty(APIConstants.KeyManager.CLIENT_SECRET_COUNT, APIUtil.getClientSecretCount());
+                additionalProperties.put(APIConstants.KeyManager.ENABLE_MULTIPLE_CLIENT_SECRETS, "true");
+                additionalProperties.put(APIConstants.KeyManager.CLIENT_SECRET_COUNT,
+                        String.valueOf(APIUtil.getClientSecretCount()));
             }
         }
         keyManagerInfoDTO.setAdditionalProperties(additionalProperties);
