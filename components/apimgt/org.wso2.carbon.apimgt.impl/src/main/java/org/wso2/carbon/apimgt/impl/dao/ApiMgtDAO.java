@@ -20581,6 +20581,42 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Remove an API revision Deployment mapping record to the database
+     *
+     * @param apiUUID     uuid of the api.
+     * @param revisionUUID uuid of the revision.
+     * @param deployments content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    public void removeAPIRevisionDeployment(String apiUUID, String revisionUUID, Set<String> deployments)
+            throws APIManagementException {
+        if (deployments == null || deployments.isEmpty()) {
+            return;
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Remove an entry from AM_DEPLOYMENT_REVISION_MAPPING table
+                try (PreparedStatement statement = connection.prepareStatement(
+                        REMOVE_API_REVISION_DEPLOYMENT_MAPPING)) {
+                    for (String deployment : deployments) {
+                        statement.setString(1, deployment);
+                        statement.setString(2, revisionUUID);
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to remove API Revision Deployment Mapping entry for API UUID " + apiUUID, e);
+        }
+    }
+
+    /**
      * Remove an deployed API revision in the database
      *
      * @param apiUUID     uuid of the revision

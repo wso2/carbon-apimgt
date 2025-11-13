@@ -188,7 +188,7 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
 
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(selectedErrorHandler);
                 return Response
-                        .status(Response.Status.fromStatusCode(selectedErrorHandler.getHttpStatusCode()))
+                        .status(selectedErrorHandler.getHttpStatusCode())
                         .type(MediaType.APPLICATION_JSON_TYPE)
                         .entity(errorDTO)
                         .build();
