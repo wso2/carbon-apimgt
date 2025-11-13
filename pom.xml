@@ -2297,7 +2297,7 @@
         <import.package.version.commons.io>[2.4.0,3.0.0)</import.package.version.commons.io>
         <import.package.version.commons.codec>[1.14.0,3.0.0)</import.package.version.commons.codec>
 
-        <org.wso2.orbit.com.amazonaws.version>2.30.22.wso2v1</org.wso2.orbit.com.amazonaws.version>
+        <org.wso2.orbit.com.amazonaws.version>2.30.22.wso2v2</org.wso2.orbit.com.amazonaws.version>
         <org.wso2.orbit.com.amazonaws.version.range>[2.20, 2.50]</org.wso2.orbit.com.amazonaws.version.range>
 
         <zipkin.version>2.27.1</zipkin.version>
