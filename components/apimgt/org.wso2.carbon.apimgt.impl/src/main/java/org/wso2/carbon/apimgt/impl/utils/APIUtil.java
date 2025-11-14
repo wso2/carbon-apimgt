@@ -85,6 +85,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.FaultyGatewayDeploymentException;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
