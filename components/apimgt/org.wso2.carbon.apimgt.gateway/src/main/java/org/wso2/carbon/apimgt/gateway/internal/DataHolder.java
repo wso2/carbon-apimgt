@@ -269,6 +269,31 @@ public class DataHolder {
         }
     }
 
+    public boolean isDuplicateEvent(String tenantDomain, String apiContext, String lastUpdatedEventId) {
+        Map<String, API> apiMap = tenantAPIMap.get(tenantDomain);
+        if (apiMap != null) {
+            API api = apiMap.get(apiContext);
+            if (api != null) {
+                if (lastUpdatedEventId != null && api.getLastUpdatedEventId() != null) {
+                    return api.getLastUpdatedEventId().equalsIgnoreCase(lastUpdatedEventId);
+                }
+            }
+        }
+        return false;
+    }
+
+    public void updateLastUpdatedEventId(GatewayAPIDTO gatewayAPIDTO, String lastUpdatedEventId) {
+        Map<String, API> apiMap = tenantAPIMap.get(gatewayAPIDTO.getTenantDomain());
+        if (apiMap != null) {
+            API api = apiMap.get(gatewayAPIDTO.getApiContext());
+            if (api != null) {
+                if (lastUpdatedEventId != null) {
+                    api.setLastUpdatedEventId(lastUpdatedEventId);
+                }
+            }
+        }
+    }
+
     /**
      * Populate vhosts information to API object
      *

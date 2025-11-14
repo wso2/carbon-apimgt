@@ -53,6 +53,7 @@ public class API implements CacheableEntity<String> {
     private Boolean isEgress = null;
     private String subtype = null;
     private List<VHost> vhosts = new ArrayList<>();
+    private String lastUpdatedEventId = null;
 
     public API() {
     }
@@ -95,6 +96,7 @@ public class API implements CacheableEntity<String> {
      * @param apiType
      * @param status
      * @param isDefaultVersion
+     * @param isDeployed
      */
     public API(String uuid, Integer apiId, String provider, String name, String version, String context,
                String policy, String apiType, String status, boolean isDefaultVersion,boolean isDeployed) {
@@ -386,5 +388,13 @@ public class API implements CacheableEntity<String> {
         if (vhosts != null) {
             this.vhosts = vhosts;
         }
+    }
+
+    public String getLastUpdatedEventId() {
+        return lastUpdatedEventId;
+    }
+
+    public void setLastUpdatedEventId(String lastUpdatedEventId) {
+        this.lastUpdatedEventId = lastUpdatedEventId;
     }
 }
