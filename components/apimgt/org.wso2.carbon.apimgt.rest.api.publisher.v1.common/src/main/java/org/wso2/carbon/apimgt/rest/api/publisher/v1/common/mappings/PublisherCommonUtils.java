@@ -135,11 +135,14 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationRespo
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationResponseToolInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityInfoDTO;
+import org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserConstants;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParserFactory;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -920,7 +923,8 @@ public class PublisherCommonUtils {
         } else {
             String oldDefinition = apiProvider
                     .getAsyncAPIDefinition(apiToUpdate.getUuid(), originalAPI.getOrganization());
-            AsyncApiParser asyncApiParser = new AsyncApiParser();
+            String asyncApiVersion = AsyncApiParserUtil.getAsyncApiVersion(oldDefinition);
+            AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(asyncApiVersion);
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
             apiToUpdate.setSwaggerDefinition(updateAsyncAPIDefinition);
@@ -2411,8 +2415,21 @@ public class PublisherCommonUtils {
             }
             apiToAdd.setSwaggerDefinition(apiDefinition);
         } else {
-            AsyncApiParser asyncApiParser = new AsyncApiParser();
+            // Note: By default, AsyncAPI version 3.0 will be used when creating new streaming APIs
+            // by defining the AsyncApiParser as AsyncApiV3Parser.
+            // If you need to use AsyncAPI version 2.x instead, uncomment the following line
+            // and comment out the next one.
+            // AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+            //                    APISpecParserConstants.AsyncApi.ASYNC_API_V2);
+            AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+                    APISpecParserConstants.AsyncApi.ASYNC_API_V3);
             String asyncApiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
+            if (log.isDebugEnabled()) {
+                String preview = asyncApiDefinition.length() > 1000 ? asyncApiDefinition.substring(0, 1000)
+                        + "...(truncated)" : asyncApiDefinition;
+                log.debug("[AsyncAPI][PublisherCommonUtils.addAPIWithGeneratedSwaggerDefinition] " +
+                        "asyncApiDefinition content: " + preview);
+            }
             apiToAdd.setAsyncApiDefinition(asyncApiDefinition);
         }
         apiToAdd.setOrganization(organization);
@@ -3109,7 +3126,8 @@ public class PublisherCommonUtils {
         existingAPI.setOrganization(organization);
         String apiDefinition = response.getJsonContent();
 
-        AsyncApiParser asyncApiParser = new AsyncApiParser();
+        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+                AsyncApiParserUtil.getAsyncApiVersion(apiDefinition));
         // Set uri templates
         Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(apiDefinition, APIConstants.
                 API_TYPE_WS.equals(existingAPI.getType()) || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals
@@ -4524,7 +4542,7 @@ public class PublisherCommonUtils {
         }
         if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiDto.getGatewayVendor())) {
             apiDto.getPolicies().add(APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED);
-            apiDto.setAsyncTransportProtocols(AsyncApiParser.getTransportProtocolsForAsyncAPI(definitionToAdd));
+            apiDto.setAsyncTransportProtocols(AsyncApiParserUtil.getTransportProtocolsForAsyncAPI(definitionToAdd));
         }
         API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(new APIDTOTypeWrapper(apiDto), apiProvider,
                 RestApiCommonUtil.getLoggedInUsername(), organization);
@@ -4539,9 +4557,11 @@ public class PublisherCommonUtils {
         apiToAdd.setAsyncApiDefinition(definitionToAdd);
 
         // load topics from AsyncAPI
-        apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(definitionToAdd,
-                APIConstants.API_TYPE_WS.equals(apiToAdd.getType()) ||
-                        !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiToAdd.getGatewayVendor())));
+        apiToAdd.setUriTemplates(
+                AsyncApiParserFactory.getAsyncApiParser(AsyncApiParserUtil.getAsyncApiVersion(definitionToAdd))
+                        .getURITemplates(definitionToAdd, APIConstants.API_TYPE_WS.equals(
+                                apiToAdd.getType()) || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(
+                                apiToAdd.getGatewayVendor())));
         apiToAdd.setOrganization(organization);
         apiToAdd.setAsyncApiDefinition(definitionToAdd);
 
