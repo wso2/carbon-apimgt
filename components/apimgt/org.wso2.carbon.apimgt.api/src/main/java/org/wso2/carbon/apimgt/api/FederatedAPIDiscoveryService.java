@@ -28,8 +28,15 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 public interface FederatedAPIDiscoveryService {
     /**
      * Schedules the discovery of APIs from a federated environment.
-     * @param environment
-     * @param organization
+     * @param environment getFederatedEnvironment
+     * @param organization organization of the environment
      */
     void scheduleDiscovery(Environment environment, String organization);
+
+    /**
+     * Stops the discovery of APIs from a federated environment.
+     * @param environment getFederatedEnvironment
+     * @param organization organization of the environment
+     */
+    void stopDiscovery(Environment environment, String organization);
 }

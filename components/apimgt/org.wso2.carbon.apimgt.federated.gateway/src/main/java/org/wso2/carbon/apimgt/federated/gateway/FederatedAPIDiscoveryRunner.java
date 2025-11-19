@@ -390,6 +390,25 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     }
 
     /**
+     * Stops the federated API discovery task for the specified environment and organization.
+     * If a discovery task is currently running for the given environment and organization, it will be
+     * cancelled and removed from the scheduled tasks.
+     *
+     * @param environment  The environment for which the discovery task should be stopped.
+     * @param organization The organization context for which the discovery task should be stopped.
+     */
+    public void stopDiscovery(Environment environment, String organization) {
+        String taskKey = "FederatedAPIDiscovery" + DELEM_COLON + environment.getName() + DELEM_COLON
+                + organization;
+        if (scheduledDiscoveryTasks.containsKey(taskKey)) {
+            scheduledDiscoveryTasks.get(taskKey).cancel(true);
+            scheduledDiscoveryTasks.remove(taskKey);
+            log.info("Stopped federated API discovery task for environment: " + environment.getName()
+                    + " in organization: " + organization);
+        }
+    }
+
+    /**
      * Attempts to acquire a lock for a discovery task.
      * If the lock is acquired, the task is scheduled for execution.
      *
