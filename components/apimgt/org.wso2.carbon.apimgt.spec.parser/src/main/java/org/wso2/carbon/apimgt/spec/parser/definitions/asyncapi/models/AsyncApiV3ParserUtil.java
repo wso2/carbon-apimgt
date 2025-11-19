@@ -1,21 +1,36 @@
+/*
+ *   Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com)
+ *
+ *   WSO2 LLC. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
 package org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.apache.commons.lang3.StringUtils;
+import io.apicurio.datamodels.models.MappedNode;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiServer;
+import io.apicurio.datamodels.models.asyncapi.v30.AsyncApi30Server;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserUtil;
 
-import java.io.IOException;
-import java.util.Iterator;
+import java.net.URI;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Helper Class utilities for AsyncApiV3Parser to keep parsing and template building logic reusable.
@@ -28,190 +43,119 @@ public class AsyncApiV3ParserUtil {
     }
 
     /**
-     * This method was created to parse YAML/JSON into JsonNode (YAMLFactory handles JSON too)
+     * Utility method to safely convert a MappedNode<T> into a Map<String, T>.
      */
-    public static JsonNode parseToJsonNode(String apiDefinition) throws APIManagementException {
-        if (apiDefinition == null || apiDefinition.trim().isEmpty()) {
-            throw new APIManagementException("AsyncAPI definition is empty or null.");
+    public static <T> Map<String, T> toMap(MappedNode<T> node) {
+        if (node == null || node.getItemNames() == null) {
+            return Collections.emptyMap();
         }
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        try {
-            return mapper.readTree(apiDefinition);
-        } catch (IOException e) {
-            String msg = "Failed to parse AsyncAPI definition: " + e.getMessage();
-            log.debug("[AsyncApiV3ParserHelper] parseToJsonNode failed: " + msg);
-            throw new APIManagementException(msg, e);
-        }
-    }
 
-    /**
-     * Return a map of name -> JsonNode for either root.mapKey or root.parentKey.mapKey.
-     * If parentKey is null, reads root.mapKey.
-     */
-    public static Map<String, JsonNode> getMap(JsonNode root, String parentKey, String mapKey) {
-        Map<String, JsonNode> map = new LinkedHashMap<>();
-        if (root == null || root.isMissingNode()) {
-            return map;
-        }
-        JsonNode node = (parentKey != null) ? root.path(parentKey).path(mapKey) : root.path(mapKey);
-        if (node != null && node.isObject()) {
-            Iterator<Map.Entry<String, JsonNode>> it = node.fields();
-            it.forEachRemaining(entry -> {
-                if (entry.getValue() != null && !entry.getValue().isNull()) {
-                    map.put(entry.getKey(), entry.getValue());
-                }
-            });
-        }
-        return map;
-    }
+        List<String> names = node.getItemNames();
+        List<T> items = node.getItems();
 
-    public static String textOrNull(JsonNode node, String field) {
-        if (node == null || node.isMissingNode()) return null;
-        JsonNode n = node.path(field);
-        return n.isTextual() ? n.asText() : null;
+        return IntStream.range(0, Math.min(names.size(), items.size()))
+                .filter(i -> items.get(i) != null)
+                .boxed()
+                .collect(Collectors.toMap(names::get, items::get, (a, b) -> b, LinkedHashMap::new));
     }
 
     /**
      * Extract channel name from a $ref like "#/channels/myChannel" (returns "myChannel").
      * If format differs, returns last path segment as fallback.
+     * Expected format: #/channels/<name>
      */
     public static String extractChannelNameFromRef(String ref) {
-        if (ref == null) return null;
-        final String prefix = "#/channels/";
-        if (ref.startsWith(prefix)) {
-            return ref.substring(prefix.length());
+        if (ref == null) {
+            return null;
         }
-        int lastSlash = ref.lastIndexOf('/');
-        if (lastSlash >= 0 && lastSlash < ref.length() - 1) {
-            return ref.substring(lastSlash + 1);
+        int index = ref.lastIndexOf('/');
+        if (index == -1 || index == ref.length() - 1) {
+            return null;
         }
-        return ref;
+
+        String extracted = ref.substring(index + 1);
+
+        // Need to fix in the Publisher UI
+        // Temp fix; if the actual channel is wildcard "/*", preserve the slash
+        // This fix currently only works for wildcard "/*"
+        if ("*".equals(extracted) && ref.contains("/channels/*")) {
+            return "/*";
+        }
+
+        return extracted;
     }
 
     /**
-     * Build a URITemplate by reading vendor extensions and x-scopes from operation/channel JSON nodes.
+     * Extract only channel name from full address
+     * Remove ALL leading slashes like "#/channels//myChannel" or "#/channels///myChannel" (returns "myChannel").
      */
-    public static URITemplate buildURITemplate(
-            String target,
-            String verb,
-            JsonNode operationNode,
-            JsonNode channelNode,
-            Set<Scope> scopes) throws APIManagementException {
+    public static String normalizeChannelName(String name) {
+        if (name == null || name.isEmpty()) {
+            return "";
+        }
+        while (name.startsWith("/")) {
+            name = name.substring(1);
+        }
+        return name;
+    }
 
-        URITemplate template = new URITemplate();
-        template.setHTTPVerb(verb);
-        template.setHttpVerbs(verb);
-        template.setUriTemplate(target);
+    /**
+     * Extract and set the Host and Pathname from the full URL
+     */
+    public static void setAsyncApiServerFromUrl(String url, AsyncApiServer server, String apiType) {
 
-        // auth type: channel-level override -> operation-level
-        String authType = null;
-        JsonNode chAuth = channelNode.path("x-auth-type");
-        if (chAuth.isTextual()) {
-            authType = chAuth.asText();
-        } else {
-            JsonNode opAuth = operationNode.path("x-auth-type");
-            if (opAuth.isTextual()) {
-                authType = opAuth.asText();
+        AsyncApi30Server srv = (AsyncApi30Server) server;
+
+        if (url == null || url.isEmpty()) {
+            srv.setHost("");
+            srv.setPathname("/");
+            if (apiType != null) {
+                srv.setProtocol(apiType.toLowerCase());
             }
-        }
-        if (StringUtils.isNotBlank(authType)) {
-            template.setAuthType(authType);
+            return;
         }
 
-        // x-scopes extraction (array | object | string)
-        java.util.List<String> opScopes = new java.util.ArrayList<>();
-        JsonNode xScopes = operationNode.path("x-scopes");
-        if (xScopes != null && !xScopes.isMissingNode()) {
-            if (xScopes.isArray()) {
-                xScopes.forEach(n -> { if (n.isTextual()) opScopes.add(n.asText()); });
-            } else if (xScopes.isObject()) {
-                xScopes.fields().forEachRemaining(f -> {
-                    JsonNode v = f.getValue();
-                    if (v.isTextual()) opScopes.add(v.asText());
-                });
-            } else if (xScopes.isTextual()) {
-                opScopes.add(xScopes.asText());
+        String host = "";
+        String path = "/";
+
+        try {
+            String fixed = url.contains("://") ? url : "http://" + url;
+            URI uri = new URI(fixed);
+
+            if (uri.getHost() != null) {
+                host = uri.getPort() == -1
+                        ? uri.getHost()
+                        : uri.getHost() + ":" + uri.getPort();
+            } else if (uri.getAuthority() != null) {
+                host = uri.getAuthority();
             }
-        }
 
-        if (!opScopes.isEmpty()) {
-            if (opScopes.size() == 1) {
-                Scope scope = APISpecParserUtil.findScopeByKey(scopes, opScopes.get(0));
-                if (scope == null) {
-                    throw new APIManagementException("Scope '" + opScopes.get(0) + "' not found.");
-                }
-                template.setScope(scope);
-                template.setScopes(scope);
+            if (uri.getPath() != null && !uri.getPath().isEmpty()) {
+                path = uri.getPath();
+            }
+
+        } catch (Exception ignore) {
+            String working = url;
+            int schemePos = working.indexOf("://");
+            int start = schemePos >= 0 ? schemePos + 3 : 0;
+
+            int slashPos = working.indexOf('/', start);
+            if (slashPos >= 0) {
+                host = working.substring(start, slashPos);
+                path = working.substring(slashPos);
             } else {
-                for (String sName : opScopes) {
-                    Scope scope = APISpecParserUtil.findScopeByKey(scopes, sName);
-                    if (scope == null) {
-                        throw new APIManagementException("Resource Scope '" + sName + "' not found.");
-                    }
-                    template.setScopes(scope);
-                }
+                host = working.substring(start);
+                path = "/";
             }
         }
-        return template;
+
+        srv.setHost(host);
+        srv.setPathname(path);
+
+        if (apiType != null) {
+            srv.setProtocol(apiType.toLowerCase());
+        }
     }
 
-    public static Map<String, String> getWSUriMapping(JsonNode root) {
-        Map<String, String> wsUriMapping = new LinkedHashMap<>();
-        if (root == null || root.isMissingNode()) {
-            return wsUriMapping;
-        }
 
-        // Prefer components.channels, otherwise root.channels
-        Map<String, JsonNode> channels = getMap(root, "components", "channels");
-        if (channels.isEmpty()) {
-            channels = getMap(root, null, "channels");
-        }
-
-        if (channels.isEmpty()) {
-            return wsUriMapping;
-        }
-
-        for (Map.Entry<String, JsonNode> entry : channels.entrySet()) {
-            String channelKey = entry.getKey();
-            JsonNode channel = entry.getValue();
-            if (channel == null || channel.isNull()) {
-                continue;
-            }
-
-            // helper to resolve x-uri-mapping from an operation node (publish/subscribe)
-            java.util.function.Function<JsonNode, String> resolveXUri = (opNode) -> {
-                if (opNode == null || opNode.isMissingNode() || opNode.isNull()) {
-                    return null;
-                }
-                JsonNode xUri = opNode.path("x-uri-mapping");
-                if (xUri != null && xUri.isTextual()) {
-                    return xUri.asText();
-                }
-                // Some specs put vendor extensions under "extensions" or nested locations; attempt a conservative fallback:
-                JsonNode extensions = opNode.path("extensions");
-                if (extensions != null && extensions.isObject()) {
-                    JsonNode alt = extensions.path("x-uri-mapping");
-                    if (alt != null && alt.isTextual()) {
-                        return alt.asText();
-                    }
-                }
-                // Also check within "bindings" extension or other common vendor spots if necessary (kept small on purpose).
-                return null;
-            };
-
-            // publish
-            String publishUri = resolveXUri.apply(channel.path("publish"));
-            if (publishUri != null) {
-                wsUriMapping.put("PUBLISH_" + channelKey, publishUri);
-            }
-
-            // subscribe
-            String subscribeUri = resolveXUri.apply(channel.path("subscribe"));
-            if (subscribeUri != null) {
-                wsUriMapping.put("SUBSCRIBE_" + channelKey, subscribeUri);
-            }
-        }
-
-        return wsUriMapping;
-    }
 }

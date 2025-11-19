@@ -225,6 +225,17 @@ public final class APISpecParserConstants {
         public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";
     }
 
+    // ASYNC API specific constants
+    public static final String ASYNCAPI_AUTHORIZATION_URL = "http://localhost:9999";
+    public static final String ASYNCAPI_URI_MAPPING = "x-uri-mapping";
+    public static final String ASYNCAPI_ACTION_SEND = "send";
+    public static final String ASYNCAPI_ACTION_RECEIVE = "receive";
+    public static final String ASYNCAPI_ACTION_SEND_OPS = "send_";
+    public static final String ASYNCAPI_ACTION_RECEIVE_OPS = "receive_";
+    public static final String ASYNCAPI_CHANNELS_PATH = "#/channels/";
+    public static final String WS_URI_MAPPING_PUBLISH = "PUBLISH_";
+    public static final String WS_URI_MAPPING_SUBSCRIBE = "SUBSCRIBE_";
+
     public static class AsyncApi {
         public static final String ASYNC_API = "asyncapi";
         public static final String ASYNC_API_V20 = "2.0";
@@ -1757,6 +1768,8 @@ public final class APISpecParserConstants {
                 "    }\n" +
                 "  }\n" +
                 "}";
+
+        public static final String JSONSCHEMA = "http://json-schema.org/draft-07/schema#";
     }
 
     public enum SupportedHTTPVerbs {

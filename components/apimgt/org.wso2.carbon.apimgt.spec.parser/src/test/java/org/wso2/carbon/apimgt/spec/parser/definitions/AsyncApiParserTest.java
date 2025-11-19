@@ -17,9 +17,9 @@
 package org.wso2.carbon.apimgt.spec.parser.definitions;
 
 import org.apache.commons.io.IOUtils;
-import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Test;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParserFactory;
@@ -73,7 +73,8 @@ public class AsyncApiParserTest {
         AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser("2.0");
         try {
             asyncApiParser.generateAsyncAPIDefinition(api);
-        } catch (JSONException e) {
+            Assert.fail("Expected exception was not thrown");
+        } catch (IllegalStateException | APIManagementException e) {
             Assert.assertNotNull(e);
         }
     }

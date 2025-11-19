@@ -1,41 +1,81 @@
+/*
+ *   Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com)
+ *
+ *   WSO2 LLC. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
 package org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.apicurio.datamodels.Library;
-import io.apicurio.datamodels.models.Document;
 import io.apicurio.datamodels.models.MappedNode;
-import io.apicurio.datamodels.models.asyncapi.*;
-import io.apicurio.datamodels.models.asyncapi.v30.*;
-import io.apicurio.datamodels.models.util.JsonUtil;
-import io.apicurio.datamodels.validation.*;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiChannelItem;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiChannels;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiComponents;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiDocument;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiExtensible;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiOAuthFlow;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiOperation;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiSecurityScheme;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiServer;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiServers;
+import io.apicurio.datamodels.models.asyncapi.v30.AsyncApi30Channel;
+import io.apicurio.datamodels.models.asyncapi.v30.AsyncApi30Channels;
+import io.apicurio.datamodels.models.asyncapi.v30.AsyncApi30Components;
+import io.apicurio.datamodels.models.asyncapi.v30.AsyncApi30Document;
+import io.apicurio.datamodels.models.asyncapi.v30.AsyncApi30Operation;
+import io.apicurio.datamodels.models.asyncapi.v30.AsyncApi30Operations;
+import io.apicurio.datamodels.models.asyncapi.v30.AsyncApi30Reference;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
-import org.osgi.service.component.annotations.Component;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserConstants;
+import org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiValidator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models.AsyncApiV3ParserUtil.
+        extractChannelNameFromRef;
+import static org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models.AsyncApiV3ParserUtil.toMap;
+
 
 /**
  * This class is used to parse AsyncAPI 3.0.x specifications.
  * It extends the AsyncApiParser class to provide specific parsing capabilities for AsyncAPI 3.0.0.
  */
-@Component(
-        name = "wso2.async.300.definition.parser.component",
-        immediate = true,
-        service = APIDefinition.class
-)
+
 public class AsyncApiV3Parser extends AsyncApiParser {
 
     private static final Log log = LogFactory.getLog(AsyncApiV3Parser.class);
@@ -43,88 +83,91 @@ public class AsyncApiV3Parser extends AsyncApiParser {
     @Override
     public Set<URITemplate> getURITemplates(String apiDefinition, boolean includePublish)
             throws APIManagementException {
-        // parse once and gather scopes
-        JsonNode root = AsyncApiV3ParserUtil.parseToJsonNode(apiDefinition);
+        AsyncApi30Document document = (AsyncApi30Document) Library.readDocumentFromJSONString(apiDefinition);
         Set<Scope> scopes = getScopes(apiDefinition);
-        Set<URITemplate> uriTemplates = new LinkedHashSet<>();
+        Set<URITemplate> uriTemplates = new HashSet<>();
 
-        // get channels and operations
-        Map<String, JsonNode> channels = AsyncApiV3ParserUtil.getMap(root, "components", "channels");
-        if (channels.isEmpty()) {
-            channels = AsyncApiV3ParserUtil.getMap(root, null, "channels");
-        }
-        Map<String, JsonNode> operations = AsyncApiV3ParserUtil.getMap(root, "components", "operations");
-        if (operations.isEmpty()) {
-            operations = AsyncApiV3ParserUtil.getMap(root, null, "operations");
-        }
+        AsyncApi30Channels channelsContainer = (AsyncApi30Channels) document.getChannels();
+        AsyncApi30Operations operationsContainer = document.getOperations();
 
-        if (!operations.isEmpty()) {
-            // operations reference channels via $ref
-            for (Map.Entry<String, JsonNode> opEntry : operations.entrySet()) {
-                JsonNode opNode = opEntry.getValue();
-                if (opNode == null || opNode.isNull()) {
-                    continue;
-                }
-                String action = AsyncApiV3ParserUtil.textOrNull(opNode, "action");
-                String channelRef = null;
-                JsonNode channelNode = opNode.path("channel");
-                if (channelNode.isTextual()) {
-                    channelRef = channelNode.asText();
-                } else if (channelNode.isObject()) {
-                    channelRef = AsyncApiV3ParserUtil.textOrNull(channelNode, "$ref");
-                }
-                if (StringUtils.isBlank(channelRef)) {
-                    continue;
-                }
-                String channelName = AsyncApiV3ParserUtil.extractChannelNameFromRef(channelRef);
-                if (StringUtils.isBlank(channelName)) {
-                    continue;
-                }
-                JsonNode channel = channels.get(channelName);
-                if (channel == null) {
-                    continue;
-                }
-                try {
-                    if ("send".equalsIgnoreCase(action) && includePublish) {
-                        uriTemplates.add(AsyncApiV3ParserUtil.buildURITemplate(channelName, APISpecParserConstants.HTTP_VERB_PUBLISH, opNode, channel, scopes));
-                    } else if ("receive".equalsIgnoreCase(action)) {
-                        uriTemplates.add(AsyncApiV3ParserUtil.buildURITemplate(channelName, APISpecParserConstants.HTTP_VERB_SUBSCRIBE, opNode, channel, scopes));
-                    }
-                } catch (APIManagementException e) {
-                    log.warn("[AsyncApiV3Parser] skipped operation '" + opEntry.getKey() + "': " + e.getMessage());
-                }
-            }
-        } else {
-            // fallback to inline publish/subscribe inside channels
-            for (Map.Entry<String, JsonNode> chEntry : channels.entrySet()) {
-                String channelName = chEntry.getKey();
-                JsonNode channelNode = chEntry.getValue();
-                if (channelNode == null || channelNode.isNull()) {
-                    continue;
-                }
-                try {
-                    JsonNode publish = channelNode.path("publish");
-                    if (includePublish && !publish.isMissingNode() && !publish.isNull()) {
-                        uriTemplates.add(AsyncApiV3ParserUtil.buildURITemplate(channelName, APISpecParserConstants.HTTP_VERB_PUBLISH, publish, channelNode, scopes));
-                    }
-                } catch (APIManagementException e) {
-                    log.warn("[AsyncApiV3Parser] skipped publish template for channel '" + channelName + "': " + e.getMessage());
-                }
-                try {
-                    JsonNode subscribe = channelNode.path("subscribe");
-                    if (!subscribe.isMissingNode() && !subscribe.isNull()) {
-                        uriTemplates.add(AsyncApiV3ParserUtil.buildURITemplate(channelName, APISpecParserConstants.HTTP_VERB_SUBSCRIBE, subscribe, channelNode, scopes));
-                    }
-                } catch (APIManagementException e) {
-                    log.warn("[AsyncApiV3Parser] skipped subscribe template for channel '" + channelName + "': " + e.getMessage());
-                }
+        Map<String, AsyncApi30Channel> channels = toMap(channelsContainer);
+        Map<String, AsyncApi30Operation> operations = toMap(operationsContainer);
+
+        for (Map.Entry<String, AsyncApi30Operation> entry : operations.entrySet()) {
+            String operationName = entry.getKey();
+            AsyncApi30Operation operation = entry.getValue();
+
+            if (operation == null || operation.getChannel() == null) continue;
+
+            String action = operation.getAction();
+            AsyncApi30Reference channelRef = operation.getChannel();
+            String channelName = extractChannelNameFromRef(channelRef.get$ref());
+            if (StringUtils.isEmpty(channelName)) continue;
+
+            AsyncApi30Channel channel = channels.get(channelName);
+            if (channel == null) continue;
+
+            if (includePublish && APISpecParserConstants.ASYNCAPI_ACTION_SEND.equalsIgnoreCase(action)) {
+                uriTemplates.add(buildURITemplate(
+                        channelName,
+                        APISpecParserConstants.HTTP_VERB_PUBLISH,
+                        operation,
+                        scopes,
+                        channel
+                ));
+            } else if (APISpecParserConstants.ASYNCAPI_ACTION_RECEIVE.equalsIgnoreCase(action)) {
+                uriTemplates.add(buildURITemplate(
+                        channelName,
+                        APISpecParserConstants.HTTP_VERB_SUBSCRIBE,
+                        operation,
+                        scopes,
+                        channel
+                ));
             }
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("[AsyncApiV3Parser] getURITemplates produced " + uriTemplates.size() + " templates.");
-        }
         return uriTemplates;
+    }
+
+    private URITemplate buildURITemplate(String target, String verb, AsyncApiOperation operation, Set<Scope> scopes,
+                                         AsyncApi30Channel channel) throws APIManagementException {
+        URITemplate template = new URITemplate();
+        template.setHTTPVerb(verb);
+        template.setHttpVerbs(verb);
+        template.setUriTemplate(target);
+
+        AsyncApiExtensible asyncApiExtensibleChannel = channel;
+        Map<String, JsonNode> extensions = asyncApiExtensibleChannel.getExtensions();
+        if (extensions != null) {
+            JsonNode authTypeExtension = extensions.get(APISpecParserConstants.SWAGGER_X_AUTH_TYPE);
+            if (authTypeExtension != null && authTypeExtension.isTextual()) {
+                template.setAuthType(authTypeExtension.asText());
+            }
+        }
+
+        List<String> opScopes = getScopeOfOperations(operation);
+        if (!opScopes.isEmpty()) {
+            if (opScopes.size() == 1) {
+                String firstScope = opScopes.get(0);
+                Scope scope = APISpecParserUtil.findScopeByKey(scopes, firstScope);
+                if (scope == null) {
+                    throw new APIManagementException("Scope '" + firstScope + "' not found.",
+                            ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
+                }
+                template.setScope(scope);
+                template.setScopes(scope);
+            } else {
+                for (String scopeName : opScopes) {
+                    Scope scope = APISpecParserUtil.findScopeByKey(scopes, scopeName);
+                    if (scope == null) {
+                        throw new APIManagementException("Resource Scope '" + scopeName + "' not found.",
+                                ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
+                    }
+                    template.setScopes(scope);
+                }
+            }
+        }
+        return template;
     }
 
     private List<String> getScopeOfOperations(AsyncApiOperation operation) {
@@ -135,7 +178,7 @@ public class AsyncApiV3Parser extends AsyncApiParser {
         AsyncApiExtensible asyncApiExtensibleOperation = (AsyncApiExtensible) operation;
         Map<String, JsonNode> extensions = asyncApiExtensibleOperation.getExtensions();
         if (extensions != null) {
-            JsonNode scopeBindings = extensions.get("x-scopes");
+            JsonNode scopeBindings = extensions.get(APISpecParserConstants.SWAGGER_X_BASIC_AUTH_SCOPES);
             if (scopeBindings != null) {
                 if (scopeBindings.isArray()) {
                     List<String> scopes = new ArrayList<>();
@@ -168,7 +211,8 @@ public class AsyncApiV3Parser extends AsyncApiParser {
         AsyncApiComponents components = document.getComponents();
 
         if (components != null && components.getSecuritySchemes() != null) {
-            AsyncApiSecurityScheme oauth2 = (AsyncApiSecurityScheme) components.getSecuritySchemes().get("oauth2");
+            AsyncApiSecurityScheme oauth2 = (AsyncApiSecurityScheme) components.getSecuritySchemes().get(
+                    APISpecParserConstants.DEFAULT_API_SECURITY_OAUTH2);
             if (oauth2 != null && oauth2.getFlows() != null && oauth2.getFlows().getImplicit() != null) {
 
                 AsyncApiOAuthFlow implicitFlow = (AsyncApiOAuthFlow) oauth2.getFlows().getImplicit();
@@ -211,7 +255,8 @@ public class AsyncApiV3Parser extends AsyncApiParser {
     }
 
     @Override
-    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent) throws APIManagementException {
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
+            throws APIManagementException {
 
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         String protocol = StringUtils.EMPTY;
@@ -219,68 +264,12 @@ public class AsyncApiV3Parser extends AsyncApiParser {
         List<String> validationErrorMessages = new ArrayList<>();
 
         try {
-            // Parse the incoming JSON into a Jackson ObjectNode
-            ObjectNode originalParsed;
-            try {
-                originalParsed = (ObjectNode) JsonUtil.parseJSON(apiDefinition);
-            } catch (Exception e) {
-                String msg = "Invalid AsyncAPI syntax: " + e.getMessage();
-                log.error(msg, e);
-                // treat parse failures as validation failures
-                validationSuccess = false;
-                validationErrorMessages.add(msg);
-                // build response below
-                originalParsed = null;
-            }
-
-
-            //If parsing succeeded, create Apicurio Document and run model validation
-            if (originalParsed != null) {
-                Document doc = Library.readDocument(originalParsed);
-                if (doc == null || doc.root() == null) {
-                    String msg = "Unable to parse AsyncAPI definition into Apicurio Document model.";
-                    log.error(msg);
-                    validationSuccess = false;
-                    validationErrorMessages.add(msg);
-                } else {
-                    // Log model type (ModelType has a useful toString)
-                    log.debug("[AsyncAPI][validateAPIDefinition] Parsed model type: " + doc.root().modelType());
-
-                    // Validate using Apicurio validation rules
-                    IValidationSeverityRegistry severityRegistry = new DefaultSeverityRegistry();
-                    List<io.apicurio.datamodels.validation.ValidationProblem> problems =
-                            Library.validate(doc, severityRegistry);
-
-                    if (problems != null && !problems.isEmpty()) {
-                        // Format problems into a readable string
-                        String formatted = formatProblems(problems);
-                        log.debug("[AsyncAPI][validateAPIDefinition] Validation Problems:\n" + formatted);
-
-                        // Determine if there are any high or medium severity problems
-                        // This can also include ValidationProblemSeverity low as well
-                        boolean hasErrors = problems.stream()
-                                .anyMatch(p -> p.severity == ValidationProblemSeverity.high
-                                        || p.severity == ValidationProblemSeverity.medium);
-
-                        if (hasErrors) {
-                            validationSuccess = false;
-                        }
-
-                        // Collect all problem messages into validationErrorMessages
-                        for (ValidationProblem problem : problems) {
-                            validationErrorMessages.add(problem.message);
-                        }
-                    } else {
-                        log.debug("[AsyncAPI][validateAPIDefinition] No validation problems found.");
-                    }
-                }
-            }
-
+            validationSuccess = AsyncApiValidator.validateAsyncApiContent(apiDefinition, validationErrorMessages);
         } catch (Exception e) {
             // unexpected problems during validation/parsing
             String msg = "Error occurred while validating AsyncAPI definition: " + e.getMessage();
             log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
         }
 
         // TODO: Validation is currently not working since the Apicurio library does not yet include
@@ -292,7 +281,7 @@ public class AsyncApiV3Parser extends AsyncApiParser {
         if (validationSuccess) {
             AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(apiDefinition);
             ArrayList<String> endpoints = new ArrayList<>();
-            AsyncApiServers servers = (AsyncApiServers) asyncApiDocument.getServers();
+            AsyncApiServers servers = asyncApiDocument.getServers();
             if (servers != null && servers.getItems() != null && !servers.getItems().isEmpty() &&
                     servers.getItems().size() == 1) {
                 protocol = ((AsyncApiServer) asyncApiDocument.getServers().getItems().get(0)).getProtocol();
@@ -327,114 +316,89 @@ public class AsyncApiV3Parser extends AsyncApiParser {
         return validationResponse;
     }
 
-    /**
-     * Format the list of problems as a string.
-     * @param problems Validation problems
-     */
-    protected String formatProblems(List<ValidationProblem> problems) {
-        StringBuilder builder = new StringBuilder();
-        problems.forEach(problem -> {
-            builder.append("[");
-            builder.append(problem.errorCode);
-            builder.append("] |");
-            builder.append(problem.severity);
-            builder.append("| {");
-            builder.append(problem.nodePath.toString(true));
-            builder.append("->");
-            builder.append(problem.property);
-            builder.append("} :: ");
-            builder.append(problem.message);
-            builder.append("\n");
-        });
-        return builder.toString();
-    }
-
     @Override
     public String generateAsyncAPIDefinition(API api) throws APIManagementException {
-        // Create an empty AsyncApiDocument and populate basic info
-        AsyncApiDocument asyncApiDocument = AsyncApiParserUtil.createAsyncApiDocument(
+        // Create an empty AsyncApiDocument v3
+        AsyncApi30Document document = (AsyncApi30Document) AsyncApiParserUtil.createAsyncApiDocument(
                 APISpecParserConstants.AsyncApi.ASYNC_API_V30);
-        asyncApiDocument.setAsyncapi(APISpecParserConstants.AsyncApi.ASYNC_API_V3);
-        asyncApiDocument.setInfo(asyncApiDocument.createInfo());
-        asyncApiDocument.getInfo().setTitle(api.getId().getName());
-        asyncApiDocument.getInfo().setVersion(api.getId().getVersion());
 
+        document.setAsyncapi(APISpecParserConstants.AsyncApi.ASYNC_API_V3);
+        document.setInfo(document.createInfo());
+        document.getInfo().setTitle(api.getId().getName());
+        document.getInfo().setVersion(api.getId().getVersion());
+
+        // Servers (top-level)
         if (!APISpecParserConstants.API_TYPE_WEBSUB.equals(api.getType())) {
-            JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
 
-            AsyncApiServers servers = asyncApiDocument.createServers();
+            JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
+            AsyncApiServers servers = document.createServers();
+
             if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
-                AsyncApiServer prodServer = getAaiServer(api, asyncApiDocument, endpointConfig,
-                        APISpecParserConstants.GATEWAY_ENV_TYPE_PRODUCTION,
-                        APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS, servers);
+                JsonObject prodObj = endpointConfig
+                        .get(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)
+                        .getAsJsonObject();
+                String url = prodObj.get(APISpecParserConstants.API_DATA_URL).getAsString();
+                AsyncApiServer prodServer = servers.createServer();
+                AsyncApiV3ParserUtil.setAsyncApiServerFromUrl(url, prodServer, api.getType());
                 servers.addItem(APISpecParserConstants.GATEWAY_ENV_TYPE_PRODUCTION, prodServer);
             }
-            if (endpointConfig.has(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
-                AsyncApiServer sandboxServer = getAaiServer(api, asyncApiDocument, endpointConfig,
-                        APISpecParserConstants.GATEWAY_ENV_TYPE_SANDBOX,
-                        APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS, servers);
 
+            if (endpointConfig.has(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+                JsonObject sandboxObj = endpointConfig
+                        .get(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)
+                        .getAsJsonObject();
+                String url = sandboxObj.get(APISpecParserConstants.API_DATA_URL).getAsString();
+                AsyncApiServer sandboxServer = servers.createServer();
+                AsyncApiV3ParserUtil.setAsyncApiServerFromUrl(url, sandboxServer, api.getType());
                 servers.addItem(APISpecParserConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxServer);
             }
-            asyncApiDocument.setServers(servers);
-        }
 
-        if (asyncApiDocument.getComponents() == null) {
-            asyncApiDocument.setComponents(asyncApiDocument.createComponents());
+            document.setServers(servers);
         }
-        AsyncApi30Components components = (AsyncApi30Components) asyncApiDocument.getComponents();
+        // Components, Channels and Operations (top-level)
+        if (document.getComponents() == null) {
+            document.setComponents(document.createComponents());
+        }
+        AsyncApi30Components components = (AsyncApi30Components) document.getComponents();
+        AsyncApi30Channels docChannels = (AsyncApi30Channels) document.createChannels();
+        AsyncApi30Operations docOperations = document.createOperations();
 
-        // Create channels container on the document add channels/operations
-        if (asyncApiDocument.getChannels() == null) {
-            asyncApiDocument.setChannels(asyncApiDocument.createChannels());
-        }
         for (URITemplate uriTemplate : api.getUriTemplates()) {
+            String channelName = uriTemplate.getUriTemplate();
             AsyncApi30Channel channel = components.createChannel();
-            channel.setAddress(uriTemplate.getUriTemplate());
-            components.addChannel(uriTemplate.getUriTemplate(), channel);
+            channel.setAddress(channelName);
+            docChannels.addItem(channelName, channel);
 
-            AsyncApi30Operation receiveOp = components.createOperation();
-            receiveOp.setAction("receive");
-            AsyncApi30Reference channelRef = receiveOp.createReference();
-            channelRef.set$ref("#/channels/" + uriTemplate.getUriTemplate());
-            receiveOp.setChannel(channelRef);
-            String receiveOpName = uriTemplate.getUriTemplate() + "_receive";
-            components.addOperation(receiveOpName, receiveOp);
+            AsyncApi30Operation receiveOp = docOperations.createOperation();
+            receiveOp.setAction(APISpecParserConstants.ASYNCAPI_ACTION_RECEIVE);
+
+            AsyncApi30Reference recvRef = receiveOp.createReference();
+            // The following normalizeChannelName will not be required if the publisher does not add "/"
+            // to every new topic
+            recvRef.set$ref(APISpecParserConstants.ASYNCAPI_CHANNELS_PATH +
+                    AsyncApiV3ParserUtil.normalizeChannelName(channelName));
+            receiveOp.setChannel(recvRef);
+            String recvOpName = APISpecParserConstants.ASYNCAPI_ACTION_RECEIVE_OPS + channelName;
+            docOperations.addItem(recvOpName, receiveOp);
 
             if (APISpecParserConstants.API_TYPE_WS.equals(api.getType())) {
-                AsyncApi30Operation sendOp = components.createOperation();
-                sendOp.setAction("send");
+                AsyncApi30Operation sendOp = docOperations.createOperation();
+                sendOp.setAction(APISpecParserConstants.ASYNCAPI_ACTION_SEND);
+
                 AsyncApi30Reference sendRef = sendOp.createReference();
-                sendRef.set$ref("#/channels/" + uriTemplate.getUriTemplate());
+                // The following normalizeChannelName will not be required if the publisher does not add "/"
+                // to every new topic
+                sendRef.set$ref(APISpecParserConstants.ASYNCAPI_CHANNELS_PATH +
+                        AsyncApiV3ParserUtil.normalizeChannelName(channelName));
                 sendOp.setChannel(sendRef);
-                String sendOpName = uriTemplate.getUriTemplate() + "_send";
-                components.addOperation(sendOpName, sendOp);
+                String sendOpName = APISpecParserConstants.ASYNCAPI_ACTION_SEND_OPS + channelName;
+                docOperations.addItem(sendOpName, sendOp);
             }
         }
+        document.setChannels(docChannels);
+        document.setOperations(docOperations);
 
-        Map<String, AsyncApi30Channel> compChannels = null;
-        try {
-            compChannels = components.getChannels();
-        } catch (ClassCastException ignore) {
-            compChannels = null;
-        }
-
-        if (compChannels != null && !compChannels.isEmpty()) {
-            AsyncApi30Channels docChannels = (AsyncApi30Channels) asyncApiDocument.createChannels();
-
-            for (Map.Entry<String, AsyncApi30Channel> entry : compChannels.entrySet()) {
-                String name = entry.getKey();
-                AsyncApi30Channel compChannel = entry.getValue();
-                if (compChannel != null) {
-                    docChannels.addItem(name, compChannel);
-                }
-            }
-
-            asyncApiDocument.setChannels(docChannels);
-        } else {
-            // If there are no component channels, leave document.channels as-is (or empty)
-        }
-        return Library.writeDocumentToJSONString(asyncApiDocument);
+        return Library.writeDocumentToJSONString(document);
     }
 
     /**
@@ -447,10 +411,18 @@ public class AsyncApiV3Parser extends AsyncApiParser {
      * @param endpoint         Endpoint to be configured
      * @return Configured AaiServer
      */
-    private AsyncApiServer getAaiServer(API api, AsyncApiDocument asyncApiDocument, JSONObject endpointConfig, String serverName,
-                                        String endpoint, AsyncApiServers servers) {
-        String url = endpointConfig.getJSONObject(endpoint).getString(APISpecParserConstants.API_DATA_URL);
-        AsyncApiServer server = (AsyncApiServer) servers.createServer();
+    private AsyncApiServer getAaiServer(API api, AsyncApiDocument asyncApiDocument, JsonObject endpointConfig, String
+            serverName, String endpoint, AsyncApiServers servers) throws APIManagementException {
+
+        JsonObject endpointObj = endpointConfig.getAsJsonObject(endpoint);
+        if (!endpointObj.has(APISpecParserConstants.API_DATA_URL)) {
+            throw new APIManagementException(
+                    "Missing or Invalid API_DATA_URL in endpoint config: " + endpoint
+            );
+        }
+
+        String url = endpointObj.get(APISpecParserConstants.API_DATA_URL).getAsString();
+        AsyncApiServer server = servers.createServer();
         AsyncApiParserUtil.setAsyncApiServer(url, server);
         server.setProtocol(api.getType().toLowerCase());
         return server;
@@ -467,8 +439,8 @@ public class AsyncApiV3Parser extends AsyncApiParser {
      * @throws APIManagementException throws if an error occurred
      */
     @Override
-    public String getAsyncApiDefinitionForStore(API api, String asyncAPIDefinition, Map<String, String> hostsWithSchemes)
-            throws APIManagementException {
+    public String getAsyncApiDefinitionForStore(API api, String asyncAPIDefinition,
+                                                Map<String, String> hostsWithSchemes) throws APIManagementException {
         AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(asyncAPIDefinition);
         String channelName = api.getContext();
         String transports = api.getTransports();
@@ -490,7 +462,7 @@ public class AsyncApiV3Parser extends AsyncApiParser {
 
         AsyncApiServer server = asyncApiDocument.getServers().getItems().get(0);
         AsyncApiParserUtil.setAsyncApiServer(url, server);
-        AsyncApiChannels apiChannels = (AsyncApiChannels) asyncApiDocument.getChannels();
+        AsyncApiChannels apiChannels = asyncApiDocument.getChannels();
         MappedNode channels = (MappedNode) apiChannels;
         AsyncApiChannelItem channelDetails = null;
         for (Object x : channels.getItemNames()) {
@@ -498,7 +470,8 @@ public class AsyncApiV3Parser extends AsyncApiParser {
             channels.removeItem((String) x);
         }
         if (channelDetails == null) {
-            throw new APIManagementException("No channel details found in AsyncAPI definition");
+            throw new APIManagementException("No channel details found in AsyncAPI definition",
+                    ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
         }
         channels.addItem(channelName, channelDetails);
         asyncApiDocument.setChannels((AsyncApiChannels) channels);
@@ -507,13 +480,14 @@ public class AsyncApiV3Parser extends AsyncApiParser {
     }
 
     @Override
-    public String updateAsyncAPIDefinition(String oldDefinition, API apiToUpdate) {
+    public String updateAsyncAPIDefinition(String oldDefinition, API apiToUpdate) throws APIManagementException {
         AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(oldDefinition);
         if (asyncApiDocument.getComponents() == null) {
             asyncApiDocument.setComponents(asyncApiDocument.createComponents());
         }
 
-        AsyncApiSecurityScheme oauth2SecurityScheme = (AsyncApiSecurityScheme) asyncApiDocument.getComponents().createSecurityScheme();
+        AsyncApiSecurityScheme oauth2SecurityScheme = (AsyncApiSecurityScheme) asyncApiDocument.getComponents().
+                createSecurityScheme();
         oauth2SecurityScheme.setType(APISpecParserConstants.DEFAULT_API_SECURITY_OAUTH2);
 
         if (oauth2SecurityScheme.getFlows() == null) {
@@ -522,7 +496,8 @@ public class AsyncApiV3Parser extends AsyncApiParser {
         if (oauth2SecurityScheme.getFlows().getImplicit() == null) {
             oauth2SecurityScheme.getFlows().setImplicit(oauth2SecurityScheme.getFlows().createOAuthFlow());
         }
-        oauth2SecurityScheme.getFlows().getImplicit().setAuthorizationUrl("http://localhost:9999");
+        oauth2SecurityScheme.getFlows().getImplicit().setAuthorizationUrl(
+                APISpecParserConstants.ASYNCAPI_AUTHORIZATION_URL);
         Map<String, String> scopes = new HashMap<>();
         Map<String, String> scopeBindings = new HashMap<>();
 
@@ -534,10 +509,11 @@ public class AsyncApiV3Parser extends AsyncApiParser {
         }
         AsyncApiParserUtil.setAsyncApiOAuthFlowsScopes(oauth2SecurityScheme, scopes, scopeBindings);
 
-        asyncApiDocument.getComponents().addSecurityScheme(APISpecParserConstants.DEFAULT_API_SECURITY_OAUTH2, oauth2SecurityScheme);
+        asyncApiDocument.getComponents().addSecurityScheme(APISpecParserConstants.DEFAULT_API_SECURITY_OAUTH2,
+                oauth2SecurityScheme);
         String endpointConfigString = apiToUpdate.getEndpointConfig();
         if (StringUtils.isNotEmpty(endpointConfigString)) {
-            JSONObject endpointConfig = new JSONObject(endpointConfigString);
+            JsonObject endpointConfig = JsonParser.parseString(endpointConfigString).getAsJsonObject();
 
             AsyncApiServers servers = asyncApiDocument.createServers();
             if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
@@ -560,20 +536,57 @@ public class AsyncApiV3Parser extends AsyncApiParser {
     @Override
     public Map<String, String> buildWSUriMapping(String apiDefinition) {
         Map<String, String> wsUriMapping = new HashMap<>();
-        if (apiDefinition == null || apiDefinition.trim().isEmpty()) {
+        AsyncApi30Document document = (AsyncApi30Document) Library.readDocumentFromJSONString(apiDefinition);
+
+        AsyncApi30Channels channelsContainer = (AsyncApi30Channels) document.getChannels();
+        Map<String, AsyncApi30Channel> channels = new HashMap<>();
+        if (channelsContainer != null) {
+            for (String name : channelsContainer.getItemNames()) {
+                channels.put(name, channelsContainer.getItem(name));
+            }
+        }
+
+        AsyncApi30Operations opsContainer = document.getOperations();
+        if (opsContainer == null || opsContainer.getItems().isEmpty()) {
             return wsUriMapping;
         }
 
-        try {
-            // Parse once and delegate to helper
-            JsonNode root = AsyncApiV3ParserUtil.parseToJsonNode(apiDefinition);
-            return AsyncApiV3ParserUtil.getWSUriMapping(root);
-        } catch (APIManagementException e) {
-            // return empty map on parse failure
-            log.debug("[AsyncApiV3Parser] buildWSUriMapping: failed to parse definition: " + e.getMessage());
-            return wsUriMapping;
+        Map<String, AsyncApi30Operation> operations = new HashMap<>();
+        for (String name : opsContainer.getItemNames()) {
+            operations.put(name, opsContainer.getItem(name));
         }
+
+        for (Map.Entry<String, AsyncApi30Operation> entry : operations.entrySet()) {
+            AsyncApi30Operation operation = entry.getValue();
+            if (operation == null) continue;
+
+            // action = send|receive
+            String action = operation.getAction();
+            if (action == null) continue;
+
+            // Channel from $ref
+            AsyncApi30Reference ref = operation.getChannel();
+            if (ref == null || ref.get$ref() == null) continue;
+
+            String channelName = extractChannelNameFromRef(ref.get$ref());
+            if (channelName == null) continue;
+
+            Map<String, JsonNode> extensions = operation.getExtensions();
+            if (extensions == null) continue;
+
+            JsonNode mappingNode = extensions.get(APISpecParserConstants.ASYNCAPI_URI_MAPPING);
+            if (mappingNode == null || !mappingNode.isTextual()) continue;
+
+            String mappingValue = mappingNode.asText();
+
+            if (APISpecParserConstants.ASYNCAPI_ACTION_SEND.equalsIgnoreCase(action)) {
+                wsUriMapping.put(APISpecParserConstants.WS_URI_MAPPING_PUBLISH + channelName, mappingValue);
+            } else if (APISpecParserConstants.ASYNCAPI_ACTION_RECEIVE.equalsIgnoreCase(action)) {
+                wsUriMapping.put(APISpecParserConstants.WS_URI_MAPPING_SUBSCRIBE + channelName, mappingValue);
+            }
+        }
+
+        return wsUriMapping;
     }
-
 
 }

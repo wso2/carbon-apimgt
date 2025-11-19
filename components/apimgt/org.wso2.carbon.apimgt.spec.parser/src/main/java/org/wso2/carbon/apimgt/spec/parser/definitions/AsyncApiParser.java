@@ -1,7 +1,29 @@
+/*
+ *   Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com)
+ *
+ *   WSO2 LLC. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
 package org.wso2.carbon.apimgt.spec.parser.definitions;
 
 import io.apicurio.datamodels.Library;
-import io.apicurio.datamodels.models.asyncapi.*;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiChannelItem;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiDocument;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiOperationBindings;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiServer;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiServers;
 import io.apicurio.datamodels.models.asyncapi.v26.AsyncApi26Channels;
 import io.apicurio.datamodels.models.asyncapi.v26.AsyncApi26Document;
 import io.apicurio.datamodels.models.asyncapi.v26.AsyncApi26Server;
@@ -74,15 +96,18 @@ public abstract class AsyncApiParser extends APIDefinition {
     }
 
     @Override
-    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url, boolean returnJsonContent) throws APIManagementException {
+    public APIDefinitionValidationResponse validateAPIDefinition(
+            String apiDefinition, String url, boolean returnJsonContent) throws APIManagementException {
         return null;
     }
 
     @Override
-    public abstract APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent) throws APIManagementException;
+    public abstract APIDefinitionValidationResponse validateAPIDefinition(
+            String apiDefinition, boolean returnJsonContent) throws APIManagementException;
 
     @Override
-    public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData) throws APIManagementException {
+    public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData)
+            throws APIManagementException {
         return null;
     }
 
@@ -112,7 +137,8 @@ public abstract class AsyncApiParser extends APIDefinition {
     }
 
     @Override
-    public String getOASDefinitionWithTierContentAwareProperty(String oasDefinition, List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException {
+    public String getOASDefinitionWithTierContentAwareProperty(String oasDefinition, List<String> contentAwareTiersList,
+                                                               String apiLevelTier) throws APIManagementException {
         return null;
     }
 
@@ -127,7 +153,8 @@ public abstract class AsyncApiParser extends APIDefinition {
     }
 
     @Override
-    public String copyVendorExtensions(String existingOASContent, String updatedOASContent) throws APIManagementException {
+    public String copyVendorExtensions(String existingOASContent, String updatedOASContent)
+            throws APIManagementException {
         return null;
     }
 
@@ -137,7 +164,7 @@ public abstract class AsyncApiParser extends APIDefinition {
     }
 
     @Override
-    public String getVendorFromExtension(String swaggerContent) {
+    public String getVendorFromExtension(String swaggerContent) throws APIManagementException {
         return APISpecParserConstants.WSO2_GATEWAY_ENVIRONMENT;
     }
 
@@ -159,8 +186,8 @@ public abstract class AsyncApiParser extends APIDefinition {
      * @param endpoint          Endpoint to be configured
      * @return Configured AaiServer
      */
-    private AsyncApiServer getAaiServer(API api, AsyncApi26Document asyncDocument, JSONObject endpointConfig, String serverName,
-                                        String endpoint, AsyncApiServers servers) {
+    private AsyncApiServer getAaiServer(API api, AsyncApi26Document asyncDocument, JSONObject endpointConfig,
+                                        String serverName, String endpoint, AsyncApiServers servers) {
 
         AsyncApi26Server server = (AsyncApi26Server) servers.createServer();
         server.setUrl(endpointConfig.getJSONObject(endpoint).getString(APISpecParserConstants.API_DATA_URL));
@@ -177,10 +204,11 @@ public abstract class AsyncApiParser extends APIDefinition {
      * @return AsyncAPI definition
      * @throws APIManagementException throws if an error occurred
      */
-    public abstract String getAsyncApiDefinitionForStore(API api, String asyncAPIDefinition, Map<String, String> hostsWithSchemes)
+    public abstract String getAsyncApiDefinitionForStore(API api, String asyncAPIDefinition,
+                                                         Map<String, String> hostsWithSchemes)
             throws APIManagementException;
 
-    public abstract String updateAsyncAPIDefinition(String oldDefinition, API apiToUpdate);
+    public abstract String updateAsyncAPIDefinition(String oldDefinition, API apiToUpdate) throws APIManagementException;
 
     public abstract Map<String,String> buildWSUriMapping(String apiDefinition);
 

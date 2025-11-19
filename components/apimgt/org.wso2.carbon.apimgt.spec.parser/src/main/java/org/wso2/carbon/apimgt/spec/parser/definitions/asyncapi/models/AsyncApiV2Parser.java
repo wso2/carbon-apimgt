@@ -1,9 +1,38 @@
+/*
+ *   Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com)
+ *
+ *   WSO2 LLC. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
 package org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.models.MappedNode;
-import io.apicurio.datamodels.models.asyncapi.*;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiChannelItem;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiChannels;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiComponents;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiDocument;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiExtensible;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiOAuthFlow;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiOperation;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiSecurityScheme;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiServer;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiServers;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -14,10 +43,9 @@ import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.osgi.service.component.annotations.Component;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -25,20 +53,25 @@ import org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserConstants;
 import org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiValidator;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class is used to parse AsyncAPI 2.x.x specifications.
  * It extends the AsyncApiParser class to provide specific parsing capabilities for AsyncAPI 2.x.x.
  */
-@Component(
-        name = "wso2.async.200.definition.parser.component",
-        immediate = true,
-        service = APIDefinition.class
-)
+
 public class AsyncApiV2Parser extends AsyncApiParser {
 
     private static final Log log = LogFactory.getLog(AsyncApiV2Parser.class);
@@ -56,11 +89,11 @@ public class AsyncApiV2Parser extends AsyncApiParser {
                 AsyncApiChannelItem channel = (AsyncApiChannelItem) channels.getItem((String) entry);
                 if (includePublish && channel.getPublish() != null) {
                     uriTemplates.add(buildURITemplate((String) entry, APISpecParserConstants.HTTP_VERB_PUBLISH,
-                            (AsyncApiOperation) channel.getPublish(), scopes, channel));
+                            channel.getPublish(), scopes, channel));
                 }
                 if (channel.getSubscribe() != null) {
                     uriTemplates.add(buildURITemplate( (String) entry, APISpecParserConstants.HTTP_VERB_SUBSCRIBE,
-                            (AsyncApiOperation) channel.getSubscribe(), scopes, channel));
+                            channel.getSubscribe(), scopes, channel));
                 }
             }
         }
@@ -89,7 +122,8 @@ public class AsyncApiV2Parser extends AsyncApiParser {
                 String firstScope = opScopes.get(0);
                 Scope scope = APISpecParserUtil.findScopeByKey(scopes, firstScope);
                 if (scope == null) {
-                    throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                    throw new APIManagementException("Scope '" + firstScope + "' not found.",
+                            ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
                 }
                 template.setScope(scope);
                 template.setScopes(scope);
@@ -97,7 +131,8 @@ public class AsyncApiV2Parser extends AsyncApiParser {
                 for (String scopeName : opScopes) {
                     Scope scope = APISpecParserUtil.findScopeByKey(scopes, scopeName);
                     if (scope == null) {
-                        throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
+                        throw new APIManagementException("Resource Scope '" + scopeName + "' not found.",
+                                ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
                     }
                     template.setScopes(scope);
                 }
@@ -114,7 +149,7 @@ public class AsyncApiV2Parser extends AsyncApiParser {
         AsyncApiExtensible asyncApiExtensibleOperation = (AsyncApiExtensible) operation;
         Map<String, JsonNode> extensions = asyncApiExtensibleOperation.getExtensions();
         if (extensions != null) {
-            JsonNode scopeBindings = extensions.get("x-scopes");
+            JsonNode scopeBindings = extensions.get(APISpecParserConstants.SWAGGER_X_BASIC_AUTH_SCOPES);
             if (scopeBindings != null) {
                 if (scopeBindings.isArray()) {
                     List<String> scopes = new ArrayList<>();
@@ -147,7 +182,8 @@ public class AsyncApiV2Parser extends AsyncApiParser {
         AsyncApiComponents components = document.getComponents();
 
         if (components != null && components.getSecuritySchemes() != null) {
-            AsyncApiSecurityScheme oauth2 = (AsyncApiSecurityScheme) components.getSecuritySchemes().get("oauth2");
+            AsyncApiSecurityScheme oauth2 = (AsyncApiSecurityScheme) components.getSecuritySchemes().get(
+                    APISpecParserConstants.DEFAULT_API_SECURITY_OAUTH2);
 
             if (oauth2 != null && oauth2.getFlows() != null && oauth2.getFlows().getImplicit() != null) {
 
@@ -190,132 +226,69 @@ public class AsyncApiV2Parser extends AsyncApiParser {
     }
 
     @Override
-    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent) throws APIManagementException {
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
+            throws APIManagementException {
 
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
-
-        //import and load AsyncAPI HyperSchema for JSON schema validation
-        JSONObject hyperSchema = new JSONObject(APISpecParserConstants.AsyncApiSchemas.ASYNCAPI_JSON_HYPERSCHEMA);
         String protocol = StringUtils.EMPTY;
-
         boolean validationSuccess = false;
-        List<String> validationErrorMessages = null;
-        boolean isWebSocket = false;
+        List<String> validationErrorMessages = new ArrayList<>();
+        // The following preserveLegacyValidation determines which validation logic to be executed
+        boolean preserveLegacyValidation = true;
 
-        JSONObject schemaToBeValidated = new JSONObject(apiDefinition);
+        if (preserveLegacyValidation){
+            JSONObject schemaToBeValidated = new JSONObject(apiDefinition);
 
-        //validate AsyncAPI using JSON schema validation
-        try {
-            JSONParser parser = new JSONParser();
-            org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(APISpecParserConstants.AsyncApiSchemas.METASCHEMA);
-            SchemaLoader schemaLoader = SchemaLoader.builder().registerSchemaByURI
-                    (new URI("http://json-schema.org/draft-07/schema#"), json).schemaJson(hyperSchema).build();
-            Schema schemaValidator = schemaLoader.load().build();
-            schemaValidator.validate(schemaToBeValidated);
-            /*AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
-            validationErrorMessages = new ArrayList<>();
-            if (asyncApiDocument.getServers().size() == 1) {
-                if (!APISpecParserConstants.WS_PROTOCOL.equalsIgnoreCase(asyncApiDocument.getServers().get(0).protocol)) {
-                    validationErrorMessages.add("#:The protocol of the server should be 'ws' for websockets");
-                }
-            }
-            if (asyncApiDocument.getServers().size() > 1) {
-                validationErrorMessages.add("#:The AsyncAPI definition should contain only a single server for websockets");
-            }
-            if (asyncApiDocument.getChannels().size() > 1) {
-                validationErrorMessages.add("#:The AsyncAPI definition should contain only a single channel for websockets");
-            }
-            if (validationErrorMessages.size() == 0) {
+            //import and load AsyncAPI HyperSchema for JSON schema validation
+            JSONObject hyperSchema = new JSONObject(APISpecParserConstants.AsyncApiSchemas.ASYNCAPI_JSON_HYPERSCHEMA);
+
+            //validate AsyncAPI using JSON schema validation
+            try {
+                JSONParser parser = new JSONParser();
+                org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(APISpecParserConstants.
+                        AsyncApiSchemas.METASCHEMA);
+                SchemaLoader schemaLoader = SchemaLoader.builder().registerSchemaByURI
+                        (new URI(APISpecParserConstants.AsyncApiSchemas.JSONSCHEMA), json).schemaJson(hyperSchema).build();
+                Schema schemaValidator = schemaLoader.load().build();
+                schemaValidator.validate(schemaToBeValidated);
+
                 validationSuccess = true;
-                validationErrorMessages = null;
-            }*/
+            } catch(ValidationException e) {
+                //validation error messages
+                validationErrorMessages = e.getAllMessages();
+            } catch (URISyntaxException e) {
+                String msg = "Error occurred when registering the schema";
+                throw new APIManagementException(msg, e,
+                        ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
+            } catch (ParseException e) {
+                String msg = "Error occurred when parsing the schema";
+                throw new APIManagementException(msg, e,
+                        ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
+            }
 
-            //AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
-            /*//Checking whether it is a websocket
-            validationErrorMessages = new ArrayList<>();
-            if (APISpecParserConstants.WS_PROTOCOL.equalsIgnoreCase(asyncApiDocument.getServers().get(0).protocol)) {
-                if (APISpecParserConstants.WS_PROTOCOL.equalsIgnoreCase(protocol)) {
-                    isWebSocket = true;
-                }
-            }*/
-
-            //validating channel count for websockets
-            /*if (isWebSocket) {
-                if (asyncApiDocument.getChannels().size() > 1) {
-                    validationErrorMessages.add("#:The AsyncAPI definition should contain only a single channel for websockets");
-                }
-            }*/
-
-            /*if (validationErrorMessages.size() == 0) {
-                validationSuccess = true;
-                validationErrorMessages = null;
-            }*/
-
+            // TODO: Validation is failing. Need to fix this. Therefore overriding the value as True.
             validationSuccess = true;
-        } catch(ValidationException e) {
-            //validation error messages
-            validationErrorMessages = e.getAllMessages();
-        } catch (URISyntaxException e) {
-            String msg = "Error occurred when registering the schema";
-            throw new APIManagementException(msg, e);
-        } catch (ParseException e) {
-            String msg = "Error occurred when parsing the schema";
-            throw new APIManagementException(msg, e);
-        }
 
-        // TODO: Validation is failing. Need to fix this. Therefore overriding the value as True.
-        validationSuccess = true;
+        } else if (!preserveLegacyValidation) {
+            try {
+                validationSuccess = AsyncApiValidator.validateAsyncApiContent(apiDefinition, validationErrorMessages);
+            } catch (Exception e) {
+                // unexpected problems during validation/parsing
+                String msg = "Error occurred while validating AsyncAPI definition: " + e.getMessage();
+                log.error(msg, e);
+                throw new APIManagementException(msg, e, ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
+            }
+        }
 
         if (validationSuccess) {
             AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(apiDefinition);
-//            AsyncApi20Document asyncApiDocument = (AsyncApi20Document) Library.readDocumentFromJSONString(apiDefinition);
             ArrayList<String> endpoints = new ArrayList<>();
-            AsyncApiServers servers = (AsyncApiServers) asyncApiDocument.getServers();
+            AsyncApiServers servers = asyncApiDocument.getServers();
             if (servers != null && servers.getItems() != null && !servers.getItems().isEmpty() &&
                     servers.getItems().size() == 1)
             {
                 protocol = ((AsyncApiServer) asyncApiDocument.getServers().getItems().get(0)).getProtocol();
             }
-            /*for (AaiServer x : asyncApiDocument.getServers()){
-                endpoints.add(x.url);
-            }
-            AsyncApiParserUtil.updateValidationResponseAsSuccess(
-                    validationResponse,
-                    apiDefinition,
-                    asyncApiDocument.asyncapi,
-                    asyncApiDocument.info.title,
-                    asyncApiDocument.info.version,
-                    null,                           //asyncApiDocument.getChannels().get(0)._name,
-                    asyncApiDocument.info.description,
-                    endpoints
-            );*/
-
-            /*if (isWebSocket) {
-                for (AaiServer x : asyncApiDocument.getServers()){
-                    endpoints.add(x.url);
-                }
-                AsyncApiParserUtil.updateValidationResponseAsSuccess(
-                        validationResponse,
-                        apiDefinition,
-                        asyncApiDocument.asyncapi,
-                        asyncApiDocument.info.title,
-                        asyncApiDocument.info.version,
-                        asyncApiDocument.getChannels().get(0)._name,            //make this null
-                        asyncApiDocument.info.description,
-                        endpoints
-                );
-            } else {
-                AsyncApiParserUtil.updateValidationResponseAsSuccess(
-                        validationResponse,
-                        apiDefinition,
-                        asyncApiDocument.asyncapi,
-                        asyncApiDocument.info.title,
-                        asyncApiDocument.info.version,
-                        null,
-                        asyncApiDocument.info.description,
-                        null
-                );
-            }*/
 
             AsyncApiParserUtil.updateValidationResponseAsSuccess(
                     validationResponse,
@@ -350,12 +323,12 @@ public class AsyncApiV2Parser extends AsyncApiParser {
     public String generateAsyncAPIDefinition(API api) throws APIManagementException {
         AsyncApiDocument asyncApiDocument = AsyncApiParserUtil.createAsyncApiDocument(
                 APISpecParserConstants.AsyncApi.ASYNC_API_V20);
-        asyncApiDocument.setAsyncapi("2.0.0");
+        asyncApiDocument.setAsyncapi(APISpecParserConstants.AsyncApi.ASYNC_API_V2);
         asyncApiDocument.setInfo(asyncApiDocument.createInfo());
         asyncApiDocument.getInfo().setTitle(api.getId().getName());
         asyncApiDocument.getInfo().setVersion(api.getId().getVersion());
         if (!APISpecParserConstants.API_TYPE_WEBSUB.equals(api.getType())) {
-            JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
+            JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
 
             AsyncApiServers servers = asyncApiDocument.createServers();
             if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
@@ -374,14 +347,14 @@ public class AsyncApiV2Parser extends AsyncApiParser {
             asyncApiDocument.setServers(servers);
         }
 
-        AsyncApiChannels apiChannels = (AsyncApiChannels) asyncApiDocument.createChannels();
+        AsyncApiChannels apiChannels = asyncApiDocument.createChannels();
         MappedNode channels = (MappedNode) apiChannels;
         for (URITemplate uriTemplate : api.getUriTemplates()) {
             AsyncApiChannelItem channelItem = AsyncApiParserUtil.createChannelItem(apiChannels);
-            AsyncApiOperation subscribeOp = (AsyncApiOperation) channelItem.createOperation();
+            AsyncApiOperation subscribeOp = channelItem.createOperation();
             channelItem.setSubscribe(subscribeOp);
             if (APISpecParserConstants.API_TYPE_WS.equals(api.getType())) {
-                AsyncApiOperation publishOp = (AsyncApiOperation) channelItem.createOperation();
+                AsyncApiOperation publishOp = channelItem.createOperation();
                 channelItem.setPublish(publishOp);
             }
             channels.addItem(uriTemplate.getUriTemplate(), channelItem);
@@ -400,10 +373,18 @@ public class AsyncApiV2Parser extends AsyncApiParser {
      * @param endpoint          Endpoint to be configured
      * @return Configured AaiServer
      */
-    private AsyncApiServer getAaiServer(API api, AsyncApiDocument asyncApiDocument, JSONObject endpointConfig, String serverName,
-                                        String endpoint, AsyncApiServers servers) {
-        String url = endpointConfig.getJSONObject(endpoint).getString(APISpecParserConstants.API_DATA_URL);
-        AsyncApiServer server = (AsyncApiServer) servers.createServer();
+    private AsyncApiServer getAaiServer(API api, AsyncApiDocument asyncApiDocument, JsonObject endpointConfig, String
+            serverName, String endpoint, AsyncApiServers servers) throws APIManagementException {
+
+        JsonObject endpointObj = endpointConfig.getAsJsonObject(endpoint);
+        if (!endpointObj.has(APISpecParserConstants.API_DATA_URL)) {
+            throw new APIManagementException(
+                    "Missing or Invalid API_DATA_URL in endpoint config: " + endpoint
+            );
+        }
+
+        String url = endpointObj.get(APISpecParserConstants.API_DATA_URL).getAsString();
+        AsyncApiServer server = servers.createServer();
         AsyncApiParserUtil.setAsyncApiServer(url, server);
         server.setProtocol(api.getType().toLowerCase());
         return server;
@@ -420,8 +401,8 @@ public class AsyncApiV2Parser extends AsyncApiParser {
      * @throws APIManagementException throws if an error occurred
      */
     @Override
-    public String getAsyncApiDefinitionForStore(API api, String asyncAPIDefinition, Map<String, String> hostsWithSchemes)
-            throws APIManagementException {
+    public String getAsyncApiDefinitionForStore(API api, String asyncAPIDefinition,
+                                                Map<String, String> hostsWithSchemes) throws APIManagementException {
         AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(asyncAPIDefinition);
         String channelName = api.getContext();
         String transports = api.getTransports();
@@ -443,14 +424,17 @@ public class AsyncApiV2Parser extends AsyncApiParser {
 
         AsyncApiServer server = asyncApiDocument.getServers().getItems().get(0);
         AsyncApiParserUtil.setAsyncApiServer(url, server);
-        AsyncApiChannels apiChannels = (AsyncApiChannels) asyncApiDocument.getChannels();
+        AsyncApiChannels apiChannels = asyncApiDocument.getChannels();
         MappedNode channels = (MappedNode) apiChannels;
         AsyncApiChannelItem channelDetails = null;
         for (Object x : channels.getItemNames()) {
             channelDetails = (AsyncApiChannelItem) channels.getItem((String) x);
             channels.removeItem((String) x);
         }
-        assert channelDetails != null;
+        if (channelDetails == null) {
+            throw new APIManagementException("No channel details found in AsyncAPI definition",
+                    ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
+        }
         channels.addItem(channelName, channelDetails);
         asyncApiDocument.setChannels((AsyncApiChannels) channels);
 
@@ -458,13 +442,14 @@ public class AsyncApiV2Parser extends AsyncApiParser {
     }
 
     @Override
-    public String updateAsyncAPIDefinition(String oldDefinition, API apiToUpdate) {
+    public String updateAsyncAPIDefinition(String oldDefinition, API apiToUpdate) throws APIManagementException {
         AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(oldDefinition);
         if (asyncApiDocument.getComponents() == null) {
             asyncApiDocument.setComponents(asyncApiDocument.createComponents());
         }
 
-        AsyncApiSecurityScheme oauth2SecurityScheme = (AsyncApiSecurityScheme) asyncApiDocument.getComponents().createSecurityScheme();
+        AsyncApiSecurityScheme oauth2SecurityScheme = (AsyncApiSecurityScheme) asyncApiDocument.getComponents().
+                createSecurityScheme();
         oauth2SecurityScheme.setType(APISpecParserConstants.DEFAULT_API_SECURITY_OAUTH2);
 
         if (oauth2SecurityScheme.getFlows() == null) {
@@ -473,7 +458,7 @@ public class AsyncApiV2Parser extends AsyncApiParser {
         if (oauth2SecurityScheme.getFlows().getImplicit() == null) {
             oauth2SecurityScheme.getFlows().setImplicit(oauth2SecurityScheme.getFlows().createOAuthFlow());
         }
-        oauth2SecurityScheme.getFlows().getImplicit().setAuthorizationUrl("http://localhost:9999");
+        oauth2SecurityScheme.getFlows().getImplicit().setAuthorizationUrl(APISpecParserConstants.ASYNCAPI_AUTHORIZATION_URL);
         Map<String, String> scopes = new HashMap<>();
         Map<String, String> scopeBindings = new HashMap<>();
 
@@ -485,10 +470,11 @@ public class AsyncApiV2Parser extends AsyncApiParser {
         }
         AsyncApiParserUtil.setAsyncApiOAuthFlowsScopes(oauth2SecurityScheme, scopes, scopeBindings);
 
-        asyncApiDocument.getComponents().addSecurityScheme(APISpecParserConstants.DEFAULT_API_SECURITY_OAUTH2, oauth2SecurityScheme);
+        asyncApiDocument.getComponents().addSecurityScheme(APISpecParserConstants.DEFAULT_API_SECURITY_OAUTH2,
+                oauth2SecurityScheme);
         String endpointConfigString = apiToUpdate.getEndpointConfig();
         if (StringUtils.isNotEmpty(endpointConfigString)) {
-            JSONObject endpointConfig = new JSONObject(endpointConfigString);
+            JsonObject endpointConfig = JsonParser.parseString(endpointConfigString).getAsJsonObject();
 
             AsyncApiServers servers = asyncApiDocument.createServers();
             if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
@@ -512,30 +498,30 @@ public class AsyncApiV2Parser extends AsyncApiParser {
     public Map<String,String> buildWSUriMapping(String apiDefinition) {
         Map<String,String> wsUriMapping = new HashMap<>();
         AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(apiDefinition);
-        AsyncApiChannels apiChannels = (AsyncApiChannels) asyncApiDocument.getChannels();
+        AsyncApiChannels apiChannels = asyncApiDocument.getChannels();
         MappedNode channels = (MappedNode) apiChannels;
         if (channels != null && !channels.getItems().isEmpty()) {
             for (Object entry : channels.getItemNames()) {
                 AsyncApiChannelItem channel = (AsyncApiChannelItem) channels.getItem((String) entry);
-                AsyncApiOperation publishOperation = (AsyncApiOperation) channel.getPublish();
+                AsyncApiOperation publishOperation = channel.getPublish();
                 if (publishOperation != null) {
                     AsyncApiExtensible publishExtensibleOperation = (AsyncApiExtensible) publishOperation;
                     Map<String, JsonNode> publishExtensions = publishExtensibleOperation.getExtensions();
                     if (publishExtensions != null) {
-                        JsonNode xUriMapping = publishExtensions.get("x-uri-mapping");
+                        JsonNode xUriMapping = publishExtensions.get(APISpecParserConstants.ASYNCAPI_URI_MAPPING);
                         if (xUriMapping != null) {
-                            wsUriMapping.put("PUBLISH_" + entry, xUriMapping.asText());
+                            wsUriMapping.put(APISpecParserConstants.WS_URI_MAPPING_PUBLISH + entry, xUriMapping.asText());
                         }
                     }
                 }
-                AsyncApiOperation subscribeOperation = (AsyncApiOperation) channel.getSubscribe();
+                AsyncApiOperation subscribeOperation = channel.getSubscribe();
                 if (subscribeOperation != null) {
                     AsyncApiExtensible subscribeExtensibleOperation = (AsyncApiExtensible) subscribeOperation;
                     Map<String, JsonNode> subscribeExtensions = subscribeExtensibleOperation.getExtensions();
                     if (subscribeExtensions != null) {
-                        JsonNode xUriMapping = subscribeExtensions.get("x-uri-mapping");
+                        JsonNode xUriMapping = subscribeExtensions.get(APISpecParserConstants.ASYNCAPI_URI_MAPPING);
                         if (xUriMapping != null) {
-                            wsUriMapping.put("SUBSCRIBE_" + entry, xUriMapping.asText());
+                            wsUriMapping.put(APISpecParserConstants.WS_URI_MAPPING_SUBSCRIBE + entry, xUriMapping.asText());
                         }
                     }
                 }

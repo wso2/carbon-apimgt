@@ -2419,16 +2419,15 @@ public class PublisherCommonUtils {
             // by defining the AsyncApiParser as AsyncApiV3Parser.
             // If you need to use AsyncAPI version 2.x instead, uncomment the following line
             // and comment out the next one.
-            // AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
-            //                    APISpecParserConstants.AsyncApi.ASYNC_API_V2);
+//             AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+//                     APISpecParserConstants.AsyncApi.ASYNC_API_V2);
             AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
                     APISpecParserConstants.AsyncApi.ASYNC_API_V3);
             String asyncApiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
             if (log.isDebugEnabled()) {
                 String preview = asyncApiDefinition.length() > 1000 ? asyncApiDefinition.substring(0, 1000)
                         + "...(truncated)" : asyncApiDefinition;
-                log.debug("[AsyncAPI][PublisherCommonUtils.addAPIWithGeneratedSwaggerDefinition] " +
-                        "asyncApiDefinition content: " + preview);
+                log.debug("Generated Swagger/AsyncApi Definition content: " + preview);
             }
             apiToAdd.setAsyncApiDefinition(asyncApiDefinition);
         }

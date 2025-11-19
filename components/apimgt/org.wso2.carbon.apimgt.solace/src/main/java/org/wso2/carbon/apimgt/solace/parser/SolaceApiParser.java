@@ -35,7 +35,7 @@ public class SolaceApiParser extends AsyncApiParser {
      * @return String
      */
     @Override
-    public String getVendorFromExtension(String definition)  {
+    public String getVendorFromExtension(String definition) throws APIManagementException {
 
         Map<String, JsonNode> extensions = getExtensionFromAsyncApiDoc(definition);
 //        Map<String, JsonNode> extensions = getExtensionFromAsyncApiDoc(getAsyncApiVersion(definition), definition);
