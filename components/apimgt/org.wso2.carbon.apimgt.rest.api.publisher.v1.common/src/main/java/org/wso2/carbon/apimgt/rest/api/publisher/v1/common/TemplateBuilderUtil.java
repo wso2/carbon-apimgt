@@ -594,7 +594,7 @@ public class TemplateBuilderUtil {
                         && !endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).isJsonNull())
                         ? endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString() : null;
                 if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(protocolType)
-                        && StringUtils.equals(api.getType().toLowerCase(), APIConstants.API_TYPE_HTTP.toLowerCase())) {
+                        && APIConstants.API_TYPE_HTTP.equalsIgnoreCase(api.getType())) {
                     ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
                     // To modify the endpoint config string
                     JSONParser parser = new JSONParser();
