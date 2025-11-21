@@ -17,7 +17,7 @@ package org.wso2.carbon.apimgt.solace.deployer;
 
 import com.google.gson.JsonObject;
 import io.apicurio.datamodels.Library;
-import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiDocument;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -79,7 +79,8 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
     @Override
     public String deploy(API api, Environment environment, String referenceArtifact) throws DeployerException {
         String apiDefinition = api.getAsyncApiDefinition();
-        Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(apiDefinition);
+        AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(apiDefinition);
+//        AsyncApi22Document aai22Document = (AsyncApi22Document) Library.readDocumentFromJSONString(apiDefinition);
         String apiNameForRegistration = api.getId().getApiName() + "-" + api.getId().getVersion();
         String[] apiContextParts = api.getContext().split("/");
         String apiNameWithContext = environment.getName() + "-" + api.getId().getName() + "-" + apiContextParts[1] +
@@ -126,7 +127,7 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
                     // create API product only
                     CloseableHttpResponse response3 = solaceAdminApis.createAPIProduct(environment.
                                     getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION),
-                            environment.getName(), aai20Document, apiNameWithContext, apiNameForRegistration);
+                            environment.getName(), asyncApiDocument, apiNameWithContext, apiNameForRegistration);
                     if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
                         log.info("API product " + apiNameWithContext + " has been created in Solace broker");
                         return "SUCCESS";
@@ -154,7 +155,7 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
                         //create API Product in Solace broker
                         CloseableHttpResponse response3 = solaceAdminApis.createAPIProduct(environment.
                                         getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION),
-                                environment.getName(), aai20Document, apiNameWithContext, apiNameForRegistration);
+                                environment.getName(), asyncApiDocument, apiNameWithContext, apiNameForRegistration);
                         if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
                             log.info("API product '" + apiNameWithContext + "' has been created in Solace broker");
                             return "SUCCESS";

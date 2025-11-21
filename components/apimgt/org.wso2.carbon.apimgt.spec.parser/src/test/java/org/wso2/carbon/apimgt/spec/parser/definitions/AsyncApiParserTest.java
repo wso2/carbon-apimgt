@@ -1,3 +1,4 @@
+
 /*
  *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -16,11 +17,12 @@
 package org.wso2.carbon.apimgt.spec.parser.definitions;
 
 import org.apache.commons.io.IOUtils;
-import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Test;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParserFactory;
 
 import java.io.File;
 import java.util.HashMap;
@@ -37,7 +39,7 @@ public class AsyncApiParserTest {
         api.setTransports("ws,wss");
         api.setEndpointConfig("{'endpoint_type':'http','sandbox_endpoints':{'url':'wss://echo.websocket.org:443'}," +
                 "'production_endpoints':{'url':'wss://echo.websocket.org:443'}}");
-        AsyncApiParser asyncApiParser = new AsyncApiParser();
+        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser("2.0");
         String asyncAPIDefinition = asyncApiParser.generateAsyncAPIDefinition(api);
         Assert.assertNotNull(asyncAPIDefinition);
     }
@@ -54,7 +56,7 @@ public class AsyncApiParserTest {
         api.setTransports("ws,wss");
         api.setEndpointConfig("{'endpoint_type':'http','sandbox_endpoints':{'url':'wss://echo.websocket.org:443'}," +
                 "'production_endpoints':{'url':'wss://echo.websocket.org:443'}}");
-        AsyncApiParser asyncApiParser = new AsyncApiParser();
+        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser("2.0");
         String asyncAPIDefinition = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "asyncAPI" +
                         File.separator + "sampleWebSocket.json"),
@@ -68,10 +70,11 @@ public class AsyncApiParserTest {
     public void testGenerateAsyncAPIDefinitionFail() throws Exception {
         APIIdentifier identifier = new APIIdentifier("admin", "HelloServer", "1.0");
         API api = new API(identifier);
-        AsyncApiParser asyncApiParser = new AsyncApiParser();
+        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser("2.0");
         try {
             asyncApiParser.generateAsyncAPIDefinition(api);
-        } catch (JSONException e) {
+            Assert.fail("Expected exception was not thrown");
+        } catch (IllegalStateException | APIManagementException e) {
             Assert.assertNotNull(e);
         }
     }
@@ -83,7 +86,7 @@ public class AsyncApiParserTest {
         hostsWithSchemes.put("wss", "wss://localhost:8099");
         APIIdentifier identifier = new APIIdentifier("admin", "HelloServer2", "1.0");
         API api = new API(identifier);
-        AsyncApiParser asyncApiParser = new AsyncApiParser();
+        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser("2.0");
         String asyncAPIDefinition = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "asyncAPI" +
                         File.separator + "incorrectWebSocket.yml"),

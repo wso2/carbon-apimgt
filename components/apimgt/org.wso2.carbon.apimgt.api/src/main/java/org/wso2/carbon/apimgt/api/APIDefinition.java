@@ -262,7 +262,7 @@ public abstract class APIDefinition {
      * @param swaggerContent String
      * @return String
      */
-    public abstract String getVendorFromExtension(String swaggerContent);
+    public abstract String getVendorFromExtension(String swaggerContent) throws APIManagementException;
 
     /**
      * Get parser Type
