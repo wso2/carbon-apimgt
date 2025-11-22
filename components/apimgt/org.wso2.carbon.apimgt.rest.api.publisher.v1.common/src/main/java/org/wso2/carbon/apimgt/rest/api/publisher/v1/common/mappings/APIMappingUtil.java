@@ -1718,8 +1718,8 @@ public class APIMappingUtil {
                                 .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
                         if (productionEndpointSecurity
                                 .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) != null) {
-                            String customParametersString = (String) productionEndpointSecurity
-                                    .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                            String customParametersString = productionEndpointSecurity
+                                    .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS).toString();
                             JSONObject customParameters = (JSONObject) parser.parse(customParametersString);
                             decryptCustomOauthParameters(customParameters, cryptoUtil);
                             productionEndpointSecurity.put(
@@ -1762,8 +1762,8 @@ public class APIMappingUtil {
                                 .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
                         if (sandboxEndpointSecurity
                                 .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) != null) {
-                            String customParametersString = (String) sandboxEndpointSecurity
-                                    .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                            String customParametersString = sandboxEndpointSecurity
+                                    .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS).toString();
                             JSONObject customParameters = (JSONObject) parser.parse(customParametersString);
                             decryptCustomOauthParameters(customParameters, cryptoUtil);
                             sandboxEndpointSecurity.put(
