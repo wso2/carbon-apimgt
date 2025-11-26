@@ -11268,8 +11268,8 @@ public final class APIUtil {
     }
 
     public static void initializeVelocityContext(VelocityEngine velocityEngine) {
-        velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
-        velocityEngine.setProperty(RuntimeConstants.OLD_SPACE_GOBBLING, "bc");
+        velocityEngine.setProperty(RuntimeConstants.CHECK_EMPTY_OBJECTS, false);
+        velocityEngine.setProperty(RuntimeConstants.SPACE_GOBBLING, "bc");
         velocityEngine.setProperty("runtime.conversion.handler", "none");
     }
 
