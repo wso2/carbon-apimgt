@@ -115,6 +115,7 @@
   "apim.publisher.key_alias": "gateway_certificate_alias",
   "apim.publisher.enable_api_doc_visibility": false,
   "apim.publisher.display_url": false,
+  "apim.publisher.use_legacy_async_parser": true,
   "apim.cors.enable": "true",
   "apim.cors.allow_origins": "*",
   "apim.cors.allow_methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",

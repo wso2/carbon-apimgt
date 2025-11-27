@@ -66,6 +66,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.lifecycle.CheckListItem;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -147,6 +148,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParseOptions;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParserFactory;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
@@ -2498,12 +2500,16 @@ public class APIMappingUtil {
 
     private static List<ScopeDTO> getScopesFromAsyncAPI(String asyncAPIDefinition) throws APIManagementException {
 
-//        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
-//        AsyncApiParserUtil.getAsyncApiVersion(asyncAPIDefinition));
         String asyncApiVersion = AsyncApiParserUtil.getAsyncApiVersion(asyncAPIDefinition);
         AsyncApiParser asyncApiParser;
+
+        AsyncApiParseOptions options =  new AsyncApiParseOptions();
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        options.setDefaultAsyncApiParserVersion(Boolean.parseBoolean(
+                config.getFirstProperty(APIConstants.API_PUBLISHER_PRESERVE_LEGACY_ASYNC_PARSER)));
+
         try {
-            asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(asyncApiVersion);
+            asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(asyncApiVersion, options);
         } catch (IllegalArgumentException | UnsupportedOperationException e) {
             throw new APIManagementException("Unsupported AsyncAPI version: " + asyncApiVersion, e);
         }

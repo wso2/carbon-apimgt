@@ -226,7 +226,6 @@ public final class APISpecParserConstants {
     }
 
     // ASYNC API specific constants
-    public static final String ASYNCAPI_AUTHORIZATION_URL = "http://localhost:9999";
     public static final String ASYNCAPI_URI_MAPPING = "x-uri-mapping";
     public static final String ASYNCAPI_ACTION_SEND = "send";
     public static final String ASYNCAPI_ACTION_RECEIVE = "receive";

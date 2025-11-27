@@ -11,11 +11,10 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 
 import java.util.Map;
 import java.util.Set;
-
-import static org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil.getExtensionFromAsyncApiDoc;
 
 
 /**
@@ -37,8 +36,7 @@ public class SolaceApiParser extends AsyncApiParser {
     @Override
     public String getVendorFromExtension(String definition) throws APIManagementException {
 
-        Map<String, JsonNode> extensions = getExtensionFromAsyncApiDoc(definition);
-//        Map<String, JsonNode> extensions = getExtensionFromAsyncApiDoc(getAsyncApiVersion(definition), definition);
+        Map<String, JsonNode> extensions = AsyncApiParserUtil.getExtensionFromAsyncApiDoc(definition);
         if (extensions != null && extensions.containsKey("x-origin")) {
             JsonNode origin = extensions.get("x-origin");
             ObjectMapper objectMapper = new ObjectMapper();

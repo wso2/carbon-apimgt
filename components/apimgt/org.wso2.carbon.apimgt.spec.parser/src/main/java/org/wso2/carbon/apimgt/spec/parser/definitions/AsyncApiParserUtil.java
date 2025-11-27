@@ -28,64 +28,52 @@ import io.apicurio.datamodels.models.MappedNode;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiChannelItem;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiChannels;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiDocument;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiExtensible;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiOAuthFlow;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiOperationBindings;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiReferenceable;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiSecurityScheme;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiServer;
 import io.apicurio.datamodels.models.asyncapi.v20.AsyncApi20Channels;
-import io.apicurio.datamodels.models.asyncapi.v20.AsyncApi20Document;
 import io.apicurio.datamodels.models.asyncapi.v20.AsyncApi20DocumentImpl;
 import io.apicurio.datamodels.models.asyncapi.v20.AsyncApi20OAuthFlow;
 import io.apicurio.datamodels.models.asyncapi.v20.AsyncApi20Parameter;
-import io.apicurio.datamodels.models.asyncapi.v20.AsyncApi20Referenceable;
 import io.apicurio.datamodels.models.asyncapi.v20.AsyncApi20SecurityScheme;
 import io.apicurio.datamodels.models.asyncapi.v20.AsyncApi20Server;
 import io.apicurio.datamodels.models.asyncapi.v21.AsyncApi21Channels;
-import io.apicurio.datamodels.models.asyncapi.v21.AsyncApi21Document;
 import io.apicurio.datamodels.models.asyncapi.v21.AsyncApi21DocumentImpl;
 import io.apicurio.datamodels.models.asyncapi.v21.AsyncApi21OAuthFlow;
 import io.apicurio.datamodels.models.asyncapi.v21.AsyncApi21Parameter;
-import io.apicurio.datamodels.models.asyncapi.v21.AsyncApi21Referenceable;
 import io.apicurio.datamodels.models.asyncapi.v21.AsyncApi21SecurityScheme;
 import io.apicurio.datamodels.models.asyncapi.v21.AsyncApi21Server;
 import io.apicurio.datamodels.models.asyncapi.v22.AsyncApi22Channels;
-import io.apicurio.datamodels.models.asyncapi.v22.AsyncApi22Document;
 import io.apicurio.datamodels.models.asyncapi.v22.AsyncApi22DocumentImpl;
 import io.apicurio.datamodels.models.asyncapi.v22.AsyncApi22OAuthFlow;
 import io.apicurio.datamodels.models.asyncapi.v22.AsyncApi22Parameter;
-import io.apicurio.datamodels.models.asyncapi.v22.AsyncApi22Referenceable;
 import io.apicurio.datamodels.models.asyncapi.v22.AsyncApi22SecurityScheme;
 import io.apicurio.datamodels.models.asyncapi.v22.AsyncApi22Server;
 import io.apicurio.datamodels.models.asyncapi.v23.AsyncApi23Channels;
-import io.apicurio.datamodels.models.asyncapi.v23.AsyncApi23Document;
 import io.apicurio.datamodels.models.asyncapi.v23.AsyncApi23DocumentImpl;
 import io.apicurio.datamodels.models.asyncapi.v23.AsyncApi23OAuthFlow;
 import io.apicurio.datamodels.models.asyncapi.v23.AsyncApi23Parameter;
-import io.apicurio.datamodels.models.asyncapi.v23.AsyncApi23Referenceable;
 import io.apicurio.datamodels.models.asyncapi.v23.AsyncApi23SecurityScheme;
 import io.apicurio.datamodels.models.asyncapi.v23.AsyncApi23Server;
 import io.apicurio.datamodels.models.asyncapi.v24.AsyncApi24Channels;
-import io.apicurio.datamodels.models.asyncapi.v24.AsyncApi24Document;
 import io.apicurio.datamodels.models.asyncapi.v24.AsyncApi24DocumentImpl;
 import io.apicurio.datamodels.models.asyncapi.v24.AsyncApi24OAuthFlow;
 import io.apicurio.datamodels.models.asyncapi.v24.AsyncApi24Parameter;
-import io.apicurio.datamodels.models.asyncapi.v24.AsyncApi24Referenceable;
 import io.apicurio.datamodels.models.asyncapi.v24.AsyncApi24SecurityScheme;
 import io.apicurio.datamodels.models.asyncapi.v24.AsyncApi24Server;
 import io.apicurio.datamodels.models.asyncapi.v25.AsyncApi25Channels;
-import io.apicurio.datamodels.models.asyncapi.v25.AsyncApi25Document;
 import io.apicurio.datamodels.models.asyncapi.v25.AsyncApi25DocumentImpl;
 import io.apicurio.datamodels.models.asyncapi.v25.AsyncApi25OAuthFlow;
 import io.apicurio.datamodels.models.asyncapi.v25.AsyncApi25Parameter;
-import io.apicurio.datamodels.models.asyncapi.v25.AsyncApi25Referenceable;
 import io.apicurio.datamodels.models.asyncapi.v25.AsyncApi25SecurityScheme;
 import io.apicurio.datamodels.models.asyncapi.v25.AsyncApi25Server;
 import io.apicurio.datamodels.models.asyncapi.v26.AsyncApi26Channels;
-import io.apicurio.datamodels.models.asyncapi.v26.AsyncApi26Document;
 import io.apicurio.datamodels.models.asyncapi.v26.AsyncApi26DocumentImpl;
 import io.apicurio.datamodels.models.asyncapi.v26.AsyncApi26OAuthFlow;
 import io.apicurio.datamodels.models.asyncapi.v26.AsyncApi26Parameter;
-import io.apicurio.datamodels.models.asyncapi.v26.AsyncApi26Referenceable;
 import io.apicurio.datamodels.models.asyncapi.v26.AsyncApi26SecurityScheme;
 import io.apicurio.datamodels.models.asyncapi.v26.AsyncApi26Server;
 import io.apicurio.datamodels.models.asyncapi.v30.AsyncApi30Channel;
@@ -95,10 +83,13 @@ import io.apicurio.datamodels.models.asyncapi.v30.AsyncApi30DocumentImpl;
 import io.apicurio.datamodels.models.asyncapi.v30.AsyncApi30OAuthFlow;
 import io.apicurio.datamodels.models.asyncapi.v30.AsyncApi30Operation;
 import io.apicurio.datamodels.models.asyncapi.v30.AsyncApi30Operations;
-import io.apicurio.datamodels.models.asyncapi.v30.AsyncApi30Referenceable;
 import io.apicurio.datamodels.models.asyncapi.v30.AsyncApi30SecurityScheme;
 import io.apicurio.datamodels.models.asyncapi.v30.AsyncApi30Server;
 import io.apicurio.datamodels.models.util.JsonUtil;
+import io.apicurio.datamodels.validation.DefaultSeverityRegistry;
+import io.apicurio.datamodels.validation.IValidationSeverityRegistry;
+import io.apicurio.datamodels.validation.ValidationProblem;
+import io.apicurio.datamodels.validation.ValidationProblemSeverity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -112,6 +103,7 @@ import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParseOptions;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParserFactory;
 
 import java.io.IOException;
@@ -123,7 +115,7 @@ import java.util.List;
 import java.util.Map;
 
 public class AsyncApiParserUtil {
-    
+
     private static final Log log = LogFactory.getLog(AsyncApiParserUtil.class);
     private static final String PATH_SEPARATOR = "/";
 
@@ -132,8 +124,10 @@ public class AsyncApiParserUtil {
             String schemaToBeValidated, boolean returnJSONContent) throws APIManagementException {
 
         log.debug("AsyncAPI definition validation has started");
-        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
-                getAsyncApiVersion(schemaToBeValidated));
+        AsyncApiParseOptions options = new AsyncApiParseOptions();
+        options.setDefaultAsyncApiParserVersion(true);
+        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(getAsyncApiVersion(
+                schemaToBeValidated), options);
         APIDefinitionValidationResponse validationResponse = asyncApiParser.validateAPIDefinition(schemaToBeValidated,
                 returnJSONContent);
         log.debug("AsyncAPI definition validation is completed");
@@ -152,8 +146,33 @@ public class AsyncApiParserUtil {
         return validationResponse;
     }
 
+    public static APIDefinitionValidationResponse validateAsyncAPISpecification(
+            String schemaToBeValidated, boolean returnJSONContent, AsyncApiParseOptions options) throws APIManagementException {
+
+        log.debug("AsyncAPI definition validation has started");
+        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(getAsyncApiVersion(
+                schemaToBeValidated), options);
+        APIDefinitionValidationResponse validationResponse = asyncApiParser.validateAPIDefinition(schemaToBeValidated,
+                returnJSONContent);
+        log.debug("AsyncAPI definition validation is completed");
+        final String asyncAPIKeyNotFound = "#: required key [asyncapi] not found";
+
+        if (!validationResponse.isValid()) {
+            for (ErrorHandler errorItem : validationResponse.getErrorItems()) {
+                if (asyncAPIKeyNotFound.equals(errorItem.getErrorMessage())) {    //change it other way
+                    addErrorToValidationResponse(validationResponse, "#: attribute [asyncapi] " +
+                            "should be present");
+                    return validationResponse;
+                }
+            }
+        }
+
+        return validationResponse;
+    }
+
+    @Deprecated
     public static APIDefinitionValidationResponse validateAsyncAPISpecificationByURL(
-            String url, HttpClient httpClient, boolean returnJSONContent) throws APIManagementException{
+            String url, HttpClient httpClient, boolean returnJSONContent) throws APIManagementException {
 
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
 
@@ -166,7 +185,40 @@ public class AsyncApiParserUtil {
                 Object obj = yamlReader.readValue(new URL(url), Object.class);
                 ObjectMapper jsonWriter = new ObjectMapper();
                 String json = jsonWriter.writeValueAsString(obj);
-                validationResponse = validateAsyncAPISpecification(json, returnJSONContent);
+                AsyncApiParseOptions options = new AsyncApiParseOptions();
+                options.setDefaultAsyncApiParserVersion(true);
+                validationResponse = validateAsyncAPISpecification(json, returnJSONContent, options);
+            } else {
+                validationResponse.setValid(false);
+                validationResponse.getErrorItems().add(ExceptionCodes.ASYNCAPI_URL_NO_200);
+            }
+        } catch (IOException e) {
+            ErrorHandler errorHandler = ExceptionCodes.ASYNCAPI_URL_MALFORMED;
+            log.error(errorHandler.getErrorDescription(), e); // log the error and continue
+            // since this method is only intended to validate a definition
+
+            validationResponse.setValid(false);
+            validationResponse.getErrorItems().add(errorHandler);
+        }
+
+        return validationResponse;
+    }
+
+    public static APIDefinitionValidationResponse validateAsyncAPISpecificationByURL(
+            String url, HttpClient httpClient, boolean returnJSONContent, AsyncApiParseOptions options) throws APIManagementException {
+
+        APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
+
+        try {
+            HttpGet httpGet = new HttpGet(url);
+            HttpResponse response = httpClient.execute(httpGet);
+
+            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
+                ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+                Object obj = yamlReader.readValue(new URL(url), Object.class);
+                ObjectMapper jsonWriter = new ObjectMapper();
+                String json = jsonWriter.writeValueAsString(obj);
+                validationResponse = validateAsyncAPISpecification(json, returnJSONContent, options);
             } else {
                 validationResponse.setValid(false);
                 validationResponse.getErrorItems().add(ExceptionCodes.ASYNCAPI_URL_NO_200);
@@ -191,8 +243,7 @@ public class AsyncApiParserUtil {
             String version,
             String context,
             String description,
-            List<String> endpoints)
-    {
+            List<String> endpoints) {
         validationResponse.setValid(true);
         validationResponse.setContent(originalAPIDefinition);
         APIDefinitionValidationResponse.Info info = new APIDefinitionValidationResponse.Info();
@@ -214,8 +265,7 @@ public class AsyncApiParserUtil {
             String context,
             String description,
             List<String> endpoints,
-            List<URITemplate> uriTemplates)
-    {
+            List<URITemplate> uriTemplates) {
         validationResponse.setValid(true);
         validationResponse.setContent(originalAPIDefinition);
         APIDefinitionValidationResponse.Info info = new APIDefinitionValidationResponse.Info();
@@ -386,72 +436,40 @@ public class AsyncApiParserUtil {
     /**
      * This method will provide the respective Async API Document with data from based on the version
      *
-     * @param version String
+     * @param version    String
      * @param definition String
      * @return AsyncApiDocument
      */
     public static AsyncApiDocument getFromAsyncApiDocument(String version, String definition) throws APIManagementException {
 
-        Document asyncApiDocument = Library.readDocumentFromJSONString(definition);
-        if (version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V20)) {
-            return (AsyncApi20Document) asyncApiDocument;
-        } else if (version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V21)) {
-            return (AsyncApi21Document) asyncApiDocument;
-        } else if (version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V22)) {
-            return (AsyncApi22Document) asyncApiDocument;
-        } else if (version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V23)) {
-            return (AsyncApi23Document) asyncApiDocument;
-        } else if (version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V24)) {
-            return (AsyncApi24Document) asyncApiDocument;
-        } else if (version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V25)) {
-            return (AsyncApi25Document) asyncApiDocument;
-        } else if (version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V26)) {
-            return (AsyncApi26Document) asyncApiDocument;
-        } else if (version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V30)) {
-            return (AsyncApi30Document) asyncApiDocument;
-        } else {
-            throw new APIManagementException("Unsupported AsyncAPI version: " + version,
-                    ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
+        try {
+            Document document = Library.readDocumentFromJSONString(definition);
+            if (document instanceof AsyncApiDocument) {
+                return (AsyncApiDocument) document;
+            }
+
+            throw new APIManagementException("Unsupported or invalid AsyncAPI definition version: " + version,
+                    ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION
+            );
+
+        } catch (Exception e) {
+            throw new APIManagementException("Error while reading AsyncAPI definition", e,
+                    ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION
+            );
         }
     }
 
     /**
-     * This method will extract the extension data from the Async Api Document based on the version
+     * This method will extract the extension data from the Async Api Document
+     *
      * @param definition String
      * @return Map<String, JsonNode>
      */
     public static Map<String, JsonNode> getExtensionFromAsyncApiDoc(String definition) throws APIManagementException {
 
         AsyncApiDocument asyncApiDocument = getFromAsyncApiDocument(getAsyncApiVersion(definition), definition);
-        Map<String, JsonNode> extensions;
-        if (asyncApiDocument instanceof AsyncApi20Document) {
-            extensions = ((AsyncApi20Document) asyncApiDocument).getExtensions();
-            return extensions;
-        } else if (asyncApiDocument instanceof AsyncApi21Document) {
-            extensions = ((AsyncApi21Document) asyncApiDocument).getExtensions();
-            return extensions;
-        } else if (asyncApiDocument instanceof AsyncApi22Document) {
-            extensions = ((AsyncApi22Document) asyncApiDocument).getExtensions();
-            return extensions;
-        } else if (asyncApiDocument instanceof AsyncApi23Document) {
-            extensions = ((AsyncApi23Document) asyncApiDocument).getExtensions();
-            return extensions;
-        } else if (asyncApiDocument instanceof AsyncApi24Document) {
-            extensions = ((AsyncApi24Document) asyncApiDocument).getExtensions();
-            return extensions;
-        } else if (asyncApiDocument instanceof AsyncApi25Document) {
-            extensions = ((AsyncApi25Document) asyncApiDocument).getExtensions();
-            return extensions;
-        } else if (asyncApiDocument instanceof AsyncApi26Document) {
-            extensions = ((AsyncApi26Document) asyncApiDocument).getExtensions();
-            return extensions;
-        } else if (asyncApiDocument instanceof AsyncApi30Document) {
-            extensions = ((AsyncApi30Document) asyncApiDocument).getExtensions();
-            return extensions;
-        } else {
-            throw new APIManagementException("Unsupported AsyncAPI version: " + getAsyncApiVersion(definition),
-                    ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
-        }
+        AsyncApiExtensible extensibleDoc = (AsyncApiExtensible) asyncApiDocument;
+        return extensibleDoc.getExtensions();
     }
 
     /**
@@ -483,10 +501,11 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * This method will extract set the OAuth Flow scopes for the Async Api Document based on the version
+     * This method will extract and set the OAuth Flow scopes for the Async Api Document based on the version
+     *
      * @param securityScheme AsyncApiSecurityScheme
-     * @param scopes  Map<String, String>
-     * @param scopeBindings Map<String, String>
+     * @param scopes         Map<String, String>
+     * @param scopeBindings  Map<String, String>
      */
     public static void setAsyncApiOAuthFlowsScopes(AsyncApiSecurityScheme securityScheme, Map<String, String> scopes,
                                                    Map<String, String> scopeBindings) throws APIManagementException {
@@ -534,6 +553,7 @@ public class AsyncApiParserUtil {
 
     /**
      * This method will create and provide the respective Async API Document with data from based on the version
+     *
      * @param version String
      * @return AsyncApiDocument
      */
@@ -562,6 +582,7 @@ public class AsyncApiParserUtil {
 
     /**
      * This method will create and provide the respective Async API Channel Item with data from based on the version
+     *
      * @param channels String
      * @return AsyncApiDocument
      */
@@ -588,6 +609,7 @@ public class AsyncApiParserUtil {
 
     /**
      * This method will create and provide the respective Async API Channel with data from based on the version
+     *
      * @param channels String
      * @return AsyncApiDocument
      */
@@ -602,6 +624,7 @@ public class AsyncApiParserUtil {
 
     /**
      * This method will return a list of channel items from the respective Async API document
+     *
      * @param asyncDocument AsyncApiDocument
      * @return List<AsyncApiChannelItem>
      */
@@ -653,31 +676,18 @@ public class AsyncApiParserUtil {
      * @return String
      */
     public static String getRefFromParameter(Object parameterObj) {
-        if (parameterObj instanceof AsyncApi20Referenceable) {
-            return ((AsyncApi20Referenceable) parameterObj).get$ref();
-        } else if (parameterObj instanceof AsyncApi21Referenceable) {
-            return ((AsyncApi21Referenceable) parameterObj).get$ref();
-        } else if (parameterObj instanceof AsyncApi22Referenceable) {
-            return ((AsyncApi22Referenceable) parameterObj).get$ref();
-        } else if (parameterObj instanceof AsyncApi23Referenceable) {
-            return ((AsyncApi23Referenceable) parameterObj).get$ref();
-        } else if (parameterObj instanceof AsyncApi24Referenceable) {
-            return ((AsyncApi24Referenceable) parameterObj).get$ref();
-        } else if (parameterObj instanceof AsyncApi25Referenceable) {
-            return ((AsyncApi25Referenceable) parameterObj).get$ref();
-        } else if (parameterObj instanceof AsyncApi26Referenceable) {
-            return ((AsyncApi26Referenceable) parameterObj).get$ref();
-        } else if (parameterObj instanceof AsyncApi30Referenceable) {
-            return ((AsyncApi30Referenceable) parameterObj).get$ref();
-        } else {
-            throw new UnsupportedOperationException("Unsupported AsyncAPI Parameter");
+        if (parameterObj instanceof AsyncApiReferenceable) {
+            return ((AsyncApiReferenceable) parameterObj).get$ref();
         }
+        throw new IllegalArgumentException("Unsupported AsyncAPI Parameter type: " +
+                (parameterObj != null ? parameterObj.getClass().getName() : "null")
+        );
     }
 
     /**
      * This method will set AsyncApiServer for the respective Async API based on the version
      *
-     * @param url String
+     * @param url    String
      * @param server AsyncApiServer
      */
     public static void setAsyncApiServer(String url, AsyncApiServer server) throws APIManagementException {
@@ -730,6 +740,89 @@ public class AsyncApiParserUtil {
             throw new APIManagementException("Unsupported AsyncAPI Channel",
                     ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
         }
+    }
+
+    /**
+     * Utility method to safely validate the Async API content
+     */
+    public static boolean validateAsyncApiContent(String apiDefinition, List<String> errorMessages) {
+        // Parse the incoming JSON into a Jackson ObjectNode
+        ObjectNode originalParsed;
+        try {
+            originalParsed = (ObjectNode) JsonUtil.parseJSON(apiDefinition);
+        } catch (Exception e) {
+            String msg = "Invalid AsyncAPI syntax: " + e.getMessage();
+            log.error(msg, e);
+            errorMessages.add(msg);
+            return false;
+        }
+
+        //If parsing succeeded, create Apicurio Document and run model validation
+        if (originalParsed != null) {
+            Document doc = Library.readDocument(originalParsed);
+            if (doc == null || doc.root() == null) {
+                String msg = "Unable to parse AsyncAPI definition into Apicurio Document model.";
+                log.error(msg);
+                errorMessages.add(msg);
+                return false;
+            } else {
+                // Log model type (ModelType has a useful toString)
+                log.debug("Parsed model type: " + doc.root().modelType());
+
+                // Validate using Apicurio validation rules
+                IValidationSeverityRegistry severityRegistry = new DefaultSeverityRegistry();
+                List<ValidationProblem> problems =
+                        Library.validate(doc, severityRegistry);
+
+                if (problems == null || problems.isEmpty()) {
+                    log.debug("No validation problems found.");
+                    return true;
+                } else {
+                    // Format problems into a readable string
+                    String formatted = formatProblems(problems);
+                    log.debug("Validation Problems:\n" + formatted);
+
+                    // Determine if there are any high or medium severity problems
+                    // This can also include ValidationProblemSeverity low as well
+                    boolean hasErrors = problems.stream()
+                            .anyMatch(p -> p.severity == ValidationProblemSeverity.high
+                                    || p.severity == ValidationProblemSeverity.medium);
+
+                    // Collect all problem messages into validationErrorMessages
+                    for (ValidationProblem problem : problems) {
+                        errorMessages.add(problem.message);
+                    }
+
+                    if (hasErrors) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Format the list of problems as a string.
+     *
+     * @param problems Validation problems
+     */
+    private static String formatProblems(List<ValidationProblem> problems) {
+        StringBuilder builder = new StringBuilder();
+        problems.forEach(problem -> {
+            builder.append("[");
+            builder.append(problem.errorCode);
+            builder.append("] |");
+            builder.append(problem.severity);
+            builder.append("| {");
+            builder.append(problem.nodePath.toString(true));
+            builder.append("->");
+            builder.append(problem.property);
+            builder.append("} :: ");
+            builder.append(problem.message);
+            builder.append("\n");
+        });
+        return builder.toString();
     }
 
 }

@@ -23,20 +23,24 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserConstants;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
-import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models.AsyncApiV2Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models.AsyncApiV3Parser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models.LegacyAsyncApiV2Parser;
 
 public class AsyncApiParserFactory {
 
-    private static final Log log = LogFactory.getLog(AsyncApiParserUtil.class);
+    private static final Log log = LogFactory.getLog(AsyncApiParserFactory.class);
 
-    public static AsyncApiParser getAsyncApiParser(String version) throws APIManagementException {
+    public static AsyncApiParser getAsyncApiParser(String version, AsyncApiParseOptions options) throws APIManagementException {
         if (version == null) {
             throw new APIManagementException("AsyncAPI version cannot be null");
         } else if (isAsyncApiV2(version)) {
             log.debug("AsyncAPI definition version is V2.x.x");
-            return new AsyncApiV2Parser();
+            if (options != null && options.getDefaultAsyncApiParserVersion()) {
+                return new LegacyAsyncApiV2Parser();
+            } else {
+                 return new AsyncApiV2Parser();
+            }
         } else if (version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V30)) {
             log.debug("AsyncAPI definition version is V3.x.x");
             return new AsyncApiV3Parser();

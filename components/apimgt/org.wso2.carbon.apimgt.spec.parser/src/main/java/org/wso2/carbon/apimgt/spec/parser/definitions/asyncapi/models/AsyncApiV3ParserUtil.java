@@ -61,9 +61,9 @@ public class AsyncApiV3ParserUtil {
 
     /**
      * Extract channel name from a $ref like "#/channels/myChannel" (returns "myChannel").
-     * If format differs, returns last path segment as fallback.
      * Expected format: #/channels/<name>
      */
+
     public static String extractChannelNameFromRef(String ref) {
         if (ref == null) {
             return null;
@@ -78,15 +78,15 @@ public class AsyncApiV3ParserUtil {
         // Need to fix in the Publisher UI
         // Temp fix; if the actual channel is wildcard "/*", preserve the slash
         // This fix currently only works for wildcard "/*"
-        if ("*".equals(extracted) && ref.contains("/channels/*")) {
-            return "/*";
-        }
+//        if ("*".equals(extracted) && ref.contains("/channels/*")) {
+//            return "/*";
+//        }
 
         return extracted;
     }
 
     /**
-     * Extract only channel name from full address
+     * Extract only channel name from full absolute path or relative path
      * Remove ALL leading slashes like "#/channels//myChannel" or "#/channels///myChannel" (returns "myChannel").
      */
     public static String normalizeChannelName(String name) {
@@ -104,13 +104,13 @@ public class AsyncApiV3ParserUtil {
      */
     public static void setAsyncApiServerFromUrl(String url, AsyncApiServer server, String apiType) {
 
-        AsyncApi30Server srv = (AsyncApi30Server) server;
+        AsyncApi30Server asyncApiServer = (AsyncApi30Server) server;
 
         if (url == null || url.isEmpty()) {
-            srv.setHost("");
-            srv.setPathname("/");
+            asyncApiServer.setHost("");
+            asyncApiServer.setPathname("/");
             if (apiType != null) {
-                srv.setProtocol(apiType.toLowerCase());
+                asyncApiServer.setProtocol(apiType.toLowerCase());
             }
             return;
         }
@@ -149,11 +149,11 @@ public class AsyncApiV3ParserUtil {
             }
         }
 
-        srv.setHost(host);
-        srv.setPathname(path);
+        asyncApiServer.setHost(host);
+        asyncApiServer.setPathname(path);
 
         if (apiType != null) {
-            srv.setProtocol(apiType.toLowerCase());
+            asyncApiServer.setProtocol(apiType.toLowerCase());
         }
     }
 

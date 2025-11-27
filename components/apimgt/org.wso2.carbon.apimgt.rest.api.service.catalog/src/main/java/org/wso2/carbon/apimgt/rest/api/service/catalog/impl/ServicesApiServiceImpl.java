@@ -35,10 +35,13 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.AsyncApiParserImplUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.ServicesApiService;
@@ -56,6 +59,7 @@ import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceEntryMapping
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParseOptions;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -468,13 +472,15 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             //validate file
             //convert .yml or .yaml to JSON for validation
             String schemaToBeValidated = CommonUtil.yamlToJson(definitionContent);
-            validationResponse = AsyncApiParserUtil.validateAsyncAPISpecification(schemaToBeValidated, true);
+            validationResponse = AsyncApiParserUtil.validateAsyncAPISpecification(schemaToBeValidated,
+                    true, AsyncApiParserImplUtil.getConfiguredDefaultParser());
         } else if (url != null) {
             try {
                 URL urlObj = new URL(url);
                 HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
                 // Validate URL
-                validationResponse = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(url, httpClient, true);
+                validationResponse = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(url, httpClient,
+                        true, AsyncApiParserImplUtil.getConfiguredDefaultParser());
             } catch (MalformedURLException e) {
                 throw new APIManagementException("Error while processing the API definition URL", e);
             }

@@ -37,12 +37,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.ValidationException;
-import org.everit.json.schema.loader.SchemaLoader;
-import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -53,10 +47,7 @@ import org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserConstants;
 import org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
-import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiValidator;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -233,51 +224,14 @@ public class AsyncApiV2Parser extends AsyncApiParser {
         String protocol = StringUtils.EMPTY;
         boolean validationSuccess = false;
         List<String> validationErrorMessages = new ArrayList<>();
-        // The following preserveLegacyValidation determines which validation logic to be executed
-        boolean preserveLegacyValidation = true;
 
-        if (preserveLegacyValidation){
-            JSONObject schemaToBeValidated = new JSONObject(apiDefinition);
-
-            //import and load AsyncAPI HyperSchema for JSON schema validation
-            JSONObject hyperSchema = new JSONObject(APISpecParserConstants.AsyncApiSchemas.ASYNCAPI_JSON_HYPERSCHEMA);
-
-            //validate AsyncAPI using JSON schema validation
-            try {
-                JSONParser parser = new JSONParser();
-                org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(APISpecParserConstants.
-                        AsyncApiSchemas.METASCHEMA);
-                SchemaLoader schemaLoader = SchemaLoader.builder().registerSchemaByURI
-                        (new URI(APISpecParserConstants.AsyncApiSchemas.JSONSCHEMA), json).schemaJson(hyperSchema).build();
-                Schema schemaValidator = schemaLoader.load().build();
-                schemaValidator.validate(schemaToBeValidated);
-
-                validationSuccess = true;
-            } catch(ValidationException e) {
-                //validation error messages
-                validationErrorMessages = e.getAllMessages();
-            } catch (URISyntaxException e) {
-                String msg = "Error occurred when registering the schema";
-                throw new APIManagementException(msg, e,
-                        ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
-            } catch (ParseException e) {
-                String msg = "Error occurred when parsing the schema";
-                throw new APIManagementException(msg, e,
-                        ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
-            }
-
-            // TODO: Validation is failing. Need to fix this. Therefore overriding the value as True.
-            validationSuccess = true;
-
-        } else if (!preserveLegacyValidation) {
-            try {
-                validationSuccess = AsyncApiValidator.validateAsyncApiContent(apiDefinition, validationErrorMessages);
-            } catch (Exception e) {
-                // unexpected problems during validation/parsing
-                String msg = "Error occurred while validating AsyncAPI definition: " + e.getMessage();
-                log.error(msg, e);
-                throw new APIManagementException(msg, e, ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
-            }
+        try {
+            validationSuccess = AsyncApiParserUtil.validateAsyncApiContent(apiDefinition, validationErrorMessages);
+        } catch (Exception e) {
+            // unexpected problems during validation/parsing
+            String msg = "Error occurred while validating AsyncAPI definition: " + e.getMessage();
+            log.error(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
         }
 
         if (validationSuccess) {
@@ -332,14 +286,12 @@ public class AsyncApiV2Parser extends AsyncApiParser {
 
             AsyncApiServers servers = asyncApiDocument.createServers();
             if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
-                AsyncApiServer prodServer = getAaiServer(api, asyncApiDocument, endpointConfig,
-                        APISpecParserConstants.GATEWAY_ENV_TYPE_PRODUCTION,
+                AsyncApiServer prodServer = getAaiServer(api, endpointConfig,
                         APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS, servers);
                 servers.addItem(APISpecParserConstants.GATEWAY_ENV_TYPE_PRODUCTION, prodServer);
             }
             if (endpointConfig.has(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
-                AsyncApiServer sandboxServer = getAaiServer(api, asyncApiDocument, endpointConfig,
-                        APISpecParserConstants.GATEWAY_ENV_TYPE_SANDBOX,
+                AsyncApiServer sandboxServer = getAaiServer(api, endpointConfig,
                         APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS, servers);
 
                 servers.addItem(APISpecParserConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxServer);
@@ -367,14 +319,12 @@ public class AsyncApiV2Parser extends AsyncApiParser {
      * Configure Async API server from endpoint configurations
      *
      * @param api               API
-     * @param asyncApiDocument  Async Api Document
      * @param endpointConfig    Endpoint configuration
-     * @param serverName        Name of the server
      * @param endpoint          Endpoint to be configured
      * @return Configured AaiServer
      */
-    private AsyncApiServer getAaiServer(API api, AsyncApiDocument asyncApiDocument, JsonObject endpointConfig, String
-            serverName, String endpoint, AsyncApiServers servers) throws APIManagementException {
+    private AsyncApiServer getAaiServer(API api, JsonObject endpointConfig, String endpoint, AsyncApiServers servers)
+            throws APIManagementException {
 
         JsonObject endpointObj = endpointConfig.getAsJsonObject(endpoint);
         if (!endpointObj.has(APISpecParserConstants.API_DATA_URL)) {
@@ -458,7 +408,8 @@ public class AsyncApiV2Parser extends AsyncApiParser {
         if (oauth2SecurityScheme.getFlows().getImplicit() == null) {
             oauth2SecurityScheme.getFlows().setImplicit(oauth2SecurityScheme.getFlows().createOAuthFlow());
         }
-        oauth2SecurityScheme.getFlows().getImplicit().setAuthorizationUrl(APISpecParserConstants.ASYNCAPI_AUTHORIZATION_URL);
+        oauth2SecurityScheme.getFlows().getImplicit().setAuthorizationUrl("http://localhost:9999");
+
         Map<String, String> scopes = new HashMap<>();
         Map<String, String> scopeBindings = new HashMap<>();
 
@@ -469,23 +420,21 @@ public class AsyncApiV2Parser extends AsyncApiParser {
             scopeBindings.put(scope.getName(), scope.getRoles());
         }
         AsyncApiParserUtil.setAsyncApiOAuthFlowsScopes(oauth2SecurityScheme, scopes, scopeBindings);
-
         asyncApiDocument.getComponents().addSecurityScheme(APISpecParserConstants.DEFAULT_API_SECURITY_OAUTH2,
                 oauth2SecurityScheme);
+
         String endpointConfigString = apiToUpdate.getEndpointConfig();
         if (StringUtils.isNotEmpty(endpointConfigString)) {
             JsonObject endpointConfig = JsonParser.parseString(endpointConfigString).getAsJsonObject();
 
             AsyncApiServers servers = asyncApiDocument.createServers();
             if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
-                AsyncApiServer prodServer = getAaiServer(apiToUpdate, asyncApiDocument, endpointConfig,
-                        APISpecParserConstants.GATEWAY_ENV_TYPE_PRODUCTION,
+                AsyncApiServer prodServer = getAaiServer(apiToUpdate, endpointConfig,
                         APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS, servers);
                 servers.addItem(APISpecParserConstants.GATEWAY_ENV_TYPE_PRODUCTION, prodServer);
             }
             if (endpointConfig.has(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
-                AsyncApiServer sandboxServer = getAaiServer(apiToUpdate, asyncApiDocument, endpointConfig,
-                        APISpecParserConstants.GATEWAY_ENV_TYPE_SANDBOX,
+                AsyncApiServer sandboxServer = getAaiServer(apiToUpdate, endpointConfig,
                         APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS, servers);
                 servers.addItem(APISpecParserConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxServer);
             }
