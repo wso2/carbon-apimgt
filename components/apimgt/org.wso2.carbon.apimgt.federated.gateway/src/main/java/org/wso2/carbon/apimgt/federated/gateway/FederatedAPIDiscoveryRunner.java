@@ -397,6 +397,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
      * @param environment  The environment for which the discovery task should be stopped.
      * @param organization The organization context for which the discovery task should be stopped.
      */
+    @Override
     public void stopDiscovery(Environment environment, String organization) {
         String taskKey = "FederatedAPIDiscovery" + DELEM_COLON + environment.getName() + DELEM_COLON
                 + organization;
