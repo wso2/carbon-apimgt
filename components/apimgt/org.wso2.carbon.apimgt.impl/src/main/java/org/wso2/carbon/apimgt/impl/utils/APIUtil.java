@@ -12051,8 +12051,8 @@ public final class APIUtil {
     public static void stopFederatedGatewayAPIDiscovery(Environment environment, String organization) {
         FederatedAPIDiscoveryService federatedAPIDiscoveryService = ServiceReferenceHolder
                 .getInstance().getFederatedAPIDiscoveryService();
-        if (environment.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR) &&
-                federatedAPIDiscoveryService != null) {
+        if (federatedAPIDiscoveryService != null && environment != null
+                && APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(environment.getProvider())) {
             federatedAPIDiscoveryService.stopDiscovery(environment, organization);
         }
     }
