@@ -783,7 +783,7 @@ public class AsyncApiParserUtil {
                     log.debug("Validation Problems:\n" + formatted);
 
                     // Determine if there are any high or medium severity problems
-                    // This can also include ValidationProblemSeverity low as well
+                    // This can also include ValidationProblemSeverity.low as well
                     boolean hasErrors = problems.stream()
                             .anyMatch(p -> p.severity == ValidationProblemSeverity.high
                                     || p.severity == ValidationProblemSeverity.medium);
@@ -793,9 +793,7 @@ public class AsyncApiParserUtil {
                         errorMessages.add(problem.message);
                     }
 
-                    if (hasErrors) {
-                        return false;
-                    }
+                    return !hasErrors;
                 }
             }
         }

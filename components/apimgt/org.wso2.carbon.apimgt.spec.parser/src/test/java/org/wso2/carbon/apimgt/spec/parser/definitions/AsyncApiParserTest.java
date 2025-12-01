@@ -42,7 +42,8 @@ public class AsyncApiParserTest {
                 "'production_endpoints':{'url':'wss://echo.websocket.org:443'}}");
         AsyncApiParseOptions options =  new AsyncApiParseOptions();
         options.setDefaultAsyncApiParserVersion(true);
-        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser("2.0", options);
+        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+                AsyncApiTestUtils.ASYNCAPI_V20, options);
         String asyncAPIDefinition = asyncApiParser.generateAsyncAPIDefinition(api);
         Assert.assertNotNull(asyncAPIDefinition);
     }
@@ -61,7 +62,8 @@ public class AsyncApiParserTest {
                 "'production_endpoints':{'url':'wss://echo.websocket.org:443'}}");
         AsyncApiParseOptions options =  new AsyncApiParseOptions();
         options.setDefaultAsyncApiParserVersion(true);
-        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser("2.0", options);
+        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+                AsyncApiTestUtils.ASYNCAPI_V20, options);
         String asyncAPIDefinition = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "asyncAPI" +
                         File.separator + "sampleWebSocket.json"),
@@ -77,7 +79,8 @@ public class AsyncApiParserTest {
         API api = new API(identifier);
         AsyncApiParseOptions options =  new AsyncApiParseOptions();
         options.setDefaultAsyncApiParserVersion(true);
-        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser("2.0", options);
+        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+                AsyncApiTestUtils.ASYNCAPI_V20, options);
         try {
             asyncApiParser.generateAsyncAPIDefinition(api);
             Assert.fail("Expected exception was not thrown");
@@ -95,7 +98,8 @@ public class AsyncApiParserTest {
         API api = new API(identifier);
         AsyncApiParseOptions options =  new AsyncApiParseOptions();
         options.setDefaultAsyncApiParserVersion(true);
-        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser("2.0", options);
+        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+                AsyncApiTestUtils.ASYNCAPI_V20, options);
         String asyncAPIDefinition = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "asyncAPI" +
                         File.separator + "incorrectWebSocket.yml"),

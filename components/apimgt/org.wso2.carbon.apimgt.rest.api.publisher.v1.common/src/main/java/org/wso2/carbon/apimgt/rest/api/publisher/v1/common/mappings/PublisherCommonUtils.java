@@ -2429,7 +2429,7 @@ public class PublisherCommonUtils {
                     APISpecParserConstants.AsyncApi.ASYNC_API_V3, getConfiguredDefaultParser());
             String asyncApiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
             if (log.isDebugEnabled()) {
-                String preview = asyncApiDefinition.length() > 1000 ? asyncApiDefinition.substring(0, 1000)
+                String preview = asyncApiDefinition.length() > 100 ? asyncApiDefinition.substring(0, 100)
                         + "...(truncated)" : asyncApiDefinition;
                 log.debug("Generated Swagger/AsyncApi Definition content: " + preview);
             }

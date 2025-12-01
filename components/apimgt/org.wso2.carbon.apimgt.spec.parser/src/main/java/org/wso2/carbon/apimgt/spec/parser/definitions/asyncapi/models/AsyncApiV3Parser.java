@@ -440,7 +440,7 @@ public class AsyncApiV3Parser extends AsyncApiParser {
             url = hostsWithSchemes.get(APISpecParserConstants.WSS_PROTOCOL).trim()
                     .replace(APISpecParserConstants.WSS_PROTOCOL_URL_PREFIX, "");
         }
-        if (ArrayUtils.contains(apiTransports, APISpecParserConstants.WSS_PROTOCOL)
+        if (ArrayUtils.contains(apiTransports, APISpecParserConstants.WS_PROTOCOL)
                 && hostsWithSchemes.get(APISpecParserConstants.WS_PROTOCOL) != null) {
             if (StringUtils.isEmpty(url)) {
                 url = hostsWithSchemes.get(APISpecParserConstants.WS_PROTOCOL).trim()

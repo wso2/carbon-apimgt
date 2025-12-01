@@ -31,7 +31,8 @@ public class AsyncApiParserFactory {
 
     private static final Log log = LogFactory.getLog(AsyncApiParserFactory.class);
 
-    public static AsyncApiParser getAsyncApiParser(String version, AsyncApiParseOptions options) throws APIManagementException {
+    public static AsyncApiParser getAsyncApiParser(String version, AsyncApiParseOptions options)
+            throws APIManagementException {
         if (version == null) {
             throw new APIManagementException("AsyncAPI version cannot be null");
         } else if (isAsyncApiV2(version)) {
