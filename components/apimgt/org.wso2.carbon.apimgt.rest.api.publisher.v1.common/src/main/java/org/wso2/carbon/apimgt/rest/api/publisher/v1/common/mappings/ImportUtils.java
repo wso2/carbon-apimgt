@@ -469,8 +469,8 @@ public class ImportUtils {
 
             // Update Custom Backend Data if endpoint type is selected to "custom_backend"
             Map endpointConf = (Map) importedApiDTO.getEndpointConfig();
-            if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                    endpointConf.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+            if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
+                    (String) endpointConf.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                 updateAPIWithCustomBackend(importedApi, extractedFolderPath, apiProvider);
             }
 

@@ -356,7 +356,7 @@ public class PublisherCommonUtils {
 
         if (apiUpdated != null && !StringUtils.isEmpty(apiUpdated.getEndpointConfig())) {
             JsonObject endpointConfig = JsonParser.parseString(apiUpdated.getEndpointConfig()).getAsJsonObject();
-            if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+            if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
                     endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && (
                     APIConstants.API_TYPE_HTTP.equals(apiUpdated.getType()) || APIConstants.API_TYPE_SOAPTOREST.equals(
                             apiUpdated.getType()))) {
@@ -684,8 +684,8 @@ public class PublisherCommonUtils {
                 oldSandboxAWSSecretKey, apiDtoToUpdate);
         // update endpointConfig with the provided custom sequence
         if (endpointConfig != null) {
-            if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                    endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+            if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
+                    (String) endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                 try {
                     if (endpointConfig.get("sequence_path") != null) {
                         String pathToSequence = endpointConfig.get("sequence_path").toString();
@@ -2696,7 +2696,7 @@ public class PublisherCommonUtils {
 
         org.json.JSONObject endpointConfigObj = new org.json.JSONObject(endpointConfigMap);
         if (!endpointConfigObj.isNull(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE) &&
-                APIConstants.ENDPOINT_TYPE_DEFAULT.equals(
+                APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
                         endpointConfigObj.getString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
             return true;
         }
@@ -3310,8 +3310,9 @@ public class PublisherCommonUtils {
                     if (existingEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) != null) {
                         //put as a value under the ENDPOINT_PRODUCTION_ENDPOINTS key
                         //if loadbalance endpoints, get relevant jsonobject from array
-                        if (existingEndpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
-                                .equals(APIConstants.ENDPOINT_TYPE_LOADBALANCE)) {
+                        if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equalsIgnoreCase(
+                                (String) existingEndpointConfigJson.get(
+                                        APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                             JSONArray productionConfigsJson = (JSONArray) existingEndpointConfigJson
                                     .get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
                             for (int i = 0; i < productionConfigsJson.size(); i++) {
@@ -3351,8 +3352,9 @@ public class PublisherCommonUtils {
                     if (existingEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) != null) {
                         //put as a value under the ENDPOINT_SANDBOX_ENDPOINTS key
                         //if loadbalance endpoints, get relevant jsonobject from array
-                        if (existingEndpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
-                                .equals(APIConstants.ENDPOINT_TYPE_LOADBALANCE)) {
+                        if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equalsIgnoreCase(
+                                (String) existingEndpointConfigJson.get(
+                                        APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                             JSONArray sandboxConfigsJson = (JSONArray) existingEndpointConfigJson
                                     .get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
                             for (int i = 0; i < sandboxConfigsJson.size(); i++) {
