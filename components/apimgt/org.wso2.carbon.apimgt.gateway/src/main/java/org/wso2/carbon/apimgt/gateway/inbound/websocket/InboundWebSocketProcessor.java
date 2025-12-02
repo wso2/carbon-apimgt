@@ -36,6 +36,7 @@ import org.apache.synapse.api.Resource;
 import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
@@ -53,6 +54,7 @@ import org.wso2.carbon.apimgt.gateway.inbound.websocket.request.RequestProcessor
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.response.GraphQLResponseProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.response.ResponseProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.Authentication.ApiKeyAuthenticator;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.Authentication.NoAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.Authentication.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
@@ -119,7 +121,13 @@ public class InboundWebSocketProcessor implements WebSocketProcessor {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
                     inboundMessageContext.getTenantDomain(), true);
-            if (isOauthAuthentication(req, inboundMessageContext)) {
+            if (isNoAuthentication(inboundMessageContext)) {
+                inboundMessageContext.setAuthenticator(new NoAuthAuthenticator());
+                setRequestHeaders(req, inboundMessageContext);
+                inboundProcessorResponseDTO = 
+                    handshakeProcessor.processHandshake(inboundMessageContext);
+                setRequestHeaders(req, inboundMessageContext);
+            } else if (isOauthAuthentication(req, inboundMessageContext)) {
                 inboundMessageContext.setAuthenticator(new OAuthAuthenticator());
                 setRequestHeaders(req, inboundMessageContext);
                 setOrReplaceRequestHeaderIgnoreCase(WebsocketUtil.authorizationHeader, req, inboundMessageContext);
@@ -285,6 +293,35 @@ public class InboundWebSocketProcessor implements WebSocketProcessor {
             }
         }
         return true;
+    }
+
+    /**
+     * Parse the authSceme for the selected resource in the InboundMessageContext.
+     *
+     * @param inboundMessageContext InboundMessageContext
+     * @return true if validation success
+     * 
+     */
+    private boolean isNoAuthentication(InboundMessageContext ctx) {
+        List<URLMapping> urlMappings = ctx.getElectedAPI().getUrlMappings();
+        for (URLMapping urlMapping : urlMappings) {
+            if (urlMapping.getUrlPattern() != null && urlMapping.getUrlPattern()
+                    .equalsIgnoreCase(ctx.getMatchingResource())) {
+                if (urlMapping.getAuthScheme() != null && urlMapping.getAuthScheme()
+                    .equals(APIConstants.AUTH_NO_AUTHENTICATION)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Found resource authentication scheme: " + APIConstants.AUTH_NO_AUTHENTICATION + 
+                                " for WebSocket context: " + ctx.getApiContext() + 
+                                ", resource: " + ctx.getMatchingResource());
+                    }
+                        return true;
+                }
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("No matching resource found to dispatch the request");
+        }
+        return false;
     }
 
     /**
