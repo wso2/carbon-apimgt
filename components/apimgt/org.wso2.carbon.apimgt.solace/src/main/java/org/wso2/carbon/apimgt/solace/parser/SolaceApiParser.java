@@ -2,8 +2,6 @@ package org.wso2.carbon.apimgt.solace.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.osgi.service.component.annotations.Component;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -20,11 +18,7 @@ import java.util.Set;
 /**
  * This Parser class will validate the Solace Async API Specifications.
  */
-@Component(
-        name = "solace.async.definition.parser.component",
-        immediate = true,
-        service = APIDefinition.class
-)
+@Deprecated
 public class SolaceApiParser extends AsyncApiParser {
 
     /**
@@ -34,7 +28,7 @@ public class SolaceApiParser extends AsyncApiParser {
      * @return String
      */
     @Override
-    public String getVendorFromExtension(String definition) throws APIManagementException {
+    public String getVendorFromExtensionWithError(String definition) throws APIManagementException {
 
         Map<String, JsonNode> extensions = AsyncApiParserUtil.getExtensionFromAsyncApiDoc(definition);
         if (extensions != null && extensions.containsKey("x-origin")) {

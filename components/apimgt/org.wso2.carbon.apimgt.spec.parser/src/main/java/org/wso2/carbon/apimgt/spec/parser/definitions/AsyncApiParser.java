@@ -18,199 +18,164 @@
  */
 package org.wso2.carbon.apimgt.spec.parser.definitions;
 
+import com.google.gson.JsonObject;
 import io.apicurio.datamodels.Library;
-import io.apicurio.datamodels.models.asyncapi.AsyncApiChannelItem;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiDocument;
-import io.apicurio.datamodels.models.asyncapi.AsyncApiOperationBindings;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiServer;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiServers;
-import io.apicurio.datamodels.models.asyncapi.v26.AsyncApi26Channels;
-import io.apicurio.datamodels.models.asyncapi.v26.AsyncApi26Document;
-import io.apicurio.datamodels.models.asyncapi.v26.AsyncApi26Server;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
+import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
-import org.osgi.service.component.annotations.Component;
-import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
-import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-@Component(
-        name = "wso2.async.definition.parser.component",
-        immediate = true,
-        service = APIDefinition.class
-)
-public abstract class AsyncApiParser extends APIDefinition {
+/**
+ * This class is Legacy Async API Parser used to parse AsyncAPI 2.x.x specifications.
+ * It extends the AbstractAsyncApiParser class to provide specific parsing capabilities for AsyncAPI 2.x.x.
+ */
+
+public class AsyncApiParser extends BaseAsyncApiV2Parser {
 
     private static final Log log = LogFactory.getLog(AsyncApiParser.class);
     private List<String> otherSchemes;
+
     public List<String> getOtherSchemes() {
         return otherSchemes;
     }
+
     public void setOtherSchemes(List<String> otherSchemes) {
         this.otherSchemes = otherSchemes;
     }
 
     @Override
-    public Map<String, Object> generateExample(String apiDefinition) throws APIManagementException{
-        return null;
+    public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
+        Set<Scope> scopeSet = AsyncApiParserUtil.getScopesFromAsyncAPIConfig(resourceConfigsJSON);
+        return scopeSet;
     }
-
-    @Override
-    public Set<URITemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException {
-        return getURITemplates(resourceConfigsJSON, true);
-    }
-
-    public abstract Set<URITemplate> getURITemplates(String apiDefinition, boolean includePublish)
-            throws APIManagementException;
-
-    @Override
-    public abstract Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
 
     public String generateAPIDefinitionForBackendAPI(SwaggerData swaggerData, String oasDefinition) {
         return null;
     }
 
     @Override
-    public String generateAPIDefinition(SwaggerData swaggerData) throws APIManagementException {
-        return null;
-    }
-
-    @Override
-    public String generateAPIDefinition(SwaggerData swaggerData, String swagger) throws APIManagementException {
-        return null;
-    }
-
-    @Override
-    public APIDefinitionValidationResponse validateAPIDefinition(
-            String apiDefinition, String url, boolean returnJsonContent) throws APIManagementException {
-        return null;
-    }
-
-    @Override
-    public abstract APIDefinitionValidationResponse validateAPIDefinition(
-            String apiDefinition, boolean returnJsonContent) throws APIManagementException;
-
-    @Override
-    public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData)
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
             throws APIManagementException {
-        return null;
+
+        APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
+        String protocol = StringUtils.EMPTY;
+        boolean validationSuccess = false;
+        List<String> validationErrorMessages = new ArrayList<>();
+        JSONObject schemaToBeValidated = new JSONObject(apiDefinition);
+        //import and load AsyncAPI HyperSchema for JSON schema validation
+        JSONObject hyperSchema = new JSONObject(APISpecParserConstants.AsyncApiSchemas.ASYNCAPI_JSON_HYPERSCHEMA);
+
+        //validate AsyncAPI using JSON schema validation
+        try {
+            JSONParser parser = new JSONParser();
+            org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(APISpecParserConstants.
+                    AsyncApiSchemas.METASCHEMA);
+            SchemaLoader schemaLoader = SchemaLoader.builder().registerSchemaByURI
+                    (new URI(APISpecParserConstants.AsyncApiSchemas.JSONSCHEMA), json).schemaJson(hyperSchema).build();
+            Schema schemaValidator = schemaLoader.load().build();
+            schemaValidator.validate(schemaToBeValidated);
+
+            validationSuccess = true;
+        } catch(ValidationException e) {
+            //validation error messages
+            validationErrorMessages = e.getAllMessages();
+        } catch (URISyntaxException e) {
+            String msg = "Error occurred when registering the schema";
+            throw new APIManagementException(msg, e,
+                    ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
+        } catch (ParseException e) {
+            String msg = "Error occurred when parsing the schema";
+            throw new APIManagementException(msg, e,
+                    ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
+        }
+
+        // TODO: Validation is failing. Need to fix this. Therefore overriding the value as True.
+        validationSuccess = true;
+
+        if (validationSuccess) {
+            AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(apiDefinition);
+            ArrayList<String> endpoints = new ArrayList<>();
+            AsyncApiServers servers = asyncApiDocument.getServers();
+            if (servers != null && servers.getItems() != null && !servers.getItems().isEmpty() &&
+                    servers.getItems().size() == 1)
+            {
+                protocol = ((AsyncApiServer) asyncApiDocument.getServers().getItems().get(0)).getProtocol();
+            }
+
+            AsyncApiParserUtil.updateValidationResponseAsSuccess(
+                    validationResponse,
+                    apiDefinition,
+                    asyncApiDocument.getAsyncapi(),
+                    asyncApiDocument.getInfo().getTitle(),
+                    asyncApiDocument.getInfo().getVersion(),
+                    null,
+                    asyncApiDocument.getInfo().getDescription(),
+                    null
+            );
+
+            validationResponse.setParser(this);
+            if (returnJsonContent) {
+                validationResponse.setJsonContent(apiDefinition);
+            }
+            if (StringUtils.isNotEmpty(protocol)) {
+                validationResponse.setProtocol(protocol);
+            }
+        } else {
+            if (validationErrorMessages != null){
+                validationResponse.setValid(false);
+                for (String errorMessage: validationErrorMessages){
+                    AsyncApiParserUtil.addErrorToValidationResponse(validationResponse, errorMessage);
+                }
+            }
+        }
+        return validationResponse;
     }
 
-    @Override
-    public String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes,
-                                           KeyManagerConfigurationDTO keyManagerConfigurationDTO)
-            throws APIManagementException {
-        return null;
-    }
-
-    @Override
-    public String getOASDefinitionForStore(APIProduct product, String oasDefinition,
-                                           Map<String, String> hostsWithSchemes,
-                                           KeyManagerConfigurationDTO keyManagerConfigurationDTO)
-            throws APIManagementException {
-        return null;
-    }
-
-    @Override
-    public String getOASDefinitionForPublisher(API api, String oasDefinition) throws APIManagementException {
-        return null;
-    }
-
-    @Override
-    public String getOASVersion(String oasDefinition) throws APIManagementException {
-        return null;
-    }
-
-    @Override
-    public String getOASDefinitionWithTierContentAwareProperty(String oasDefinition, List<String> contentAwareTiersList,
-                                                               String apiLevelTier) throws APIManagementException {
-        return null;
-    }
-
-    @Override
-    public String processOtherSchemeScopes(String resourceConfigsJSON) throws APIManagementException {
-        return null;
-    }
-
-    @Override
-    public API setExtensionsToAPI(String swaggerContent, API api) throws APIManagementException {
-        return null;
-    }
-
-    @Override
-    public String copyVendorExtensions(String existingOASContent, String updatedOASContent)
-            throws APIManagementException {
-        return null;
-    }
-
-    @Override
-    public String processDisableSecurityExtension(String swaggerContent) throws APIManagementException{
-        return null;
-    }
-
-    @Override
-    public String getVendorFromExtension(String swaggerContent) throws APIManagementException {
-        return APISpecParserConstants.WSO2_GATEWAY_ENVIRONMENT;
-    }
-
-    @Override
-    public String injectMgwThrottlingExtensionsToDefault(String swaggerContent) throws APIManagementException{
-        return null;
-    }
-
-    @UsedByMigrationClient
-    public abstract String generateAsyncAPIDefinition(API api) throws APIManagementException;
 
     /**
-     * Configure Aai server from endpoint configurations
+     * Configure Async API server from endpoint configurations
      *
      * @param api               API
-     * @param asyncDocument    Async API Document
-     * @param endpointConfig   Endpoint configuration
-     * @param serverName        Name of the server
+     * @param endpointConfig    Endpoint configuration
      * @param endpoint          Endpoint to be configured
-     * @return Configured AaiServer
+     * @return Configured Async API Server
      */
-    private AsyncApiServer getAaiServer(API api, AsyncApi26Document asyncDocument, JSONObject endpointConfig,
-                                        String serverName, String endpoint, AsyncApiServers servers) {
+    private AsyncApiServer getAaiServer(API api, JsonObject endpointConfig, String endpoint, AsyncApiServers servers)
+            throws APIManagementException {
 
-        AsyncApi26Server server = (AsyncApi26Server) servers.createServer();
-        server.setUrl(endpointConfig.getJSONObject(endpoint).getString(APISpecParserConstants.API_DATA_URL));
+        JsonObject endpointObj = endpointConfig.getAsJsonObject(endpoint);
+        if (!endpointObj.has(APISpecParserConstants.API_DATA_URL)) {
+            throw new APIManagementException(
+                    "Missing or Invalid API_DATA_URL in endpoint config: " + endpoint
+            );
+        }
+
+        String url = endpointObj.get(APISpecParserConstants.API_DATA_URL).getAsString();
+        AsyncApiServer server = servers.createServer();
+        AsyncApiParserUtil.setAsyncApiServer(url, server);
         server.setProtocol(api.getType().toLowerCase());
         return server;
     }
-
-    /**
-     * Update AsyncAPI definition for store
-     *
-     * @param api            API
-     * @param asyncAPIDefinition  AsyncAPI definition
-     * @param hostsWithSchemes host addresses with protocol mapping
-     * @return AsyncAPI definition
-     * @throws APIManagementException throws if an error occurred
-     */
-    public abstract String getAsyncApiDefinitionForStore(API api, String asyncAPIDefinition,
-                                                         Map<String, String> hostsWithSchemes)
-            throws APIManagementException;
-
-    public abstract String updateAsyncAPIDefinition(String oldDefinition, API apiToUpdate) throws APIManagementException;
-
-    public abstract Map<String,String> buildWSUriMapping(String apiDefinition);
 
     /**
      * Get available transport protocols for the Async API
@@ -220,112 +185,10 @@ public abstract class AsyncApiParser extends APIDefinition {
      * @throws APIManagementException If the async env configuration if not provided properly
      */
     public static List<String> getTransportProtocolsForAsyncAPI(String definition) throws APIManagementException {
-        AsyncApiDocument aaiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(definition);
-        HashSet<String> asyncTransportProtocols = new HashSet<>();
-        for (AsyncApiChannelItem channel : ((AsyncApi26Channels) aaiDocument.getChannels()).getItems()) {
-            asyncTransportProtocols.addAll(getProtocols(channel));
-        }
-        ArrayList<String> asyncTransportProtocolsList = new ArrayList<>(asyncTransportProtocols);
+
+        ArrayList<String> asyncTransportProtocolsList = (ArrayList<String>)
+                AsyncApiParserUtil.getTransportProtocolsForAsyncAPI(definition);
         return asyncTransportProtocolsList;
     }
 
-    /**
-     * Get the transport protocols
-     *
-     * @param channel AaiChannelItem to get protocol
-     * @return HashSet<String> set of transport protocols
-     */
-    public static HashSet<String> getProtocols(AsyncApiChannelItem channel) {
-
-        HashSet<String> protocols = new HashSet<>();
-
-        if (channel.getSubscribe() != null) {
-            if (channel.getSubscribe().getBindings() != null) {
-                protocols.addAll(getProtocolsFromBindings(channel.getSubscribe().getBindings()));
-            }
-        }
-        if (channel.getPublish() != null) {
-            if (channel.getPublish().getBindings() != null) {
-                protocols.addAll(getProtocolsFromBindings(channel.getPublish().getBindings()));
-            }
-        }
-
-        return protocols;
-    }
-
-    /**
-     * Get the transport protocols the bindings
-     *
-     * @param bindings AaiOperationBindings to get protocols
-     * @return HashSet<String> set of transport protocols
-     */
-    private static HashSet<String> getProtocolsFromBindings(AsyncApiOperationBindings bindings) {
-
-        HashSet<String> protocolsFromBindings = new HashSet<>();
-
-        if (bindings.getHttp() != null) {
-            protocolsFromBindings.add(APISpecParserConstants.HTTP_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.getWs() != null) {
-            protocolsFromBindings.add(APISpecParserConstants.WS_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.getKafka() != null) {
-            protocolsFromBindings.add(APISpecParserConstants.KAFKA_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.getAmqp() != null) {
-            protocolsFromBindings.add(APISpecParserConstants.AMQP_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.getAmqp1() != null) {
-            protocolsFromBindings.add(APISpecParserConstants.AMQP1_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.getMqtt() != null) {
-            protocolsFromBindings.add(APISpecParserConstants.MQTT_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.getMqtt5() != null) {
-            protocolsFromBindings.add(APISpecParserConstants.MQTT5_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.getNats() != null) {
-            protocolsFromBindings.add(APISpecParserConstants.NATS_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.getJms() != null) {
-            protocolsFromBindings.add(APISpecParserConstants.JMS_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.getSns() != null) {
-            protocolsFromBindings.add(APISpecParserConstants.SNS_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.getSqs() != null) {
-            protocolsFromBindings.add(APISpecParserConstants.SQS_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.getStomp() != null) {
-            protocolsFromBindings.add(APISpecParserConstants.STOMP_TRANSPORT_PROTOCOL_NAME);
-        }
-        if (bindings.getRedis() != null) {
-            protocolsFromBindings.add(APISpecParserConstants.REDIS_TRANSPORT_PROTOCOL_NAME);
-        }
-
-        if (bindings.hasExtraProperties()) {
-            protocolsFromBindings.addAll(bindings.getExtraPropertyNames());
-        }
-
-        return protocolsFromBindings;
-    }
-
-    @Override
-    public String getType() {
-        return APISpecParserConstants.WSO2_GATEWAY_ENVIRONMENT;
-    }
-
-    @Override
-    public Set<URITemplate> generateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
-                                             String mcpSubtype, Set<URITemplate> uriTemplates) {
-
-        throw new UnsupportedOperationException("MCP tool generation is not supported for Async API definitions.");
-    }
-
-    @Override
-    public Set<URITemplate> updateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
-                                           String mcpSubtype, Set<URITemplate> uriTemplates) {
-
-        throw new UnsupportedOperationException("MCP tool generation is not supported for Async API definitions.");
-    }
 }

@@ -25,10 +25,8 @@ import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.models.MappedNode;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiChannelItem;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiChannels;
-import io.apicurio.datamodels.models.asyncapi.AsyncApiComponents;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiDocument;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiExtensible;
-import io.apicurio.datamodels.models.asyncapi.AsyncApiOAuthFlow;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiOperation;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiSecurityScheme;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiServer;
@@ -52,15 +50,15 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserConstants;
 import org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserUtil;
-import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AbstractAsyncApiParser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiV3ParserUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,7 +68,7 @@ import java.util.Set;
  * It extends the AsyncApiParser class to provide specific parsing capabilities for AsyncAPI 3.0.0.
  */
 
-public class AsyncApiV3Parser extends AsyncApiParser {
+public class AsyncApiV3Parser extends AbstractAsyncApiParser {
 
     private static final Log log = LogFactory.getLog(AsyncApiV3Parser.class);
 
@@ -199,51 +197,7 @@ public class AsyncApiV3Parser extends AsyncApiParser {
 
     @Override
     public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
-        Set<Scope> scopeSet = new LinkedHashSet<>();
-        AsyncApiDocument document = (AsyncApiDocument) Library.readDocumentFromJSONString(resourceConfigsJSON);
-        AsyncApiComponents components = document.getComponents();
-
-        if (components != null && components.getSecuritySchemes() != null) {
-            AsyncApiSecurityScheme oauth2 = (AsyncApiSecurityScheme) components.getSecuritySchemes().get(
-                    APISpecParserConstants.DEFAULT_API_SECURITY_OAUTH2);
-            if (oauth2 != null && oauth2.getFlows() != null && oauth2.getFlows().getImplicit() != null) {
-
-                AsyncApiOAuthFlow implicitFlow = (AsyncApiOAuthFlow) oauth2.getFlows().getImplicit();
-                Map<String, String> scopes = AsyncApiParserUtil.getAsyncApiOAuthFlowsScopes(implicitFlow);
-                AsyncApiExtensible asyncApiExtImplicitFlow = (AsyncApiExtensible) implicitFlow;
-                Map<String, JsonNode> extensions = implicitFlow != null ? asyncApiExtImplicitFlow.getExtensions():null;
-
-                JsonNode xScopesBindings = null;
-                if (extensions != null) {
-                    xScopesBindings = extensions.get(APISpecParserConstants.SWAGGER_X_SCOPES_BINDINGS);
-                }
-
-                Map<String, String> scopeBindings = new HashMap<>();
-                if (xScopesBindings != null && xScopesBindings.isObject()) {
-                    Iterator<Map.Entry<String, JsonNode>> fields = xScopesBindings.fields();
-                    while (fields.hasNext()) {
-                        Map.Entry<String, JsonNode> entry = fields.next();
-                        if (entry.getValue().isTextual()) {
-                            scopeBindings.put(entry.getKey(), entry.getValue().asText());
-                        }
-                    }
-                }
-
-                if (scopes != null) {
-                    for (Map.Entry<String, String> entry : scopes.entrySet()) {
-                        Scope scope = new Scope();
-                        scope.setKey(entry.getKey());
-                        scope.setName(entry.getKey());
-                        scope.setDescription(entry.getValue());
-                        String scopeBinding = scopeBindings.get(scope.getKey());
-                        if (scopeBinding != null) {
-                            scope.setRoles(scopeBinding);
-                        }
-                        scopeSet.add(scope);
-                    }
-                }
-            }
-        }
+        Set<Scope> scopeSet = AsyncApiParserUtil.getScopesFromAsyncAPIConfig(resourceConfigsJSON);
         return scopeSet;
     }
 

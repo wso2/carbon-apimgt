@@ -137,7 +137,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationRespo
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityInfoDTO;
 import org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserConstants;
-import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AbstractAsyncApiParser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS2Parser;
@@ -927,7 +927,7 @@ public class PublisherCommonUtils {
                     .getAsyncAPIDefinition(apiToUpdate.getUuid(), originalAPI.getOrganization());
             String asyncApiVersion = AsyncApiParserUtil.getAsyncApiVersion(oldDefinition);
 
-            AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(asyncApiVersion,
+            AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(asyncApiVersion,
                     getConfiguredDefaultParser());
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
 
@@ -2420,12 +2420,14 @@ public class PublisherCommonUtils {
             }
             apiToAdd.setSwaggerDefinition(apiDefinition);
         } else {
-            // Note: By default, AsyncAPI version 3.0 will be used when creating new streaming APIs
-            // by defining the AsyncApiParser as AsyncApiV3Parser.
-            // If you need to use AsyncAPI version 2.x instead, use the following line
-//             AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
-//                     APISpecParserConstants.AsyncApi.ASYNC_API_V2, getConfiguredDefaultParser());
-            AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+            /**
+             * Note: By default, AsyncAPI version 3.0 will be used when creating new streaming APIs
+             * by defining the AsyncApiParser as AsyncApiV3Parser.
+             * If you need to use AsyncAPI version 2.x instead, use the following line
+             * AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+             * APISpecParserConstants.AsyncApi.ASYNC_API_V2, getConfiguredDefaultParser());
+             */
+            AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
                     APISpecParserConstants.AsyncApi.ASYNC_API_V3, getConfiguredDefaultParser());
             String asyncApiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
             if (log.isDebugEnabled()) {
@@ -3128,7 +3130,7 @@ public class PublisherCommonUtils {
         API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
         existingAPI.setOrganization(organization);
         String apiDefinition = response.getJsonContent();
-        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+        AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
                 AsyncApiParserUtil.getAsyncApiVersion(apiDefinition), getConfiguredDefaultParser());
 
         // Set uri templates

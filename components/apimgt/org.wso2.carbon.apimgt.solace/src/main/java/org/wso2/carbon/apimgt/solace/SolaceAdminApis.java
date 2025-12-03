@@ -593,7 +593,6 @@ public class SolaceAdminApis {
     private org.json.JSONObject getAttributesFromParameterSchema(String parameterName,
                                                                  Object parameterObj) {
         ObjectNode schemaNode = (ObjectNode) AsyncApiParserUtil.getSchemaFromParameter(parameterObj);
-//        ObjectNode schemaNode = (ObjectNode) parameterObj.getSchema();
         org.json.JSONObject schemaJson = new org.json.JSONObject(schemaNode.toString());
         String enumString = "";
         if (schemaJson.has("enum")) {

@@ -2569,7 +2569,12 @@ public class OAS3Parser extends APIDefinition {
     }
 
     @Override
-    public String getVendorFromExtension(String swaggerContent) throws APIManagementException {
+    public String getVendorFromExtension(String swaggerContent) {
+        return null;
+    }
+
+    @Override
+    public String getVendorFromExtensionWithError(String swaggerContent) throws APIManagementException {
         return null;
     }
 

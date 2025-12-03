@@ -24,7 +24,6 @@ import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models.LegacyAsyncApiV2Parser;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -40,7 +39,7 @@ public class LegacyAsyncApiV2ParserTest {
 
     @Test
     public void testValidateV3DefinitionWithURITemplates() throws Exception {
-        LegacyAsyncApiV2Parser parser = new LegacyAsyncApiV2Parser();
+        AsyncApiParser parser = new AsyncApiParser();
 
         APIDefinitionValidationResponse resp = parser.validateAPIDefinition(AsyncApiTestUtils.ASYNCAPI_V2_SAMPLE,
                 true);
@@ -55,7 +54,7 @@ public class LegacyAsyncApiV2ParserTest {
 
     @Test
     public void testUpdateAsyncAPIDefinition() throws Exception {
-        LegacyAsyncApiV2Parser parser = new LegacyAsyncApiV2Parser();
+        AsyncApiParser parser = new AsyncApiParser();
 
         API minimal = Mockito.mock(API.class);
         when(minimal.getScopes()).thenReturn(Collections.emptySet());
@@ -73,7 +72,7 @@ public class LegacyAsyncApiV2ParserTest {
 
     @Test
     public void testGenerateAsyncAPIDefinitionSuccess() throws Exception {
-        LegacyAsyncApiV2Parser parser = new LegacyAsyncApiV2Parser();
+        AsyncApiParser parser = new AsyncApiParser();
 
         URITemplate template = new URITemplate();
         template.setUriTemplate("orders");
@@ -95,7 +94,7 @@ public class LegacyAsyncApiV2ParserTest {
 
     @Test
     public void testGenerateAsyncAPIDefinitionFailure() {
-        LegacyAsyncApiV2Parser parser = new LegacyAsyncApiV2Parser();
+        AsyncApiParser parser = new AsyncApiParser();
 
         URITemplate template = new URITemplate();
         template.setUriTemplate("orders");

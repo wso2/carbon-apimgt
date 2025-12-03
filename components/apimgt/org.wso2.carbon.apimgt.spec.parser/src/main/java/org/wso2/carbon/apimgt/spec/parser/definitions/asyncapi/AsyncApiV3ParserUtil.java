@@ -16,7 +16,7 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models;
+package org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi;
 
 import io.apicurio.datamodels.models.MappedNode;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiServer;
@@ -44,6 +44,10 @@ public class AsyncApiV3ParserUtil {
 
     /**
      * Utility method to safely convert a MappedNode<T> into a Map<String, T>.
+     *
+     * @param node
+     * @param <T>
+     * @return <T> Map<String, T>
      */
     public static <T> Map<String, T> toMap(MappedNode<T> node) {
         if (node == null || node.getItemNames() == null) {
@@ -62,8 +66,10 @@ public class AsyncApiV3ParserUtil {
     /**
      * Extract channel name from a $ref like "#/channels/myChannel" (returns "myChannel").
      * Expected format: #/channels/<name>
+     *
+     * @param ref String
+     * @return    String
      */
-
     public static String extractChannelNameFromRef(String ref) {
         if (ref == null) {
             return null;
@@ -72,22 +78,17 @@ public class AsyncApiV3ParserUtil {
         if (index == -1 || index == ref.length() - 1) {
             return null;
         }
-
         String extracted = ref.substring(index + 1);
-
-        // Need to fix in the Publisher UI
-        // Temp fix; if the actual channel is wildcard "/*", preserve the slash
-        // This fix currently only works for wildcard "/*"
-//        if ("*".equals(extracted) && ref.contains("/channels/*")) {
-//            return "/*";
-//        }
-
         return extracted;
     }
+
 
     /**
      * Extract only channel name from full absolute path or relative path
      * Remove ALL leading slashes like "#/channels//myChannel" or "#/channels///myChannel" (returns "myChannel").
+     *
+     * @param name String
+     * @return     String
      */
     public static String normalizeChannelName(String name) {
         if (name == null || name.isEmpty()) {
@@ -99,8 +100,13 @@ public class AsyncApiV3ParserUtil {
         return name;
     }
 
+
     /**
      * Extract and set the Host and Pathname from the full URL
+     *
+     * @param url     String
+     * @param server  AsyncApiServer
+     * @param apiType String
      */
     public static void setAsyncApiServerFromUrl(String url, AsyncApiServer server, String apiType) {
 
@@ -156,6 +162,5 @@ public class AsyncApiV3ParserUtil {
             asyncApiServer.setProtocol(apiType.toLowerCase());
         }
     }
-
 
 }

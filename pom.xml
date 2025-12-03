@@ -416,7 +416,7 @@
             <dependency>
                 <groupId>io.apicurio</groupId>
                 <artifactId>apicurio-data-models</artifactId>
-                <version>2.2.2</version>
+                <version>${apicurio.version}</version>
             </dependency>
 
             <dependency>
@@ -2329,5 +2329,6 @@
         <batik.version>1.17</batik.version>
         <mcp.transformer.version>0.9.1</mcp.transformer.version>
         <netty.version>4.1.126.Final</netty.version>
+        <apicurio.version>2.2.2</apicurio.version>
     </properties>
 </project>

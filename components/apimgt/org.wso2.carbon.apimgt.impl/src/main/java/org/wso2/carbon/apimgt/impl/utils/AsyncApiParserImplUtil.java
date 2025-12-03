@@ -4,7 +4,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AbstractAsyncApiParser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParseOptions;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParserFactory;
 
@@ -20,9 +20,9 @@ public class AsyncApiParserImplUtil {
         return options;
     }
 
-    public static AsyncApiParser getAsyncApiParserWithOptions(String version) throws APIManagementException {
+    public static AbstractAsyncApiParser getAsyncApiParserWithOptions(String version) throws APIManagementException {
 
-        AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(version, getConfiguredDefaultParser());
-        return  asyncApiParser;
+        AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(version, getConfiguredDefaultParser());
+        return asyncApiParser;
     }
 }

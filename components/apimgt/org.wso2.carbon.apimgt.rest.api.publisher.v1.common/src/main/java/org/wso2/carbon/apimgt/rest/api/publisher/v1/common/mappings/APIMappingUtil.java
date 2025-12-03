@@ -145,7 +145,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWs
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoEndpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
-import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AbstractAsyncApiParser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParseOptions;
@@ -2501,20 +2501,17 @@ public class APIMappingUtil {
     private static List<ScopeDTO> getScopesFromAsyncAPI(String asyncAPIDefinition) throws APIManagementException {
 
         String asyncApiVersion = AsyncApiParserUtil.getAsyncApiVersion(asyncAPIDefinition);
-        AsyncApiParser asyncApiParser;
-
+        AbstractAsyncApiParser asyncApiParser;
         AsyncApiParseOptions options =  new AsyncApiParseOptions();
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         options.setDefaultAsyncApiParserVersion(Boolean.parseBoolean(
                 config.getFirstProperty(APIConstants.API_PUBLISHER_PRESERVE_LEGACY_ASYNC_PARSER)));
-
         try {
             asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(asyncApiVersion, options);
         } catch (IllegalArgumentException | UnsupportedOperationException e) {
             throw new APIManagementException("Unsupported AsyncAPI version: " + asyncApiVersion, e);
         }
         Set<Scope> scopes = asyncApiParser.getScopes(asyncAPIDefinition);
-
         List<ScopeDTO> scopeDTOS = new ArrayList<>();
         for (Scope aScope : scopes) {
             ScopeDTO scopeDTO = new ScopeDTO();
@@ -3428,7 +3425,7 @@ public class APIMappingUtil {
                 if (!apiDefinitionMap.isEmpty()) {
                     for (Map.Entry<String, APIDefinition> apiDefinitionEntry : apiDefinitionMap.entrySet()) {
                         APIDefinition apiParser = apiDefinitionEntry.getValue();
-                        String gatewayVendor = apiParser.getVendorFromExtension(model.getContent());
+                        String gatewayVendor = apiParser.getVendorFromExtensionWithError(model.getContent());
                         if (gatewayVendor != null) {
                             infoDTO.setGatewayVendor(gatewayVendor);
                             break;
