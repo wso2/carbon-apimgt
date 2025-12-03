@@ -64,14 +64,22 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This class is used to parse AsyncAPI 3.0.x specifications.
- * It extends the AsyncApiParser class to provide specific parsing capabilities for AsyncAPI 3.0.0.
+ * AsyncAPI v3 parser responsible for processing AsyncAPI 3.0.x specifications.
+ * This class extends the AbstractAsyncApiParser class and
+ * provides version-specific parsing capabilities for AsyncAPI 3.0 definitions.
  */
-
 public class AsyncApiV3Parser extends AbstractAsyncApiParser {
 
     private static final Log log = LogFactory.getLog(AsyncApiV3Parser.class);
 
+    /**
+     * Extracts URI templates from the given AsyncAPI definition.
+     *
+     * @param apiDefinition   the AsyncAPI definition as a JSON string
+     * @param includePublish  whether to include operations when generating URI templates
+     * @return a set of generated URITemplate objects for the defined channels
+     * @throws APIManagementException if an error occurs while parsing the AsyncAPI definition
+     */
     @Override
     public Set<URITemplate> getURITemplates(String apiDefinition, boolean includePublish)
             throws APIManagementException {
@@ -120,6 +128,17 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
         return uriTemplates;
     }
 
+    /**
+     * Builds an URITemplate object for a given AsyncAPI channel operation.
+     *
+     * @param target   the URI template path for the operation
+     * @param verb     the HTTP verb (e.g., publish or subscribe) for the operation
+     * @param operation the AsyncAPI operation object
+     * @param scopes    the set of available scopes to be applied to the template
+     * @param channel   the AsyncAPI channel containing the operation and potential extensions
+     * @return a fully constructed URITemplate
+     * @throws APIManagementException if any operation scope cannot be resolved
+     */
     private URITemplate buildURITemplate(String target, String verb, AsyncApiOperation operation, Set<Scope> scopes,
                                          AsyncApi30Channel channel) throws APIManagementException {
         URITemplate template = new URITemplate();
@@ -161,6 +180,12 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
         return template;
     }
 
+    /**
+     * Extracts the scopes defined in the extensions of an AsyncAPI operation.
+
+     * @param operation the AsyncAPI operation containing possible scope extensions
+     * @return a list of scope names defined in the operation extensions
+     */
     private List<String> getScopeOfOperations(AsyncApiOperation operation) {
         return getScopeOfOperationsFromExtensions(operation);
     }
@@ -195,12 +220,27 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
         return Collections.emptyList();
     }
 
+    /**
+     * Extracts and returns the set of scopes defined in the given AsyncAPI configuration.
+     *
+     * @param resourceConfigsJSON the AsyncAPI configuration in JSON format
+     * @return a set of Scope bjects defined in the configuration
+     * @throws APIManagementException if an error occurs while extracting the scopes
+     */
     @Override
     public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
         Set<Scope> scopeSet = AsyncApiParserUtil.getScopesFromAsyncAPIConfig(resourceConfigsJSON);
         return scopeSet;
     }
 
+    /**
+     * Validates the given AsyncAPI definition.
+     *
+     * @param apiDefinition      the AsyncAPI definition to be validated, in JSON format
+     * @param returnJsonContent  whether the validated content should be returned in JSON format
+     * @return an APIDefinitionValidationResponse containing validation results and messages
+     * @throws APIManagementException if an error occurs during validation or schema processing
+     */
     @Override
     public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
             throws APIManagementException {
@@ -209,7 +249,6 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
         String protocol = StringUtils.EMPTY;
         boolean validationSuccess = false;
         List<String> validationErrorMessages = new ArrayList<>();
-
         try {
             validationSuccess = AsyncApiParserUtil.validateAsyncApiContent(apiDefinition, validationErrorMessages);
         } catch (Exception e) {
@@ -219,9 +258,11 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
             throw new APIManagementException(msg, e, ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
         }
 
-        // TODO: Validation is currently not working since the Apicurio library does not yet include
-        //  the AsyncAPI v3 model in its ValidationRuleSet. As a result, the validation (problems)
-        //  returns null. Temporarily overriding the value as true until this is fixed.
+        /**
+         * TODO Validation is currently not working since the Apicurio library does not yet include
+         * the AsyncAPI v3 model in its ValidationRuleSet. As a result, the validation (problems)
+         * returns null. Temporarily overriding the value as true until this is fixed.
+         */
         validationSuccess = true;
 
         // Build the validation response
@@ -263,6 +304,13 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
         return validationResponse;
     }
 
+    /**
+     * Generates an AsyncAPI definition for the given API instance.
+     *
+     * @param api the API object from which the AsyncAPI definition will be generated
+     * @return the generated AsyncAPI definition as a String
+     * @throws APIManagementException if an error occurs while generating the AsyncAPI definition
+     */
     @Override
     public String generateAsyncAPIDefinition(API api) throws APIManagementException {
         // Create an empty AsyncApiDocument v3
@@ -314,9 +362,8 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
             String channelName = uriTemplate.getUriTemplate();
             AsyncApi30Channel channel = components.createChannel();
             channel.setAddress(channelName);
+            // The below normalizeChannelName will not be required if the publisher does not add "/" to every new topic
             channels.addItem(AsyncApiV3ParserUtil.normalizeChannelName(channelName), channel);
-            // The above normalizeChannelName will not be required if the publisher does not add "/" to every new topic
-
             AsyncApi30Operation receiveOp = operations.createOperation();
             receiveOp.setAction(APISpecParserConstants.ASYNCAPI_ACTION_RECEIVE);
 
@@ -341,7 +388,6 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
         }
         document.setChannels(channels);
         document.setOperations(operations);
-
         return Library.writeDocumentToJSONString(document);
     }
 
@@ -362,7 +408,6 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
                     "Missing or Invalid API_DATA_URL in endpoint config: " + endpoint
             );
         }
-
         String url = endpointObj.get(APISpecParserConstants.API_DATA_URL).getAsString();
         AsyncApiServer server = servers.createServer();
         AsyncApiParserUtil.setAsyncApiServer(url, server);
@@ -386,7 +431,6 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
         AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(asyncAPIDefinition);
         String channelName = api.getContext();
         String transports = api.getTransports();
-
         String url = StringUtils.EMPTY;
         String[] apiTransports = transports.split(",");
         if (ArrayUtils.contains(apiTransports, APISpecParserConstants.WSS_PROTOCOL)
@@ -417,17 +461,23 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
         }
         channels.addItem(channelName, channelDetails);
         asyncApiDocument.setChannels((AsyncApiChannels) channels);
-
         return Library.writeDocumentToJSONString(asyncApiDocument);
     }
 
+    /**
+     * Updates an existing AsyncAPI definition with the latest API configuration details.
+     *
+     * @param oldDefinition the existing AsyncAPI definition as a JSON string
+     * @param apiToUpdate    the API containing updated configuration details
+     * @return the updated AsyncAPI definition as a String
+     * @throws APIManagementException if an error occurs while reading or updating the definition
+     */
     @Override
     public String updateAsyncAPIDefinition(String oldDefinition, API apiToUpdate) throws APIManagementException {
         AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(oldDefinition);
         if (asyncApiDocument.getComponents() == null) {
             asyncApiDocument.setComponents(asyncApiDocument.createComponents());
         }
-
         AsyncApiSecurityScheme oauth2SecurityScheme = (AsyncApiSecurityScheme) asyncApiDocument.getComponents().
                 createSecurityScheme();
         oauth2SecurityScheme.setType(APISpecParserConstants.DEFAULT_API_SECURITY_OAUTH2);
@@ -472,6 +522,12 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
         return Library.writeDocumentToJSONString(asyncApiDocument);
     }
 
+    /**
+     * Builds a WebSocket URI mapping from the given AsyncAPI definition.
+     *
+     * @param apiDefinition the AsyncAPI definition in JSON format
+     * @return a map of channel names to WebSocket URIs
+     */
     @Override
     public Map<String, String> buildWSUriMapping(String apiDefinition) {
         Map<String, String> wsUriMapping = new HashMap<>();
@@ -524,7 +580,6 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
                 wsUriMapping.put(APISpecParserConstants.WS_URI_MAPPING_SUBSCRIBE + channelName, mappingValue);
             }
         }
-
         return wsUriMapping;
     }
 

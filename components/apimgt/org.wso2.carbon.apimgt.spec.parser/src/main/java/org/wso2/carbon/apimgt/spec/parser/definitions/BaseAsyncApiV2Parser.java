@@ -23,7 +23,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.models.MappedNode;
-import io.apicurio.datamodels.models.asyncapi.*;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiChannelItem;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiChannels;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiDocument;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiExtensible;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiOperation;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiSecurityScheme;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiServer;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiServers;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -33,10 +40,29 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+/**
+ * Abstract base class for all AsyncAPI v2 parser implementations.
+ * This class provides common functionality shared between both the legacy and the new AsyncAPI v2 parsers
+ */
 public class BaseAsyncApiV2Parser extends AbstractAsyncApiParser {
 
+    /**
+     * Extracts URI templates from the given AsyncAPI definition.
+     *
+     * @param apiDefinition   the AsyncAPI definition as a JSON string
+     * @param includePublish  whether to include operations when generating URI templates
+     * @return a set of generated URITemplate objects for the defined channels
+     * @throws APIManagementException if an error occurs while parsing the AsyncAPI definition
+     */
     @Override
     public Set<URITemplate> getURITemplates(String apiDefinition, boolean includePublish) throws APIManagementException {
         Set<URITemplate> uriTemplates = new HashSet<>();
@@ -60,6 +86,17 @@ public class BaseAsyncApiV2Parser extends AbstractAsyncApiParser {
         return uriTemplates;
     }
 
+    /**
+     * Builds an URITemplate object for a given AsyncAPI channel operation.
+     *
+     * @param target   the URI template path for the operation
+     * @param verb     the HTTP verb (e.g., publish or subscribe) for the operation
+     * @param operation the AsyncAPI operation object
+     * @param scopes    the set of available scopes to be applied to the template
+     * @param channel   the AsyncAPI channel containing the operation and potential extensions
+     * @return a fully constructed URITemplate
+     * @throws APIManagementException if any operation scope cannot be resolved
+     */
     private URITemplate buildURITemplate(String target, String verb, AsyncApiOperation operation, Set<Scope> scopes,
                                          AsyncApiChannelItem channel) throws APIManagementException {
         URITemplate template = new URITemplate();
@@ -101,6 +138,12 @@ public class BaseAsyncApiV2Parser extends AbstractAsyncApiParser {
         return template;
     }
 
+    /**
+     * Extracts the scopes defined in the extensions of an AsyncAPI operation.
+
+     * @param operation the AsyncAPI operation containing possible scope extensions
+     * @return a list of scope names defined in the operation extensions
+     */
     private List<String> getScopeOfOperations(AsyncApiOperation operation) {
         return getScopeOfOperationsFromExtensions(operation);
     }
@@ -135,6 +178,13 @@ public class BaseAsyncApiV2Parser extends AbstractAsyncApiParser {
         return Collections.emptyList();
     }
 
+    /**
+     * Generates an AsyncAPI definition for the given API instance.
+     *
+     * @param api the API object from which the AsyncAPI definition will be generated
+     * @return the generated AsyncAPI definition as a String
+     * @throws APIManagementException if an error occurs while generating the AsyncAPI definition
+     */
     @Override
     @UsedByMigrationClient
     public String generateAsyncAPIDefinition(API api) throws APIManagementException {
@@ -202,6 +252,15 @@ public class BaseAsyncApiV2Parser extends AbstractAsyncApiParser {
         return server;
     }
 
+    /**
+     * Update AsyncAPI definition for store
+     *
+     * @param api                API
+     * @param asyncAPIDefinition AsyncAPI definition
+     * @param hostsWithSchemes   host addresses with protocol mapping
+     * @return AsyncAPI definition
+     * @throws APIManagementException throws if an error occurred
+     */
     @Override
     public String getAsyncApiDefinitionForStore(API api, String asyncAPIDefinition, Map<String, String> hostsWithSchemes) throws APIManagementException {
         AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(asyncAPIDefinition);
@@ -242,6 +301,14 @@ public class BaseAsyncApiV2Parser extends AbstractAsyncApiParser {
         return Library.writeDocumentToJSONString(asyncApiDocument);
     }
 
+    /**
+     * Updates an existing AsyncAPI definition with the latest API configuration details.
+     *
+     * @param oldDefinition the existing AsyncAPI definition as a JSON string
+     * @param apiToUpdate    the API containing updated configuration details
+     * @return the updated AsyncAPI definition as a String
+     * @throws APIManagementException if an error occurs while reading or updating the definition
+     */
     @Override
     public String updateAsyncAPIDefinition(String oldDefinition, API apiToUpdate) throws APIManagementException {
         AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(oldDefinition);
@@ -294,6 +361,12 @@ public class BaseAsyncApiV2Parser extends AbstractAsyncApiParser {
         return Library.writeDocumentToJSONString(asyncApiDocument);
     }
 
+    /**
+     * Builds a WebSocket URI mapping from the given AsyncAPI definition.
+     *
+     * @param apiDefinition the AsyncAPI definition in JSON format
+     * @return a map of channel names to WebSocket URIs
+     */
     @Override
     public Map<String, String> buildWSUriMapping(String apiDefinition) {
         Map<String,String> wsUriMapping = new HashMap<>();

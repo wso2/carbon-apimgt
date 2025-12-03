@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -46,8 +45,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * This class is Legacy Async API Parser used to parse AsyncAPI 2.x.x specifications.
- * It extends the AbstractAsyncApiParser class to provide specific parsing capabilities for AsyncAPI 2.x.x.
+ * Legacy AsyncAPI v2 parser responsible for processing AsyncAPI 2.x specifications.
+ * This class extends BaseAsyncApiV2Parser and
+ * provides legacy-specific parsing capabilities for AsyncAPI 2.x definitions.
  */
 
 public class AsyncApiParser extends BaseAsyncApiV2Parser {
@@ -63,16 +63,27 @@ public class AsyncApiParser extends BaseAsyncApiV2Parser {
         this.otherSchemes = otherSchemes;
     }
 
+    /**
+     * Extracts and returns the set of scopes defined in the given AsyncAPI configuration.
+     *
+     * @param resourceConfigsJSON the AsyncAPI configuration in JSON format
+     * @return a set of Scope bjects defined in the configuration
+     * @throws APIManagementException if an error occurs while extracting the scopes
+     */
     @Override
     public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
         Set<Scope> scopeSet = AsyncApiParserUtil.getScopesFromAsyncAPIConfig(resourceConfigsJSON);
         return scopeSet;
     }
 
-    public String generateAPIDefinitionForBackendAPI(SwaggerData swaggerData, String oasDefinition) {
-        return null;
-    }
-
+    /**
+     * Validates the given AsyncAPI definition against the AsyncAPI JSON HyperSchema.
+     *
+     * @param apiDefinition      the AsyncAPI definition to be validated, in JSON format
+     * @param returnJsonContent  whether the validated content should be returned in JSON format
+     * @return an APIDefinitionValidationResponse containing validation results and messages
+     * @throws APIManagementException if an error occurs during validation or schema processing
+     */
     @Override
     public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
             throws APIManagementException {

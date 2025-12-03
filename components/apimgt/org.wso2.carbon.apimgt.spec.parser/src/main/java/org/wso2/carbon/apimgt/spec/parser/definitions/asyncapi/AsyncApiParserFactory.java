@@ -27,10 +27,27 @@ import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models.AsyncApiV2Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models.AsyncApiV3Parser;
 
+/**
+ * Factory class for creating version-specific AsyncAPI parsers.
+ * This factory returns the appropriate AbstractAsyncApiParser implementation based on the provided AsyncAPI version.
+ */
 public class AsyncApiParserFactory {
 
     private static final Log log = LogFactory.getLog(AsyncApiParserFactory.class);
 
+    /**
+     * Returns the appropriate AsyncAPI parser implementation based on the given version
+     * and parsing options.
+     * <p>
+     * If the version belongs to AsyncAPI v2.x, the parser type is selected based on AsyncApiParseOptions
+     * — either the new or the legacy v2 parser is returned. For AsyncAPI v3.x, the v3 parser is returned.
+     * </p>
+     *
+     * @param version  the AsyncAPI specification version
+     * @param options  parsing options used to determine the v2 parser selection
+     * @return a version-specific AbstractAsyncApiParser implementation
+     * @throws APIManagementException if the version is null or unsupported
+     */
     public static AbstractAsyncApiParser getAsyncApiParser(String version, AsyncApiParseOptions options)
             throws APIManagementException {
         if (version == null) {
@@ -50,6 +67,12 @@ public class AsyncApiParserFactory {
         }
     }
 
+    /**
+     * Checks whether the given version belongs to AsyncAPI v2.x.
+     *
+     * @param version
+     * @return boolean value of True/False
+     */
     private static boolean isAsyncApiV2(String version) {
         return version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V20)
                 || version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V21)

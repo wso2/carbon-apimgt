@@ -29,6 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Abstract base class used to create AsyncAPI parsers.
+ * It extends the APIDefinition class and provides common parsing capabilities for AsyncAPI specifications
+ */
 public abstract class AbstractAsyncApiParser extends APIDefinition {
 
     @Override

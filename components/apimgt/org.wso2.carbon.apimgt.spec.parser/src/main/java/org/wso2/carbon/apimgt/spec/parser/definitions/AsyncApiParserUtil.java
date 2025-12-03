@@ -120,6 +120,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Helper Class utilities for Async Api Parsers
+ */
 public class AsyncApiParserUtil {
 
     private static final Log log = LogFactory.getLog(AsyncApiParserUtil.class);
