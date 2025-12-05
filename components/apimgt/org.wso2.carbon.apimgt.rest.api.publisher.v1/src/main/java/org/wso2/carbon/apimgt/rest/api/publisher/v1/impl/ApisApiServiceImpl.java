@@ -50,7 +50,6 @@ import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.ExternalGatewayAPIValidationException;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
@@ -4618,7 +4617,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
                 // Validate URL
                 validationResponse = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(url, httpClient,
-                        returnContent, AsyncApiParserImplUtil.getConfiguredDefaultParser());
+                        returnContent, AsyncApiParserImplUtil.getParserOptionsFromConfig());
             } catch (MalformedURLException e) {
                 throw new APIManagementException("Error while processing the API definition URL", e);
             }
@@ -4628,7 +4627,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String schemaToBeValidated = ApisApiServiceImplUtils.getSchemaToBeValidated(fileInputStream,
                     isServiceAPI, fileName);
             validationResponse = AsyncApiParserUtil.validateAsyncAPISpecification(schemaToBeValidated,
-                    returnContent, AsyncApiParserImplUtil.getConfiguredDefaultParser());
+                    returnContent, AsyncApiParserImplUtil.getParserOptionsFromConfig());
         }
 
         responseDTO = APIMappingUtil.getAsyncAPISpecificationValidationResponseFromModel(validationResponse, returnContent);
@@ -4797,7 +4796,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         APIDefinitionValidationResponse response = AsyncApiParserUtil
                 .validateAsyncAPISpecification(apiDefinition, true,
-                        AsyncApiParserImplUtil.getConfiguredDefaultParser());
+                        AsyncApiParserImplUtil.getParserOptionsFromConfig());
         if (!response.isValid()) {
             RestApiUtil.handleBadRequest(response.getErrorItems(), log);
         }

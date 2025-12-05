@@ -20,21 +20,21 @@ package org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi;
 
 /**
  * Holds configuration options used during AsyncAPI parsing.
- * This class is primarily used to determine which version of the AsyncAPI v2 parser
- * should be used (default/new or legacy).
+ * This class is primarily used to determine which version of the AsyncAPI v2 parser should be used (default/new or
+ * legacy).
  */
 public class AsyncApiParseOptions {
 
-    private boolean defaultAsyncApiParserVersion = true;
+    private boolean preserveLegacyAsyncApiParser = true;
 
     public AsyncApiParseOptions() {
     }
 
-    public boolean getDefaultAsyncApiParserVersion() {
-        return defaultAsyncApiParserVersion;
+    public boolean getPreserveLegacyAsyncApiParser() {
+        return preserveLegacyAsyncApiParser;
     }
 
-    public void setDefaultAsyncApiParserVersion(boolean defaultAsyncApiParserVersion) {
-        this.defaultAsyncApiParserVersion = defaultAsyncApiParserVersion;
+    public void setPreserveLegacyAsyncApiParser(boolean preserveLegacyAsyncApiParser) {
+        this.preserveLegacyAsyncApiParser = preserveLegacyAsyncApiParser;
     }
 }

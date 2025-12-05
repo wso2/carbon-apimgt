@@ -18,7 +18,6 @@
  */
 package org.wso2.carbon.apimgt.spec.parser.definitions;
 
-import com.google.gson.JsonObject;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiDocument;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiServer;
@@ -35,14 +34,12 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiValidationSchemas;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Legacy AsyncAPI v2 parser responsible for processing AsyncAPI 2.x specifications.
@@ -64,19 +61,6 @@ public class AsyncApiParser extends BaseAsyncApiV2Parser {
     }
 
     /**
-     * Extracts and returns the set of scopes defined in the given AsyncAPI configuration.
-     *
-     * @param resourceConfigsJSON the AsyncAPI configuration in JSON format
-     * @return a set of Scope bjects defined in the configuration
-     * @throws APIManagementException if an error occurs while extracting the scopes
-     */
-    @Override
-    public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
-        Set<Scope> scopeSet = AsyncApiParserUtil.getScopesFromAsyncAPIConfig(resourceConfigsJSON);
-        return scopeSet;
-    }
-
-    /**
      * Validates the given AsyncAPI definition against the AsyncAPI JSON HyperSchema.
      *
      * @param apiDefinition      the AsyncAPI definition to be validated, in JSON format
@@ -94,15 +78,15 @@ public class AsyncApiParser extends BaseAsyncApiV2Parser {
         List<String> validationErrorMessages = new ArrayList<>();
         JSONObject schemaToBeValidated = new JSONObject(apiDefinition);
         //import and load AsyncAPI HyperSchema for JSON schema validation
-        JSONObject hyperSchema = new JSONObject(APISpecParserConstants.AsyncApiSchemas.ASYNCAPI_JSON_HYPERSCHEMA);
+        JSONObject hyperSchema = new JSONObject(AsyncApiValidationSchemas.ASYNCAPI_JSON_HYPERSCHEMA);
 
         //validate AsyncAPI using JSON schema validation
         try {
             JSONParser parser = new JSONParser();
-            org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(APISpecParserConstants.
-                    AsyncApiSchemas.METASCHEMA);
+            org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(
+                    AsyncApiValidationSchemas.METASCHEMA);
             SchemaLoader schemaLoader = SchemaLoader.builder().registerSchemaByURI
-                    (new URI(APISpecParserConstants.AsyncApiSchemas.JSONSCHEMA), json).schemaJson(hyperSchema).build();
+                    (new URI(AsyncApiValidationSchemas.JSONSCHEMA), json).schemaJson(hyperSchema).build();
             Schema schemaValidator = schemaLoader.load().build();
             schemaValidator.validate(schemaToBeValidated);
 
@@ -127,8 +111,7 @@ public class AsyncApiParser extends BaseAsyncApiV2Parser {
             AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(apiDefinition);
             ArrayList<String> endpoints = new ArrayList<>();
             AsyncApiServers servers = asyncApiDocument.getServers();
-            if (servers != null && servers.getItems() != null && !servers.getItems().isEmpty() &&
-                    servers.getItems().size() == 1)
+            if (servers != null && servers.getItems() != null && !servers.getItems().isEmpty())
             {
                 protocol = ((AsyncApiServer) asyncApiDocument.getServers().getItems().get(0)).getProtocol();
             }
@@ -162,39 +145,15 @@ public class AsyncApiParser extends BaseAsyncApiV2Parser {
         return validationResponse;
     }
 
-
     /**
-     * Configure Async API server from endpoint configurations
-     *
-     * @param api               API
-     * @param endpointConfig    Endpoint configuration
-     * @param endpoint          Endpoint to be configured
-     * @return Configured Async API Server
-     */
-    private AsyncApiServer getAaiServer(API api, JsonObject endpointConfig, String endpoint, AsyncApiServers servers)
-            throws APIManagementException {
-
-        JsonObject endpointObj = endpointConfig.getAsJsonObject(endpoint);
-        if (!endpointObj.has(APISpecParserConstants.API_DATA_URL)) {
-            throw new APIManagementException(
-                    "Missing or Invalid API_DATA_URL in endpoint config: " + endpoint
-            );
-        }
-
-        String url = endpointObj.get(APISpecParserConstants.API_DATA_URL).getAsString();
-        AsyncApiServer server = servers.createServer();
-        AsyncApiParserUtil.setAsyncApiServer(url, server);
-        server.setProtocol(api.getType().toLowerCase());
-        return server;
-    }
-
-    /**
-     * Get available transport protocols for the Async API
+     * Get available transport protocols for the Async API.
      *
      * @param definition Async API Definition
      * @return List<String> List of available transport protocols
      * @throws APIManagementException If the async env configuration if not provided properly
+     * @deprecated This method has no usage hence it was deprecated.
      */
+    @Deprecated
     public static List<String> getTransportProtocolsForAsyncAPI(String definition) throws APIManagementException {
 
         ArrayList<String> asyncTransportProtocolsList = (ArrayList<String>)

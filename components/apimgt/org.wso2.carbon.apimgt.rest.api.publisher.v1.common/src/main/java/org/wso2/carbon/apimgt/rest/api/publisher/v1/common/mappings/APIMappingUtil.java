@@ -66,7 +66,6 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.lifecycle.CheckListItem;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -2502,10 +2501,7 @@ public class APIMappingUtil {
 
         String asyncApiVersion = AsyncApiParserUtil.getAsyncApiVersion(asyncAPIDefinition);
         AbstractAsyncApiParser asyncApiParser;
-        AsyncApiParseOptions options =  new AsyncApiParseOptions();
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-        options.setDefaultAsyncApiParserVersion(Boolean.parseBoolean(
-                config.getFirstProperty(APIConstants.API_PUBLISHER_PRESERVE_LEGACY_ASYNC_PARSER)));
+        AsyncApiParseOptions options =  PublisherCommonUtils.getParserOptionsFromConfig();
         try {
             asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(asyncApiVersion, options);
         } catch (IllegalArgumentException | UnsupportedOperationException e) {

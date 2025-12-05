@@ -73,7 +73,6 @@ import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityI
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
@@ -91,7 +90,6 @@ import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
@@ -2427,10 +2425,7 @@ public class ImportUtils {
 
         try {
             String asyncApiDefinition = loadAsyncApiDefinitionFromFile(pathToArchive);
-            AsyncApiParseOptions options =  new AsyncApiParseOptions();
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-            options.setDefaultAsyncApiParserVersion(Boolean.parseBoolean(
-                    config.getFirstProperty(APIConstants.API_PUBLISHER_PRESERVE_LEGACY_ASYNC_PARSER)));
+            AsyncApiParseOptions options =  PublisherCommonUtils.getParserOptionsFromConfig();
             APIDefinitionValidationResponse validationResponse =
                     AsyncApiParserUtil.validateAsyncAPISpecification(asyncApiDefinition, true, options);
             if (!validationResponse.isValid()) {

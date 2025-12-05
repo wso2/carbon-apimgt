@@ -1,3 +1,21 @@
+/*
+ *   Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com)
+ *
+ *   WSO2 LLC. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
 package org.wso2.carbon.apimgt.spec.parser.definitions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +37,7 @@ import org.junit.Test;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParseOptions;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -170,8 +189,10 @@ public class AsyncApiParserUtilTest {
         };
 
         String fileUrl = tmp.toURI().toURL().toString();
+        AsyncApiParseOptions options =  new AsyncApiParseOptions();
+        options.setPreserveLegacyAsyncApiParser(true);
         APIDefinitionValidationResponse resp = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(
-                fileUrl, okHttpClient, true);
+                fileUrl, okHttpClient, true, options);
         assertNotNull(resp);
         assertTrue("Validation by URL with 200 status should succeed", resp.isValid());
     }
@@ -248,8 +269,10 @@ public class AsyncApiParserUtilTest {
             }
         };
 
+        AsyncApiParseOptions options =  new AsyncApiParseOptions();
+        options.setPreserveLegacyAsyncApiParser(true);
         APIDefinitionValidationResponse resp = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(
-                fileUrl, nonOkHttpClient, true);
+                fileUrl, nonOkHttpClient, true, options);
         assertNotNull(resp);
         assertFalse("Expected validation to fail when HTTP status != 200", resp.isValid());
         // Ensure the known error code for URL not 200 is present in the response error items

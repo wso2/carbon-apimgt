@@ -41,7 +41,7 @@ public class AsyncApiParserTest {
         api.setEndpointConfig("{'endpoint_type':'http','sandbox_endpoints':{'url':'wss://echo.websocket.org:443'}," +
                 "'production_endpoints':{'url':'wss://echo.websocket.org:443'}}");
         AsyncApiParseOptions options =  new AsyncApiParseOptions();
-        options.setDefaultAsyncApiParserVersion(true);
+        options.setPreserveLegacyAsyncApiParser(true);
         AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
                 AsyncApiTestUtils.ASYNCAPI_V20, options);
         String asyncAPIDefinition = asyncApiParser.generateAsyncAPIDefinition(api);
@@ -61,7 +61,7 @@ public class AsyncApiParserTest {
         api.setEndpointConfig("{'endpoint_type':'http','sandbox_endpoints':{'url':'wss://echo.websocket.org:443'}," +
                 "'production_endpoints':{'url':'wss://echo.websocket.org:443'}}");
         AsyncApiParseOptions options =  new AsyncApiParseOptions();
-        options.setDefaultAsyncApiParserVersion(true);
+        options.setPreserveLegacyAsyncApiParser(true);
         AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
                 AsyncApiTestUtils.ASYNCAPI_V20, options);
         String asyncAPIDefinition = IOUtils.toString(
@@ -78,7 +78,7 @@ public class AsyncApiParserTest {
         APIIdentifier identifier = new APIIdentifier("admin", "HelloServer", "1.0");
         API api = new API(identifier);
         AsyncApiParseOptions options =  new AsyncApiParseOptions();
-        options.setDefaultAsyncApiParserVersion(true);
+        options.setPreserveLegacyAsyncApiParser(true);
         AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
                 AsyncApiTestUtils.ASYNCAPI_V20, options);
         try {
@@ -97,7 +97,7 @@ public class AsyncApiParserTest {
         APIIdentifier identifier = new APIIdentifier("admin", "HelloServer2", "1.0");
         API api = new API(identifier);
         AsyncApiParseOptions options =  new AsyncApiParseOptions();
-        options.setDefaultAsyncApiParserVersion(true);
+        options.setPreserveLegacyAsyncApiParser(true);
         AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
                 AsyncApiTestUtils.ASYNCAPI_V20, options);
         String asyncAPIDefinition = IOUtils.toString(

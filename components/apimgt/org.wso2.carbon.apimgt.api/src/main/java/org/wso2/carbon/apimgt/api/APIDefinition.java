@@ -257,7 +257,7 @@ public abstract class APIDefinition {
             throws APIManagementException;
 
     /**
-     * This method will extract the vendor provider or the API specification form the extensions list
+     * This method will extract the vendor provider or the API specification from the extensions list
      *
      * @param swaggerContent String
      * @return String

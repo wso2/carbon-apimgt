@@ -18,7 +18,6 @@
  */
 package org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models;
 
-import com.google.gson.JsonObject;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiDocument;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiServer;
@@ -29,15 +28,11 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserConstants;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.BaseAsyncApiV2Parser;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * New AsyncAPI v2 parser used to process AsyncAPI 2.x specifications.
@@ -47,19 +42,6 @@ import java.util.Set;
 public class AsyncApiV2Parser extends BaseAsyncApiV2Parser {
 
     private static final Log log = LogFactory.getLog(AsyncApiV2Parser.class);
-
-    /**
-     * Extracts and returns the set of scopes defined in the given AsyncAPI configuration.
-     *
-     * @param resourceConfigsJSON the AsyncAPI configuration in JSON format
-     * @return a set of Scope bjects defined in the configuration
-     * @throws APIManagementException if an error occurs while extracting the scopes
-     */
-    @Override
-    public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
-        Set<Scope> scopeSet = AsyncApiParserUtil.getScopesFromAsyncAPIConfig(resourceConfigsJSON);
-        return scopeSet;
-    }
 
     /**
      * Validates the given AsyncAPI definition against the AsyncAPI JSON HyperSchema.
@@ -83,7 +65,6 @@ public class AsyncApiV2Parser extends BaseAsyncApiV2Parser {
         } catch (Exception e) {
             // unexpected problems during validation/parsing
             String msg = "Error occurred while validating AsyncAPI definition: " + e.getMessage();
-            log.error(msg, e);
             throw new APIManagementException(msg, e, ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
         }
 
@@ -91,9 +72,7 @@ public class AsyncApiV2Parser extends BaseAsyncApiV2Parser {
             AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(apiDefinition);
             ArrayList<String> endpoints = new ArrayList<>();
             AsyncApiServers servers = asyncApiDocument.getServers();
-            if (servers != null && servers.getItems() != null && !servers.getItems().isEmpty() &&
-                    servers.getItems().size() == 1)
-            {
+            if (servers != null && servers.getItems() != null && !servers.getItems().isEmpty()) {
                 protocol = ((AsyncApiServer) asyncApiDocument.getServers().getItems().get(0)).getProtocol();
             }
 
@@ -124,30 +103,5 @@ public class AsyncApiV2Parser extends BaseAsyncApiV2Parser {
             }
         }
         return validationResponse;
-    }
-
-    /**
-     * Configure Async API server from endpoint configurations
-     *
-     * @param api               API
-     * @param endpointConfig    Endpoint configuration
-     * @param endpoint          Endpoint to be configured
-     * @return Configured AaiServer
-     */
-    private AsyncApiServer getAaiServer(API api, JsonObject endpointConfig, String endpoint, AsyncApiServers servers)
-            throws APIManagementException {
-
-        JsonObject endpointObj = endpointConfig.getAsJsonObject(endpoint);
-        if (!endpointObj.has(APISpecParserConstants.API_DATA_URL)) {
-            throw new APIManagementException(
-                    "Missing or Invalid API_DATA_URL in endpoint config: " + endpoint
-            );
-        }
-
-        String url = endpointObj.get(APISpecParserConstants.API_DATA_URL).getAsString();
-        AsyncApiServer server = servers.createServer();
-        AsyncApiParserUtil.setAsyncApiServer(url, server);
-        server.setProtocol(api.getType().toLowerCase());
-        return server;
     }
 }

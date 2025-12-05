@@ -22,19 +22,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.gson.JsonObject;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.models.Document;
 import io.apicurio.datamodels.models.MappedNode;
-import io.apicurio.datamodels.models.asyncapi.AsyncApiChannelItem;
-import io.apicurio.datamodels.models.asyncapi.AsyncApiChannels;
-import io.apicurio.datamodels.models.asyncapi.AsyncApiComponents;
-import io.apicurio.datamodels.models.asyncapi.AsyncApiDocument;
-import io.apicurio.datamodels.models.asyncapi.AsyncApiExtensible;
-import io.apicurio.datamodels.models.asyncapi.AsyncApiOAuthFlow;
-import io.apicurio.datamodels.models.asyncapi.AsyncApiOperationBindings;
-import io.apicurio.datamodels.models.asyncapi.AsyncApiReferenceable;
-import io.apicurio.datamodels.models.asyncapi.AsyncApiSecurityScheme;
-import io.apicurio.datamodels.models.asyncapi.AsyncApiServer;
+import io.apicurio.datamodels.models.asyncapi.*;
 import io.apicurio.datamodels.models.asyncapi.v20.AsyncApi20Channels;
 import io.apicurio.datamodels.models.asyncapi.v20.AsyncApi20DocumentImpl;
 import io.apicurio.datamodels.models.asyncapi.v20.AsyncApi20OAuthFlow;
@@ -103,6 +95,7 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParseOptions;
@@ -121,7 +114,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Helper Class utilities for Async Api Parsers
+ * Helper Class utilities for Async Api Parsers.
  */
 public class AsyncApiParserUtil {
 
@@ -129,7 +122,8 @@ public class AsyncApiParserUtil {
     private static final String PATH_SEPARATOR = "/";
 
     /**
-     * Validate the provided AsyncAPI specification and return validation response information
+     * Validate the provided AsyncAPI specification and return validation response information.
+     *
      * @param schemaToBeValidated String
      * @param returnJSONContent returnJSONContent
      * @return APIDefinitionValidationResponse
@@ -141,7 +135,7 @@ public class AsyncApiParserUtil {
 
         log.debug("AsyncAPI definition validation has started");
         AsyncApiParseOptions options = new AsyncApiParseOptions();
-        options.setDefaultAsyncApiParserVersion(true);
+        options.setPreserveLegacyAsyncApiParser(true);
         AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(getAsyncApiVersion(
                 schemaToBeValidated), options);
         APIDefinitionValidationResponse validationResponse = asyncApiParser.validateAPIDefinition(schemaToBeValidated,
@@ -162,7 +156,7 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * Validate the provided AsyncAPI specification and return validation response information
+     * Validate the provided AsyncAPI specification and return validation response information.
      *
      * @param schemaToBeValidated String
      * @param returnJSONContent boolean
@@ -171,7 +165,8 @@ public class AsyncApiParserUtil {
      * @throws APIManagementException
      */
     public static APIDefinitionValidationResponse validateAsyncAPISpecification(
-            String schemaToBeValidated, boolean returnJSONContent, AsyncApiParseOptions options) throws APIManagementException {
+            String schemaToBeValidated, boolean returnJSONContent, AsyncApiParseOptions options)
+            throws APIManagementException {
 
         log.debug("AsyncAPI definition validation has started");
         AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(getAsyncApiVersion(
@@ -193,6 +188,9 @@ public class AsyncApiParserUtil {
         return validationResponse;
     }
 
+    /**
+     * @deprecated This method is duplicated and has no usage; therefore, it has been deprecated.
+     */
     @Deprecated
     public static APIDefinitionValidationResponse validateAsyncAPISpecificationByURL(
             String url, HttpClient httpClient, boolean returnJSONContent) throws APIManagementException {
@@ -207,7 +205,7 @@ public class AsyncApiParserUtil {
                 ObjectMapper jsonWriter = new ObjectMapper();
                 String json = jsonWriter.writeValueAsString(obj);
                 AsyncApiParseOptions options = new AsyncApiParseOptions();
-                options.setDefaultAsyncApiParserVersion(true);
+                options.setPreserveLegacyAsyncApiParser(true);
                 validationResponse = validateAsyncAPISpecification(json, returnJSONContent, options);
             } else {
                 validationResponse.setValid(false);
@@ -224,7 +222,7 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * Validate the provided AsyncAPI specification with the API definition URL
+     * Validate the provided AsyncAPI specification with the API definition URL.
      *
      * @param url String
      * @param httpClient HttpClient
@@ -234,7 +232,8 @@ public class AsyncApiParserUtil {
      * @throws APIManagementException
      */
     public static APIDefinitionValidationResponse validateAsyncAPISpecificationByURL(
-            String url, HttpClient httpClient, boolean returnJSONContent, AsyncApiParseOptions options) throws APIManagementException {
+            String url, HttpClient httpClient, boolean returnJSONContent, AsyncApiParseOptions options)
+            throws APIManagementException {
 
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         try {
@@ -261,7 +260,7 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * This method will update the validationResponse as sucesss with relevant Async API details
+     * This method will update the validationResponse as sucesss with relevant Async API details.
      *
      * @param validationResponse APIDefinitionValidationResponse
      * @param originalAPIDefinition String
@@ -294,7 +293,7 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * This method will update the validationResponse as sucesss with relevant Async API details
+     * This method will update the validationResponse as sucesss with relevant Async API details.
      *
      * @param validationResponse APIDefinitionValidationResponse
      * @param originalAPIDefinition String
@@ -330,7 +329,7 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * Extract and return the scopes from Async API document
+     * Extract and return the scopes from Async API document.
      *
      * @param resourceConfigsJSON
      * @return Set<Scope> Scopes from Async API
@@ -387,7 +386,7 @@ public class AsyncApiParserUtil {
 
 
     /**
-     * Adding validation errors and messages into the ErrorItem
+     * Adding validation errors and messages into the ErrorItem.
      *
      * @param validationResponse APIDefinitionValidationResponse
      * @param errMessage String
@@ -402,7 +401,7 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * Get available transport protocols for the Async API
+     * Get available transport protocols for the Async API.
      *
      * @param definition Async API Definition
      * @return List<String> List of available transport protocols
@@ -462,7 +461,7 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * Get the transport protocols
+     * Get the transport protocols.
      *
      * @param channel AsyncApiChannelItem to get protocol
      * @return HashSet<String> set of transport protocols
@@ -487,7 +486,7 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * Get the transport protocols the bindings
+     * Get the transport protocols the bindings.
      *
      * @param bindings AsyncApiOperationBindings to get protocols
      * @return HashSet<String> set of transport protocols
@@ -558,13 +557,14 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * This method will provide the respective Async API Document with data from based on the version
+     * This method will provide the respective Async API Document with data from based on the version.
      *
      * @param version    String
      * @param definition String
      * @return AsyncApiDocument
      */
-    public static AsyncApiDocument getFromAsyncApiDocument(String version, String definition) throws APIManagementException {
+    public static AsyncApiDocument getFromAsyncApiDocument(String version, String definition)
+            throws APIManagementException {
 
         if (definition == null || definition.trim().isEmpty()) {
             throw new APIManagementException("AsyncAPI definition cannot be null or empty",
@@ -586,7 +586,7 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * This method will extract the extension data from the Async Api Document
+     * This method will extract the extension data from the Async Api Document.
      *
      * @param definition String
      * @return Map<String, JsonNode>
@@ -603,7 +603,7 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * This method will extract the OAuth Flow data from the Async Api Document based on the version
+     * This method will extract the OAuth Flow data from the Async Api Document based on the version.
      *
      * @param flow AsyncApiOAuthFlows
      * @return Map<String, JsonNode>
@@ -632,7 +632,31 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * This method will extract and set the OAuth Flow scopes for the Async Api Document based on the version
+     * Configure Async API server from endpoint configurations.
+     *
+     * @param api               API
+     * @param endpointConfig    Endpoint configuration
+     * @param endpoint          Endpoint to be configured
+     * @return Configured Async API Server
+     */
+    public static AsyncApiServer getAsyncAPIServer(API api, JsonObject endpointConfig, String endpoint,
+                                                   AsyncApiServers servers)
+            throws APIManagementException {
+        JsonObject endpointObj = endpointConfig.getAsJsonObject(endpoint);
+        if (!endpointObj.has(APISpecParserConstants.API_DATA_URL)) {
+            throw new APIManagementException(
+                    "Missing or Invalid API_DATA_URL in endpoint config: " + endpoint
+            );
+        }
+        String url = endpointObj.get(APISpecParserConstants.API_DATA_URL).getAsString();
+        AsyncApiServer server = servers.createServer();
+        AsyncApiParserUtil.setAsyncApiServer(url, server);
+        server.setProtocol(api.getType().toLowerCase());
+        return server;
+    }
+
+    /**
+     * This method will extract and set the OAuth Flow scopes for the Async Api Document based on the version.
      *
      * @param securityScheme AsyncApiSecurityScheme
      * @param scopes         Map<String, String>
@@ -686,7 +710,7 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * This method will create and provide the respective Async API Document with data from based on the version
+     * This method will create and provide the respective Async API Document with data from based on the version.
      *
      * @param version String
      * @return AsyncApiDocument
@@ -720,7 +744,7 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * This method will create and provide the respective Async API Channel Item with data from based on the version
+     * This method will create and provide the respective Async API Channel Item with data from based on the version.
      *
      * @param channels String
      * @return AsyncApiDocument
@@ -752,7 +776,7 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * This method will create and provide the respective Async API Channel with data from based on the version
+     * This method will create and provide the respective Async API Channel with data from based on the version.
      *
      * @param channels String
      * @return AsyncApiDocument
@@ -768,7 +792,7 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * This method will return a list of channel items from the respective Async API document
+     * This method will return a list of channel items from the respective Async API document.
      *
      * @param asyncDocument AsyncApiDocument
      * @return List<AsyncApiChannelItem>
@@ -792,10 +816,11 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * This method will return schema from the parameter object for the respective Async API based on the version
+     * This method will return schema from the parameter object for the respective Async API based on the version.
      *
      * @param parameterObj Object
      * @return Object
+     * @Deprecated This method is used inside a deprecated class (SolaceAdminApis) hence it was deprecated.
      */
     @Deprecated
     public static Object getSchemaFromParameter(Object parameterObj) {
@@ -820,10 +845,11 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * This method will return reference from the parameter object for the respective Async API based on the version
+     * This method will return reference from the parameter object for the respective Async API based on the version.
      *
      * @param parameterObj Object
      * @return String
+     * @Deprecated This method is used inside a deprecated class (SolaceAdminApis) hence it was deprecated.
      */
     @Deprecated
     public static String getRefFromParameter(Object parameterObj) {
@@ -837,7 +863,7 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * This method will set AsyncApiServer for the respective Async API based on the version
+     * This method will set AsyncApiServer for the respective Async API based on the version.
      *
      * @param url    String
      * @param server AsyncApiServer
@@ -900,7 +926,7 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * Utility method to safely validate the Async API content
+     * Utility method to safely validate the Async API content.
      *
      * @param apiDefinition String
      * @param errorMessages List<String>

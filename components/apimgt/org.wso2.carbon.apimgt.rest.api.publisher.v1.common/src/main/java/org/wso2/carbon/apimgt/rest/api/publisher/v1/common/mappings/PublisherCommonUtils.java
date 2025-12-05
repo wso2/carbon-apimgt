@@ -928,7 +928,7 @@ public class PublisherCommonUtils {
             String asyncApiVersion = AsyncApiParserUtil.getAsyncApiVersion(oldDefinition);
 
             AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(asyncApiVersion,
-                    getConfiguredDefaultParser());
+                    getParserOptionsFromConfig());
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
 
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
@@ -2420,21 +2420,9 @@ public class PublisherCommonUtils {
             }
             apiToAdd.setSwaggerDefinition(apiDefinition);
         } else {
-            /**
-             * Note: By default, AsyncAPI version 3.0 will be used when creating new streaming APIs
-             * by defining the AsyncApiParser as AsyncApiV3Parser.
-             * If you need to use AsyncAPI version 2.x instead, use the following line
-             * AsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
-             * APISpecParserConstants.AsyncApi.ASYNC_API_V2, getConfiguredDefaultParser());
-             */
             AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
-                    APISpecParserConstants.AsyncApi.ASYNC_API_V3, getConfiguredDefaultParser());
+                    APISpecParserConstants.AsyncApi.ASYNC_API_V3, getParserOptionsFromConfig());
             String asyncApiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
-            if (log.isDebugEnabled()) {
-                String preview = asyncApiDefinition.length() > 100 ? asyncApiDefinition.substring(0, 100)
-                        + "...(truncated)" : asyncApiDefinition;
-                log.debug("Generated Swagger/AsyncApi Definition content: " + preview);
-            }
             apiToAdd.setAsyncApiDefinition(asyncApiDefinition);
         }
         apiToAdd.setOrganization(organization);
@@ -3131,7 +3119,7 @@ public class PublisherCommonUtils {
         existingAPI.setOrganization(organization);
         String apiDefinition = response.getJsonContent();
         AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
-                AsyncApiParserUtil.getAsyncApiVersion(apiDefinition), getConfiguredDefaultParser());
+                AsyncApiParserUtil.getAsyncApiVersion(apiDefinition), getParserOptionsFromConfig());
 
         // Set uri templates
         Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(apiDefinition, APIConstants.
@@ -4566,7 +4554,7 @@ public class PublisherCommonUtils {
         // load topics from AsyncAPI
         apiToAdd.setUriTemplates(
                 AsyncApiParserFactory.getAsyncApiParser(AsyncApiParserUtil.getAsyncApiVersion(definitionToAdd),
-                        getConfiguredDefaultParser()).getURITemplates(definitionToAdd,
+                        getParserOptionsFromConfig()).getURITemplates(definitionToAdd,
                         APIConstants.API_TYPE_WS.equals(apiToAdd.getType()) ||
                                 !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiToAdd.getGatewayVendor())));
         apiToAdd.setOrganization(organization);
@@ -5249,10 +5237,16 @@ public class PublisherCommonUtils {
                 oldProductionApiKeyValue, oldSandboxApiKeyValue, newBackend::setEndpointConfigFromMap);
     }
 
-    private static AsyncApiParseOptions getConfiguredDefaultParser() {
+    /**
+     * Reads the toml configuration and builds the AsyncApiParseOptions.
+     * The value is derived from the API_PUBLISHER_PRESERVE_LEGACY_ASYNC_PARSER configuration property.
+     *
+     * @return populated AsyncApiParseOptions instance based on server configuration
+     */
+    public static AsyncApiParseOptions getParserOptionsFromConfig() {
         AsyncApiParseOptions options = new AsyncApiParseOptions();
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-        options.setDefaultAsyncApiParserVersion(Boolean.parseBoolean(
+        options.setPreserveLegacyAsyncApiParser(Boolean.parseBoolean(
                 config.getFirstProperty(APIConstants.API_PUBLISHER_PRESERVE_LEGACY_ASYNC_PARSER)));
         return options;
     }

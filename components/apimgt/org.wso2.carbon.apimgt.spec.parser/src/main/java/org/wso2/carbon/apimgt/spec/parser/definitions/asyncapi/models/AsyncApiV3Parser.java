@@ -254,7 +254,6 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
         } catch (Exception e) {
             // unexpected problems during validation/parsing
             String msg = "Error occurred while validating AsyncAPI definition: " + e.getMessage();
-            log.error(msg, e);
             throw new APIManagementException(msg, e, ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
         }
 
@@ -270,8 +269,7 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
             AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(apiDefinition);
             ArrayList<String> endpoints = new ArrayList<>();
             AsyncApiServers servers = asyncApiDocument.getServers();
-            if (servers != null && servers.getItems() != null && !servers.getItems().isEmpty() &&
-                    servers.getItems().size() == 1) {
+            if (servers != null && servers.getItems() != null && !servers.getItems().isEmpty()) {
                 protocol = ((AsyncApiServer) asyncApiDocument.getServers().getItems().get(0)).getProtocol();
             }
 
@@ -293,12 +291,10 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
             if (StringUtils.isNotEmpty(protocol)) {
                 validationResponse.setProtocol(protocol);
             }
-        } else {
-            if (validationErrorMessages != null) {
-                validationResponse.setValid(false);
-                for (String errorMessage : validationErrorMessages) {
-                    AsyncApiParserUtil.addErrorToValidationResponse(validationResponse, errorMessage);
-                }
+        } else if (validationErrorMessages != null) {
+            validationResponse.setValid(false);
+            for (String errorMessage : validationErrorMessages) {
+                AsyncApiParserUtil.addErrorToValidationResponse(validationResponse, errorMessage);
             }
         }
         return validationResponse;
@@ -316,18 +312,14 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
         // Create an empty AsyncApiDocument v3
         AsyncApi30Document document = (AsyncApi30Document) AsyncApiParserUtil.createAsyncApiDocument(
                 APISpecParserConstants.AsyncApi.ASYNC_API_V30);
-
         document.setAsyncapi(APISpecParserConstants.AsyncApi.ASYNC_API_V3);
         document.setInfo(document.createInfo());
         document.getInfo().setTitle(api.getId().getName());
         document.getInfo().setVersion(api.getId().getVersion());
-
         // Servers (top-level)
         if (!APISpecParserConstants.API_TYPE_WEBSUB.equals(api.getType())) {
-
             JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
             AsyncApiServers servers = document.createServers();
-
             if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
                 JsonObject prodObj = endpointConfig
                         .get(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)
@@ -337,7 +329,6 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
                 AsyncApiV3ParserUtil.setAsyncApiServerFromUrl(url, prodServer, api.getType());
                 servers.addItem(APISpecParserConstants.GATEWAY_ENV_TYPE_PRODUCTION, prodServer);
             }
-
             if (endpointConfig.has(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
                 JsonObject sandboxObj = endpointConfig
                         .get(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)
@@ -347,7 +338,6 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
                 AsyncApiV3ParserUtil.setAsyncApiServerFromUrl(url, sandboxServer, api.getType());
                 servers.addItem(APISpecParserConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxServer);
             }
-
             document.setServers(servers);
         }
         // Components, Channels and Operations (top-level)
@@ -357,7 +347,6 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
         AsyncApi30Components components = (AsyncApi30Components) document.getComponents();
         AsyncApi30Channels channels = (AsyncApi30Channels) document.createChannels();
         AsyncApi30Operations operations = document.createOperations();
-
         for (URITemplate uriTemplate : api.getUriTemplates()) {
             String channelName = uriTemplate.getUriTemplate();
             AsyncApi30Channel channel = components.createChannel();
@@ -366,14 +355,12 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
             channels.addItem(AsyncApiV3ParserUtil.normalizeChannelName(channelName), channel);
             AsyncApi30Operation receiveOp = operations.createOperation();
             receiveOp.setAction(APISpecParserConstants.ASYNCAPI_ACTION_RECEIVE);
-
             AsyncApi30Reference recvRef = receiveOp.createReference();
             recvRef.set$ref(APISpecParserConstants.ASYNCAPI_CHANNELS_PATH +
                     AsyncApiV3ParserUtil.normalizeChannelName(channelName));
             receiveOp.setChannel(recvRef);
             String recvOpName = APISpecParserConstants.ASYNCAPI_ACTION_RECEIVE_OPS + channelName;
             operations.addItem(recvOpName, receiveOp);
-
             if (APISpecParserConstants.API_TYPE_WS.equals(api.getType())) {
                 AsyncApi30Operation sendOp = operations.createOperation();
                 sendOp.setAction(APISpecParserConstants.ASYNCAPI_ACTION_SEND);
@@ -392,7 +379,7 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
     }
 
     /**
-     * Configure Async API server from endpoint configurations
+     * Configure Async API server from endpoint configurations.
      *
      * @param api              API
      * @param endpointConfig   Endpoint configuration
@@ -402,22 +389,13 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
     private AsyncApiServer getAaiServer(API api, JsonObject endpointConfig, String endpoint, AsyncApiServers servers)
             throws APIManagementException {
 
-        JsonObject endpointObj = endpointConfig.getAsJsonObject(endpoint);
-        if (!endpointObj.has(APISpecParserConstants.API_DATA_URL)) {
-            throw new APIManagementException(
-                    "Missing or Invalid API_DATA_URL in endpoint config: " + endpoint
-            );
-        }
-        String url = endpointObj.get(APISpecParserConstants.API_DATA_URL).getAsString();
-        AsyncApiServer server = servers.createServer();
-        AsyncApiParserUtil.setAsyncApiServer(url, server);
-        server.setProtocol(api.getType().toLowerCase());
+        AsyncApiServer server = AsyncApiParserUtil.getAsyncAPIServer(api, endpointConfig, endpoint, servers);
         return server;
     }
 
 
     /**
-     * Update AsyncAPI definition for store
+     * Update AsyncAPI definition for store.
      *
      * @param api                API
      * @param asyncAPIDefinition AsyncAPI definition

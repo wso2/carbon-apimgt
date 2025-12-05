@@ -80,7 +80,6 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
     public String deploy(API api, Environment environment, String referenceArtifact) throws DeployerException {
         String apiDefinition = api.getAsyncApiDefinition();
         AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(apiDefinition);
-//        AsyncApi22Document aai22Document = (AsyncApi22Document) Library.readDocumentFromJSONString(apiDefinition);
         String apiNameForRegistration = api.getId().getApiName() + "-" + api.getId().getVersion();
         String[] apiContextParts = api.getContext().split("/");
         String apiNameWithContext = environment.getName() + "-" + api.getId().getName() + "-" + apiContextParts[1] +

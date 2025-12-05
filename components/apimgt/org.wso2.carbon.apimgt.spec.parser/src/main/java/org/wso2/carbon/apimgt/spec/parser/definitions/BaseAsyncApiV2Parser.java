@@ -50,10 +50,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Abstract base class for all AsyncAPI v2 parser implementations.
+ * Base class for all AsyncAPI v2 parser implementations.
  * This class provides common functionality shared between both the legacy and the new AsyncAPI v2 parsers
  */
-public class BaseAsyncApiV2Parser extends AbstractAsyncApiParser {
+public abstract class BaseAsyncApiV2Parser extends AbstractAsyncApiParser {
 
     /**
      * Extracts URI templates from the given AsyncAPI definition.
@@ -64,7 +64,8 @@ public class BaseAsyncApiV2Parser extends AbstractAsyncApiParser {
      * @throws APIManagementException if an error occurs while parsing the AsyncAPI definition
      */
     @Override
-    public Set<URITemplate> getURITemplates(String apiDefinition, boolean includePublish) throws APIManagementException {
+    public Set<URITemplate> getURITemplates(String apiDefinition, boolean includePublish)
+            throws APIManagementException {
         Set<URITemplate> uriTemplates = new HashSet<>();
         Set<Scope> scopes = getScopes(apiDefinition);
         AsyncApiDocument document = (AsyncApiDocument) Library.readDocumentFromJSONString(apiDefinition);
@@ -179,6 +180,19 @@ public class BaseAsyncApiV2Parser extends AbstractAsyncApiParser {
     }
 
     /**
+     * Extracts and returns the set of scopes defined in the given AsyncAPI configuration.
+     *
+     * @param resourceConfigsJSON the AsyncAPI configuration in JSON format
+     * @return a set of Scope bjects defined in the configuration
+     * @throws APIManagementException if an error occurs while extracting the scopes
+     */
+    @Override
+    public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
+        Set<Scope> scopeSet = AsyncApiParserUtil.getScopesFromAsyncAPIConfig(resourceConfigsJSON);
+        return scopeSet;
+    }
+
+    /**
      * Generates an AsyncAPI definition for the given API instance.
      *
      * @param api the API object from which the AsyncAPI definition will be generated
@@ -229,7 +243,7 @@ public class BaseAsyncApiV2Parser extends AbstractAsyncApiParser {
     }
 
     /**
-     * Configure Async API server from endpoint configurations
+     * Configure Async API server from endpoint configurations.
      *
      * @param api               API
      * @param endpointConfig    Endpoint configuration
@@ -238,22 +252,13 @@ public class BaseAsyncApiV2Parser extends AbstractAsyncApiParser {
      */
     private AsyncApiServer getAaiServer(API api, JsonObject endpointConfig, String endpoint, AsyncApiServers servers)
             throws APIManagementException {
-        JsonObject endpointObj = endpointConfig.getAsJsonObject(endpoint);
-        if (!endpointObj.has(APISpecParserConstants.API_DATA_URL)) {
-            throw new APIManagementException(
-                    "Missing or Invalid API_DATA_URL in endpoint config: " + endpoint
-            );
-        }
 
-        String url = endpointObj.get(APISpecParserConstants.API_DATA_URL).getAsString();
-        AsyncApiServer server = servers.createServer();
-        AsyncApiParserUtil.setAsyncApiServer(url, server);
-        server.setProtocol(api.getType().toLowerCase());
+        AsyncApiServer server = AsyncApiParserUtil.getAsyncAPIServer(api, endpointConfig, endpoint, servers);
         return server;
     }
 
     /**
-     * Update AsyncAPI definition for store
+     * Update AsyncAPI definition for store.
      *
      * @param api                API
      * @param asyncAPIDefinition AsyncAPI definition
@@ -262,7 +267,9 @@ public class BaseAsyncApiV2Parser extends AbstractAsyncApiParser {
      * @throws APIManagementException throws if an error occurred
      */
     @Override
-    public String getAsyncApiDefinitionForStore(API api, String asyncAPIDefinition, Map<String, String> hostsWithSchemes) throws APIManagementException {
+    public String getAsyncApiDefinitionForStore(
+            API api, String asyncAPIDefinition, Map<String, String> hostsWithSchemes)
+            throws APIManagementException {
         AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(asyncAPIDefinition);
         String channelName = api.getContext();
         String transports = api.getTransports();
@@ -383,7 +390,8 @@ public class BaseAsyncApiV2Parser extends AbstractAsyncApiParser {
                     if (publishExtensions != null) {
                         JsonNode xUriMapping = publishExtensions.get(APISpecParserConstants.ASYNCAPI_URI_MAPPING);
                         if (xUriMapping != null) {
-                            wsUriMapping.put(APISpecParserConstants.WS_URI_MAPPING_PUBLISH + entry, xUriMapping.asText());
+                            wsUriMapping.put(
+                                    APISpecParserConstants.WS_URI_MAPPING_PUBLISH + entry, xUriMapping.asText());
                         }
                     }
                 }
@@ -394,7 +402,8 @@ public class BaseAsyncApiV2Parser extends AbstractAsyncApiParser {
                     if (subscribeExtensions != null) {
                         JsonNode xUriMapping = subscribeExtensions.get(APISpecParserConstants.ASYNCAPI_URI_MAPPING);
                         if (xUriMapping != null) {
-                            wsUriMapping.put(APISpecParserConstants.WS_URI_MAPPING_SUBSCRIBE + entry, xUriMapping.asText());
+                            wsUriMapping.put(
+                                    APISpecParserConstants.WS_URI_MAPPING_SUBSCRIBE + entry, xUriMapping.asText());
                         }
                     }
                 }

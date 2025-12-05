@@ -23,7 +23,11 @@ import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -46,23 +50,12 @@ public abstract class AbstractAsyncApiParser extends APIDefinition {
     }
 
     @Override
-    public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
-        return null;
-    }
-
-    @Override
     public String generateAPIDefinition(SwaggerData swaggerData) throws APIManagementException {
         return null;
     }
 
     @Override
     public String generateAPIDefinition(SwaggerData swaggerData, String swagger) throws APIManagementException {
-        return null;
-    }
-
-    @Override
-    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
-            throws APIManagementException {
         return null;
     }
 
@@ -156,7 +149,7 @@ public abstract class AbstractAsyncApiParser extends APIDefinition {
                                              String backendId, String mcpSubtype, Set<URITemplate> uriTemplates)
             throws APIManagementException {
         throw new APIManagementException("MCP tool generation is not supported for Async API definitions.",
-                ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
+                ExceptionCodes.ERROR_MCP_TOOL_GENERATION_NOT_SUPPORTED);
     }
 
     @Override
@@ -164,7 +157,7 @@ public abstract class AbstractAsyncApiParser extends APIDefinition {
                                            String backendId, String mcpSubtype, Set<URITemplate> uriTemplates)
             throws APIManagementException {
         throw new APIManagementException("MCP tool generation is not supported for Async API definitions.",
-                ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
+                ExceptionCodes.ERROR_MCP_TOOL_GENERATION_NOT_SUPPORTED);
     }
 
     @Override
@@ -173,15 +166,54 @@ public abstract class AbstractAsyncApiParser extends APIDefinition {
         return null;
     }
 
+    /**
+     * Extracts and builds URI templates from the given AsyncAPI definition.
+     *
+     * @param apiDefinition   AsyncAPI definition in JSON/YAML format
+     * @param includePublish  Whether to include publish/subscribe operations in the result
+     * @return Set of constructed URI templates
+     * @throws APIManagementException if parsing or template building fails
+     */
     public abstract Set<URITemplate> getURITemplates(String apiDefinition, boolean includePublish)
             throws APIManagementException;
 
+    /**
+     * Generates an AsyncAPI definition based on the provided API artifact.
+     *
+     * @param api API object containing metadata and configuration
+     * @return Generated AsyncAPI definition as a String
+     * @throws APIManagementException if generation fails
+     */
     public abstract String generateAsyncAPIDefinition(API api) throws APIManagementException;
 
-    public abstract String getAsyncApiDefinitionForStore(API api, String asyncAPIDefinition,
-                                                         Map<String, String> hostsWithSchemes) throws APIManagementException;
+    /**
+     * Prepares and customizes the AsyncAPI definition for the Developer Portal (Store).
+     *
+     * @param api                 API object
+     * @param asyncAPIDefinition  Original AsyncAPI definition
+     * @param hostsWithSchemes    Map of hosts and corresponding schemes
+     * @return Modified AsyncAPI definition for Store consumption
+     * @throws APIManagementException if processing fails
+     */
+    public abstract String getAsyncApiDefinitionForStore(
+            API api, String asyncAPIDefinition, Map<String, String> hostsWithSchemes) throws APIManagementException;
 
-    public abstract String updateAsyncAPIDefinition(String oldDefinition, API apiToUpdate) throws APIManagementException;
+    /**
+     * Updates an existing AsyncAPI definition using the provided API details.
+     *
+     * @param oldDefinition Existing AsyncAPI definition
+     * @param apiToUpdate   API object containing updated values
+     * @return Updated AsyncAPI definition
+     * @throws APIManagementException if update fails
+     */
+    public abstract String updateAsyncAPIDefinition(
+            String oldDefinition, API apiToUpdate) throws APIManagementException;
 
+    /**
+     * Builds a WebSocket URI to channel mapping from the AsyncAPI definition.
+     *
+     * @param apiDefinition AsyncAPI definition
+     * @return map of channel names to WebSocket URIs
+     */
     public abstract Map<String, String> buildWSUriMapping(String apiDefinition);
 }

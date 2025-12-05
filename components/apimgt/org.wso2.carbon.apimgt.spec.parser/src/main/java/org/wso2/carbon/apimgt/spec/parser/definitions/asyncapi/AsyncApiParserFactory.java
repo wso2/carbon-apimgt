@@ -30,14 +30,16 @@ import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models.AsyncApiV3
 /**
  * Factory class for creating version-specific AsyncAPI parsers.
  * This factory returns the appropriate AbstractAsyncApiParser implementation based on the provided AsyncAPI version.
+ *
+ * Note: By default, AsyncAPI version 3.0 will be used when creating new streaming APIs via the Publisher Portal, as
+ * the default AsyncApiParser is set to AsyncApiV3Parser.
  */
 public class AsyncApiParserFactory {
 
     private static final Log log = LogFactory.getLog(AsyncApiParserFactory.class);
 
     /**
-     * Returns the appropriate AsyncAPI parser implementation based on the given version
-     * and parsing options.
+     * Returns the appropriate AsyncAPI parser implementation based on the given version and parsing options.
      * <p>
      * If the version belongs to AsyncAPI v2.x, the parser type is selected based on AsyncApiParseOptions
      * — either the new or the legacy v2 parser is returned. For AsyncAPI v3.x, the v3 parser is returned.
@@ -54,10 +56,10 @@ public class AsyncApiParserFactory {
             throw new APIManagementException("AsyncAPI version cannot be null");
         } else if (isAsyncApiV2(version)) {
             log.debug("AsyncAPI definition version is V2.x.x");
-            if (options != null && options.getDefaultAsyncApiParserVersion()) {
+            if (options != null && options.getPreserveLegacyAsyncApiParser()) {
                 return new AsyncApiParser();
             } else {
-                 return new AsyncApiV2Parser();
+                return new AsyncApiV2Parser();
             }
         } else if (version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V30)) {
             log.debug("AsyncAPI definition version is V3.x.x");
@@ -69,17 +71,12 @@ public class AsyncApiParserFactory {
 
     /**
      * Checks whether the given version belongs to AsyncAPI v2.x.
+     * Note: This method strictly allows only AsyncAPI version 2.0 → 2.6
      *
      * @param version
      * @return boolean value of True/False
      */
     private static boolean isAsyncApiV2(String version) {
-        return version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V20)
-                || version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V21)
-                || version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V22)
-                || version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V23)
-                || version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V24)
-                || version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V25)
-                || version.startsWith(APISpecParserConstants.AsyncApi.ASYNC_API_V26);
+        return version != null && APISpecParserConstants.ASYNC_API_V2_PATTERN.matcher(version).matches();
     }
 }

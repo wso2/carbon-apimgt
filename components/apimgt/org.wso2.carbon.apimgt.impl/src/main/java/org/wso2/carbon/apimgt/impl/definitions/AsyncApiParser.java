@@ -15,43 +15,4 @@ import java.util.Set;
 @Deprecated
 @UsedByMigrationClient
 public class AsyncApiParser extends org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser {
-    @Override
-    public Set<URITemplate> getURITemplates(String apiDefinition, boolean includePublish)
-            throws APIManagementException {
-        return Set.of();
-    }
-
-    @Override
-    public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
-        return Set.of();
-    }
-
-    @Override
-    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
-            throws APIManagementException {
-        throw new UnsupportedOperationException(
-                "AsyncApiParser is deprecated. Use org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser " +
-                        "instead to get version-specific parser.");
-    }
-
-    @Override
-    public String generateAsyncAPIDefinition(API api) throws APIManagementException {
-        return "";
-    }
-
-    @Override
-    public String getAsyncApiDefinitionForStore(API api, String asyncAPIDefinition,
-                                                Map<String, String> hostsWithSchemes) throws APIManagementException {
-        return "";
-    }
-
-    @Override
-    public String updateAsyncAPIDefinition(String oldDefinition, API apiToUpdate) {
-        return "";
-    }
-
-    @Override
-    public Map<String, String> buildWSUriMapping(String apiDefinition) {
-        return Map.of();
-    }
 }
