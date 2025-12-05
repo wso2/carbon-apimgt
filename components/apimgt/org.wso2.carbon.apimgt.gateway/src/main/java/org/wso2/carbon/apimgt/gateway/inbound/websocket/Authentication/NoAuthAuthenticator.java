@@ -45,9 +45,7 @@ public class NoAuthAuthenticator implements Authenticator {
     @Override
     public InboundProcessorResponseDTO authenticate(InboundMessageContext inboundMessageContext) 
             throws APISecurityException {
-                if (log.isDebugEnabled()) {
-                    log.debug("Validating authentication context for no-auth WebSocket API");
-                }
+                log.debug("Validating authentication context for no-auth WebSocket API");
                 // Get client IP for throttling (similar to REST API handleNoAuthentication)
                 String clientIP = inboundMessageContext.getUserIP();
                 if (clientIP == null || clientIP.isEmpty()) {
@@ -94,9 +92,7 @@ public class NoAuthAuthenticator implements Authenticator {
         
                     return responseDTO;
                 } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Failed to validate authentication context for no-auth WebSocket API");
-                    }
+                    log.debug("Failed to validate authentication context for no-auth WebSocket API");
                     throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                             APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
                 }

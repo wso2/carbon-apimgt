@@ -307,8 +307,7 @@ public class InboundWebSocketProcessor implements WebSocketProcessor {
         for (URLMapping urlMapping : urlMappings) {
             if (urlMapping.getUrlPattern() != null && urlMapping.getUrlPattern()
                     .equalsIgnoreCase(ctx.getMatchingResource())) {
-                if (urlMapping.getAuthScheme() != null && urlMapping.getAuthScheme()
-                    .equals(APIConstants.AUTH_NO_AUTHENTICATION)) {
+                if (APIConstants.AUTH_NO_AUTHENTICATION.equals(urlMapping.getAuthScheme())) {
                     if (log.isDebugEnabled()) {
                         log.debug("Found resource authentication scheme: " + APIConstants.AUTH_NO_AUTHENTICATION + 
                                 " for WebSocket context: " + ctx.getApiContext() + 
@@ -318,9 +317,7 @@ public class InboundWebSocketProcessor implements WebSocketProcessor {
                 }
             }
         }
-        if (log.isDebugEnabled()) {
-            log.debug("No matching resource found to dispatch the request");
-        }
+        log.debug("No matching resource found to dispatch the request");
         return false;
     }
 
