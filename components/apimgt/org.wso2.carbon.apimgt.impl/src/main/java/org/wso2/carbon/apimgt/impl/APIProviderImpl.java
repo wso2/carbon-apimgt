@@ -4548,10 +4548,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         BlockConditionsDTO createdBlockConditionsDto = apiMgtDAO.addBlockConditions(blockConditionsDTO);
 
         if (createdBlockConditionsDto != null) {
-            publishBlockingEvent(createdBlockConditionsDto, "true");
+            publishBlockingEvent(createdBlockConditionsDto, String.valueOf(conditionStatus));
+            return createdBlockConditionsDto.getUUID();
+        } else {
+            throw new APIManagementException("Error occurred while adding the block condition");
         }
-
-        return createdBlockConditionsDto.getUUID();
     }
 
     @Override
