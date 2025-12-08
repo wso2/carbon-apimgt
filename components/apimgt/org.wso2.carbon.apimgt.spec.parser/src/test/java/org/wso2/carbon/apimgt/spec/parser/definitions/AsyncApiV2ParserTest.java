@@ -66,7 +66,7 @@ public class AsyncApiV2ParserTest {
         AsyncApiV2Parser parser = new AsyncApiV2Parser();
         String invalid = "{\"asyncapi\":\"2.0.0\",\"info\":{\"title\":\"missing version\"}}";
         APIDefinitionValidationResponse resp = parser.validateAPIDefinition(invalid, true);
-        assertNotNull(resp);
+        assertNotNull("Validation response should not be null", resp);
         assertFalse("Invalid v2 definition should be marked invalid", resp.isValid());
     }
 

@@ -20,6 +20,10 @@ package org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi;
 
 public final class AsyncApiValidationSchemas {
 
+    private AsyncApiValidationSchemas() {
+        // Utility class, prevent instantiation
+    }
+
     public static final String METASCHEMA = "{\n" +
             "    \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n" +
             "    \"$id\": \"http://json-schema.org/draft-07/schema#\",\n" +

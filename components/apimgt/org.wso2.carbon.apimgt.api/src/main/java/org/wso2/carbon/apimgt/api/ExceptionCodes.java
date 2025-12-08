@@ -277,6 +277,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "MCP tool generation is not supported for Async API definitions"),
 
     ERROR_READING_ASYNCAPI_SPECIFICATION(900765, "AsyncAPI specification read error", 500, "Exception occurred while reading the AsyncAPI Specification file"),
+    ERROR_VALIDATING_ASYNCAPI_SPECIFICATION(900768, "AsyncAPI specification validation error", 500, "Exception occurred " + "while " + "validating the AsyncAPI Specification file"),
     ERROR_RETRIEVE_KM_INFORMATION(900766, "Failed to retrieve key manager information", 500, "Couldn't get the key manager information by name or UUID"),
 
     // REST API related codes

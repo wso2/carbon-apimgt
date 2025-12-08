@@ -31,8 +31,8 @@ public class SolaceApiParser extends AsyncApiParser {
     public String getVendorFromExtensionWithError(String definition) throws APIManagementException {
 
         Map<String, JsonNode> extensions = AsyncApiParserUtil.getExtensionFromAsyncApiDoc(definition);
-        if (extensions != null && extensions.containsKey("x-origin")) {
-            JsonNode origin = extensions.get("x-origin");
+        if (extensions != null && extensions.containsKey(SolaceConstants.SOLACE_EXTENSION_KEY)) {
+            JsonNode origin = extensions.get(SolaceConstants.SOLACE_EXTENSION_KEY);
             ObjectMapper objectMapper = new ObjectMapper();
             Map originMap = objectMapper.convertValue(origin, Map.class);
             if (originMap.containsKey("vendor")) {

@@ -43,11 +43,11 @@ public class LegacyAsyncApiV2ParserTest {
 
         APIDefinitionValidationResponse resp = parser.validateAPIDefinition(AsyncApiTestUtils.ASYNCAPI_V2_SAMPLE,
                 true);
-        assertNotNull(resp);
+        assertNotNull("Validation response should not be null", resp);
         assertTrue("Legacy parser should validate the simple V2 sample as valid", resp.isValid());
 
         Set<URITemplate> templates = parser.getURITemplates(AsyncApiTestUtils.ASYNCAPI_V2_SAMPLE, true);
-        assertNotNull(templates);
+        assertNotNull("getURITemplates result should not be null", templates);
         assertFalse("Legacy parser should produce templates for the V2 sample", templates.isEmpty());
     }
 

@@ -2508,6 +2508,9 @@ public class APIMappingUtil {
             throw new APIManagementException("Unsupported AsyncAPI version: " + asyncApiVersion, e);
         }
         Set<Scope> scopes = asyncApiParser.getScopes(asyncAPIDefinition);
+        if (scopes == null || scopes.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<ScopeDTO> scopeDTOS = new ArrayList<>();
         for (Scope aScope : scopes) {
             ScopeDTO scopeDTO = new ScopeDTO();

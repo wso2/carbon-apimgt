@@ -23,6 +23,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiChannelItem;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiDocument;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiReferenceable;
+import io.apicurio.datamodels.models.asyncapi.v20.AsyncApi20Parameter;
+import io.apicurio.datamodels.models.asyncapi.v21.AsyncApi21Parameter;
+import io.apicurio.datamodels.models.asyncapi.v22.AsyncApi22Parameter;
+import io.apicurio.datamodels.models.asyncapi.v23.AsyncApi23Parameter;
+import io.apicurio.datamodels.models.asyncapi.v24.AsyncApi24Parameter;
+import io.apicurio.datamodels.models.asyncapi.v25.AsyncApi25Parameter;
+import io.apicurio.datamodels.models.asyncapi.v26.AsyncApi26Parameter;
 import org.apache.axis2.util.URL;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -535,7 +543,7 @@ public class SolaceAdminApis {
                 for (String parameterName : parameterKeySet) {
                     if (!parameters1.contains(parameterName)) {
                         Object parameterObject = channel.getParameters().getItem(parameterName);
-                        Object paramObjSchema = AsyncApiParserUtil.getSchemaFromParameter(parameterObject);
+                        Object paramObjSchema = getSchemaFromParameter(parameterObject);
                         if (paramObjSchema != null) {
                             org.json.JSONObject attributeObj = getAttributesFromParameterSchema(parameterName,
                                     parameterObject);
@@ -544,12 +552,11 @@ public class SolaceAdminApis {
                                 parameters1.add(parameterName);
                             }
                         } else {
-                            String parameterObjectRef = AsyncApiParserUtil.getRefFromParameter(parameterObject);
+                            String parameterObjectRef = getRefFromParameter(parameterObject);
                             if (parameterObjectRef != null) {
                                 if (asyncDocument.getComponents().getParameters() != null) {
                                     Object parameterObject1 = channel.getParameters().getItem(parameterName);
-                                    Object paramObjSchema1 = AsyncApiParserUtil.
-                                            getSchemaFromParameter(parameterObject1);
+                                    Object paramObjSchema1 = getSchemaFromParameter(parameterObject1);
                                     if (paramObjSchema1 != null) {
                                         org.json.JSONObject attributeObj =
                                                 getAttributesFromParameterSchema(parameterName, parameterObject1);
@@ -592,7 +599,7 @@ public class SolaceAdminApis {
      */
     private org.json.JSONObject getAttributesFromParameterSchema(String parameterName,
                                                                  Object parameterObj) {
-        ObjectNode schemaNode = (ObjectNode) AsyncApiParserUtil.getSchemaFromParameter(parameterObj);
+        ObjectNode schemaNode = (ObjectNode) getSchemaFromParameter(parameterObj);
         org.json.JSONObject schemaJson = new org.json.JSONObject(schemaNode.toString());
         String enumString = "";
         if (schemaJson.has("enum")) {
@@ -742,6 +749,49 @@ public class SolaceAdminApis {
         credentialsBody.put("secret", credentialsSecret);
         requestBody.put("credentials", credentialsBody);
         return requestBody;
+    }
+
+    /**
+     * This method will return schema from the parameter object for the respective Async API based on the version.
+     *
+     * @param parameterObj Object
+     * @return Object
+     */
+    public static Object getSchemaFromParameter(Object parameterObj) {
+
+        if (parameterObj instanceof AsyncApi20Parameter) {
+            return ((AsyncApi20Parameter) parameterObj).getSchema();
+        } else if (parameterObj instanceof AsyncApi21Parameter) {
+            return ((AsyncApi21Parameter) parameterObj).getSchema();
+        } else if (parameterObj instanceof AsyncApi22Parameter) {
+            return ((AsyncApi22Parameter) parameterObj).getSchema();
+        } else if (parameterObj instanceof AsyncApi23Parameter) {
+            return ((AsyncApi23Parameter) parameterObj).getSchema();
+        } else if (parameterObj instanceof AsyncApi24Parameter) {
+            return ((AsyncApi24Parameter) parameterObj).getSchema();
+        } else if (parameterObj instanceof AsyncApi25Parameter) {
+            return ((AsyncApi25Parameter) parameterObj).getSchema();
+        } else if (parameterObj instanceof AsyncApi26Parameter) {
+            return ((AsyncApi26Parameter) parameterObj).getSchema();
+        } else {
+            throw new UnsupportedOperationException("Unsupported AsyncAPI Parameter");
+        }
+    }
+
+    /**
+     * This method will return reference from the parameter object for the respective Async API based on the version.
+     *
+     * @param parameterObj Object
+     * @return String
+     */
+    public static String getRefFromParameter(Object parameterObj) {
+
+        if (parameterObj instanceof AsyncApiReferenceable) {
+            return ((AsyncApiReferenceable) parameterObj).get$ref();
+        }
+        throw new IllegalArgumentException("Unsupported AsyncAPI Parameter type: " +
+                (parameterObj != null ? parameterObj.getClass().getName() : "null")
+        );
     }
 
 }

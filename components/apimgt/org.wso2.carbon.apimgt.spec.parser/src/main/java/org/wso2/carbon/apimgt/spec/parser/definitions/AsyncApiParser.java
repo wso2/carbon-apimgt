@@ -111,8 +111,8 @@ public class AsyncApiParser extends BaseAsyncApiV2Parser {
             AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(apiDefinition);
             ArrayList<String> endpoints = new ArrayList<>();
             AsyncApiServers servers = asyncApiDocument.getServers();
-            if (servers != null && servers.getItems() != null && !servers.getItems().isEmpty())
-            {
+            if (servers != null && servers.getItems() != null && !servers.getItems().isEmpty() &&
+                    servers.getItems().get(0).getProtocol() != null) {
                 protocol = ((AsyncApiServer) asyncApiDocument.getServers().getItems().get(0)).getProtocol();
             }
 

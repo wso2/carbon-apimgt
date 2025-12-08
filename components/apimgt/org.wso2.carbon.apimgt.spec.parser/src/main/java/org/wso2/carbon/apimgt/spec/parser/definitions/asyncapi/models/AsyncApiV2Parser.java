@@ -65,7 +65,7 @@ public class AsyncApiV2Parser extends BaseAsyncApiV2Parser {
         } catch (Exception e) {
             // unexpected problems during validation/parsing
             String msg = "Error occurred while validating AsyncAPI definition: " + e.getMessage();
-            throw new APIManagementException(msg, e, ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
+            throw new APIManagementException(msg, e, ExceptionCodes.ERROR_VALIDATING_ASYNCAPI_SPECIFICATION);
         }
 
         if (validationSuccess) {

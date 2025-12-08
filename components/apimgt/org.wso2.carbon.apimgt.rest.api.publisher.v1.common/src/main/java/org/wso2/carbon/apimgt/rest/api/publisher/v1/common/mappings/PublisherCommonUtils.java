@@ -4552,11 +4552,14 @@ public class PublisherCommonUtils {
         apiToAdd.setAsyncApiDefinition(definitionToAdd);
 
         // load topics from AsyncAPI
-        apiToAdd.setUriTemplates(
-                AsyncApiParserFactory.getAsyncApiParser(AsyncApiParserUtil.getAsyncApiVersion(definitionToAdd),
-                        getParserOptionsFromConfig()).getURITemplates(definitionToAdd,
-                        APIConstants.API_TYPE_WS.equals(apiToAdd.getType()) ||
-                                !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiToAdd.getGatewayVendor())));
+        Set<URITemplate> uriTemplates = AsyncApiParserFactory.getAsyncApiParser(
+                AsyncApiParserUtil.getAsyncApiVersion(definitionToAdd), getParserOptionsFromConfig())
+                .getURITemplates(definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType())
+                                || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiToAdd.getGatewayVendor()));
+        if (uriTemplates == null || uriTemplates.isEmpty()) {
+            throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
+        }
+        apiToAdd.setUriTemplates(uriTemplates);
         apiToAdd.setOrganization(organization);
         apiToAdd.setAsyncApiDefinition(definitionToAdd);
 

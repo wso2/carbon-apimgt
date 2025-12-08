@@ -816,53 +816,6 @@ public class AsyncApiParserUtil {
     }
 
     /**
-     * This method will return schema from the parameter object for the respective Async API based on the version.
-     *
-     * @param parameterObj Object
-     * @return Object
-     * @Deprecated This method is used inside a deprecated class (SolaceAdminApis) hence it was deprecated.
-     */
-    @Deprecated
-    public static Object getSchemaFromParameter(Object parameterObj) {
-
-        if (parameterObj instanceof AsyncApi20Parameter) {
-            return ((AsyncApi20Parameter) parameterObj).getSchema();
-        } else if (parameterObj instanceof AsyncApi21Parameter) {
-            return ((AsyncApi21Parameter) parameterObj).getSchema();
-        } else if (parameterObj instanceof AsyncApi22Parameter) {
-            return ((AsyncApi22Parameter) parameterObj).getSchema();
-        } else if (parameterObj instanceof AsyncApi23Parameter) {
-            return ((AsyncApi23Parameter) parameterObj).getSchema();
-        } else if (parameterObj instanceof AsyncApi24Parameter) {
-            return ((AsyncApi24Parameter) parameterObj).getSchema();
-        } else if (parameterObj instanceof AsyncApi25Parameter) {
-            return ((AsyncApi25Parameter) parameterObj).getSchema();
-        } else if (parameterObj instanceof AsyncApi26Parameter) {
-            return ((AsyncApi26Parameter) parameterObj).getSchema();
-        } else {
-            throw new UnsupportedOperationException("Unsupported AsyncAPI Parameter");
-        }
-    }
-
-    /**
-     * This method will return reference from the parameter object for the respective Async API based on the version.
-     *
-     * @param parameterObj Object
-     * @return String
-     * @Deprecated This method is used inside a deprecated class (SolaceAdminApis) hence it was deprecated.
-     */
-    @Deprecated
-    public static String getRefFromParameter(Object parameterObj) {
-
-        if (parameterObj instanceof AsyncApiReferenceable) {
-            return ((AsyncApiReferenceable) parameterObj).get$ref();
-        }
-        throw new IllegalArgumentException("Unsupported AsyncAPI Parameter type: " +
-                (parameterObj != null ? parameterObj.getClass().getName() : "null")
-        );
-    }
-
-    /**
      * This method will set AsyncApiServer for the respective Async API based on the version.
      *
      * @param url    String
