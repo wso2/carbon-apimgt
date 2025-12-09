@@ -424,7 +424,12 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
             }
         }
 
-        AsyncApiServer server = asyncApiDocument.getServers().getItems().get(0);
+        AsyncApiServers servers = asyncApiDocument.getServers();
+        if (servers == null || servers.getItems() == null || servers.getItems().isEmpty()) {
+            throw new APIManagementException("No server details found in AsyncAPI definition",
+                    ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
+        }
+        AsyncApiServer server = servers.getItems().get(0);
         AsyncApiParserUtil.setAsyncApiServer(url, server);
         AsyncApiChannels apiChannels = asyncApiDocument.getChannels();
         MappedNode channels = (MappedNode) apiChannels;

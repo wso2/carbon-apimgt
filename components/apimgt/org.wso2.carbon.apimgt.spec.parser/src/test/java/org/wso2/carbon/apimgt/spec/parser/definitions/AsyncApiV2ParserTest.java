@@ -43,7 +43,7 @@ import static org.mockito.Mockito.when;
 public class AsyncApiV2ParserTest {
 
     @Test
-    public void testValidateV3DefinitionWithURITemplates() throws Exception {
+    public void testValidateV2DefinitionWithURITemplates() throws Exception {
         AsyncApiV2Parser parser = new AsyncApiV2Parser();
 
         // Validate
