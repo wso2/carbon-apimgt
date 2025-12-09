@@ -15667,12 +15667,11 @@ public class ApiMgtDAO {
             } catch (IOException e) {
                 log.error("Error while retrieving LLM configuration", e);
             }
-
-            // Get models registered under the LLM provider
-            setLLMProviderModels(organization, provider);
-
-            return provider;
         }
+        // Get models registered under the LLM provider
+        setLLMProviderModels(organization, provider);
+
+        return provider;
     }
 
     /**
