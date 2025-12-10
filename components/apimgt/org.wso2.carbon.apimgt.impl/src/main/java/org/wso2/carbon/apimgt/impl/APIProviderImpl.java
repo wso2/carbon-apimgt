@@ -1205,6 +1205,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public void updateResourcePolicyFromRegistryResourceId(APIIdentifier identifier, String resourceId, String content)
+            throws APIManagementException {
+        try {
+            apiPersistenceInstance.updateResourcePolicyFromRegistryResourceId(identifier, resourceId, content);
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while updating the resource policy for API: " + identifier
+                    + " with resource ID: " + resourceId, e);
+        }
+    }
+
     /**
      * This method is used to validate and update API level and Operation level policy mappings.
      *
@@ -1249,6 +1260,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void validateKeyManagers(API api) throws APIManagementException {
+        // Validate Key Managers in Add API
+        validateKeyManagers(api, null);
+    }
+
+    private void validateKeyManagers(API api, List<String> existingKeyManagers) throws APIManagementException {
 
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getGlobalAndTenantKeyManagers(tenantDomain);
         List<KeyManagerConfigurationDTO> keyManagerConfigurationsByOrganization =
@@ -1282,6 +1298,40 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(
                     "Key Manager(s) Not found :" + String.join(" , ", configuredMissingKeyManagers),
                     ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
+        }
+        List<String> keyManagersToValidate = api.getKeyManagers();
+        List<String> validKeyManagers = new ArrayList<>();
+        if (existingKeyManagers != null) {
+            // Filters to keep only key managers that are not in the old existing key managers list
+            keyManagersToValidate = api.getKeyManagers().stream()
+                    .filter(km -> !existingKeyManagers.contains(km))
+                    .collect(Collectors.toList());
+
+            // Add old existing key managers to valid list if they are available in updated API as well
+            validKeyManagers.addAll(existingKeyManagers.stream()
+                    .filter(km -> api.getKeyManagers().contains(km))
+                    .collect(Collectors.toList()));
+        }
+
+        for (String keyManager : keyManagersToValidate) {
+            if (!APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManager)) {
+                if (!disabledKeyManagers.contains(keyManager)) {
+                    validKeyManagers.add(keyManager);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Added valid key manager: " + keyManager + " for API: " + api.getId().getApiName());
+                    }
+                }
+            } else {
+                tenantKeyManagers.values().stream()
+                        .map(KeyManagerDto::getName)
+                        .filter(kmName -> !disabledKeyManagers.contains(kmName))
+                        .forEach(validKeyManagers::add);
+            }
+        }
+        if (validKeyManagers.isEmpty()) {
+            throw new APIManagementException(
+                    "API must have at least one valid and enabled key manager configured",
+                    ExceptionCodes.KEY_MANAGER_NOT_FOUND);
         }
     }
 
@@ -2627,6 +2677,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String graphQLSchema = getGraphqlSchemaDefinition(existingApiId, organization);
         if (graphQLSchema != null) {
             saveGraphqlSchemaDefinition(newAPIId, graphQLSchema, organization);
+        }
+
+        // Copy labels
+        List<Label> labels = getAllLabelsOfApi(existingApiId);
+        if (labels != null && !labels.isEmpty()) {
+            List<String> labelIds = labels.stream().map(Label::getLabelId).collect(Collectors.toList());
+            attachApiLabels(newAPIId, labelIds, organization);
         }
 
         // update old api
@@ -4508,10 +4565,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         BlockConditionsDTO createdBlockConditionsDto = apiMgtDAO.addBlockConditions(blockConditionsDTO);
 
         if (createdBlockConditionsDto != null) {
-            publishBlockingEvent(createdBlockConditionsDto, "true");
+            publishBlockingEvent(createdBlockConditionsDto, String.valueOf(conditionStatus));
+            return createdBlockConditionsDto.getUUID();
+        } else {
+            throw new APIManagementException("Error occurred while adding the block condition");
         }
-
-        return createdBlockConditionsDto.getUUID();
     }
 
     @Override

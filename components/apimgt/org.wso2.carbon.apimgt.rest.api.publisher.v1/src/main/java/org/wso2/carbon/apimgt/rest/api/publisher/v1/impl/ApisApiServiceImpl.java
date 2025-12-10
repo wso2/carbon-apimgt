@@ -2868,7 +2868,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                                 .entity(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE)).build();
                     }
                     provider.updateAPI(api, originalAPI);
-                    SequenceUtils.updateResourcePolicyFromRegistryResourceId(api.getId(), resourcePolicyId,
+                    provider.updateResourcePolicyFromRegistryResourceId(api.getId(), resourcePolicyId,
                             body.getContent());
                     String updatedPolicyContent = SequenceUtils
                             .getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);
@@ -4356,8 +4356,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Cannot deploy an API with custom sequence to the APK gateway
         Map endpointConfigMap = (Map) apiDto.getEndpointConfig();
         if (endpointConfigMap != null && !APIConstants.WSO2_SYNAPSE_GATEWAY.equals(apiDto.getGatewayType())
-                && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                && APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
+                (String) endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Cannot Deploy an API with a Custom Sequence to APK Gateway: " + apiId).build();
         }

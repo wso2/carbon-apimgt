@@ -100,6 +100,13 @@ public class InMemoryAPIDeployer {
         Set<String> gatewayLabels = gatewayEvent.getGatewayLabels();
         gatewayLabels.retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
         try {
+            if (DataHolder.getInstance().isDuplicateEvent(gatewayEvent.getTenantDomain(), gatewayEvent.getContext(),
+                    gatewayEvent.getEventId())) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Duplicate event received for API with id " + apiId + ". Hence skipping deployment.");
+                }
+                return true;
+            }
             GatewayAPIDTO gatewayAPIDTO = retrieveArtifact(apiId, gatewayLabels);
             if (gatewayAPIDTO != null) {
                 APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdmin();
@@ -112,6 +119,7 @@ public class InMemoryAPIDeployer {
                 DataHolder.getInstance().addKeyManagerToAPIMapping(apiId, gatewayAPIDTO.getKeyManagers());
                 DataHolder.getInstance().addAPIMetaData(gatewayEvent);
                 DataHolder.getInstance().markAPIAsDeployed(gatewayAPIDTO);
+                DataHolder.getInstance().updateLastUpdatedEventId(gatewayAPIDTO, gatewayEvent.getEventId());
                 DataHolder.getInstance().populateVhosts(gatewayAPIDTO);
                 syncAPIPropertiesAcrossComponents(gatewayAPIDTO);
                 if (log.isDebugEnabled()) {
