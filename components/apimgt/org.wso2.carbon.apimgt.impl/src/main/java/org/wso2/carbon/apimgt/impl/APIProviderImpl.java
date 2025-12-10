@@ -1018,7 +1018,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Validate Transports
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
-        validateKeyManagers(api);
+        validateKeyManagers(api, existingAPI.getKeyManagers());
         validateKeyManagerScopes(api, tenantDomain);
         // Validate and process API level and operation level policies
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
