@@ -64,4 +64,21 @@ public class SolaceApiParserTest {
         assertNull("When vendor is not Solace, method should return null", vendor);
     }
 
+    @Test
+    public void testGetVendorFromExtension_vendorMatches_returnsSolace() throws Exception {
+        // x-origin object contains vendor key with matching value
+        String definition = "{\"asyncapi\":\"2.0.0\",\"info\":{\"title\":\"t\",\"version\":\"1.0.0\"}," +
+                "\"x-origin\":{\"vendor\":\"" + SolaceConstants.SOLACE_ENVIRONMENT + "\"}}";
+        String vendor = parser.getVendorFromExtensionWithError(definition);
+        assertEquals(SolaceConstants.SOLACE_ENVIRONMENT, vendor);
+    }
+
+    @Test
+    public void testGetVendorFromExtension_xOriginPresent_butNoVendorKey_returnsNull() throws Exception {
+        String definition = "{\"asyncapi\":\"2.0.0\",\"info\":{\"title\":\"t\",\"version\":\"1.0.0\"}," +
+                "\"x-origin\":{\"other\":\"value\"}}";
+        String vendor = parser.getVendorFromExtensionWithError(definition);
+        assertNull("Missing vendor key inside x-origin should return null", vendor);
+    }
+
 }

@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.spec.parser.definitions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.apicurio.datamodels.models.asyncapi.AsyncApiDocument;
+import io.apicurio.datamodels.models.asyncapi.v20.AsyncApi20Document;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -43,6 +45,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -56,6 +59,10 @@ public class AsyncApiParserUtilTest {
             "{\"asyncapi\":\"2.0.0\",\"info\":{\"title\":\"test\",\"version\":\"1.0.0\"},\"channels\":{}}";
 
     private static final String INVALID_JSON = "{ this is : not json }";
+
+    private static final String VALID_ASYNCAPI_NO_CHANNELS =
+            "{\"asyncapi\":\"2.0.0\",\"info\":{\"title\":\"test\",\"version\":\"1.0.0\"}}";
+
 
     @Test
     public void testGetAsyncApiVersion() {
@@ -282,4 +289,70 @@ public class AsyncApiParserUtilTest {
         assertTrue("Expecting error item describing non-200 URL result",
                 found || !resp.getErrorItems().isEmpty());
     }
+
+    @Test
+    public void testCreateAsyncApiDocument_supportedVersions() throws APIManagementException {
+        // These should create non-null AsyncApiDocument implementations
+        AsyncApiDocument d20 = AsyncApiParserUtil.createAsyncApiDocument("2.0.0");
+        assertNotNull(d20);
+
+        AsyncApiDocument d30 = AsyncApiParserUtil.createAsyncApiDocument("3.0.0");
+        assertNotNull(d30);
+    }
+
+    @Test(expected = Exception.class)
+    public void testCreateAsyncApiDocument_unsupportedVersion_throws() throws APIManagementException {
+        // unsupported version should throw
+        AsyncApiParserUtil.createAsyncApiDocument("1.0.0");
+    }
+
+    @Test
+    public void testGetAsyncApiVersion_and_getFromAsyncApiDocument() throws APIManagementException {
+        String v = AsyncApiParserUtil.getAsyncApiVersion(VALID_ASYNCAPI_JSON);
+        assertEquals("2.0.0", v);
+
+        AsyncApiDocument doc = AsyncApiParserUtil.getFromAsyncApiDocument("2.0.0", VALID_ASYNCAPI_JSON);
+        assertNotNull(doc);
+        assertTrue("Expected an AsyncApi20Document instance", doc instanceof AsyncApi20Document);
+    }
+
+    @Test
+    public void testValidateAsyncApiContent_valid_and_invalid() throws APIManagementException {
+        List<String> errors = new ArrayList<>();
+        boolean ok = AsyncApiParserUtil.validateAsyncApiContent(VALID_ASYNCAPI_JSON, errors);
+        // The minimal document should parse; validation may vary but parsing should succeed
+        assertTrue(ok);
+        assertTrue(errors.isEmpty());
+
+        List<String> errors2 = new ArrayList<>();
+        boolean notOk = AsyncApiParserUtil.validateAsyncApiContent("not-a-json", errors2);
+        assertFalse(notOk);
+        assertFalse(errors2.isEmpty());
+    }
+
+    @Test(expected = Exception.class)
+    public void testGetTransportProtocolsForAsyncAPI_withoutChannels_throws() throws Exception {
+        // For a minimal document without channels, the implementation may throw an exception
+        AsyncApiParserUtil.getTransportProtocolsForAsyncAPI(VALID_ASYNCAPI_NO_CHANNELS);
+    }
+
+    @Test(expected = Exception.class)
+    public void testCreateChannelItem_withNull_throws() throws Exception {
+        // Passing null should not match any supported channel types and should throw
+        AsyncApiParserUtil.createChannelItem(null);
+    }
+
+    @Test(expected = Exception.class)
+    public void testSetAsyncApiServer_withNullServer_throws() throws Exception {
+        // Passing null server should cause the method to throw some exception
+        AsyncApiParserUtil.setAsyncApiServer("http://example.com", null);
+    }
+
+    @Test(expected = Exception.class)
+    public void testSetAsyncApiOAuthFlowsScopes_withNullSecurityScheme_throws() throws Exception {
+        // Passing null security scheme should cause an exception (or UnsupportedOperationException)
+        AsyncApiParserUtil.setAsyncApiOAuthFlowsScopes(
+                null, Collections.emptyMap(), Collections.emptyMap());
+    }
+
 }
