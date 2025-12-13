@@ -164,6 +164,7 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                 if (StringUtils.equals(method, APIConstants.MCP.METHOD_TOOL_CALL)) {
                     Params params = request.getParams();
                     String toolName = params.getToolName();
+                    messageContext.setProperty(APIMgtGatewayConstants.MCP_TOOL_NAME, toolName);
                     API api = GatewayUtils.getAPI(messageContext);
                     URLMapping extendedOperation = api.getUrlMappings()
                             .stream()
