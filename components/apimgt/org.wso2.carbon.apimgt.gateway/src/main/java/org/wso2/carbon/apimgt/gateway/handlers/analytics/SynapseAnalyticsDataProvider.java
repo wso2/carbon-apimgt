@@ -81,13 +81,21 @@ import java.util.stream.Collectors;
 
 import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
 import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.API_OBJECT;
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE;
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE_KEY;
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.MCP_HTTP_METHOD;
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.MCP_RESOURCE;
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.MCP_TOOL_NAME;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.MASK_VALUE;
+import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.MCP_METHOD;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_HEADERS;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_HEADER_MASK;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.RESPONSE_HEADERS;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.RESPONSE_HEADER_MASK;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.SEND_HEADER;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.UNKNOWN_VALUE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.AI.MCP;
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_TYPE;
 
 public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
@@ -488,6 +496,10 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             int startHourUtc = getHourByUTC(startTime);
             getAiAnalyticsData((Map) aiMeta, startHourUtc, custom);
         }
+        if (messageContext.getProperty(API_TYPE) != null && messageContext.getProperty(API_TYPE)
+                .toString().equals(MCP)) {
+            getMCPAnalyticsData(custom);
+        }
 
         return custom;
     }
@@ -547,6 +559,15 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         );
         aiTokenUsage.put(Constants.HOUR, requestStartHour);
         customProperties.put(Constants.AI_TOKEN_USAGE, aiTokenUsage);
+    }
+
+    private void getMCPAnalyticsData(Map<String, Object> customProperties) {
+        Map<String, Object> mcpAnalytics = new HashMap<>();
+        mcpAnalytics.put(MCP_METHOD, messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
+        mcpAnalytics.put(MCP_API_ELECTED_RESOURCE, messageContext.getProperty(MCP_API_ELECTED_RESOURCE_KEY));
+        mcpAnalytics.put(MCP_HTTP_METHOD, messageContext.getProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY));
+        mcpAnalytics.put(MCP_TOOL_NAME, messageContext.getProperty(MCP_TOOL_NAME));
+        customProperties.put(APIMgtGatewayConstants.MCP_ANALYTICS, mcpAnalytics);
     }
 
     private String getApiContext() {

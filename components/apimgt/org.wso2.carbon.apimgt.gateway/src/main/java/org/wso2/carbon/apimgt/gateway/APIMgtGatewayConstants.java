@@ -219,10 +219,17 @@ public class APIMgtGatewayConstants {
     public static final String MCP_METHOD = "api.ut.MCP_METHOD";
     public static final String MCP_REQUEST_BODY = "MCP_REQUEST_BODY";
     public static final String MCP_NO_AUTH_REQUEST = "MCP_NO_AUTH_REQUEST";
+    public static final String MCP_HTTP_METHOD_KEY = "MCP_HTTP_METHOD";
+    public static final String MCP_API_ELECTED_RESOURCE = "resource";
+    public static final String MCP_API_ELECTED_RESOURCE_KEY = "MCP_API_ELECTED_RESOURCE_KEY";
     public static final String MCP_RESOURCE= "/mcp";
     public static final String MCP_WELL_KNOWN_RESOURCE = "/.well-known/oauth-protected-resource";
     public static final String MCP_AUTH_CLAIM = "MCP_AUTHENTICATED";
     public static final Long MCP_AUTH_TOKEN_EXPIRATION_TIME = 6000L;
+    public static final String MCP_ANALYTICS = "mcpAnalytics";
+    public static final String MCP_TOOL_NAME = "toolName";
+    public static final String MCP_HTTP_METHOD = "httpMethod";
+
     /**
      * JWT Claim related Constants
      */
