@@ -562,6 +562,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     private void getMCPAnalyticsData(Map<String, Object> customProperties) {
+        log.debug("Extracting MCP analytics data from message context");
         Map<String, Object> mcpAnalytics = new HashMap<>();
         mcpAnalytics.put(MCP_METHOD, messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
         mcpAnalytics.put(MCP_API_ELECTED_RESOURCE, messageContext.getProperty(MCP_API_ELECTED_RESOURCE_KEY));
