@@ -495,8 +495,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             int startHourUtc = getHourByUTC(startTime);
             getAiAnalyticsData((Map) aiMeta, startHourUtc, custom);
         }
-        if (messageContext.getProperty(API_TYPE) != null && messageContext.getProperty(API_TYPE)
-                .toString().equals(MCP)) {
+        if (MCP.equals(messageContext.getProperty(API_TYPE))) {
             getMCPAnalyticsData(custom);
         }
 
