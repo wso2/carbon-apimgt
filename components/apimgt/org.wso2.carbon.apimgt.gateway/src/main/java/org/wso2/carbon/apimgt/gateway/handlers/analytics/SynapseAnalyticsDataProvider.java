@@ -84,7 +84,6 @@ import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.API_OBJECT;
 import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE;
 import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE_KEY;
 import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.MCP_HTTP_METHOD;
-import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.MCP_RESOURCE;
 import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.MCP_TOOL_NAME;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.MASK_VALUE;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.MCP_METHOD;
