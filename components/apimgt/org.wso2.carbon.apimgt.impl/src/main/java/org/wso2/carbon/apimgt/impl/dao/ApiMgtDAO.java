@@ -6169,8 +6169,8 @@ public class ApiMgtDAO {
     /**
      * Get published default version using existing connection for APIIdentifier.
      *
-     * @param connection        Existing database connection
      * @param apiId             API identifier
+     * @param connection        Existing database connection
      * @return                  Published default version string
      * @throws SQLException     If an error occurs while accessing the database
      */
@@ -6179,6 +6179,9 @@ public class ApiMgtDAO {
         String publishedDefaultVersion = null;
         String query = SQLConstants.GET_PUBLISHED_DEFAULT_VERSION_SQL;
         try (PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieving published default version for API: " + apiId.getName());
+            }
             prepStmt.setString(1, apiId.getName());
             prepStmt.setString(2, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
             try (ResultSet rs = prepStmt.executeQuery()) {
@@ -17067,10 +17070,13 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         Connection connection = null;
         try {
-            int id = getAPIProductId(productIdentifier);
+            if (log.isDebugEnabled()) {
+                log.debug("Deleting API Product: " + productIdentifier.getName() + " version: " + productIdentifier.getVersion());
+            }
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             //  delete product ratings
+            int id = getAPIProductId(productIdentifier, connection);
             ps = connection.prepareStatement(deleteRatingsQuery);
             ps.setInt(1, id);
             ps.execute();
@@ -17130,37 +17136,58 @@ public class ApiMgtDAO {
         return productMappings;
     }
 
+    /**
+     * Retrieve the API Product ID for a given APIProductIdentifier.
+     *
+     * @param identifier The APIProductIdentifier for which the ID is to be retrieved.
+     * @return The API Product ID.
+     * @throws APIManagementException If an error occurs while retrieving the API Product ID.
+     */
     public int getAPIProductId(APIProductIdentifier identifier) throws APIManagementException {
 
-        Connection conn = null;
+        int productId = -1;
+        try {
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                return getAPIProductId(identifier, connection);
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving api product id for product " + identifier.getName() + " by "
+                    + APIUtil.replaceEmailDomainBack(identifier.getProviderName()), e);
+        }
+        return productId;
+    }
+
+    /**
+     * Retrieve the API Product ID for a given APIProductIdentifier.
+     *
+     * @param identifier  The APIProductIdentifier for which the ID is to be retrieved.
+     * @param connection  The database connection to be used for the query.
+     * @return The API Product ID.
+     * @throws APIManagementException If an error occurs while retrieving the API Product ID.
+     * @throws SQLException If an error occurs while executing the SQL query.
+     */
+    public int getAPIProductId(APIProductIdentifier identifier, Connection connection)
+            throws APIManagementException, SQLException {
+
         String queryGetProductId = SQLConstants.GET_PRODUCT_ID;
-        PreparedStatement preparedStatement = null;
-        ResultSet rs = null;
         int productId = -1;
 
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            preparedStatement = conn.prepareStatement(queryGetProductId);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(queryGetProductId)) {
             preparedStatement.setString(1, identifier.getName());
             preparedStatement.setString(2, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             preparedStatement.setString(3, identifier.getVersion());
 
-            rs = preparedStatement.executeQuery();
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
+                    productId = rs.getInt("API_ID");
+                }
 
-            if (rs.next()) {
-                productId = rs.getInt("API_ID");
+                if (productId == -1) {
+                    String msg = "Unable to find the API Product : " + identifier.getName() + " in the database";
+                    log.error(msg);
+                    throw new APIManagementException(msg);
+                }
             }
-
-            if (productId == -1) {
-                String msg = "Unable to find the API Product : " + productId + " in the database";
-                log.error(msg);
-                throw new APIManagementException(msg);
-            }
-        } catch (SQLException e) {
-            handleException("Error while retrieving api product id for product " + identifier.getName() + " by " +
-                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(preparedStatement, conn, rs);
         }
         return productId;
     }
