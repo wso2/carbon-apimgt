@@ -105,6 +105,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParseOptions;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.registry.core.Registry;
@@ -2424,8 +2425,9 @@ public class ImportUtils {
 
         try {
             String asyncApiDefinition = loadAsyncApiDefinitionFromFile(pathToArchive);
+            AsyncApiParseOptions options =  PublisherCommonUtils.getParserOptionsFromConfig();
             APIDefinitionValidationResponse validationResponse =
-                    AsyncApiParserUtil.validateAsyncAPISpecification(asyncApiDefinition, true);
+                    AsyncApiParserUtil.validateAsyncAPISpecification(asyncApiDefinition, true, options);
             if (!validationResponse.isValid()) {
                 String errorMessage = "Error occurred while importing the API. Invalid AsyncAPI definition found. "
                         + validationResponse.getErrorItems();

@@ -69,6 +69,7 @@ import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.OperationPoliciesApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.AsyncApiParserImplUtil;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -4615,15 +4616,18 @@ public class ApisApiServiceImpl implements ApisApiService {
                 URL urlObj = new URL(url);
                 HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
                 // Validate URL
-                validationResponse = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(url, httpClient, returnContent);
+                validationResponse = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(url, httpClient,
+                        returnContent, AsyncApiParserImplUtil.getParserOptionsFromConfig());
             } catch (MalformedURLException e) {
                 throw new APIManagementException("Error while processing the API definition URL", e);
             }
         } else if (fileInputStream != null) {
             //validate file
             String fileName = fileDetail != null ? fileDetail.getContentDisposition().getFilename() : StringUtils.EMPTY;
-            String schemaToBeValidated = ApisApiServiceImplUtils.getSchemaToBeValidated(fileInputStream, isServiceAPI, fileName);
-            validationResponse = AsyncApiParserUtil.validateAsyncAPISpecification(schemaToBeValidated, returnContent);
+            String schemaToBeValidated = ApisApiServiceImplUtils.getSchemaToBeValidated(fileInputStream,
+                    isServiceAPI, fileName);
+            validationResponse = AsyncApiParserUtil.validateAsyncAPISpecification(schemaToBeValidated,
+                    returnContent, AsyncApiParserImplUtil.getParserOptionsFromConfig());
         }
 
         responseDTO = APIMappingUtil.getAsyncAPISpecificationValidationResponseFromModel(validationResponse, returnContent);
@@ -4789,8 +4793,10 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private String updateAsyncAPIDefinition(String apiId, String apiDefinition, String organization)
             throws APIManagementException, FaultGatewaysException {
+
         APIDefinitionValidationResponse response = AsyncApiParserUtil
-                .validateAsyncAPISpecification(apiDefinition, true);
+                .validateAsyncAPISpecification(apiDefinition, true,
+                        AsyncApiParserImplUtil.getParserOptionsFromConfig());
         if (!response.isValid()) {
             RestApiUtil.handleBadRequest(response.getErrorItems(), log);
         }

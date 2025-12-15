@@ -16,14 +16,25 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.impl.definitions;
-
-import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+package org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi;
 
 /**
- * @deprecated use org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser instead
+ * Holds configuration options used during AsyncAPI parsing.
+ * This class is primarily used to determine which version of the AsyncAPI v2 parser should be used (default/new or
+ * legacy).
  */
-@Deprecated
-@UsedByMigrationClient
-public class AsyncApiParser extends org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser {
+public class AsyncApiParseOptions {
+
+    private boolean preserveLegacyAsyncApiParser = true;
+
+    public AsyncApiParseOptions() {
+    }
+
+    public boolean getPreserveLegacyAsyncApiParser() {
+        return preserveLegacyAsyncApiParser;
+    }
+
+    public void setPreserveLegacyAsyncApiParser(boolean preserveLegacyAsyncApiParser) {
+        this.preserveLegacyAsyncApiParser = preserveLegacyAsyncApiParser;
+    }
 }

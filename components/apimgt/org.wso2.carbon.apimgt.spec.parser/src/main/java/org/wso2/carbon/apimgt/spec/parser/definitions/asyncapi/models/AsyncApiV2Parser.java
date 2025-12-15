@@ -16,7 +16,7 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.spec.parser.definitions;
+package org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.models;
 
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.models.asyncapi.AsyncApiDocument;
@@ -25,40 +25,23 @@ import io.apicurio.datamodels.models.asyncapi.AsyncApiServers;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.ValidationException;
-import org.everit.json.schema.loader.SchemaLoader;
-import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiValidationSchemas;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.BaseAsyncApiV2Parser;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Legacy AsyncAPI v2 parser responsible for processing AsyncAPI 2.x specifications.
+ * New AsyncAPI v2 parser used to process AsyncAPI 2.x specifications.
  * This class extends BaseAsyncApiV2Parser and
- * provides legacy-specific parsing capabilities for AsyncAPI 2.x definitions.
+ * provides version-specific  parsing capabilities for AsyncAPI 2.x definitions.
  */
+public class AsyncApiV2Parser extends BaseAsyncApiV2Parser {
 
-public class AsyncApiParser extends BaseAsyncApiV2Parser {
-
-    private static final Log log = LogFactory.getLog(AsyncApiParser.class);
-    private List<String> otherSchemes;
-
-    public List<String> getOtherSchemes() {
-        return otherSchemes;
-    }
-
-    public void setOtherSchemes(List<String> otherSchemes) {
-        this.otherSchemes = otherSchemes;
-    }
+    private static final Log log = LogFactory.getLog(AsyncApiV2Parser.class);
 
     /**
      * Validates the given AsyncAPI definition against the AsyncAPI JSON HyperSchema.
@@ -76,43 +59,20 @@ public class AsyncApiParser extends BaseAsyncApiV2Parser {
         String protocol = StringUtils.EMPTY;
         boolean validationSuccess = false;
         List<String> validationErrorMessages = new ArrayList<>();
-        JSONObject schemaToBeValidated = new JSONObject(apiDefinition);
-        //import and load AsyncAPI HyperSchema for JSON schema validation
-        JSONObject hyperSchema = new JSONObject(AsyncApiValidationSchemas.ASYNCAPI_JSON_HYPERSCHEMA);
 
-        //validate AsyncAPI using JSON schema validation
         try {
-            JSONParser parser = new JSONParser();
-            org.json.simple.JSONObject json = (org.json.simple.JSONObject) parser.parse(
-                    AsyncApiValidationSchemas.METASCHEMA);
-            SchemaLoader schemaLoader = SchemaLoader.builder().registerSchemaByURI
-                    (new URI(AsyncApiValidationSchemas.JSONSCHEMA), json).schemaJson(hyperSchema).build();
-            Schema schemaValidator = schemaLoader.load().build();
-            schemaValidator.validate(schemaToBeValidated);
-
-            validationSuccess = true;
-        } catch(ValidationException e) {
-            //validation error messages
-            validationErrorMessages = e.getAllMessages();
-        } catch (URISyntaxException e) {
-            String msg = "Error occurred when registering the schema";
-            throw new APIManagementException(msg, e,
-                    ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
-        } catch (ParseException e) {
-            String msg = "Error occurred when parsing the schema";
-            throw new APIManagementException(msg, e,
-                    ExceptionCodes.ERROR_READING_ASYNCAPI_SPECIFICATION);
+            validationSuccess = AsyncApiParserUtil.validateAsyncApiContent(apiDefinition, validationErrorMessages);
+        } catch (Exception e) {
+            // unexpected problems during validation/parsing
+            String msg = "Error occurred while validating AsyncAPI definition: " + e.getMessage();
+            throw new APIManagementException(msg, e, ExceptionCodes.ERROR_VALIDATING_ASYNCAPI_SPECIFICATION);
         }
-
-        // TODO: Validation is failing. Need to fix this. Therefore overriding the value as True.
-        validationSuccess = true;
 
         if (validationSuccess) {
             AsyncApiDocument asyncApiDocument = (AsyncApiDocument) Library.readDocumentFromJSONString(apiDefinition);
             ArrayList<String> endpoints = new ArrayList<>();
             AsyncApiServers servers = asyncApiDocument.getServers();
-            if (servers != null && servers.getItems() != null && !servers.getItems().isEmpty() &&
-                    servers.getItems().get(0).getProtocol() != null) {
+            if (servers != null && servers.getItems() != null && !servers.getItems().isEmpty()) {
                 protocol = ((AsyncApiServer) asyncApiDocument.getServers().getItems().get(0)).getProtocol();
             }
 
@@ -144,21 +104,4 @@ public class AsyncApiParser extends BaseAsyncApiV2Parser {
         }
         return validationResponse;
     }
-
-    /**
-     * Get available transport protocols for the Async API.
-     *
-     * @param definition Async API Definition
-     * @return List<String> List of available transport protocols
-     * @throws APIManagementException If the async env configuration if not provided properly
-     * @deprecated This method has no usage hence it was deprecated.
-     */
-    @Deprecated
-    public static List<String> getTransportProtocolsForAsyncAPI(String definition) throws APIManagementException {
-
-        ArrayList<String> asyncTransportProtocolsList = (ArrayList<String>)
-                AsyncApiParserUtil.getTransportProtocolsForAsyncAPI(definition);
-        return asyncTransportProtocolsList;
-    }
-
 }
