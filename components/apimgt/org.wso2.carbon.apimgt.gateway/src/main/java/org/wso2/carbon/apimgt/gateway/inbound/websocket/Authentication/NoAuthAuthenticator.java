@@ -49,11 +49,17 @@ public class NoAuthAuthenticator implements Authenticator {
                 // Get client IP for throttling (similar to REST API handleNoAuthentication)
                 String clientIP = inboundMessageContext.getUserIP();
                 if (clientIP == null || clientIP.isEmpty()) {
-                    clientIP = "127.0.0.1"; // Default fallback
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        "Unable to determine client IP for throttling in no-auth scenario");
                 }
         
-                // Clean up IP format if needed (remove port)
-                if (clientIP.indexOf(":") > 0) {
+                // Clean up IP format if needed (remove port for IPv4)
+                // IPv6 addresses are enclosed in brackets when a port is present, e.g., [2001:db8::1]:8080
+                if (clientIP.contains("[") && clientIP.contains("]")) {
+                    // IPv6 with port: extract address between brackets
+                    clientIP = clientIP.substring(clientIP.indexOf("[") + 1, clientIP.indexOf("]"));
+                } else if (clientIP.indexOf(":") > 0 && clientIP.indexOf(":") == clientIP.lastIndexOf(":")) {
+                    // IPv4 with port: strip everything after the colon
                     clientIP = clientIP.substring(0, clientIP.indexOf(":"));
                 }
         

@@ -126,7 +126,6 @@ public class InboundWebSocketProcessor implements WebSocketProcessor {
                 setRequestHeaders(req, inboundMessageContext);
                 inboundProcessorResponseDTO = 
                     handshakeProcessor.processHandshake(inboundMessageContext);
-                setRequestHeaders(req, inboundMessageContext);
             } else if (isOauthAuthentication(req, inboundMessageContext)) {
                 inboundMessageContext.setAuthenticator(new OAuthAuthenticator());
                 setRequestHeaders(req, inboundMessageContext);
