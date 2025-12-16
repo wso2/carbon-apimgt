@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.FaultyGatewayDeploymentException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
@@ -1253,8 +1254,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<KeyManagerConfigurationDTO> keyManagerConfigurationsByOrganization =
                 apiMgtDAO.getKeyManagerConfigurationsByOrganization(organization);
         Set<String> disabledKeyManagers = keyManagerConfigurationsByOrganization.stream()
-                .filter(config -> !config.isEnabled()) 
-                .map(KeyManagerConfigurationDTO::getName) 
+                .filter(config -> !config.isEnabled())
+                .map(KeyManagerConfigurationDTO::getName)
                 .collect(Collectors.toSet());
 
         if (log.isDebugEnabled()) {
@@ -7365,7 +7366,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     @Deprecated
     public void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID,
-                                          String revisionId, String environment) {
+                                          String revisionId, String environment) throws APIManagementException {
         resumeDeployedAPIRevisionInternal(apiId, organization, revisionUUID, revisionId, environment, false);
     }
 
@@ -7381,7 +7382,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID,
-                                          String revisionId, String environment, boolean isInitiatedFromGateway) {
+                                          String revisionId, String environment, boolean isInitiatedFromGateway)
+            throws APIManagementException {
         resumeDeployedAPIRevisionInternal(apiId, organization, revisionUUID, revisionId, environment,
                 isInitiatedFromGateway);
     }
@@ -7397,8 +7399,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param skipDeployToGateway Flag to skip deployment to gateway
      */
     private void resumeDeployedAPIRevisionInternal(String apiId, String organization, String revisionUUID,
-                                                   String revisionId, String environment, boolean skipDeployToGateway) {
+                                                   String revisionId, String environment, boolean skipDeployToGateway)
+            throws APIManagementException {
         try {
+            Set<String> deploymentFailures = new HashSet<>();
+            Set<String> unDeploymentFailures = new HashSet<>();
             APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
             APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
             APIRevisionDeployment newDeployment = getAPIRevisionDeployment(environment, revisionUUID);
@@ -7415,21 +7420,53 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             Set<String> targetEnvironments = Collections.singleton(environment);
             Map<String, String> gatewayVhosts = Collections.singletonMap(environment, newDeployment.getVhost());
-            apiMgtDAO.removeAPIRevisionDeployment(apiId, deploymentsToRemove);
-
             if (!skipDeployToGateway) {
                 if (!deploymentsToRemove.isEmpty()) {
-                    removeFromGateway(api, deploymentsToRemove, targetEnvironments, false);
+                    try {
+                        removeFromGateway(api, deploymentsToRemove, targetEnvironments, false);
+                    } catch (RuntimeException e) {
+                        if (e instanceof FaultyGatewayDeploymentException) {
+                            Set<String> environments = ((FaultyGatewayDeploymentException) e).getEnvironments();
+                            if (environments != null && !environments.isEmpty()) {
+                                deploymentsToRemove.removeIf(
+                                        deployment -> environments.contains(deployment.getDeployment()));
+                                unDeploymentFailures.addAll(environments);
+                            }
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
 
                 GatewayArtifactsMgtDAO.getInstance()
                         .addAndRemovePublishedGatewayLabels(apiId, revisionUUID,
                                 targetEnvironments, gatewayVhosts, deploymentsToRemove);
-                gatewayManager.deployToGateway(api, organization, targetEnvironments);
+                try {
+                    gatewayManager.deployToGateway(api, organization, targetEnvironments);
+                } catch (RuntimeException e) {
+                    if (e instanceof FaultyGatewayDeploymentException) {
+                        Set<String> environments = ((FaultyGatewayDeploymentException) e).getEnvironments();
+                        if (environments != null && !environments.isEmpty()) {
+                            GatewayArtifactsMgtDAO.getInstance()
+                                    .removePublishedGatewayLabels(apiId, revisionUUID, environments);
+                            apiMgtDAO.removeAPIRevisionDeployment(apiId, revisionUUID, environments);
+                            deploymentFailures.addAll(environments);
+                        }
+                    } else {
+                        throw e;
+                    }
+                }
             }
+            apiMgtDAO.removeAPIRevisionDeployment(apiId, deploymentsToRemove);
             updatePublishedDefaultVersionIfRequired(apiIdentifier, api, organization);
+            if (!deploymentFailures.isEmpty() || !unDeploymentFailures.isEmpty()) {
+                throw new APIManagementException("Errors occurred during deployment/resume of API revision. " +
+                        "Deployment failures in environments: " + String.join(", ", deploymentFailures) +
+                        ". Undeployment failures in environments: " + String.join(", ", unDeploymentFailures) + ".",
+                        ExceptionCodes.from(ExceptionCodes.API_DEPLOYMENT_ERROR, apiId));
+            }
         } catch (APIManagementException e) {
-            log.error("Error while resuming API revision deployment for API ID: " + apiId, e);
+            throw e;
         }
     }
 
@@ -7647,6 +7684,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         API api = getAPIbyUUID(apiId, apiRevision, organization);
         Set<String> environmentsToRemove = new HashSet<>();
+        Set<String> unDeploymentFailures = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
         }
@@ -7665,9 +7703,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (log.isDebugEnabled()) {
             log.debug("Undeploying API revision: " + apiRevision.getRevisionUUID() + " from gateways on delete/retire");
         }
-        removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet(), onDeleteOrRetire);
+        try {
+            removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet(), onDeleteOrRetire);
+        } catch (RuntimeException e) {
+            if (e instanceof FaultyGatewayDeploymentException) {
+                Set<String> environments = ((FaultyGatewayDeploymentException) e).getEnvironments();
+                if (environments != null && !environments.isEmpty()) {
+                    apiRevisionDeployments.removeIf(
+                            deployment -> environments.contains(deployment.getDeployment()));
+                    environmentsToRemove.removeAll(environments);
+                    unDeploymentFailures.addAll(environments);
+                }
+            } else {
+                throw e;
+            }
+        }
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevisionId, environmentsToRemove);
+        if (!unDeploymentFailures.isEmpty()){
+            throw new APIManagementException("Errors occurred during unDeployment of API revision. " +
+                    "UnDeployment failures in environments: " + String.join(", ", unDeploymentFailures) + ".",
+                    ExceptionCodes.from(ExceptionCodes.API_DEPLOYMENT_ERROR, apiId));
+        }
     }
 
     /**

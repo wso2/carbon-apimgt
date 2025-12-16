@@ -876,8 +876,9 @@ public enum ExceptionCodes implements ErrorHandler {
             "Invalid request: Empty or null acknowledgment list"),
     GATEWAY_DEPLOYMENT_STATUS_INTERNAL_SERVER_ERROR(902054, "Internal server error.", 500,
                                                     "Error occurred while retrieving/persisting deployment status "
-                                                            + "acknowledgment");
-
+                                                            + "acknowledgment"),
+    API_DEPLOYMENT_ERROR(902060, "Error while deploying API to Gateway", 207,
+            "Error while deploying API to Gateway. %s");
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;
