@@ -363,7 +363,7 @@ public class RestApiPublisherUtils {
     }
 
     /**
-     * This method will detect the Media Type of the given input stream
+     * This method will detect the Media Type of the given input stream.
      *
      * @param inputStream stream containing the data of which the Media Type has to be detected
      * @return Media Type of the given input stream
