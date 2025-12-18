@@ -542,6 +542,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateResourceThrottlingTiers(api, tenantDomain);
         validateKeyManagers(api);
+        validateKeyManagerScopes(api, tenantDomain);
         // Validate and process API level and operation level policies
         validateAndProcessAPIPolicyParameters(api, null, tenantDomain);
         String apiName = api.getId().getApiName();
@@ -1028,6 +1029,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             checkIfAdditionalPropertyValuesAreNullOrEmpty(new ApiTypeWrapper(api));
         }
 
+        validateKeyManagerScopes(api, tenantDomain);
         // Validate and process API level and operation level policies
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
@@ -1133,8 +1135,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void validateKeyManagerScopes(API api, String tenantDomain) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating key manager scopes for API: " + api.getId().getApiName());
+        }
+
         Set<String> oldLocalScopeKeys;
         Set<String> oldVersionedLocalScopeKeys;
+        Set<String> oldVersionedUnattachedLocalScopeKeys;
         boolean isCreateNewVersion = false;
         int tenantId = -1;
 
@@ -1160,9 +1167,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (api.getUuid() != null && !api.getUuid().isEmpty()) {
             oldLocalScopeKeys = new HashSet<>(apiMgtDAO.getAllLocalScopeKeysForAPI(api.getUuid(), tenantId));
             oldVersionedLocalScopeKeys = apiMgtDAO.getVersionedLocalScopeKeysForAPI(api.getUuid(), tenantId);
+            oldVersionedUnattachedLocalScopeKeys = apiMgtDAO.getAllUnattachedLocalScopeKeysFromVersionedAPIs(
+                    api.getUuid(), tenantId);
         } else {
             oldLocalScopeKeys = Collections.emptySet();
             oldVersionedLocalScopeKeys = Collections.emptySet();
+            oldVersionedUnattachedLocalScopeKeys = Collections.emptySet();
             Set<String> apiVersions = getAPIVersions(api.getId().getProviderName(),
                     api.getId().getApiName(), api.getOrganization());
             if (!apiVersions.isEmpty()) {
@@ -1181,6 +1191,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     .filter(scope -> !oldVersionedLocalScopeKeys.contains(scope))
                     .collect(Collectors.toSet());
         }
+
+        if (!oldVersionedUnattachedLocalScopeKeys.isEmpty()) {
+            scopesToAdd = scopesToAdd.stream()
+                    .filter(scope -> !oldVersionedUnattachedLocalScopeKeys.contains(scope))
+                    .collect(Collectors.toSet());
+        }
+
         for (String scope : scopesToAdd) {
             if (log.isDebugEnabled()) {
                 log.debug("Checking if scope: " + scope + " exists in Key Manager for tenant: " + tenantDomain);
