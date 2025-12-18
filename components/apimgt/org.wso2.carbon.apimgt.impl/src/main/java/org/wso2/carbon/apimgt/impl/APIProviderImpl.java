@@ -9458,7 +9458,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if the additional property value is null or empty string
      */
     private void checkIfAdditionalPropertyValuesAreNullOrEmpty(ApiTypeWrapper wrapper) throws APIManagementException {
-        JSONObject additionalProperties = new JSONObject();
+        JSONObject additionalProperties;
         if (wrapper.isAPIProduct()) {
             additionalProperties = wrapper.getApiProduct().getAdditionalProperties();
         } else {
@@ -9467,8 +9467,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (additionalProperties != null && !additionalProperties.isEmpty()) {
             for (Object entry : additionalProperties.keySet()) {
                 if (additionalProperties.get(entry) == null ||
-                        StringUtils.isEmpty((String) additionalProperties.get(entry))) {
-                    String errorMessage = "Failed to add additional property " + entry + " as the value is null.";
+                        StringUtils.isEmpty(additionalProperties.get(entry).toString())) {
+                    String errorMessage = "Failed to add additional property " + entry + " as the value is null " +
+                            "or empty.";
                     log.error(errorMessage);
                     throw new APIManagementException(errorMessage);
                 }
