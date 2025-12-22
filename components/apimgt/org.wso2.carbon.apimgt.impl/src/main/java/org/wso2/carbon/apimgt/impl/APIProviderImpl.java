@@ -1338,7 +1338,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         .forEach(validKeyManagers::add);
             }
         }
-        if (validKeyManagers.isEmpty()) {
+        if (validKeyManagers.isEmpty() && !api.isInitiatedFromGateway()) {
             throw new APIManagementException(
                     "API must have at least one valid and enabled key manager configured",
                     ExceptionCodes.KEY_MANAGER_NOT_FOUND);
