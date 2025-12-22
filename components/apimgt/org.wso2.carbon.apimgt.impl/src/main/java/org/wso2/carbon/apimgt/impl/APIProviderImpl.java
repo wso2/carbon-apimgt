@@ -556,6 +556,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
 
+        if (api.getAdditionalProperties() != null) {
+            checkIfAdditionalPropertyValuesAreNullOrEmpty(new ApiTypeWrapper(api));
+        }
+
         //Validate API with Federated Gateway
         if (!api.isInitiatedFromGateway()) {
             APIUtil.validateApiWithFederatedGateway(api);
@@ -1020,6 +1024,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
         validateKeyManagers(api, existingAPI.getKeyManagers());
+
+        if (api.getAdditionalProperties() != null) {
+            checkIfAdditionalPropertyValuesAreNullOrEmpty(new ApiTypeWrapper(api));
+        }
+
         validateKeyManagerScopes(api, tenantDomain);
         // Validate and process API level and operation level policies
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
@@ -5504,6 +5513,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetTransports(apiProduct);
         validateAndSetAPISecurity(apiProduct);
 
+        if (apiProduct.getAdditionalProperties() != null) {
+            checkIfAdditionalPropertyValuesAreNullOrEmpty(new ApiTypeWrapper(apiProduct));
+        }
+
         PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
         PublisherAPIProduct addedAPIProduct;
         try {
@@ -5538,6 +5551,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Validate Transports and Security
         validateAndSetTransports(apiProduct);
         validateAndSetAPISecurity(apiProduct);
+
+        if (apiProduct.getAdditionalProperties() != null) {
+            checkIfAdditionalPropertyValuesAreNullOrEmpty(new ApiTypeWrapper(apiProduct));
+        }
 
         PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
         PublisherAPIProduct addedAPIProduct;
@@ -9446,6 +9463,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 BackendOperationMapping backendOperationMapping = uriTemplate.getBackendOperationMapping();
                 if (backendOperationMapping != null) {
                     backendOperationMapping.setBackendId(newBackendId);
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks whether the additional property values are null or empty strings.
+     *
+     * @param wrapper API/APIProduct wrapper
+     * @throws APIManagementException if the additional property value is null or empty string
+     */
+    private void checkIfAdditionalPropertyValuesAreNullOrEmpty(ApiTypeWrapper wrapper) throws APIManagementException {
+        JSONObject additionalProperties;
+        if (wrapper.isAPIProduct()) {
+            additionalProperties = wrapper.getApiProduct().getAdditionalProperties();
+        } else {
+            additionalProperties = wrapper.getApi().getAdditionalProperties();
+        }
+        if (additionalProperties != null && !additionalProperties.isEmpty()) {
+            for (Object entry : additionalProperties.keySet()) {
+                if (additionalProperties.get(entry) == null ||
+                        StringUtils.isEmpty(additionalProperties.get(entry).toString())) {
+                    String errorMessage = "Failed to add additional property " + entry + " as the value is null " +
+                            "or empty.";
+                    log.error(errorMessage);
+                    throw new APIManagementException(errorMessage);
                 }
             }
         }
