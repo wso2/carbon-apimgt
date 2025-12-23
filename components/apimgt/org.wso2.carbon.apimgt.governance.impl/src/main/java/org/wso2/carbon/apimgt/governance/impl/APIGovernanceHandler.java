@@ -483,7 +483,7 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(apiProjectZip))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().contains(APIMGovernanceConstants.API_FILE_NAME)) {
+                if (entry.getName().contains(File.separator + APIMGovernanceConstants.API_FILE_NAME)) {
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     byte[] buffer = new byte[1024];
                     int length;
