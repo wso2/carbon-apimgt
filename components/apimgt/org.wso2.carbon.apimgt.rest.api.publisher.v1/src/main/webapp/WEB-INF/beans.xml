@@ -86,7 +86,9 @@
                   value="#{systemProperties['rest.api.publisher.allowed.origins'] != null ?
                       systemProperties['rest.api.publisher.allowed.origins'].split(',') : {}}"/>
     </bean>
-    <bean id="OrganizationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor"/>
+    <bean id="OrganizationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor">
+        <property name="allowTenantHeader" value="false" />
+    </bean>
     <bean id="ResourceQuotaLimitInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.quotalimit.ResourceQuotaLimitInterceptor"/>
 
     <!-- Out interceptors -->

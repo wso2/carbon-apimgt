@@ -36,12 +36,18 @@ public class OnPremResolver implements OrganizationResolver {
 
     @Override
     public String resolve(Map<String, Object> properties) throws APIManagementException {
-        ArrayList requestedTenantDomain = (ArrayList) ((TreeMap) (properties.get(APIConstants.PROPERTY_HEADERS_KEY)))
-                .get(HEADER_X_WSO2_TENANT);
-        if (requestedTenantDomain == null || requestedTenantDomain.isEmpty()) {
+        Object tenantHeaderAllowedProperty = properties.get(APIConstants.PROPERTY_ALLOW_TENANT_HEADER_KEY);
+        boolean isTenantHeaderAllowed = tenantHeaderAllowedProperty == null || (Boolean) tenantHeaderAllowedProperty;
+        ArrayList requestedTenantDomain = null;
+        if (isTenantHeaderAllowed) {
             requestedTenantDomain = (ArrayList) ((TreeMap) (properties.get(APIConstants.PROPERTY_HEADERS_KEY)))
-                    .get(APIConstants.HEADER_TENANT);
+                    .get(HEADER_X_WSO2_TENANT);
+            if (requestedTenantDomain == null || requestedTenantDomain.isEmpty()) {
+                requestedTenantDomain = (ArrayList) ((TreeMap) (properties.get(APIConstants.PROPERTY_HEADERS_KEY)))
+                        .get(APIConstants.HEADER_TENANT);
+            }
         }
+
         String tenantDomain = null;
         if (requestedTenantDomain != null) {
             String header = requestedTenantDomain.get(0).toString();
