@@ -630,7 +630,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public ConsumerSecretInfo generateNewApplicationConsumerSecret(ConsumerSecretRequest consumerSecretRequest)
             throws APIManagementException {
 
-        ClientSecret clientSecret = null;
+        ClientSecret clientSecret;
         String clientId = consumerSecretRequest.getClientId();
         String encodedClientId = Base64.getUrlEncoder()
                 .encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
