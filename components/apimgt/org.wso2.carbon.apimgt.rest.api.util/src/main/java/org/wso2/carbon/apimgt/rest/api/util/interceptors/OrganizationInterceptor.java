@@ -35,11 +35,13 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 public class OrganizationInterceptor extends AbstractPhaseInterceptor {
 
     private static final Log logger = LogFactory.getLog(OrganizationInterceptor.class);
+    private boolean allowTenantHeader;
 
     public OrganizationInterceptor() {
         // We will use PRE_INVOKE phase as we need to process message before hit actual
         // service
         super(Phase.PRE_INVOKE);
+        this.allowTenantHeader = true;
     }
 
     @Override
@@ -52,6 +54,7 @@ public class OrganizationInterceptor extends AbstractPhaseInterceptor {
             HashMap<String, Object> properties = new HashMap<String, Object>();
             properties.put(APIConstants.PROPERTY_HEADERS_KEY, message.get(Message.PROTOCOL_HEADERS));
             properties.put(APIConstants.PROPERTY_QUERY_KEY, message.get(Message.QUERY_STRING));
+            properties.put(APIConstants.PROPERTY_ALLOW_TENANT_HEADER_KEY, allowTenantHeader);
             
             String organization = resolver.resolve(properties);
             message.put(RestApiConstants.ORGANIZATION, organization);
@@ -63,6 +66,10 @@ public class OrganizationInterceptor extends AbstractPhaseInterceptor {
             }
         }
         logger.debug("Organization :" + message.get(RestApiConstants.ORGANIZATION));
+    }
+
+    public void setAllowTenantHeader(boolean allowTenantHeader) {
+        this.allowTenantHeader = allowTenantHeader;
     }
 
 }

@@ -99,7 +99,9 @@
                       systemProperties['rest.api.admin.allowed.origins'].split(',') : {}}"/>
     </bean>
 
-    <bean id="OrganizationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor"/>
+    <bean id="OrganizationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor">
+        <property name="allowTenantHeader" value="false" />
+    </bean>
 
     <!-- Out interceptors -->
     <bean id="gZipInterceptor" class="org.apache.cxf.transport.common.gzip.GZIPOutInterceptor" />

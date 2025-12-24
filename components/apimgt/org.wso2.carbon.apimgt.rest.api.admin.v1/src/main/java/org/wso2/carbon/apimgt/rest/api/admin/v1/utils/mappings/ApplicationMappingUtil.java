@@ -133,15 +133,19 @@ public class ApplicationMappingUtil {
 
     public static List<ScopeInfoDTO> getScopeInfoDTO(Set<Scope> scopes) {
         List<ScopeInfoDTO> scopeDto = new ArrayList<ScopeInfoDTO>();
-        for (Scope scope : scopes) {
-            ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO();
-            scopeInfoDTO.setKey(scope.getKey());
-            scopeInfoDTO.setName(scope.getName());
-            scopeInfoDTO.setDescription(scope.getDescription());
-            if (StringUtils.isNotBlank(scope.getRoles())) {
-                scopeInfoDTO.setRoles(Arrays.asList(scope.getRoles().trim().split(",")));
+        if (scopes != null && !scopes.isEmpty()) {
+            for (Scope scope : scopes) {
+                if (scope != null) {
+                    ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO();
+                    scopeInfoDTO.setKey(scope.getKey());
+                    scopeInfoDTO.setName(scope.getName());
+                    scopeInfoDTO.setDescription(scope.getDescription());
+                    if (StringUtils.isNotBlank(scope.getRoles())) {
+                        scopeInfoDTO.setRoles(Arrays.asList(scope.getRoles().trim().split(",")));
+                    }
+                    scopeDto.add(scopeInfoDTO);
+                }
             }
-            scopeDto.add(scopeInfoDTO);
         }
         return scopeDto;
     }
