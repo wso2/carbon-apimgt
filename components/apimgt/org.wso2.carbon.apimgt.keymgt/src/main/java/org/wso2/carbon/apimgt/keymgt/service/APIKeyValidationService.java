@@ -166,9 +166,14 @@ public class APIKeyValidationService {
 
         if (state) {
             // Set the end user name
-            String endUser = getEndUserFromValidationContext(validationContext);
-            validationContext.getValidationInfoDTO().setEndUserName(endUser);
+            if (validationContext.getTokenInfo() != null) {
+                // If the token is an app token, set the subscriber as the end user name
+                // Otherwise keep the end user from the token info
+                String endUser = getEndUserFromValidationContext(validationContext);
+                validationContext.getValidationInfoDTO().setEndUserName(endUser);
+            }
 
+            // Validate scopes
             Timer timer4 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "VALIDATE_SCOPES"));
             Timer.Context timerContext4 = timer4.start();
