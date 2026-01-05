@@ -3528,6 +3528,7 @@ public final class APIConstants {
 
     public static final String  PROPERTY_QUERY_KEY = "query";
     public static final String  PROPERTY_HEADERS_KEY = "headers";
+    public static final String  PROPERTY_ALLOW_TENANT_HEADER_KEY = "allowTenantHeader";
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
 
     //Constants related to Operation Policies
