@@ -404,6 +404,12 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
         if (scheduledDiscoveryTasks.containsKey(taskKey)) {
             scheduledDiscoveryTasks.get(taskKey).cancel(true);
             scheduledDiscoveryTasks.remove(taskKey);
+            // Cancel and remove associated heartbeat task
+            ScheduledFuture<?> heartbeat = scheduledHeartBeatTasks.get(taskKey);
+            if (heartbeat != null) {
+                heartbeat.cancel(true);
+                scheduledHeartBeatTasks.remove(taskKey);
+            }
             log.info("Stopped federated API discovery task for environment: " + environment.getName()
                     + " in organization: " + organization);
         }
