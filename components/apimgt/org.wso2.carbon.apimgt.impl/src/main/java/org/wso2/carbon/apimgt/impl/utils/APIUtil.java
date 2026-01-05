@@ -12056,7 +12056,6 @@ public final class APIUtil {
             federatedAPIDiscoveryService.stopDiscovery(environment, organization);
             log.debug("Successfully stopped federated API discovery for environment: " + environment.getName());
         }
-        }
     }
 
     /**
