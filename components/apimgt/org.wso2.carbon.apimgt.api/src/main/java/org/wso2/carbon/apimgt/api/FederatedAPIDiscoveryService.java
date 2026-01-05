@@ -26,17 +26,20 @@ import org.wso2.carbon.apimgt.api.model.Environment;
  * This interface provides functionality to schedule the discovery of APIs from a federated environment.
  */
 public interface FederatedAPIDiscoveryService {
+
     /**
-     * Schedules the discovery of APIs from a federated environment.
-     * @param environment getFederatedEnvironment
-     * @param organization organization of the environment
+     * Schedules the discovery of APIs from the specified federated environment for a given organization.
+     *
+     * @param environment the federated environment where the API discovery will be scheduled
+     * @param organization the organization associated with the specified environment
      */
     void scheduleDiscovery(Environment environment, String organization);
 
     /**
-     * Stops the discovery of APIs from a federated environment.
-     * @param environment getFederatedEnvironment
-     * @param organization organization of the environment
+     * Stops the discovery of APIs from the specified federated environment for a given organization.
+     *
+     * @param environment the federated environment where the API discovery should be stopped
+     * @param organization the organization associated with the specified environment
      */
     void stopDiscovery(Environment environment, String organization);
 }
