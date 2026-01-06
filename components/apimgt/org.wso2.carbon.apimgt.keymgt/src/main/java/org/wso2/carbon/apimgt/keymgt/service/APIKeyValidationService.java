@@ -165,10 +165,9 @@ public class APIKeyValidationService {
         log.debug("State after calling validateSubscription... " + state);
 
         if (state) {
-            // Set the end user name
-            if (validationContext.getTokenInfo() != null) {
+            if (validationContext.getTokenInfo() != null
+                    && validationContext.getTokenInfo().isApplicationToken()) {
                 // If the token is an app token, set the subscriber as the end user name
-                // Otherwise keep the end user from the token info
                 String endUser = getEndUserFromValidationContext(validationContext);
                 validationContext.getValidationInfoDTO().setEndUserName(endUser);
             }
