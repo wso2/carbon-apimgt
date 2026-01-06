@@ -217,12 +217,19 @@ public class APIMappingUtil {
             context = "/t/" + providerDomain + context;
         }
 
-        // This is to support the pluggable version strategy
-        // if the context does not contain any {version} segment, we use the default version strategy.
-        context = checkAndSetVersionParam(context);
-        model.setContextTemplate(context);
+        boolean isDiscoveredWebSocket = Boolean.TRUE.equals(dto.isInitiatedFromGateway())
+                && APIDTO.TypeEnum.WS.equals(dto.getType());
 
-        context = updateContextWithVersion(dto.getVersion(), originalContext, context);
+        if (!isDiscoveredWebSocket){
+            // This is to support the pluggable version strategy
+            // if the context does not contain any {version} segment, we use the default version strategy.
+            context = checkAndSetVersionParam(context);
+            model.setContextTemplate(context);
+
+            context = updateContextWithVersion(dto.getVersion(), originalContext, context);
+        } else{
+            model.setContextTemplate(context);
+        }
         model.setContext(context);
         model.setDescription(dto.getDescription());
         model.setDisplayName((dto.getDisplayName() != null && !dto.getDisplayName().trim().isEmpty())
