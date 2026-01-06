@@ -292,10 +292,25 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     JsonObject apiJson = (JsonObject) new Gson().toJsonTree(apidto);
                     apiJson = CommonUtil.addTypeAndVersionToFile(ImportExportConstants.TYPE_API,
                             ImportExportConstants.APIM_VERSION, apiJson);
+                    String definition;
+                    if (api.isAsync()) {
+                        definition = api.getAsyncApiDefinition();
+                    } else {
+                        definition = api.getSwaggerDefinition();
+                    }
+
+                    if (definition == null || StringUtils.isBlank(definition)) {
+                        log.warn("API definition is empty for: " + apidto.getName() + " version: " + apidto.getVersion());
+                        if (log.isDebugEnabled()) {
+                            log.debug("API type: " + apidto.getType() + ", API object: " + api.toString());
+                        }
+                        continue;
+                    }
+                    
                     InputStream apiZip = FederatedGatewayUtil.createZipAsInputStream(
-                            apiJson.toString(), api.getSwaggerDefinition(),
+                            apiJson.toString(), definition,
                             FederatedGatewayUtil.createDeploymentYaml(environment),
-                            apidto.getName());
+                            apidto.getName(), api.isAsync());
 
                     ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
 
