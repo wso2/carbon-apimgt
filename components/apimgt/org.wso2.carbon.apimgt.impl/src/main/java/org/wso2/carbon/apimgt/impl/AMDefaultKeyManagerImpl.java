@@ -66,7 +66,6 @@ import org.wso2.carbon.apimgt.impl.kmclient.model.TokenInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.UserClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
-import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -704,7 +703,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         } catch (KeyManagerClientException e) {
             String errMsg = "Error while deleting consumer secret of clientId : " + clientId;
             throw new APIManagementException(errMsg, e, ExceptionCodes
-                    .from(ExceptionCodes.CLIENT_SECRET_RETRIEVAL_FAILED, clientId));
+                    .from(ExceptionCodes.CLIENT_SECRET_DELETION_FAILED, clientId));
         }
     }
 
