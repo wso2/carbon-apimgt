@@ -9,6 +9,7 @@ import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayFeatureCatalogDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsAiApiConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsCustomPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberContactAttributeDTO;
 import javax.validation.constraints.*;
@@ -48,6 +49,7 @@ public class SettingsDTO   {
     private Boolean allowSubscriptionValidationDisabling = true;
     private Boolean designAssistantEnabled = true;
     private Boolean aiAuthTokenProvided = false;
+    private SettingsAiApiConfigurationDTO aiApiConfiguration = null;
     private Boolean isGatewayNotificationEnabled = false;
     private Boolean isMCPSupportEnabled = true;
     private List<SettingsCustomPropertiesDTO> customProperties = new ArrayList<SettingsCustomPropertiesDTO>();
@@ -428,6 +430,24 @@ public class SettingsDTO   {
   }
 
   /**
+   **/
+  public SettingsDTO aiApiConfiguration(SettingsAiApiConfigurationDTO aiApiConfiguration) {
+    this.aiApiConfiguration = aiApiConfiguration;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("aiApiConfiguration")
+  public SettingsAiApiConfigurationDTO getAiApiConfiguration() {
+    return aiApiConfiguration;
+  }
+  public void setAiApiConfiguration(SettingsAiApiConfigurationDTO aiApiConfiguration) {
+    this.aiApiConfiguration = aiApiConfiguration;
+  }
+
+  /**
    * Is Gateway Notification Enabled
    **/
   public SettingsDTO isGatewayNotificationEnabled(Boolean isGatewayNotificationEnabled) {
@@ -512,6 +532,7 @@ public class SettingsDTO   {
         Objects.equals(allowSubscriptionValidationDisabling, settings.allowSubscriptionValidationDisabling) &&
         Objects.equals(designAssistantEnabled, settings.designAssistantEnabled) &&
         Objects.equals(aiAuthTokenProvided, settings.aiAuthTokenProvided) &&
+        Objects.equals(aiApiConfiguration, settings.aiApiConfiguration) &&
         Objects.equals(isGatewayNotificationEnabled, settings.isGatewayNotificationEnabled) &&
         Objects.equals(isMCPSupportEnabled, settings.isMCPSupportEnabled) &&
         Objects.equals(customProperties, settings.customProperties);
@@ -519,7 +540,7 @@ public class SettingsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, designAssistantEnabled, aiAuthTokenProvided, isGatewayNotificationEnabled, isMCPSupportEnabled, customProperties);
+    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, designAssistantEnabled, aiAuthTokenProvided, aiApiConfiguration, isGatewayNotificationEnabled, isMCPSupportEnabled, customProperties);
   }
 
   @Override
@@ -548,6 +569,7 @@ public class SettingsDTO   {
     sb.append("    allowSubscriptionValidationDisabling: ").append(toIndentedString(allowSubscriptionValidationDisabling)).append("\n");
     sb.append("    designAssistantEnabled: ").append(toIndentedString(designAssistantEnabled)).append("\n");
     sb.append("    aiAuthTokenProvided: ").append(toIndentedString(aiAuthTokenProvided)).append("\n");
+    sb.append("    aiApiConfiguration: ").append(toIndentedString(aiApiConfiguration)).append("\n");
     sb.append("    isGatewayNotificationEnabled: ").append(toIndentedString(isGatewayNotificationEnabled)).append("\n");
     sb.append("    isMCPSupportEnabled: ").append(toIndentedString(isMCPSupportEnabled)).append("\n");
     sb.append("    customProperties: ").append(toIndentedString(customProperties)).append("\n");

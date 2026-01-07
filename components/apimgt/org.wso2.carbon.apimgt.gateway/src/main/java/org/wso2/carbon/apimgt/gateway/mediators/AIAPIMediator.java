@@ -186,8 +186,32 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             return;
         }
 
-        messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
-                APIConstants.AIAPIConstants.DEFAULT_ENDPOINT);
+        // Handle Intelligent Model Routing configs
+        Map<String, Object> intelligentRoutingConfigs;
+        if (messageContext.getProperty(APIConstants.AIAPIConstants.INTELLIGENT_MODEL_ROUTING_CONFIGS) != null) {
+            intelligentRoutingConfigs =
+                    (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.INTELLIGENT_MODEL_ROUTING_CONFIGS);
+            handleIntelligentRouting(messageContext, providerConfiguration, intelligentRoutingConfigs, provider);
+            if (log.isDebugEnabled()) {
+                log.debug("Intelligent model routing configured, processing with routing configurations");
+            }
+            return;
+        }
+
+        // Handle Semantic Routing configs
+        Map<String, Object> semanticRoutingConfigs;
+        if (messageContext.getProperty(APIConstants.AIAPIConstants.SEMANTIC_ROUTING_CONFIGS) != null) {
+            semanticRoutingConfigs =
+                    (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.SEMANTIC_ROUTING_CONFIGS);
+            handleSemanticRouting(messageContext, providerConfiguration, semanticRoutingConfigs, provider);
+            if (log.isDebugEnabled()) {
+                log.debug("Semantic routing configured, processing with routing configurations");
+            }
+            return;
+        }
+
+       messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
+               APIConstants.AIAPIConstants.DEFAULT_ENDPOINT);
 
         Map<String, FailoverPolicyConfigDTO> failoverConfigMap = null;
 
@@ -422,6 +446,114 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         }
 
         messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, targetModelEndpoint.getEndpointId());
+    }
+
+    /**
+     * Handles intelligent model routing by modifying the request payload based on the target model metadata.
+     *
+     * @param messageContext        The Synapse message context
+     * @param providerConfiguration The LLM provider configuration
+     * @param routingConfigs        The intelligent routing configurations
+     * @param provider              LLM service provider
+     * @throws XMLStreamException If an error occurs while processing the XML message.
+     * @throws IOException        If an I/O error occurs during request modification.
+     */
+    private void handleIntelligentRouting(
+            MessageContext messageContext, LLMProviderConfiguration providerConfiguration,
+            Map<String, Object> routingConfigs, LLMProviderInfo provider)
+            throws XMLStreamException, IOException {
+
+        LLMProviderMetadata targetModelMetadata = getTargetModelMetadata(providerConfiguration);
+        if (targetModelMetadata == null) {
+            log.error("Target model metadata is null for intelligent routing.");
+            return;
+        }
+
+        ModelEndpointDTO targetModelEndpoint =
+                (ModelEndpointDTO) routingConfigs.get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
+
+        if (targetModelEndpoint == null) {
+            log.error("Target model endpoint is null for intelligent routing.");
+            return;
+        }
+
+        if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(targetModelMetadata.getInputSource())) {
+            org.apache.axis2.context.MessageContext axis2Ctx =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            RelayUtils.buildMessage(axis2Ctx);
+            boolean isProviderAzureV1 = isAzureV1Provider(provider);
+
+            if (!isProviderAzureV1) {
+                modifyRequestPayload(targetModelEndpoint.getModel(), targetModelMetadata, axis2Ctx);
+                if (log.isDebugEnabled()) {
+                    log.debug("Intelligent routing: Modified request payload with model: " + targetModelEndpoint.getModel());
+                }
+            }
+        } else if (APIConstants.AIAPIConstants.INPUT_SOURCE_PATH.equalsIgnoreCase(
+                targetModelMetadata.getInputSource())) {
+            modifyRequestPath(targetModelEndpoint.getModel(), targetModelMetadata, messageContext);
+            if (log.isDebugEnabled()) {
+                log.debug("Intelligent routing: Modified request path with model: " + targetModelEndpoint.getModel());
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
+            }
+        }
+    }
+
+    /**
+     * Handles semantic routing by modifying the request payload based on the target model metadata.
+     *
+     * @param messageContext        The Synapse message context
+     * @param providerConfiguration The LLM provider configuration
+     * @param routingConfigs        The semantic routing configurations
+     * @param provider              LLM service provider
+     * @throws XMLStreamException If an error occurs while processing the XML message.
+     * @throws IOException        If an I/O error occurs during request modification.
+     */
+    private void handleSemanticRouting(
+            MessageContext messageContext, LLMProviderConfiguration providerConfiguration,
+            Map<String, Object> routingConfigs, LLMProviderInfo provider)
+            throws XMLStreamException, IOException {
+
+        LLMProviderMetadata targetModelMetadata = getTargetModelMetadata(providerConfiguration);
+        if (targetModelMetadata == null) {
+            log.error("Target model metadata is null for semantic routing.");
+            return;
+        }
+
+        ModelEndpointDTO targetModelEndpoint =
+                (ModelEndpointDTO) routingConfigs.get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
+
+        if (targetModelEndpoint == null) {
+            log.error("Target model endpoint is null for semantic routing.");
+            return;
+        }
+
+        if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(targetModelMetadata.getInputSource())) {
+            org.apache.axis2.context.MessageContext axis2Ctx =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            RelayUtils.buildMessage(axis2Ctx);
+            boolean isProviderAzureV1 = isAzureV1Provider(provider);
+
+            if (!isProviderAzureV1) {
+                modifyRequestPayload(targetModelEndpoint.getModel(), targetModelMetadata, axis2Ctx);
+                if (log.isDebugEnabled()) {
+                    log.debug("Semantic routing: Modified request payload with model: " + targetModelEndpoint.getModel());
+                }
+            }
+        } else if (APIConstants.AIAPIConstants.INPUT_SOURCE_PATH.equalsIgnoreCase(
+                targetModelMetadata.getInputSource())) {
+            modifyRequestPath(targetModelEndpoint.getModel(), targetModelMetadata, messageContext);
+            if (log.isDebugEnabled()) {
+                log.debug("Semantic routing: Modified request path with model: " + targetModelEndpoint.getModel());
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
+            }
+        }
     }
 
     /**

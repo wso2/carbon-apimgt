@@ -2043,6 +2043,12 @@
               {% endfor %}
           </EmbeddingProvider>
 
+          <LLMProvider type="{{apim.ai.llm_provider.type}}">
+              {% for key,value in apim.ai.llm_provider.properties.items() %}
+              <Property name="{{key}}">{{value}}</Property>
+              {% endfor %}
+          </LLMProvider>
+
           <VectorDBProvider type="{{apim.ai.vector_db_provider.type}}">
                 {% for key,value in apim.ai.vector_db_provider.properties.items() %}
                 <Property name="{{key}}">{{value}}</Property>

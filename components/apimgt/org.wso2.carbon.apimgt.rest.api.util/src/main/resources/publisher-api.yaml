@@ -15235,6 +15235,18 @@ components:
           type: boolean
           description: Checks if the auth token is provided for AI service usage.
           default: false
+        aiApiConfiguration:
+          type: object
+          description: AI provider configuration status
+          properties:
+            llmProviderConfigured:
+              type: boolean
+              description: Checks if LLM provider is configured in deployment.toml
+              default: false
+            embeddingProviderConfigured:
+              type: boolean
+              description: Checks if Embedding provider is configured in deployment.toml
+              default: false
         isMCPSupportEnabled:
           type: boolean
           description: This indicates whether the MCP support is enabled or not.
