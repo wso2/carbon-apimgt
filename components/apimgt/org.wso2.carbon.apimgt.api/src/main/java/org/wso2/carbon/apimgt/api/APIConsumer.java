@@ -641,7 +641,7 @@ public interface APIConsumer extends APIManager {
 
     default List<ConsumerSecretInfo> retrieveConsumerSecrets(String clientId, String keyManagerName)
             throws APIManagementException {
-        throw new UnsupportedOperationException("Generating new consumer secret is not supported");
+        throw new UnsupportedOperationException("Retrieving consumer secrets is not supported");
     }
 
     default void deleteConsumerSecret(String secretId, String keyManagerName,
