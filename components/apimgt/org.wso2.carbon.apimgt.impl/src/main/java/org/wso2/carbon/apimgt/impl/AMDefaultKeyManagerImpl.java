@@ -685,6 +685,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             return null;
         }
         List<ConsumerSecretInfo> consumerSecretInfoList = new ArrayList<>();
+        if (clientSecretList.getList() == null) {
+            return consumerSecretInfoList;
+        }
         for (ClientSecret clientSecret : clientSecretList.getList()) {
             consumerSecretInfoList.add(getConsumerSecretInfo(clientSecret, true));
         }
