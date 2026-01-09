@@ -3115,6 +3115,8 @@ public final class APIConstants {
         public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";
         public static final String ENABLE_MULTIPLE_CLIENT_SECRETS = "enable_multiple_client_secrets";
         public static final String CLIENT_SECRET_COUNT = "client_secret_count";
+        public static final String CLIENT_SECRET_DESCRIPTION = "client_secret_description";
+        public static final String CLIENT_SECRET_EXPIRES_IN = "client_secret_expires_in";
 
         public static class KeyManagerEvent {
 

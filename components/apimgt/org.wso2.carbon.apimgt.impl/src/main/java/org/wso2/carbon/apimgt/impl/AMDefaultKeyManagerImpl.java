@@ -409,6 +409,36 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             }
         }
 
+        if (additionalProperties.containsKey(APIConstants.KeyManager.CLIENT_SECRET_DESCRIPTION)) {
+            Object clientSecretDescriptionValue =
+                    additionalProperties.get(APIConstants.KeyManager.CLIENT_SECRET_DESCRIPTION);
+            if (clientSecretDescriptionValue instanceof String) {
+                if (!APIConstants.KeyManager.CLIENT_SECRET_DESCRIPTION.equals(clientSecretDescriptionValue)) {
+                    String clientSecretDescription = (String) clientSecretDescriptionValue;
+                    clientInfo.setClientSecretDescription(clientSecretDescription);
+                }
+            }
+        }
+
+        if (additionalProperties.containsKey(APIConstants.KeyManager.CLIENT_SECRET_EXPIRES_IN)) {
+            Object clientSecretExpiresInObject =
+                    additionalProperties.get(APIConstants.KeyManager.CLIENT_SECRET_EXPIRES_IN);
+            try {
+                if (clientSecretExpiresInObject instanceof String) {
+                    if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(clientSecretExpiresInObject)) {
+                        long expiresIn = Long.parseLong((String) clientSecretExpiresInObject);
+                        clientInfo.setClientSecretExpiresIn(expiresIn);
+                    }
+                } else if (clientSecretExpiresInObject instanceof Number) {
+                    long expiresIn = ((Number) clientSecretExpiresInObject).longValue();
+                    clientInfo.setClientSecretExpiresIn(expiresIn);
+                }
+            } catch (NumberFormatException e) {
+                // No need to throw as it's due to a non-numeric value.
+                log.debug("Invalid client secret expires-in value given for " + oauthClientName, e);
+            }
+        }
+
         // Set the display name of the application. This name would appear in the consent page of the app.
         clientInfo.setApplicationDisplayName(info.getClientName());
 
@@ -1533,6 +1563,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                                         throw new APIManagementException(errMsg, ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
                                     }
                                 } else {
+                                    if (APIConstants.KeyManager.CLIENT_SECRET_DESCRIPTION.equals(entry.getKey())) {
+                                        continue; // Skip numeric validation for this property
+                                    }
                                     Long longValue = Long.parseLong(additionalProperty);
                                     if (longValue < 0) {
                                         String errMsg = "Application configuration values cannot have negative values.";
