@@ -1280,6 +1280,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             ConsumerSecretDTO consumerSecretResponseDTO = ApplicationKeyMappingUtil.
                     fromConsumerSecretToDTO(consumerSecret);
             return Response.status(Response.Status.CREATED).entity(consumerSecretResponseDTO).build();
+        } else {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APP_CONSUMER_KEY, keyMappingId, log);
         }
         return null;
     }
@@ -1305,6 +1307,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             ConsumerSecretListDTO consumerSecretListDTO = ApplicationKeyMappingUtil.
                     fromConsumerSecretListToDTO(consumerSecrets);
             return Response.ok().entity(consumerSecretListDTO).build();
+        } else {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APP_CONSUMER_KEY, keyMappingId, log);
         }
         return null;
     }
@@ -1331,6 +1335,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             apiConsumer.deleteConsumerSecret(consumerSecretDeletionRequestDTO.getSecretId(),
                     applicationKeyDTO.getKeyManager(), consumerSecretRequest);
             return Response.noContent().build();
+        } else {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APP_CONSUMER_KEY, keyMappingId, log);
         }
         return null;
     }

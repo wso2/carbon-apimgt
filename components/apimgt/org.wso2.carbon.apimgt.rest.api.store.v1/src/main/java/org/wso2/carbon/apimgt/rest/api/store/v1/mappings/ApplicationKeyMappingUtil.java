@@ -156,7 +156,7 @@ public class ApplicationKeyMappingUtil {
     }
 
     public static ConsumerSecretRequest buildConsumerSecretRequest(String clientId,
-                                                                       Map<String, Object> additionalProperties) {
+                                                                   Map<String, Object> additionalProperties) {
         ConsumerSecretRequest consumerSecretRequest = new ConsumerSecretRequest();
         consumerSecretRequest.setClientId(clientId);
         if (additionalProperties != null) {
