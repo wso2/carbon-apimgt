@@ -540,7 +540,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Path("/{applicationId}/oauth-keys/{keyMappingId}/generate-secret")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Generate a New Consumer Secret ", notes = "This operation can be used to generate a new consumer secret for an application for the give key type ", response = ConsumerSecretDTO.class, authorizations = {
+    @ApiOperation(value = "Generate a New Consumer Secret ", notes = "This operation can be used to generate a new consumer secret for an application for the given key type ", response = ConsumerSecretDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
             @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
@@ -560,7 +560,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Path("/{applicationId}/oauth-keys/{keyMappingId}/secrets")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve Consumer Secrets ", notes = "This operation can be used to retrieve consumer secrets of an application for the give key type ", response = ConsumerSecretListDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve Consumer Secrets ", notes = "This operation can be used to retrieve consumer secrets of an application for the given key type ", response = ConsumerSecretListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
             @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")

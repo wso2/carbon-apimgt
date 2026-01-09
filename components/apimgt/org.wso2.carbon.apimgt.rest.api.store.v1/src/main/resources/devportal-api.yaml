@@ -3236,7 +3236,7 @@ paths:
       summary: |
         Generate a New Consumer Secret
       description: |
-        This operation can be used to generate a new consumer secret for an application for the give key type
+        This operation can be used to generate a new consumer secret for an application for the given key type
       operationId: generateConsumerSecret
       parameters:
         - $ref: '#/components/parameters/applicationId'
@@ -3284,8 +3284,13 @@ paths:
             - apim:app_manage
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -X POST "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/generate-secret"'
+          source: |
+            curl -k \
+              -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" \
+              -H "Content-Type: application/json" \
+              -X POST \
+              -d '{"additionalProperties":{"description":"pizza application secret7","expiresIn":86400}}' \
+              "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/generate-secret"
   /applications/{applicationId}/oauth-keys/{keyMappingId}/secrets:
     get:
       tags:
@@ -3293,7 +3298,7 @@ paths:
       summary: |
         Retrieve Consumer Secrets
       description: |
-        This operation can be used to retrieve consumer secrets of an application for the give key type
+        This operation can be used to retrieve consumer secrets of an application for the given key type
       operationId: getConsumerSecrets
       parameters:
         - $ref: '#/components/parameters/applicationId'
@@ -3373,8 +3378,13 @@ paths:
             - apim:app_manage
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -X DELETE "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/secrets/4efd2684-9657-4a01-a956-16cd89e96077"'
+          source: |
+            curl -k \
+              -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" \
+              -H "Content-Type: application/json" \
+              -X POST \
+              -d '{"secretId":"sec_123456"}' \
+              "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/oauth-keys/df972173-c957-46d4-96ac-99be8e303584/secrets/4efd2684-9657-4a01-a956-16cd89e96077"
 
   /applications/{applicationId}/api-keys/{keyType}/generate:
     post:
@@ -7593,9 +7603,9 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            code: 401
+            code: 403
             message: Forbidden
-            description: The user do not have permission to perform this action
+            description: The user does not have permission to perform this action
             moreInfo: ""
             error: [ ]
     UnsupportedMediaType:
@@ -7724,14 +7734,6 @@ components:
       in: path
       description: |
         OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping.
-      required: true
-      schema:
-        type: string
-    secretId:
-      name: secretId
-      in: path
-      description: |
-        Unique identifier of the secret
       required: true
       schema:
         type: string
