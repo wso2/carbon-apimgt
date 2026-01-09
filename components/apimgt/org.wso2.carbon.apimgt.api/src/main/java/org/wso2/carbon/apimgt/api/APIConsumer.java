@@ -633,17 +633,56 @@ public interface APIConsumer extends APIManager {
      */
     String renewConsumerSecret(String clientId, String keyManagerName) throws APIManagementException;
 
+    /**
+     * Generates a new consumer secret for an OAuth application.
+     * <p>
+     * Implementations may override this method to support creating additional
+     * consumer secrets for a given client. The default implementation does not
+     * support this operation and will throw an {@link UnsupportedOperationException}.
+     *
+     * @param keyManagerName         name of the Key Manager associated with the OAuth application
+     * @param consumerSecretRequest  request containing information required to generate the consumer secret
+     * @return {@link ConsumerSecretInfo} containing details of the generated consumer secret
+     * @throws APIManagementException if an error occurs while generating the consumer secret
+     * @throws UnsupportedOperationException if the Key Manager does not support generating consumer secrets
+     */
     default ConsumerSecretInfo generateConsumerSecret(String keyManagerName,
                                                       ConsumerSecretRequest consumerSecretRequest)
             throws APIManagementException {
         throw new UnsupportedOperationException("Generating new consumer secret is not supported");
     }
 
+    /**
+     * Retrieves all consumer secrets associated with a given OAuth client.
+     * <p>
+     * Implementations may override this method to support listing multiple
+     * consumer secrets for a client. The default implementation does not
+     * support this operation and will throw an {@link UnsupportedOperationException}.
+     *
+     * @param clientId       client ID of the application
+     * @param keyManagerName name of the Key Manager associated with the OAuth application
+     * @return list of {@link ConsumerSecretInfo} objects associated with the client
+     * @throws APIManagementException if an error occurs while retrieving consumer secrets
+     * @throws UnsupportedOperationException if the Key Manager does not support retrieving consumer secrets
+     */
     default List<ConsumerSecretInfo> retrieveConsumerSecrets(String clientId, String keyManagerName)
             throws APIManagementException {
         throw new UnsupportedOperationException("Retrieving consumer secrets is not supported");
     }
 
+    /**
+     * Deletes a specific consumer secret associated with an OAuth application.
+     * <p>
+     * Implementations may override this method to support deletion of
+     * individual consumer secrets. The default implementation does not
+     * support this operation and will throw an {@link UnsupportedOperationException}.
+     *
+     * @param secretId               identifier of the consumer secret to be deleted
+     * @param keyManagerName         name of the Key Manager associated with the OAuth application
+     * @param consumerSecretRequest  request containing additional information required for deletion
+     * @throws APIManagementException if an error occurs while deleting the consumer secret
+     * @throws UnsupportedOperationException if the Key Manager does not support deleting consumer secrets
+     */
     default void deleteConsumerSecret(String secretId, String keyManagerName,
                                       ConsumerSecretRequest consumerSecretRequest)
             throws APIManagementException {
