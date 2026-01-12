@@ -1001,6 +1001,10 @@ public class APIManagerConfiguration {
 
                         this.llmProviderConfigurationDTO.setType(type);
                         this.llmProviderConfigurationDTO.setProperties(propertiesMap);
+                        log.info("LLM provider configured with type: " + type);
+                        if (log.isDebugEnabled()) {
+                            log.debug("LLM provider properties loaded with " + propertiesMap.size() + " configuration entries");
+                        }
                     }
 
                     if (APIConstants.AI.VECTOR_DB_PROVIDER.equals(aiChildElement.getLocalName())) {

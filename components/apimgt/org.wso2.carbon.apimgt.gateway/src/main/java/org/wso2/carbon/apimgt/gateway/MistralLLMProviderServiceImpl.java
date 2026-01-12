@@ -30,6 +30,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.LLMProviderServiceForChatCompletion;
 import org.wso2.carbon.apimgt.api.dto.LLMProviderConfigurationDTO;
@@ -44,7 +46,7 @@ import java.nio.charset.StandardCharsets;
  * This service interacts with the Mistral API to send chat completion requests.
  */
 public class MistralLLMProviderServiceImpl implements LLMProviderServiceForChatCompletion {
-
+    private static final Log log = LogFactory.getLog(MistralLLMProviderServiceImpl.class);
     private HttpClient httpClient;
     private String mistralApiKey;
     private String endpointUrl;
@@ -135,6 +137,7 @@ public class MistralLLMProviderServiceImpl implements LLMProviderServiceForChatC
 
                     return contentNode.asText();
                 } else {
+                    log.error("Mistral API returned unexpected status code: " + statusCode);
                     throw new APIManagementException("Unexpected status code " + statusCode + ": " + responseBody);
                 }
             }

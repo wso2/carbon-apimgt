@@ -30,6 +30,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.LLMProviderServiceForChatCompletion;
 import org.wso2.carbon.apimgt.api.dto.LLMProviderConfigurationDTO;
@@ -44,6 +46,7 @@ import java.nio.charset.StandardCharsets;
  * This service interacts with the OpenAI API to send chat completion requests.
  */
 public class OpenAILLMProviderServiceImpl implements LLMProviderServiceForChatCompletion {
+    private static final Log log = LogFactory.getLog(OpenAILLMProviderServiceImpl.class);
     private HttpClient httpClient;
     private String openAiApiKey;
     private String endpointUrl;
@@ -134,6 +137,7 @@ public class OpenAILLMProviderServiceImpl implements LLMProviderServiceForChatCo
 
                     return contentNode.asText();
                 } else {
+                    log.error("OpenAI API returned unexpected status code: " + statusCode);
                     throw new APIManagementException("Unexpected response code " + statusCode + ": " + responseBody);
                 }
             }

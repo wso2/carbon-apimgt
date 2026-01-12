@@ -246,6 +246,7 @@ public class APIHandlerServiceComponent {
         LLMProviderConfigurationDTO llmProviderConfigurationDTO =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getLLMProvider();
         if (llmProviderConfigurationDTO.getType() != null) {
+            log.info("Initializing LLM provider service for type: " + llmProviderConfigurationDTO.getType());
             try {
                 String llmProviderType = llmProviderConfigurationDTO.getType();
                 LLMProviderServiceForChatCompletion llmProviderService;
