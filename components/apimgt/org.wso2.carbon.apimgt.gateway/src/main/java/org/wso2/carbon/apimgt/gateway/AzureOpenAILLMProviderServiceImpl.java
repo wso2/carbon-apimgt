@@ -32,6 +32,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.LLMProviderServiceForChatCompletion;
 import org.wso2.carbon.apimgt.api.dto.LLMProviderConfigurationDTO;
@@ -92,7 +93,7 @@ public class AzureOpenAILLMProviderServiceImpl implements LLMProviderServiceForC
     @Override
     public String getChatCompletion(String systemPrompt, String userMessage) throws APIManagementException {
         HttpPost post = new HttpPost(endpointUrl);
-        post.setHeader(APIConstants.API_KEY_AUTH, azureApiKey);
+        post.setHeader(AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_KEY, azureApiKey);
         post.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
 
         try {

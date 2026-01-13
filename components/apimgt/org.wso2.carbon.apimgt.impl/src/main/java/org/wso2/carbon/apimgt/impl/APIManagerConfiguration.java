@@ -979,6 +979,7 @@ public class APIManagerConfiguration {
                         String type = aiChildElement.getAttributeValue(
                                 new QName(APIConstants.AI.LLM_PROVIDER_TYPE));
                         if (type == null || type.isEmpty()) {
+                            log.warn("LLM provider type not defined in configuration, skipping LLM provider initialization");
                             continue; // skip if no type defined
                         }
 
