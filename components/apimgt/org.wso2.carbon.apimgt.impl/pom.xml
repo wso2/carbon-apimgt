@@ -584,7 +584,6 @@
                             javax.servlet;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.http;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
-                            org.eclipse.equinox.http.helper,
                             com.google.gson,
                             software.amazon.awssdk.services.sts.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
                             software.amazon.awssdk.services.lambda.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
@@ -654,6 +653,15 @@
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
+                        <Provide-Capability>
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.impl.APIManagerConfigurationService,
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.eventing.EventPublisherFactory,
+                            osgi.service;objectClass=org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService,
+                            osgi.service;objectClass=org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration,
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.impl.jwt.JWTValidationService,
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService,
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService,
+                        </Provide-Capability>
                     </instructions>
                 </configuration>
             </plugin>

@@ -478,7 +478,7 @@
                             org.wso2.carbon.apimgt.api.*; version="${carbon.apimgt.imp.pkg.version}",
                             edu.emory.mathcs.backport.*,
                             org.apache.axis2.*; version="${imp.pkg.version.axis2}",
-                            javax.activation.*; version="[0.0.0, 1.0.0)",
+                            javax.activation.*; version="[0.0.0, 1.0.0)"; resolution:=optional,
                             javax.cache,
                             javax.net.ssl,
                             javax.xml.namespace,
@@ -518,6 +518,11 @@
                             javax.annotation;version=0.0.0;resolution:=optional,
                             *;resolution:=optional
                         </Import-Package>
+                        <Provide-Capability>
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.api.GuardrailProviderService,
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.api.EmbeddingProviderService,
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.api.VectorDBProviderService,
+                        </Provide-Capability>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>

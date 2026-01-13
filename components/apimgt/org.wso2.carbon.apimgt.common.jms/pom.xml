@@ -65,7 +65,7 @@
                         </Export-Package>
                         <Import-Package>
                             com.google.gson.annotations.*,
-                            javax.transaction.*,
+                            javax.transaction.*; resolution:=optional,
                             org.apache.axis2.*,
                             org.apache.commons.*,
                             *;resolution:=optional

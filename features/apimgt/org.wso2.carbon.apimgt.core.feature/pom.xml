@@ -82,6 +82,35 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.spec.parser</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.aries.spifly</groupId>
+            <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>9.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-commons</artifactId>
+            <version>9.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-util</artifactId>
+            <version>9.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-tree</artifactId>
+            <version>9.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-analysis</artifactId>
+            <version>9.6</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -228,7 +257,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.apache.velocity:velocity-engine-core:${velocity.version}</bundleDef>
-                                <bundleDef>org.slf4j:slf4j-api:${slf4j.api.version}</bundleDef>
+                                <!--<bundleDef>org.slf4j:slf4j-api:${slf4j.api.version}</bundleDef>-->
                                 <bundleDef>io.github.openfeign:feign-core:${openfeign.version}</bundleDef>
                                 <bundleDef>io.github.openfeign:feign-gson:${openfeign.version}</bundleDef>
                                 <bundleDef>io.github.openfeign:feign-okhttp:${openfeign.version}</bundleDef>
@@ -239,6 +268,12 @@
                                 <bundleDef>org.wso2.orbit.org.everit.json:org.everit.json.schema:${everit.version}</bundleDef>
                                 <bundleDef>org.apache.httpcomponents.wso2:httpcore</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.spec.parser:${carbon.apimgt.version}</bundleDef>
+                                <!--<bundleDef>org.apache.aries.spifly:org.apache.aries.spifly.dynamic.bundle:${org.apache.aries.spifly.dynamic.bundle.version}</bundleDef>
+                                <bundleDef>org.ow2.asm:asm:9.6</bundleDef>
+                                <bundleDef>org.ow2.asm:asm-commons:9.6</bundleDef>
+                                <bundleDef>org.ow2.asm:asm-util:9.6</bundleDef>
+                                <bundleDef>org.ow2.asm:asm-tree:9.6</bundleDef>
+                                <bundleDef>org.ow2.asm:asm-analysis:9.6</bundleDef>-->
                             </bundles>
                         </configuration>
                     </execution>

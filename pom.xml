@@ -2044,6 +2044,11 @@
                 <artifactId>mcp-transformer-java</artifactId>
                 <version>${mcp.transformer.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.aries.spifly</groupId>
+                <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
+                <version>${org.apache.aries.spifly.dynamic.bundle.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -2143,18 +2148,18 @@
         <!-- Servlet API -->
         <exp.pkg.version.javax.servlet>2.6.0</exp.pkg.version.javax.servlet>
         <imp.pkg.version.javax.servlet>[2.6.0, 3.0.0)</imp.pkg.version.javax.servlet>
-        <javax.servlet.imp.pkg.version>[2.6.0, 3.0.0)</javax.servlet.imp.pkg.version>
+        <javax.servlet.imp.pkg.version>[3.1.0, 4.0.0)</javax.servlet.imp.pkg.version>
 
         <!-- Jaggery Version -->
         <jaggery.version>0.14.13</jaggery.version>
 
 	    <!-- OSGi -->
-        <imp.package.version.osgi.service>[1.2.0,1.3.0)</imp.package.version.osgi.service>
+        <imp.package.version.osgi.service>[1.3.0, 2.0.0)</imp.package.version.osgi.service>
         <imp.package.version.osgi.util>[1.2.0,2.0.0)</imp.package.version.osgi.util>
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-        <synapse.version>4.0.0-wso2v262</synapse.version>
+        <synapse.version>4.0.0-wso2v261</synapse.version>
         <orbit.version.json>3.0.0.wso2v7</orbit.version.json>
 
         <!-- orbit httpmime versions-->
@@ -2227,7 +2232,7 @@
         <pdfbox.version>3.0.1</pdfbox.version>
         <pdfbox.io.version>3.0.1.wso2v1</pdfbox.io.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
-        <swagger.inflector.oas3.version>2.0.5.wso2v2</swagger.inflector.oas3.version>
+        <swagger.inflector.oas3.version>2.0.5.wso2v3</swagger.inflector.oas3.version>
         <swagger.parser.v3.version>2.1.25.wso2v2</swagger.parser.v3.version>
         <swagger.core.version>1.6.11.wso2v1</swagger.core.version>
         <swagger.models.version>1.6.11</swagger.models.version>
@@ -2272,7 +2277,7 @@
         <swagger3-codegen-maven-plugin.version>3.0.19</swagger3-codegen-maven-plugin.version>
         <swagger3.core.version>2.2.20</swagger3.core.version>
         <javax.enterprise.version>2.0</javax.enterprise.version>
-        <jaeger.client.version>1.8.0.wso2v1</jaeger.client.version>
+        <jaeger.client.version>1.8.0.wso2v2</jaeger.client.version>
         <zipkin.sender.okhttp3.version>2.17.2.wso2v2</zipkin.sender.okhttp3.version>
         <zipkin.reporter.version>2.17.2</zipkin.reporter.version>
         <zipkin.reporter.version.range>[2.17,4)</zipkin.reporter.version.range>
@@ -2330,5 +2335,6 @@
         <mcp.transformer.version>0.9.1</mcp.transformer.version>
         <netty.version>4.1.126.Final</netty.version>
         <apicurio.version>2.2.2</apicurio.version>
+        <org.apache.aries.spifly.dynamic.bundle.version>1.3.7</org.apache.aries.spifly.dynamic.bundle.version>
     </properties>
 </project>
