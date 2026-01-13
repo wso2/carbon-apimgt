@@ -2439,11 +2439,16 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (api == null) {
                 throw new GraphQLPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
             }
-            String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + api.apiProvider
+            String initialOwner = RegistryPersistenceUtil.extractOriginalProviderFromPath(registry, apiId);
+            if (initialOwner == null) {
+                throw new GraphQLPersistenceException(
+                        "Unable to extract original provider from API path for apiId: " + apiId);
+            }
+            String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + initialOwner
                     + RegistryConstants.PATH_SEPARATOR + api.apiName + RegistryConstants.PATH_SEPARATOR + api.apiVersion
                     + RegistryConstants.PATH_SEPARATOR;
 
-            String saveResourcePath = path + api.apiProvider + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR
+            String saveResourcePath = path + initialOwner + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR
                     + api.apiName + api.apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
             Resource resource;
             if (!registry.resourceExists(saveResourcePath)) {
@@ -2491,9 +2496,14 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 throw new GraphQLPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
             }
             String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
+            String initialOwner = RegistryPersistenceUtil.extractOriginalProviderFromPath(registry, apiId);
+            if (initialOwner == null) {
+                throw new GraphQLPersistenceException(
+                        "Unable to extract original provider from API path for apiId: " + apiId);
+            }
             int prependIndex = apiPath.lastIndexOf("/api");
             String apiSourcePath = apiPath.substring(0, prependIndex);
-            String schemaName = api.apiProvider + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR + api.apiName
+            String schemaName = initialOwner + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR + api.apiName
                     + api.apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
             String schemaResourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR + schemaName;
             if (registry.resourceExists(schemaResourcePath)) {
