@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2026 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -23,11 +23,11 @@ package org.wso2.carbon.apimgt.api;
 import org.wso2.carbon.apimgt.api.dto.LLMProviderConfigurationDTO;
 
 /**
- * Interface for LLM provider services for chat completion.
+ * Interface for AI LLM provider services.
  * This interface defines methods for initializing the provider, retrieving the type,
- * and sending chat completion requests to LLM providers.
+ * and sending requests to LLM providers (supports chat completions, resources, etc.).
  */
-public interface LLMProviderServiceForChatCompletion {
+public interface AILLMProviderService {
     /**
      * Initialize the provider with required HTTP client and configuration properties.
      *

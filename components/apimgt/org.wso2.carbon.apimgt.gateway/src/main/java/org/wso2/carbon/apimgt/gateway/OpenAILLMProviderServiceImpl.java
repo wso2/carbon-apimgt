@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2026 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -33,7 +33,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.LLMProviderServiceForChatCompletion;
+import org.wso2.carbon.apimgt.api.AILLMProviderService;
 import org.wso2.carbon.apimgt.api.dto.LLMProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -45,7 +45,7 @@ import java.nio.charset.StandardCharsets;
  * OpenAI LLM Provider Service.
  * This service interacts with the OpenAI API to send chat completion requests.
  */
-public class OpenAILLMProviderServiceImpl implements LLMProviderServiceForChatCompletion {
+public class OpenAILLMProviderServiceImpl implements AILLMProviderService {
     private static final Log log = LogFactory.getLog(OpenAILLMProviderServiceImpl.class);
     private HttpClient httpClient;
     private String openAiApiKey;

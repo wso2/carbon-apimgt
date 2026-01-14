@@ -32,7 +32,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EmbeddingProviderService;
-import org.wso2.carbon.apimgt.api.LLMProviderServiceForChatCompletion;
+import org.wso2.carbon.apimgt.api.AILLMProviderService;
 import org.wso2.carbon.apimgt.api.VectorDBProviderService;
 import org.wso2.carbon.apimgt.api.GuardrailProviderService;
 import org.wso2.carbon.apimgt.api.dto.EmbeddingProviderConfigurationDTO;
@@ -249,7 +249,7 @@ public class APIHandlerServiceComponent {
             log.info("Initializing LLM provider service for type: " + llmProviderConfigurationDTO.getType());
             try {
                 String llmProviderType = llmProviderConfigurationDTO.getType();
-                LLMProviderServiceForChatCompletion llmProviderService;
+                AILLMProviderService llmProviderService;
                 switch (llmProviderType) {
                     case APIConstants.AI.OPENAI_LLM_PROVIDER_TYPE:
                         llmProviderService = new OpenAILLMProviderServiceImpl();
@@ -266,7 +266,7 @@ public class APIHandlerServiceComponent {
                 }
                 llmProviderService.init(llmProviderConfigurationDTO);
                 context.getBundleContext().registerService(
-                        LLMProviderServiceForChatCompletion.class.getName(),
+                        AILLMProviderService.class.getName(),
                         llmProviderService,
                         null
                 );

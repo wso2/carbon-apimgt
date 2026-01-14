@@ -34,7 +34,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayFeatureCatalogDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAttributeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsAiApiConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsAiApiPolicyConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberContactAttributeDTO;
 
@@ -116,15 +116,15 @@ public class SettingsMappingUtil {
             settingsDTO.setIsGatewayNotificationEnabled(APIUtil.isGatewayNotificationEnabled());
 
             // Set AI provider configuration status
-            SettingsAiApiConfigurationDTO aiConfig = 
-                    new SettingsAiApiConfigurationDTO();
+            SettingsAiApiPolicyConfigurationDTO aiConfig = 
+                    new SettingsAiApiPolicyConfigurationDTO();
             String llmType = config.getLLMProvider().getType();
             String embeddingType = config.getEmbeddingProvider().getType();
             aiConfig.setLlmProviderConfigured(
                     llmType != null && !llmType.isEmpty());
             aiConfig.setEmbeddingProviderConfigured(
                     embeddingType != null && !embeddingType.isEmpty());
-            settingsDTO.setAiApiConfiguration(aiConfig);
+            settingsDTO.setAiApiPolicyConfiguration(aiConfig);
         }
         return settingsDTO;
     }

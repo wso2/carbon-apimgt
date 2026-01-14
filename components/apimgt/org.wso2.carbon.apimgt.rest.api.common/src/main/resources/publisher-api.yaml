@@ -18117,7 +18117,7 @@ components:
           type: boolean
           description: Checks if the auth token is provided for AI service usage.
           default: false
-        aiApiConfiguration:
+        aiApiPolicyConfiguration:
           type: object
           description: AI provider configuration status
           properties:
