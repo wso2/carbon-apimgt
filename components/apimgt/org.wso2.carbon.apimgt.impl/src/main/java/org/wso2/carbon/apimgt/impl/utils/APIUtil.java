@@ -392,6 +392,7 @@ public final class APIUtil {
 
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
+    private static final int CONSUMER_SECRET_MASK_LENGTH = 16;
 
     private APIUtil() {
 
@@ -4892,8 +4893,8 @@ public final class APIUtil {
     public static String maskSecret(String secret) {
         boolean isHashingEnabled = OAuthServerConfiguration.getInstance().isClientSecretHashEnabled();
         if (secret == null || secret.isEmpty() || isHashingEnabled) {
-            // Always return a fixed 16-character mask if secret is null or empty or if hashing is enabled
-            return generateMask(16);
+            // Always return a fixed length mask value if secret is null or empty or if hashing is enabled
+            return generateMask(CONSUMER_SECRET_MASK_LENGTH);
         }
 
         // Show first 3 characters, mask the rest so total = 16
@@ -4910,10 +4911,6 @@ public final class APIUtil {
             sb.append('*');
         }
         return sb.toString();
-    }
-
-    public static String getEffectiveSecret(String secret) {
-        return isMultipleClientSecretsEnabled() ? maskSecret(secret) : secret;
     }
 
     private static String bytesToHex(byte[] bytes) {

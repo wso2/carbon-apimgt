@@ -87,6 +87,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -166,7 +167,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         try {
             createdClient = dcrClient.createApplication(request);
-            buildDTOFromClientInfo(createdClient, oAuthApplicationInfo, false);
+            buildDTOFromClientInfo(createdClient, oAuthApplicationInfo);
 
             oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
             oAuthApplicationInfo.setIsSaasApplication(false);
@@ -540,7 +541,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             createdClient = dcrClient.updateApplication(Base64.getUrlEncoder().encodeToString(
                     oAuthApplicationInfo.getClientId().getBytes(StandardCharsets.UTF_8)), request);
-            return buildDTOFromClientInfo(createdClient, new OAuthApplicationInfo(), true);
+            OAuthApplicationInfo applicationInfo = buildDTOFromClientInfo(createdClient,
+                    new OAuthApplicationInfo());
+            if (APIUtil.isMultipleClientSecretsEnabled()) {
+                applicationInfo.setClientSecret(APIUtil.maskSecret(applicationInfo.getClientSecret()));
+            }
+            return applicationInfo;
         } catch (KeyManagerClientException e) {
             handleException("Error occurred while updating OAuth Client : ", e);
             return null;
@@ -558,7 +564,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             updatedClient = dcrClient.updateApplicationOwner(owner, Base64.getUrlEncoder().encodeToString(
                     oAuthApplicationInfo.getClientId().getBytes(StandardCharsets.UTF_8)));
-            return buildDTOFromClientInfo(updatedClient, new OAuthApplicationInfo(), true);
+            OAuthApplicationInfo applicationInfo = buildDTOFromClientInfo(updatedClient,
+                    new OAuthApplicationInfo());
+            if (APIUtil.isMultipleClientSecretsEnabled()) {
+                applicationInfo.setClientSecret(APIUtil.maskSecret(applicationInfo.getClientSecret()));
+            }
+            return applicationInfo;
         } catch (KeyManagerClientException e) {
             handleException("Error occurred while updating OAuth Client : ", e);
             return null;
@@ -590,7 +601,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             ClientInfo clientInfo = dcrClient.getApplication(Base64.getUrlEncoder().encodeToString(
                     consumerKey.getBytes(StandardCharsets.UTF_8)));
-            return buildDTOFromClientInfo(clientInfo, new OAuthApplicationInfo(), true);
+            OAuthApplicationInfo applicationInfo = buildDTOFromClientInfo(clientInfo,
+                    new OAuthApplicationInfo());
+            if (APIUtil.isMultipleClientSecretsEnabled()) {
+                applicationInfo.setClientSecret(APIUtil.maskSecret(applicationInfo.getClientSecret()));
+            }
+            return applicationInfo;
         } catch (KeyManagerClientException e) {
             if (e.getStatusCode() == 404) {
                 return null;
@@ -670,14 +686,25 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             throws APIManagementException {
 
         ClientSecret clientSecret;
+        if (consumerSecretRequest == null) {
+            log.warn("No information available to generate new consumer secret.");
+            return null;
+        }
         String clientId = consumerSecretRequest.getClientId();
         String encodedClientId = Base64.getUrlEncoder()
                 .encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
         ClientSecretRequest clientSecretRequest = new ClientSecretRequest();
-        clientSecretRequest.setDescription((String) consumerSecretRequest
-                .getParameter(ApplicationConstants.SECRET_DESCRIPTION));
-        clientSecretRequest.setExpiresIn((Integer) consumerSecretRequest
-                .getParameter(ApplicationConstants.SECRET_EXPIRES_IN));
+        Object descriptionObj =
+                consumerSecretRequest.getParameter(ApplicationConstants.SECRET_DESCRIPTION);
+        if (descriptionObj instanceof String) {
+            clientSecretRequest.setDescription((String) descriptionObj);
+        }
+
+        Object expiresInObj =
+                consumerSecretRequest.getParameter(ApplicationConstants.SECRET_EXPIRES_IN);
+        if (expiresInObj instanceof Integer) {
+            clientSecretRequest.setExpiresIn((Integer) expiresInObj);
+        }
         try {
             clientSecret = dcrClient.generateNewApplicationSecret(encodedClientId, clientSecretRequest);
         } catch (KeyManagerClientException e) {
@@ -830,7 +857,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             clientInfo = dcrClient.getApplication(Base64.getUrlEncoder().encodeToString(
                     consumerKey.getBytes(StandardCharsets.UTF_8)));
-            buildDTOFromClientInfo(clientInfo, oAuthApplicationInfo, false);
+            buildDTOFromClientInfo(clientInfo, oAuthApplicationInfo);
         } catch (KeyManagerClientException e) {
             handleException("Some thing went wrong while getting OAuth application for given consumer key " +
                     oAuthApplicationInfo.getClientId(), e);
@@ -857,8 +884,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * @return OAuthApplicationInfo object with response information added
      */
     private OAuthApplicationInfo buildDTOFromClientInfo(ClientInfo appResponse,
-                                                        OAuthApplicationInfo oAuthApplicationInfo,
-                                                        boolean shouldMaskSecret) {
+                                                        OAuthApplicationInfo oAuthApplicationInfo) {
 
         oAuthApplicationInfo.setClientName(appResponse.getClientName());
         oAuthApplicationInfo.setClientId(appResponse.getClientId());
@@ -867,11 +893,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_REDIRECT_URIS,
                     String.join(",", appResponse.getRedirectUris()));
         }
-        String secret = appResponse.getClientSecret();
-        if (shouldMaskSecret) {
-            secret = APIUtil.getEffectiveSecret(secret);
-        }
-        oAuthApplicationInfo.setClientSecret(secret);
+        oAuthApplicationInfo.setClientSecret(appResponse.getClientSecret());
         if (appResponse.getGrantTypes() != null) {
             oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_GRANT,
                     String.join(" ", appResponse.getGrantTypes()));
