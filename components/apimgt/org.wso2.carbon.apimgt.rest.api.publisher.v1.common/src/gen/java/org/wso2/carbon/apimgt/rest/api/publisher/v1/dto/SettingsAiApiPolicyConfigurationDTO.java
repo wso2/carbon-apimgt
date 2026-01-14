@@ -21,7 +21,7 @@ import javax.validation.Valid;
 
 @ApiModel(description = "AI provider configuration status")
 
-public class SettingsAiApiConfigurationDTO   {
+public class SettingsAiApiPolicyConfigurationDTO   {
   
     private Boolean llmProviderConfigured = false;
     private Boolean embeddingProviderConfigured = false;
@@ -29,7 +29,7 @@ public class SettingsAiApiConfigurationDTO   {
   /**
    * Checks if LLM provider is configured in deployment.toml
    **/
-  public SettingsAiApiConfigurationDTO llmProviderConfigured(Boolean llmProviderConfigured) {
+  public SettingsAiApiPolicyConfigurationDTO llmProviderConfigured(Boolean llmProviderConfigured) {
     this.llmProviderConfigured = llmProviderConfigured;
     return this;
   }
@@ -47,7 +47,7 @@ public class SettingsAiApiConfigurationDTO   {
   /**
    * Checks if Embedding provider is configured in deployment.toml
    **/
-  public SettingsAiApiConfigurationDTO embeddingProviderConfigured(Boolean embeddingProviderConfigured) {
+  public SettingsAiApiPolicyConfigurationDTO embeddingProviderConfigured(Boolean embeddingProviderConfigured) {
     this.embeddingProviderConfigured = embeddingProviderConfigured;
     return this;
   }
@@ -71,9 +71,9 @@ public class SettingsAiApiConfigurationDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    SettingsAiApiConfigurationDTO settingsAiApiConfiguration = (SettingsAiApiConfigurationDTO) o;
-    return Objects.equals(llmProviderConfigured, settingsAiApiConfiguration.llmProviderConfigured) &&
-        Objects.equals(embeddingProviderConfigured, settingsAiApiConfiguration.embeddingProviderConfigured);
+    SettingsAiApiPolicyConfigurationDTO settingsAiApiPolicyConfiguration = (SettingsAiApiPolicyConfigurationDTO) o;
+    return Objects.equals(llmProviderConfigured, settingsAiApiPolicyConfiguration.llmProviderConfigured) &&
+        Objects.equals(embeddingProviderConfigured, settingsAiApiPolicyConfiguration.embeddingProviderConfigured);
   }
 
   @Override
@@ -84,7 +84,7 @@ public class SettingsAiApiConfigurationDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class SettingsAiApiConfigurationDTO {\n");
+    sb.append("class SettingsAiApiPolicyConfigurationDTO {\n");
     
     sb.append("    llmProviderConfigured: ").append(toIndentedString(llmProviderConfigured)).append("\n");
     sb.append("    embeddingProviderConfigured: ").append(toIndentedString(embeddingProviderConfigured)).append("\n");
