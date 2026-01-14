@@ -103,17 +103,17 @@ public interface KeyManager {
 
     default ConsumerSecretInfo generateNewApplicationConsumerSecret(ConsumerSecretRequest consumerSecretRequest)
             throws APIManagementException {
-        throw new UnsupportedOperationException("Generating new consumer secret is not supported");
+        throw new UnsupportedOperationException("Generating new consumer secret for an application is not supported");
     }
 
     default List<ConsumerSecretInfo> retrieveApplicationConsumerSecrets(String clientId)
             throws APIManagementException {
-        throw new UnsupportedOperationException("Generating new consumer secret is not supported");
+        throw new UnsupportedOperationException("Retrieving consumer secrets of an application is not supported");
     }
 
     default void deleteApplicationConsumerSecret(String secretId, ConsumerSecretRequest consumerSecretRequest)
             throws APIManagementException {
-        throw new UnsupportedOperationException("Generating new consumer secret is not supported");
+        throw new UnsupportedOperationException("Deleting a consumer secret of an application is not supported");
     }
 
     /**
