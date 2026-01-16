@@ -1747,10 +1747,12 @@ public class APIAdminImpl implements APIAdmin {
             Map<String, Object> additionalProperties = keyManagerConfigurationDTO.getAdditionalProperties();
             List<ConfigurationDto> connectionConfigurations =
                     keyManagerConnectorConfiguration.getConnectionConfigurations();
-            for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
-                if (connectionConfiguration.isMask()) {
-                    additionalProperties.replace(connectionConfiguration.getName(),
-                            APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+            if (connectionConfigurations != null && !connectionConfigurations.isEmpty()) {
+                for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
+                    if (connectionConfiguration.isMask()) {
+                        additionalProperties.replace(connectionConfiguration.getName(),
+                                APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+                    }
                 }
             }
 
@@ -1758,9 +1760,11 @@ public class APIAdminImpl implements APIAdmin {
             if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
                     && !(keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty())) {
                 List<ConfigurationDto> authConfigurations = keyManagerConnectorConfiguration.getAuthConfigurations();
-                // Recursively check nested objects in authConfigurations and apply masking
-                for (ConfigurationDto authConfiguration : authConfigurations) {
-                    applyMaskToNestedFields(authConfiguration.getValues(), additionalProperties);
+                if (authConfigurations != null && !authConfigurations.isEmpty()) {
+                    // Recursively check nested objects in authConfigurations and apply masking
+                    for (ConfigurationDto authConfiguration : authConfigurations) {
+                        applyMaskToNestedFields(authConfiguration.getValues(), additionalProperties);
+                    }
                 }
             }
         }
