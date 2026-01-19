@@ -23,6 +23,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
@@ -93,5 +94,18 @@ public class APIMRestAPICommonComponent {
 
     protected void removeRestAPIAuthenticationService(RestAPIAuthenticator authenticator) {
         ServiceReferenceHolder.getInstance().removeAuthenticator(authenticator);
+    }
+
+    @Reference(name = "apim.dependency.config.service", service = org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService.class,
+            cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIMDependencyConfigurationService")
+    protected void setAPIMDependencyConfigurationService(APIMDependencyConfigurationService service) {
+
+        log.debug("Setting APIM Dependency Configuration Service");
+        ServiceReferenceHolder.getInstance().setAPIMDependencyConfigurationService(service);
+    }
+
+    protected void unsetAPIMDependencyConfigurationService(APIMDependencyConfigurationService service) {
+        ServiceReferenceHolder.getInstance().setAPIMDependencyConfigurationService(null);
     }
 }
