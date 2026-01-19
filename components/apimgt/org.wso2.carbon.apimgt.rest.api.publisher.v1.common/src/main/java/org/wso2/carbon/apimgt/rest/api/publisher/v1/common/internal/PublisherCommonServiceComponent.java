@@ -29,6 +29,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.SynapseArtifactGenerator;
@@ -163,5 +164,18 @@ public class PublisherCommonServiceComponent {
             log.debug("APIMGovernanceService unset in PublisherServiceComponent");
         }
         ServiceReferenceHolder.getInstance().setAPIMGovernanceService(null);
+    }
+
+    @Reference(name = "apim.dependency.config.service", service = APIMDependencyConfigurationService.class,
+            cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIMDependencyConfigurationService")
+    protected void setAPIMDependencyConfigurationService(APIMDependencyConfigurationService service) {
+
+        log.debug("Setting APIM Dependency Configuration Service");
+        ServiceReferenceHolder.getInstance().setAPIMDependencyConfigurationService(service);
+    }
+
+    protected void unsetAPIMDependencyConfigurationService(APIMDependencyConfigurationService service) {
+        ServiceReferenceHolder.getInstance().setAPIMDependencyConfigurationService(null);
     }
 }

@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -75,6 +76,27 @@ public abstract class APIDefinition {
      * @throws APIManagementException
      */
     public abstract String generateAPIDefinition(SwaggerData swaggerData) throws APIManagementException;
+
+    /**
+     * This method generates API definition using the given api's URI templates and the swagger.
+     * It will alter the provided swagger definition based on the URI templates. For example: if there is a new
+     * URI template not included in the swagger, it will be added as a basic resource; any additional resources in
+     * the swagger that are not represented by URI templates will be removed. Changes to scopes and throttling policies
+     * on resources will be reflected in the resulting swagger.
+     * When an OASParserOptions `options` parameter is provided, the parser will honor those options when producing the
+     * API definition.
+     ```
+     *
+     * @param swaggerData api
+     * @param swagger     swagger definition
+     * @param options OAS Parser options
+     * @return API definition in string format
+     * @throws APIManagementException if error occurred when generating API Definition
+     */
+    public String generateAPIDefinition(SwaggerData swaggerData, String swagger, OASParserOptions options)
+            throws APIManagementException {
+        return generateAPIDefinition(swaggerData, swagger);
+    }
 
     /**
      * This method generates API definition using the given api's URI templates and the swagger.
@@ -161,6 +183,22 @@ public abstract class APIDefinition {
             throws APIManagementException;
 
     /**
+     * Populate definition with wso2 APIM specific information
+     * When an OASParserOptions `options` parameter is provided, the parser will honor those options when producing the
+     * API definition.
+     *
+     * @param oasDefinition OAS definition
+     * @param swaggerData   API
+     * @param options OAS Parser options
+     * @return Generated OAS definition
+     * @throws APIManagementException If an error occurred
+     */
+    public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData, OASParserOptions options)
+            throws APIManagementException{
+        return populateCustomManagementInfo(oasDefinition, swaggerData);
+    }
+
+    /**
      * Update the OAS definition for API consumers
      *
      * @param api                        API
@@ -173,6 +211,21 @@ public abstract class APIDefinition {
     public abstract String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes,
                                                     KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException;
+
+    /**
+     * Update the OAS definition for API consumers
+     *
+     * @param api                        API
+     * @param oasDefinition              OAS definition
+     * @param hostsWithSchemes           host addresses with protocol mapping
+     * @param keyManagerConfigurationDTO configuration details of the Key Manager
+     * @return updated OAS definition
+     * @throws APIManagementException throws if an error occurred
+     */
+    public String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes,
+            KeyManagerConfigurationDTO keyManagerConfigurationDTO, OASParserOptions options) throws APIManagementException {
+        return getOASDefinitionForStore(api, oasDefinition, hostsWithSchemes, keyManagerConfigurationDTO);
+    }
 
     /**
      * Update the OAS definition for API consumers
@@ -190,6 +243,23 @@ public abstract class APIDefinition {
             throws APIManagementException;
 
     /**
+     * Update the OAS definition for API consumers
+     *
+     * @param product                    APIProduct
+     * @param oasDefinition              OAS definition
+     * @param hostsWithSchemes           host addresses with protocol mapping
+     * @param keyManagerConfigurationDTO configuration details of the Key Manager
+     * @return updated OAS definition
+     * @throws APIManagementException throws if an error occurred
+     */
+    public String getOASDefinitionForStore(APIProduct product, String oasDefinition,
+            Map<String, String> hostsWithSchemes,
+            KeyManagerConfigurationDTO keyManagerConfigurationDTO, OASParserOptions options)
+            throws APIManagementException{
+        return getOASDefinitionForStore(product, oasDefinition, hostsWithSchemes, keyManagerConfigurationDTO);
+    }
+
+    /**
      * Update OAS definition for API Publisher
      *
      * @param api           API
@@ -199,6 +269,22 @@ public abstract class APIDefinition {
      */
     public abstract String getOASDefinitionForPublisher(API api, String oasDefinition)
             throws APIManagementException;
+
+    /**
+     * Update OAS definition for API Publisher
+     * When an OASParserOptions `options` parameter is provided, the parser will honor those options when producing the
+     * API definition.
+     *
+     * @param api           API
+     * @param oasDefinition
+     * @param options OAS Parser options
+     * @return OAS definition
+     * @throws APIManagementException throws if an error occurred
+     */
+    public String getOASDefinitionForPublisher(API api, String oasDefinition, OASParserOptions options)
+            throws APIManagementException{
+        return getOASDefinitionForPublisher(api, oasDefinition);
+    }
 
     public abstract String getOASVersion(String oasDefinition) throws APIManagementException;
 
@@ -215,6 +301,21 @@ public abstract class APIDefinition {
             throws APIManagementException;
 
     /**
+     * This method changes the URI templates from the API definition as it support different schemes
+     * When an OASParserOptions `options` parameter is provided, the parser will honor those options when producing the
+     * API definition.
+     *
+     * @param resourceConfigsJSON json String of oasDefinition
+     * @param options OAS Parser options
+     * @throws APIManagementException throws if an error occurred
+     * @return String
+     */
+    public String processOtherSchemeScopes(String resourceConfigsJSON, OASParserOptions options)
+            throws APIManagementException{
+        return processOtherSchemeScopes(resourceConfigsJSON);
+    }
+
+    /**
      * This method returns OAS definition which replaced X-WSO2-throttling-tier extension comes from
      * mgw with X-throttling-tier extensions in OAS file
      *
@@ -224,6 +325,22 @@ public abstract class APIDefinition {
      */
     public abstract String injectMgwThrottlingExtensionsToDefault(String swaggerContent)
             throws APIManagementException;
+
+    /**
+     * This method returns OAS definition which replaced X-WSO2-throttling-tier extension comes from
+     * mgw with X-throttling-tier extensions in OAS file
+     * When an OASParserOptions `options` parameter is provided, the parser will honor those options when producing the
+     * API definition.
+     *
+     * @param swaggerContent String
+     * @param options OAS Parser options
+     * @return OpenAPI
+     * @throws APIManagementException
+     */
+    public String injectMgwThrottlingExtensionsToDefault(String swaggerContent, OASParserOptions options)
+            throws APIManagementException {
+        return injectMgwThrottlingExtensionsToDefault(swaggerContent);
+    }
 
     /**
      * This method returns api that is attached with api extensions related to micro-gw
@@ -245,6 +362,23 @@ public abstract class APIDefinition {
      */
     public abstract String copyVendorExtensions(String existingOASContent, String updatedOASContent)
             throws APIManagementException;
+
+    /**
+     * This method copy the vendor extensions from Existing OAS to the updated OAS
+     * When an OASParserOptions `options` parameter is provided, the parser will honor those options when producing the
+     * API definition.
+     *
+     * @param existingOASContent Current OAS Content
+     * @param updatedOASContent Updated OAS Content
+     * @param options OAS Parser options
+     * @return OAS content
+     * @throws APIManagementException
+     */
+    public String copyVendorExtensions(String existingOASContent, String updatedOASContent, OASParserOptions options)
+            throws APIManagementException{
+        return copyVendorExtensions(existingOASContent, updatedOASContent);
+    }
+
     /**
      * This method will extractX-WSO2-disable-security extension provided in API level
      * by mgw and inject that extension to all resources in OAS file
@@ -255,6 +389,22 @@ public abstract class APIDefinition {
      */
     public abstract String processDisableSecurityExtension(String swaggerContent)
             throws APIManagementException;
+
+    /**
+     * This method will extractX-WSO2-disable-security extension provided in API level
+     * by mgw and inject that extension to all resources in OAS file
+     * When an OASParserOptions `options` parameter is provided, the parser will honor those options when producing the
+     * API definition.
+     *
+     * @param swaggerContent String
+     * @param options OAS Parser options
+     * @return String
+     * @throws APIManagementException
+     */
+    public String processDisableSecurityExtension(String swaggerContent, OASParserOptions options)
+            throws APIManagementException {
+        return processDisableSecurityExtension(swaggerContent);
+    }
 
     /**
      * This method will extract the vendor provider or the API specification from the extensions list
