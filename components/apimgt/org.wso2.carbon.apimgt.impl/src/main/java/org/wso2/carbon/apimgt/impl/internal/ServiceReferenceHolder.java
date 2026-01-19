@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
@@ -59,6 +60,7 @@ public class ServiceReferenceHolder {
     private static ConfigurationContextService contextService;
     private RegistryService registryService;
     private APIManagerConfigurationService amConfigurationService;
+    private APIMDependencyConfigurationService dependencyConfigurationService;
     private RealmService realmService;
     private TenantIndexingLoader indexLoader;
     private OutputEventAdapterService outputEventAdapterService;
@@ -123,6 +125,14 @@ public class ServiceReferenceHolder {
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigurationService) {
 
         this.amConfigurationService = amConfigurationService;
+    }
+
+    public void setAPIMDependencyConfigurationService(APIMDependencyConfigurationService dependencyConfigurationService) {
+        this.dependencyConfigurationService = dependencyConfigurationService;
+    }
+
+    public APIMDependencyConfigurationService getAPIMDependencyConfigurationService() {
+        return dependencyConfigurationService;
     }
 
     @UsedByMigrationClient

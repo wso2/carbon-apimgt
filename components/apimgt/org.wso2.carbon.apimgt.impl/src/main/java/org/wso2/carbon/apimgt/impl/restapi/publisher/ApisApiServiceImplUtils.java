@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
 import org.wso2.carbon.apimgt.api.model.Backend;
 import org.apache.http.client.HttpClient;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.impl.MCPInitializerAndToolFetcher;
@@ -727,11 +728,15 @@ public class ApisApiServiceImplUtils {
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             definitionToAdd = new OAS3Parser().generateAPIDefinition(swaggerData);
         } else {
-            definition = OASParserUtil.preProcess(definition);
+            definition = OASParserUtil.preProcess(definition,
+                    ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                            .getAPIMDependencyConfigurations().getOasParserOptions());
             if (syncOperations) {
                 validateScopes(apiToAdd, apiProvider, username);
                 SwaggerData swaggerData = new SwaggerData(apiToAdd);
-                definition = apiDefinition.populateCustomManagementInfo(definition, swaggerData);
+                definition = apiDefinition.populateCustomManagementInfo(definition, swaggerData,
+                        ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                                .getAPIMDependencyConfigurations().getOasParserOptions());
             }
             Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definition);
             applyDefaultThrottlingAndAuth(uriTemplates, defaultAPILevelPolicy);
@@ -744,8 +749,9 @@ public class ApisApiServiceImplUtils {
             if (!syncOperations) {
                 validateScopes(apiToAdd, apiProvider, username);
                 SwaggerData swaggerData = new SwaggerData(apiToAdd);
-                definition =
-                        apiDefinition.populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
+                definition = apiDefinition.populateCustomManagementInfo(validationResponse.getJsonContent(),
+                        swaggerData, ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                                .getAPIMDependencyConfigurations().getOasParserOptions());
             }
             definitionToAdd = definition;
         }
