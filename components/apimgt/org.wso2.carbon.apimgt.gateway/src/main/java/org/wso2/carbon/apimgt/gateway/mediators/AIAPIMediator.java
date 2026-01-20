@@ -175,37 +175,13 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             return;
         }
 
-        Map<String, Object> roundRobinConfigs;
-        if (messageContext.getProperty(APIConstants.AIAPIConstants.ROUND_ROBIN_CONFIGS) != null) {
-            roundRobinConfigs =
-                    (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.ROUND_ROBIN_CONFIGS);
-            handleLoadBalancing(messageContext, providerConfiguration, roundRobinConfigs, provider);
+        Map<String, Object> routingConfigs;
+        if (messageContext.getProperty(APIConstants.AIAPIConstants.HANDLE_ROUTING_CONFIGS) != null) {
+            routingConfigs =
+                    (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.HANDLE_ROUTING_CONFIGS);
+            handleRouting(messageContext, providerConfiguration, routingConfigs, provider);
             if (log.isDebugEnabled()) {
-                log.debug("Load balancing configured, processing with round-robin configurations");
-            }
-            return;
-        }
-
-        // Handle Intelligent Model Routing configs
-        Map<String, Object> intelligentRoutingConfigs;
-        if (messageContext.getProperty(APIConstants.AIAPIConstants.INTELLIGENT_MODEL_ROUTING_CONFIGS) != null) {
-            intelligentRoutingConfigs =
-                    (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.INTELLIGENT_MODEL_ROUTING_CONFIGS);
-            handleIntelligentRouting(messageContext, providerConfiguration, intelligentRoutingConfigs, provider);
-            if (log.isDebugEnabled()) {
-                log.debug("Intelligent model routing configured, processing with routing configurations");
-            }
-            return;
-        }
-
-        // Handle Semantic Routing configs
-        Map<String, Object> semanticRoutingConfigs;
-        if (messageContext.getProperty(APIConstants.AIAPIConstants.SEMANTIC_ROUTING_CONFIGS) != null) {
-            semanticRoutingConfigs =
-                    (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.SEMANTIC_ROUTING_CONFIGS);
-            handleSemanticRouting(messageContext, providerConfiguration, semanticRoutingConfigs, provider);
-            if (log.isDebugEnabled()) {
-                log.debug("Semantic routing configured, processing with routing configurations");
+                log.debug("Handling routing configured, processing with routing configurations");
             }
             return;
         }
@@ -398,18 +374,18 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
     }
 
     /**
-     * Handles load balancing by modifying the request payload based on the target model metadata.
+     * Handles routing by modifying the request payload based on the target model metadata.
      *
      * @param messageContext
      * @param providerConfiguration The {@link LLMProviderConfiguration} containing provider-specific configurations.
-     * @param roundRobinConfigs     The target model for which load balancing is applied.
+     * @param routingConfigs        The routing configurations.
      * @param provider              LLM service provider
      * @throws XMLStreamException If an error occurs while processing the XML message.
      * @throws IOException        If an I/O error occurs during request modification.
      */
-    private void handleLoadBalancing(
+    private void handleRouting(
             MessageContext messageContext, LLMProviderConfiguration providerConfiguration,
-            Map<String, Object> roundRobinConfigs, LLMProviderInfo provider)
+            Map<String, Object> routingConfigs, LLMProviderInfo provider)
             throws XMLStreamException, IOException {
 
         LLMProviderMetadata targetModelMetadata = getTargetModelMetadata(providerConfiguration);
@@ -419,7 +395,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         }
 
         ModelEndpointDTO targetModelEndpoint =
-                (ModelEndpointDTO) roundRobinConfigs.get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
+                (ModelEndpointDTO) routingConfigs.get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
 
         if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(targetModelMetadata.getInputSource())) {
             org.apache.axis2.context.MessageContext axis2Ctx =
@@ -446,114 +422,6 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         }
 
         messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, targetModelEndpoint.getEndpointId());
-    }
-
-    /**
-     * Handles intelligent model routing by modifying the request payload based on the target model metadata.
-     *
-     * @param messageContext        The Synapse message context
-     * @param providerConfiguration The LLM provider configuration
-     * @param routingConfigs        The intelligent routing configurations
-     * @param provider              LLM service provider
-     * @throws XMLStreamException If an error occurs while processing the XML message.
-     * @throws IOException        If an I/O error occurs during request modification.
-     */
-    private void handleIntelligentRouting(
-            MessageContext messageContext, LLMProviderConfiguration providerConfiguration,
-            Map<String, Object> routingConfigs, LLMProviderInfo provider)
-            throws XMLStreamException, IOException {
-
-        LLMProviderMetadata targetModelMetadata = getTargetModelMetadata(providerConfiguration);
-        if (targetModelMetadata == null) {
-            log.error("Target model metadata is null for intelligent routing.");
-            return;
-        }
-
-        ModelEndpointDTO targetModelEndpoint =
-                (ModelEndpointDTO) routingConfigs.get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
-
-        if (targetModelEndpoint == null) {
-            log.error("Target model endpoint is null for intelligent routing.");
-            return;
-        }
-
-        if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(targetModelMetadata.getInputSource())) {
-            org.apache.axis2.context.MessageContext axis2Ctx =
-                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            RelayUtils.buildMessage(axis2Ctx);
-            boolean isProviderAzureV1 = isAzureV1Provider(provider);
-
-            if (!isProviderAzureV1) {
-                modifyRequestPayload(targetModelEndpoint.getModel(), targetModelMetadata, axis2Ctx);
-                if (log.isDebugEnabled()) {
-                    log.debug("Intelligent routing: Modified request payload with model: " + targetModelEndpoint.getModel());
-                }
-            }
-        } else if (APIConstants.AIAPIConstants.INPUT_SOURCE_PATH.equalsIgnoreCase(
-                targetModelMetadata.getInputSource())) {
-            modifyRequestPath(targetModelEndpoint.getModel(), targetModelMetadata, messageContext);
-            if (log.isDebugEnabled()) {
-                log.debug("Intelligent routing: Modified request path with model: " + targetModelEndpoint.getModel());
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
-            }
-        }
-    }
-
-    /**
-     * Handles semantic routing by modifying the request payload based on the target model metadata.
-     *
-     * @param messageContext        The Synapse message context
-     * @param providerConfiguration The LLM provider configuration
-     * @param routingConfigs        The semantic routing configurations
-     * @param provider              LLM service provider
-     * @throws XMLStreamException If an error occurs while processing the XML message.
-     * @throws IOException        If an I/O error occurs during request modification.
-     */
-    private void handleSemanticRouting(
-            MessageContext messageContext, LLMProviderConfiguration providerConfiguration,
-            Map<String, Object> routingConfigs, LLMProviderInfo provider)
-            throws XMLStreamException, IOException {
-
-        LLMProviderMetadata targetModelMetadata = getTargetModelMetadata(providerConfiguration);
-        if (targetModelMetadata == null) {
-            log.error("Target model metadata is null for semantic routing.");
-            return;
-        }
-
-        ModelEndpointDTO targetModelEndpoint =
-                (ModelEndpointDTO) routingConfigs.get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
-
-        if (targetModelEndpoint == null) {
-            log.error("Target model endpoint is null for semantic routing.");
-            return;
-        }
-
-        if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(targetModelMetadata.getInputSource())) {
-            org.apache.axis2.context.MessageContext axis2Ctx =
-                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            RelayUtils.buildMessage(axis2Ctx);
-            boolean isProviderAzureV1 = isAzureV1Provider(provider);
-
-            if (!isProviderAzureV1) {
-                modifyRequestPayload(targetModelEndpoint.getModel(), targetModelMetadata, axis2Ctx);
-                if (log.isDebugEnabled()) {
-                    log.debug("Semantic routing: Modified request payload with model: " + targetModelEndpoint.getModel());
-                }
-            }
-        } else if (APIConstants.AIAPIConstants.INPUT_SOURCE_PATH.equalsIgnoreCase(
-                targetModelMetadata.getInputSource())) {
-            modifyRequestPath(targetModelEndpoint.getModel(), targetModelMetadata, messageContext);
-            if (log.isDebugEnabled()) {
-                log.debug("Semantic routing: Modified request path with model: " + targetModelEndpoint.getModel());
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
-            }
-        }
     }
 
     /**
@@ -781,10 +649,10 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         llmProviderService.getResponseMetadata(llmResponseMetaData, providerConfigs.getMetadata(), metadataMap);
         messageContext.setProperty(APIConstants.AIAPIConstants.AI_API_RESPONSE_METADATA, metadataMap);
 
-        Map<String, Object> roundRobinConfigs = null;
-        if (messageContext.getProperty(APIConstants.AIAPIConstants.ROUND_ROBIN_CONFIGS) != null) {
-            roundRobinConfigs =
-                    (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.ROUND_ROBIN_CONFIGS);
+        Map<String, Object> policyRoutingConfigs = null;
+        if (messageContext.getProperty(APIConstants.AIAPIConstants.HANDLE_ROUTING_CONFIGS) != null) {
+            policyRoutingConfigs =
+                    (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.HANDLE_ROUTING_CONFIGS);
         }
 
         Map<String, Object> failoverConfigs = null;
@@ -793,7 +661,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                     (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.FAILOVER_CONFIGS);
         }
 
-        if (roundRobinConfigs == null && failoverConfigs == null) {
+        if (policyRoutingConfigs == null && failoverConfigs == null) {
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
                     APIConstants.AIAPIConstants.EXIT_ENDPOINT);
             return;
@@ -803,14 +671,14 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                 (int) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                         .getProperty(APIMgtGatewayConstants.HTTP_SC);
 
-        if (handleSuccessfulResponse(messageContext, statusCode, providerConfigs, roundRobinConfigs, failoverConfigs)) {
+        if (handleSuccessfulResponse(messageContext, statusCode, providerConfigs, policyRoutingConfigs, failoverConfigs)) {
             return;
         }
 
-        if (roundRobinConfigs != null) {
+        if (policyRoutingConfigs != null) {
             ModelEndpointDTO targetModelEndpoint =
-                    (ModelEndpointDTO) roundRobinConfigs.get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
-            Long suspendDuration = (Long) roundRobinConfigs.get(APIConstants.AIAPIConstants.SUSPEND_DURATION);
+                    (ModelEndpointDTO) policyRoutingConfigs.get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
+            Long suspendDuration = (Long) policyRoutingConfigs.get(APIConstants.AIAPIConstants.SUSPEND_DURATION);
             suspendTargetEndpoint(messageContext, targetModelEndpoint.getEndpointId(), targetModelEndpoint.getModel(),
                     suspendDuration);
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
@@ -834,13 +702,13 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param messageContext        The message context containing the request and response data.
      * @param statusCode            The HTTP status code of the response.
      * @param providerConfiguration The LLM provider configuration used for fetching token metadata.
-     * @param roundRobinConfigs     The configuration for round robin load balancing.
+     * @param policyRoutingConfigs     The configuration for round robin load balancing.
      * @param failoverConfigs       The configuration for failover handling.
      * @return True if the response is successful and further processing is done, false otherwise.
      */
     private boolean handleSuccessfulResponse(MessageContext messageContext, int statusCode,
                                              LLMProviderConfiguration providerConfiguration,
-                                             Map<String, Object> roundRobinConfigs,
+                                             Map<String, Object> policyRoutingConfigs,
                                              Map<String, Object> failoverConfigs) {
 
         List<Integer> allowedStatusCodes = Arrays.asList(HttpStatus.SC_BAD_REQUEST,
@@ -858,11 +726,11 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             if (remainingTokenCountHeader != null && transportHeaders.containsKey(remainingTokenCountHeader)) {
                 long remainingTokenCount = Long.parseLong((String) transportHeaders.get(remainingTokenCountHeader));
                 if (remainingTokenCount <= 0) {
-                    if (roundRobinConfigs != null) {
+                    if (policyRoutingConfigs != null) {
 
-                        ModelEndpointDTO targetModelEndpoint = (ModelEndpointDTO) roundRobinConfigs
+                        ModelEndpointDTO targetModelEndpoint = (ModelEndpointDTO) policyRoutingConfigs
                                 .get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
-                        Long suspendDuration = (Long) roundRobinConfigs
+                        Long suspendDuration = (Long) policyRoutingConfigs
                                 .get(APIConstants.AIAPIConstants.SUSPEND_DURATION);
 
                         suspendTargetEndpoint(messageContext, targetModelEndpoint.getEndpointId(),

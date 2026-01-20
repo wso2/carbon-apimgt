@@ -64,8 +64,9 @@ public class AzureOpenAILLMProviderServiceImpl implements AILLMProviderService {
         endpointUrl = providerConfig.getProperties().get(APIConstants.AI.LLM_PROVIDER_LLM_ENDPOINT);
 
         if (this.azureApiKey == null || this.endpointUrl == null) {
-            throw new APIManagementException(
-                    "Missing required Azure OpenAI LLM configuration properties: 'apikey' and/or 'llm_endpoint'");
+            String errorMsg = "Missing required Azure OpenAI LLM configuration properties: 'apikey' and/or 'llm_endpoint'";
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg);
         }
 
         // Retry parameters
@@ -78,8 +79,9 @@ public class AzureOpenAILLMProviderServiceImpl implements AILLMProviderService {
                     .getOrDefault(APIConstants.AI.RETRY_PROGRESSION_FACTOR,
                             APIConstants.AI.DEFAULT_RETRY_PROGRESSION_FACTOR));
         } catch (NumberFormatException e) {
-            throw new APIManagementException("Invalid retry configuration provided: " +
-                    "'retrieval_timeout', 'retry_count', 'retry_progression_factor'");
+            String errorMsg = "Invalid retry configuration provided: 'retrieval_timeout', 'retry_count', 'retry_progression_factor'";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg);
         }
 
         this.httpClient = APIUtil.getHttpClient(endpointUrl);
@@ -103,14 +105,14 @@ public class AzureOpenAILLMProviderServiceImpl implements AILLMProviderService {
 
             // Add system message
             ObjectNode systemMessage = objectMapper.createObjectNode();
-            systemMessage.put("role", "system");
-            systemMessage.put("content", systemPrompt);
+            systemMessage.put(APIConstants.AI.LLM_PROVIDER_MESSAGE_ROLE, APIConstants.AI.LLM_PROVIDER_MESSAGE_ROLE_SYSTEM);
+            systemMessage.put(APIConstants.AI.LLM_PROVIDER_MESSAGE_CONTENT, systemPrompt);
             messagesArray.add(systemMessage);
 
             // Add user message
             ObjectNode userMsg = objectMapper.createObjectNode();
-            userMsg.put("role", "user");
-            userMsg.put("content", userMessage);
+            userMsg.put(APIConstants.AI.LLM_PROVIDER_MESSAGE_ROLE, APIConstants.AI.LLM_PROVIDER_MESSAGE_ROLE_USER);
+            userMsg.put(APIConstants.AI.LLM_PROVIDER_MESSAGE_CONTENT, userMessage);
             messagesArray.add(userMsg);
 
             requestBody.set(APIConstants.AI.LLM_PROVIDER_REQUEST_MESSAGES, messagesArray);
@@ -127,8 +129,9 @@ public class AzureOpenAILLMProviderServiceImpl implements AILLMProviderService {
                     JsonNode contentNode = root.at(APIConstants.AI.LLM_PROVIDER_RESPONSE_CONTENT_PATH);
 
                     if (contentNode.isMissingNode()) {
-                        throw new APIManagementException(
-                                "Missing 'content' in response: " + responseBody);
+                        String errorMsg = "Missing 'content' in response: " + responseBody;
+                        log.error(errorMsg);
+                        throw new APIManagementException(errorMsg);
                     }
 
                     return contentNode.asText();

@@ -185,6 +185,7 @@ public class APIConstants {
         public static final String ROUND_ROBIN_CONFIGS = "ROUND_ROBIN_CONFIGS";
         public static final String INTELLIGENT_MODEL_ROUTING_CONFIGS = "INTELLIGENT_MODEL_ROUTING_CONFIGS";
         public static final String SEMANTIC_ROUTING_CONFIGS = "SEMANTIC_ROUTING_CONFIGS";
+        public static final String HANDLE_ROUTING_CONFIGS = "HANDLE_ROUTING_CONFIGS";
         public static final String FAILOVER_CONFIGS = "FAILOVER_CONFIGS";
         public static final String TARGET_MODEL_ENDPOINT = "TARGET_MODEL_ENDPOINT";
         public static final String TARGET_ENDPOINT = "TARGET_ENDPOINT";

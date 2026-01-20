@@ -637,6 +637,10 @@ public final class APIConstants {
         public static final String LLM_PROVIDER_LLM_MODEL = "llm_model";
         public static final String LLM_PROVIDER_REQUEST_MODEL = "model";
         public static final String LLM_PROVIDER_REQUEST_MESSAGES = "messages";
+        public static final String LLM_PROVIDER_MESSAGE_ROLE = "role";
+        public static final String LLM_PROVIDER_MESSAGE_CONTENT = "content";
+        public static final String LLM_PROVIDER_MESSAGE_ROLE_SYSTEM = "system";
+        public static final String LLM_PROVIDER_MESSAGE_ROLE_USER = "user";
         public static final String LLM_PROVIDER_RESPONSE_CONTENT_PATH = "/choices/0/message/content";
 
         public static final String VECTOR_DB_PROVIDER = "VectorDBProvider";

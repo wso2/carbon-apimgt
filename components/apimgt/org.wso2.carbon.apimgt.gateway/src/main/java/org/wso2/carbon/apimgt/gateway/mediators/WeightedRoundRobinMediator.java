@@ -104,7 +104,7 @@ public class WeightedRoundRobinMediator extends AbstractMediator implements Mana
             roundRobinConfigs.put(AIAPIConstants.TARGET_MODEL_ENDPOINT, nextEndpoint);
             roundRobinConfigs.put(AIAPIConstants.SUSPEND_DURATION,
                     endpoints.getSuspendDuration() * AIAPIConstants.MILLISECONDS_IN_SECOND);
-            messageContext.setProperty(AIAPIConstants.ROUND_ROBIN_CONFIGS, roundRobinConfigs);
+            messageContext.setProperty(AIAPIConstants.HANDLE_ROUTING_CONFIGS, roundRobinConfigs);
         } else {
             messageContext.setProperty(AIAPIConstants.TARGET_ENDPOINT, AIAPIConstants.REJECT_ENDPOINT);
         }
