@@ -176,9 +176,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         }
 
         Map<String, Object> routingConfigs;
-        if (messageContext.getProperty(APIConstants.AIAPIConstants.HANDLE_ROUTING_CONFIGS) != null) {
+        if (messageContext.getProperty(APIConstants.AIAPIConstants.ROUTING_CONFIGS) != null) {
             routingConfigs =
-                    (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.HANDLE_ROUTING_CONFIGS);
+                    (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.ROUTING_CONFIGS);
             handleRouting(messageContext, providerConfiguration, routingConfigs, provider);
             if (log.isDebugEnabled()) {
                 log.debug("Handling routing configured, processing with routing configurations");
@@ -186,8 +186,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             return;
         }
 
-       messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
-               APIConstants.AIAPIConstants.DEFAULT_ENDPOINT);
+        messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
+                APIConstants.AIAPIConstants.DEFAULT_ENDPOINT);
 
         Map<String, FailoverPolicyConfigDTO> failoverConfigMap = null;
 
@@ -430,7 +430,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param model               The new model to set in the request path.
      * @param targetModelMetadata The {@link LLMProviderMetadata} containing metadata for extracting the model
      *                            attribute.
-     * @param messageContext     The Synapse {@link MessageContext} containing the API request details.
+     * @param messageContext      The Synapse {@link MessageContext} containing the API request details.
      */
     private void modifyRequestPath(String model, LLMProviderMetadata targetModelMetadata,
                                    MessageContext messageContext) {
@@ -459,7 +459,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             }
             axis2Ctx.setProperty(NhttpConstants.REST_URL_POSTFIX, finalPath.toString());
             if (log.isDebugEnabled()) {
-                log.debug("Updated request path from: " + requestPath +" to: " + finalPath);
+                log.debug("Updated request path from: " + requestPath + " to: " + finalPath);
             }
         }
     }
@@ -649,10 +649,10 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         llmProviderService.getResponseMetadata(llmResponseMetaData, providerConfigs.getMetadata(), metadataMap);
         messageContext.setProperty(APIConstants.AIAPIConstants.AI_API_RESPONSE_METADATA, metadataMap);
 
-        Map<String, Object> policyRoutingConfigs = null;
-        if (messageContext.getProperty(APIConstants.AIAPIConstants.HANDLE_ROUTING_CONFIGS) != null) {
-            policyRoutingConfigs =
-                    (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.HANDLE_ROUTING_CONFIGS);
+        Map<String, Object> routingConfigs = null;
+        if (messageContext.getProperty(APIConstants.AIAPIConstants.ROUTING_CONFIGS) != null) {
+            routingConfigs =
+                    (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.ROUTING_CONFIGS);
         }
 
         Map<String, Object> failoverConfigs = null;
@@ -661,7 +661,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                     (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.FAILOVER_CONFIGS);
         }
 
-        if (policyRoutingConfigs == null && failoverConfigs == null) {
+        if (routingConfigs == null && failoverConfigs == null) {
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
                     APIConstants.AIAPIConstants.EXIT_ENDPOINT);
             return;
@@ -671,14 +671,14 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                 (int) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                         .getProperty(APIMgtGatewayConstants.HTTP_SC);
 
-        if (handleSuccessfulResponse(messageContext, statusCode, providerConfigs, policyRoutingConfigs, failoverConfigs)) {
+        if (handleSuccessfulResponse(messageContext, statusCode, providerConfigs, routingConfigs, failoverConfigs)) {
             return;
         }
 
-        if (policyRoutingConfigs != null) {
+        if (routingConfigs != null) {
             ModelEndpointDTO targetModelEndpoint =
-                    (ModelEndpointDTO) policyRoutingConfigs.get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
-            Long suspendDuration = (Long) policyRoutingConfigs.get(APIConstants.AIAPIConstants.SUSPEND_DURATION);
+                    (ModelEndpointDTO) routingConfigs.get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
+            Long suspendDuration = (Long) routingConfigs.get(APIConstants.AIAPIConstants.SUSPEND_DURATION);
             suspendTargetEndpoint(messageContext, targetModelEndpoint.getEndpointId(), targetModelEndpoint.getModel(),
                     suspendDuration);
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
@@ -702,13 +702,13 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param messageContext        The message context containing the request and response data.
      * @param statusCode            The HTTP status code of the response.
      * @param providerConfiguration The LLM provider configuration used for fetching token metadata.
-     * @param policyRoutingConfigs     The configuration for round robin load balancing.
+     * @param routingConfigs  The configuration for round robin load balancing.
      * @param failoverConfigs       The configuration for failover handling.
      * @return True if the response is successful and further processing is done, false otherwise.
      */
     private boolean handleSuccessfulResponse(MessageContext messageContext, int statusCode,
                                              LLMProviderConfiguration providerConfiguration,
-                                             Map<String, Object> policyRoutingConfigs,
+                                             Map<String, Object> routingConfigs,
                                              Map<String, Object> failoverConfigs) {
 
         List<Integer> allowedStatusCodes = Arrays.asList(HttpStatus.SC_BAD_REQUEST,
@@ -720,17 +720,17 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
 
             String remainingTokenCountHeader = null;
             LLMProviderMetadata remainingTokenCountMetadata = getRemainingTokenCountMetadata(providerConfiguration);
-            if (remainingTokenCountMetadata != null){
+            if (remainingTokenCountMetadata != null) {
                 remainingTokenCountHeader = remainingTokenCountMetadata.getAttributeIdentifier();
             }
             if (remainingTokenCountHeader != null && transportHeaders.containsKey(remainingTokenCountHeader)) {
                 long remainingTokenCount = Long.parseLong((String) transportHeaders.get(remainingTokenCountHeader));
                 if (remainingTokenCount <= 0) {
-                    if (policyRoutingConfigs != null) {
+                    if (routingConfigs != null) {
 
-                        ModelEndpointDTO targetModelEndpoint = (ModelEndpointDTO) policyRoutingConfigs
+                        ModelEndpointDTO targetModelEndpoint = (ModelEndpointDTO) routingConfigs
                                 .get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
-                        Long suspendDuration = (Long) policyRoutingConfigs
+                        Long suspendDuration = (Long) routingConfigs
                                 .get(APIConstants.AIAPIConstants.SUSPEND_DURATION);
 
                         suspendTargetEndpoint(messageContext, targetModelEndpoint.getEndpointId(),
