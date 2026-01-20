@@ -14717,59 +14717,73 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Retrieves block conditions based on the specified condition type and condition value. If the condition value is
-     * wrapped in double quotes (""), an exact match is performed; otherwise, a partial match is applied.
-     *
-     * @param conditionType  type of the condition
-     * @param conditionValue condition value
-     * @param tenantDomain   tenant domain
-     * @return list of block conditions
-     * @throws APIManagementException
-     */
-    public List<BlockConditionsDTO> getBlockConditionsByConditionTypeAndValue(String conditionType,
-                                                                              String conditionValue, String tenantDomain) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement selectPreparedStatement = null;
-        ResultSet resultSet = null;
-        List<BlockConditionsDTO> blockConditionsDTOList = new ArrayList<>();
-        try {
-            String query;
-            boolean isExactMatch = conditionValue != null && conditionValue.startsWith("\"") && conditionValue.endsWith(
-                    "\"");
-            if (isExactMatch) {
-                query = ThrottleSQLConstants.GET_BLOCK_CONDITIONS_BY_TYPE_AND_EXACT_VALUE_SQL;
-                conditionValue = conditionValue.substring(1, conditionValue.length() - 1);
-            } else {
-                query = ThrottleSQLConstants.GET_BLOCK_CONDITIONS_BY_TYPE_AND_VALUE_SQL;
-            }
-            connection = APIMgtDBUtil.getConnection();
-            selectPreparedStatement = connection.prepareStatement(query);
-            String conditionTypeUpper = conditionType != null ? conditionType.toUpperCase() : null;
-            selectPreparedStatement.setString(1, conditionTypeUpper);
-            selectPreparedStatement.setString(2, conditionTypeUpper);
-            if (isExactMatch) {
-                selectPreparedStatement.setString(3, conditionValue);
-                selectPreparedStatement.setString(4, tenantDomain);
-            } else {
-                String conditionValuePattern = "%" + conditionValue + "%";
-                selectPreparedStatement.setString(3, conditionValuePattern);
-                selectPreparedStatement.setString(4, conditionValue);
-                selectPreparedStatement.setString(5, tenantDomain);
-            }
-            resultSet = selectPreparedStatement.executeQuery();
-            while (resultSet.next()) {
-                BlockConditionsDTO blockConditionsDTO = populateBlockConditionsDataWithRS(resultSet);
-                blockConditionsDTOList.add(blockConditionsDTO);
-            }
-        } catch (SQLException e) {
-            handleException(
-                    "Failed to get Block conditions by condition type: " + conditionType + " and condition value: " + conditionValue,
-                    e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
+ * Retrieve block conditions by condition type and value.
+ *
+ * @param conditionType  type of the condition
+ * @param conditionValue condition value
+ * @param tenantDomain   tenant domain
+ * @return list of block conditions
+ * @throws APIManagementException if a database error occurs
+ */
+public List<BlockConditionsDTO> getBlockConditionsByConditionTypeAndValue(String conditionType,
+                                                                          String conditionValue,
+                                                                          String tenantDomain)
+        throws APIManagementException {
+
+    Connection connection = null;
+    PreparedStatement selectPreparedStatement = null;
+    ResultSet resultSet = null;
+    List<BlockConditionsDTO> blockConditionsDTOList = new ArrayList<>();
+
+    try {
+        String query;
+        boolean isExactMatch = conditionValue != null
+                && conditionValue.startsWith("\"")
+                && conditionValue.endsWith("\"");
+
+        // Choose the correct SQL query depending on whether exact match syntax is used
+        if (isExactMatch) {
+            query = ThrottleSQLConstants.GET_BLOCK_CONDITIONS_BY_TYPE_AND_EXACT_VALUE_SQL;
+            conditionValue = conditionValue.substring(1, conditionValue.length() - 1);
+        } else {
+            // ✅ Still use same query but we’ll now bind with exact match (no wildcards)
+            query = ThrottleSQLConstants.GET_BLOCK_CONDITIONS_BY_TYPE_AND_VALUE_SQL;
         }
-        return blockConditionsDTOList;
+
+        connection = APIMgtDBUtil.getConnection();
+        selectPreparedStatement = connection.prepareStatement(query);
+
+        String conditionTypeUpper = conditionType != null ? conditionType.toUpperCase() : null;
+        selectPreparedStatement.setString(1, conditionTypeUpper);
+        selectPreparedStatement.setString(2, conditionTypeUpper);
+
+        if (isExactMatch) {
+            // When user uses quoted value → exact match
+            selectPreparedStatement.setString(3, conditionValue);
+            selectPreparedStatement.setString(4, tenantDomain);
+        } else {
+            // ✅ FIXED: Remove LIKE pattern; bind exact value directly
+            selectPreparedStatement.setString(3, conditionValue);
+            selectPreparedStatement.setString(4, tenantDomain);
+        }
+
+        resultSet = selectPreparedStatement.executeQuery();
+
+        while (resultSet.next()) {
+            BlockConditionsDTO blockConditionsDTO = populateBlockConditionsDataWithRS(resultSet);
+            blockConditionsDTOList.add(blockConditionsDTO);
+        }
+
+    } catch (SQLException e) {
+        handleException(
+                "Failed to get Block conditions by condition type: " + conditionType +
+                        " and condition value: " + conditionValue, e);
+    } finally {
+        APIMgtDBUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
     }
+
+    return blockConditionsDTOList;
+}
 
     /**
      * Update the block condition state true (Enabled) /false (Disabled) given the UUID
