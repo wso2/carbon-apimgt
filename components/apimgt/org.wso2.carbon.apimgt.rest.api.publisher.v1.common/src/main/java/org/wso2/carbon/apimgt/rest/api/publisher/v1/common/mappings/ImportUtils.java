@@ -363,7 +363,9 @@ public class ImportUtils {
                 // If the set of operations are not set in the DTO, those should be set explicitly. Otherwise when
                 // updating a "No resources found" error will be thrown. This is not a problem in the UI, since
                 // when updating an API from the UI there is at least one resource (operation) inside the DTO.
-                if (importedApiDTO.getOperations().isEmpty()) {
+                // We skip this for discovered streaming APIs as they might not have operations populated yet
+                // and we want to avoid potential NPEs in the parser (GH-issue-fix).
+                if (importedApiDTO.getOperations().isEmpty() && !(asyncAPI && Boolean.TRUE.equals(importedApiDTO.isInitiatedFromGateway()))) {
                     if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                         setOperationsToDTO(importedApiDTO, graphQLValidationResponseDTO);
                     } else {
@@ -1787,7 +1789,10 @@ public class ImportUtils {
             throws APIManagementException {
 
         List<URITemplate> uriTemplates = new ArrayList<>();
-        uriTemplates.addAll(response.getParser().getURITemplates(response.getJsonContent()));
+        Set<URITemplate> templates = response.getParser().getURITemplates(response.getJsonContent());
+        if (templates != null) {
+            uriTemplates.addAll(templates);
+        }
         List<APIOperationsDTO> apiOperationsDtos = APIMappingUtil.fromURITemplateListToOprationList(uriTemplates);
         apiDto.setOperations(apiOperationsDtos);
     }

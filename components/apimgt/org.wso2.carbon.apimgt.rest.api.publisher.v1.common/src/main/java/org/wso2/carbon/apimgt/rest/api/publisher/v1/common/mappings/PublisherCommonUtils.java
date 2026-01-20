@@ -737,7 +737,9 @@ public class PublisherCommonUtils {
         apiDtoToUpdate.setLifeCycleStatus(originalAPI.getStatus());
         apiDtoToUpdate.setType(APIDTO.TypeEnum.fromValue(originalAPI.getType()));
 
-        List<APIResource> removedProductResources = getRemovedProductResources(apiDtoToUpdate, originalAPI);
+        List<APIResource> removedProductResources = (isAsyncAPI && (apiDtoToUpdate.getOperations() == null || apiDtoToUpdate.getOperations().isEmpty()))
+                ? Collections.emptyList()
+                : getRemovedProductResources(apiDtoToUpdate, originalAPI);
 
         if (!removedProductResources.isEmpty()) {
             throw new APIManagementException(
@@ -871,7 +873,7 @@ public class PublisherCommonUtils {
             }
         }
         // Validate if resources are empty
-        if (apiDtoToUpdate.getOperations() == null || apiDtoToUpdate.getOperations().isEmpty()) {
+        if (apiDtoToUpdate.getOperations() == null || apiDtoToUpdate.getOperations().isEmpty() && !isAsyncAPI) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
         API apiToUpdate = APIMappingUtil.fromDTOtoAPI(apiDtoToUpdate, apiIdentifier.getProviderName());
@@ -3125,7 +3127,7 @@ public class PublisherCommonUtils {
         Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(apiDefinition, APIConstants.
                 API_TYPE_WS.equals(existingAPI.getType()) || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals
                 (existingAPI.getGatewayVendor()));
-        if (uriTemplates == null || uriTemplates.isEmpty()) {
+        if (uriTemplates == null || uriTemplates.isEmpty() && !existingAPI.isInitiatedFromGateway()) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
         //set existing operation policies to URI templates
