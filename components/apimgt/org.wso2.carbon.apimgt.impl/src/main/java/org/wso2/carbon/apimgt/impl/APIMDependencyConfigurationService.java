@@ -17,7 +17,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 /**
- * Service interface for retrieving the current APIManagerConfiguration.
+ * Service interface for retrieving the current APIMDependencyConfiguration.
  */
 public interface APIMDependencyConfigurationService {
 

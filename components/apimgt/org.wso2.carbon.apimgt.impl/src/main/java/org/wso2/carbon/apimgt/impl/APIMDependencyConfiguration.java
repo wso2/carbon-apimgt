@@ -30,9 +30,9 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * Handles loading and accessing dependency configuration properties. The properties file is first read from the Carbon
- * configuration directory, and if not found, it is loaded from the classpath. Loaded properties are kept in memory and
- * can be retrieved through this class.
+ * Handles loading and accessing dependency configuration properties. The properties file is read from the Carbon
+ + configuration directory. If not found, a warning is logged and empty properties are used. Loaded properties are
+ + kept in memory and can be retrieved through this class.
  */
 public class APIMDependencyConfiguration {
 
@@ -82,7 +82,7 @@ public class APIMDependencyConfiguration {
         Properties properties = new Properties();
 
         if (log.isDebugEnabled()) {
-            log.debug("Loading a file '" + propertiesFileName + "' from classpath");
+            log.debug("Loading a configuration file '" + propertiesFileName);
         }
         try (InputStream in = new FileInputStream(
                 CarbonUtils.getCarbonConfigDirPath() + File.separator + propertiesFileName)) {
