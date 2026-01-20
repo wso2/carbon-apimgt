@@ -170,12 +170,16 @@ public class PublisherCommonServiceComponent {
             cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetAPIMDependencyConfigurationService")
     protected void setAPIMDependencyConfigurationService(APIMDependencyConfigurationService service) {
-
-        log.debug("Setting APIM Dependency Configuration Service");
+        if (log.isDebugEnabled()) {
+            log.debug("Setting APIM Dependency Configuration Service");
+        }
         ServiceReferenceHolder.getInstance().setAPIMDependencyConfigurationService(service);
     }
 
     protected void unsetAPIMDependencyConfigurationService(APIMDependencyConfigurationService service) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting APIM Dependency Configuration Service");
+        }
         ServiceReferenceHolder.getInstance().setAPIMDependencyConfigurationService(null);
     }
 }
