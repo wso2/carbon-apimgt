@@ -86,6 +86,14 @@ public class SubscriptionDataHolder {
     public void refreshSubscriptionStore() {
         subscriptionStore.keySet().forEach(tenant -> {
             // Cleaning the existing SubscriptionDataStore instance before re-population
+            SubscriptionDataStore oldStore = subscriptionStore.get(tenant);
+            if (oldStore != null) {
+                try {
+                    oldStore.destroy();
+                } catch (Throwable t) {
+                    log.warn("Error while destroying old SubscriptionDataStore for tenant: " + tenant, t);
+                }
+            }
             subscriptionStore.put(tenant, new SubscriptionDataStoreImpl(tenant));
             if (log.isDebugEnabled()) {
                 log.debug("Refreshing subscription data store for tenant: " + tenant);
