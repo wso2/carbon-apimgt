@@ -3127,7 +3127,7 @@ public class PublisherCommonUtils {
         Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(apiDefinition, APIConstants.
                 API_TYPE_WS.equals(existingAPI.getType()) || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals
                 (existingAPI.getGatewayVendor()));
-        if (uriTemplates == null || uriTemplates.isEmpty() && !existingAPI.isInitiatedFromGateway()) {
+        if ((uriTemplates == null || uriTemplates.isEmpty()) && !existingAPI.isInitiatedFromGateway()) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
         //set existing operation policies to URI templates
