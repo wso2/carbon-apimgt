@@ -737,9 +737,7 @@ public class PublisherCommonUtils {
         apiDtoToUpdate.setLifeCycleStatus(originalAPI.getStatus());
         apiDtoToUpdate.setType(APIDTO.TypeEnum.fromValue(originalAPI.getType()));
 
-        List<APIResource> removedProductResources = (isAsyncAPI && (apiDtoToUpdate.getOperations() == null || apiDtoToUpdate.getOperations().isEmpty()))
-                ? Collections.emptyList()
-                : getRemovedProductResources(apiDtoToUpdate, originalAPI);
+        List<APIResource> removedProductResources = getRemovedProductResources(apiDtoToUpdate, originalAPI);
 
         if (!removedProductResources.isEmpty()) {
             throw new APIManagementException(
