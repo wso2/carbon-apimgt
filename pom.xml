@@ -2228,7 +2228,7 @@
         <cxf.version>3.6.8</cxf.version>
         <carbon.metrics.version>1.3.12</carbon.metrics.version>
         <!-- apache pdfbox version -->
-        <event.processor.version>2.3.19</event.processor.version>
+        <event.processor.version>2.3.20-SNAPSHOT</event.processor.version>
         <pdfbox.version>3.0.1</pdfbox.version>
         <pdfbox.io.version>3.0.1.wso2v1</pdfbox.io.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>

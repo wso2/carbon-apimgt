@@ -210,7 +210,9 @@
                         --add-opens java.base/java.util=ALL-UNNAMED 
                         --add-opens java.base/java.security=ALL-UNNAMED 
                         --add-opens java.base/sun.security.x509=ALL-UNNAMED
-                        --add-opens java.base/java.security.cert=ALL-UNNAMED                   
+                        --add-opens java.base/java.security.cert=ALL-UNNAMED     
+                        --add-opens java.base/java.util.regex=ALL-UNNAMED
+                        --add-opens java.base/java.lang=ALL-UNNAMED              
                     </argLine>
                     <excludes>
                         <exclude>**/Abstract*</exclude>
