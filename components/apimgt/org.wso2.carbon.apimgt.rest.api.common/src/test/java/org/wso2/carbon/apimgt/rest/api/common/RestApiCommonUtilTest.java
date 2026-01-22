@@ -21,6 +21,8 @@
 package org.wso2.carbon.apimgt.rest.api.common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import io.swagger.v3.core.util.Json;
 import org.junit.Test;
 import org.junit.Assert;
 import org.junit.runner.RunWith;
@@ -105,6 +107,8 @@ public class RestApiCommonUtilTest {
                         "\"x-wso2-sandbox-endpoints\":{\"urls\":[\"http://www.mocky.io/v2/5185415ba171ea3a00704eed\"]," +
                         "\"type\":\"http\"},\"x-wso2-auth-header\":\"Authorization\",\"x-wso2-basePath\":\"hello/3.14\"," +
                         "\"x-wso2-disable-security\":true}";
-        Assert.assertEquals("", expected, openAPIDefinition);
+        JsonNode expectedJson = Json.mapper().readTree(expected);
+        JsonNode actualJson = Json.mapper().readTree(openAPIDefinition);
+        Assert.assertEquals(expectedJson, actualJson);
     }
 }
