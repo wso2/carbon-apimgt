@@ -217,7 +217,11 @@ public class APIMappingUtil {
             context = "/t/" + providerDomain + context;
         }
         context = checkAndSetVersionParam(context);
+
+        // This is to support the pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
         model.setContextTemplate(context);
+        
         context = updateContextWithVersion(dto.getVersion(), originalContext, context);
         model.setContext(context);
         model.setDescription(dto.getDescription());
