@@ -12,6 +12,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRenewalRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRevokeRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
@@ -38,6 +40,8 @@ import javax.ws.rs.core.SecurityContext;
 
 public interface ApplicationsApiService {
       public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(String applicationId, String keyType, String ifMatch, APIKeyGenerateRequestDTO apIKeyGenerateRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdApiKeysKeyTypeGet(String applicationId, String keyType, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameRenewPost(String applicationId, String keyType, String keyDisplayName, String ifMatch, APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType, String ifMatch, APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO applicationKeyGenerateRequestDTO, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;

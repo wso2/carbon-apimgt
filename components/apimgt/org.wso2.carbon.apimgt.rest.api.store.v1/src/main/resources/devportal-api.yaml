@@ -3271,6 +3271,87 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/generate"'
 
+  /applications/{applicationId}/api-keys/{keyType}/{keyDisplayName}/renew:
+    post:
+      tags:
+        - API Keys
+      summary: Renew API Key
+      description: |
+        Renew a self contained API Key for the application specified by the display name
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/keyType'
+        - $ref: '#/components/parameters/keyDisplayName'
+        - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        description: |
+          API Key renewal request object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIKeyRenewalRequest'
+        required: false
+      responses:
+        200:
+          description: |
+            OK.
+            apikey renewed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKey'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+            - apim:api_key
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/generate/test-key"'
+
+  /applications/{applicationId}/api-keys/{keyType}:
+    get:
+      tags:
+        - API Keys
+      summary: Get API Key(s) of a Given Type
+      description: |
+        Retrieve self contained API Key(s) for the application specifying the key type in the URI.
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/keyType'
+        - $ref: '#/components/parameters/If-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            API key(s) of given type are returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+            - apim:api_key
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X GET "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION"'
+
   /applications/{applicationId}/api-keys/{keyType}/revoke:
     post:
       tags:
@@ -5872,6 +5953,19 @@ components:
           type: integer
           format: int32
           example: 3600
+    APIKeyList:
+      title: API Keys List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of API keys returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIKey'
     ApplicationKey:
       title: Application key details
       type: object
@@ -6087,6 +6181,19 @@ components:
         additionalProperties:
           type: object
           properties: {}
+          description: Additional parameters if Authorization server needs any
+    APIKeyRenewalRequest:
+      title: API Key renewal request object
+      type: object
+      properties:
+        validityPeriod:
+          type: integer
+          description: Token validity period
+          format: int32
+          example: 3600
+        additionalProperties:
+          type: object
+          properties: { }
           description: Additional parameters if Authorization server needs any
     APIKeyRevokeRequest:
       title: API Key revoke request object
@@ -7610,6 +7717,13 @@ components:
         enum:
           - PRODUCTION
           - SANDBOX
+    keyDisplayName:
+      name: keyDisplayName
+      in: query
+      description: |
+        Name of the API key.
+      schema:
+        type: string
     If-None-Match:
       name: If-None-Match
       in: header
