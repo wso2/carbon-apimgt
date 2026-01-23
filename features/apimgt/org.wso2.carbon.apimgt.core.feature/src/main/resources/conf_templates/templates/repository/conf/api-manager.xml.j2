@@ -1721,6 +1721,9 @@
         {% if apimgt.mutual_ssl.client_certificate_encode is defined %}
         <ClientCertificateEncode>{{apimgt.mutual_ssl.client_certificate_encode}}</ClientCertificateEncode>
         {% endif %}
+        {% if apimgt.mutual_ssl.forward_client_certificate_header is defined %}
+        <ForwardClientCertificateHeader>{{apimgt.mutual_ssl.forward_client_certificate_header}}</ForwardClientCertificateHeader>
+        {% endif %}
      </MutualSSL>
 
      <GlobalCacheInvalidation>
