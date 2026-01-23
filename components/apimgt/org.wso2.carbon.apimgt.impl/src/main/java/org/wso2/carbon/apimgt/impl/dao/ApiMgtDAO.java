@@ -128,12 +128,7 @@ import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
-import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -16560,6 +16555,44 @@ public class ApiMgtDAO {
             handleException("Failed to add Application", sqlException);
         } finally {
             APIMgtDBUtil.closeAllConnections(null, connection, null);
+        }
+    }
+
+    /**
+     * Add new api key against an Application
+     *
+     * @param apiKeyHash Generated api key value
+     * @param keyInfoDTO JWTTokenInfoDTO object with required data
+     * @throws APIManagementException
+     */
+    public void addAPIKey(String apiKeyHash, APIKeyDTO keyInfoDTO) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // This query to update the AM_API_KEY table
+            String sqlQuery = SQLConstants.API_KEY_SQL;
+            // Adding data to the AM_API_KEY table
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, "Test");
+            ps.setString(2, keyInfoDTO.getApplicationId());
+            ps.setString(3, apiKeyHash);
+            ps.setString(4, keyInfoDTO.getKeyType());
+            ps.setString(5, null);
+            ps.setString(6, keyInfoDTO.getAuthUser());
+            ps.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+            ps.setLong(8, keyInfoDTO.getValidityPeriod());
+            ps.setString(9, "NOT_USED");
+
+            ps.executeUpdate();
+            conn.commit();
+        } catch (SQLException e) {
+            handleException("Failed to add generated API keys", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
     }
 
