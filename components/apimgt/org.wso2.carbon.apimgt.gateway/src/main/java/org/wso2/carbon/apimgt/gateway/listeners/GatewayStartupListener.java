@@ -542,12 +542,12 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             try {
                 new EndpointCertificateDeployer(tenantDomain).deployAllTenantCertificatesAtStartup();
                 new GoogleAnalyticsConfigDeployer(tenantDomain).deploy();
+                LLMProviderManager.getInstance().initializeLLMProviderConfigurations(tenantDomain);
             } catch (APIManagementException e) {
                 log.error(e);
             }
         }).start();
         retrieveAndDeployArtifacts(tenantDomain);
-        LLMProviderManager.getInstance().initializeLLMProviderConfigurations(tenantDomain);
         ServiceReferenceHolder.getInstance().addLoadedTenant(tenantDomain);
     }
 
