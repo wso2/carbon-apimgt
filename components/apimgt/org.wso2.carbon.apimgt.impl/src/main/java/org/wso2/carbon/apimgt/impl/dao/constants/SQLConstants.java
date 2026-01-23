@@ -3915,6 +3915,11 @@ public class SQLConstants {
 
     public static final String SCOPE_EXIST_SQL = "SELECT 1 FROM AM_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
 
+    public static final String API_KEY_SQL =
+            " INSERT INTO AM_API_KEY (API_KEY_NAME, APPLICATION_ID, API_KEY_HASH, " +
+                    "   KEY_TYPE, API_KEY_PROPERTIES, AUTHZ_USER, TIME_CREATED, VALIDITY_PERIOD, LAST_USED)" +
+                    " VALUES (?,?,?,?,?,?,?,?,?)";
+
     /**
      * Static class to hold database queries related to webhooks subscriptions
      */

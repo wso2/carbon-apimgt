@@ -9158,6 +9158,27 @@ public final class APIUtil {
     }
 
     /**
+     * Generates the hash value for a given API key.
+     *
+     * @param apiKey api key.
+     * @return the hashed api key.
+     */
+    public static String sha256(String apiKey) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(apiKey.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder();
+            for (byte b : hashBytes) {
+                hex.append(String.format("%02x", b));
+            }
+            return hex.toString();
+        } catch (NoSuchAlgorithmException e) {
+            // SHA-256 is always available in Java
+            throw new IllegalStateException("SHA-256 algorithm not found", e);
+        }
+    }
+
+    /**
      * Get expiry time of a given jwt token. This method should be called only after validating whether the token is
      * JWT via isValidJWT method.
      *

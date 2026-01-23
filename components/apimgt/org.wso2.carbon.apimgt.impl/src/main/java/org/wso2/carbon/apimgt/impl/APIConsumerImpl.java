@@ -96,16 +96,10 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.api.model.ApplicationResponse;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -157,6 +151,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -403,6 +400,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                  String permittedIP, String permittedReferer) throws APIManagementException {
 
         JwtTokenInfoDTO jwtTokenInfoDTO;
+        String apiKey;
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setId(application.getId());
         applicationDTO.setUuid(application.getUUID());
@@ -428,10 +426,22 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         ApiKeyGenerator apiKeyGenerator = loadApiKeyGenerator();
         if (apiKeyGenerator != null) {
-            return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+            apiKey = apiKeyGenerator.generateToken(jwtTokenInfoDTO);
         } else {
             throw new APIManagementException("Failed to generate the API key");
         }
+        APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
+        apiKeyInfoDTO.setKeyDisplayName(null);
+        apiKeyInfoDTO.setApplicationId(application.getUUID());
+        apiKeyInfoDTO.setKeyType(application.getKeyType());
+        apiKeyInfoDTO.setApiKeyProperties(null);
+        apiKeyInfoDTO.setAuthUser(userName);
+        apiKeyInfoDTO.setValidityPeriod(validityPeriod);
+        apiKeyInfoDTO.setLastUsedTime(null);
+        apiKeyInfoDTO.setPermittedIP(permittedIP);
+        apiKeyInfoDTO.setPermittedReferer(permittedReferer);
+        apiMgtDAO.addAPIKey(APIUtil.sha256(apiKey), apiKeyInfoDTO);
+        return apiKey;
     }
 
     private ApiKeyGenerator loadApiKeyGenerator() throws APIManagementException {
