@@ -221,7 +221,7 @@ public class APIMappingUtil {
         // if the context does not contain any {version} segment, we use the default version strategy.
         context = checkAndSetVersionParam(context);
         model.setContextTemplate(context);
-        
+
         context = updateContextWithVersion(dto.getVersion(), originalContext, context);
         model.setContext(context);
         model.setDescription(dto.getDescription());
