@@ -751,6 +751,9 @@ public class PublisherCommonUtils {
         List<API> usedMcpServers =
                 apiProvider.getMCPServersUsedByAPI(originalAPI.getUuid(), originalAPI.getOrganization());
         if (!usedMcpServers.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("API: " + originalAPI.getUuid() + " is using MCP servers. Validating MCP resources.");
+            }
             List<APIOperationsDTO> updatedOperations = apiDtoToUpdate.getOperations();
             if (updatedOperations != null && !updatedOperations.isEmpty()) {
                 Set<URITemplate> updatedUriTemplates =

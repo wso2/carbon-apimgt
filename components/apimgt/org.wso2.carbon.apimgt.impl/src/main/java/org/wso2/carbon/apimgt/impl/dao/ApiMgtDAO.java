@@ -20880,6 +20880,10 @@ public class ApiMgtDAO {
                 Map<String, List<Integer>> apiOperationMappingsReferencedByAPIID =
                         getAPIOperationMappingsReferencedByAPIID(apiId);
                 if (!apiOperationMappingsReferencedByAPIID.isEmpty()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Removing API Operation Mappings references for API ID: " + apiId +
+                                " before removing URL mappings.");
+                    }
                     removeAPIOperationMappingsReferencedByAPIID(connection, apiOperationMappingsReferencedByAPIID);
                 }
 
