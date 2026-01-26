@@ -446,11 +446,24 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             String rawPath = uri.getRawPath();
             String rawQuery = uri.getRawQuery();
 
-            // Encode only the substituted model as a path-segment-safe value and quote replacement
-            String encodedModel = encodePathSegmentRFC3986(model);
-            String updatedRawPath = rawPath.replaceAll(
+            String decodedPath = decodePathUrl(rawPath);
+
+            // Replace the model in the decoded path
+            String updatedDecodedPath = decodedPath.replaceAll(
                     targetModelMetadata.getAttributeIdentifier(),
-                    java.util.regex.Matcher.quoteReplacement(encodedModel));
+                    java.util.regex.Matcher.quoteReplacement(model));
+
+            // Re-encode the entire path to ensure proper URL encoding
+            String updatedRawPath;
+            try {
+                updatedRawPath = new URI(null, null, updatedDecodedPath, null).getRawPath();
+            } catch (java.net.URISyntaxException e) {
+                String encodedModel = encodePathSegmentRFC3986(model);
+                String decodedRawPath = decodePathUrl(rawPath);
+                updatedRawPath = decodedRawPath.replaceAll(
+                        targetModelMetadata.getAttributeIdentifier(),
+                        java.util.regex.Matcher.quoteReplacement(encodedModel));
+            }
 
             StringBuilder finalPath = new StringBuilder(updatedRawPath);
             if (rawQuery != null) {
@@ -461,6 +474,20 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             if (log.isDebugEnabled()) {
                 log.debug("Updated request path from: " + requestPath +" to: " + finalPath);
             }
+        }
+    }
+
+    /**
+     * Decodes a URL path using UTF-8. Falls back to the raw path if decoding fails.
+     *
+     * @param rawPath The percent-encoded path.
+     * @return The decoded path, or the original if decoding fails.
+     */
+    private String decodePathUrl(String rawPath) {
+        try {
+            return java.net.URLDecoder.decode(rawPath, StandardCharsets.UTF_8.name());
+        } catch (java.io.UnsupportedEncodingException e) {
+            return rawPath;
         }
     }
 
@@ -547,10 +574,12 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
 
             URI uri = URI.create(requestPath);
             String rawPath = uri.getRawPath();
+            // Decode the path 
+            String decodedPath = decodePathUrl(rawPath);
 
             String regex = requestModelMetadata.getAttributeIdentifier();
             java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
-            java.util.regex.Matcher matcher = pattern.matcher(rawPath);
+            java.util.regex.Matcher matcher = pattern.matcher(decodedPath);
             if (matcher.find()) {
                 String model = matcher.group();
                 if (log.isDebugEnabled()) {
