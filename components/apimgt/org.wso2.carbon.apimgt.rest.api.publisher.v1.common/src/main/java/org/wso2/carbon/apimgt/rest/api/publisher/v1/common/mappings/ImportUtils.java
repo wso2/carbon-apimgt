@@ -102,10 +102,12 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubtypeConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AbstractAsyncApiParser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParseOptions;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParserFactory;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.registry.core.Registry;
@@ -363,13 +365,11 @@ public class ImportUtils {
                 // If the set of operations are not set in the DTO, those should be set explicitly. Otherwise when
                 // updating a "No resources found" error will be thrown. This is not a problem in the UI, since
                 // when updating an API from the UI there is at least one resource (operation) inside the DTO.
-                // We skip this for discovered streaming APIs as they might not have operations populated yet
-                // and we want to avoid potential NPEs in the parser (GH-issue-fix).
-                if (importedApiDTO.getOperations().isEmpty() && !(asyncAPI && Boolean.TRUE.equals(importedApiDTO.isInitiatedFromGateway()))) {
+                if (importedApiDTO.getOperations().isEmpty()) {
                     if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                         setOperationsToDTO(importedApiDTO, graphQLValidationResponseDTO);
                     } else {
-                        setOperationsToDTO(importedApiDTO, validationResponse);
+                        setOperationsToDTO(importedApiDTO, validationResponse, asyncAPI);
                     }
                 }
 
@@ -1785,13 +1785,32 @@ public class ImportUtils {
      * @param response API Validation Response
      * @throws APIManagementException If an error occurs when retrieving the URI templates
      */
-    private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response)
+    private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response, boolean asyncAPI)
             throws APIManagementException {
 
         List<URITemplate> uriTemplates = new ArrayList<>();
-        Set<URITemplate> templates = response.getParser().getURITemplates(response.getJsonContent());
-        if (templates != null) {
-            uriTemplates.addAll(templates);
+        String jsonContent = response.getJsonContent();
+        if(asyncAPI) {
+            AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+                AsyncApiParserUtil.getAsyncApiVersion(jsonContent), 
+                null // Pass null for parser options if getParserOptionsFromConfig() is not static/accessible
+          );
+
+            // Calculate the boolean flag for WebSocket support
+            // (Logic adapted from your updateAsyncAPIDefinition method)
+            boolean isWebSocket = APIConstants.API_TYPE_WS.equals(apiDto.getType().toString());
+            
+            // Extract templates specifically looking for "channels"
+            Set<URITemplate> asyncTemplates = asyncApiParser.getURITemplates(jsonContent, isWebSocket);
+
+            if (asyncTemplates != null) {
+                uriTemplates.addAll(asyncTemplates);
+            }
+        }else{
+            Set<URITemplate> templates = response.getParser().getURITemplates(jsonContent);
+            if (templates != null) {
+                uriTemplates.addAll(templates);
+            }
         }
         List<APIOperationsDTO> apiOperationsDtos = APIMappingUtil.fromURITemplateListToOprationList(uriTemplates);
         apiDto.setOperations(apiOperationsDtos);

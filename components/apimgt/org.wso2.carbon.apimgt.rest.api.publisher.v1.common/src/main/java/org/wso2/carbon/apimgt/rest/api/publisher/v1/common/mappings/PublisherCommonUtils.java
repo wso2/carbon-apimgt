@@ -870,7 +870,7 @@ public class PublisherCommonUtils {
             }
         }
         // Validate if resources are empty
-        if (apiDtoToUpdate.getOperations() == null || apiDtoToUpdate.getOperations().isEmpty() && !isAsyncAPI) {
+        if (apiDtoToUpdate.getOperations() == null || apiDtoToUpdate.getOperations().isEmpty()) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
         API apiToUpdate = APIMappingUtil.fromDTOtoAPI(apiDtoToUpdate, apiIdentifier.getProviderName());
@@ -3124,7 +3124,7 @@ public class PublisherCommonUtils {
         Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(apiDefinition, APIConstants.
                 API_TYPE_WS.equals(existingAPI.getType()) || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals
                 (existingAPI.getGatewayVendor()));
-        if ((uriTemplates == null || uriTemplates.isEmpty()) && !existingAPI.isInitiatedFromGateway()) {
+        if ((uriTemplates == null || uriTemplates.isEmpty())) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
         //set existing operation policies to URI templates
