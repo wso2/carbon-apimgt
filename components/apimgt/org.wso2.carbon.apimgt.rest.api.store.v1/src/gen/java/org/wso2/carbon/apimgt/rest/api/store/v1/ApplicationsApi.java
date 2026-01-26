@@ -15,6 +15,10 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationThrottleResetDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretCreationRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDeletionRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.WorkflowResponseDTO;
@@ -409,6 +413,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Keys are re generated. ", response = ApplicationKeyReGenerateResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The user do not have permission to perform this action.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
     public Response applicationsApplicationIdOauthKeysKeyMappingIdRegenerateSecretPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping. ",required=true) @PathParam("keyMappingId") String keyMappingId) throws APIManagementException{
@@ -520,7 +525,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
             @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
         })
-    }, tags={ "Applications" })
+    }, tags={ "Applications",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = ApplicationDTO.class),
         @ApiResponse(code = 202, message = "Accepted. The request has been accepted. ", response = WorkflowResponseDTO.class),
@@ -529,5 +534,67 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
     public Response applicationsPost(@ApiParam(value = "Application object that is to be created. " ,required=true) ApplicationDTO applicationDTO) throws APIManagementException{
         return delegate.applicationsPost(applicationDTO, securityContext);
+    }
+
+    @POST
+    @Path("/{applicationId}/oauth-keys/{keyMappingId}/generate-secret")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Generate a New Consumer Secret ", notes = "This operation can be used to generate a new consumer secret for an application for the given key type ", response = ConsumerSecretDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+        })
+    }, tags={ "Application Secrets",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = ConsumerSecretDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The user do not have permission to perform this action.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response generateConsumerSecret(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping. ",required=true) @PathParam("keyMappingId") String keyMappingId, @ApiParam(value = "Request payload containing details for creating a new consumer secret " ,required=true) ConsumerSecretCreationRequestDTO consumerSecretCreationRequestDTO) throws APIManagementException{
+        return delegate.generateConsumerSecret(applicationId, keyMappingId, consumerSecretCreationRequestDTO, securityContext);
+    }
+
+    @GET
+    @Path("/{applicationId}/oauth-keys/{keyMappingId}/secrets")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve Consumer Secrets ", notes = "This operation can be used to retrieve consumer secrets of an application for the given key type ", response = ConsumerSecretListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+        })
+    }, tags={ "Application Secrets",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Consumer secrets are retrieved. ", response = ConsumerSecretListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The user do not have permission to perform this action.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getConsumerSecrets(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping. ",required=true) @PathParam("keyMappingId") String keyMappingId) throws APIManagementException{
+        return delegate.getConsumerSecrets(applicationId, keyMappingId, securityContext);
+    }
+
+    @POST
+    @Path("/{applicationId}/oauth-keys/{keyMappingId}/revoke-secret")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Revoke a Consumer Secret ", notes = "This operation can be used to revoke a consumer secret for an application for the give key type ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+        })
+    }, tags={ "Application Secrets" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 204, message = "OK. Consumer secret deleted. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The user do not have permission to perform this action.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response revokeConsumerSecret(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "OAuth Key Identifier consisting of the UUID of the Oauth Key Mapping. ",required=true) @PathParam("keyMappingId") String keyMappingId, @ApiParam(value = "Request payload containing details for revoking a new consumer secret " ,required=true) ConsumerSecretDeletionRequestDTO consumerSecretDeletionRequestDTO) throws APIManagementException{
+        return delegate.revokeConsumerSecret(applicationId, keyMappingId, consumerSecretDeletionRequestDTO, securityContext);
     }
 }

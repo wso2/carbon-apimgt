@@ -25,14 +25,22 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretInfo;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretRequest;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretCreationRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDeletionRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -145,5 +153,77 @@ public class ApplicationKeyMappingUtil {
         apiKeyDto.setApikey(apiKey);
         apiKeyDto.setValidityTime(validityTime);
         return apiKeyDto;
+    }
+
+    /**
+     * Convert ConsumerSecretCreationRequestDTO to ConsumerSecretRequest
+     *
+     * @param clientId                          Client ID
+     * @param consumerSecretCreationRequestDTO  ConsumerSecretCreationRequestDTO object
+     * @return ConsumerSecretRequest object
+     */
+    public static ConsumerSecretRequest fromDTOtoConsumerSecretRequest(String clientId,
+                                                                       ConsumerSecretCreationRequestDTO consumerSecretCreationRequestDTO) {
+        return buildConsumerSecretRequest(clientId, consumerSecretCreationRequestDTO.getAdditionalProperties());
+    }
+
+    /**
+     * Convert ConsumerSecretDeletionRequestDTO to ConsumerSecretRequest
+     *
+     * @param clientId                          Client ID
+     * @param consumerSecretDeletionRequestDTO  ConsumerSecretDeletionRequestDTO object
+     * @return ConsumerSecretRequest object
+     */
+    public static ConsumerSecretRequest fromDTOtoConsumerSecretRequest(String clientId,
+                                                                       ConsumerSecretDeletionRequestDTO consumerSecretDeletionRequestDTO) {
+        return buildConsumerSecretRequest(clientId, consumerSecretDeletionRequestDTO.getAdditionalProperties());
+    }
+
+    /**
+     * Build ConsumerSecretRequest object
+     *
+     * @param clientId                  Client ID
+     * @param additionalProperties      Additional properties map
+     * @return ConsumerSecretRequest object
+     */
+    public static ConsumerSecretRequest buildConsumerSecretRequest(String clientId,
+                                                                   Map<String, Object> additionalProperties) {
+        ConsumerSecretRequest consumerSecretRequest = new ConsumerSecretRequest();
+        consumerSecretRequest.setClientId(clientId);
+        if (additionalProperties != null) {
+            consumerSecretRequest.putAll(additionalProperties);
+        }
+        return consumerSecretRequest;
+    }
+
+    /**
+     * Convert ConsumerSecretInfo to ConsumerSecretDTO
+     *
+     * @param consumerSecret  ConsumerSecretInfo object
+     * @return ConsumerSecretDTO object
+     */
+    public static ConsumerSecretDTO fromConsumerSecretToDTO(ConsumerSecretInfo consumerSecret) {
+        ConsumerSecretDTO consumerSecretDTO = new ConsumerSecretDTO();
+        consumerSecretDTO.setSecretId(consumerSecret.getSecretId());
+        consumerSecretDTO.secretValue(consumerSecret.getClientSecret());
+        consumerSecretDTO.setAdditionalProperties(consumerSecret.getParameters());
+        return consumerSecretDTO;
+    }
+
+    /**
+     * Convert List of ConsumerSecretInfo to ConsumerSecretListDTO
+     *
+     * @param consumerSecrets  List of ConsumerSecretInfo objects
+     * @return ConsumerSecretListDTO object
+     */
+    public static ConsumerSecretListDTO fromConsumerSecretListToDTO(List<ConsumerSecretInfo> consumerSecrets) {
+        ConsumerSecretListDTO consumerSecretListDTO = new ConsumerSecretListDTO();
+        List<ConsumerSecretDTO> consumerSecretDTOs = new ArrayList<>();
+        for (ConsumerSecretInfo consumerSecret : consumerSecrets) {
+            consumerSecretDTOs.add(fromConsumerSecretToDTO(consumerSecret));
+        }
+        consumerSecretListDTO.setCount(consumerSecretDTOs.size());
+        consumerSecretListDTO.setList(consumerSecretDTOs);
+        return consumerSecretListDTO;
     }
 }

@@ -43,6 +43,8 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretInfo;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -75,6 +77,10 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretCreationRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDeletionRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
@@ -402,12 +408,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         //subscriber field of the body is not honored. It is taken from the context
         Application application = ApplicationMappingUtil.fromDTOtoApplication(applicationDto, username);
         application.setSubOrganization(sharedOrganization);
-        
+
         application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD); // default
         if ((applicationDto.getVisibility() != null)
                 && applicationDto.getVisibility() == VisibilityEnum.SHARED_WITH_ORG && sharedOrganization != null) {
             application.setSharedOrganization(sharedOrganization);
-        } 
+        }
 
         int applicationId = apiConsumer.addApplication(application, username, organization);
 
@@ -603,7 +609,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD);
             }
 
-        } 
+        }
         apiConsumer.updateApplication(application);
 
         // Added to use the application name as part of sp name instead of application UUID when specified
@@ -904,7 +910,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     if (StringUtils.isNotEmpty(body.getCallbackUrl())) {
                         jsonParamObj.put(APIConstants.JSON_CALLBACK_URL, body.getCallbackUrl());
                     }
-                    
+
                     String jsonParams = jsonParamObj.toString();
                     String tokenScopes = StringUtils.join(body.getScopes(), " ");
                     String keyManagerName = APIConstants.KeyManager.DEFAULT_KEY_MANAGER;
@@ -985,7 +991,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * Used to get all keys of an application
      *
      * @param applicationUUID Id of the application
-     * @param orgInfo 
+     * @param orgInfo
      * @return List of application keys
      */
     private Set<APIKey> getApplicationKeys(String applicationUUID, String tenantDomain, OrganizationInfo orgInfo) {
@@ -1217,7 +1223,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdKeysKeyTypeRegenerateSecretPost(String applicationId,
-            String keyType, MessageContext messageContext) {
+            String keyType, MessageContext messageContext) throws APIManagementException {
+        if (APIUtil.isMultipleClientSecretsEnabled()) {
+            throw new APIManagementException("The requested operation is not supported",
+                    ExceptionCodes.OPERATION_NOT_SUPPORTED_FOR_MULTIPLE_CLIENT_SECRET_MODE);
+        }
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
@@ -1242,6 +1252,91 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while re generating the consumer secret ", e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response generateConsumerSecret(String applicationId, String keyMappingId,
+                                           ConsumerSecretCreationRequestDTO consumerSecretCreationRequestDTO,
+                                           MessageContext messageContext) throws APIManagementException {
+        if (!APIUtil.isMultipleClientSecretsEnabled()) {
+            throw new APIManagementException("The requested operation is not supported",
+                    ExceptionCodes.OPERATION_NOT_SUPPORTED_FOR_SINGLE_CLIENT_SECRET_MODE);
+        }
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
+        if (applicationKeys == null) {
+            return null;
+        }
+        ApplicationKeyDTO applicationKeyDTO = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
+        if (applicationKeyDTO != null) {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            String clientId = applicationKeyDTO.getConsumerKey();
+            ConsumerSecretRequest consumerSecretRequest = ApplicationKeyMappingUtil.
+                    fromDTOtoConsumerSecretRequest(clientId, consumerSecretCreationRequestDTO);
+            ConsumerSecretInfo consumerSecret = apiConsumer.generateConsumerSecret(applicationKeyDTO.getKeyManager(),
+                    consumerSecretRequest);
+            ConsumerSecretDTO consumerSecretResponseDTO = ApplicationKeyMappingUtil.
+                    fromConsumerSecretToDTO(consumerSecret);
+            return Response.status(Response.Status.CREATED).entity(consumerSecretResponseDTO).build();
+        } else {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APP_CONSUMER_KEY, keyMappingId, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response getConsumerSecrets(String applicationId, String keyMappingId, MessageContext messageContext)
+            throws APIManagementException {
+        if (!APIUtil.isMultipleClientSecretsEnabled()) {
+            throw new APIManagementException("The requested operation is not supported",
+                    ExceptionCodes.OPERATION_NOT_SUPPORTED_FOR_SINGLE_CLIENT_SECRET_MODE);
+        }
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
+        if (applicationKeys == null) {
+            return null;
+        }
+        ApplicationKeyDTO applicationKeyDTO = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
+        if (applicationKeyDTO != null) {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            String clientId = applicationKeyDTO.getConsumerKey();
+            List<ConsumerSecretInfo> consumerSecrets = apiConsumer.retrieveConsumerSecrets(clientId,
+                    applicationKeyDTO.getKeyManager());
+            ConsumerSecretListDTO consumerSecretListDTO = ApplicationKeyMappingUtil.
+                    fromConsumerSecretListToDTO(consumerSecrets);
+            return Response.ok().entity(consumerSecretListDTO).build();
+        } else {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APP_CONSUMER_KEY, keyMappingId, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response revokeConsumerSecret(String applicationId, String keyMappingId,
+                                         ConsumerSecretDeletionRequestDTO consumerSecretDeletionRequestDTO,
+                                         MessageContext messageContext) throws APIManagementException {
+        if (!APIUtil.isMultipleClientSecretsEnabled()) {
+            throw new APIManagementException("The requested operation is not supported",
+                    ExceptionCodes.OPERATION_NOT_SUPPORTED_FOR_SINGLE_CLIENT_SECRET_MODE);
+        }
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
+        if (applicationKeys == null) {
+            return null;
+        }
+        ApplicationKeyDTO applicationKeyDTO = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
+        if (applicationKeyDTO != null) {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            String clientId = applicationKeyDTO.getConsumerKey();
+            ConsumerSecretRequest consumerSecretRequest = ApplicationKeyMappingUtil.
+                    fromDTOtoConsumerSecretRequest(clientId, consumerSecretDeletionRequestDTO);
+            apiConsumer.deleteConsumerSecret(consumerSecretDeletionRequestDTO.getSecretId(),
+                    applicationKeyDTO.getKeyManager(), consumerSecretRequest);
+            return Response.noContent().build();
+        } else {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APP_CONSUMER_KEY, keyMappingId, log);
         }
         return null;
     }
@@ -1504,6 +1599,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                                                                        String keyMappingId,
                                                                                        MessageContext messageContext)
             throws APIManagementException {
+        if (APIUtil.isMultipleClientSecretsEnabled()) {
+            throw new APIManagementException("The requested operation is not supported",
+                    ExceptionCodes.OPERATION_NOT_SUPPORTED_FOR_MULTIPLE_CLIENT_SECRET_MODE);
+        }
 
         String username = RestApiCommonUtil.getLoggedInUsername();
             Set<APIKey> applicationKeys = getApplicationKeys(applicationId);

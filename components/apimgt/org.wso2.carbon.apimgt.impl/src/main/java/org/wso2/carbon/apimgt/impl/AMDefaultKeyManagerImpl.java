@@ -43,6 +43,8 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretInfo;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretRequest;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
@@ -61,6 +63,9 @@ import org.wso2.carbon.apimgt.impl.kmclient.model.AuthClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.Claim;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ClaimsList;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ClientInfo;
+import org.wso2.carbon.apimgt.impl.kmclient.model.ClientSecret;
+import org.wso2.carbon.apimgt.impl.kmclient.model.ClientSecretList;
+import org.wso2.carbon.apimgt.impl.kmclient.model.ClientSecretRequest;
 import org.wso2.carbon.apimgt.impl.kmclient.model.DCRClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectionClient;
@@ -82,6 +87,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -414,6 +420,36 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             }
         }
 
+        if (additionalProperties.containsKey(APIConstants.KeyManager.CLIENT_SECRET_DESCRIPTION)) {
+            Object clientSecretDescriptionValue =
+                    additionalProperties.get(APIConstants.KeyManager.CLIENT_SECRET_DESCRIPTION);
+            if (clientSecretDescriptionValue instanceof String) {
+                if (!APIConstants.KeyManager.CLIENT_SECRET_DESCRIPTION.equals(clientSecretDescriptionValue)) {
+                    String clientSecretDescription = (String) clientSecretDescriptionValue;
+                    clientInfo.setClientSecretDescription(clientSecretDescription);
+                }
+            }
+        }
+
+        if (additionalProperties.containsKey(APIConstants.KeyManager.CLIENT_SECRET_EXPIRES_IN)) {
+            Object clientSecretExpiresInObject =
+                    additionalProperties.get(APIConstants.KeyManager.CLIENT_SECRET_EXPIRES_IN);
+            try {
+                if (clientSecretExpiresInObject instanceof String) {
+                    if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(clientSecretExpiresInObject)) {
+                        long expiresIn = Long.parseLong((String) clientSecretExpiresInObject);
+                        clientInfo.setClientSecretExpiresIn(expiresIn);
+                    }
+                } else if (clientSecretExpiresInObject instanceof Number) {
+                    long expiresIn = ((Number) clientSecretExpiresInObject).longValue();
+                    clientInfo.setClientSecretExpiresIn(expiresIn);
+                }
+            } catch (NumberFormatException e) {
+                // No need to throw as it's due to a non-numeric value.
+                log.debug("Invalid client secret expires-in value given for " + oauthClientName, e);
+            }
+        }
+
         // Set the display name of the application. This name would appear in the consent page of the app.
         clientInfo.setApplicationDisplayName(info.getClientName());
 
@@ -505,7 +541,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             createdClient = dcrClient.updateApplication(Base64.getUrlEncoder().encodeToString(
                     oAuthApplicationInfo.getClientId().getBytes(StandardCharsets.UTF_8)), request);
-            return buildDTOFromClientInfo(createdClient, new OAuthApplicationInfo());
+            OAuthApplicationInfo applicationInfo = buildDTOFromClientInfo(createdClient,
+                    new OAuthApplicationInfo());
+            if (APIUtil.isMultipleClientSecretsEnabled()) {
+                applicationInfo.setClientSecret(APIUtil.maskSecret(applicationInfo.getClientSecret()));
+            }
+            return applicationInfo;
         } catch (KeyManagerClientException e) {
             handleException("Error occurred while updating OAuth Client : ", e);
             return null;
@@ -523,7 +564,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             updatedClient = dcrClient.updateApplicationOwner(owner, Base64.getUrlEncoder().encodeToString(
                     oAuthApplicationInfo.getClientId().getBytes(StandardCharsets.UTF_8)));
-            return buildDTOFromClientInfo(updatedClient, new OAuthApplicationInfo());
+            OAuthApplicationInfo applicationInfo = buildDTOFromClientInfo(updatedClient,
+                    new OAuthApplicationInfo());
+            if (APIUtil.isMultipleClientSecretsEnabled()) {
+                applicationInfo.setClientSecret(APIUtil.maskSecret(applicationInfo.getClientSecret()));
+            }
+            return applicationInfo;
         } catch (KeyManagerClientException e) {
             handleException("Error occurred while updating OAuth Client : ", e);
             return null;
@@ -555,7 +601,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             ClientInfo clientInfo = dcrClient.getApplication(Base64.getUrlEncoder().encodeToString(
                     consumerKey.getBytes(StandardCharsets.UTF_8)));
-            return buildDTOFromClientInfo(clientInfo, new OAuthApplicationInfo());
+            OAuthApplicationInfo applicationInfo = buildDTOFromClientInfo(clientInfo,
+                    new OAuthApplicationInfo());
+            if (APIUtil.isMultipleClientSecretsEnabled()) {
+                applicationInfo.setClientSecret(APIUtil.maskSecret(applicationInfo.getClientSecret()));
+            }
+            return applicationInfo;
         } catch (KeyManagerClientException e) {
             if (e.getStatusCode() == 404) {
                 return null;
@@ -628,6 +679,101 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             handleException("Error while generating new consumer secret", e);
         }
         return null;
+    }
+
+    @Override
+    public ConsumerSecretInfo generateNewApplicationConsumerSecret(ConsumerSecretRequest consumerSecretRequest)
+            throws APIManagementException {
+
+        ClientSecret clientSecret;
+        if (consumerSecretRequest == null) {
+            log.warn("No information available to generate new consumer secret.");
+            return null;
+        }
+        String clientId = consumerSecretRequest.getClientId();
+        String encodedClientId = Base64.getUrlEncoder()
+                .encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
+        ClientSecretRequest clientSecretRequest = new ClientSecretRequest();
+        Object descriptionObj =
+                consumerSecretRequest.getParameter(ApplicationConstants.SECRET_DESCRIPTION);
+        if (descriptionObj instanceof String) {
+            clientSecretRequest.setDescription((String) descriptionObj);
+        }
+
+        Object expiresInObj =
+                consumerSecretRequest.getParameter(ApplicationConstants.SECRET_EXPIRES_IN);
+        if (expiresInObj instanceof Integer) {
+            clientSecretRequest.setExpiresIn((Integer) expiresInObj);
+        }
+        try {
+            clientSecret = dcrClient.generateNewApplicationSecret(encodedClientId, clientSecretRequest);
+        } catch (KeyManagerClientException e) {
+            String errMsg = "Error while generating new consumer secret for clientId : " + clientId;
+            throw new APIManagementException(errMsg, e, ExceptionCodes
+                    .from(ExceptionCodes.CLIENT_SECRET_GENERATION_FAILED, clientId));
+        }
+        if (clientSecret == null) {
+            return null;
+        }
+        return getConsumerSecretInfo(clientSecret, false);
+    }
+
+    private static ConsumerSecretInfo getConsumerSecretInfo(ClientSecret clientSecret, boolean shouldMaskSecret) {
+        ConsumerSecretInfo clientSecretInfo = new ConsumerSecretInfo();
+        clientSecretInfo.setSecretId(clientSecret.getSecretId());
+        String secretValue = clientSecret.getClientSecret();
+        if (shouldMaskSecret) {
+            secretValue = APIUtil.maskSecret(secretValue);
+        }
+        clientSecretInfo.setClientSecret(secretValue);
+        Map<String, Object> additionalProperties = new HashMap<>();
+        if (clientSecret.getDescription() != null) {
+            additionalProperties.put(ApplicationConstants.SECRET_DESCRIPTION, clientSecret.getDescription());
+        }
+        additionalProperties.put(ApplicationConstants.SECRET_EXPIRES_AT, clientSecret.getClientSecretExpiresAt());
+        clientSecretInfo.setParameters(additionalProperties);
+        return clientSecretInfo;
+    }
+
+    @Override
+    public List<ConsumerSecretInfo> retrieveApplicationConsumerSecrets(String clientId) throws APIManagementException {
+
+        ClientSecretList clientSecretList = null;
+        String encodedClientId = Base64.getUrlEncoder().encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
+        try {
+            clientSecretList = dcrClient.getApplicationSecrets(encodedClientId);
+        } catch (KeyManagerClientException e) {
+            String errMsg = "Error while retrieving consumer secrets of clientId : " + clientId;
+            throw new APIManagementException(errMsg, e, ExceptionCodes
+                    .from(ExceptionCodes.CLIENT_SECRET_RETRIEVAL_FAILED, clientId));
+        }
+        if (clientSecretList == null) {
+            return null;
+        }
+        List<ConsumerSecretInfo> consumerSecretInfoList = new ArrayList<>();
+        if (clientSecretList.getList() == null) {
+            return consumerSecretInfoList;
+        }
+        for (ClientSecret clientSecret : clientSecretList.getList()) {
+            consumerSecretInfoList.add(getConsumerSecretInfo(clientSecret, true));
+        }
+        return consumerSecretInfoList;
+    }
+
+    @Override
+    public void deleteApplicationConsumerSecret(String secretId, ConsumerSecretRequest consumerSecretRequest)
+            throws APIManagementException {
+        String clientId = consumerSecretRequest.getClientId();
+        String encodedClientId = Base64.getUrlEncoder()
+                .encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
+        String encodedSecretId = Base64.getUrlEncoder().encodeToString(secretId.getBytes(StandardCharsets.UTF_8));
+        try {
+            dcrClient.deleteApplicationSecret(encodedClientId, encodedSecretId);
+        } catch (KeyManagerClientException e) {
+            String errMsg = "Error while deleting consumer secret of clientId : " + clientId;
+            throw new APIManagementException(errMsg, e, ExceptionCodes
+                    .from(ExceptionCodes.CLIENT_SECRET_DELETION_FAILED, clientId));
+        }
     }
 
     @Override
@@ -729,12 +875,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         return oAuthApplicationInfo;
     }
-
     /**
      * Builds an OAuthApplicationInfo object using the ClientInfo response
      *
      * @param appResponse          ClientInfo response object
      * @param oAuthApplicationInfo original OAuthApplicationInfo object
+     * @param shouldMaskSecret     whether to mask the client secret in the response
      * @return OAuthApplicationInfo object with response information added
      */
     private OAuthApplicationInfo buildDTOFromClientInfo(ClientInfo appResponse,
@@ -1448,6 +1594,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                                         throw new APIManagementException(errMsg, ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
                                     }
                                 } else {
+                                    if (APIConstants.KeyManager.CLIENT_SECRET_DESCRIPTION.equals(entry.getKey())) {
+                                        continue; // Skip numeric validation for this property
+                                    }
                                     Long longValue = Long.parseLong(additionalProperty);
                                     if (longValue < 0) {
                                         String errMsg = "Application configuration values cannot have negative values.";

@@ -106,6 +106,13 @@ public class KeyManagerMappingUtil {
                     (String) keyManagerConfigurationDTO.getAdditionalProperties()
                             .get(APIConstants.KeyManager.SANDBOX_REVOKE_ENDPOINT));
         }
+        if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())) {
+            if (APIUtil.isMultipleClientSecretsEnabled()) {
+                additionalProperties.put(APIConstants.KeyManager.ENABLE_MULTIPLE_CLIENT_SECRETS, "true");
+                additionalProperties.put(APIConstants.KeyManager.CLIENT_SECRET_COUNT,
+                        String.valueOf(APIUtil.getClientSecretCount()));
+            }
+        }
         keyManagerInfoDTO.setAdditionalProperties(additionalProperties);
         keyManagerInfoDTO
                 .setApplicationConfiguration(fromKeyManagerConfigurationDto(keyManagerConfigurationDTO));
