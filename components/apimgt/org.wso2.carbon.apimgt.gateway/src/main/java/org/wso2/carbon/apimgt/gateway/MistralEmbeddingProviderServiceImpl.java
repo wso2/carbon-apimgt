@@ -29,6 +29,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EmbeddingProviderService;
 import org.wso2.carbon.apimgt.api.dto.EmbeddingProviderConfigurationDTO;
@@ -43,6 +45,8 @@ import java.nio.charset.StandardCharsets;
  * This service interacts with the Mistral API to generate embeddings for given input text.
  */
 public class MistralEmbeddingProviderServiceImpl implements EmbeddingProviderService {
+
+    private static final Log log = LogFactory.getLog(MistralEmbeddingProviderServiceImpl.class);
 
     private HttpClient httpClient;
     private String mistralApiKey;
@@ -118,8 +122,12 @@ public class MistralEmbeddingProviderServiceImpl implements EmbeddingProviderSer
                     JsonNode embeddingArray = root.at(APIConstants.AI.EMBEDDING_PROVIDER_RESPONSE_EMBEDDING_PATH);
 
                     if (embeddingArray.isMissingNode() || !embeddingArray.isArray()) {
+                        log.error("Missing or invalid 'embedding' array in Mistral embedding provider response");
+                        if (log.isDebugEnabled()) {
+                            log.debug("Response body: " + responseBody);
+                        }
                         throw new APIManagementException(
-                                "Missing or invalid 'embedding' array in response: " + responseBody);
+                                "Missing or invalid 'embedding' array in Mistral embedding provider response");
                     }
 
                     double[] embedding = new double[embeddingArray.size()];
@@ -128,7 +136,11 @@ public class MistralEmbeddingProviderServiceImpl implements EmbeddingProviderSer
                     }
                     return embedding;
                 } else {
-                    throw new APIManagementException("Unexpected status code " + statusCode + ": " + responseBody);
+                    log.error("Mistral Embedding API returned unexpected status code: " + statusCode);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Response body: " + responseBody);
+                    }
+                    throw new APIManagementException("Unexpected status code: " + statusCode);
                 }
             }
         } catch (IOException e) {

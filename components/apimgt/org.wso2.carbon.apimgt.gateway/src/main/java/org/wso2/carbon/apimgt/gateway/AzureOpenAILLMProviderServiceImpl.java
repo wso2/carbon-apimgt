@@ -124,15 +124,20 @@ public class AzureOpenAILLMProviderServiceImpl implements AILLMProviderService {
                     JsonNode contentNode = root.at(APIConstants.AI.LLM_PROVIDER_RESPONSE_CONTENT_PATH);
 
                     if (contentNode.isMissingNode()) {
-                        String errorMsg = "Missing 'content' in response: " + responseBody;
-                        log.error(errorMsg);
-                        throw new APIManagementException(errorMsg);
+                        log.error("Missing 'content' in Azure OpenAI LLM provider response");
+                        if (log.isDebugEnabled()) {
+                            log.debug("Response body: " + responseBody);
+                        }
+                        throw new APIManagementException("Missing 'content' in Azure OpenAI LLM provider response");
                     }
 
                     return contentNode.asText();
                 } else {
                     log.error("Azure OpenAI API returned unexpected status code: " + statusCode);
-                    throw new APIManagementException("Unexpected response code " + statusCode + ": " + responseBody);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Response body: " + responseBody);
+                    }
+                    throw new APIManagementException("Unexpected status code: " + statusCode);
                 }
             }
         } catch (IOException e) {
