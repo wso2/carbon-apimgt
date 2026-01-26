@@ -53,12 +53,13 @@ public class MCPUtils {
         for (Map.Entry<String, Boolean> entry : apiResourcesAssignedToMCP.entrySet()) {
             if (entry.getValue()) {
                 String key = entry.getKey();
-                if (key.split(":").length != 2) {
+                int sep = key.lastIndexOf(':');
+                if (sep <= 0 || sep == key.length() - 1) {
                     throw new APIManagementException("Invalid resource key found while validating MCP resources",
                             ExceptionCodes.INTERNAL_ERROR);
                 }
-                String httpResource = key.split(":")[0];
-                String httpMethod = key.split(":")[1];
+                String httpResource = key.substring(0, sep);
+                String httpMethod = key.substring(sep + 1);
                 boolean resourceFound = false;
                 for (URITemplate uriTemplate : uriTemplates) {
                     if (uriTemplate.getUriTemplate().equals(httpResource) &&
