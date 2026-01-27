@@ -1790,7 +1790,7 @@ public class ImportUtils {
 
         List<URITemplate> uriTemplates = new ArrayList<>();
         String jsonContent = response.getJsonContent();
-        if(asyncAPI) {
+        if (asyncAPI) {
             AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
                 AsyncApiParserUtil.getAsyncApiVersion(jsonContent), 
                 null 
@@ -1803,7 +1803,7 @@ public class ImportUtils {
             if (asyncTemplates != null) {
                 uriTemplates.addAll(asyncTemplates);
             }
-        }else{
+        } else {
             Set<URITemplate> templates = response.getParser()
                 .getURITemplates(jsonContent);
             if (templates != null) {
