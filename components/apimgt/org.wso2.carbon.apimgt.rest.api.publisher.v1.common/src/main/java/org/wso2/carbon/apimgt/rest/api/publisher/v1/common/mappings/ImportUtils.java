@@ -1785,17 +1785,16 @@ public class ImportUtils {
      * @param response API Validation Response
      * @throws APIManagementException If an error occurs when retrieving the URI templates
      */
-    private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response, boolean asyncAPI)
-            throws APIManagementException {
+    private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response,
+            boolean asyncAPI) throws APIManagementException {
 
         List<URITemplate> uriTemplates = new ArrayList<>();
         String jsonContent = response.getJsonContent();
         if(asyncAPI) {
             AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
                 AsyncApiParserUtil.getAsyncApiVersion(jsonContent), 
-                null // Pass null for parser options if getParserOptionsFromConfig() is not static/accessible
+                null 
           );
-
             // Calculate the boolean flag for WebSocket support
             // (Logic adapted from your updateAsyncAPIDefinition method)
             boolean isWebSocket = APIConstants.API_TYPE_WS.equals(apiDto.getType().toString());

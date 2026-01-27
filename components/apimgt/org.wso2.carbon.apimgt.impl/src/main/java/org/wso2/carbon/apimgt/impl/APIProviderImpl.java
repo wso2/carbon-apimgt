@@ -2623,7 +2623,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         existingAPI.setOrganization(organization);
         APIIdentifier existingAPIId = existingAPI.getId();
-        String existingApiDefinition = existingAPI.isAsync() ? existingAPI.getAsyncApiDefinition() : existingAPI.getSwaggerDefinition();
+        String existingApiDefinition = existingAPI.isAsync() ? existingAPI.getAsyncApiDefinition() 
+                : existingAPI.getSwaggerDefinition();
         String existingAPICreatedTime = existingAPI.getCreatedTime();
         String existingAPIStatus = existingAPI.getStatus();
         boolean isExsitingAPIdefaultVersion = existingAPI.isDefaultVersion();
