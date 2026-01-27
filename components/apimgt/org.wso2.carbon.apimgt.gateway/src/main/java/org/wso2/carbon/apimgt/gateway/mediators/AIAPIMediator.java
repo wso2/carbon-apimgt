@@ -459,8 +459,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                 updatedRawPath = new URI(null, null, updatedDecodedPath, null).getRawPath();
             } catch (java.net.URISyntaxException e) {
                 log.warn("Failed to re-encode path with URI constructor, falling back to manual encoding");
-                updatedRawPath = rawPath.replace(targetModelMetadata.getAttributeIdentifier(),
-                        encodePathSegmentRFC3986(model));
+                updatedRawPath = rawPath.replaceAll(targetModelMetadata.getAttributeIdentifier(),
+                        java.util.regex.Matcher.quoteReplacement(encodePathSegmentRFC3986(model)));
             }
 
             StringBuilder finalPath = new StringBuilder(updatedRawPath);
@@ -476,18 +476,13 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
     }
 
     /**
-     * Decodes a URL path using UTF-8. Falls back to the raw path if decoding fails.
+     * Decodes percent-encoded sequences in a URL path.
      *
      * @param rawPath The percent-encoded path.
-     * @return The decoded path, or the original if decoding fails.
+     * @return The decoded path.
      */
     private String decodePathUrl(String rawPath) {
-        java.util.regex.Matcher m = java.util.regex.Pattern.compile("%([0-9A-Fa-f]{2})").matcher(rawPath);
-        StringBuffer sb = new StringBuffer();
-        while (m.find()) {
-            m.appendReplacement(sb, String.valueOf((char) Integer.parseInt(m.group(1), 16)));
-        }
-        return m.appendTail(sb).toString();
+        return java.net.URLDecoder.decode(rawPath.replace("+", "%2B"), StandardCharsets.UTF_8);
     }
 
     /**
