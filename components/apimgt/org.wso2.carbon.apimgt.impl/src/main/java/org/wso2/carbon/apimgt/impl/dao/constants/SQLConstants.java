@@ -3919,6 +3919,8 @@ public class SQLConstants {
             " INSERT INTO AM_API_KEY (API_KEY_NAME, APPLICATION_ID, API_KEY_HASH, " +
                     "   KEY_TYPE, API_KEY_PROPERTIES, AUTHZ_USER, TIME_CREATED, VALIDITY_PERIOD, LAST_USED)" +
                     " VALUES (?,?,?,?,?,?,?,?,?)";
+    public static final String GET_API_KEY_SQL =
+            " SELECT API_KEY_NAME, TIME_CREATED, VALIDITY_PERIOD, LAST_USED FROM AM_API_KEY WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
 
     /**
      * Static class to hold database queries related to webhooks subscriptions

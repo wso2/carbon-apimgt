@@ -42,62 +42,7 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.AIConfiguration;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIInfo;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
-import org.wso2.carbon.apimgt.api.model.ApiResult;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
-import org.wso2.carbon.apimgt.api.model.Backend;
-import org.wso2.carbon.apimgt.api.model.BackendOperation;
-import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
-import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
-import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.GatewayMode;
-import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
-import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.LLMModel;
-import org.wso2.carbon.apimgt.api.model.LLMProvider;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.OperationPolicy;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
-import org.wso2.carbon.apimgt.api.model.OperationPolicySpecAttribute;
-import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
-import org.wso2.carbon.apimgt.api.model.Pagination;
-import org.wso2.carbon.apimgt.api.model.ResourcePath;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
-import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.VHost;
-import org.wso2.carbon.apimgt.api.model.Workflow;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -16594,6 +16539,49 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
+    }
+
+    /**
+     * Returns a list of api keys against an Application
+     *
+     * @param applicationId Application ID
+     * @param keyType Key type of the api keys
+     * @throws APIManagementException
+     */
+    public List<APIKeyInfo> getAPIKeys(String applicationId, String keyType) throws APIManagementException {
+
+        List<APIKeyInfo> apiKeyInfoList = new ArrayList<APIKeyInfo>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // This query to access the AM_API_KEY table
+            String sqlQuery = SQLConstants.GET_API_KEY_SQL;
+            // Retrieving data from the AM_API_KEY table
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, applicationId);
+            ps.setString(2, keyType);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    APIKeyInfo keyInfo = new APIKeyInfo();
+                    keyInfo.setKeyDisplayName(rs.getString("API_KEY_NAME"));
+                    keyInfo.setCreatedTime(rs.getTimestamp("TIME_CREATED").toString());
+                    keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
+                    keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
+                    keyInfo.setApplicationId(applicationId);
+                    keyInfo.setKeyType(keyType);
+                    apiKeyInfoList.add(keyInfo);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to add generated API keys", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+        return apiKeyInfoList;
     }
 
     /**

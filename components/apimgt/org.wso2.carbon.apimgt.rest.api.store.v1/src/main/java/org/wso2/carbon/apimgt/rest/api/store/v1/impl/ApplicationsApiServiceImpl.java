@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.EmptyCallbackURLForCodeGrantsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
@@ -714,6 +715,29 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
     @Override
     public Response applicationsApplicationIdApiKeysKeyTypeGet(String applicationId, String keyType, String ifMatch, MessageContext messageContext) throws APIManagementException {
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        Application application;
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
+            if ((application = apiConsumer.getApplicationByUUID(applicationId)) == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            } else {
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                } else {
+                    boolean isValidKeyType = APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)
+                                    || APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType);
+                    if (!isValidKeyType) {
+                        RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
+                    } else {
+                        List<APIKeyInfo> apiKeyList = apiConsumer.getApiKeys(applicationId, keyType);
+                        return Response.ok().entity(apiKeyList).build();
+                    }
+                }
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving API Keys for application " + applicationId, e, log);
+        }
         return null;
     }
 

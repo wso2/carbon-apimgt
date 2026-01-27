@@ -405,7 +405,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
     public List<APIKeyInfo> getApiKeys(String applicationId, String keyType) throws APIManagementException {
-        return null;
+        List<APIKeyInfo> apiKeyInfoList;
+        try {
+            apiKeyInfoList  = apiMgtDAO.getAPIKeys(applicationId, keyType);
+        } catch (APIManagementException e) {
+                throw new APIManagementException("Error while getting the api keys for the application: "
+                        + applicationId, e);
+        }
+        return apiKeyInfoList;
     }
 
     private ApiKeyGenerator loadApiKeyGenerator() throws APIManagementException {

@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
@@ -619,6 +620,17 @@ public interface APIConsumer extends APIManager {
      */
     String generateApiKey(Application application, String userName, long validityPeriod, String permittedIP,
                           String permittedReferer)
+            throws APIManagementException;
+
+    /**
+     * Returns a list of api keys for a given application key type.
+     *
+     * @param applicationId Application Id of the application.
+     * @param keyType Key type of the api keys
+     * @return A List of api keys.
+     * @throws APIManagementException This is the custom exception class for API management.
+     */
+    List<APIKeyInfo> getApiKeys(String applicationId, String keyType)
             throws APIManagementException;
 
     /**
