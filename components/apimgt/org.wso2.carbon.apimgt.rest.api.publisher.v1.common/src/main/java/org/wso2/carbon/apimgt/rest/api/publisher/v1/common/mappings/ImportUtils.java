@@ -1794,24 +1794,24 @@ public class ImportUtils {
             AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
                 AsyncApiParserUtil.getAsyncApiVersion(jsonContent), 
                 null 
-          );
-            // Calculate the boolean flag for WebSocket support
-            // (Logic adapted from your updateAsyncAPIDefinition method)
-            boolean isWebSocket = APIConstants.API_TYPE_WS.equals(apiDto.getType().toString());
-            
-            // Extract templates specifically looking for "channels"
-            Set<URITemplate> asyncTemplates = asyncApiParser.getURITemplates(jsonContent, isWebSocket);
+            );
+            boolean isWebSocket = APIConstants.API_TYPE_WS
+                .equals(apiDto.getType().toString());
+            Set<URITemplate> asyncTemplates = asyncApiParser
+                .getURITemplates(jsonContent, isWebSocket);
 
             if (asyncTemplates != null) {
                 uriTemplates.addAll(asyncTemplates);
             }
         }else{
-            Set<URITemplate> templates = response.getParser().getURITemplates(jsonContent);
+            Set<URITemplate> templates = response.getParser()
+                .getURITemplates(jsonContent);
             if (templates != null) {
                 uriTemplates.addAll(templates);
             }
         }
-        List<APIOperationsDTO> apiOperationsDtos = APIMappingUtil.fromURITemplateListToOprationList(uriTemplates);
+        List<APIOperationsDTO> apiOperationsDtos = APIMappingUtil
+            .fromURITemplateListToOprationList(uriTemplates);
         apiDto.setOperations(apiOperationsDtos);
     }
 
