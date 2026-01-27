@@ -19,6 +19,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
@@ -482,7 +483,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @return The decoded path.
      */
     private String decodePathUrl(String rawPath) {
-        return java.net.URLDecoder.decode(rawPath.replace("+", "%2B"), StandardCharsets.UTF_8);
+        // URLDecoder is for form-encoded data and converts + to space; escape + first to preserve it in paths
+        return URLDecoder.decode(rawPath.replace("+", "%2B"), StandardCharsets.UTF_8);
     }
 
     /**
