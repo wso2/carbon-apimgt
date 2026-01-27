@@ -458,11 +458,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             try {
                 updatedRawPath = new URI(null, null, updatedDecodedPath, null).getRawPath();
             } catch (java.net.URISyntaxException e) {
-                String encodedModel = encodePathSegmentRFC3986(model);
-                String decodedRawPath = decodePathUrl(rawPath);
-                updatedRawPath = decodedRawPath.replaceAll(
-                        targetModelMetadata.getAttributeIdentifier(),
-                        java.util.regex.Matcher.quoteReplacement(encodedModel));
+                log.warn("Failed to re-encode path with URI constructor, falling back to manual encoding");
+                updatedRawPath = rawPath.replace(targetModelMetadata.getAttributeIdentifier(),
+                        encodePathSegmentRFC3986(model));
             }
 
             StringBuilder finalPath = new StringBuilder(updatedRawPath);
@@ -484,11 +482,12 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @return The decoded path, or the original if decoding fails.
      */
     private String decodePathUrl(String rawPath) {
-        try {
-            return java.net.URLDecoder.decode(rawPath, StandardCharsets.UTF_8.name());
-        } catch (java.io.UnsupportedEncodingException e) {
-            return rawPath;
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("%([0-9A-Fa-f]{2})").matcher(rawPath);
+        StringBuffer sb = new StringBuffer();
+        while (m.find()) {
+            m.appendReplacement(sb, String.valueOf((char) Integer.parseInt(m.group(1), 16)));
         }
+        return m.appendTail(sb).toString();
     }
 
     /**
@@ -574,7 +573,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
 
             URI uri = URI.create(requestPath);
             String rawPath = uri.getRawPath();
-            // Decode the path 
+            // Decode the path
             String decodedPath = decodePathUrl(rawPath);
 
             String regex = requestModelMetadata.getAttributeIdentifier();
