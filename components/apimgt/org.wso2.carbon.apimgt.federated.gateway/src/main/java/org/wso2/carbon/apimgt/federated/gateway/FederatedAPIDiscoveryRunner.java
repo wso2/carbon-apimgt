@@ -300,7 +300,8 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     }
 
                     if (definition == null || StringUtils.isBlank(definition)) {
-                        log.warn("API definition is empty for: " + apidto.getName() + " version: " + apidto.getVersion());
+                        log.warn("API definition is empty for: " + apidto.getName() + " version: "
+                            + apidto.getVersion());
                         if (log.isDebugEnabled()) {
                             log.debug("API type: " + apidto.getType() + ", API object: " + api.toString());
                         }
