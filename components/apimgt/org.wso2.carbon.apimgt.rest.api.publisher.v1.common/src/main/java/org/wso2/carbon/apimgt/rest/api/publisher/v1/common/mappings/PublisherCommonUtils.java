@@ -105,6 +105,7 @@ import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.MCPInitializerAndToolFetcher;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -135,11 +136,15 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationRespo
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationResponseToolInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityInfoDTO;
-import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.APISpecParserConstants;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AbstractAsyncApiParser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParseOptions;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParserFactory;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -351,7 +356,7 @@ public class PublisherCommonUtils {
 
         if (apiUpdated != null && !StringUtils.isEmpty(apiUpdated.getEndpointConfig())) {
             JsonObject endpointConfig = JsonParser.parseString(apiUpdated.getEndpointConfig()).getAsJsonObject();
-            if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
+            if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
                     endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && (
                     APIConstants.API_TYPE_HTTP.equals(apiUpdated.getType()) || APIConstants.API_TYPE_SOAPTOREST.equals(
                             apiUpdated.getType()))) {
@@ -679,8 +684,8 @@ public class PublisherCommonUtils {
                 oldSandboxAWSSecretKey, apiDtoToUpdate);
         // update endpointConfig with the provided custom sequence
         if (endpointConfig != null) {
-            if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                    endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+            if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
+                    (String) endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                 try {
                     if (endpointConfig.get("sequence_path") != null) {
                         String pathToSequence = endpointConfig.get("sequence_path").toString();
@@ -920,8 +925,12 @@ public class PublisherCommonUtils {
         } else {
             String oldDefinition = apiProvider
                     .getAsyncAPIDefinition(apiToUpdate.getUuid(), originalAPI.getOrganization());
-            AsyncApiParser asyncApiParser = new AsyncApiParser();
+            String asyncApiVersion = AsyncApiParserUtil.getAsyncApiVersion(oldDefinition);
+
+            AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(asyncApiVersion,
+                    getParserOptionsFromConfig());
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
+
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
             apiToUpdate.setSwaggerDefinition(updateAsyncAPIDefinition);
         }
@@ -2411,7 +2420,8 @@ public class PublisherCommonUtils {
             }
             apiToAdd.setSwaggerDefinition(apiDefinition);
         } else {
-            AsyncApiParser asyncApiParser = new AsyncApiParser();
+            AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+                    APISpecParserConstants.AsyncApi.ASYNC_API_V3, getParserOptionsFromConfig());
             String asyncApiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
             apiToAdd.setAsyncApiDefinition(asyncApiDefinition);
         }
@@ -2676,7 +2686,7 @@ public class PublisherCommonUtils {
 
         org.json.JSONObject endpointConfigObj = new org.json.JSONObject(endpointConfigMap);
         if (!endpointConfigObj.isNull(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE) &&
-                APIConstants.ENDPOINT_TYPE_DEFAULT.equals(
+                APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(
                         endpointConfigObj.getString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
             return true;
         }
@@ -3108,8 +3118,9 @@ public class PublisherCommonUtils {
         API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
         existingAPI.setOrganization(organization);
         String apiDefinition = response.getJsonContent();
+        AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
+                AsyncApiParserUtil.getAsyncApiVersion(apiDefinition), getParserOptionsFromConfig());
 
-        AsyncApiParser asyncApiParser = new AsyncApiParser();
         // Set uri templates
         Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(apiDefinition, APIConstants.
                 API_TYPE_WS.equals(existingAPI.getType()) || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals
@@ -3289,8 +3300,9 @@ public class PublisherCommonUtils {
                     if (existingEndpointConfigJson.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) != null) {
                         //put as a value under the ENDPOINT_PRODUCTION_ENDPOINTS key
                         //if loadbalance endpoints, get relevant jsonobject from array
-                        if (existingEndpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
-                                .equals(APIConstants.ENDPOINT_TYPE_LOADBALANCE)) {
+                        if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equalsIgnoreCase(
+                                (String) existingEndpointConfigJson.get(
+                                        APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                             JSONArray productionConfigsJson = (JSONArray) existingEndpointConfigJson
                                     .get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
                             for (int i = 0; i < productionConfigsJson.size(); i++) {
@@ -3330,8 +3342,9 @@ public class PublisherCommonUtils {
                     if (existingEndpointConfigJson.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) != null) {
                         //put as a value under the ENDPOINT_SANDBOX_ENDPOINTS key
                         //if loadbalance endpoints, get relevant jsonobject from array
-                        if (existingEndpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
-                                .equals(APIConstants.ENDPOINT_TYPE_LOADBALANCE)) {
+                        if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equalsIgnoreCase(
+                                (String) existingEndpointConfigJson.get(
+                                        APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                             JSONArray sandboxConfigsJson = (JSONArray) existingEndpointConfigJson
                                     .get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
                             for (int i = 0; i < sandboxConfigsJson.size(); i++) {
@@ -4524,7 +4537,7 @@ public class PublisherCommonUtils {
         }
         if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiDto.getGatewayVendor())) {
             apiDto.getPolicies().add(APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED);
-            apiDto.setAsyncTransportProtocols(AsyncApiParser.getTransportProtocolsForAsyncAPI(definitionToAdd));
+            apiDto.setAsyncTransportProtocols(AsyncApiParserUtil.getTransportProtocolsForAsyncAPI(definitionToAdd));
         }
         API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(new APIDTOTypeWrapper(apiDto), apiProvider,
                 RestApiCommonUtil.getLoggedInUsername(), organization);
@@ -4539,9 +4552,14 @@ public class PublisherCommonUtils {
         apiToAdd.setAsyncApiDefinition(definitionToAdd);
 
         // load topics from AsyncAPI
-        apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(definitionToAdd,
-                APIConstants.API_TYPE_WS.equals(apiToAdd.getType()) ||
-                        !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiToAdd.getGatewayVendor())));
+        Set<URITemplate> uriTemplates = AsyncApiParserFactory.getAsyncApiParser(
+                AsyncApiParserUtil.getAsyncApiVersion(definitionToAdd), getParserOptionsFromConfig())
+                .getURITemplates(definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType())
+                                || !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(apiToAdd.getGatewayVendor()));
+        if (uriTemplates == null || uriTemplates.isEmpty()) {
+            throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
+        }
+        apiToAdd.setUriTemplates(uriTemplates);
         apiToAdd.setOrganization(organization);
         apiToAdd.setAsyncApiDefinition(definitionToAdd);
 
@@ -5220,5 +5238,19 @@ public class PublisherCommonUtils {
 
         PublisherCommonUtils.encryptApiKeyInternal(newBackend.getEndpointConfigAsMap(), cryptoUtil,
                 oldProductionApiKeyValue, oldSandboxApiKeyValue, newBackend::setEndpointConfigFromMap);
+    }
+
+    /**
+     * Reads the toml configuration and builds the AsyncApiParseOptions.
+     * The value is derived from the API_PUBLISHER_PRESERVE_LEGACY_ASYNC_PARSER configuration property.
+     *
+     * @return populated AsyncApiParseOptions instance based on server configuration
+     */
+    public static AsyncApiParseOptions getParserOptionsFromConfig() {
+        AsyncApiParseOptions options = new AsyncApiParseOptions();
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        options.setPreserveLegacyAsyncApiParser(Boolean.parseBoolean(
+                config.getFirstProperty(APIConstants.API_PUBLISHER_PRESERVE_LEGACY_ASYNC_PARSER)));
+        return options;
     }
 }

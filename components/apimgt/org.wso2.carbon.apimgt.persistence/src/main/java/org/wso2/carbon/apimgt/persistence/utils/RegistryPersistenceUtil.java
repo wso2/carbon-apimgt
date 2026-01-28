@@ -2112,4 +2112,96 @@ public class RegistryPersistenceUtil {
         }
         return query.substring(startIndex, endIndex);
     }
+
+    public static String extractApiSourcePath(String apiPath) throws APIPersistenceException {
+        if (apiPath == null) {
+            throw new APIPersistenceException("API path cannot be null");
+        }
+
+        int prependIndex = apiPath.lastIndexOf(APIConstants.API_RESOURCE_NAME);
+        if (prependIndex == -1) {
+            throw new APIPersistenceException("API resource name '" + APIConstants.API_RESOURCE_NAME
+                    + "' not found in API path: " + apiPath);
+        }
+
+        return apiPath.substring(0, prependIndex);
+    }
+
+    /**
+     * Extracts the original provider name of an API given its artifact ID.
+     *
+     * @param registry Registry instance
+     * @param apiId    API artifact ID
+     * @return Original provider name, or null if not found
+     * @throws RegistryException if an error occurs while accessing the registry
+     */
+    public static String extractOriginalProviderFromPath(Registry registry, String apiId) throws RegistryException {
+        if (log.isDebugEnabled()) {
+            log.debug("Extracting original provider for API ID: " + apiId);
+        }
+        String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
+        if (apiPath == null) {
+            return null;
+        }
+
+        // Check if it's a working API path
+        if (apiPath.contains(APIConstants.API_ROOT_LOCATION)) {
+            return extractProviderFromApiRootPath(apiPath);
+        }
+
+        // Check if it's a revision path - need to resolve to actual API first
+        if (apiPath.contains(APIConstants.API_REVISION_LOCATION)) {
+            return extractProviderFromRevisionPath(registry, apiPath);
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("API path does not match known patterns for extracting provider: " + apiPath);
+        }
+
+        return null;
+    }
+
+    private static String extractProviderFromApiRootPath(String apiPath) {
+        String relativePath = apiPath.substring(
+                apiPath.indexOf(APIConstants.API_ROOT_LOCATION) + APIConstants.API_ROOT_LOCATION.length());
+        return extractFirstPathSegment(relativePath);
+    }
+
+    private static String extractProviderFromRevisionPath(Registry registry, String revisionPath) throws RegistryException {
+        if (log.isDebugEnabled()) {
+            log.debug("Extracting provider from revision path: " + revisionPath);
+        }
+        String relativePath = revisionPath.substring(
+                revisionPath.indexOf(APIConstants.API_REVISION_LOCATION) + APIConstants.API_REVISION_LOCATION.length());
+
+        String apiUuid = extractFirstPathSegment(relativePath);
+        if (apiUuid == null) {
+            return null;
+        }
+
+        String actualApiPath = GovernanceUtils.getArtifactPath(registry, apiUuid);
+        if (actualApiPath != null && actualApiPath.contains(APIConstants.API_ROOT_LOCATION)) {
+            return extractProviderFromApiRootPath(actualApiPath);
+        }
+
+        return null;
+    }
+
+    private static String extractFirstPathSegment(String path) {
+        if (path == null) {
+            return null;
+        }
+
+        String normalizedPath = path.startsWith(RegistryConstants.PATH_SEPARATOR)
+                ? path.substring(1)
+                : path;
+
+        String[] segments = normalizedPath.split(RegistryConstants.PATH_SEPARATOR);
+        if (segments.length > 0 && StringUtils.isNotBlank(segments[0])) {
+            return segments[0];
+        }
+
+        return null;
+    }
+
 }

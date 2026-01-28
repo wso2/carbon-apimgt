@@ -72,6 +72,7 @@ public final class ImportExportConstants {
 
     public static final String JSON_EXTENSION = ".json";
     public static final String YAML_EXTENSION = ".yaml";
+    public static final String YML_EXTENSION = ".yml";
 
     // Image resource
     public static final String IMAGE_RESOURCE = "Image";

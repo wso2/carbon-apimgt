@@ -301,12 +301,16 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 // Add application keys if present and keys does not exists in the current application
                 if (applicationDTO.getKeys().size() > 0) {
                     for (ApplicationKeyDTO applicationKeyDTO : applicationDTO.getKeys()) {
-                        if (!availableTypes.contains(applicationKeyDTO.getKeyType().value())) {
-                            ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO, apiConsumer,
-                                    false);
-                        } else {
-                            ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO, apiConsumer,
-                                    update);
+                        if (applicationKeyDTO.getConsumerKey() != null && !applicationKeyDTO.getConsumerKey()
+                                .isEmpty() && applicationKeyDTO.getConsumerSecret() != null && !applicationKeyDTO.getConsumerSecret()
+                                .isEmpty()) {
+                            if (!availableTypes.contains(applicationKeyDTO.getKeyType().value())) {
+                                ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO,
+                                        apiConsumer, false);
+                            } else {
+                                ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO,
+                                        apiConsumer, update);
+                            }
                         }
                     }
                 }

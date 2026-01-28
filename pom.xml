@@ -6,7 +6,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>9.32.148-SNAPSHOT</version>
+    <version>9.32.169-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>https://wso2.org</url>
 
@@ -416,7 +416,7 @@
             <dependency>
                 <groupId>io.apicurio</groupId>
                 <artifactId>apicurio-data-models</artifactId>
-                <version>1.1.5</version>
+                <version>${apicurio.version}</version>
             </dependency>
 
             <dependency>
@@ -2060,7 +2060,7 @@
 
         <!-- APIM Component Version -->
         <hamcrest.version>1.3</hamcrest.version>
-        <carbon.apimgt.version>9.32.148-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>9.32.169-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
 
@@ -2079,7 +2079,7 @@
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
 
         <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.25.736</carbon.identity.version>
+        <carbon.identity.version>5.25.737</carbon.identity.version>
         <carbon.identity.governance.version>1.8.111</carbon.identity.governance.version>
         <carbon.identity-inbound-auth-oauth.version>6.13.41</carbon.identity-inbound-auth-oauth.version>
         <carbon.identity-oauth2-grant-jwt.version>2.2.4</carbon.identity-oauth2-grant-jwt.version>
@@ -2297,7 +2297,7 @@
         <import.package.version.commons.io>[2.4.0,3.0.0)</import.package.version.commons.io>
         <import.package.version.commons.codec>[1.14.0,3.0.0)</import.package.version.commons.codec>
 
-        <org.wso2.orbit.com.amazonaws.version>2.30.22.wso2v1</org.wso2.orbit.com.amazonaws.version>
+        <org.wso2.orbit.com.amazonaws.version>2.30.22.wso2v2</org.wso2.orbit.com.amazonaws.version>
         <org.wso2.orbit.com.amazonaws.version.range>[2.20, 2.50]</org.wso2.orbit.com.amazonaws.version.range>
 
         <zipkin.version>2.27.1</zipkin.version>
@@ -2329,5 +2329,6 @@
         <batik.version>1.17</batik.version>
         <mcp.transformer.version>0.9.1</mcp.transformer.version>
         <netty.version>4.1.126.Final</netty.version>
+        <apicurio.version>2.2.2</apicurio.version>
     </properties>
 </project>

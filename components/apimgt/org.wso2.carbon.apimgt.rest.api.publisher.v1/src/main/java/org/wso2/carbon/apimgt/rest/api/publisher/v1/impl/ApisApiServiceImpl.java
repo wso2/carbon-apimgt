@@ -69,6 +69,7 @@ import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.OperationPoliciesApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.AsyncApiParserImplUtil;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -2868,7 +2869,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                                 .entity(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE)).build();
                     }
                     provider.updateAPI(api, originalAPI);
-                    SequenceUtils.updateResourcePolicyFromRegistryResourceId(api.getId(), resourcePolicyId,
+                    provider.updateResourcePolicyFromRegistryResourceId(api.getId(), resourcePolicyId,
                             body.getContent());
                     String updatedPolicyContent = SequenceUtils
                             .getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);
@@ -4356,8 +4357,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Cannot deploy an API with custom sequence to the APK gateway
         Map endpointConfigMap = (Map) apiDto.getEndpointConfig();
         if (endpointConfigMap != null && !APIConstants.WSO2_SYNAPSE_GATEWAY.equals(apiDto.getGatewayType())
-                && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                && APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
+                (String) endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Cannot Deploy an API with a Custom Sequence to APK Gateway: " + apiId).build();
         }
@@ -4615,15 +4616,18 @@ public class ApisApiServiceImpl implements ApisApiService {
                 URL urlObj = new URL(url);
                 HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
                 // Validate URL
-                validationResponse = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(url, httpClient, returnContent);
+                validationResponse = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(url, httpClient,
+                        returnContent, AsyncApiParserImplUtil.getParserOptionsFromConfig());
             } catch (MalformedURLException e) {
                 throw new APIManagementException("Error while processing the API definition URL", e);
             }
         } else if (fileInputStream != null) {
             //validate file
             String fileName = fileDetail != null ? fileDetail.getContentDisposition().getFilename() : StringUtils.EMPTY;
-            String schemaToBeValidated = ApisApiServiceImplUtils.getSchemaToBeValidated(fileInputStream, isServiceAPI, fileName);
-            validationResponse = AsyncApiParserUtil.validateAsyncAPISpecification(schemaToBeValidated, returnContent);
+            String schemaToBeValidated = ApisApiServiceImplUtils.getSchemaToBeValidated(fileInputStream,
+                    isServiceAPI, fileName);
+            validationResponse = AsyncApiParserUtil.validateAsyncAPISpecification(schemaToBeValidated,
+                    returnContent, AsyncApiParserImplUtil.getParserOptionsFromConfig());
         }
 
         responseDTO = APIMappingUtil.getAsyncAPISpecificationValidationResponseFromModel(validationResponse, returnContent);
@@ -4789,8 +4793,10 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private String updateAsyncAPIDefinition(String apiId, String apiDefinition, String organization)
             throws APIManagementException, FaultGatewaysException {
+
         APIDefinitionValidationResponse response = AsyncApiParserUtil
-                .validateAsyncAPISpecification(apiDefinition, true);
+                .validateAsyncAPISpecification(apiDefinition, true,
+                        AsyncApiParserImplUtil.getParserOptionsFromConfig());
         if (!response.isValid()) {
             RestApiUtil.handleBadRequest(response.getErrorItems(), log);
         }

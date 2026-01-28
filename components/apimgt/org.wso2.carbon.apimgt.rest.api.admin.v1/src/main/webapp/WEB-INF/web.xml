@@ -87,7 +87,7 @@
             org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor,
             org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor,
             org.wso2.carbon.apimgt.rest.api.util.interceptors.validation.ValidationInInterceptor,
-            org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor
+            org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor(allowTenantHeader=false)
         </param-value>
     </init-param>
     <init-param>

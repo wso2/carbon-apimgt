@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * This class represents the constants used in the API Specification Parser.
@@ -223,6 +224,32 @@ public final class APISpecParserConstants {
         public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
         public static final String APPLICATION_GRANT_TYPE = "application";
         public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";
+    }
+
+    // ASYNC API specific constants
+    public static final String ASYNCAPI_URI_MAPPING = "x-uri-mapping";
+    public static final String ASYNCAPI_ACTION_SEND = "send";
+    public static final String ASYNCAPI_ACTION_RECEIVE = "receive";
+    public static final String ASYNCAPI_ACTION_SEND_OPS = "send_";
+    public static final String ASYNCAPI_ACTION_RECEIVE_OPS = "receive_";
+    public static final String ASYNCAPI_CHANNELS_PATH = "#/channels/";
+    public static final String WS_URI_MAPPING_PUBLISH = "PUBLISH_";
+    public static final String WS_URI_MAPPING_SUBSCRIBE = "SUBSCRIBE_";
+
+    public static final Pattern ASYNC_API_V2_PATTERN = Pattern.compile("^2\\.[0-6](\\..*)?$");
+
+    public static class AsyncApi {
+        public static final String ASYNC_API = "asyncapi";
+        public static final String ASYNC_API_V20 = "2.0";
+        public static final String ASYNC_API_V21 = "2.1";
+        public static final String ASYNC_API_V22 = "2.2";
+        public static final String ASYNC_API_V23 = "2.3";
+        public static final String ASYNC_API_V24 = "2.4";
+        public static final String ASYNC_API_V25 = "2.5";
+        public static final String ASYNC_API_V26 = "2.6";
+        public static final String ASYNC_API_V30 = "3.0";
+        public static final String ASYNC_API_V2 = "2.0.0";
+        public static final String ASYNC_API_V3 = "3.0.0";
     }
 
     public enum SupportedHTTPVerbs {

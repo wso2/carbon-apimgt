@@ -378,6 +378,17 @@ public interface APIProvider extends APIManager {
     List<SequenceBackendData> getAllSequenceBackendsByAPIUUID(String apiUUID) throws APIManagementException;
 
     /**
+     * Update the resource policy content of the given API and resource
+     *
+     * @param identifier API Identifier
+     * @param resourceId Resource ID
+     * @param content    New content of the resource policy
+     * @throws APIManagementException if failed to update resource policy
+     */
+     void updateResourcePolicyFromRegistryResourceId(APIIdentifier identifier, String resourceId, String content)
+             throws APIManagementException;
+
+    /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
      *
      * @param apiId          The id of the API to be copied
@@ -2098,7 +2109,7 @@ public interface APIProvider extends APIManager {
      */
     @Deprecated
     void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID, String revisionId,
-                                   String environment);
+                                   String environment) throws APIManagementException;
 
     /**
      * Resume API revision deployment process
@@ -2111,7 +2122,7 @@ public interface APIProvider extends APIManager {
      * @param isInitiatedFromGateway whether the deployment is initiated from the gateway
      */
     void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID, String revisionId,
-                                   String environment, boolean isInitiatedFromGateway);
+                                   String environment, boolean isInitiatedFromGateway) throws APIManagementException;
 
     /***
      * Cleanup pending or rejected revision workflows

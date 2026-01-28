@@ -656,7 +656,8 @@ public class ApiMgtDAO {
                 subscriber.setId(subscriberId);
                 subscriber.setTenantId(rs.getInt("TENANT_ID"));
                 subscriber.setEmail(rs.getString("EMAIL_ADDRESS"));
-                subscriber.setSubscribedDate(new Date(rs.getTimestamp("DATE_SUBSCRIBED").getTime()));
+                Timestamp dateSubscribed = rs.getTimestamp("DATE_SUBSCRIBED");
+                subscriber.setSubscribedDate(dateSubscribed == null ? null : new Date(dateSubscribed.getTime()));
                 return subscriber;
             }
         } catch (SQLException e) {
@@ -4292,8 +4293,10 @@ public class ApiMgtDAO {
                 application.setIsBlackListed(rs.getBoolean("ENABLED"));
                 application.setOwner(rs.getString("CREATED_BY"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
-                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("APP_UPDATED_TIME").getTime()));
-                application.setCreatedTime(String.valueOf(rs.getTimestamp("APP_CREATED_TIME").getTime()));
+                Timestamp updated_time = rs.getTimestamp("APP_UPDATED_TIME");
+                application.setLastUpdatedTime(updated_time == null ? null : String.valueOf(updated_time.getTime()));
+                Timestamp createdTime = rs.getTimestamp("APP_CREATED_TIME");
+                application.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
 
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(connection, application);
@@ -5433,7 +5436,7 @@ public class ApiMgtDAO {
             identifier = apiTypeWrapper.getApi().getId();
             apiUUID = apiTypeWrapper.getApi().getUuid();
             if (apiUUID != null) {
-                id = getAPIID(apiUUID);
+                id = getAPIID(apiUUID, connection);
             }
             if (id == -1) {
                 id = identifier.getId();
@@ -5950,7 +5953,8 @@ public class ApiMgtDAO {
                 workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(rs.getString("WF_TYPE"));
                 workflowDTO.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
                 workflowDTO.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                workflowDTO.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").getTime());
+                Timestamp createdTime = rs.getTimestamp("WF_CREATED_TIME");
+                workflowDTO.setCreatedTime(createdTime == null ? 0L : createdTime.getTime());
                 workflowDTO.setWorkflowReference(rs.getString("WF_REFERENCE"));
                 workflowDTO.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                 workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
@@ -6015,7 +6019,8 @@ public class ApiMgtDAO {
                 workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(rs.getString("WF_TYPE"));
                 workflowDTO.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
                 workflowDTO.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                workflowDTO.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").getTime());
+                Timestamp createdTime = rs.getTimestamp("WF_CREATED_TIME");
+                workflowDTO.setCreatedTime(createdTime == null ? 0L : createdTime.getTime());
                 workflowDTO.setWorkflowReference(rs.getString("WF_REFERENCE"));
                 workflowDTO.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                 workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
@@ -6053,7 +6058,8 @@ public class ApiMgtDAO {
                             .createWorkflowDTO(rs.getString("WF_TYPE"));
                     workflowDTO.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
                     workflowDTO.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                    workflowDTO.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").getTime());
+                    Timestamp createdTime = rs.getTimestamp("WF_CREATED_TIME");
+                    workflowDTO.setCreatedTime(createdTime == null ? 0L : createdTime.getTime());
                     workflowDTO.setWorkflowReference(rs.getString("WF_REFERENCE"));
                     workflowDTO.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                     workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
@@ -6156,6 +6162,33 @@ public class ApiMgtDAO {
             handleException("Error while getting default version for " + apiId.getName(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return publishedDefaultVersion;
+    }
+
+    /**
+     * Get published default version using existing connection for APIIdentifier.
+     *
+     * @param apiId             API identifier
+     * @param connection        Existing database connection
+     * @return                  Published default version string
+     * @throws SQLException     If an error occurs while accessing the database
+     */
+    private String getPublishedDefaultVersion(APIIdentifier apiId, Connection connection) throws SQLException {
+
+        String publishedDefaultVersion = null;
+        String query = SQLConstants.GET_PUBLISHED_DEFAULT_VERSION_SQL;
+        try (PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieving published default version for API: " + apiId.getName());
+            }
+            prepStmt.setString(1, apiId.getName());
+            prepStmt.setString(2, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    publishedDefaultVersion = rs.getString("PUBLISHED_DEFAULT_API_VERSION");
+                }
+            }
         }
         return publishedDefaultVersion;
     }
@@ -6589,8 +6622,10 @@ public class ApiMgtDAO {
                 application.setGroupId(rs.getString("GROUP_ID"));
                 application.setOwner(rs.getString("CREATED_BY"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
-                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
-                application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
+                Timestamp updated_time = rs.getTimestamp("UPDATED_TIME");
+                application.setLastUpdatedTime(updated_time == null ? null : String.valueOf(updated_time.getTime()));
+                Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
+                application.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
 
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(connection, application);
@@ -6663,8 +6698,10 @@ public class ApiMgtDAO {
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
                 application.setOrganization(rs.getString("ORGANIZATION"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
-                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
-                application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
+                Timestamp updated_time = rs.getTimestamp("UPDATED_TIME");
+                application.setLastUpdatedTime(updated_time == null ? null : String.valueOf(updated_time.getTime()));
+                Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
+                application.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
 
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriberName);
                 Map<String, Map<String, OAuthApplicationInfo>>
@@ -6820,8 +6857,10 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
-                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
-                application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
+                Timestamp updated_time = rs.getTimestamp("UPDATED_TIME");
+                application.setLastUpdatedTime(updated_time == null ? null : String.valueOf(updated_time.getTime()));
+                Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
+                application.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
 
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriberName);
                 Map<String, Map<String, OAuthApplicationInfo>>
@@ -6895,8 +6934,6 @@ public class ApiMgtDAO {
                 application.setOrganization(rs.getString("ORGANIZATION"));
                 application.setSharedOrganization(rs.getString("SHARED_ORGANIZATION"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
-                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
-                application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
                 if (multiGroupAppSharingEnabled) {
                     if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
                         application.setGroupId(getGroupId(connection, application.getId()));
@@ -7597,8 +7634,8 @@ public class ApiMgtDAO {
             prepStmt.execute();
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
-            String curDefaultVersion = getDefaultVersion(identifier);
-            String pubDefaultVersion = getPublishedDefaultVersion(identifier);
+            String curDefaultVersion = getDefaultVersion(connection, identifier);
+            String pubDefaultVersion = getPublishedDefaultVersion(identifier, connection);
             if (identifier.getVersion().equals(curDefaultVersion)) {
                 ArrayList<Identifier> apiIdList = new ArrayList<Identifier>() {{
                     add(identifier);
@@ -11363,6 +11400,39 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed while getting local scopes for API:" + uuid + " tenant: " + tenantId, e);
+        }
+        return localScopes;
+    }
+
+    /**
+     * Gets local scope keys from versioned APIs which are not yet attached to the given API.
+     *
+     * @param uuid API uuid
+     * @param tenantId      Tenant Id
+     * @return Local Scope keys set
+     * @throws APIManagementException if fails to get local scope keys for API
+     */
+    public Set<String> getAllUnattachedLocalScopeKeysFromVersionedAPIs(String uuid, int tenantId)
+            throws APIManagementException {
+        Set<String> localScopes = new HashSet<>();
+        String getAllLocalScopesStmt = SQLConstants.GET_ALL_UNATTACHED_VERSIONED_LOCAL_SCOPES_FOR_API_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(getAllLocalScopesStmt)) {
+            APIIdentifier apiIdentifier = getAPIIdentifierFromUUID(uuid);
+            preparedStatement.setString(1, apiIdentifier.getApiName());
+            preparedStatement.setInt(2, tenantId);
+            preparedStatement.setInt(3, tenantId);
+            preparedStatement.setString(4, apiIdentifier.getApiName());
+            preparedStatement.setString(5, apiIdentifier.getVersion());
+            preparedStatement.setInt(6, tenantId);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                while (rs.next()) {
+                    localScopes.add(rs.getString("SCOPE_NAME"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed while getting unattached and versioned local scopes for API:" + uuid + " tenant: "
+                    + tenantId, e);
         }
         return localScopes;
     }
@@ -15234,8 +15304,10 @@ public class ApiMgtDAO {
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
                 application.setKeyType(rs.getString("KEY_TYPE"));
                 application.setOrganization(rs.getString("ORGANIZATION"));
-                application.setLastUpdatedTime(String.valueOf(rs.getTimestamp("UPDATED_TIME").getTime()));
-                application.setCreatedTime(String.valueOf(rs.getTimestamp("CREATED_TIME").getTime()));
+                Timestamp updated_time = rs.getTimestamp("UPDATED_TIME");
+                application.setLastUpdatedTime(updated_time == null ? null : String.valueOf(updated_time.getTime()));
+                Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
+                application.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
 
                 if (multiGroupAppSharingEnabled) {
                     if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
@@ -15631,12 +15703,11 @@ public class ApiMgtDAO {
             } catch (IOException e) {
                 log.error("Error while retrieving LLM configuration", e);
             }
-
-            // Get models registered under the LLM provider
-            setLLMProviderModels(organization, provider);
-
-            return provider;
         }
+        // Get models registered under the LLM provider
+        setLLMProviderModels(organization, provider);
+
+        return provider;
     }
 
     /**
@@ -16999,10 +17070,13 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         Connection connection = null;
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Deleting API Product: " + productIdentifier.getName() + " version: " + productIdentifier.getVersion());
+            }
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             //  delete product ratings
-            int id = getAPIProductId(productIdentifier);
+            int id = getAPIProductId(productIdentifier, connection);
             ps = connection.prepareStatement(deleteRatingsQuery);
             ps.setInt(1, id);
             ps.execute();
@@ -17023,7 +17097,7 @@ public class ApiMgtDAO {
             deleteAllAPISpecificOperationPoliciesByAPIUUID(connection, productIdentifier.getUUID(), null);
 
             // delete the default version if the deleted product is a default version
-            String curDefaultVersion = getDefaultVersion(productIdentifier);
+            String curDefaultVersion = getDefaultVersion(connection, productIdentifier);
             String pubDefaultVersion = getPublishedDefaultVersion(productIdentifier, connection);
             if (productIdentifier.getVersion().equals(curDefaultVersion)) {
                 ArrayList<Identifier> apiIdList = new ArrayList<Identifier>() {{
@@ -17062,37 +17136,58 @@ public class ApiMgtDAO {
         return productMappings;
     }
 
+    /**
+     * Retrieve the API Product ID for a given APIProductIdentifier.
+     *
+     * @param identifier The APIProductIdentifier for which the ID is to be retrieved.
+     * @return The API Product ID.
+     * @throws APIManagementException If an error occurs while retrieving the API Product ID.
+     */
     public int getAPIProductId(APIProductIdentifier identifier) throws APIManagementException {
 
-        Connection conn = null;
+        int productId = -1;
+        try {
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                return getAPIProductId(identifier, connection);
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving api product id for product " + identifier.getName() + " by "
+                    + APIUtil.replaceEmailDomainBack(identifier.getProviderName()), e);
+        }
+        return productId;
+    }
+
+    /**
+     * Retrieve the API Product ID for a given APIProductIdentifier.
+     *
+     * @param identifier  The APIProductIdentifier for which the ID is to be retrieved.
+     * @param connection  The database connection to be used for the query.
+     * @return The API Product ID.
+     * @throws APIManagementException If an error occurs while retrieving the API Product ID.
+     * @throws SQLException If an error occurs while executing the SQL query.
+     */
+    public int getAPIProductId(APIProductIdentifier identifier, Connection connection)
+            throws APIManagementException, SQLException {
+
         String queryGetProductId = SQLConstants.GET_PRODUCT_ID;
-        PreparedStatement preparedStatement = null;
-        ResultSet rs = null;
         int productId = -1;
 
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            preparedStatement = conn.prepareStatement(queryGetProductId);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(queryGetProductId)) {
             preparedStatement.setString(1, identifier.getName());
             preparedStatement.setString(2, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             preparedStatement.setString(3, identifier.getVersion());
 
-            rs = preparedStatement.executeQuery();
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
+                    productId = rs.getInt("API_ID");
+                }
 
-            if (rs.next()) {
-                productId = rs.getInt("API_ID");
+                if (productId == -1) {
+                    String msg = "Unable to find the API Product : " + identifier.getName() + " in the database";
+                    log.error(msg);
+                    throw new APIManagementException(msg);
+                }
             }
-
-            if (productId == -1) {
-                String msg = "Unable to find the API Product : " + productId + " in the database";
-                log.error(msg);
-                throw new APIManagementException(msg);
-            }
-        } catch (SQLException e) {
-            handleException("Error while retrieving api product id for product " + identifier.getName() + " by " +
-                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(preparedStatement, conn, rs);
         }
         return productId;
     }
@@ -17128,7 +17223,7 @@ public class ApiMgtDAO {
             int productId = getAPIID(product.getUuid(), conn);
             updateAPIProductResourceMappings(product, productId, conn);
 
-            String previousDefaultVersion = getDefaultVersion(product.getId());
+            String previousDefaultVersion = getDefaultVersion(conn, product.getId());
             if (product.isDefaultVersion() ^ product.getId().getVersion().equals(previousDefaultVersion)) {
                 //If the api product is selected as default version, it is added/replaced into AM_API_DEFAULT_VERSION table
                 if (product.isDefaultVersion()) {
@@ -18070,8 +18165,10 @@ public class ApiMgtDAO {
                     workflow.setWorkflowType(rs.getString("WF_TYPE"));
                     String workflowstatus = rs.getString("WF_STATUS");
                     workflow.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(workflowstatus));
-                    workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toString());
-                    workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toString());
+                    Timestamp createdTime = rs.getTimestamp("WF_CREATED_TIME");
+                    workflow.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime));
+                    Timestamp updatedTime = rs.getTimestamp("WF_UPDATED_TIME");
+                    workflow.setUpdatedTime(updatedTime == null ? null : String.valueOf(updatedTime));
                     workflow.setWorkflowStatusDesc(rs.getString("WF_STATUS_DESC"));
                     workflow.setTenantId(rs.getInt("TENANT_ID"));
                     workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
@@ -18141,8 +18238,10 @@ public class ApiMgtDAO {
                     workflow.setWorkflowType(rs.getString("WF_TYPE"));
                     String workflowstatus = rs.getString("WF_STATUS");
                     workflow.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(workflowstatus));
-                    workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toString());
-                    workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toString());
+                    Timestamp createdTime = rs.getTimestamp("WF_CREATED_TIME");
+                    workflow.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime));
+                    Timestamp updatedTime = rs.getTimestamp("WF_UPDATED_TIME");
+                    workflow.setUpdatedTime(updatedTime == null ? null : String.valueOf(updatedTime));
                     workflow.setWorkflowStatusDesc(rs.getString("WF_STATUS_DESC"));
                     workflow.setTenantId(rs.getInt("TENANT_ID"));
                     workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
@@ -18213,8 +18312,10 @@ public class ApiMgtDAO {
                     workflow.setWorkflowType(rs.getString("WF_TYPE"));
                     String workflowstatus = rs.getString("WF_STATUS");
                     workflow.setStatus(org.wso2.carbon.apimgt.api.WorkflowStatus.valueOf(workflowstatus));
-                    workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toString());
-                    workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toString());
+                    Timestamp createdTime = rs.getTimestamp("WF_CREATED_TIME");
+                    workflow.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime));
+                    Timestamp updatedTime = rs.getTimestamp("WF_UPDATED_TIME");
+                    workflow.setUpdatedTime(updatedTime == null ? null : String.valueOf(updatedTime));
                     workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
                     workflow.setTenantId(rs.getInt("TENANT_ID"));
                     workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
@@ -20577,6 +20678,42 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to remove API Revision Deployment Mapping entry for API UUID "
                     + apiUUID, e);
+        }
+    }
+
+    /**
+     * Remove an API revision Deployment mapping record to the database
+     *
+     * @param apiUUID     uuid of the api.
+     * @param revisionUUID uuid of the revision.
+     * @param deployments content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    public void removeAPIRevisionDeployment(String apiUUID, String revisionUUID, Set<String> deployments)
+            throws APIManagementException {
+        if (deployments == null || deployments.isEmpty()) {
+            return;
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Remove an entry from AM_DEPLOYMENT_REVISION_MAPPING table
+                try (PreparedStatement statement = connection.prepareStatement(
+                        REMOVE_API_REVISION_DEPLOYMENT_MAPPING)) {
+                    for (String deployment : deployments) {
+                        statement.setString(1, deployment);
+                        statement.setString(2, revisionUUID);
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to remove API Revision Deployment Mapping entry for API UUID " + apiUUID, e);
         }
     }
 
@@ -23796,7 +23933,7 @@ public class ApiMgtDAO {
         }
 
         try (PreparedStatement ps = connection.prepareStatement(query)) {
-            int apiId = getAPIID(currentApiUuid);
+            int apiId = getAPIID(currentApiUuid, connection);
             ps.setInt(1, apiId);
             if (isRevision) {
                 ps.setString(2, uuid);
@@ -23839,7 +23976,7 @@ public class ApiMgtDAO {
             currentApiUuid = uuid;
         }
         try (PreparedStatement ps = connection.prepareStatement(query)) {
-            int apiId = getAPIID(currentApiUuid);
+            int apiId = getAPIID(currentApiUuid, connection);
             ps.setInt(1, apiId);
             if (isRevision) {
                 ps.setString(2, uuid);

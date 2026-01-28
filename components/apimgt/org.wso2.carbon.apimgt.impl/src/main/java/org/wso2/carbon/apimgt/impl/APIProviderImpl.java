@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.FaultyGatewayDeploymentException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
@@ -541,6 +542,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateResourceThrottlingTiers(api, tenantDomain);
         validateKeyManagers(api);
+        validateKeyManagerScopes(api, tenantDomain);
         // Validate and process API level and operation level policies
         validateAndProcessAPIPolicyParameters(api, null, tenantDomain);
         String apiName = api.getId().getApiName();
@@ -553,6 +555,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Validate Transports
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
+
+        if (api.getAdditionalProperties() != null) {
+            checkIfAdditionalPropertyValuesAreNullOrEmpty(new ApiTypeWrapper(api));
+        }
 
         //Validate API with Federated Gateway
         if (!api.isInitiatedFromGateway()) {
@@ -1017,7 +1023,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Validate Transports
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
-        validateKeyManagers(api);
+        validateKeyManagers(api, existingAPI.getKeyManagers());
+
+        if (api.getAdditionalProperties() != null) {
+            checkIfAdditionalPropertyValuesAreNullOrEmpty(new ApiTypeWrapper(api));
+        }
+
+        validateKeyManagerScopes(api, tenantDomain);
         // Validate and process API level and operation level policies
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
@@ -1123,8 +1135,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void validateKeyManagerScopes(API api, String tenantDomain) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating key manager scopes for API: " + api.getId().getApiName());
+        }
+
         Set<String> oldLocalScopeKeys;
         Set<String> oldVersionedLocalScopeKeys;
+        Set<String> oldVersionedUnattachedLocalScopeKeys;
         boolean isCreateNewVersion = false;
         int tenantId = -1;
 
@@ -1150,9 +1167,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (api.getUuid() != null && !api.getUuid().isEmpty()) {
             oldLocalScopeKeys = new HashSet<>(apiMgtDAO.getAllLocalScopeKeysForAPI(api.getUuid(), tenantId));
             oldVersionedLocalScopeKeys = apiMgtDAO.getVersionedLocalScopeKeysForAPI(api.getUuid(), tenantId);
+            oldVersionedUnattachedLocalScopeKeys = apiMgtDAO.getAllUnattachedLocalScopeKeysFromVersionedAPIs(
+                    api.getUuid(), tenantId);
         } else {
             oldLocalScopeKeys = Collections.emptySet();
             oldVersionedLocalScopeKeys = Collections.emptySet();
+            oldVersionedUnattachedLocalScopeKeys = Collections.emptySet();
             Set<String> apiVersions = getAPIVersions(api.getId().getProviderName(),
                     api.getId().getApiName(), api.getOrganization());
             if (!apiVersions.isEmpty()) {
@@ -1171,6 +1191,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     .filter(scope -> !oldVersionedLocalScopeKeys.contains(scope))
                     .collect(Collectors.toSet());
         }
+
+        if (!oldVersionedUnattachedLocalScopeKeys.isEmpty()) {
+            scopesToAdd = scopesToAdd.stream()
+                    .filter(scope -> !oldVersionedUnattachedLocalScopeKeys.contains(scope))
+                    .collect(Collectors.toSet());
+        }
+
         for (String scope : scopesToAdd) {
             if (log.isDebugEnabled()) {
                 log.debug("Checking if scope: " + scope + " exists in Key Manager for tenant: " + tenantDomain);
@@ -1185,6 +1212,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             " because we are creating a new API version.");
                 }
             }
+        }
+    }
+
+    @Override
+    public void updateResourcePolicyFromRegistryResourceId(APIIdentifier identifier, String resourceId, String content)
+            throws APIManagementException {
+        try {
+            apiPersistenceInstance.updateResourcePolicyFromRegistryResourceId(identifier, resourceId, content);
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while updating the resource policy for API: " + identifier
+                    + " with resource ID: " + resourceId, e);
         }
     }
 
@@ -1232,13 +1270,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void validateKeyManagers(API api) throws APIManagementException {
+        // Validate Key Managers in Add API
+        validateKeyManagers(api, null);
+    }
+
+    private void validateKeyManagers(API api, List<String> existingKeyManagers) throws APIManagementException {
 
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getGlobalAndTenantKeyManagers(tenantDomain);
         List<KeyManagerConfigurationDTO> keyManagerConfigurationsByOrganization =
                 apiMgtDAO.getKeyManagerConfigurationsByOrganization(organization);
         Set<String> disabledKeyManagers = keyManagerConfigurationsByOrganization.stream()
-                .filter(config -> !config.isEnabled()) 
-                .map(KeyManagerConfigurationDTO::getName) 
+                .filter(config -> !config.isEnabled())
+                .map(KeyManagerConfigurationDTO::getName)
                 .collect(Collectors.toSet());
 
         if (log.isDebugEnabled()) {
@@ -1265,6 +1308,40 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(
                     "Key Manager(s) Not found :" + String.join(" , ", configuredMissingKeyManagers),
                     ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
+        }
+        List<String> keyManagersToValidate = api.getKeyManagers();
+        List<String> validKeyManagers = new ArrayList<>();
+        if (existingKeyManagers != null) {
+            // Filters to keep only key managers that are not in the old existing key managers list
+            keyManagersToValidate = api.getKeyManagers().stream()
+                    .filter(km -> !existingKeyManagers.contains(km))
+                    .collect(Collectors.toList());
+
+            // Add old existing key managers to valid list if they are available in updated API as well
+            validKeyManagers.addAll(existingKeyManagers.stream()
+                    .filter(km -> api.getKeyManagers().contains(km))
+                    .collect(Collectors.toList()));
+        }
+
+        for (String keyManager : keyManagersToValidate) {
+            if (!APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManager)) {
+                if (!disabledKeyManagers.contains(keyManager)) {
+                    validKeyManagers.add(keyManager);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Added valid key manager: " + keyManager + " for API: " + api.getId().getApiName());
+                    }
+                }
+            } else {
+                tenantKeyManagers.values().stream()
+                        .map(KeyManagerDto::getName)
+                        .filter(kmName -> !disabledKeyManagers.contains(kmName))
+                        .forEach(validKeyManagers::add);
+            }
+        }
+        if (validKeyManagers.isEmpty()) {
+            throw new APIManagementException(
+                    "API must have at least one valid and enabled key manager configured",
+                    ExceptionCodes.KEY_MANAGER_NOT_FOUND);
         }
     }
 
@@ -4498,10 +4575,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         BlockConditionsDTO createdBlockConditionsDto = apiMgtDAO.addBlockConditions(blockConditionsDTO);
 
         if (createdBlockConditionsDto != null) {
-            publishBlockingEvent(createdBlockConditionsDto, "true");
+            publishBlockingEvent(createdBlockConditionsDto, String.valueOf(conditionStatus));
+            return createdBlockConditionsDto.getUUID();
+        } else {
+            throw new APIManagementException("Error occurred while adding the block condition");
         }
-
-        return createdBlockConditionsDto.getUUID();
     }
 
     @Override
@@ -5435,6 +5513,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetTransports(apiProduct);
         validateAndSetAPISecurity(apiProduct);
 
+        if (apiProduct.getAdditionalProperties() != null) {
+            checkIfAdditionalPropertyValuesAreNullOrEmpty(new ApiTypeWrapper(apiProduct));
+        }
+
         PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
         PublisherAPIProduct addedAPIProduct;
         try {
@@ -5469,6 +5551,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Validate Transports and Security
         validateAndSetTransports(apiProduct);
         validateAndSetAPISecurity(apiProduct);
+
+        if (apiProduct.getAdditionalProperties() != null) {
+            checkIfAdditionalPropertyValuesAreNullOrEmpty(new ApiTypeWrapper(apiProduct));
+        }
 
         PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
         PublisherAPIProduct addedAPIProduct;
@@ -7314,7 +7400,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     @Deprecated
     public void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID,
-                                          String revisionId, String environment) {
+                                          String revisionId, String environment) throws APIManagementException {
         resumeDeployedAPIRevisionInternal(apiId, organization, revisionUUID, revisionId, environment, false);
     }
 
@@ -7330,7 +7416,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID,
-                                          String revisionId, String environment, boolean isInitiatedFromGateway) {
+                                          String revisionId, String environment, boolean isInitiatedFromGateway)
+            throws APIManagementException {
         resumeDeployedAPIRevisionInternal(apiId, organization, revisionUUID, revisionId, environment,
                 isInitiatedFromGateway);
     }
@@ -7346,8 +7433,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param skipDeployToGateway Flag to skip deployment to gateway
      */
     private void resumeDeployedAPIRevisionInternal(String apiId, String organization, String revisionUUID,
-                                                   String revisionId, String environment, boolean skipDeployToGateway) {
+                                                   String revisionId, String environment, boolean skipDeployToGateway)
+            throws APIManagementException {
         try {
+            Set<String> deploymentFailures = new HashSet<>();
+            Set<String> unDeploymentFailures = new HashSet<>();
             APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
             APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
             APIRevisionDeployment newDeployment = getAPIRevisionDeployment(environment, revisionUUID);
@@ -7364,21 +7454,53 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             Set<String> targetEnvironments = Collections.singleton(environment);
             Map<String, String> gatewayVhosts = Collections.singletonMap(environment, newDeployment.getVhost());
-            apiMgtDAO.removeAPIRevisionDeployment(apiId, deploymentsToRemove);
-
             if (!skipDeployToGateway) {
                 if (!deploymentsToRemove.isEmpty()) {
-                    removeFromGateway(api, deploymentsToRemove, targetEnvironments, false);
+                    try {
+                        removeFromGateway(api, deploymentsToRemove, targetEnvironments, false);
+                    } catch (RuntimeException e) {
+                        if (e instanceof FaultyGatewayDeploymentException) {
+                            Set<String> environments = ((FaultyGatewayDeploymentException) e).getEnvironments();
+                            if (environments != null && !environments.isEmpty()) {
+                                deploymentsToRemove.removeIf(
+                                        deployment -> environments.contains(deployment.getDeployment()));
+                                unDeploymentFailures.addAll(environments);
+                            }
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
 
                 GatewayArtifactsMgtDAO.getInstance()
                         .addAndRemovePublishedGatewayLabels(apiId, revisionUUID,
                                 targetEnvironments, gatewayVhosts, deploymentsToRemove);
-                gatewayManager.deployToGateway(api, organization, targetEnvironments);
+                try {
+                    gatewayManager.deployToGateway(api, organization, targetEnvironments);
+                } catch (RuntimeException e) {
+                    if (e instanceof FaultyGatewayDeploymentException) {
+                        Set<String> environments = ((FaultyGatewayDeploymentException) e).getEnvironments();
+                        if (environments != null && !environments.isEmpty()) {
+                            GatewayArtifactsMgtDAO.getInstance()
+                                    .removePublishedGatewayLabels(apiId, revisionUUID, environments);
+                            apiMgtDAO.removeAPIRevisionDeployment(apiId, revisionUUID, environments);
+                            deploymentFailures.addAll(environments);
+                        }
+                    } else {
+                        throw e;
+                    }
+                }
             }
+            apiMgtDAO.removeAPIRevisionDeployment(apiId, deploymentsToRemove);
             updatePublishedDefaultVersionIfRequired(apiIdentifier, api, organization);
+            if (!deploymentFailures.isEmpty() || !unDeploymentFailures.isEmpty()) {
+                throw new APIManagementException("Errors occurred during deployment/resume of API revision. " +
+                        "Deployment failures in environments: " + String.join(", ", deploymentFailures) +
+                        ". Undeployment failures in environments: " + String.join(", ", unDeploymentFailures) + ".",
+                        ExceptionCodes.from(ExceptionCodes.API_DEPLOYMENT_ERROR, apiId));
+            }
         } catch (APIManagementException e) {
-            log.error("Error while resuming API revision deployment for API ID: " + apiId, e);
+            throw e;
         }
     }
 
@@ -7596,6 +7718,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         API api = getAPIbyUUID(apiId, apiRevision, organization);
         Set<String> environmentsToRemove = new HashSet<>();
+        Set<String> unDeploymentFailures = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
         }
@@ -7614,9 +7737,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (log.isDebugEnabled()) {
             log.debug("Undeploying API revision: " + apiRevision.getRevisionUUID() + " from gateways on delete/retire");
         }
-        removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet(), onDeleteOrRetire);
+        try {
+            removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet(), onDeleteOrRetire);
+        } catch (RuntimeException e) {
+            if (e instanceof FaultyGatewayDeploymentException) {
+                Set<String> environments = ((FaultyGatewayDeploymentException) e).getEnvironments();
+                if (environments != null && !environments.isEmpty()) {
+                    apiRevisionDeployments.removeIf(
+                            deployment -> environments.contains(deployment.getDeployment()));
+                    environmentsToRemove.removeAll(environments);
+                    unDeploymentFailures.addAll(environments);
+                }
+            } else {
+                throw e;
+            }
+        }
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevisionId, environmentsToRemove);
+        if (!unDeploymentFailures.isEmpty()){
+            throw new APIManagementException("Errors occurred during unDeployment of API revision. " +
+                    "UnDeployment failures in environments: " + String.join(", ", unDeploymentFailures) + ".",
+                    ExceptionCodes.from(ExceptionCodes.API_DEPLOYMENT_ERROR, apiId));
+        }
     }
 
     /**
@@ -9321,6 +9463,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 BackendOperationMapping backendOperationMapping = uriTemplate.getBackendOperationMapping();
                 if (backendOperationMapping != null) {
                     backendOperationMapping.setBackendId(newBackendId);
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks whether the additional property values are null or empty strings.
+     *
+     * @param wrapper API/APIProduct wrapper
+     * @throws APIManagementException if the additional property value is null or empty string
+     */
+    private void checkIfAdditionalPropertyValuesAreNullOrEmpty(ApiTypeWrapper wrapper) throws APIManagementException {
+        JSONObject additionalProperties;
+        if (wrapper.isAPIProduct()) {
+            additionalProperties = wrapper.getApiProduct().getAdditionalProperties();
+        } else {
+            additionalProperties = wrapper.getApi().getAdditionalProperties();
+        }
+        if (additionalProperties != null && !additionalProperties.isEmpty()) {
+            for (Object entry : additionalProperties.keySet()) {
+                if (additionalProperties.get(entry) == null ||
+                        StringUtils.isEmpty(additionalProperties.get(entry).toString())) {
+                    String errorMessage = "Failed to add additional property " + entry + " as the value is null " +
+                            "or empty.";
+                    log.error(errorMessage);
+                    throw new APIManagementException(errorMessage);
                 }
             }
         }

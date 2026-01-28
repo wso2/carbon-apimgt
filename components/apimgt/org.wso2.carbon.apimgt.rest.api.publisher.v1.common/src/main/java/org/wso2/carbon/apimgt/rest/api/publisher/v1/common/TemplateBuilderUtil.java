@@ -590,47 +590,46 @@ public class TemplateBuilderUtil {
             try {
                 // Avoid number format issues in Endpoint Configuration
                 JsonObject endpointConf = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
-                if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                        endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && StringUtils.equals(
-                        api.getType().toLowerCase(), APIConstants.API_TYPE_HTTP.toLowerCase())) {
+                String protocolType = (endpointConf != null && endpointConf.has(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                        && !endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).isJsonNull())
+                        ? endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString() : null;
+                if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(protocolType)
+                        && APIConstants.API_TYPE_HTTP.equalsIgnoreCase(api.getType())) {
                     ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
                     // To modify the endpoint config string
                     JSONParser parser = new JSONParser();
                     ObjectMapper objectMapper = new ObjectMapper();
                     JSONObject endpointConfig = (JSONObject) parser.parse(endpointConfigString);
-                    if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                            endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-                        String policyDirectory =
-                                extractedFolderPath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
-                        String seqName = APIUtil.getCustomBackendName(api.getUuid(), APIConstants.API_KEY_TYPE_SANDBOX);
-                        SequenceBackendData seqData = apiMgtDAO.getCustomBackendByAPIUUID(api.getUuid(),
-                                APIConstants.API_KEY_TYPE_SANDBOX);
-                        if (seqData != null) {
-                            String name = seqData.getName();
-                            if (!StringUtils.isEmpty(name) && !name.contains(
-                                    APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
-                                name = name + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
-                            }
-                            if (APIUtil.checkFileExistence(policyDirectory + File.separator + name)) {
-                                endpointConfig.put("sandbox", seqName);
-                            }
+                    String policyDirectory =
+                            extractedFolderPath + File.separator + ImportExportConstants.CUSTOM_BACKEND_DIRECTORY;
+                    String seqName = APIUtil.getCustomBackendName(api.getUuid(), APIConstants.API_KEY_TYPE_SANDBOX);
+                    SequenceBackendData seqData = apiMgtDAO.getCustomBackendByAPIUUID(api.getUuid(),
+                            APIConstants.API_KEY_TYPE_SANDBOX);
+                    if (seqData != null) {
+                        String name = seqData.getName();
+                        if (!StringUtils.isEmpty(name) && !name.contains(
+                                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
+                            name = name + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
                         }
-
-                        seqName = APIUtil.getCustomBackendName(api.getUuid(), APIConstants.API_KEY_TYPE_PRODUCTION);
-                        seqData = apiMgtDAO.getCustomBackendByAPIUUID(api.getUuid(),
-                                APIConstants.API_KEY_TYPE_PRODUCTION);
-                        if (seqData != null) {
-                            String name = seqData.getName();
-                            if (!StringUtils.isEmpty(name) && !name.contains(
-                                    APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
-                                name = name + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
-                            }
-                            if (APIUtil.checkFileExistence(policyDirectory + File.separator + name)) {
-                                endpointConfig.put("production", seqName);
-                            }
+                        if (APIUtil.checkFileExistence(policyDirectory + File.separator + name)) {
+                            endpointConfig.put("sandbox", seqName);
                         }
-                        api.setEndpointConfig(objectMapper.writeValueAsString(endpointConfig));
                     }
+
+                    seqName = APIUtil.getCustomBackendName(api.getUuid(), APIConstants.API_KEY_TYPE_PRODUCTION);
+                    seqData = apiMgtDAO.getCustomBackendByAPIUUID(api.getUuid(),
+                            APIConstants.API_KEY_TYPE_PRODUCTION);
+                    if (seqData != null) {
+                        String name = seqData.getName();
+                        if (!StringUtils.isEmpty(name) && !name.contains(
+                                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML)) {
+                            name = name + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+                        }
+                        if (APIUtil.checkFileExistence(policyDirectory + File.separator + name)) {
+                            endpointConfig.put("production", seqName);
+                        }
+                    }
+                    api.setEndpointConfig(objectMapper.writeValueAsString(endpointConfig));
                 }
             } catch (IOException | ParseException ex) {
                 throw new APIManagementException("Error when updating Endpoint Configuration of API: " + api.getUuid(),
@@ -882,9 +881,11 @@ public class TemplateBuilderUtil {
             // check the endpoint type
             if (!StringUtils.isEmpty(api.getEndpointConfig())) {
                 JsonObject endpointConfObj = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
-                if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(endpointConfObj.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
-                        .getAsString()) && !APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(
-                        api.getImplementation())) {
+                String protocolType = (endpointConfObj.has(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                        && !endpointConfObj.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).isJsonNull()) ?
+                        endpointConfObj.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString() : null;
+                if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(protocolType) &&
+                        !APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
                     addEndpoints(api, apiTemplateBuilder, productAPIDto, null);
                 }
             } else {
@@ -936,8 +937,10 @@ public class TemplateBuilderUtil {
             }
 
             JsonObject endpointConfigMap = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
-            if (endpointConfigMap != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                    endpointConfigMap.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())
+            String protocolType = (endpointConfigMap != null && endpointConfigMap.has(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                    && !endpointConfigMap.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).isJsonNull()) ?
+                    endpointConfigMap.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString() : null;
+            if (endpointConfigMap != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(protocolType)
                     && APIConstants.API_TYPE_HTTP.equals(api.getType())) {
                 GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveSequenceBackendForAPIProduct(api,
                         apiProduct, APIConstants.API_KEY_TYPE_SANDBOX, extractedPath);
@@ -1048,8 +1051,8 @@ public class TemplateBuilderUtil {
         // If the API exists in the Gateway and If the Gateway type is 'production' and a production url has not been
         // specified Or if the Gateway type is 'sandbox' and a sandbox url has not been specified
 
-        if (endpointConfig != null && !APIConstants.ENDPOINT_TYPE_AWSLAMBDA.equals(
-                endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) && (
+        if (endpointConfig != null && !APIConstants.ENDPOINT_TYPE_AWSLAMBDA.equalsIgnoreCase(
+                (String) endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) && (
                 (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())
                         && !APIUtil.isProductionEndpointsExists(api.getEndpointConfig())) || (
                         APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())
@@ -1114,9 +1117,10 @@ public class TemplateBuilderUtil {
                 apiConfig = builder.getConfigStringForTemplate(environment);
             }
             gatewayAPIDTO.setApiDefinition(apiConfig);
-            if (endpointConfig != null && !endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
-                    .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA) && !endpointConfig.get(
-                    API_ENDPOINT_CONFIG_PROTOCOL_TYPE).equals(APIConstants.ENDPOINT_TYPE_SEQUENCE)) {
+            if (endpointConfig != null && !APIConstants.ENDPOINT_TYPE_AWSLAMBDA.equalsIgnoreCase(
+                    (String) endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)) &&
+                    !APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase((String) endpointConfig
+                            .get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                 if (!isWsApi) {
                     addEndpoints(api, builder, gatewayAPIDTO, endpointList);
                 }
@@ -1299,8 +1303,8 @@ public class TemplateBuilderUtil {
         }
         Map<String, Object> endpointConfigMap = (Map) apidto.getEndpointConfig();
 
-        if (endpointConfigMap != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                endpointConfigMap.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+        if (endpointConfigMap != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
+                (String) endpointConfigMap.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
             GatewayContentDTO gatewayCustomBackendSequenceDTO = retrieveCustomBackendSequence(api,
                     APIConstants.API_KEY_TYPE_SANDBOX, extractedPath);
             if (gatewayCustomBackendSequenceDTO != null) {
@@ -1470,29 +1474,42 @@ public class TemplateBuilderUtil {
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         Map<String, Map<String, String>> topicMappings = api.getWebSocketTopicMappingConfiguration().getMappings();
         List<GatewayContentDTO> endpointsToAdd = new ArrayList<>();
-        for (URITemplate resource : uriTemplates) {
-            String topic = resource.getUriTemplate();
-            Map<String, String> endpoints = topicMappings.get(topic);
-            // Production and Sandbox endpoints
-            for (Map.Entry<String, String> endpointData : endpoints.entrySet()) {
-                if (!"resourceKey".equals(endpointData.getKey())) {
-                    String endpointType = endpointData.getKey();
-                    String endpointUrl = endpointData.getValue();
+        if (topicMappings != null) {
+            for (URITemplate resource : uriTemplates) {
+                String topic = resource.getUriTemplate();
+                Map<String, String> endpoints = topicMappings.get(topic);
+                // Production and Sandbox endpoints
+                if (endpoints != null) {
+                    for (Map.Entry<String, String> endpointData : endpoints.entrySet()) {
+                        if (!"resourceKey".equals(endpointData.getKey())) {
+                            String endpointType = endpointData.getKey();
+                            String endpointUrl = endpointData.getValue();
 
-                    String endpointConfigContext = builder.getConfigStringForWebSocketEndpointTemplate(
-                            endpointType, getWebsocketResourceKey(topic), endpointUrl);
-                    GatewayContentDTO endpoint = new GatewayContentDTO();
-                    // For WS APIs, resource type is not applicable,
-                    // so we can just use the uriTemplate/uriMapping to identify the resource
-                    endpoint.setName(getEndpointName(endpointConfigContext));
-                    endpoint.setContent(endpointConfigContext);
-                    endpointsToAdd.add(endpoint);
+                            String endpointConfigContext = builder.getConfigStringForWebSocketEndpointTemplate(
+                                    endpointType, getWebsocketResourceKey(topic), endpointUrl);
+                            GatewayContentDTO endpoint = new GatewayContentDTO();
+                            // For WS APIs, resource type is not applicable,
+                            // so we can just use the uriTemplate/uriMapping to identify the resource
+                            endpoint.setName(getEndpointName(endpointConfigContext));
+                            endpoint.setContent(endpointConfigContext);
+                            endpointsToAdd.add(endpoint);
+                        }
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("No endpoints found for topic: " + topic);
+                    }
+                    continue;
+                }
+                // Graphql APIs with subscriptions has only one wild card resource mapping to WS endpoints.
+                // Hence, iterating once through resources is enough.
+                if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                    break;
                 }
             }
-            // Graphql APIs with subscriptions has only one wild card resource mapping to WS endpoints. Hence, iterating
-            // once through resources is enough.
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                break;
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("No Topic Mapping Configuration found for WebSocket API: " + api.getDisplayName());
             }
         }
         gatewayAPIDTO.setEndpointEntriesToBeAdd(addGatewayContentsToList(endpointsToAdd,
@@ -1568,8 +1585,10 @@ public class TemplateBuilderUtil {
                                              APIConstants.ENDPOINT_SECURITY_SANDBOX);
                     }
                 }
-            } else if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA
-                    .equals(endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
+            } else if (endpointConfig.has(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                    && !endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).isJsonNull()
+                    && APIConstants.ENDPOINT_TYPE_AWSLAMBDA.equalsIgnoreCase(
+                            endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
                 addAWSCredentialsToList(prefix, api, gatewayAPIDTO, endpointConfig);
             }
         }
@@ -2118,8 +2137,8 @@ public class TemplateBuilderUtil {
                 JSONObject prodWSEndpointConfig;
                 String prodWsEndpoint = "";
                 // If load_balanced endpoints get the first prod endpoint url from the list
-                if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equals(
-                        oldEndpointConfigJson.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equalsIgnoreCase(
+                        (String) oldEndpointConfigJson.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                     // get first load balanced endpoint
                     prodWsEndpoint = (String) ((JSONObject) ((org.json.simple.JSONArray) oldEndpointConfigJson
                             .get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)).get(0)).get(APIConstants.ENDPOINT_URL);
@@ -2137,7 +2156,7 @@ public class TemplateBuilderUtil {
                 } else if (prodWsEndpoint.indexOf(APIConstants.HTTPS_PROTOCOL_URL_PREFIX) == 0) {
                     prodWsEndpoint = prodWsEndpoint.replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX,
                             APIConstants.WSS_PROTOCOL_URL_PREFIX);
-                } else if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equals(prodWsEndpoint)) {
+                } else if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(prodWsEndpoint)) {
                     // supported uri schemes for url are https://, http:// or default
                     throw new APIManagementException("Unsupported URI scheme present for Production endpoint: "
                             + prodWsEndpoint);
@@ -2151,8 +2170,8 @@ public class TemplateBuilderUtil {
                 JSONObject sandboxWSEndpointConfig;
                 String sandboxWsEndpoint = "";
                 // If load_balanced endpoints get the first sandbox endpoint url from the list
-                if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equals(
-                        oldEndpointConfigJson.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equalsIgnoreCase(
+                        (String) oldEndpointConfigJson.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                     // get first load balanced endpoint
                     sandboxWsEndpoint = (String) ((JSONObject) ((org.json.simple.JSONArray) oldEndpointConfigJson
                             .get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)).get(0)).get(APIConstants.ENDPOINT_URL);
@@ -2169,7 +2188,7 @@ public class TemplateBuilderUtil {
                 } else if (sandboxWsEndpoint.indexOf(APIConstants.HTTPS_PROTOCOL_URL_PREFIX) == 0) {
                     sandboxWsEndpoint = sandboxWsEndpoint.replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX,
                             APIConstants.WSS_PROTOCOL_URL_PREFIX);
-                } else if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equals(sandboxWsEndpoint)) {
+                } else if (!APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(sandboxWsEndpoint)) {
                     throw new APIManagementException("Unsupported URI scheme present for Sandbox endpoint: "
                             + sandboxWsEndpoint);
                 }

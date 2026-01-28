@@ -1153,6 +1153,7 @@ public final class APIConstants {
     public static final String API_PUBLISHER_SUBSCRIBER_CLAIMS = API_PUBLISHER + "SubscriberClaims";
     public static final String API_PUBLISHER_INTERNAL_API_KEY_ALIAS = API_PUBLISHER + "InternalKeyAlias";
     public static final String API_PUBLISHER_SUPPORTED_DOC_TYPES = API_PUBLISHER + "SupportedDocumentTypes";
+    public static final String API_PUBLISHER_PRESERVE_LEGACY_ASYNC_PARSER = API_PUBLISHER + "PreserveLegacyAsyncParser";
     public static final String WSO2_API_STORE_TYPE = "wso2";
 
     public static final String EXTERNAL_API_STORES = "ExternalAPIStores";
@@ -3527,6 +3528,7 @@ public final class APIConstants {
 
     public static final String  PROPERTY_QUERY_KEY = "query";
     public static final String  PROPERTY_HEADERS_KEY = "headers";
+    public static final String  PROPERTY_ALLOW_TENANT_HEADER_KEY = "allowTenantHeader";
     public static final String DEFAULT_ORG_RESOLVER = "org.wso2.carbon.apimgt.impl.resolver.OnPremResolver";
 
     //Constants related to Operation Policies

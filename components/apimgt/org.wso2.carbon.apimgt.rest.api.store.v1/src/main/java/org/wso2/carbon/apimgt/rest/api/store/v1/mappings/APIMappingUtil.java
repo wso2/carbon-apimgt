@@ -309,6 +309,16 @@ public class APIMappingUtil {
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getName());
         dto.setVersion(model.getId().getVersion());
+
+        List<APICategory> apiCategories = model.getApiCategories();
+        List<String> categoryNamesList = new ArrayList<>();
+        if (apiCategories != null) {
+            for (APICategory category : apiCategories) {
+                categoryNamesList.add(category.getName());
+            }
+        }
+        dto.setCategories(categoryNamesList);
+
         String providerName = model.getId().getProviderName();
         dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         dto.setId(model.getUuid());

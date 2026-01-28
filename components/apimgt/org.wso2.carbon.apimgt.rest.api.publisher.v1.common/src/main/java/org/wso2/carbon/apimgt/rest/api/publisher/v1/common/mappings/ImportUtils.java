@@ -105,6 +105,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.asyncapi.AsyncApiParseOptions;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.registry.core.Registry;
@@ -466,8 +467,8 @@ public class ImportUtils {
 
             // Update Custom Backend Data if endpoint type is selected to "custom_backend"
             Map endpointConf = (Map) importedApiDTO.getEndpointConfig();
-            if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                    endpointConf.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+            if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equalsIgnoreCase(
+                    (String) endpointConf.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
                 updateAPIWithCustomBackend(importedApi, extractedFolderPath, apiProvider);
             }
 
@@ -2424,8 +2425,9 @@ public class ImportUtils {
 
         try {
             String asyncApiDefinition = loadAsyncApiDefinitionFromFile(pathToArchive);
+            AsyncApiParseOptions options =  PublisherCommonUtils.getParserOptionsFromConfig();
             APIDefinitionValidationResponse validationResponse =
-                    AsyncApiParserUtil.validateAsyncAPISpecification(asyncApiDefinition, true);
+                    AsyncApiParserUtil.validateAsyncAPISpecification(asyncApiDefinition, true, options);
             if (!validationResponse.isValid()) {
                 String errorMessage = "Error occurred while importing the API. Invalid AsyncAPI definition found. "
                         + validationResponse.getErrorItems();
