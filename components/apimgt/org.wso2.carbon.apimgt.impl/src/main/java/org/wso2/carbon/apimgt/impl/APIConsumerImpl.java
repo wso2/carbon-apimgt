@@ -3611,7 +3611,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         } else {
             api.setContext(getBasePath(apiTenantDomain, api.getContext()));
         }
-        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, keyManagerConfigurationDTO);
+        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, keyManagerConfigurationDTO,
+                ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                        .getAPIMDependencyConfigurations().getOasParserOptions());
         return updatedDefinition;
     }
 
