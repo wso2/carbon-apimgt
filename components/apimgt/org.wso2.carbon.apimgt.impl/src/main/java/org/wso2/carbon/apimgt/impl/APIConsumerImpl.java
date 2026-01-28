@@ -527,7 +527,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiKeyInfoDTO.setLastUsedTime(null);
         apiKeyInfoDTO.setPermittedIP(permittedIP);
         apiKeyInfoDTO.setPermittedReferer(permittedReferer);
-        apiMgtDAO.addAPIKey(APIUtil.sha256(apiKey), apiKeyInfoDTO);
+        apiMgtDAO.addAPIKey(APIUtil.sha256HashWithSalt(apiKey), apiKeyInfoDTO);
         return apiKey;
     }
 
