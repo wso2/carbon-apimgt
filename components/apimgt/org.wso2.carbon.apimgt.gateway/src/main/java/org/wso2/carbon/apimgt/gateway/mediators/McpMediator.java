@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
@@ -106,7 +107,43 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         if (IN_FLOW.equals(mcpDirection)) {
             if (StringUtils.equals(subType, APIConstants.API_SUBTYPE_SERVER_PROXY) &&
                     !StringUtils.equals(APIConstants.MCP.METHOD_TOOL_LIST, mcpMethod)) {
-                // For server proxy APIs, we do not handle MCP requests
+                // For server proxy APIs, modify the SOAP envelope to set the tool name
+                try {
+                    org.apache.axis2.context.MessageContext axis2MC =
+                            ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+
+                    String electedResource =
+                            (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE);
+                    if (electedResource != null && JsonUtil.hasAJsonPayload(axis2MC)) {
+                        String jsonPayload = JsonUtil.jsonPayloadToString(axis2MC);
+                        
+                        // Parse JSON and modify the name field
+                        JsonObject jsonObject = new Gson().fromJson(jsonPayload,
+                                com.google.gson.JsonObject.class);
+                        String originalToolName = null;
+                        if (jsonObject.has("params")) {
+                            JsonObject params = jsonObject.getAsJsonObject("params");
+                            // Capture original tool name before modifying
+                            if (params.has("name")) {
+                                originalToolName = params.get("name").getAsString();
+                            }
+                            params.addProperty("name", electedResource);
+                        }
+                        
+                        // Replace the payload with modified JSON
+                        JsonUtil.removeJsonPayload(axis2MC);
+                        JsonUtil.getNewJsonPayload(axis2MC, jsonObject.toString(), true, true);
+                        
+                        if (log.isDebugEnabled()) {
+                            log.debug("Updated tool name from " + originalToolName + " to " + electedResource +
+                                    " for API: " + matchedAPI.getName() + ":" + matchedAPI.getVersion());
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Error while modifying payload for server proxy API: " + matchedAPI.getName()
+                            + ":" + matchedAPI.getVersion(), e);
+                }
+                
                 log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
                         matchedAPI.getVersion());
                 return true;
