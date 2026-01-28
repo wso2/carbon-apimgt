@@ -1769,9 +1769,9 @@ public class APIMappingUtil {
                             Object customParametersObject = sandboxEndpointSecurity
                                     .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                             JSONObject customParameters;
-                            if (customParametersObject instanceof JSONObject)
+                            if (customParametersObject instanceof JSONObject) {
                                 customParameters = (JSONObject) customParametersObject;
-                            else {
+                            } else {
                                 customParameters = (JSONObject) parser.parse(customParametersObject.toString());
                             }
                             decryptCustomOauthParameters(customParameters, cryptoUtil);
