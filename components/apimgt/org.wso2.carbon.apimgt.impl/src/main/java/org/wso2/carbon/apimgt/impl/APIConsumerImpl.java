@@ -113,6 +113,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -181,6 +182,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private long tagCacheValidityTime;
     private volatile long lastUpdatedTime;
     private final Object tagCacheMutex = new Object();
+    private static final SecureRandom secureRandom = new SecureRandom();
     protected String userNameWithoutChange;
 
     boolean orgWideAppUpdateEnabled = Boolean.getBoolean(APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
@@ -384,11 +386,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         jwtTokenInfoDTO.setPermittedIP(permittedIP);
         jwtTokenInfoDTO.setPermittedReferer(permittedReferer);
 
-        ApiKeyGenerator apiKeyGenerator = loadApiKeyGenerator();
-        if (apiKeyGenerator != null) {
-            apiKey = apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+        if (APIKeyUtils.isJWTAPIKeyGenerationEnabled()) {
+            ApiKeyGenerator apiKeyGenerator = loadApiKeyGenerator();
+            if (apiKeyGenerator != null) {
+                apiKey = apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+            } else {
+                throw new APIManagementException("Failed to generate the API key in JWT format");
+            }
         } else {
-            throw new APIManagementException("Failed to generate the API key");
+            // Generate API key in opaque format
+            byte[] randomBytes = new byte[32]; // 256 bits
+            secureRandom.nextBytes(randomBytes);
+            apiKey = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
         }
         APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
         apiKeyInfoDTO.setKeyDisplayName(null);

@@ -1045,6 +1045,10 @@ public final class APIConstants {
             API_KEY_VALIDATOR + "EnableProvisionedAppValidation";
     public static final String LIGHTWEIGHT_API_KEY_GENERATION_ENABLED =
             API_KEY_VALIDATOR + "EnableLightWeightAPIKeyGeneration";
+
+    public static final String JWT_API_KEY_GENERATION_ENABLED =
+            API_KEY_VALIDATOR + "EnableJWTAPIKeyGeneration";
+
     public static final String ALLOW_SUBSCRIPTION_VALIDATION_DISABLING = API_KEY_VALIDATOR +
             "AllowSubscriptionValidationDisabling";
     public static final String DISABLE_RETRIEVE_KEY_MAPPING = API_KEY_VALIDATOR + "DisableRetrieveKeyMapping";

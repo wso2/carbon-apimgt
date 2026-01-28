@@ -16531,6 +16531,7 @@ public class ApiMgtDAO {
             ps.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             ps.setLong(8, keyInfoDTO.getValidityPeriod());
             ps.setString(9, "NOT_USED");
+            ps.setString(10, "ACTIVE");
 
             ps.executeUpdate();
             conn.commit();
