@@ -30,6 +30,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.GuardrailProviderService;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -46,6 +48,8 @@ import org.wso2.carbon.apimgt.impl.utils.AWSUtil;
  * This service interacts with the AWS Bedrock Guardrails API to perform guardrail checks.
  */
 public class AWSBedrockGuardrailProviderServiceImpl implements GuardrailProviderService {
+
+    private static final Log log = LogFactory.getLog(AWSBedrockGuardrailProviderServiceImpl.class);
 
     private String accessKey;
     private String secretKey;
@@ -155,7 +159,11 @@ public class AWSBedrockGuardrailProviderServiceImpl implements GuardrailProvider
                     JsonNode root = objectMapper.readTree(responseBody);
                     return root.toString();
                 } else {
-                    throw new APIManagementException("Unexpected status code " + statusCode + ": " + responseBody);
+                    log.error("AWS Bedrock Guardrail API returned unexpected status code: " + statusCode);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Response body: " + responseBody);
+                    }
+                    throw new APIManagementException("Unexpected status code: " + statusCode);
                 }
             }
         } catch (IOException e) {

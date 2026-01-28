@@ -68,6 +68,7 @@ import org.wso2.carbon.apimgt.impl.dto.ai.AIAPIConfigurationsDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.EmbeddingProviderConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.LLMProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.GuardrailProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
@@ -149,6 +150,8 @@ public class APIManagerConfiguration {
     private final Map<String, TenantSharingConfigurationDTO> tenantSharingConfigurations = new HashMap<>();
     private final EmbeddingProviderConfigurationDTO embeddingProviderConfigurationDTO =
             new EmbeddingProviderConfigurationDTO();
+    private final LLMProviderConfigurationDTO llmProviderConfigurationDTO =
+            new LLMProviderConfigurationDTO();
     private final VectorDBProviderConfigurationDTO vectorDBProviderConfigurationDTO =
             new VectorDBProviderConfigurationDTO();
     private static Properties realtimeNotifierProperties;
@@ -971,6 +974,40 @@ public class APIManagerConfiguration {
                         this.embeddingProviderConfigurationDTO.setProperties(propertiesMap);
                     }
 
+                    if (APIConstants.AI.LLM_PROVIDER.equals(aiChildElement.getLocalName())) {
+                        // Get the LLM provider type
+                        String type = aiChildElement.getAttributeValue(
+                                new QName(APIConstants.AI.LLM_PROVIDER_TYPE));
+                        if (type == null || type.isEmpty()) {
+                            log.warn("LLM provider type not defined in configuration, skipping LLM provider initialization");
+                            continue; // skip if no type defined
+                        }
+
+                        Map<String, String> propertiesMap = new HashMap<>();
+
+                        // Iterate through each <Property>
+                        for (Iterator<?> props = aiChildElement.getChildElements(); props.hasNext(); ) {
+                            OMElement prop = (OMElement) props.next();
+
+                            if (APIConstants.AI.LLM_PROVIDER_PROPERTY.equals(prop.getLocalName())) {
+                                String key = prop.getAttributeValue(
+                                        new QName(APIConstants.AI.LLM_PROVIDER_PROPERTY_KEY));
+                                String value = MiscellaneousUtil.resolve(prop, secretResolver);
+
+                                if (key != null && !key.isEmpty()) {
+                                    propertiesMap.put(key, value);
+                                }
+                            }
+                        }
+
+                        this.llmProviderConfigurationDTO.setType(type);
+                        this.llmProviderConfigurationDTO.setProperties(propertiesMap);
+                        log.info("LLM provider configured with type: " + type);
+                        if (log.isDebugEnabled()) {
+                            log.debug("LLM provider properties loaded with " + propertiesMap.size() + " configuration entries");
+                        }
+                    }
+
                     if (APIConstants.AI.VECTOR_DB_PROVIDER.equals(aiChildElement.getLocalName())) {
                         // Get the vector DB type
                         String type = aiChildElement.getAttributeValue(
@@ -1450,6 +1487,11 @@ public class APIManagerConfiguration {
     public EmbeddingProviderConfigurationDTO getEmbeddingProvider() {
 
         return embeddingProviderConfigurationDTO;
+    }
+
+    public LLMProviderConfigurationDTO getLLMProvider() {
+
+        return llmProviderConfigurationDTO;
     }
 
     public VectorDBProviderConfigurationDTO getVectorDBProvider() {
