@@ -9158,24 +9158,38 @@ public final class APIUtil {
     }
 
     /**
-     * Generates the hash value for a given API key.
+     * Generates the hash value with salt using SHA-256 for a given API key.
      *
      * @param apiKey api key.
      * @return the hashed api key.
      */
-    public static String sha256(String apiKey) {
+    public static String sha256HashWithSalt(String apiKey) {
         try {
+            byte[] salt = new byte[16]; // 128-bit salt
+            new SecureRandom().nextBytes(salt);
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(apiKey.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hex = new StringBuilder();
-            for (byte b : hashBytes) {
-                hex.append(String.format("%02x", b));
-            }
-            return hex.toString();
+            digest.update(salt); // Prepend salt
+            byte[] hash = digest.digest(apiKey.getBytes(StandardCharsets.UTF_8));
+
+            // Convert salt and hash to hex
+            String saltHex = convertBytesToHex(salt);
+            String hashHex = convertBytesToHex(hash);
+
+            // Format: $sha256$<salt_hex>$<hash_hex>
+            return String.format("$sha256$%s$%s", saltHex, hashHex);
+
         } catch (NoSuchAlgorithmException e) {
             // SHA-256 is always available in Java
             throw new IllegalStateException("SHA-256 algorithm not found", e);
         }
+    }
+
+    private static String convertBytesToHex(byte[] bytes) {
+        StringBuilder hex = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
+            hex.append(String.format("%02x", b));
+        }
+        return hex.toString();
     }
 
     /**

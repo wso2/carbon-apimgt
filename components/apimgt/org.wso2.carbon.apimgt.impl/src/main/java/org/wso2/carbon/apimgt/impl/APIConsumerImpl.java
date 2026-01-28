@@ -115,6 +115,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -399,7 +400,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiKeyInfoDTO.setLastUsedTime(null);
         apiKeyInfoDTO.setPermittedIP(permittedIP);
         apiKeyInfoDTO.setPermittedReferer(permittedReferer);
-        apiMgtDAO.addAPIKey(APIUtil.sha256(apiKey), apiKeyInfoDTO);
+        apiMgtDAO.addAPIKey(APIUtil.sha256HashWithSalt(apiKey), apiKeyInfoDTO);
         return apiKey;
     }
 
