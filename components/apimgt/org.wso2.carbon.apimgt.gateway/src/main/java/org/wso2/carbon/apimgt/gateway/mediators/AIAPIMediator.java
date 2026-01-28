@@ -175,11 +175,17 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             return;
         }
 
-        Map<String, Object> roundRobinConfigs;
-        if (messageContext.getProperty(APIConstants.AIAPIConstants.ROUND_ROBIN_CONFIGS) != null) {
-            roundRobinConfigs =
-                    (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.ROUND_ROBIN_CONFIGS);
-            handleLoadBalancing(messageContext, providerConfiguration, roundRobinConfigs, provider);
+        // Prefer the new generic TARGET_MODEL_CONFIGS; fall back to ROUND_ROBIN_CONFIGS for compatibility
+        Map<String, Object> targetModelConfigs = null;
+        if (messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_MODEL_CONFIGS) != null) {
+            targetModelConfigs = (Map<String, Object>) messageContext
+                    .getProperty(APIConstants.AIAPIConstants.TARGET_MODEL_CONFIGS);
+        } else if (messageContext.getProperty(APIConstants.AIAPIConstants.ROUND_ROBIN_CONFIGS) != null) {
+            targetModelConfigs = (Map<String, Object>) messageContext
+                    .getProperty(APIConstants.AIAPIConstants.ROUND_ROBIN_CONFIGS);
+        }
+        if (targetModelConfigs != null) {
+            handleLoadBalancing(messageContext, providerConfiguration, targetModelConfigs, provider);
             if (log.isDebugEnabled()) {
                 log.debug("Load balancing configured, processing with round-robin configurations");
             }
@@ -649,10 +655,14 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         llmProviderService.getResponseMetadata(llmResponseMetaData, providerConfigs.getMetadata(), metadataMap);
         messageContext.setProperty(APIConstants.AIAPIConstants.AI_API_RESPONSE_METADATA, metadataMap);
 
+        // Read target model configs from the new generic property first, then fall back for compatibility
         Map<String, Object> roundRobinConfigs = null;
-        if (messageContext.getProperty(APIConstants.AIAPIConstants.ROUND_ROBIN_CONFIGS) != null) {
-            roundRobinConfigs =
-                    (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.ROUND_ROBIN_CONFIGS);
+        if (messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_MODEL_CONFIGS) != null) {
+            roundRobinConfigs = (Map<String, Object>) messageContext
+                    .getProperty(APIConstants.AIAPIConstants.TARGET_MODEL_CONFIGS);
+        } else if (messageContext.getProperty(APIConstants.AIAPIConstants.ROUND_ROBIN_CONFIGS) != null) {
+            roundRobinConfigs = (Map<String, Object>) messageContext
+                    .getProperty(APIConstants.AIAPIConstants.ROUND_ROBIN_CONFIGS);
         }
 
         Map<String, Object> failoverConfigs = null;
