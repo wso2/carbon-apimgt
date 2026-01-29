@@ -1671,6 +1671,7 @@ public class APIMappingUtil {
         dto.setRevisionId(model.getRevisionId());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
         dto.setEnableSubscriberVerification(model.isEnableSubscriberVerification());
+        dto.setTransport(List.of(model.getTransports().split(",")));
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
         advertiseInfoDTO.setApiExternalProductionEndpoint(model.getApiExternalProductionEndpoint());
