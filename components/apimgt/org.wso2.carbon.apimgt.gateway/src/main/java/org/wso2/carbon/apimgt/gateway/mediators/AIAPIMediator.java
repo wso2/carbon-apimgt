@@ -19,6 +19,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
@@ -446,11 +447,22 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             String rawPath = uri.getRawPath();
             String rawQuery = uri.getRawQuery();
 
-            // Encode only the substituted model as a path-segment-safe value and quote replacement
-            String encodedModel = encodePathSegmentRFC3986(model);
-            String updatedRawPath = rawPath.replaceAll(
+            String decodedPath = decodePathUrl(rawPath);
+
+            // Replace the model in the decoded path
+            String updatedDecodedPath = decodedPath.replaceAll(
                     targetModelMetadata.getAttributeIdentifier(),
-                    java.util.regex.Matcher.quoteReplacement(encodedModel));
+                    java.util.regex.Matcher.quoteReplacement(model));
+
+            // Re-encode the entire path to ensure proper URL encoding
+            String updatedRawPath;
+            try {
+                updatedRawPath = new URI(null, null, updatedDecodedPath, null).getRawPath();
+            } catch (java.net.URISyntaxException e) {
+                log.warn("Failed to re-encode path with URI constructor, falling back to manual encoding");
+                updatedRawPath = rawPath.replaceAll(targetModelMetadata.getAttributeIdentifier(),
+                        java.util.regex.Matcher.quoteReplacement(encodePathSegmentRFC3986(model)));
+            }
 
             StringBuilder finalPath = new StringBuilder(updatedRawPath);
             if (rawQuery != null) {
@@ -462,6 +474,17 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                 log.debug("Updated request path from: " + requestPath +" to: " + finalPath);
             }
         }
+    }
+
+    /**
+     * Decodes percent-encoded sequences in a URL path.
+     *
+     * @param rawPath The percent-encoded path.
+     * @return The decoded path.
+     */
+    private String decodePathUrl(String rawPath) {
+        // URLDecoder is for form-encoded data and converts + to space; escape + first to preserve it in paths
+        return URLDecoder.decode(rawPath.replace("+", "%2B"), StandardCharsets.UTF_8);
     }
 
     /**
@@ -547,10 +570,12 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
 
             URI uri = URI.create(requestPath);
             String rawPath = uri.getRawPath();
+            // Decode the path
+            String decodedPath = decodePathUrl(rawPath);
 
             String regex = requestModelMetadata.getAttributeIdentifier();
             java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
-            java.util.regex.Matcher matcher = pattern.matcher(rawPath);
+            java.util.regex.Matcher matcher = pattern.matcher(decodedPath);
             if (matcher.find()) {
                 String model = matcher.group();
                 if (log.isDebugEnabled()) {
