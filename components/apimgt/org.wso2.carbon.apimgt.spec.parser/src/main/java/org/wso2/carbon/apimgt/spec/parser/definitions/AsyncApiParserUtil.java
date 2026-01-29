@@ -1006,7 +1006,17 @@ public class AsyncApiParserUtil {
                     if (elements.hasNext()) {
                         JsonNode server = elements.next();
                         if (server.has("url")) {
-                            return server.get("url").asText();
+                            String resolvedUrl = server.get("url").asText();
+                            if (server.has("variables") && server.get("variables").has("basePath")) {
+                                JsonNode basePath = server.get("variables").get("basePath");
+                                if (basePath.has("default")) {
+                                    String stageName = basePath.get("default").asText();
+                                    resolvedUrl = resolvedUrl
+                                            .replace("/{basePath}", "/" + stageName)
+                                            .replace("{basePath}", stageName);
+                                }
+                            }
+                            return resolvedUrl;
                         }
                     }
                 }
