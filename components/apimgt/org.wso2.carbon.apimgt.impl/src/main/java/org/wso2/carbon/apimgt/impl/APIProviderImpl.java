@@ -1338,7 +1338,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         .forEach(validKeyManagers::add);
             }
         }
-        if (validKeyManagers.isEmpty()) {
+        if (validKeyManagers.isEmpty() && !api.isInitiatedFromGateway()) {
             throw new APIManagementException(
                     "API must have at least one valid and enabled key manager configured",
                     ExceptionCodes.KEY_MANAGER_NOT_FOUND);
@@ -2623,7 +2623,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         existingAPI.setOrganization(organization);
         APIIdentifier existingAPIId = existingAPI.getId();
-        String existingAPISwaggerDefinition = existingAPI.getSwaggerDefinition();
+        String existingApiDefinition = existingAPI.isAsync() ? existingAPI.getAsyncApiDefinition() 
+                : existingAPI.getSwaggerDefinition();
         String existingAPICreatedTime = existingAPI.getCreatedTime();
         String existingAPIStatus = existingAPI.getStatus();
         boolean isExsitingAPIdefaultVersion = existingAPI.isDefaultVersion();
@@ -2646,7 +2647,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<OperationPolicy> apiLevelPolicies = extractAndDropAPILevelPoliciesFromAPI(existingAPI);
         updateMCPServerBackends(existingAPI, existingApiId, organization);
         //update swagger definition with version
-        APIUtil.updateAPISwaggerWithVersion(existingAPI);
+        APIUtil.updateAPIDefinitionWithVersion(existingAPI);
         API newAPI = addAPI(existingAPI);
         String newAPIId = newAPI.getUuid();
         cloneAPIPoliciesForNewAPIVersion(existingApiId, newAPI, operationPoliciesMap, apiLevelPolicies);
@@ -2703,7 +2704,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         existingAPI.setId(existingAPIId);
         existingAPI.setContext(existingContext);
         existingAPI.setCreatedTime(existingAPICreatedTime);
-        existingAPI.setSwaggerDefinition(existingAPISwaggerDefinition);
+        if (existingAPI.isAsync()) {
+            existingAPI.setAsyncApiDefinition(existingApiDefinition);
+        } else {
+            existingAPI.setSwaggerDefinition(existingApiDefinition);
+        }
         // update existing api with the original timestamp
         existingAPI.setVersionTimestamp(existingVersionTimestamp);
         if (isDefaultVersion) {
