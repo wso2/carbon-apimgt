@@ -23152,7 +23152,7 @@ public class ApiMgtDAO {
      * @return Map of URL identifiers to lists of URL mapping IDs
      * @throws APIManagementException if database access fails
      */
-    private Map<String, List<Integer>> getAPIOperationMappingsReferencedByAPIID(int apiId)
+    public Map<String, List<Integer>> getAPIOperationMappingsReferencedByAPIID(int apiId)
             throws APIManagementException {
         Map<String, List<Integer>> references = new HashMap<>();
         String query = SQLConstants.GET_API_OPERATION_MAPPINGS_REFERENCED_BY_API;
