@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIType;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
@@ -586,41 +587,56 @@ public class APIMappingUtil {
 
     private static APIURLsDTO extractEndpointUrlsForDiscoveredApi(APIDTO apidto) {
         try {
-            if (StringUtils.isBlank(apidto.getApiDefinition())) {
-                return null;
-            }
-            JsonElement configElement = JsonParser.parseString(apidto.getApiDefinition());
-            if (!configElement.isJsonObject()) {
-                return null;
-            }
-            JsonObject configObject = configElement.getAsJsonObject();
-            JsonArray servers = configObject.getAsJsonArray("servers");
-            if (servers == null || servers.size() == 0) {
-                return null;
-            }
-            JsonObject server = servers.get(0).getAsJsonObject();
-            if (server == null || !server.has("url")) {
-                return null;
-            }
-            String resolvedUrl = server.get("url").getAsString();
-            JsonObject variables = server.getAsJsonObject("variables");
-            if (variables != null && variables.has("basePath")) {
-                JsonObject basePath = variables.getAsJsonObject("basePath");
-                if (basePath != null && basePath.has("default")) {
-                    String stageName = basePath.get("default").getAsString();
-                    resolvedUrl = resolvedUrl
-                            .replace("/{basePath}", "/" + stageName)
-                            .replace("{basePath}", stageName);
+            String resolvedUrl = null;
+            if ("WS".equalsIgnoreCase(apidto.getType())
+                    || "WSS".equalsIgnoreCase(apidto.getType())) {
+                resolvedUrl = AsyncApiParserUtil
+                    .getEndpointUrlFromAsyncApiDefinition(apidto.getApiDefinition());
+            } else {
+                if (StringUtils.isBlank(apidto.getApiDefinition())) {
+                    return null;
+                }
+                JsonElement configElement = JsonParser.parseString(apidto.getApiDefinition());
+                if (!configElement.isJsonObject()) {
+                    return null;
+                }
+                JsonObject configObject = configElement.getAsJsonObject();
+                JsonArray servers = configObject.getAsJsonArray("servers");
+                if (servers == null || servers.size() == 0) {
+                    return null;
+                }
+                JsonObject server = servers.get(0).getAsJsonObject();
+                if (server == null || !server.has("url")) {
+                    return null;
+                }
+                resolvedUrl = server.get("url").getAsString();
+                JsonObject variables = server.getAsJsonObject("variables");
+                if (variables != null && variables.has("basePath")) {
+                    JsonObject basePath = variables.getAsJsonObject("basePath");
+                    if (basePath != null && basePath.has("default")) {
+                        String stageName = basePath.get("default").getAsString();
+                        resolvedUrl = resolvedUrl
+                                .replace("/{basePath}", "/" + stageName)
+                                .replace("{basePath}", stageName);
+                    }
                 }
             }
+            
             if (StringUtils.isBlank(resolvedUrl)) {
-                return null;
+                    return null;
             }
+
             APIURLsDTO urls = new APIURLsDTO();
-            if (StringUtils.startsWithIgnoreCase(resolvedUrl, APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
+            if (StringUtils.startsWithIgnoreCase(resolvedUrl, APIConstants.WS_PROTOCOL_URL_PREFIX)) {
+                urls.setWs(resolvedUrl);
+            } else if (StringUtils.startsWithIgnoreCase(resolvedUrl, APIConstants.WSS_PROTOCOL_URL_PREFIX)) {
+                urls.setWss(resolvedUrl);
+            } else if (StringUtils.startsWithIgnoreCase(resolvedUrl, APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
                 urls.setHttp(resolvedUrl);
-            } else {
+            } else if (StringUtils.startsWithIgnoreCase(resolvedUrl, APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
                 urls.setHttps(resolvedUrl);
+            } else {
+                return null;
             }
             return urls;
         } catch (RuntimeException e) {
@@ -708,8 +724,26 @@ public class APIMappingUtil {
                     apiurLsDTO.setHttps(httpsUrl + contextToAppend);
                 }
             }
+        } else {
+            if (apidto.isInitiatedFromGateway()) {
+                APIURLsDTO extractedURLs;
+                extractedURLs = extractEndpointUrlsForDiscoveredApi(apidto);
+                if (extractedURLs == null) {
+                    if (apidto.getTransport().contains(APIConstants.WS_PROTOCOL)) {
+                        apiurLsDTO.setWs(vHost.getWsUrl() + context);
+                    }
+                    if (apidto.getTransport().contains(APIConstants.WSS_PROTOCOL)) {
+                        apiurLsDTO.setWss(vHost.getWssUrl() + context);
+                    }
+                } else {
+                    apiurLsDTO = extractedURLs;
+                }
+            } else {
+                apiurLsDTO.setWs(vHost.getWsUrl() + context);
+                apiurLsDTO.setWss(vHost.getWssUrl() + context);
+            }
         }
-        if (isWs || isGQLSubscription) {
+        if (isGQLSubscription) {
             apiurLsDTO.setWs(vHost.getWsUrl() + context);
             apiurLsDTO.setWss(vHost.getWssUrl() + context);
         }

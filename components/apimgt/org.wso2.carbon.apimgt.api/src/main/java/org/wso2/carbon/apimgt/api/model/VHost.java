@@ -158,13 +158,11 @@ public class VHost implements Serializable {
     }
 
     public String getWsUrl() {
-        int port = (wsPort != null) ? wsPort : DEFAULT_HTTP_PORT;
-        return getUrl("ws", wsHost, port == DEFAULT_HTTP_PORT ? ""  : ":" + port, "");
+        return getUrl("ws", wsHost, wsPort == DEFAULT_WS_PORT ? ""  : ":" + wsPort, "");
     }
 
     public String getWssUrl() {
-        int port = (wssPort != null) ? wssPort : DEFAULT_HTTPS_PORT;
-        return getUrl("wss", wssHost, port == DEFAULT_HTTPS_PORT ? "" : ":" + port, "");
+        return getUrl("wss", wssHost, wssPort == DEFAULT_HTTPS_PORT ? "" : ":" + wssPort, "");
     }
 
     private String getUrl(String protocol, String hostName, String port, String context) {
