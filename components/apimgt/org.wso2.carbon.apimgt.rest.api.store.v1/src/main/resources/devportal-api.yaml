@@ -3271,13 +3271,13 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/generate"'
 
-  /applications/{applicationId}/api-keys/{keyType}/{keyDisplayName}/renew:
+  /applications/{applicationId}/api-keys/{keyType}/{keyDisplayName}/regenerate:
     post:
       tags:
         - API Keys
-      summary: Renew API Key
+      summary: Regenerate API Key
       description: |
-        Renew a self contained API Key for the application specified by the display name
+        Regenerate a self contained API Key for the application specified by the display name
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'
@@ -3295,7 +3295,7 @@ paths:
         200:
           description: |
             OK.
-            apikey renewed successfully.
+            Api key regenerated successfully.
           content:
             application/json:
               schema:
@@ -3314,7 +3314,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/generate/test-key"'
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/test-key/regenerate"'
 
   /applications/{applicationId}/api-keys/{keyType}:
     get:
@@ -3352,6 +3352,38 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X GET "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION"'
 
+  /applications/{applicationId}/api-keys/{keyType}/{keyDisplayName}:
+    delete:
+      tags:
+        - API Keys
+      summary: Revoke API Key
+      description: |
+        Revoke a self contained API Key for the application specified by the display name
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/keyType'
+        - $ref: '#/components/parameters/keyDisplayName'
+        - $ref: '#/components/parameters/If-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Api key revoked successfully.
+          content: { }
+        400:
+          $ref: '#/components/responses/BadRequest'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+            - apim:api_key
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -X DELETE "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/test-key"'
+
   /applications/{applicationId}/api-keys/{keyType}/revoke:
     post:
       tags:
@@ -3381,6 +3413,7 @@ paths:
           $ref: '#/components/responses/BadRequest'
         412:
           $ref: '#/components/responses/PreconditionFailed'
+      deprecated: true
       security:
         - OAuth2Security:
             - apim:subscribe
@@ -7719,9 +7752,10 @@ components:
           - SANDBOX
     keyDisplayName:
       name: keyDisplayName
-      in: query
+      in: path
       description: |
         Name of the API key.
+      required: true
       schema:
         type: string
     If-None-Match:

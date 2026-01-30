@@ -94,11 +94,11 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         return delegate.applicationsApplicationIdApiKeysKeyTypeGet(applicationId, keyType, ifMatch, securityContext);
     }
 
-    @POST
-    @Path("/{applicationId}/api-keys/{keyType}/{keyDisplayName}/renew")
-    @Consumes({ "application/json" })
+    @DELETE
+    @Path("/{applicationId}/api-keys/{keyType}/{keyDisplayName}")
+    
     @Produces({ "application/json" })
-    @ApiOperation(value = "Renew API Key", notes = "Renew a self contained API Key for the application specified by the display name ", response = APIKeyDTO.class, authorizations = {
+    @ApiOperation(value = "Revoke API Key", notes = "Revoke a self contained API Key for the application specified by the display name ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
             @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
@@ -106,12 +106,31 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         })
     }, tags={ "API Keys",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. apikey renewed successfully. ", response = APIKeyDTO.class),
+        @ApiResponse(code = 200, message = "OK. Api key revoked successfully. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameDelete(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "Name of the API key. ",required=true) @PathParam("keyDisplayName") String keyDisplayName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameDelete(applicationId, keyType, keyDisplayName, ifMatch, securityContext);
+    }
+
+    @POST
+    @Path("/{applicationId}/api-keys/{keyType}/{keyDisplayName}/regenerate")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Regenerate API Key", notes = "Regenerate a self contained API Key for the application specified by the display name ", response = APIKeyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "API Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Api key regenerated successfully. ", response = APIKeyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameRenewPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType,  @ApiParam(value = "Name of the API key. ")  @QueryParam("keyDisplayName") String keyDisplayName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @ApiParam(value = "API Key renewal request object " ) APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO) throws APIManagementException{
-        return delegate.applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameRenewPost(applicationId, keyType, keyDisplayName, ifMatch, apIKeyRenewalRequestDTO, securityContext);
+    public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameRegeneratePost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "Name of the API key. ",required=true) @PathParam("keyDisplayName") String keyDisplayName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @ApiParam(value = "API Key renewal request object " ) APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO) throws APIManagementException{
+        return delegate.applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameRegeneratePost(applicationId, keyType, keyDisplayName, ifMatch, apIKeyRenewalRequestDTO, securityContext);
     }
 
     @POST

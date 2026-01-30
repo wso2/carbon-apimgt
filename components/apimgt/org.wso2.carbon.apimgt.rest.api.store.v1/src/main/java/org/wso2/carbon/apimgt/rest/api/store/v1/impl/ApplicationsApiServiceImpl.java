@@ -742,7 +742,50 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameRenewPost(String applicationId, String keyType, String keyDisplayName, String ifMatch, APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO, MessageContext messageContext) throws APIManagementException {
+    public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameDelete(String applicationId, String keyType, String keyDisplayName, String ifMatch, MessageContext messageContext) throws APIManagementException {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        if (!StringUtils.isEmpty(keyDisplayName)) {
+            try {
+                APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+                Application application = apiConsumer.getApplicationByUUID(applicationId);
+                if (application != null) {
+                    if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)
+                            || RestAPIStoreUtils.isApplicationSharedtoUser(application)) {
+                        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                        apiConsumer.revokeAPIKey(applicationId, keyType, keyDisplayName, tenantDomain);
+                        return Response.ok().build();
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Logged in user " + username + " isn't the owner of the application "
+                                    + applicationId);
+                        }
+                        RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION,
+                                applicationId, log);
+                    }
+                } else {
+                    if(log.isDebugEnabled()) {
+                        log.debug("Application with given id " + applicationId + " doesn't not exist ");
+                    }
+                    RestApiUtil.handleBadRequest("Validation failed for the given token ", log);
+                }
+            } catch (APIManagementException e) {
+                String msg = "Error while revoking API Key of application " + applicationId;
+                if(log.isDebugEnabled()) {
+                    log.debug("Error while revoking API Key of application " +
+                            applicationId+ " and token " + keyDisplayName);
+                }
+                log.error(msg, e);
+                RestApiUtil.handleInternalServerError(msg, e, log);
+            }
+        } else {
+            log.debug("Provided API Key " + keyDisplayName + " is not valid");
+            RestApiUtil.handleBadRequest("Provided API Key isn't valid ", log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameRegeneratePost(String applicationId, String keyType, String keyDisplayName, String ifMatch, APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO, MessageContext messageContext) throws APIManagementException {
         return null;
     }
 

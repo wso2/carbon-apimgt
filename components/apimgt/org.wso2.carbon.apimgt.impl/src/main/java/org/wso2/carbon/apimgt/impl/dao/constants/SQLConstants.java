@@ -3915,12 +3915,14 @@ public class SQLConstants {
 
     public static final String SCOPE_EXIST_SQL = "SELECT 1 FROM AM_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
 
-    public static final String API_KEY_SQL =
-            " INSERT INTO AM_API_KEY (API_KEY_NAME, APPLICATION_ID, API_KEY_HASH, " +
+    public static final String ADD_API_KEY_SQL =
+            "INSERT INTO AM_API_KEY (API_KEY_NAME, APPLICATION_ID, API_KEY_HASH, " +
                     "   KEY_TYPE, API_KEY_PROPERTIES, AUTHZ_USER, TIME_CREATED, VALIDITY_PERIOD, LAST_USED, STATUS)" +
                     " VALUES (?,?,?,?,?,?,?,?,?,?)";
     public static final String GET_API_KEY_SQL =
-            " SELECT API_KEY_NAME, TIME_CREATED, VALIDITY_PERIOD, LAST_USED FROM AM_API_KEY WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND STATUS = ACTIVE";
+            "SELECT API_KEY_NAME, TIME_CREATED, VALIDITY_PERIOD, LAST_USED FROM AM_API_KEY WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND STATUS = 'ACTIVE'";
+    public static final String DELETE_API_KEY_SQL =
+            "UPDATE AM_API_KEY SET STATUS = 'REVOKED' WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND API_KEY_NAME = ?";
 
     /**
      * Static class to hold database queries related to webhooks subscriptions

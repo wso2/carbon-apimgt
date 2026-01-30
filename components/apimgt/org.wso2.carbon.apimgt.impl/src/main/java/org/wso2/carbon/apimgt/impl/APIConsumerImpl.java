@@ -3546,6 +3546,23 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         revocationRequestPublisher.publishRevocationEvents(apiKey, properties);
     }
 
+    @Override
+    public void revokeAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain) throws APIManagementException {
+
+        RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
+        Properties properties = new Properties();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        String eventID = UUID.randomUUID().toString();
+        properties.put(APIConstants.NotificationEvent.EVENT_ID, eventID);
+        properties.put(APIConstants.NotificationEvent.EVENT_TYPE, APIConstants.API_KEY_AUTH_TYPE);
+        properties.put(APIConstants.NotificationEvent.TOKEN_TYPE, APIConstants.API_KEY_AUTH_TYPE);
+        properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
+        properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
+        properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
+        apiMgtDAO.revokeAPIKey(applicationId, keyType, keyDisplayName);
+        revocationRequestPublisher.publishRevocationEvents(keyDisplayName, properties);
+    }
+
     /**
      * Get server URL updated Open API definition for given synapse gateway environment
      *
