@@ -107,7 +107,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         if (IN_FLOW.equals(mcpDirection)) {
             if (StringUtils.equals(subType, APIConstants.API_SUBTYPE_SERVER_PROXY) &&
                     !StringUtils.equals(APIConstants.MCP.METHOD_TOOL_LIST, mcpMethod)) {
-                // For server proxy APIs, modify the SOAP envelope to set the tool name
+                // For server proxy APIs, modify the JSON payload to set the tool name
                 try {
                     org.apache.axis2.context.MessageContext axis2MC =
                             ((Axis2MessageContext) messageContext).getAxis2MessageContext();
@@ -118,8 +118,12 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                         String jsonPayload = JsonUtil.jsonPayloadToString(axis2MC);
                         
                         // Parse JSON and modify the name field
-                        JsonObject jsonObject = new Gson().fromJson(jsonPayload,
-                                com.google.gson.JsonObject.class);
+                        JsonObject jsonObject = new Gson().fromJson(jsonPayload, JsonObject.class);
+                        if (jsonObject == null) {
+                            log.warn("Failed to parse JSON payload for server proxy API: " + matchedAPI.getName()
+                                    + ":" + matchedAPI.getVersion());
+                            return false;
+                        }
                         String originalToolName = null;
                         if (jsonObject.has("params")) {
                             JsonObject params = jsonObject.getAsJsonObject("params");
@@ -142,10 +146,12 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                 } catch (Exception e) {
                     log.error("Error while modifying payload for server proxy API: " + matchedAPI.getName()
                             + ":" + matchedAPI.getVersion(), e);
+                    return false;
                 }
-                
-                log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
-                        matchedAPI.getVersion());
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
+                            matchedAPI.getVersion());
+                }
                 return true;
             }
             if (path.startsWith(APIMgtGatewayConstants.MCP_RESOURCE) && httpMethod.equals(APIConstants.HTTP_POST)) {
