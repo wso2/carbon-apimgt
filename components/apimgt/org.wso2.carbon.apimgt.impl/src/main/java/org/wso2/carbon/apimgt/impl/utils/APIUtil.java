@@ -12054,7 +12054,10 @@ public final class APIUtil {
         if (APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(environment.getProvider()) &&
                 federatedAPIDiscoveryService != null) {
             federatedAPIDiscoveryService.stopDiscovery(environment, organization);
-            log.debug("Successfully stopped federated API discovery for environment: " + environment.getName());
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully stopped federated API discovery for environment: " + 
+                environment.getName());
+            }
         }
     }
 
