@@ -16519,7 +16519,7 @@ public class ApiMgtDAO {
             conn.setAutoCommit(false);
 
             // This query to update the AM_API_KEY table
-            String sqlQuery = SQLConstants.API_KEY_SQL;
+            String sqlQuery = SQLConstants.ADD_API_KEY_SQL;
             // Adding data to the AM_API_KEY table
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, "Test");
@@ -16583,6 +16583,39 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
         return apiKeyInfoList;
+    }
+
+    /**
+     * Revoke an api key provided by the key display name
+     *
+     * @param applicationId Id of the application
+     * @param keyType Key type of the token
+     * @param keyDisplayName API key name
+     * @throws APIManagementException
+     */
+    public void revokeAPIKey(String applicationId, String keyType, String keyDisplayName) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // This query to update an entry from the AM_API_KEY table
+            String sqlQuery = SQLConstants.DELETE_API_KEY_SQL;
+            // Updating data from the AM_API_KEY table by setting STATUS to REVOKED
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, applicationId);
+            ps.setString(2, keyType);
+            ps.setString(3, keyDisplayName);
+
+            ps.executeUpdate();
+            conn.commit();
+        } catch (SQLException e) {
+            handleException("Failed to revoke the API key", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
     }
 
     /**
