@@ -3,7 +3,6 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 /*
 *  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
-*  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
 *  in compliance with the License.
 *  You may obtain a copy of the License at
@@ -33,12 +32,17 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.caching.impl.Util;
@@ -46,7 +50,10 @@ import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -55,7 +62,8 @@ import java.util.TreeMap;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Util.class, MetricManager.class, Timer.Context.class, APIUtil.class, GatewayUtils.class,
-        ServiceReferenceHolder.class, MultitenantUtils.class, APIKeyValidator.class})
+        ServiceReferenceHolder.class, MultitenantUtils.class, APIKeyValidator.class, DataHolder.class,
+        KeyManagerHolder.class})
 public class APIAuthenticationHandlerTestCase {
 
     private Timer.Context context;
@@ -233,6 +241,70 @@ public class APIAuthenticationHandlerTestCase {
         apiAuthenticationHandler.destroy();
     }
 
+    @Test
+    public void testHandleRequestForMCPNoAuth() {
+        APIAuthenticationHandler apiAuthenticationHandler = createAPIAuthenticationHandler();
+        apiAuthenticationHandler.setApiType(APIConstants.API_TYPE_MCP);
+        apiAuthenticationHandler.init(synapseEnvironment);
+
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST)).thenReturn(true);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD)).thenReturn("initialize");
+
+        Options options = Mockito.mock(Options.class);
+        Mockito.when(options.getMessageId()).thenReturn("1");
+        Mockito.when(axis2MsgCntxt.getOptions()).thenReturn(options);
+
+        TreeMap transportHeaders = new TreeMap();
+        Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
+
+        Assert.assertTrue(apiAuthenticationHandler.handleRequest(messageContext));
+        Mockito.verify(messageContext).setProperty(APIMgtGatewayConstants.API_TYPE, APIConstants.API_TYPE_MCP);
+    }
+
+    @Test
+    public void testHandleAuthFailureForMCPWithDCR() throws Exception {
+        APIAuthenticationHandler apiAuthenticationHandler = createAPIAuthenticationHandlerForExceptionTest();
+        apiAuthenticationHandler.setApiType(APIConstants.API_TYPE_MCP);
+        String apiUUID = "1234-5678";
+        apiAuthenticationHandler.setApiUUID(apiUUID);
+        apiAuthenticationHandler.init(synapseEnvironment);
+
+        PowerMockito.mockStatic(DataHolder.class);
+        DataHolder dataHolder = Mockito.mock(DataHolder.class);
+        Mockito.when(DataHolder.getInstance()).thenReturn(dataHolder);
+        List<String> keyManagers = new ArrayList<>();
+        keyManagers.add("default");
+        Mockito.when(dataHolder.getKeyManagersFromUUID(apiUUID)).thenReturn(keyManagers);
+
+        PowerMockito.mockStatic(KeyManagerHolder.class);
+        KeyManagerDto keyManagerDto = Mockito.mock(KeyManagerDto.class);
+        Mockito.when(KeyManagerHolder.getKeyManagerByName(Mockito.anyString(), Mockito.eq("default"))).thenReturn(keyManagerDto);
+
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        Mockito.when(keyManagerDto.getKeyManager()).thenReturn(keyManager);
+        KeyManagerConfiguration kmConfig = Mockito.mock(KeyManagerConfiguration.class);
+        Mockito.when(keyManager.getKeyManagerConfiguration()).thenReturn(kmConfig);
+        String dcrEndpoint = "https://localhost:9443/client-registration/v0.17/register";
+        Mockito.when(kmConfig.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT)).thenReturn(dcrEndpoint);
+
+        Options options = Mockito.mock(Options.class);
+        Mockito.when(options.getMessageId()).thenReturn("1");
+        Mockito.when(axis2MsgCntxt.getOptions()).thenReturn(options);
+
+        TreeMap transportHeaders = new TreeMap();
+        Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
+        Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/mcp/1.0.0");
+        PowerMockito.when(APIUtil.getHostAddress()).thenReturn("localhost");
+        PowerMockito.when(APIUtil.getPortOffset()).thenReturn(0);
+
+        Assert.assertFalse(apiAuthenticationHandler.handleRequest(messageContext));
+
+        String wwwAuthenticate = (String) transportHeaders.get("WWW-Authenticate");
+        Assert.assertNotNull(wwwAuthenticate);
+        Assert.assertTrue(wwwAuthenticate.contains("dcr=\"" + dcrEndpoint + "\""));
+        Assert.assertTrue(wwwAuthenticate.contains("resource_metadata="));
+    }
+
     /*
     * This method will create an instance of APIAuthenticationHandler
     * */
@@ -310,7 +382,7 @@ public class APIAuthenticationHandlerTestCase {
 
             @Override
             protected boolean isAuthenticate(MessageContext messageContext) throws APISecurityException {
-                throw new APISecurityException(1000, "test");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "test");
             }
 
             @Override
@@ -351,7 +423,8 @@ public class APIAuthenticationHandlerTestCase {
                 .thenReturn("org.wso2.amAPIAuthenticationHandler");
         PowerMockito.when(MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, "org.wso2.amAPIAuthenticationHandler"))
                 .thenReturn(timer);
-        Mockito.verify(apiAuthenticationHandler.startMetricTimer());
+        apiAuthenticationHandler.startMetricTimer();
+        Mockito.verify(timer).start();
     }
 
     @Test
@@ -359,8 +432,7 @@ public class APIAuthenticationHandlerTestCase {
       APIAuthenticationHandler apiAuthenticationHandler = new APIAuthenticationHandler();
         Mockito.when(context.stop()).thenReturn(1000L);
         apiAuthenticationHandler.stopMetricTimer(context);
-        Assert.assertTrue(true);
+        Mockito.verify(context).stop();
     }
 
 }
-

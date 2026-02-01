@@ -47,11 +47,14 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MutualSSLA
 import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.InternalAPIKeyAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -452,10 +455,13 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
 
             if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) && isMCPNoAuthRequest) {
-                log.debug("Skipping authentication for MCP request"
-                        + ", method: " + messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
-                // TODO: Check if we need to handle same as the no auth case for REST
-                return true;
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping authentication for MCP request"
+                            + ", method: " + messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
+                }
+                handleNoAuthentication(messageContext);
+                setAPIParametersToMessageContext(messageContext);
+                return ExtensionListenerUtil.postProcessRequest(messageContext, type);
             }
 
             if (ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
@@ -768,10 +774,13 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                         }
                         String resourceMetadata = APIConstants.HTTPS_PROTOCOL + APIConstants.URL_SCHEME_SEPARATOR +
                                 hostAddress + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
-                        headers.put(HttpHeaders.WWW_AUTHENTICATE, "Bearer resource_metadata=" +
-                                "\"" + resourceMetadata + "\","
-                                + " error=\"invalid_token\","
-                                + " error_description=\"Access token is missing or expired\"");
+                        String dcrEndpoint = getDcrEndpoint();
+                        String wwwAuthenticate = "Bearer resource_metadata=\"" + resourceMetadata + "\"";
+                        if (StringUtils.isNotEmpty(dcrEndpoint)) {
+                            wwwAuthenticate += ", dcr=\"" + dcrEndpoint + "\"";
+                        }
+                        wwwAuthenticate += ", error=\"invalid_token\", error_description=\"Access token is missing or expired\"";
+                        headers.put(HttpHeaders.WWW_AUTHENTICATE, wwwAuthenticate);
                     }
                 } else {
                     headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
@@ -929,5 +938,37 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     public void setKeyManagers(String keyManagers) {
         this.keyManagers = keyManagers;
+    }
+
+    private String getDcrEndpoint() {
+        if (StringUtils.isEmpty(apiUUID)) {
+            return null;
+        }
+        List<String> keyManagers = DataHolder.getInstance().getKeyManagersFromUUID(apiUUID);
+        if (keyManagers == null || keyManagers.isEmpty()) {
+            return null;
+        }
+
+        String tenantDomain = GatewayUtils.getTenantDomain();
+        KeyManagerDto keyManagerDto = null;
+        if (APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManagers.get(0))) {
+            Map<String, KeyManagerDto> keyManagerMap = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
+            if (keyManagerMap.size() == 1) {
+                keyManagerDto = keyManagerMap.values().iterator().next();
+            }
+        } else if (keyManagers.size() == 1) {
+            keyManagerDto = KeyManagerHolder.getKeyManagerByName(tenantDomain, keyManagers.get(0));
+        }
+
+        if (keyManagerDto != null && keyManagerDto.getKeyManager() != null) {
+            try {
+                org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration config =
+                        keyManagerDto.getKeyManager().getKeyManagerConfiguration();
+                return (String) config.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
+            } catch (APIManagementException e) {
+                log.error("Error while retrieving key manager configuration for MCP DCR support", e);
+            }
+        }
+        return null;
     }
 }
