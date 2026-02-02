@@ -21,7 +21,9 @@ package org.wso2.carbon.apimgt.governance.gatekeeper.listener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.apimgt.governance.gatekeeper.model.DeduplicationAlert;
 import org.wso2.carbon.apimgt.governance.gatekeeper.model.DuplicateCheckResult;
+import org.wso2.carbon.apimgt.governance.gatekeeper.service.DeduplicationAlertService;
 import org.wso2.carbon.apimgt.governance.gatekeeper.service.GatekeeperService;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
@@ -98,6 +100,7 @@ public class GatekeeperAPIEventListener implements Notifier {
     private void handleAPICreateOrUpdate(GatekeeperService gatekeeperService, APIEvent apiEvent) {
         String apiId = apiEvent.getUuid();
         String apiName = apiEvent.getApiName();
+        String apiVersion = apiEvent.getApiVersion();
         String organization = apiEvent.getTenantDomain();
 
         try {
@@ -109,6 +112,11 @@ public class GatekeeperAPIEventListener implements Notifier {
                 return;
             }
 
+            // Log API definition size for debugging similarity issues
+            if (log.isDebugEnabled()) {
+                log.debug("API Definition for " + apiName + " has length: " + apiDefinition.length());
+            }
+
             // Check for duplicates BEFORE indexing
             DuplicateCheckResult checkResult = gatekeeperService.checkForDuplicates(
                     apiId, apiDefinition, organization);
@@ -117,19 +125,54 @@ public class GatekeeperAPIEventListener implements Notifier {
                 List<DuplicateCheckResult.SimilarAPI> similarApis = checkResult.getSimilarAPIs();
                 
                 StringBuilder warningMsg = new StringBuilder();
-                warningMsg.append("API '").append(apiName).append("' appears to be similar to existing APIs:\n");
+                warningMsg.append("\n╔══════════════════════════════════════════════════════════════════════════════╗\n");
+                warningMsg.append("║                      DUPLICATE API DETECTED                                  ║\n");
+                warningMsg.append("╠══════════════════════════════════════════════════════════════════════════════╣\n");
+                warningMsg.append("║ New API: ").append(apiName).append(" v").append(apiVersion).append("\n");
+                warningMsg.append("║ Similar APIs found:\n");
                 
                 for (DuplicateCheckResult.SimilarAPI similar : similarApis) {
-                    warningMsg.append(String.format("  - API ID: %s (similarity: %.2f%%)\n",
-                            similar.getApiId(), similar.getSimilarityScore() * 100));
+                    warningMsg.append(String.format("║   • API UUID: %s\n", similar.getApiId()));
+                    warningMsg.append(String.format("║     Similarity: %.2f%% (threshold: %.2f%%)\n",
+                            similar.getSimilarityScore() * 100, 
+                            checkResult.getThreshold() * 100));
                 }
+                warningMsg.append("╠══════════════════════════════════════════════════════════════════════════════╣\n");
+                warningMsg.append("║ MODE: AUDIT - API was created but flagged for review                        ║\n");
+                warningMsg.append("║ ACTION REQUIRED: Review pending alerts in the Governance dashboard          ║\n");
+                warningMsg.append("╚══════════════════════════════════════════════════════════════════════════════╝\n");
                 
                 log.warn(warningMsg.toString());
                 
-                // TODO: In future phases, this could:
-                // 1. Send notifications to administrators
-                // 2. Block the API creation based on policy
-                // 3. Add governance violations to the compliance dashboard
+                // Create a deduplication alert for user decision
+                try {
+                    DeduplicationAlertService alertService = DeduplicationAlertService.getInstance();
+                    
+                    // Get API context if available
+                    String apiContext = getApiContext(apiId, organization);
+                    String createdBy = getApiCreator(apiId, organization);
+                    
+                    DeduplicationAlert alert = alertService.createAlertFromCheckResult(
+                            checkResult, apiName, apiVersion, apiContext, createdBy, organization);
+                    
+                    if (alert != null) {
+                        log.info("Created deduplication alert: " + alert.getAlertId() + 
+                                " with severity: " + alert.getSeverity() +
+                                " for API: " + apiName);
+                        
+                        // Log available actions for visibility
+                        log.info("Available actions for alert " + alert.getAlertId() + ": " +
+                                alert.getAvailableActions());
+                        
+                        // Log instructions for resolving the alert
+                        log.info("To resolve this alert, use the Governance API: " +
+                                "POST /api/am/governance/deduplication/alerts/" + alert.getAlertId() + "/decision");
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to create deduplication alert for API " + apiName + 
+                            ": " + e.getMessage(), e);
+                    // Continue with indexing even if alert creation fails
+                }
             } else {
                 log.info("No duplicates found for API: " + apiName);
             }
@@ -144,6 +187,47 @@ public class GatekeeperAPIEventListener implements Notifier {
     }
 
     /**
+     * Get API context from the API Manager.
+     */
+    private String getApiContext(String apiId, String organization) {
+        try {
+            org.wso2.carbon.apimgt.api.APIProvider apiProvider = 
+                    org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance()
+                            .getAPIProvider(getAdminUsername(organization));
+            if (apiProvider != null) {
+                org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPIbyUUID(apiId, organization);
+                if (api != null) {
+                    return api.getContext();
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Could not fetch API context for API " + apiId + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Get API creator from the API Manager.
+     */
+    private String getApiCreator(String apiId, String organization) {
+        try {
+            org.wso2.carbon.apimgt.api.APIProvider apiProvider = 
+                    org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance()
+                            .getAPIProvider(getAdminUsername(organization));
+            if (apiProvider != null) {
+                org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPIbyUUID(apiId, organization);
+                if (api != null && api.getId() != null) {
+                    return api.getId().getProviderName();
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Could not fetch API creator for API " + apiId + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+
+    /**
      * Handle API delete events - remove from index.
      */
     private void handleAPIDelete(GatekeeperService gatekeeperService, APIEvent apiEvent) {
@@ -152,8 +236,17 @@ public class GatekeeperAPIEventListener implements Notifier {
         String organization = apiEvent.getTenantDomain();
 
         try {
+            // Remove from deduplication index
             gatekeeperService.removeAPI(apiId, organization);
             log.info("Removed API from deduplication index: " + apiName + " (ID: " + apiId + ")");
+            
+            // Auto-resolve any pending alerts for this API
+            try {
+                DeduplicationAlertService alertService = DeduplicationAlertService.getInstance();
+                alertService.autoResolveAlertsForDeletedApi(apiId, organization);
+            } catch (Exception e) {
+                log.warn("Failed to auto-resolve alerts for deleted API " + apiId + ": " + e.getMessage());
+            }
         } catch (Exception e) {
             log.error("Error removing API from index: " + e.getMessage(), e);
         }

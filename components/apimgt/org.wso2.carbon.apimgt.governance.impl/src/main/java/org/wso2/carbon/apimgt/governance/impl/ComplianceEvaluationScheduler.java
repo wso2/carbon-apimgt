@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationRequest;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
@@ -295,6 +296,15 @@ public class ComplianceEvaluationScheduler {
 
         for (Ruleset ruleset : rulesets) {
             List<RuleViolation> ruleViolations = new ArrayList<>();
+
+            // Skip DEDUPLICATION rulesets - they are handled by the Gatekeeper module
+            // during API creation, not by the compliance evaluation scheduler
+            if (RuleCategory.DEDUPLICATION.equals(ruleset.getRuleCategory())) {
+                log.debug("Skipping DEDUPLICATION ruleset " + ruleset.getId() + 
+                        " for artifact " + artifactRefId + ". Deduplication is handled by Gatekeeper.");
+                skippedRulesets++;
+                continue;
+            }
 
             // Check if ruleset's artifact type matches with the artifact's type
             ExtendedArtifactType extendedArtifactType = ruleset.getArtifactType();
