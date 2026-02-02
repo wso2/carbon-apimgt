@@ -395,9 +395,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         } else {
             // Generate API key in opaque format
-            byte[] randomBytes = new byte[32]; // 256 bits
-            secureRandom.nextBytes(randomBytes);
-            apiKey = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+            apiKey = generateOpaqueKey();
         }
         APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
         apiKeyInfoDTO.setKeyDisplayName(null);
@@ -3561,6 +3559,42 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
         apiMgtDAO.revokeAPIKey(applicationId, keyType, keyDisplayName);
         revocationRequestPublisher.publishRevocationEvents(keyDisplayName, properties);
+    }
+
+    @Override
+    public void regenerateAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain, String username) throws APIManagementException {
+
+        // Revoke the existing key
+        RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
+        Properties properties = new Properties();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        String eventID = UUID.randomUUID().toString();
+        properties.put(APIConstants.NotificationEvent.EVENT_ID, eventID);
+        properties.put(APIConstants.NotificationEvent.EVENT_TYPE, APIConstants.API_KEY_AUTH_TYPE);
+        properties.put(APIConstants.NotificationEvent.TOKEN_TYPE, APIConstants.API_KEY_AUTH_TYPE);
+        properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
+        properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
+        properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
+        apiMgtDAO.revokeAPIKey(applicationId, keyType, keyDisplayName);
+        revocationRequestPublisher.publishRevocationEvents(keyDisplayName, properties);
+        // Generate a new key with the same display name and other additional properties
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(applicationId, keyType, keyDisplayName);
+        APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
+        apiKeyInfoDTO.setKeyDisplayName(keyDisplayName);
+        apiKeyInfoDTO.setApplicationId(applicationId);
+        apiKeyInfoDTO.setKeyType(keyType);
+        apiKeyInfoDTO.setApiKeyProperties(null);
+        apiKeyInfoDTO.setAuthUser(username);
+        apiKeyInfoDTO.setValidityPeriod(apiKeyInfo.getValidityPeriod());
+        apiKeyInfoDTO.setLastUsedTime(apiKeyInfo.getLastUsedTime());
+        apiMgtDAO.addAPIKey(APIUtil.sha256HashWithSalt(generateOpaqueKey()), apiKeyInfoDTO);
+    }
+
+    private String generateOpaqueKey() {
+        byte[] randomBytes = new byte[32]; // 256 bits
+        secureRandom.nextBytes(randomBytes);
+        String apiKey = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+        return apiKey;
     }
 
     /**

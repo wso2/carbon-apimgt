@@ -727,6 +727,16 @@ public interface APIConsumer extends APIManager {
     void revokeAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain) throws APIManagementException;
 
     /**
+     * Regenerate opaque api key for the given key display name with same properties
+     * @param applicationId Id of the application
+     * @param keyType Key type of the token
+     * @param keyDisplayName Api key name
+     * @param tenantDomain Tenant domain
+     * @throws APIManagementException
+     */
+    void regenerateAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain, String username) throws APIManagementException;
+
+    /**
      * Updates the details of the specified user application.
      *
      * @param query Search query typed by the user at the devportal

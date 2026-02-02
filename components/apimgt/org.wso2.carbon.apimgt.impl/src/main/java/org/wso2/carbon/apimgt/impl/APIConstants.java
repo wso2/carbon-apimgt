@@ -826,6 +826,7 @@ public final class APIConstants {
     public static final String IS_ENABLED = "is_enabled";
     public static final String BLOCKING_CONDITIONS_STREAM_ID = "org.wso2.blocking.request.stream:1.0.0";
     public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.apimgt.token.revocation.stream:1.0.0";
+    public static final String API_KEY_USAGE_STREAM_ID = "org.wso2.apimgt.api.key.usage.stream:1.0.0";
     public static final String CACHE_INVALIDATION_STREAM_ID = "org.wso2.apimgt.cache.invalidation.stream:1.0.0";
     public static final String NOTIFICATION_STREAM_ID = "org.wso2.apimgt.notification.stream:1.0.0";
     public static final String WEBHOOKS_SUBSCRIPTION_STREAM_ID = "org.wso2.apimgt.webhooks.request.stream:1.0.0";
@@ -3358,12 +3359,15 @@ public final class APIConstants {
     public static class NotificationEvent {
 
         public static final String TOKEN_TYPE = "token_type";
+        public static final String USAGE_TYPE = "usage_type";
         public static final String TOKEN_REVOCATION_EVENT = "token_revocation";
+        public static final String API_KEY_USAGE_EVENT = "key_usage";
         public static final String CONSUMER_APP_REVOCATION_EVENT
                 = "consumer_app_revocation_event";
         public static final String SUBJECT_ENTITY_REVOCATION_EVENT
                 = "subject_entity_revocation_event";
         public static final String CONSUMER_KEY = "consumer_key";
+        public static final String API_KEY_HASH = "apiKeyHash";
         public static final String EVENT_ID = "eventId";
         public static final String TENANT_ID = "tenantId";
         public static final String TENANT_DOMAIN = "tenant_domain";
@@ -3371,6 +3375,7 @@ public final class APIConstants {
         public static final String APPLICATION_TOKEN_TYPE_OAUTH2 = "Default";
         public static final String EXPIRY_TIME = "expiryTime";
         public static final String REVOCATION_TIME = "revocationTime";
+        public static final String LAST_USED_TIME = "lastUsedTime";
         public static final String ORGANIZATION = "organization";
         public static final String STREAM_ID = "streamId";
         public static final String ENTITY_ID = "entityId";

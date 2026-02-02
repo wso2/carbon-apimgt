@@ -3921,6 +3921,8 @@ public class SQLConstants {
                     " VALUES (?,?,?,?,?,?,?,?,?,?)";
     public static final String GET_API_KEY_SQL =
             "SELECT API_KEY_NAME, TIME_CREATED, VALIDITY_PERIOD, LAST_USED FROM AM_API_KEY WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND STATUS = 'ACTIVE'";
+    public static final String GET_API_KEY_FROM_DISPLAY_NAME_SQL =
+            "SELECT API_KEY_PROPERTIES, AUTHZ_USER, VALIDITY_PERIOD, LAST_USED FROM AM_API_KEY WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND API_KEY_NAME = ?";
     public static final String DELETE_API_KEY_SQL =
             "UPDATE AM_API_KEY SET STATUS = 'REVOKED' WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND API_KEY_NAME = ?";
 
