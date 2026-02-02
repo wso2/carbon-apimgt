@@ -16522,7 +16522,7 @@ public class ApiMgtDAO {
             String sqlQuery = SQLConstants.ADD_API_KEY_SQL;
             // Adding data to the AM_API_KEY table
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, "Test");
+            ps.setString(1, keyInfoDTO.getKeyDisplayName());
             ps.setString(2, keyInfoDTO.getApplicationId());
             ps.setString(3, apiKeyHash);
             ps.setString(4, keyInfoDTO.getKeyType());
@@ -16578,11 +16578,52 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to add generated API keys", e);
+            handleException("Failed to get API keys", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
         return apiKeyInfoList;
+    }
+
+    /**
+     * Returns the api key specified by the key display name
+     *
+     * @param applicationId Application ID
+     * @param keyType Key type of the api key
+     * @param keyDisplayName Display name of the api key
+     * @throws APIManagementException
+     */
+    public APIKeyInfo getAPIKey(String applicationId, String keyType, String keyDisplayName) throws APIManagementException {
+
+        APIKeyInfo keyInfo = new APIKeyInfo();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // This query to access the AM_API_KEY table
+            String sqlQuery = SQLConstants.GET_API_KEY_FROM_DISPLAY_NAME_SQL;
+            // Retrieving data from the AM_API_KEY table
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, applicationId);
+            ps.setString(2, keyType);
+            ps.setString(3, keyDisplayName);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                keyInfo.setKeyDisplayName(keyDisplayName);
+                keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
+                keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
+                keyInfo.setApplicationId(applicationId);
+                keyInfo.setKeyType(keyType);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get the API key details for " + keyDisplayName, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+        return keyInfo;
     }
 
     /**
