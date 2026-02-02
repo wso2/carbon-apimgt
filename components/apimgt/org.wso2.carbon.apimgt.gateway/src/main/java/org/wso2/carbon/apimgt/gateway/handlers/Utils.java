@@ -875,18 +875,34 @@ public class Utils {
                     + corsRequestMethod);
         }
         List<Resource> acceptableResourcesList = new LinkedList<>();
+        List<Resource> optionsResourcesList = new LinkedList<>();
+        boolean isOptionsRequest = RESTConstants.METHOD_OPTIONS.equals(httpMethod);
+
         for (Resource resource : allAPIResources) {
-            //If the requesting method is OPTIONS or if the Resource contains the requesting method
-            if (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod) &&
-                    RESTConstants.METHOD_OPTIONS.equals(httpMethod)) {
-                acceptableResourcesList.add(0, resource);
-            } else if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resource.getMethods() != null &&
-                    Arrays.asList(resource.getMethods()).contains(corsRequestMethod)) ||
-                    (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
+            log.debug("Evaluating resource for acceptable methods");
+            String[] methods = resource.getMethods();
+            if (methods == null) {
+                continue;
+            }
+
+            List<String> methodList = Arrays.asList(methods);
+
+            // Handle OPTIONS request with single OPTIONS method defined
+            if (isOptionsRequest && methods.length == 1 && methodList.contains(httpMethod)) {
+                optionsResourcesList.add(resource);
+            } else if ((isOptionsRequest && methodList.contains(corsRequestMethod)) ||
+                    methodList.contains(httpMethod)) {
                 acceptableResourcesList.add(resource);
             }
         }
-        return new LinkedHashSet<>(acceptableResourcesList);
+
+        Set<Resource> result = new LinkedHashSet<>();
+        result.addAll(optionsResourcesList);
+        result.addAll(acceptableResourcesList);
+        if (log.isDebugEnabled()) {
+            log.debug("Found " + result.size() + " acceptable resources for method: " + httpMethod);
+        }
+        return result;
     }
 
     /**
