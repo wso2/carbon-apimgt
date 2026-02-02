@@ -30,6 +30,7 @@ public final class GatekeeperConstants {
     /**
      * Default similarity threshold for MinHash LSH comparison.
      * APIs with Jaccard similarity above this threshold are considered duplicates.
+     * Default is 0.95 (95%) - can be configured in deployment.toml.
      */
     public static final double DEFAULT_SIMILARITY_THRESHOLD = 0.95;
 
@@ -66,6 +67,23 @@ public final class GatekeeperConstants {
     public static final String DEDUPLICATION_RULE_CATEGORY = "DEDUPLICATION";
 
     /**
+     * Mode of operation for duplicate detection.
+     * AUDIT: Log warnings and create alerts, but allow API creation (default)
+     * WARN: Same as AUDIT, but also add warning to API response
+     * BLOCK: Reject API creation if duplicates exceed threshold
+     */
+    public enum DeduplicationMode {
+        AUDIT,  // Log and alert only (default for Phase 1)
+        WARN,   // Log, alert, and add warning to response
+        BLOCK   // Reject API creation (requires decision before proceeding)
+    }
+
+    /**
+     * Default deduplication mode - AUDIT for Phase 1
+     */
+    public static final DeduplicationMode DEFAULT_DEDUPLICATION_MODE = DeduplicationMode.AUDIT;
+
+    /**
      * Ruleset YAML configuration keys.
      */
     public static final class RulesetConfig {
@@ -73,6 +91,7 @@ public final class GatekeeperConstants {
         public static final String NUM_HASH_FUNCTIONS = "num_hash_functions";
         public static final String NUM_BANDS = "num_bands";
         public static final String ENABLED = "enabled";
+        public static final String MODE = "mode"; // audit, warn, or block
 
         private RulesetConfig() {
         }

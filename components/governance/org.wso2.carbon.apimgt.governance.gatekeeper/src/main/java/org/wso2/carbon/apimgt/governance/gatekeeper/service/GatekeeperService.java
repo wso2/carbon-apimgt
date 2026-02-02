@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.governance.gatekeeper.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.gatekeeper.GatekeeperConstants;
 import org.wso2.carbon.apimgt.governance.gatekeeper.dao.MinHashDAO;
@@ -29,9 +32,13 @@ import org.wso2.carbon.apimgt.governance.gatekeeper.minhash.MinHashGenerator;
 import org.wso2.carbon.apimgt.governance.gatekeeper.model.APISignature;
 import org.wso2.carbon.apimgt.governance.gatekeeper.model.ConflictReport;
 import org.wso2.carbon.apimgt.governance.gatekeeper.model.DeduplicationResult;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Main service class for API deduplication using MinHash and LSH.
@@ -354,8 +361,10 @@ public class GatekeeperService {
     public org.wso2.carbon.apimgt.governance.gatekeeper.model.DuplicateCheckResult checkForDuplicates(
             String apiId, String apiDefinition, String organization) throws APIMGovernanceException {
         
+        double threshold = GatekeeperConstants.DEFAULT_SIMILARITY_THRESHOLD;
+        
         DeduplicationResult result = checkForDuplicates(
-                apiDefinition, apiId, organization, GatekeeperConstants.DEFAULT_SIMILARITY_THRESHOLD);
+                apiDefinition, apiId, organization, threshold);
         
         // Convert to DuplicateCheckResult
         org.wso2.carbon.apimgt.governance.gatekeeper.model.DuplicateCheckResult checkResult = 
@@ -363,6 +372,7 @@ public class GatekeeperService {
         
         checkResult.setApiId(apiId);
         checkResult.setHasDuplicates(result.isDuplicate());
+        checkResult.setThreshold(threshold);
         
         if (result.isDuplicate() && result.getConflictReports() != null) {
             List<org.wso2.carbon.apimgt.governance.gatekeeper.model.DuplicateCheckResult.SimilarAPI> similarApis 
@@ -378,5 +388,136 @@ public class GatekeeperService {
         }
         
         return checkResult;
+    }
+
+    /**
+     * Indexes all existing APIs that are not yet in the AM_API_MINHASH table.
+     * This method should be called during server startup to ensure all pre-existing
+     * APIs are indexed for deduplication checks.
+     *
+     * @return Number of APIs indexed
+     */
+    public int indexExistingAPIs() {
+        log.info("Starting to index existing APIs for deduplication...");
+        
+        int indexedCount = 0;
+        int skippedCount = 0;
+        int errorCount = 0;
+        
+        try {
+            // Get all existing API signatures from database
+            Set<String> existingSignatureApiIds = new HashSet<>();
+            List<APISignature> existingSignatures = minHashDAO.getAllSignatures();
+            for (APISignature sig : existingSignatures) {
+                existingSignatureApiIds.add(sig.getApiUuid());
+            }
+            log.info("Found " + existingSignatureApiIds.size() + " APIs already indexed in AM_API_MINHASH");
+
+            // Get all organizations
+            List<String> organizations = getOrganizations();
+            
+            for (String organization : organizations) {
+                try {
+                    // Get all APIs for this organization
+                    List<ApiResult> apis = ApiMgtDAO.getInstance().getAllAPIs(organization);
+                    log.info("Found " + apis.size() + " APIs in organization: " + organization);
+                    
+                    for (ApiResult apiResult : apis) {
+                        String apiId = apiResult.getId();
+                        
+                        // Skip if already indexed
+                        if (existingSignatureApiIds.contains(apiId)) {
+                            skippedCount++;
+                            continue;
+                        }
+                        
+                        try {
+                            // Get API definition
+                            String apiDefinition = getAPIDefinition(apiId, organization);
+                            
+                            if (apiDefinition != null && !apiDefinition.isEmpty()) {
+                                // Index the API
+                                addApiToIndex(apiDefinition, apiId, organization, true);
+                                indexedCount++;
+                                
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Indexed existing API: " + apiId + " in organization: " + organization);
+                                }
+                            } else {
+                                log.warn("API definition not found for API: " + apiId + ". Skipping indexing.");
+                                skippedCount++;
+                            }
+                        } catch (Exception e) {
+                            log.warn("Failed to index API " + apiId + ": " + e.getMessage());
+                            errorCount++;
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Error processing organization " + organization + ": " + e.getMessage(), e);
+                }
+            }
+            
+        } catch (Exception e) {
+            log.error("Error indexing existing APIs: " + e.getMessage(), e);
+        }
+        
+        log.info("Finished indexing existing APIs. Indexed: " + indexedCount + 
+                ", Skipped: " + skippedCount + ", Errors: " + errorCount);
+        
+        return indexedCount;
+    }
+
+    /**
+     * Gets all organizations in the system.
+     * Currently only returns super tenant, can be extended for multi-tenancy.
+     * 
+     * @return List of organization names
+     */
+    private List<String> getOrganizations() {
+        List<String> organizations = new ArrayList<>();
+        // For now, just index super tenant APIs
+        // Can be extended to support multi-tenancy
+        organizations.add("carbon.super");
+        return organizations;
+    }
+
+    /**
+     * Gets the API definition for an API using the APIProvider.
+     * 
+     * @param apiId The API UUID
+     * @param organization The organization
+     * @return The API definition (OpenAPI spec) or null if not found
+     */
+    private String getAPIDefinition(String apiId, String organization) {
+        try {
+            String adminUsername = getAdminUsername(organization);
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(adminUsername);
+            
+            if (apiProvider != null) {
+                API api = apiProvider.getAPIbyUUID(apiId, organization);
+                if (api != null) {
+                    String swagger = apiProvider.getOpenAPIDefinition(api.getUuid(), organization);
+                    if (swagger != null && !swagger.isEmpty()) {
+                        return swagger;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Could not get API definition for " + apiId + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Gets the admin username for the given organization.
+     * 
+     * @param organization The organization/tenant domain
+     * @return The admin username
+     */
+    private String getAdminUsername(String organization) {
+        if (organization == null || "carbon.super".equals(organization)) {
+            return "admin";
+        }
+        return "admin@" + organization;
     }
 }

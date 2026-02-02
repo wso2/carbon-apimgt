@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
+import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
@@ -38,9 +39,12 @@ import org.wso2.rule.validator.InvalidContentTypeException;
 import org.wso2.rule.validator.InvalidRulesetException;
 import org.wso2.rule.validator.validator.Validator;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -54,6 +58,10 @@ import java.util.Map;
 )
 public class SpectralValidationEngine implements ValidationEngine {
     private static final Log log = LogFactory.getLog(SpectralValidationEngine.class);
+    
+    // Deduplication ruleset detection constants
+    private static final String DEDUPLICATION_KEY = "deduplication";
+    private static final String SIMILARITY_THRESHOLD_KEY = "similarity_threshold";
 
     /**
      * Check if a ruleset is valid
@@ -63,6 +71,18 @@ public class SpectralValidationEngine implements ValidationEngine {
      */
     @Override
     public void validateRulesetContent(Ruleset ruleset) throws APIMGovernanceException {
+        
+        log.info("SpectralValidationEngine.validateRulesetContent called for: " + ruleset.getName());
+        
+        // Check if this is a deduplication ruleset - delegate to Gatekeeper validation
+        if (isDeduplicationRuleset(ruleset)) {
+            log.info("Deduplication ruleset detected, using custom validation for: " + ruleset.getName());
+            validateDeduplicationRulesetContent(ruleset);
+            return;
+        }
+        
+        log.info("Using standard Spectral validation for: " + ruleset.getName());
+        
         RulesetContent content = ruleset.getRulesetContent();
         String rulesetContentString = new String(content.getContent(),
                 StandardCharsets.UTF_8);
@@ -94,6 +114,17 @@ public class SpectralValidationEngine implements ValidationEngine {
      */
     @Override
     public List<Rule> extractRulesFromRuleset(Ruleset ruleset) throws APIMGovernanceException {
+        
+        log.info("SpectralValidationEngine.extractRulesFromRuleset called for: " + ruleset.getName());
+        
+        // Check if this is a deduplication ruleset - use custom extraction
+        if (isDeduplicationRuleset(ruleset)) {
+            log.info("Deduplication ruleset detected, using custom extraction for: " + ruleset.getName());
+            return extractDeduplicationRules(ruleset);
+        }
+        
+        log.info("Using standard rule extraction for: " + ruleset.getName());
+        
         String ruleContentString = new String(ruleset.getRulesetContent().getContent(),
                 StandardCharsets.UTF_8);
 
@@ -158,6 +189,14 @@ public class SpectralValidationEngine implements ValidationEngine {
      */
     @Override
     public List<RuleViolation> validate(String target, Ruleset ruleset) throws APIMGovernanceException {
+
+        // DEDUPLICATION rulesets are handled by the Gatekeeper module, not by Spectral.
+        // Return empty list as deduplication checks are done during API creation via event listeners.
+        if (isDeduplicationRuleset(ruleset)) {
+            log.info("Skipping Spectral validation for DEDUPLICATION ruleset: " + ruleset.getName() +
+                    ". Deduplication is handled by the Gatekeeper module.");
+            return Collections.emptyList();
+        }
 
         try {
             RulesetContent rulesetContent = ruleset.getRulesetContent();
@@ -224,5 +263,223 @@ public class SpectralValidationEngine implements ValidationEngine {
 
     }
 
+    // ========================================================================================
+    // DEDUPLICATION RULESET HANDLING
+    // ========================================================================================
+
+    /**
+     * Checks if a ruleset is a deduplication ruleset based on its category, name, or content.
+     * A deduplication ruleset has RuleCategory.DEDUPLICATION or contains a 'deduplication' section.
+     *
+     * @param ruleset The ruleset to check
+     * @return true if this is a deduplication ruleset
+     */
+    private boolean isDeduplicationRuleset(Ruleset ruleset) {
+        if (ruleset == null) {
+            return false;
+        }
+
+        // FIRST check RuleCategory (most reliable check)
+        if (ruleset.getRuleCategory() == RuleCategory.DEDUPLICATION) {
+            log.info("Detected deduplication ruleset by RuleCategory: " + ruleset.getName());
+            return true;
+        }
+
+        // SECOND check if ruleset name contains deduplication (fast check)
+        if (ruleset.getName() != null && 
+                (ruleset.getName().toLowerCase(Locale.ENGLISH).contains("deduplication") ||
+                 ruleset.getName().toLowerCase(Locale.ENGLISH).contains("duplicate"))) {
+            log.info("Detected deduplication ruleset by name: " + ruleset.getName());
+            return true;
+        }
+
+        // THIRD check ruleset content
+        if (ruleset.getRulesetContent() == null || ruleset.getRulesetContent().getContent() == null) {
+            return false;
+        }
+
+        try {
+            String contentString = new String(ruleset.getRulesetContent().getContent(), StandardCharsets.UTF_8);
+            ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+            Map<String, Object> contentMap = yamlMapper.readValue(contentString, Map.class);
+
+            // Check for 'deduplication' section
+            if (contentMap.containsKey(DEDUPLICATION_KEY)) {
+                log.info("Detected deduplication ruleset by 'deduplication' key in content");
+                return true;
+            }
+
+            // Also check for similarity_threshold at root level
+            if (contentMap.containsKey(SIMILARITY_THRESHOLD_KEY)) {
+                log.info("Detected deduplication ruleset by 'similarity_threshold' key in content");
+                return true;
+            }
+
+            return false;
+        } catch (IOException e) {
+            log.debug("Error parsing ruleset content: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Validates a deduplication ruleset content.
+     * Checks for valid configuration values.
+     *
+     * @param ruleset The deduplication ruleset to validate
+     * @throws APIMGovernanceException If validation fails
+     */
+    private void validateDeduplicationRulesetContent(Ruleset ruleset) throws APIMGovernanceException {
+        RulesetContent content = ruleset.getRulesetContent();
+        if (content == null || content.getContent() == null) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
+        }
+
+        String contentString = new String(content.getContent(), StandardCharsets.UTF_8);
+
+        try {
+            ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+            Map<String, Object> config = yamlMapper.readValue(contentString, Map.class);
+
+            // Extract deduplication config (could be at root or nested)
+            Map<String, Object> dedupConfig = config;
+            if (config.containsKey(DEDUPLICATION_KEY) && config.get(DEDUPLICATION_KEY) instanceof Map) {
+                dedupConfig = (Map<String, Object>) config.get(DEDUPLICATION_KEY);
+            }
+
+            // Validate similarity_threshold if present
+            Double threshold = extractThreshold(dedupConfig);
+            if (threshold != null) {
+                if (threshold < 0.5 || threshold > 1.0) {
+                    throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT_DETAILED,
+                            ruleset.getName(),
+                            "similarity_threshold must be between 0.5 and 1.0, got " + threshold);
+                }
+            }
+
+            // Check enabled flag if present
+            if (dedupConfig.containsKey("enabled")) {
+                Object enabledObj = dedupConfig.get("enabled");
+                if (!(enabledObj instanceof Boolean)) {
+                    throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT_DETAILED,
+                            ruleset.getName(),
+                            "'enabled' must be a boolean value (true/false)");
+                }
+            }
+
+            log.info("Successfully validated deduplication ruleset: " + ruleset.getName());
+
+        } catch (APIMGovernanceException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT_DETAILED,
+                    ruleset.getName(), "Failed to parse YAML content: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Extracts rules from a deduplication ruleset.
+     *
+     * @param ruleset The deduplication ruleset
+     * @return List of rules
+     * @throws APIMGovernanceException If extraction fails
+     */
+    private List<Rule> extractDeduplicationRules(Ruleset ruleset) throws APIMGovernanceException {
+        List<Rule> rules = new ArrayList<>();
+
+        try {
+            String contentString = new String(ruleset.getRulesetContent().getContent(), StandardCharsets.UTF_8);
+            ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+            Map<String, Object> config = yamlMapper.readValue(contentString, Map.class);
+
+            // Extract deduplication config
+            Map<String, Object> dedupConfig = config;
+            if (config.containsKey(DEDUPLICATION_KEY) && config.get(DEDUPLICATION_KEY) instanceof Map) {
+                dedupConfig = (Map<String, Object>) config.get(DEDUPLICATION_KEY);
+            }
+
+            // Get threshold for rule description
+            Double threshold = extractThreshold(dedupConfig);
+            if (threshold == null) {
+                threshold = 0.95; // Default
+            }
+
+            // Create the main deduplication rule
+            Rule deduplicationRule = new Rule();
+            deduplicationRule.setId(APIMGovernanceUtil.generateUUID());
+            deduplicationRule.setName("api-deduplication-check");
+            deduplicationRule.setDescription(String.format(
+                    "Detects duplicate APIs with similarity >= %.0f%% using MinHash/LSH algorithms",
+                    threshold * 100));
+            deduplicationRule.setSeverity(RuleSeverity.ERROR);
+
+            // Store the full config as rule content for later use
+            ObjectMapper jsonMapper = new ObjectMapper();
+            String ruleContent = jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(dedupConfig);
+            deduplicationRule.setContent(ruleContent);
+
+            rules.add(deduplicationRule);
+
+            // Also extract any rules from 'rules' section if present (for compatibility)
+            if (config.containsKey("rules") && config.get("rules") instanceof Map) {
+                Map<String, Map<String, Object>> yamlRules = (Map<String, Map<String, Object>>) config.get("rules");
+                for (Map.Entry<String, Map<String, Object>> entry : yamlRules.entrySet()) {
+                    String ruleName = entry.getKey();
+                    Map<String, Object> ruleDetails = entry.getValue();
+
+                    // Skip if this is the api-deduplication-check rule we already added
+                    if ("api-deduplication-check".equals(ruleName)) {
+                        continue;
+                    }
+
+                    Rule rule = new Rule();
+                    rule.setId(APIMGovernanceUtil.generateUUID());
+                    rule.setName(ruleName);
+                    rule.setDescription(ruleDetails.get("description") != null ? 
+                            ruleDetails.get("description").toString() : "Deduplication rule");
+                    
+                    String severity = ruleDetails.get("severity") != null ? 
+                            ruleDetails.get("severity").toString() : "error";
+                    rule.setSeverity(RuleSeverity.fromString(severity));
+                    
+                    String content = jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(ruleDetails);
+                    rule.setContent(content);
+                    
+                    rules.add(rule);
+                }
+            }
+
+            log.info("Extracted " + rules.size() + " rule(s) from deduplication ruleset: " + ruleset.getName());
+            return rules;
+
+        } catch (IOException e) {
+            log.error("Error extracting rules from deduplication ruleset: " + e.getMessage(), e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_EXTRACTING_RULE_CONTENT, e);
+        }
+    }
+
+    /**
+     * Extracts threshold value from config map.
+     *
+     * @param config The configuration map
+     * @return The threshold value or null if not found
+     */
+    private Double extractThreshold(Map<String, Object> config) {
+        Object thresholdObj = config.get(SIMILARITY_THRESHOLD_KEY);
+        if (thresholdObj == null) {
+            return null;
+        }
+        
+        if (thresholdObj instanceof Number) {
+            return ((Number) thresholdObj).doubleValue();
+        } else if (thresholdObj instanceof String) {
+            try {
+                return Double.parseDouble((String) thresholdObj);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
+    }
 
 }

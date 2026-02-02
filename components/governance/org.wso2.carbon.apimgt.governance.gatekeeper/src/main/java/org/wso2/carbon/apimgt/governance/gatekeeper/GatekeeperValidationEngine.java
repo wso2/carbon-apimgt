@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
@@ -43,19 +42,18 @@ import java.util.Map;
 /**
  * Gatekeeper Validation Engine for API deduplication.
  * <p>
- * This validation engine is registered as an OSGi service and processes rulesets
- * with the DEDUPLICATION category. It uses MinHash and LSH algorithms to detect
- * structurally similar APIs and prevent API sprawl.
+ * This class provides validation logic for DEDUPLICATION rulesets and is used
+ * internally by the Gatekeeper module. It is NOT registered as an OSGi service
+ * because the SpectralValidationEngine already handles all ruleset types including
+ * deduplication rulesets during startup.
+ * <p>
+ * This engine is used at runtime for API similarity detection using MinHash and LSH
+ * algorithms to prevent API sprawl.
  * <p>
  * Configuration is done through the Governance Ruleset YAML with the following properties:
  * - similarity_threshold: Minimum Jaccard similarity for duplicate detection (default: 0.95)
  * - enabled: Whether deduplication is enabled (default: true)
  */
-@Component(
-        name = "org.wso2.carbon.apimgt.governance.gatekeeper.GatekeeperValidationEngine",
-        immediate = true,
-        service = ValidationEngine.class
-)
 public class GatekeeperValidationEngine implements ValidationEngine {
 
     private static final Log log = LogFactory.getLog(GatekeeperValidationEngine.class);
