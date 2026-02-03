@@ -18,7 +18,7 @@ public class ConfigurationDto {
     private boolean updateDisabled = false;
     private ConstraintConfigDto constraint;
 
-    public ConfigurationDto withConstraint(String constraintType, Map<String, Object> defaultConstraints,
+    public ConfigurationDto withConstraint(AppConfigConstraintType constraintType, Map<String, Object> defaultConstraints,
                                            String label, String tooltip) {
         this.constraint = new ConstraintConfigDto(
             this.name,

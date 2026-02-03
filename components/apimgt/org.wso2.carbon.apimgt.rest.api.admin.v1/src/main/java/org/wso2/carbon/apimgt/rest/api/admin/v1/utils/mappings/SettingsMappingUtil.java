@@ -167,7 +167,7 @@ public class SettingsMappingUtil {
                 constraintDTO.setMultiple(constraintConfig.isMultiple());
                 constraintDTO.setValues(constraintConfig.getValues());
                 constraintDTO.setDefault(constraintConfig.getDefaultConstraints());
-                constraintDTO.setConstraintType(constraintConfig.getConstraintType());
+                constraintDTO.setConstraintType(constraintConfig.getConstraintType().toString());
                 settingsKeyManagerConfigurationDTO.getAvailableAppConfigConstraints().add(constraintDTO);
             }
         }

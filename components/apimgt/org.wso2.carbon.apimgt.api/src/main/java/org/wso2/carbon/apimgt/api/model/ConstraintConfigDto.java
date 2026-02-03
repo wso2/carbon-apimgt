@@ -33,13 +33,13 @@ public class ConstraintConfigDto {
     private String label;          // UI Label (e.g., "Access Token Expiry")
     private String type;           // UI Type (e.g., "input", "select")
     private String toolTip;        // UI Tooltip
-    private String constraintType; // Suggested Validator (e.g., "RANGE", "REGEX", "ENUM")
+    private AppConfigConstraintType constraintType; // Suggested Validator (e.g., RANGE, REGEX, ENUM)
     private List values = new ArrayList<>();
     private boolean multiple;
     private Map<String, Object> defaultConstraints = new HashMap<>(); // Optional defaults
 
     public ConstraintConfigDto(String name, String type, List values, boolean multiple, String label,
-                               String toolTip, String constraintType, Map<String, Object> defaultConstraints) {
+                               String toolTip, AppConfigConstraintType constraintType, Map<String, Object> defaultConstraints) {
         this.name = name;
         this.label = label;
         this.type = type;
@@ -84,11 +84,11 @@ public class ConstraintConfigDto {
         this.toolTip = toolTip;
     }
 
-    public String getConstraintType() {
+    public AppConfigConstraintType getConstraintType() {
         return constraintType;
     }
 
-    public void setConstraintType(String constraintType) {
+    public void setConstraintType(AppConfigConstraintType constraintType) {
         this.constraintType = constraintType;
     }
 
