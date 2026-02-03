@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationConfigurationConstraintDTO;
 import javax.validation.constraints.*;
 
 
@@ -31,6 +32,7 @@ public class KeyManagerApplicationConfigurationDTO   {
     private String tooltip = null;
     private Object _default = null;
     private List<Object> values = new ArrayList<Object>();
+    private ApplicationConfigurationConstraintDTO constraint = null;
 
   /**
    **/
@@ -186,6 +188,24 @@ public class KeyManagerApplicationConfigurationDTO   {
     this.values = values;
   }
 
+  /**
+   **/
+  public KeyManagerApplicationConfigurationDTO constraint(ApplicationConfigurationConstraintDTO constraint) {
+    this.constraint = constraint;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("constraint")
+  public ApplicationConfigurationConstraintDTO getConstraint() {
+    return constraint;
+  }
+  public void setConstraint(ApplicationConfigurationConstraintDTO constraint) {
+    this.constraint = constraint;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -204,12 +224,13 @@ public class KeyManagerApplicationConfigurationDTO   {
         Objects.equals(multiple, keyManagerApplicationConfiguration.multiple) &&
         Objects.equals(tooltip, keyManagerApplicationConfiguration.tooltip) &&
         Objects.equals(_default, keyManagerApplicationConfiguration._default) &&
-        Objects.equals(values, keyManagerApplicationConfiguration.values);
+        Objects.equals(values, keyManagerApplicationConfiguration.values) &&
+        Objects.equals(constraint, keyManagerApplicationConfiguration.constraint);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, label, type, required, mask, multiple, tooltip, _default, values);
+    return Objects.hash(name, label, type, required, mask, multiple, tooltip, _default, values, constraint);
   }
 
   @Override
@@ -226,6 +247,7 @@ public class KeyManagerApplicationConfigurationDTO   {
     sb.append("    tooltip: ").append(toIndentedString(tooltip)).append("\n");
     sb.append("    _default: ").append(toIndentedString(_default)).append("\n");
     sb.append("    values: ").append(toIndentedString(values)).append("\n");
+    sb.append("    constraint: ").append(toIndentedString(constraint)).append("\n");
     sb.append("}");
     return sb.toString();
   }
