@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.api.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ConfigurationDto {
 
@@ -15,6 +16,30 @@ public class ConfigurationDto {
     private List values = new ArrayList<>();
     private boolean multiple;
     private boolean updateDisabled = false;
+    private ConstraintConfigDto constraint;
+
+    public ConfigurationDto withConstraint(String constraintType, Map<String, Object> defaultConstraints,
+                                           String label, String tooltip) {
+        this.constraint = new ConstraintConfigDto(
+            this.name,
+            this.type,
+            this.values,
+            this.multiple,
+            label,
+            tooltip,
+            constraintType,
+            defaultConstraints
+        );
+        return this;
+    }
+
+    public boolean hasConstraint() {
+        return this.constraint != null;
+    }
+
+    public ConstraintConfigDto getConstraint() {
+        return this.constraint;
+    }
 
     public String getName() {
 
