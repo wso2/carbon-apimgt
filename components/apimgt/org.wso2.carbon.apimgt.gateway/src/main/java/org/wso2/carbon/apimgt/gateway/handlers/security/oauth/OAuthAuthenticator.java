@@ -278,7 +278,7 @@ public class OAuthAuthenticator implements Authenticator {
                             }
                         }
                     }
-                } catch ( ParseException | IllegalArgumentException e) {
+                } catch (ParseException | IllegalArgumentException e) {
                     log.debug("Not a JWT token. Failed to decode the token header.", e);
                 } catch (APIManagementException e) {
                     log.error("Error while validating JWT token. ", e);

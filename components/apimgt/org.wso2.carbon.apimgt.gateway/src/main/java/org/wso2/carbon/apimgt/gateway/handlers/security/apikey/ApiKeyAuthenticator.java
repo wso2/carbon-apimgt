@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+import org.wso2.carbon.apimgt.impl.publishers.ApiKeyUsagePublisher;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.net.URLEncoder;
@@ -57,6 +58,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
 
 public class ApiKeyAuthenticator implements Authenticator {
 
@@ -173,6 +176,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                 APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext,
                         jwtGenerationEnabled ? getContextHeader() : null);
                 synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, authenticationContext.getUsername());
+                updateApiKeyLastUsedTime(apiKey, tenantDomain);
                 log.debug("User is authorized to access the resource using Api Key.");
                 return new AuthenticationResponse(true, isMandatory, false,
                         0, null);
@@ -197,6 +201,21 @@ public class ApiKeyAuthenticator implements Authenticator {
             return new AuthenticationResponse(false, isMandatory, true,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
+    }
+
+    private void updateApiKeyLastUsedTime(String apiKey, String tenantDomain) {
+        ApiKeyUsagePublisher apiKeyUsagePublisher = ApiKeyUsagePublisher.getInstance();
+        Properties properties = new Properties();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        String eventID = UUID.randomUUID().toString();
+        properties.put(APIConstants.NotificationEvent.EVENT_ID, eventID);
+        properties.put(APIConstants.NotificationEvent.EVENT_TYPE, APIConstants.API_KEY_AUTH_TYPE);
+        properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
+        properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
+        properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.API_KEY_USAGE_STREAM_ID);
+        properties.put(APIConstants.NotificationEvent.API_KEY, apiKey);
+        properties.put(APIConstants.NotificationEvent.LAST_USED_TIME, System.currentTimeMillis());
+        apiKeyUsagePublisher.publishApiKeyUsageEvents(properties);
     }
 
     private String extractApiKey(MessageContext mCtx) throws APISecurityException {

@@ -23,6 +23,10 @@ public class APIKeyInfo {
     private String lastUsedTime;
     private String createdTime;
     private long validityPeriod;
+    private byte[] properties;
+    private String apiKeyHash;
+    private String authUser;
+    private String status;
 
     public String getKeyDisplayName() {
         return keyDisplayName;
@@ -70,5 +74,37 @@ public class APIKeyInfo {
 
     public void setValidityPeriod(long validityPeriod) {
         this.validityPeriod = validityPeriod;
+    }
+
+    public byte[] getProperties() {
+        return properties;
+    }
+
+    public void setProperties(byte[] properties) {
+        this.properties = properties;
+    }
+
+    public String getApiKeyHash() {
+        return apiKeyHash;
+    }
+
+    public void setApiKeyHash(String apiKeyHash) {
+        this.apiKeyHash = apiKeyHash;
+    }
+
+    public String getAuthUser() {
+        return authUser;
+    }
+
+    public void setAuthUser(String authUser) {
+        this.authUser = authUser;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
