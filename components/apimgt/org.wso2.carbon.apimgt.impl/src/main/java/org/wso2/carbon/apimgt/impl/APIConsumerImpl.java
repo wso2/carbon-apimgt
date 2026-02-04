@@ -107,7 +107,7 @@ import org.wso2.carbon.user.mgt.common.UserAdminException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
@@ -401,13 +401,26 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiKeyInfoDTO.setKeyDisplayName(null);
         apiKeyInfoDTO.setApplicationId(application.getUUID());
         apiKeyInfoDTO.setKeyType(application.getKeyType());
-        apiKeyInfoDTO.setApiKeyProperties(null);
+        Properties props = new Properties();
+        byte[] salt = APIUtil.generateSalt();
+        props.setProperty("salt", APIUtil.convertBytesToHex(salt));
+        props.setProperty("permittedIP", permittedIP);
+        props.setProperty("permittedReferer", permittedReferer);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try {
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(props);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while writing api key properties: ", e);
+        }
+        byte[] serializedProps = bos.toByteArray();
+        apiKeyInfoDTO.setApiKeyProperties(serializedProps);
         apiKeyInfoDTO.setAuthUser(userName);
         apiKeyInfoDTO.setValidityPeriod(validityPeriod);
         apiKeyInfoDTO.setLastUsedTime(null);
         apiKeyInfoDTO.setPermittedIP(permittedIP);
         apiKeyInfoDTO.setPermittedReferer(permittedReferer);
-        apiMgtDAO.addAPIKey(APIUtil.sha256HashWithSalt(apiKey), apiKeyInfoDTO);
+        apiMgtDAO.addAPIKey(APIUtil.sha256HashWithSalt(apiKey, salt), apiKeyInfoDTO);
         return apiKey;
     }
 
@@ -3583,11 +3596,30 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         apiKeyInfoDTO.setKeyDisplayName(keyDisplayName);
         apiKeyInfoDTO.setApplicationId(applicationId);
         apiKeyInfoDTO.setKeyType(keyType);
-        apiKeyInfoDTO.setApiKeyProperties(null);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte[] salt = APIUtil.generateSalt();
+        try {
+            byte[] apikeyProperties = apiKeyInfo.getProperties();
+            Properties oldProps = new Properties();
+            if (apikeyProperties != null) {
+                ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(apikeyProperties));
+                oldProps = (Properties) ois.readObject();
+            }
+            Properties props = new Properties();
+            props.setProperty("permittedIP", oldProps.getProperty("permittedIP"));
+            props.setProperty("permittedReferer", oldProps.getProperty("permittedReferer"));
+            props.setProperty("salt", APIUtil.convertBytesToHex(salt));
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(props);
+        } catch (ClassNotFoundException | IOException e) {
+            throw new APIManagementException("Error while generating api key properties: ", e);
+        }
+        byte[] serializedProps = bos.toByteArray();
+        apiKeyInfoDTO.setApiKeyProperties(serializedProps);
         apiKeyInfoDTO.setAuthUser(username);
         apiKeyInfoDTO.setValidityPeriod(apiKeyInfo.getValidityPeriod());
         apiKeyInfoDTO.setLastUsedTime(apiKeyInfo.getLastUsedTime());
-        apiMgtDAO.addAPIKey(APIUtil.sha256HashWithSalt(generateOpaqueKey()), apiKeyInfoDTO);
+        apiMgtDAO.addAPIKey(APIUtil.sha256HashWithSalt(generateOpaqueKey(), salt), apiKeyInfoDTO);
     }
 
     private String generateOpaqueKey() {

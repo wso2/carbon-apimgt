@@ -3368,6 +3368,7 @@ public final class APIConstants {
                 = "subject_entity_revocation_event";
         public static final String CONSUMER_KEY = "consumer_key";
         public static final String API_KEY_HASH = "apiKeyHash";
+        public static final String API_KEY = "apiKey";
         public static final String EVENT_ID = "eventId";
         public static final String TENANT_ID = "tenantId";
         public static final String TENANT_DOMAIN = "tenant_domain";

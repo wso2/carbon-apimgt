@@ -153,6 +153,7 @@ public class APIManagerConfiguration {
             new VectorDBProviderConfigurationDTO();
     private static Properties realtimeNotifierProperties;
     private static Properties persistentNotifierProperties;
+    private static Properties realtimeApiKeyUsageNotifierProperties;
     private static Map<String, String> analyticsProperties;
     private static Map<String, String> persistenceProperties = new HashMap<String, String>();
     private static String tokenRevocationClassName;
@@ -210,6 +211,11 @@ public class APIManagerConfiguration {
     public static Properties getRealtimeTokenRevocationNotifierProperties() {
 
         return realtimeNotifierProperties;
+    }
+
+    public static Properties getRealtimeApiKeyUsageNotifierProperties() {
+
+        return realtimeApiKeyUsageNotifierProperties;
     }
 
     public static Properties getPersistentTokenRevocationNotifiersProperties() {

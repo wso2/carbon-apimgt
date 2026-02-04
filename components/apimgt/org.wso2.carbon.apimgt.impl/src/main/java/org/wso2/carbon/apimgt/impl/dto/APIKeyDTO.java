@@ -11,8 +11,7 @@ public class APIKeyDTO implements Serializable {
     private String keyDisplayName;
     private String applicationId;
     private String keyType;
-
-    private String apiKeyProperties;
+    private byte[] apiKeyProperties;
     private String authUser;
     private long validityPeriod;
     private String lastUsedTime;
@@ -43,11 +42,11 @@ public class APIKeyDTO implements Serializable {
         this.keyType = keyType;
     }
 
-    public String getApiKeyProperties() {
+    public byte[] getApiKeyProperties() {
         return apiKeyProperties;
     }
 
-    public void setApiKeyProperties(String apiKeyProperties) {
+    public void setApiKeyProperties(byte[] apiKeyProperties) {
         this.apiKeyProperties = apiKeyProperties;
     }
 

@@ -9163,9 +9163,8 @@ public final class APIUtil {
      * @param apiKey api key.
      * @return the hashed api key.
      */
-    public static String sha256HashWithSalt(String apiKey) {
+    public static String sha256HashWithSalt(String apiKey, byte[] salt) {
         try {
-            byte[] salt = new byte[16]; // 128-bit salt
             new SecureRandom().nextBytes(salt);
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             digest.update(salt); // Prepend salt
@@ -9184,7 +9183,11 @@ public final class APIUtil {
         }
     }
 
-    private static String convertBytesToHex(byte[] bytes) {
+    public static byte[] generateSalt () {
+        return new byte[16]; // 128-bit salt
+    }
+
+    public static String convertBytesToHex(byte[] bytes) {
         StringBuilder hex = new StringBuilder(bytes.length * 2);
         for (byte b : bytes) {
             hex.append(String.format("%02x", b));

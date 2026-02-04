@@ -16526,11 +16526,15 @@ public class ApiMgtDAO {
             ps.setString(2, keyInfoDTO.getApplicationId());
             ps.setString(3, apiKeyHash);
             ps.setString(4, keyInfoDTO.getKeyType());
-            ps.setString(5, null);
+            ps.setBytes(5, keyInfoDTO.getApiKeyProperties());
             ps.setString(6, keyInfoDTO.getAuthUser());
             ps.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             ps.setLong(8, keyInfoDTO.getValidityPeriod());
-            ps.setString(9, "NOT_USED");
+            if (keyInfoDTO.getLastUsedTime() == null) {
+                ps.setString(9, "NOT_USED");
+            } else {
+                ps.setString(9, keyInfoDTO.getLastUsedTime());
+            }
             ps.setString(10, "ACTIVE");
 
             ps.executeUpdate();
@@ -16586,6 +16590,49 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Returns a list of all api keys
+     *
+     * @throws APIManagementException
+     */
+    public List<APIKeyInfo> getAllAPIKeys() throws APIManagementException {
+
+        List<APIKeyInfo> apiKeyInfoList = new ArrayList<APIKeyInfo>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // This query to access the AM_API_KEY table
+            String sqlQuery = SQLConstants.GET_ALL_API_KEYS_SQL;
+            // Retrieving data from the AM_API_KEY table
+            ps = conn.prepareStatement(sqlQuery);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    APIKeyInfo keyInfo = new APIKeyInfo();
+                    keyInfo.setKeyDisplayName(rs.getString("API_KEY_NAME"));
+                    keyInfo.setCreatedTime(rs.getTimestamp("TIME_CREATED").toString());
+                    keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
+                    keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
+                    keyInfo.setApplicationId(rs.getString("APPLICATION_ID"));
+                    keyInfo.setKeyType(rs.getString("KEY_TYPE"));
+                    keyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
+                    keyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
+                    keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
+                    keyInfo.setStatus(rs.getString("STATUS"));
+                    apiKeyInfoList.add(keyInfo);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get all API keys", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+        return apiKeyInfoList;
+    }
+
+    /**
      * Returns the api key specified by the key display name
      *
      * @param applicationId Application ID
@@ -16617,6 +16664,7 @@ public class ApiMgtDAO {
                 keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
                 keyInfo.setApplicationId(applicationId);
                 keyInfo.setKeyType(keyType);
+                keyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
             }
         } catch (SQLException e) {
             handleException("Failed to get the API key details for " + keyDisplayName, e);
@@ -16654,6 +16702,37 @@ public class ApiMgtDAO {
             conn.commit();
         } catch (SQLException e) {
             handleException("Failed to revoke the API key", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
+    /**
+     * Update last used time of an API key
+     *
+     * @param apiKeyHash Hash value of the API key
+     * @param lastUsedTime LAst used time
+     * @throws APIManagementException
+     */
+    public void updateAPIKeyUsage(String apiKeyHash, String lastUsedTime) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // This query to update an entry from the AM_API_KEY table
+            String sqlQuery = SQLConstants.UPDATE_API_KEY_LAST_USED_SQL;
+            // Updating data from the AM_API_KEY table by setting LAST_USED column
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, lastUsedTime);
+            ps.setString(2, apiKeyHash);
+
+            ps.executeUpdate();
+            conn.commit();
+        } catch (SQLException e) {
+            handleException("Failed to update last used time for the API key", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
