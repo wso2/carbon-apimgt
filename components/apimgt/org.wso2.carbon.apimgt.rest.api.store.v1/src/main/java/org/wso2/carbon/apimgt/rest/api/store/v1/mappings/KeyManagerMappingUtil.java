@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.KeyManagerApplicationConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationConfigurationConstraintDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.KeyManagerListDTO;
 
@@ -145,6 +146,11 @@ public class KeyManagerMappingUtil {
             if (enableApplicationScopesKM instanceof Boolean) {
                 enableApplicationScopes = (boolean) enableApplicationScopesKM;
             }
+            Map<String, Object> savedConstraints = null;
+            Object constraintsObj = dto.getAdditionalProperties().get(APIConstants.KeyManager.CONSTRAINTS);
+            if (constraintsObj instanceof Map) {
+                savedConstraints = (Map<String, Object>) constraintsObj;
+            }
             for (ConfigurationDto configurationDto : keyManagerConnectorConfiguration.getApplicationConfigurations()) {
                 KeyManagerApplicationConfigurationDTO keyManagerApplicationConfigurationDTO =
                         new KeyManagerApplicationConfigurationDTO();
@@ -160,10 +166,79 @@ public class KeyManagerMappingUtil {
                     keyManagerApplicationConfigurationDTO.setTooltip(configurationDto.getTooltip());
                     keyManagerApplicationConfigurationDTO.setDefault(configurationDto.getDefaultValue());
                     keyManagerApplicationConfigurationDTO.setValues(configurationDto.getValues());
+                    keyManagerApplicationConfigurationDTO.setConstraint(
+                            getConstraintForField(configurationDto, savedConstraints));
+
                     keyManagerApplicationConfigurationDTOS.add(keyManagerApplicationConfigurationDTO);
                 }
             }
         }
         return keyManagerApplicationConfigurationDTOS;
+    }
+
+    /**
+     * Gets constraint configuration for a specific field.
+     *
+     * @param configurationDto Field configuration
+     * @param savedConstraints Saved constraints from key manager instance (can be null)
+     * @return Constraint DTO or null if no constraint exists
+     */
+    private static ApplicationConfigurationConstraintDTO getConstraintForField(
+            ConfigurationDto configurationDto, Map<String, Object> savedConstraints) {
+        
+        // If user has saved constraints, use only those
+        if (savedConstraints != null) {
+            return getSavedConstraintFromKeyManager(configurationDto.getName(), savedConstraints);
+        }
+        
+        // Otherwise, use default constraint from the connector
+        return getDefaultConstraintFromConnector(configurationDto);
+    }
+
+    /**
+     * Retrieves saved constraint from key manager instance for a specific field.
+     */
+    private static ApplicationConfigurationConstraintDTO getSavedConstraintFromKeyManager(
+            String fieldName, Map<String, Object> savedConstraints) {
+
+        if (!savedConstraints.containsKey(fieldName)) {
+            return null;
+        }
+        Object constraintObj = savedConstraints.get(fieldName);
+        if (!(constraintObj instanceof Map)) {
+            return null;
+        }
+        Map<String, Object> constraintMap = (Map<String, Object>) constraintObj;
+        return createConstraintDTO(
+                (String) constraintMap.get("type"),
+                constraintMap.get("value")
+        );
+    }
+
+    /**
+     * Retrieves default constraint from connector.
+     */
+    private static ApplicationConfigurationConstraintDTO getDefaultConstraintFromConnector(ConfigurationDto configurationDto) {
+
+        if (!configurationDto.hasConstraint()) {
+            return null;
+        }
+        return createConstraintDTO(
+                configurationDto.getConstraint().getConstraintType().toString(),
+                configurationDto.getConstraint().getDefaultConstraints()
+        );
+    }
+
+    /**
+     * Creates a constraint DTO with the given type and value.
+     */
+    private static ApplicationConfigurationConstraintDTO createConstraintDTO(String type, Object value) {
+        if (type == null && value == null) {
+            return null;
+        }
+        ApplicationConfigurationConstraintDTO constraintDTO = new ApplicationConfigurationConstraintDTO();
+        constraintDTO.setType(type);
+        constraintDTO.setValue(value);
+        return constraintDTO;
     }
 }

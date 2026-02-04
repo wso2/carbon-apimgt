@@ -3052,6 +3052,7 @@ public final class APIConstants {
         public static final String EVENT_HUB_CONFIGURATIONS = "EventHubConfigurations";
         public static final String KEY_MANAGER = "KeyManager";
         public static final String APPLICATION_CONFIGURATIONS = "ApplicationConfigurations";
+        public static final String CONSTRAINTS = "constraints";
         public static final String EVENT_RECEIVER_CONFIGURATION = "EventReceiverConfiguration";
 
         public static final String ENABLE = "Enable";
