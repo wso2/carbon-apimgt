@@ -23,6 +23,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationConfigValidator;
+import org.wso2.carbon.apimgt.api.model.AppConfigConstraintType;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -31,11 +35,11 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.kmvalidator.KeyManagerApplicationConfigValidatorFactory;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import com.google.gson.Gson;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class contains REST API Store related utility operations
@@ -227,4 +231,74 @@ public class RestAPIStoreUtils {
         return false;
     }
 
+    /**
+     * Validates the application configuration against the constraints defined in the Key Manager.
+     *
+     * @param keyManager           Key Manager name or UUID
+     * @param additionalProperties Additional properties from the request (Map or JSON string)
+     * @throws APIManagementException If validation fails
+     */
+    public static void validateKeyManagerAppConfiguration(String keyManager, Object additionalProperties) throws APIManagementException {
+        
+        KeyManagerConfigurationDTO kmConfig = ApiMgtDAO.getInstance().getKeyManagerConfigurationByUUID(keyManager);
+        if (kmConfig == null) {
+            return;
+        }
+        Map<String, Object> kmProps = kmConfig.getAdditionalProperties();
+        if (kmProps == null) {
+            return;
+        }
+        Object constraintsObj = kmProps.get(APIConstants.KeyManager.CONSTRAINTS);
+        if (constraintsObj == null) {
+            return;
+        }
+        Map<String, Map<String, Object>> constraintsMap;
+        if (constraintsObj instanceof Map) {
+            constraintsMap = (Map<String, Map<String, Object>>) constraintsObj;
+        } else {
+             return;
+        }
+        Map<String, Object> inputProps;
+        if (additionalProperties instanceof Map) {
+            inputProps = (Map<String, Object>) additionalProperties;
+        } else {
+            return;
+        }
+        // for each of constraint check if that field (the key) exist in additionalProperties
+        for (Map.Entry<String, Map<String, Object>> entry : constraintsMap.entrySet()) {
+            String fieldName = entry.getKey();
+            Map<String, Object> constraintConfig = entry.getValue();
+            if (constraintConfig == null) {
+                continue;
+            }
+            if (!inputProps.containsKey(fieldName)) {
+                throw new APIManagementException("Missing input for constrained property: " + fieldName,
+                        ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES,
+                                "Missing input for constrained property: " + fieldName));
+            }
+            Object inputValue = inputProps.get(fieldName);
+            String constraintTypeStr = (String) constraintConfig.get("type");
+            AppConfigConstraintType constraintType = AppConfigConstraintType.fromString(constraintTypeStr);
+            if (constraintType == null) {
+                // Ignore unknown types
+                continue;
+            }
+            KeyManagerApplicationConfigValidator validator = KeyManagerApplicationConfigValidatorFactory
+                    .getValidator(constraintType);
+            if (validator != null) {
+                Object constraintValue = constraintConfig.get("value");
+                Map<String, Object> constraints = Collections.emptyMap();
+                if (constraintValue instanceof Map) {
+                    constraints = (Map<String, Object>) constraintValue;
+                } else if (constraintValue != null) {
+                    constraints = new Gson().fromJson(constraintValue.toString(), Map.class);
+                }
+                if (!validator.validate(inputValue, constraints)) {
+                    throw new APIManagementException(validator.getErrorMessage(),
+                            ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES,
+                                    validator.getErrorMessage()));
+                }
+            }
+        }
+    }
 }
