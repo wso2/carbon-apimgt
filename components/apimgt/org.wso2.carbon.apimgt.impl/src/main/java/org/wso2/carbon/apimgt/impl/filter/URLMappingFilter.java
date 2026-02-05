@@ -29,16 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.FileInputStream;
 
-/* TODO probably need to register as whiteboard pattern
-import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
-
-@Component(service = Filter.class,
-    property = {
-        // Apply to our specific servlet pattern
-        HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN + "=/test",
-        HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME + "=LoggingFilter"
-    })
-*/
 public class URLMappingFilter implements Filter {
 
     private FilterConfig filterConfig;

@@ -125,7 +125,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>
-            <artifactId>swagger-inflector-oas3</artifactId>
+            <artifactId>swagger-inflector-oas3-jdk21</artifactId>
         </dependency>
         <dependency>
             <groupId>com.damnhandy.wso2</groupId>
@@ -281,10 +281,10 @@
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}
+                                    org.wso2.orbit.io.swagger:swagger-inflector-oas3-jdk21:${swagger.inflector.oas3.version}
                                 </bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
-                                <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3-jdk21:${swagger.inflector.oas3.version}</bundleDef>
 
                                 <bundleDef>org.wso2.orbit.com.squareup.okio:okio:${okio.wso2.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.squareup.okhttp:okhttp:${okhttp.wso2.version}</bundleDef>
