@@ -294,9 +294,9 @@ public class RestAPIStoreUtils {
                     constraints = new Gson().fromJson(constraintValue.toString(), Map.class);
                 }
                 if (!validator.validate(inputValue, constraints)) {
-                    throw new APIManagementException(validator.getErrorMessage(),
-                            ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES,
-                                    validator.getErrorMessage()));
+                    String fieldError = "Property '" + fieldName + "' is invalid. " + validator.getErrorMessage();
+                    throw new APIManagementException(fieldError,
+                            ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, fieldError));
                 }
             }
         }
