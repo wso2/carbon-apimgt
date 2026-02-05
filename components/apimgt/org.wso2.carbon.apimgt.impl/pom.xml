@@ -657,9 +657,6 @@
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Provide-Capability>
                             osgi.service;objectClass=org.wso2.carbon.apimgt.impl.APIManagerConfigurationService,
-                            osgi.service;objectClass=org.wso2.carbon.apimgt.eventing.EventPublisherFactory,
-                            osgi.service;objectClass=org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService,
-                            osgi.service;objectClass=org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration,
                             osgi.service;objectClass=org.wso2.carbon.apimgt.impl.jwt.JWTValidationService,
                             osgi.service;objectClass=org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService,
                             osgi.service;objectClass=org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService,

@@ -56,6 +56,9 @@
                         <Import-Package>
                             *;resolution:=optional
                         </Import-Package>
+                        <Provide-Capability>
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.eventing.EventPublisherFactory
+                        </Provide-Capability>
                     </instructions>
                 </configuration>
             </plugin>
