@@ -4,17 +4,17 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.token.APIKeyLastUsedNotifier;
-import org.wso2.carbon.apimgt.notification.APIKeyLastUsedNotifierImpl;
+import org.wso2.carbon.apimgt.impl.token.OpaqueAPIKeyNotifier;
+import org.wso2.carbon.apimgt.notification.OpaqueAPIKeyNotifierImpl;
 
 /**
- * This class is used to activate Api key last used time notification bundle.
+ * This class is used to activate Api key info notification bundle.
  */
-@Component(name = "apim.api.key.last.used.notifier.component", immediate = true)
-public class ApiKeyLastUsedNotifierComponent {
+@Component(name = "apim.api.key.notifier.component", immediate = true)
+public class OpaqueApiKeyNotifierComponent {
     @Activate
     protected void activate() {
-        APIKeyLastUsedNotifier notifier = new APIKeyLastUsedNotifierImpl();
+        OpaqueAPIKeyNotifier notifier = new OpaqueAPIKeyNotifierImpl();
         ServiceReferenceHolder.getInstance().setApiKeyLastUsedNotifier(notifier);
     }
 

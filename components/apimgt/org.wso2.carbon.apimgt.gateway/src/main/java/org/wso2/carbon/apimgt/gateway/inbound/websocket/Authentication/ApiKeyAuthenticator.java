@@ -110,7 +110,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                             apiKey, tenantDomain, payload);
                     ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(payload, inboundMessageContext.getUserIP(),
                             apiContext, apiVersion, inboundMessageContext.getRequestHeaders().
-                                    get(APIMgtGatewayConstants.REFERER));
+                                    get(APIMgtGatewayConstants.REFERER), null);
                     APIKeyValidationInfoDTO apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext, apiVersion,
                             payload, splitToken[0]);
                     String endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO, jwtConfigurationDto,

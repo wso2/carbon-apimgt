@@ -696,7 +696,11 @@ public class GatewayUtils {
         AuthenticationContext authContext = new AuthenticationContext();
         authContext.setAuthenticated(true);
         authContext.setApiKey(tokenSignature);
+        if (payload != null) {
         authContext.setUsername(payload.getSubject());
+        } else {
+            authContext.setUsername(apiKeyValidationInfoDTO.getEndUserName());
+        }
 
         if (apiKeyValidationInfoDTO != null) {
             authContext.setApiTier(apiKeyValidationInfoDTO.getApiTier());
@@ -720,7 +724,7 @@ public class GatewayUtils {
             authContext.setGraphQLMaxComplexity(apiKeyValidationInfoDTO.getGraphQLMaxComplexity());
         }
         // Set JWT token sent to the backend
-        if (StringUtils.isNotEmpty(endUserToken)) {
+        if (StringUtils.isNotEmpty(endUserToken) && endUserToken != null) {
             authContext.setCallerToken(endUserToken);
         }
         return authContext;

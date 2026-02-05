@@ -51,8 +51,12 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
 import javax.cache.Cache;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Properties;
 
 /**
  * This class contains the common utility methods required for API Key authentication.
@@ -279,11 +283,28 @@ public class ApiKeyAuthenticatorUtils {
      * @throws APISecurityException If the API Key is not allowed to access the API.
      */
     public static void validateAPIKeyRestrictions(JWTClaimsSet payload, String clientIP, String apiContext,
-                                                  String apiVersion, String referer) throws APISecurityException {
+                                                  String apiVersion, String referer, byte[] additionalProperties)
+            throws APISecurityException, APIManagementException {
 
         String permittedIPList = null;
-        if (payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_IP) != null) {
-            permittedIPList = (String) payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_IP);
+        String permittedRefererList = null;
+        if (payload != null) {
+            if (payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_IP) != null) {
+                permittedIPList = (String) payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_IP);
+            }
+            if (payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_REFERER) != null) {
+                permittedRefererList = (String) payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_REFERER);
+            }
+        } else {
+            try {
+                // Taking values from the DB for an opaque API key
+                ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(additionalProperties));
+                Properties props = (Properties) ois.readObject();
+                permittedIPList = props.getProperty("permittedIP");
+                permittedRefererList = props.getProperty("permittedReferer");
+            } catch (IOException | ClassNotFoundException e) {
+                throw new APIManagementException("Error while parsing API key additional properties", e);
+            }
         }
         if (StringUtils.isNotEmpty(permittedIPList)) {
             // Validate client IP against permitted IPs
@@ -303,11 +324,6 @@ public class ApiKeyAuthenticatorUtils {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                         "Access forbidden for the invocations");
             }
-        }
-
-        String permittedRefererList = null;
-        if (payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_REFERER) != null) {
-            permittedRefererList = (String) payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_REFERER);
         }
         if (StringUtils.isNotEmpty(permittedRefererList)) {
             // Validate http referer against the permitted referrers
