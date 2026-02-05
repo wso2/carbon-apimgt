@@ -827,6 +827,7 @@ public final class APIConstants {
     public static final String BLOCKING_CONDITIONS_STREAM_ID = "org.wso2.blocking.request.stream:1.0.0";
     public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.apimgt.token.revocation.stream:1.0.0";
     public static final String API_KEY_USAGE_STREAM_ID = "org.wso2.apimgt.api.key.usage.stream:1.0.0";
+    public static final String API_KEY_INFO_STREAM_ID = "org.wso2.apimgt.api.key.info.stream:1.0.0";
     public static final String CACHE_INVALIDATION_STREAM_ID = "org.wso2.apimgt.cache.invalidation.stream:1.0.0";
     public static final String NOTIFICATION_STREAM_ID = "org.wso2.apimgt.notification.stream:1.0.0";
     public static final String WEBHOOKS_SUBSCRIPTION_STREAM_ID = "org.wso2.apimgt.webhooks.request.stream:1.0.0";
@@ -2333,6 +2334,7 @@ public final class APIConstants {
     public static final String BLOCK_CONDITION_TYPE = "conditionType";
     public static final String BLOCK_CONDITION_VALUE = "conditionValue";
     public static final String REVOKED_TOKEN_KEY = "revokedToken";
+    public static final String ENCODED_API_KEY_INFO = "encodedApiKeyInfo";
     public static final String REVOKED_TOKEN_EXPIRY_TIME = "expiryTime";
     public static final String EVENT_TYPE = "eventType";
     public static final String EVENT_WAITING_TIME_CONFIG = "EventWaitingTime";
@@ -3286,6 +3288,7 @@ public final class APIConstants {
         public static final String TOPIC_CACHE_INVALIDATION = "cacheInvalidation";
         public static final String TOPIC_KEY_MANAGER = "keyManager";
         public static final String TOPIC_NOTIFICATION = "notification";
+        public static final String OPAQUE_API_KEY_INFO = "opaqueApiKeyInfo";
         public static final String TOPIC_ASYNC_WEBHOOKS_DATA = "asyncWebhooksData";
     }
 
@@ -3360,8 +3363,10 @@ public final class APIConstants {
 
         public static final String TOKEN_TYPE = "token_type";
         public static final String USAGE_TYPE = "usage_type";
+        public static final String INFO_TYPE = "info_type";
         public static final String TOKEN_REVOCATION_EVENT = "token_revocation";
-        public static final String API_KEY_USAGE_EVENT = "key_usage";
+        public static final String API_KEY_USAGE_EVENT = "api_key_usage";
+        public static final String API_KEY_INFO_EVENT = "api_key_info";
         public static final String CONSUMER_APP_REVOCATION_EVENT
                 = "consumer_app_revocation_event";
         public static final String SUBJECT_ENTITY_REVOCATION_EVENT
@@ -3369,6 +3374,13 @@ public final class APIConstants {
         public static final String CONSUMER_KEY = "consumer_key";
         public static final String API_KEY_HASH = "apiKeyHash";
         public static final String API_KEY = "apiKey";
+        public static final String SALT = "salt";
+        public static final String LOOKUP_KEY = "lookupKey";
+        public static final String KEY_TYPE = "keyType";
+        public static final String ADDITIONAL_PROPERTIES = "additionalProperties";
+        public static final String APPLICATION_ID = "applicationId";
+        public static final String VALIDITY_PERIOD = "validityPeriod";
+        public static final String STATUS = "status";
         public static final String EVENT_ID = "eventId";
         public static final String TENANT_ID = "tenantId";
         public static final String TENANT_DOMAIN = "tenant_domain";

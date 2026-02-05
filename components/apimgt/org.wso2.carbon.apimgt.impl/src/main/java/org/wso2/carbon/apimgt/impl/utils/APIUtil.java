@@ -320,6 +320,8 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLContext;
 import java.security.cert.X509Certificate;
 import java.text.Normalizer;
@@ -9180,6 +9182,26 @@ public final class APIUtil {
         } catch (NoSuchAlgorithmException e) {
             // SHA-256 is always available in Java
             throw new IllegalStateException("SHA-256 algorithm not found", e);
+        }
+    }
+
+    /**
+     * Generate deterministic lookup key for an opaque API key.
+     *
+     * @param apiKey        Plain text API key
+     * @param sharedSecret Shared secret (same in CP and GW)
+     * @return Base64 encoded Lookup key
+     */
+    public static String generateLookupKey(String apiKey, String sharedSecret) throws APIManagementException {
+        try {
+            Mac mac = Mac.getInstance(APIConstants.HMAC_SHA_256);
+            SecretKeySpec keySpec = new SecretKeySpec(sharedSecret.getBytes(StandardCharsets.UTF_8),
+                    APIConstants.HMAC_SHA_256);
+            mac.init(keySpec);
+
+            return Base64.encodeBase64URLSafeString(mac.doFinal(apiKey.getBytes(StandardCharsets.UTF_8)));
+        } catch (IllegalStateException | NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new APIManagementException("Error generating API key lookup key", e);
         }
     }
 

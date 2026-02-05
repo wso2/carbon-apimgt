@@ -21,15 +21,21 @@ package org.wso2.carbon.apimgt.impl.token;
 import java.util.Properties;
 
 /**
- * This interface can be used to send a last used time of an api key on realtime or to a persistent storage.
+ * This interface can be used to send opaque api key info on realtime or to a persistent storage.
  */
-public interface APIKeyLastUsedNotifier {
+public interface OpaqueAPIKeyNotifier {
 
     /**
      * Method to send the api key last used time on realtime
      * @param properties additional properties to send
      */
-    void sendMessageOnRealtime(Properties properties);
+    void sendLastUsedTimeOnRealtime(Properties properties);
+
+    /**
+     * Method to send the api key info on realtime
+     * @param properties additional properties to send
+     */
+    void sendApiKeyInfoOnRealtime(Properties properties);
 
     /**
      * Initialization properties from configuration

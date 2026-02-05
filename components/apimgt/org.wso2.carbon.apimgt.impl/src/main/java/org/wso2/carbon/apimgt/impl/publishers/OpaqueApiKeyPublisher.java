@@ -22,43 +22,53 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.token.APIKeyLastUsedNotifier;
+import org.wso2.carbon.apimgt.impl.token.OpaqueAPIKeyNotifier;
 
 import java.util.Properties;
 
 /**
- * Publisher class to notify the api key usage
+ * Publisher class to notify api key info
  */
-public class ApiKeyUsagePublisher {
+public class OpaqueApiKeyPublisher {
 
-    private static final Log log = LogFactory.getLog(ApiKeyUsagePublisher.class);
+    private static final Log log = LogFactory.getLog(OpaqueApiKeyPublisher.class);
 
-    private static ApiKeyUsagePublisher apiKeyUsagePublisher = null;
+    private static OpaqueApiKeyPublisher opaqueApiKeyPublisher = null;
     private boolean realtimeNotifierEnabled;
-    private APIKeyLastUsedNotifier apiKeyLastUsedNotifier;
+    private OpaqueAPIKeyNotifier opaqueApiKeyNotifier;
 
-    private ApiKeyUsagePublisher() {
+    private OpaqueApiKeyPublisher() {
 
         Properties realtimeNotifierProperties = APIManagerConfiguration.getRealtimeApiKeyUsageNotifierProperties();
         realtimeNotifierEnabled = realtimeNotifierProperties != null;
-        apiKeyLastUsedNotifier = ServiceReferenceHolder.getInstance().getApiKeyLastUsedNotifier();
-        apiKeyLastUsedNotifier.init(realtimeNotifierProperties);
-        log.debug("API key last used notifier initialized");
+        opaqueApiKeyNotifier = ServiceReferenceHolder.getInstance().getOpaqueApiKeyNotifier();
+        opaqueApiKeyNotifier.init(realtimeNotifierProperties);
+        log.debug("Opaque API key notifier initialized");
     }
 
-    public static synchronized ApiKeyUsagePublisher getInstance() {
+    public static synchronized OpaqueApiKeyPublisher getInstance() {
 
-        if (apiKeyUsagePublisher == null) {
-            apiKeyUsagePublisher = new ApiKeyUsagePublisher();
+        if (opaqueApiKeyPublisher == null) {
+            opaqueApiKeyPublisher = new OpaqueApiKeyPublisher();
         }
-        return apiKeyUsagePublisher;
+        return opaqueApiKeyPublisher;
     }
 
     public void publishApiKeyUsageEvents(Properties properties) {
 
         if (realtimeNotifierEnabled) {
             log.debug("Realtime message sending is enabled");
-            apiKeyLastUsedNotifier.sendMessageOnRealtime(properties);
+            opaqueApiKeyNotifier.sendLastUsedTimeOnRealtime(properties);
+        } else {
+            log.debug("Realtime message sending isn't enabled or configured properly");
+        }
+    }
+
+    public void publishApiKeyInfoEvents(Properties properties) {
+
+        if (realtimeNotifierEnabled) {
+            log.debug("Realtime message sending is enabled");
+            opaqueApiKeyNotifier.sendApiKeyInfoOnRealtime(properties);
         } else {
             log.debug("Realtime message sending isn't enabled or configured properly");
         }

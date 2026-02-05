@@ -22,6 +22,8 @@ public class APIKeyInfo {
     private String keyType;
     private String lastUsedTime;
     private String createdTime;
+    private String salt;
+    private String lookupKey;
     private long validityPeriod;
     private byte[] properties;
     private String apiKeyHash;
@@ -66,6 +68,22 @@ public class APIKeyInfo {
 
     public void setCreatedTime(String createdTime) {
         this.createdTime = createdTime;
+    }
+
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
+
+    public String getLookupKey() {
+        return lookupKey;
+    }
+
+    public void setLookupKey(String lookupKey) {
+        this.lookupKey = lookupKey;
     }
 
     public long getValidityPeriod() {

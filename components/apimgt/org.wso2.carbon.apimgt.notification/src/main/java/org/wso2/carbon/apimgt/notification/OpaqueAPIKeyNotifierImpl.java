@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.eventing.EventPublisherEvent;
 import org.wso2.carbon.apimgt.eventing.EventPublisherType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.token.APIKeyLastUsedNotifier;
+import org.wso2.carbon.apimgt.impl.token.OpaqueAPIKeyNotifier;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.nio.charset.StandardCharsets;
@@ -35,13 +35,13 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Implemented class for APIKeyLastUsedNotifier interface
- * SendMessageOnRealtime() method is implemented
- * SendMessageToPersistentStorage() method is implemented
+ * Implemented class for OpaqueAPIKeyNotifier interface
+ * sendLastUsedTimeOnRealtime() method is implemented
+ * sendApiKeyInfoOnRealtime() method is implemented
  */
-public class APIKeyLastUsedNotifierImpl implements APIKeyLastUsedNotifier {
+public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
 
-    private static final Log log = LogFactory.getLog(APIKeyLastUsedNotifierImpl.class);
+    private static final Log log = LogFactory.getLog(OpaqueAPIKeyNotifierImpl.class);
     protected static final String DEFAULT_TTL = "3600";
     protected Properties realTimeNotifierProperties;
 
@@ -51,30 +51,59 @@ public class APIKeyLastUsedNotifierImpl implements APIKeyLastUsedNotifier {
      * @param properties additional properties to send
      */
     @Override
-    public void sendMessageOnRealtime(Properties properties) {
+    public void sendLastUsedTimeOnRealtime(Properties properties) {
 
         Map<String, String> apiKeyLastUsedTimeMap = new HashMap<>();
-        apiKeyLastUsedTimeMap.put(APIConstants.NotificationEvent.API_KEY_HASH,
-                properties.getProperty(APIConstants.NotificationEvent.API_KEY_HASH));
+        apiKeyLastUsedTimeMap.put(APIConstants.NotificationEvent.API_KEY,
+                properties.getProperty(APIConstants.NotificationEvent.API_KEY));
         apiKeyLastUsedTimeMap.put(APIConstants.NotificationEvent.LAST_USED_TIME,
                 properties.getProperty(APIConstants.NotificationEvent.LAST_USED_TIME));
         String encodedLastUsedTimeEvent = base64Encode(apiKeyLastUsedTimeMap);
         sendApiKeyUsageOnRealtime(encodedLastUsedTimeEvent, properties);
     }
 
-    private String base64Encode(Map<String, String> apiKeyLastUsedTimeMap) {
+    /**
+     * Method to publish the api key info on to the realtime message broker
+     *
+     * @param properties additional properties to send
+     */
+    @Override
+    public void sendApiKeyInfoOnRealtime(Properties properties) {
 
-        String encodedLastUsedTimeEvent = null;
+        Map<String, String> apiKeyInfoMap = new HashMap<>();
+        apiKeyInfoMap.put(APIConstants.NotificationEvent.API_KEY_HASH,
+                properties.getProperty(APIConstants.NotificationEvent.API_KEY_HASH));
+        apiKeyInfoMap.put(APIConstants.NotificationEvent.SALT,
+                properties.getProperty(APIConstants.NotificationEvent.SALT));
+        apiKeyInfoMap.put(APIConstants.NotificationEvent.KEY_TYPE,
+                properties.getProperty(APIConstants.NotificationEvent.KEY_TYPE));
+        apiKeyInfoMap.put(APIConstants.NotificationEvent.APPLICATION_ID,
+                properties.getProperty(APIConstants.NotificationEvent.APPLICATION_ID));
+        apiKeyInfoMap.put(APIConstants.NotificationEvent.STATUS,
+                properties.getProperty(APIConstants.NotificationEvent.STATUS));
+        apiKeyInfoMap.put(APIConstants.NotificationEvent.VALIDITY_PERIOD,
+                properties.getProperty(APIConstants.NotificationEvent.VALIDITY_PERIOD));
+        apiKeyInfoMap.put(APIConstants.NotificationEvent.LOOKUP_KEY,
+                properties.getProperty(APIConstants.NotificationEvent.LOOKUP_KEY));
+        apiKeyInfoMap.put(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES,
+                (String) properties.get(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES));
+        String encodedApiKeyInfoEvent = base64Encode(apiKeyInfoMap);
+        sendApiKeyInfoOnRealtime(encodedApiKeyInfoEvent, properties);
+    }
+
+    private String base64Encode(Map<String, String> apiKeyMap) {
+
+        String encodedApiKeyEvent = null;
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            String lastUsedTimeJson = objectMapper.writeValueAsString(apiKeyLastUsedTimeMap);
+            String apiKeyMapJson = objectMapper.writeValueAsString(apiKeyMap);
             byte[] encodedLastUsedTimeStream =
-                    Base64.encodeBase64(lastUsedTimeJson.getBytes(StandardCharsets.UTF_8));
-            encodedLastUsedTimeEvent = new String(encodedLastUsedTimeStream, StandardCharsets.UTF_8);
+                    Base64.encodeBase64(apiKeyMapJson.getBytes(StandardCharsets.UTF_8));
+            encodedApiKeyEvent = new String(encodedLastUsedTimeStream, StandardCharsets.UTF_8);
         } catch (JsonProcessingException e) {
             log.error("Error while encoding api key last used time event for api key last used time event.");
         }
-        return encodedLastUsedTimeEvent;
+        return encodedApiKeyEvent;
     }
 
     private void sendApiKeyUsageOnRealtime(String encodedLastUsedTimeEvent, Properties properties) {
@@ -101,6 +130,28 @@ public class APIKeyLastUsedNotifierImpl implements APIKeyLastUsedNotifier {
         apiKeyUsageEvent.setOrgId(orgId);
         APIUtil.publishEvent(EventPublisherType.API_KEY_USAGE, apiKeyUsageEvent,
                 apiKeyUsageEvent.toString());
+    }
+
+    private void sendApiKeyInfoOnRealtime(String encodedApiKeyInfo, Properties properties) {
+        // Variables related to Realtime Notifier
+        String type = null;
+        String realtimeNotifierTTL = realTimeNotifierProperties.getProperty("ttl", DEFAULT_TTL);
+        String eventId = properties.getProperty(APIConstants.NotificationEvent.EVENT_ID);
+        if (APIConstants.NotificationEvent.API_KEY_INFO_EVENT.equals(
+                properties.getProperty(APIConstants.NotificationEvent.EVENT_TYPE))) {
+            type = properties.getProperty(APIConstants.NotificationEvent.INFO_TYPE);
+        } else {
+            type = properties.getProperty(APIConstants.NotificationEvent.EVENT_TYPE);
+        }
+        String orgId = properties.getProperty(APIConstants.NotificationEvent.ORG_ID);
+        int tenantId = (int) properties.get(APIConstants.NotificationEvent.TENANT_ID);
+        Object[] objects =
+                new Object[]{eventId, encodedApiKeyInfo, realtimeNotifierTTL, tenantId};
+        EventPublisherEvent apiKeyInfoEvent = new EventPublisherEvent(APIConstants.API_KEY_INFO_STREAM_ID,
+                System.currentTimeMillis(), objects);
+        apiKeyInfoEvent.setOrgId(orgId);
+        APIUtil.publishEvent(EventPublisherType.API_KEY_INFO, apiKeyInfoEvent,
+                apiKeyInfoEvent.toString());
     }
 
     @Override
