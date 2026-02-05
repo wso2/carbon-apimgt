@@ -280,9 +280,6 @@
                                 <bundleDef>org.wso2.wsdl4j:wsdl4j.wso2:${wsdl4j.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}
                                 </bundleDef>
-                                <bundleDef>
-                                    org.wso2.orbit.io.swagger:swagger-inflector-oas3-jdk21:${swagger.inflector.oas3.version}
-                                </bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3-jdk21:${swagger.inflector.oas3.version}</bundleDef>
 
