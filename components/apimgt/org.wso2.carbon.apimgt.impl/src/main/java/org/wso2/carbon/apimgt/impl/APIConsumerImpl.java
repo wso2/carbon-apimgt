@@ -4378,7 +4378,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
                 // populate relevant external info environment
                 Map<String, Environment> environments = getGatewayEnvironmentsByOrganization(organization, username);
-                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments.toString(), organization));
+                String environmentsString = String.join(",", environments.keySet());
+                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentsString, organization));
                 //CORS . if null is returned, set default config from the configuration
                 if (api.getCorsConfiguration() == null) {
                     api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
