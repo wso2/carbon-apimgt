@@ -668,6 +668,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         Application application;
         int validityPeriod;
+        String keyDisplayName = null;
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
             if ((application = apiConsumer.getApplicationByUUID(applicationId)) == null) {
@@ -688,7 +689,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     } else {
                         validityPeriod = -1;
                     }
-
+                    if (body != null && body.getKeyDisplayName() != null) {
+                        keyDisplayName = body.getKeyDisplayName();
+                    }
                     String restrictedIP = null;
                     String restrictedReferer = null;
 
@@ -702,7 +705,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         }
                     }
                     String apiKey = apiConsumer.generateApiKey(application, userName, validityPeriod,
-                            restrictedIP, restrictedReferer);
+                            restrictedIP, restrictedReferer, keyDisplayName);
                     APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKey, validityPeriod);
                     return Response.ok().entity(apiKeyDto).build();
                 }

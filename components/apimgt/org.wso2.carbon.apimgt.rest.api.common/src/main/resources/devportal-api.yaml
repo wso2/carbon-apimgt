@@ -6206,6 +6206,10 @@ components:
       title: API Key generation request object
       type: object
       properties:
+        keyDisplayName:
+          type: string
+          description: API Key name
+          example: Test_Key
         validityPeriod:
           type: integer
           description: Token validity period
