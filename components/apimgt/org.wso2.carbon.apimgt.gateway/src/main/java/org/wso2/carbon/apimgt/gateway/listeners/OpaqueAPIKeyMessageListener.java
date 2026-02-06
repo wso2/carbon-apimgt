@@ -88,7 +88,7 @@ public class OpaqueAPIKeyMessageListener implements MessageListener {
             apiKeyInfo.setKeyType((String) opaqueApiKeyInfoMap.get(APIConstants.NotificationEvent.KEY_TYPE));
             apiKeyInfo.setValidityPeriod((Long) opaqueApiKeyInfoMap.get(APIConstants.NotificationEvent.VALIDITY_PERIOD));
             apiKeyInfo.setStatus((String) opaqueApiKeyInfoMap.get(APIConstants.NotificationEvent.STATUS));
-            apiKeyInfo.setProperties((byte[]) opaqueApiKeyInfoMap.get(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES));
+            apiKeyInfo.setAdditionalProperties(((String) opaqueApiKeyInfoMap.get(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES)));
             DataHolder.getInstance().addOpaqueAPIKeyInfo(apiKeyInfo);
         }
     }

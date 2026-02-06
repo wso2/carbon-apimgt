@@ -20,8 +20,27 @@ import javax.validation.Valid;
 
 public class APIKeyDTO   {
   
+    private String keyDisplayName = null;
     private String apikey = null;
     private Integer validityTime = null;
+
+  /**
+   * API Key name
+   **/
+  public APIKeyDTO keyDisplayName(String keyDisplayName) {
+    this.keyDisplayName = keyDisplayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Test_Key", value = "API Key name")
+  @JsonProperty("keyDisplayName")
+  public String getKeyDisplayName() {
+    return keyDisplayName;
+  }
+  public void setKeyDisplayName(String keyDisplayName) {
+    this.keyDisplayName = keyDisplayName;
+  }
 
   /**
    * API Key
@@ -68,13 +87,14 @@ public class APIKeyDTO   {
       return false;
     }
     APIKeyDTO apIKey = (APIKeyDTO) o;
-    return Objects.equals(apikey, apIKey.apikey) &&
+    return Objects.equals(keyDisplayName, apIKey.keyDisplayName) &&
+        Objects.equals(apikey, apIKey.apikey) &&
         Objects.equals(validityTime, apIKey.validityTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apikey, validityTime);
+    return Objects.hash(keyDisplayName, apikey, validityTime);
   }
 
   @Override
@@ -82,6 +102,7 @@ public class APIKeyDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIKeyDTO {\n");
     
+    sb.append("    keyDisplayName: ").append(toIndentedString(keyDisplayName)).append("\n");
     sb.append("    apikey: ").append(toIndentedString(apikey)).append("\n");
     sb.append("    validityTime: ").append(toIndentedString(validityTime)).append("\n");
     sb.append("}");

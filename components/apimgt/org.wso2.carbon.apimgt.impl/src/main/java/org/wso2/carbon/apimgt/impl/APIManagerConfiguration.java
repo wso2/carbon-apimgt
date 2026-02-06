@@ -153,7 +153,7 @@ public class APIManagerConfiguration {
             new VectorDBProviderConfigurationDTO();
     private static Properties realtimeNotifierProperties;
     private static Properties persistentNotifierProperties;
-    private static Properties realtimeApiKeyUsageNotifierProperties;
+    private static Properties realtimeOpaqueApiKeyNotifierProperties;
     private static Map<String, String> analyticsProperties;
     private static Map<String, String> persistenceProperties = new HashMap<String, String>();
     private static String tokenRevocationClassName;
@@ -213,9 +213,9 @@ public class APIManagerConfiguration {
         return realtimeNotifierProperties;
     }
 
-    public static Properties getRealtimeApiKeyUsageNotifierProperties() {
+    public static Properties getRealtimeOpaqueApiKeyNotifierProperties() {
 
-        return realtimeApiKeyUsageNotifierProperties;
+        return realtimeOpaqueApiKeyNotifierProperties;
     }
 
     public static Properties getPersistentTokenRevocationNotifiersProperties() {
@@ -413,6 +413,7 @@ public class APIManagerConfiguration {
                             propertyElem.getText());
                 }
                 realtimeNotifierProperties = properties;
+                realtimeOpaqueApiKeyNotifierProperties = properties;
             } else if (PERSISTENT_NOTIFIER.equals(localName)) {
                 Iterator revocationPropertiesIterator = element.getChildrenWithLocalName("Property");
                 Properties properties = new Properties();
