@@ -85,8 +85,9 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
                 properties.getProperty(APIConstants.NotificationEvent.VALIDITY_PERIOD));
         apiKeyInfoMap.put(APIConstants.NotificationEvent.LOOKUP_KEY,
                 properties.getProperty(APIConstants.NotificationEvent.LOOKUP_KEY));
-        apiKeyInfoMap.put(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES,
-                (String) properties.get(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES));
+        String propsAsString = Base64.encodeBase64String((byte[]) properties.get(APIConstants.
+                NotificationEvent.ADDITIONAL_PROPERTIES));
+        apiKeyInfoMap.put(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES, propsAsString);
         String encodedApiKeyInfoEvent = base64Encode(apiKeyInfoMap);
         sendApiKeyInfoOnRealtime(encodedApiKeyInfoEvent, properties);
     }

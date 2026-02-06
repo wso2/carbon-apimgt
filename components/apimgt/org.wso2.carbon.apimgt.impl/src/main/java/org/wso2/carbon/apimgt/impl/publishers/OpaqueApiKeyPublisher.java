@@ -39,7 +39,7 @@ public class OpaqueApiKeyPublisher {
 
     private OpaqueApiKeyPublisher() {
 
-        Properties realtimeNotifierProperties = APIManagerConfiguration.getRealtimeApiKeyUsageNotifierProperties();
+        Properties realtimeNotifierProperties = APIManagerConfiguration.getRealtimeOpaqueApiKeyNotifierProperties();
         realtimeNotifierEnabled = realtimeNotifierProperties != null;
         opaqueApiKeyNotifier = ServiceReferenceHolder.getInstance().getOpaqueApiKeyNotifier();
         opaqueApiKeyNotifier.init(realtimeNotifierProperties);

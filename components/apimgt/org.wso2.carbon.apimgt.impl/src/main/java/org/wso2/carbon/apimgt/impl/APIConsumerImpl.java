@@ -398,6 +398,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Properties props = new Properties();
         byte[] salt = APIUtil.generateSalt();
         props.setProperty("salt", APIUtil.convertBytesToHex(salt));
+        if (permittedIP == null) {
+            permittedIP = "";
+        }
+        if (permittedReferer == null) {
+            permittedReferer = "";
+        }
         props.setProperty("permittedIP", permittedIP);
         props.setProperty("permittedReferer", permittedReferer);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -418,12 +424,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String lookupSecret = "s3cR3tXyZ9rP0qA1bC2dEfG4hIjKlMnOpQrStUvWxYz123456";
         String lookupKey = APIUtil.generateLookupKey(apiKey, lookupSecret);
         apiMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
-        sendAPIKeyInfoEvent(apiKeyHash, salt, application, validityPeriod, lookupKey, application.getKeyType(), serializedProps);
+        sendAPIKeyInfoEvent(apiKeyHash, salt, application, validityPeriod, lookupKey, application.getKeyType(), props);
         return apiKey;
     }
 
     private void sendAPIKeyInfoEvent(String apiKeyHash, byte[] salt, Application application, long validityPeriod,
-                                     String lookupKey, String keyType, byte[] serializedProps) {
+                                     String lookupKey, String keyType, Properties props) {
         OpaqueApiKeyPublisher apiKeyInfoPublisher = OpaqueApiKeyPublisher.getInstance();
         Properties properties = new Properties();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -435,13 +441,23 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.API_KEY_INFO_STREAM_ID);
         properties.put(APIConstants.NotificationEvent.API_KEY_HASH, apiKeyHash);
         properties.put(APIConstants.NotificationEvent.APPLICATION_ID, application.getUUID());
-        properties.put(APIConstants.NotificationEvent.SALT, salt);
+        properties.put(APIConstants.NotificationEvent.SALT, Base64.getEncoder().encodeToString(salt));
         properties.put(APIConstants.NotificationEvent.VALIDITY_PERIOD, validityPeriod);
         properties.put(APIConstants.NotificationEvent.LOOKUP_KEY, lookupKey);
         properties.put(APIConstants.NotificationEvent.KEY_TYPE, keyType);
         properties.put(APIConstants.NotificationEvent.STATUS, "ACTIVE");
-        properties.put(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES, serializedProps);
+        String additionalPropertiesJson = propertiesToJson(props);
+        properties.put(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES,
+                additionalPropertiesJson);
         apiKeyInfoPublisher.publishApiKeyInfoEvents(properties);
+    }
+
+    private static String propertiesToJson(Properties props) {
+        JSONObject json = new JSONObject();
+        for (String name : props.stringPropertyNames()) {
+            json.put(name, props.getProperty(name));
+        }
+        return json.toString();
     }
 
     @Override

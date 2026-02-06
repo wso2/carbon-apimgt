@@ -5978,6 +5978,10 @@ components:
       title: API Key details to invoke APIs
       type: object
       properties:
+        keyDisplayName:
+          type: string
+          description: API Key name
+          example: Test_Key
         apikey:
           type: string
           description: API Key

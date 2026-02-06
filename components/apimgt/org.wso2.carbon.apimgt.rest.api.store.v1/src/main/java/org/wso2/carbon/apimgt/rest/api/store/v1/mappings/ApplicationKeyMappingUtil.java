@@ -140,10 +140,11 @@ public class ApplicationKeyMappingUtil {
         return applicationKeyDTO;
     }
 
-    public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime){
+    public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime, String keyDisplayName){
         APIKeyDTO apiKeyDto = new APIKeyDTO();
         apiKeyDto.setApikey(apiKey);
         apiKeyDto.setValidityTime(validityTime);
+        apiKeyDto.setKeyDisplayName(keyDisplayName);
         return apiKeyDto;
     }
 }

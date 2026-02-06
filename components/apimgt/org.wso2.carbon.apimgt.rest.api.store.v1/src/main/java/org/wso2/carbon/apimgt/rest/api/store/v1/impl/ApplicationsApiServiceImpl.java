@@ -706,7 +706,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     }
                     String apiKey = apiConsumer.generateApiKey(application, userName, validityPeriod,
                             restrictedIP, restrictedReferer, keyDisplayName);
-                    APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKey, validityPeriod);
+                    APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKey, validityPeriod, keyDisplayName);
                     return Response.ok().entity(apiKeyDto).build();
                 }
             }

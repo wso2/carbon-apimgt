@@ -26,6 +26,7 @@ public class APIKeyInfo {
     private String lookupKey;
     private long validityPeriod;
     private byte[] properties;
+    private String additionalProperties;
     private String apiKeyHash;
     private String authUser;
     private String status;
@@ -100,6 +101,14 @@ public class APIKeyInfo {
 
     public void setProperties(byte[] properties) {
         this.properties = properties;
+    }
+
+    public String getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(String additionalProperties) {
+        this.additionalProperties = additionalProperties;
     }
 
     public String getApiKeyHash() {
