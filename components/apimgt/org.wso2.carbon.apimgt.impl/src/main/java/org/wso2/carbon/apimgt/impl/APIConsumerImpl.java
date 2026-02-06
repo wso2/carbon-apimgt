@@ -480,7 +480,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
     public String generateApiKey(Application application, String userName, long validityPeriod,
-                                 String permittedIP, String permittedReferer) throws APIManagementException {
+                                 String permittedIP, String permittedReferer, String keyDisplayName) throws APIManagementException {
 
         JwtTokenInfoDTO jwtTokenInfoDTO;
         String apiKey;
@@ -519,7 +519,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiKey = generateOpaqueKey();
         }
         APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
-        apiKeyInfoDTO.setKeyDisplayName(null);
+        apiKeyInfoDTO.setKeyDisplayName(keyDisplayName);
         apiKeyInfoDTO.setApplicationId(application.getUUID());
         apiKeyInfoDTO.setKeyType(application.getKeyType());
         Properties props = new Properties();
