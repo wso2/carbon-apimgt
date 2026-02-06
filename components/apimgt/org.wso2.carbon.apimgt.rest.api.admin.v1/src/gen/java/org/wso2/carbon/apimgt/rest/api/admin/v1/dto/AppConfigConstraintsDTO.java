@@ -26,7 +26,7 @@ public class AppConfigConstraintsDTO   {
     private String label = null;
     private String type = null;
     private Boolean multiple = null;
-    private String toolTip = null;
+    private String tooltip = null;
     private String constraintType = null;
     private List<Object> values = new ArrayList<Object>();
     private Object _default = null;
@@ -101,19 +101,19 @@ public class AppConfigConstraintsDTO   {
 
   /**
    **/
-  public AppConfigConstraintsDTO toolTip(String toolTip) {
-    this.toolTip = toolTip;
+  public AppConfigConstraintsDTO tooltip(String tooltip) {
+    this.tooltip = tooltip;
     return this;
   }
 
   
   @ApiModelProperty(example = "Define the valid range for token expiration in seconds.", value = "")
-  @JsonProperty("toolTip")
-  public String getToolTip() {
-    return toolTip;
+  @JsonProperty("tooltip")
+  public String getTooltip() {
+    return tooltip;
   }
-  public void setToolTip(String toolTip) {
-    this.toolTip = toolTip;
+  public void setTooltip(String tooltip) {
+    this.tooltip = tooltip;
   }
 
   /**
@@ -182,7 +182,7 @@ public class AppConfigConstraintsDTO   {
         Objects.equals(label, appConfigConstraints.label) &&
         Objects.equals(type, appConfigConstraints.type) &&
         Objects.equals(multiple, appConfigConstraints.multiple) &&
-        Objects.equals(toolTip, appConfigConstraints.toolTip) &&
+        Objects.equals(tooltip, appConfigConstraints.tooltip) &&
         Objects.equals(constraintType, appConfigConstraints.constraintType) &&
         Objects.equals(values, appConfigConstraints.values) &&
         Objects.equals(_default, appConfigConstraints._default);
@@ -190,7 +190,7 @@ public class AppConfigConstraintsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, label, type, multiple, toolTip, constraintType, values, _default);
+    return Objects.hash(name, label, type, multiple, tooltip, constraintType, values, _default);
   }
 
   @Override
@@ -202,7 +202,7 @@ public class AppConfigConstraintsDTO   {
     sb.append("    label: ").append(toIndentedString(label)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    multiple: ").append(toIndentedString(multiple)).append("\n");
-    sb.append("    toolTip: ").append(toIndentedString(toolTip)).append("\n");
+    sb.append("    tooltip: ").append(toIndentedString(tooltip)).append("\n");
     sb.append("    constraintType: ").append(toIndentedString(constraintType)).append("\n");
     sb.append("    values: ").append(toIndentedString(values)).append("\n");
     sb.append("    _default: ").append(toIndentedString(_default)).append("\n");

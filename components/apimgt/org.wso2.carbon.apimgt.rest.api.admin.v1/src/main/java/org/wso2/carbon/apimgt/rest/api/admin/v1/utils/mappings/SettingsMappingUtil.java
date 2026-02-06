@@ -163,7 +163,7 @@ public class SettingsMappingUtil {
                 constraintDTO.setName(constraintConfig.getName());
                 constraintDTO.setLabel(constraintConfig.getLabel());
                 constraintDTO.setType(constraintConfig.getType());
-                constraintDTO.setToolTip(constraintConfig.getToolTip());
+                constraintDTO.setTooltip(constraintConfig.getTooltip());
                 constraintDTO.setMultiple(constraintConfig.isMultiple());
                 constraintDTO.setValues(constraintConfig.getValues());
                 constraintDTO.setDefault(constraintConfig.getDefaultConstraints());

@@ -32,18 +32,18 @@ public class ConstraintConfigDto {
     private String name;           // Matches the form field name (e.g., "application_access_token_expiry_time")
     private String label;          // UI Label (e.g., "Access Token Expiry")
     private String type;           // UI Type (e.g., "input", "select")
-    private String toolTip;        // UI Tooltip
+    private String tooltip;        // UI Tooltip
     private AppConfigConstraintType constraintType; // Suggested Validator (e.g., RANGE, REGEX, ENUM)
     private List values = new ArrayList<>();
     private boolean multiple;
     private Map<String, Object> defaultConstraints = new HashMap<>(); // Optional defaults
 
     public ConstraintConfigDto(String name, String type, List values, boolean multiple, String label,
-                               String toolTip, AppConfigConstraintType constraintType, Map<String, Object> defaultConstraints) {
+                               String tooltip, AppConfigConstraintType constraintType, Map<String, Object> defaultConstraints) {
         this.name = name;
         this.label = label;
         this.type = type;
-        this.toolTip = toolTip;
+        this.tooltip = tooltip;
         this.constraintType = constraintType;
         this.values = values;
         this.multiple = multiple;
@@ -76,12 +76,12 @@ public class ConstraintConfigDto {
         this.type = type;
     }
 
-    public String getToolTip() {
-        return toolTip;
+    public String getTooltip() {
+        return tooltip;
     }
 
-    public void setToolTip(String toolTip) {
-        this.toolTip = toolTip;
+    public void setTooltip(String toolTip) {
+        this.tooltip = toolTip;
     }
 
     public AppConfigConstraintType getConstraintType() {

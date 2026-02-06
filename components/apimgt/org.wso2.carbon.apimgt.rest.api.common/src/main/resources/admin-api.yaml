@@ -6496,7 +6496,7 @@ components:
         multiple:
           type: boolean
           example: true
-        toolTip:
+        tooltip:
           type: string
           example: Define the valid range for token expiration in seconds.
         constraintType:
