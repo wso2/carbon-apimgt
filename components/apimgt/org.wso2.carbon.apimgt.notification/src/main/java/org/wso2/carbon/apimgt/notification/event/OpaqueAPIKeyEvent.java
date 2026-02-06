@@ -18,9 +18,6 @@
 
 package org.wso2.carbon.apimgt.notification.event;
 
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import java.util.List;
-
 /**
  * Opaque API Key Info Event Model to Send Event.
  */
@@ -31,8 +28,9 @@ public class OpaqueAPIKeyEvent extends Event {
     private String apiKeyHash;
     private String applicationId;
     private long expiryTime;
-    private String user;
-    private List<SubscribedAPI> subscribedApis;
+    private String lookupKey;
+    private String additionalProperties;
+    private String keyType;
     private String status;
     private String salt;
 
@@ -60,20 +58,28 @@ public class OpaqueAPIKeyEvent extends Event {
         this.expiryTime = expiryTime;
     }
 
-    public String getUser() {
-        return user;
+    public String getLookupKey() {
+        return lookupKey;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public void setLookupKey(String lookupKey) {
+        this.lookupKey = lookupKey;
     }
 
-    public List<SubscribedAPI> getSubscribedApis() {
-        return subscribedApis;
+    public String getAdditionalProperties() {
+        return additionalProperties;
     }
 
-    public void setSubscribedApis(List<SubscribedAPI> subscribedApis) {
-        this.subscribedApis = subscribedApis;
+    public void setAdditionalProperties(String additionalProperties) {
+        this.additionalProperties = additionalProperties;
+    }
+
+    public String getKeyType() {
+        return keyType;
+    }
+
+    public void setKeyType(String keyType) {
+        this.keyType = keyType;
     }
 
     public String getStatus() {
@@ -95,19 +101,20 @@ public class OpaqueAPIKeyEvent extends Event {
     @Override
     public String toString() {
 
-        return "APIKeyUsageEvent{" +
+        return "OpaqueAPIKeyEvent{" +
                 "apiKeyHash='" + apiKeyHash + '\'' +
                 ", applicationId=" + applicationId +
                 ", expiryTime=" + expiryTime + '\'' +
-                ", user='" + user +
-                ", subscribedApis=" + subscribedApis + '\'' +
-                ", status=" + status +
-                ", salt='" + salt + '\'' +
-                ", eventId='" + eventId +
-                ", timeStamp=" + timeStamp + '\'' +
-                ", type='" + type +
-                ", tenantId=" + tenantId + '\'' +
-                ", tenantDomain='" + tenantDomain +
+                ", keyType='" + keyType +
+                ", status=" + status + '\'' +
+                ", salt='" + salt +
+                ", lookupKey='" + lookupKey + '\'' +
+                ", additionalProperties='" + additionalProperties +
+                ", eventId='" + eventId + '\'' +
+                ", timeStamp=" + timeStamp +
+                ", type='" + type + '\'' +
+                ", tenantId=" + tenantId +
+                ", tenantDomain='" + tenantDomain + '\'' +
                 '}';
     }
 }

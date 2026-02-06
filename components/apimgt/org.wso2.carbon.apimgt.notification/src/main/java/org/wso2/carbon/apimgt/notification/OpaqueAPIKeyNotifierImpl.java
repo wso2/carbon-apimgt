@@ -135,6 +135,10 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
     private void sendApiKeyInfoOnRealtime(String encodedApiKeyInfo, Properties properties) {
         // Variables related to Realtime Notifier
         String type = null;
+        long expiryTimeForJWT = 0L;
+        if (properties.getProperty(APIConstants.NotificationEvent.EXPIRY_TIME) != null) {
+            expiryTimeForJWT = Long.parseLong(properties.getProperty(APIConstants.NotificationEvent.EXPIRY_TIME));
+        }
         String realtimeNotifierTTL = realTimeNotifierProperties.getProperty("ttl", DEFAULT_TTL);
         String eventId = properties.getProperty(APIConstants.NotificationEvent.EVENT_ID);
         if (APIConstants.NotificationEvent.API_KEY_INFO_EVENT.equals(
@@ -146,7 +150,7 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
         String orgId = properties.getProperty(APIConstants.NotificationEvent.ORG_ID);
         int tenantId = (int) properties.get(APIConstants.NotificationEvent.TENANT_ID);
         Object[] objects =
-                new Object[]{eventId, encodedApiKeyInfo, realtimeNotifierTTL, tenantId};
+                new Object[]{eventId, encodedApiKeyInfo, realtimeNotifierTTL, expiryTimeForJWT, type, tenantId};
         EventPublisherEvent apiKeyInfoEvent = new EventPublisherEvent(APIConstants.API_KEY_INFO_STREAM_ID,
                 System.currentTimeMillis(), objects);
         apiKeyInfoEvent.setOrgId(orgId);

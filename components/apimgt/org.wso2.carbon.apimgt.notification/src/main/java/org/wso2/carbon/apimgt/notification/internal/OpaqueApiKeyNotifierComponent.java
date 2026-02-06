@@ -15,11 +15,11 @@ public class OpaqueApiKeyNotifierComponent {
     @Activate
     protected void activate() {
         OpaqueAPIKeyNotifier notifier = new OpaqueAPIKeyNotifierImpl();
-        ServiceReferenceHolder.getInstance().setApiKeyLastUsedNotifier(notifier);
+        ServiceReferenceHolder.getInstance().setOpaqueApiKeyNotifier(notifier);
     }
 
     @Deactivate
     protected void deactivate() {
-        ServiceReferenceHolder.getInstance().setApiKeyLastUsedNotifier(null);
+        ServiceReferenceHolder.getInstance().setOpaqueApiKeyNotifier(null);
     }
 }
