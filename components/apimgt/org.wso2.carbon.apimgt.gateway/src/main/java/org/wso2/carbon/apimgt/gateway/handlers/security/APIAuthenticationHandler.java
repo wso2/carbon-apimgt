@@ -800,7 +800,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                             hostHeader = APIUtil.getHostAddress();
                         }
                         String resourceMetadata = APIConstants.HTTPS_PROTOCOL + APIConstants.URL_SCHEME_SEPARATOR +
-                                hostAddress + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
+                                hostHeader + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
                         String dcrEndpoint = getDcrEndpoint();
                         String wwwAuthenticate = "Bearer resource_metadata=\"" + resourceMetadata + "\"";
                         if (StringUtils.isNotEmpty(dcrEndpoint)) {
@@ -997,5 +997,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
         }
         return null;
+    }
+
+    public boolean isMCPGetRequest(MessageContext messageContext) {
+        String path = (String) messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
+        String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
+        return (APIConstants.MCP.MCP_RESOURCES_MCP.equals(path) && APIConstants.HTTP_GET.equalsIgnoreCase(httpMethod));
     }
 }

@@ -334,9 +334,11 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             for (URLMapping urlMapping : api.getResources()) {
                 if (urlMapping.getScopes() != null) {
                     allScopes.addAll(urlMapping.getScopes());
+                    allScopes.add("default");
                 }
             }
         }
+        allScopes.add("default");
         return allScopes;
     }
 }
