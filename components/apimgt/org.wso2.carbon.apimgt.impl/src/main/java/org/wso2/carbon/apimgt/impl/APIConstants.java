@@ -3288,7 +3288,8 @@ public final class APIConstants {
         public static final String TOPIC_CACHE_INVALIDATION = "cacheInvalidation";
         public static final String TOPIC_KEY_MANAGER = "keyManager";
         public static final String TOPIC_NOTIFICATION = "notification";
-        public static final String OPAQUE_API_KEY_INFO = "opaqueApiKeyInfo";
+        public static final String TOPIC_OPAQUE_API_KEY_INFO = "opaqueAPIKeyInfo";
+        public static final String TOPIC_API_KEY_USAGE = "apiKeyUsage";
         public static final String TOPIC_ASYNC_WEBHOOKS_DATA = "asyncWebhooksData";
     }
 

@@ -5990,6 +5990,26 @@ components:
           type: integer
           format: int32
           example: 3600
+    APIKeyInfo:
+      title: API Key details to invoke APIs
+      type: object
+      properties:
+        keyDisplayName:
+          type: string
+          description: API Key name
+          example: Test_Key
+        issuedOn:
+          type: string
+          description: Created Time
+          example: 2026-02-06 23:45:07
+        validityPeriod:
+          type: integer
+          format: int32
+          example: 3600
+        lastUsed:
+          type: string
+          description: Last Used Time
+          example: NOT_USED
     APIKeyList:
       title: API Keys List
       type: object
@@ -6002,7 +6022,7 @@ components:
         list:
           type: array
           items:
-            $ref: '#/components/schemas/APIKey'
+            $ref: '#/components/schemas/APIKeyInfo'
     ApplicationKey:
       title: Application key details
       type: object

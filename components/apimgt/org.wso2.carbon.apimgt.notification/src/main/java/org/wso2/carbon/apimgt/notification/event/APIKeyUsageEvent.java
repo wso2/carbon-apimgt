@@ -25,17 +25,30 @@ public class APIKeyUsageEvent extends Event {
 
     private static final long serialVersionUID = 1L;
 
-    private String apiKey;
+    private String eventId;
+    private String apiKeyHash;
     private long lastUsedTime;
+    private String ttl;
     private long expiryTime;
-    private String user;
+    private String type;
+    private int tenantId;
 
-    public String getApiKey() {
-        return apiKey;
+    @Override
+    public String getEventId() {
+        return eventId;
     }
 
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
+    @Override
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
+    }
+
+    public String getApiKeyHash() {
+        return apiKeyHash;
+    }
+
+    public void setApiKeyHash(String apiKeyHash) {
+        this.apiKeyHash = apiKeyHash;
     }
 
     public long getLastUsedTime() {
@@ -46,6 +59,14 @@ public class APIKeyUsageEvent extends Event {
         this.lastUsedTime = lastUsedTime;
     }
 
+    public String getTtl() {
+        return ttl;
+    }
+
+    public void setTtl(String ttl) {
+        this.ttl = ttl;
+    }
+
     public long getExpiryTime() {
         return expiryTime;
     }
@@ -54,27 +75,37 @@ public class APIKeyUsageEvent extends Event {
         this.expiryTime = expiryTime;
     }
 
-    public String getUser() {
-        return user;
+    @Override
+    public String getType() {
+        return type;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    @Override
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    @Override
+    public int getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public void setTenantId(int tenantId) {
+        this.tenantId = tenantId;
     }
 
     @Override
     public String toString() {
 
         return "APIKeyUsageEvent{" +
-                "apiKey='" + apiKey + '\'' +
-                ", lastUsedTime=" + lastUsedTime +
+                "eventId='" + eventId + '\'' +
+                ", apiKeyHash='" + apiKeyHash +
+                ", lastUsedTime=" + lastUsedTime + '\'' +
+                ", ttl=" + ttl +
                 ", expiryTime=" + expiryTime + '\'' +
-                ", user='" + user +
-                ", eventId='" + eventId + '\'' +
-                ", timeStamp=" + timeStamp +
-                ", type='" + type + '\'' +
-                ", tenantId=" + tenantId +
-                ", tenantDomain='" + tenantDomain + '\'' +
+                ", type='" + type +
+                ", tenantId=" + tenantId + '\'' +
                 '}';
     }
 }

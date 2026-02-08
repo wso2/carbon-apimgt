@@ -9171,7 +9171,6 @@ public final class APIUtil {
      */
     public static String sha256HashWithSalt(String apiKey, byte[] salt) {
         try {
-            new SecureRandom().nextBytes(salt);
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             digest.update(salt); // Prepend salt
             byte[] hash = digest.digest(apiKey.getBytes(StandardCharsets.UTF_8));

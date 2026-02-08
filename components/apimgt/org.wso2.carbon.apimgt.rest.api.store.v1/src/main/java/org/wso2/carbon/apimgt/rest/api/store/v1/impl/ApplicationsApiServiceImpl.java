@@ -734,7 +734,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
                     } else {
                         List<APIKeyInfo> apiKeyList = apiConsumer.getApiKeys(applicationId, keyType);
-                        return Response.ok().entity(apiKeyList).build();
+                        List<APIKeyInfoDTO> apiKeyInfoDTOList = ApplicationKeyMappingUtil.formApiKeyListToDTOList(apiKeyList);
+                        return Response.ok().entity(apiKeyInfoDTOList).build();
                     }
                 }
             }
@@ -798,9 +799,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)
                             || RestAPIStoreUtils.isApplicationSharedtoUser(application)) {
                         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                        apiConsumer.revokeAPIKey(applicationId, keyType, keyDisplayName, tenantDomain);
-                        apiConsumer.regenerateAPIKey(applicationId, keyType, keyDisplayName, tenantDomain, username);
-                        return Response.ok().build();
+                        APIKeyInfo apiKeyInfo = apiConsumer.regenerateAPIKey(applicationId, keyType, keyDisplayName, tenantDomain, username);
+                        APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKeyInfo.getApiKey(),
+                                (int) apiKeyInfo.getValidityPeriod(), apiKeyInfo.getKeyDisplayName());
+                        return Response.ok().entity(apiKeyDto).build();
                     } else {
                         if (log.isDebugEnabled()) {
                             log.debug("Logged in user " + username + " isn't the owner of the application "

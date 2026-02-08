@@ -735,7 +735,7 @@ public interface APIConsumer extends APIManager {
      * @param tenantDomain Tenant domain
      * @throws APIManagementException
      */
-    void regenerateAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain, String username) throws APIManagementException;
+    APIKeyInfo regenerateAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain, String username) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.

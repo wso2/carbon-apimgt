@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -24,7 +24,7 @@ import javax.validation.Valid;
 public class APIKeyListDTO   {
   
     private Integer count = null;
-    private List<APIKeyDTO> list = new ArrayList<APIKeyDTO>();
+    private List<APIKeyInfoDTO> list = new ArrayList<APIKeyInfoDTO>();
 
   /**
    * Number of API keys returned. 
@@ -46,7 +46,7 @@ public class APIKeyListDTO   {
 
   /**
    **/
-  public APIKeyListDTO list(List<APIKeyDTO> list) {
+  public APIKeyListDTO list(List<APIKeyInfoDTO> list) {
     this.list = list;
     return this;
   }
@@ -55,10 +55,10 @@ public class APIKeyListDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("list")
-  public List<APIKeyDTO> getList() {
+  public List<APIKeyInfoDTO> getList() {
     return list;
   }
-  public void setList(List<APIKeyDTO> list) {
+  public void setList(List<APIKeyInfoDTO> list) {
     this.list = list;
   }
 

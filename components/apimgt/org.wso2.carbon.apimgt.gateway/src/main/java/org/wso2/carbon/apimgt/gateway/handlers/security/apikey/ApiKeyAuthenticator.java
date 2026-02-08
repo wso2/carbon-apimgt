@@ -51,12 +51,10 @@ import org.wso2.carbon.apimgt.impl.publishers.OpaqueApiKeyPublisher;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 
 public class ApiKeyAuthenticator implements Authenticator {
 
@@ -174,7 +172,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                         ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(payload, GatewayUtils.getIp(axis2MessageContext),
                                 apiContext, apiVersion, referer, null);
                         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload,
-                                splitToken[0]);
+                                null, 0, splitToken[0]);
                         String endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO, jwtConfigurationDto, apiKey,
                                 signedJWT, payload, tokenIdentifier, apiContext, apiVersion, isGatewayTokenCacheEnabled);
                         AuthenticationContext authenticationContext = GatewayUtils.generateAuthenticationContext(tokenIdentifier,
@@ -200,7 +198,6 @@ public class ApiKeyAuthenticator implements Authenticator {
             if (opaqueApiKeyAuthenticationContext.isAuthenticated()) {
                 APISecurityUtils.setAuthenticationContext(synCtx, opaqueApiKeyAuthenticationContext, null);
                 synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, opaqueApiKeyAuthenticationContext.getUsername());
-                updateApiKeyLastUsedTime(apiKey, tenantDomain);
                 log.debug("User is authorized to access the resource using Api Key.");
                 return new AuthenticationResponse(true, isMandatory, false,
                         0, null);
@@ -242,16 +239,19 @@ public class ApiKeyAuthenticator implements Authenticator {
         APIKeyInfo apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKey);
 
         if (apiKeyInfo == null || !"ACTIVE".equals(apiKeyInfo.getStatus())) {
-            log.error("Invalid Api Key. API key information not available.");
+            log.error("Invalid Api Key. Active API key information not available.");
             throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                     APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
         }
 
         // Hash the provided API key
-        String apiKeyHash = APIUtil.sha256HashWithSalt(apiKey, apiKeyInfo.getSalt().getBytes());
+        byte[] salt = Base64.getDecoder().decode(apiKeyInfo.getSalt());
+        String apiKeyHash = APIUtil.sha256HashWithSalt(apiKey, salt);
 
         // Check whether the provided API key is already there in the stored list and return false otherwise
-        if (!apiKeyHash.equals(apiKeyInfo.getApiKeyHash())) {
+        if (!MessageDigest.isEqual(
+                apiKeyHash.getBytes(StandardCharsets.UTF_8),
+                apiKeyInfo.getApiKeyHash().getBytes(StandardCharsets.UTF_8))) {
             log.error("Invalid Api Key. API key hash is not matched.");
             throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                     APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
@@ -259,17 +259,14 @@ public class ApiKeyAuthenticator implements Authenticator {
 
         // Validate subscription
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
-        APIKeyValidator apiKeyValidator = new APIKeyValidator();
         try {
-            apiKeyValidationInfoDTO =
-                    apiKeyValidator.validateSubscription(apiContext, apiVersion, apiKeyInfo.getApplicationId(),
-                            GatewayUtils.getTenantDomain(), apiKeyInfo.getKeyType());
-            if (apiKeyValidationInfoDTO.isAuthorized()) {
+            apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext, apiVersion, null, apiKeyInfo.getKeyType(),
+                    apiKeyInfo.getAppId(), apiKey);
+            if (apiKeyValidationInfoDTO != null && apiKeyValidationInfoDTO.isAuthorized()) {
                 if (log.isDebugEnabled()) {
                     log.debug("User is subscribed to the API: " + apiContext + ", " +
                             "version: " + apiVersion + ". Token: " + apiKey);
                 }
-                apiKeyValidationInfoDTO.setType(apiKeyInfo.getKeyType());
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("User is not subscribed to access the API: " + apiContext +
@@ -286,16 +283,17 @@ public class ApiKeyAuthenticator implements Authenticator {
 
         // Check for permittedIP and permittedReferrers
         ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(null, ip,
-                apiContext, apiVersion, referrer, apiKeyInfo.getProperties());
+                apiContext, apiVersion, referrer, apiKeyInfo.getAdditionalProperties());
 
         // TO DO: Check for api key expiry and status is ACTIVE
         // TO DO: Add api key to cache and first check whether the api key is available in cache before doing any DB operations
 
+        updateApiKeyLastUsedTime(apiKeyHash, apiKeyValidationInfoDTO.getSubscriberTenantDomain());
         // Set and return auth context
         return GatewayUtils.generateAuthenticationContext(apiKey, null, apiKeyValidationInfoDTO, null);
     }
 
-    private void updateApiKeyLastUsedTime(String apiKey, String tenantDomain) {
+    private void updateApiKeyLastUsedTime(String apiKeyHash, String tenantDomain) {
         OpaqueApiKeyPublisher apiKeyUsagePublisher = OpaqueApiKeyPublisher.getInstance();
         Properties properties = new Properties();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -305,7 +303,7 @@ public class ApiKeyAuthenticator implements Authenticator {
         properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.API_KEY_USAGE_STREAM_ID);
-        properties.put(APIConstants.NotificationEvent.API_KEY, apiKey);
+        properties.put(APIConstants.NotificationEvent.API_KEY_HASH, apiKeyHash);
         properties.put(APIConstants.NotificationEvent.LAST_USED_TIME, System.currentTimeMillis());
         apiKeyUsagePublisher.publishApiKeyUsageEvents(properties);
     }

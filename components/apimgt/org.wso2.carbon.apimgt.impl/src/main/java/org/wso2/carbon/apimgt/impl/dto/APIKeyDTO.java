@@ -8,6 +8,7 @@ import java.io.Serializable;
 public class APIKeyDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    private String apiKey;
     private String keyDisplayName;
     private String applicationId;
     private String keyType;
@@ -17,6 +18,14 @@ public class APIKeyDTO implements Serializable {
     private String lastUsedTime;
     private String permittedIP;
     private String permittedReferer;
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
 
     public String getKeyDisplayName() {
         return keyDisplayName;

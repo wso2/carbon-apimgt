@@ -33,6 +33,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -104,9 +105,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -120,7 +118,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
@@ -429,35 +426,45 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     private void sendAPIKeyInfoEvent(String apiKeyHash, byte[] salt, Application application, long validityPeriod,
-                                     String lookupKey, String keyType, Properties props) {
+                                     String lookupKey, String keyType, Properties props) throws APIManagementException {
         OpaqueApiKeyPublisher apiKeyInfoPublisher = OpaqueApiKeyPublisher.getInstance();
         Properties properties = new Properties();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         String eventID = UUID.randomUUID().toString();
         properties.put(APIConstants.NotificationEvent.EVENT_ID, eventID);
-        properties.put(APIConstants.NotificationEvent.EVENT_TYPE, APIConstants.API_KEY_AUTH_TYPE);
         properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.API_KEY_INFO_STREAM_ID);
         properties.put(APIConstants.NotificationEvent.API_KEY_HASH, apiKeyHash);
-        properties.put(APIConstants.NotificationEvent.APPLICATION_ID, application.getUUID());
+        properties.put(APIConstants.NotificationEvent.APPLICATION_ID, application.getId());
         properties.put(APIConstants.NotificationEvent.SALT, Base64.getEncoder().encodeToString(salt));
-        properties.put(APIConstants.NotificationEvent.VALIDITY_PERIOD, validityPeriod);
+        properties.put(APIConstants.NotificationEvent.VALIDITY_PERIOD, String.valueOf(validityPeriod));
         properties.put(APIConstants.NotificationEvent.LOOKUP_KEY, lookupKey);
         properties.put(APIConstants.NotificationEvent.KEY_TYPE, keyType);
         properties.put(APIConstants.NotificationEvent.STATUS, "ACTIVE");
-        String additionalPropertiesJson = propertiesToJson(props);
-        properties.put(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES,
-                additionalPropertiesJson);
-        apiKeyInfoPublisher.publishApiKeyInfoEvents(properties);
-    }
-
-    private static String propertiesToJson(Properties props) {
-        JSONObject json = new JSONObject();
-        for (String name : props.stringPropertyNames()) {
-            json.put(name, props.getProperty(name));
+        // Safely convert additional properties
+        if (props != null && !props.isEmpty()) {
+            Map<String, String> safeProps = new HashMap<>();
+            for (String key : props.stringPropertyNames()) {
+                Object value = props.get(key);
+                if (value instanceof byte[]) {
+                    // Convert byte[] → Base64
+                    safeProps.put(key, Base64.getEncoder().encodeToString((byte[]) value));
+                } else {
+                    safeProps.put(key, value.toString());
+                }
+            }
+            String additionalPropsJson = null;
+            try {
+                additionalPropsJson = new ObjectMapper().writeValueAsString(safeProps);
+            } catch (JsonProcessingException e) {
+                throw new APIManagementException("Error while parsing the additional properties json of the api key.", e);
+            }
+            // Escape quotes, so it can be safely embedded in another JSON
+            String escapedAdditionalProps = StringEscapeUtils.escapeJson(additionalPropsJson);
+            properties.put(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES, escapedAdditionalProps);
         }
-        return json.toString();
+        apiKeyInfoPublisher.publishApiKeyInfoEvents(properties);
     }
 
     @Override
@@ -3611,21 +3618,10 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
 
     @Override
-    public void regenerateAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain, String username) throws APIManagementException {
+    public APIKeyInfo regenerateAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain, String username) throws APIManagementException {
 
         // Revoke the existing key
-        RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
-        Properties properties = new Properties();
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        String eventID = UUID.randomUUID().toString();
-        properties.put(APIConstants.NotificationEvent.EVENT_ID, eventID);
-        properties.put(APIConstants.NotificationEvent.EVENT_TYPE, APIConstants.API_KEY_AUTH_TYPE);
-        properties.put(APIConstants.NotificationEvent.TOKEN_TYPE, APIConstants.API_KEY_AUTH_TYPE);
-        properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
-        properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
-        properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
-        apiMgtDAO.revokeAPIKey(applicationId, keyType, keyDisplayName);
-        revocationRequestPublisher.publishRevocationEvents(keyDisplayName, properties);
+        revokeAPIKey(applicationId, keyType, keyDisplayName, tenantDomain);
         // Generate a new key with the same display name and other additional properties
         APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(applicationId, keyType, keyDisplayName);
         APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
@@ -3655,7 +3651,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         apiKeyInfoDTO.setAuthUser(username);
         apiKeyInfoDTO.setValidityPeriod(apiKeyInfo.getValidityPeriod());
         apiKeyInfoDTO.setLastUsedTime(apiKeyInfo.getLastUsedTime());
-        apiMgtDAO.addAPIKey(APIUtil.sha256HashWithSalt(generateOpaqueKey(), salt), apiKeyInfoDTO);
+        String apiKey = generateOpaqueKey();
+        apiKeyInfoDTO.setApiKey(apiKey);
+        apiMgtDAO.addAPIKey(APIUtil.sha256HashWithSalt(apiKey, salt), apiKeyInfoDTO);
+        APIKeyInfo regeneratedApiKeyInfo = new APIKeyInfo();
+        regeneratedApiKeyInfo.setKeyDisplayName(keyDisplayName);
+        regeneratedApiKeyInfo.setApiKey(apiKey);
+        regeneratedApiKeyInfo.setValidityPeriod(apiKeyInfo.getValidityPeriod());
+        return regeneratedApiKeyInfo;
     }
 
     private String generateOpaqueKey() {

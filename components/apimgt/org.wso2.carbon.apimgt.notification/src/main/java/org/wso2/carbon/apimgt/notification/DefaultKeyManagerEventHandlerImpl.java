@@ -22,7 +22,6 @@ import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.notification.event.APIKeyUsageEvent;
 import org.wso2.carbon.apimgt.notification.event.ConsumerAppRevocationEvent;
 import org.wso2.carbon.apimgt.notification.event.SubjectEntityRevocationEvent;
 import org.wso2.carbon.apimgt.notification.event.TokenRevocationEvent;
@@ -47,9 +46,6 @@ public class DefaultKeyManagerEventHandlerImpl extends AbstractKeyManagerEventHa
         } else if (StringUtils.isNotEmpty(event)
                 && event.contains(APIConstants.NotificationEvent.TOKEN_REVOCATION_EVENT)) {
             handleTokenRevocationEvent(event);
-        } else if (StringUtils.isNotEmpty(event)
-                && event.contains(APIConstants.NotificationEvent.API_KEY_USAGE_EVENT)) {
-            handleApiKeyUsageEvent(event);
         }
         return true;
     }
@@ -64,13 +60,6 @@ public class DefaultKeyManagerEventHandlerImpl extends AbstractKeyManagerEventHa
 
         TokenRevocationEvent tokenRevocationEvent = new Gson().fromJson(event, TokenRevocationEvent.class);
         handleTokenRevocationEvent(tokenRevocationEvent);
-        return true;
-    }
-
-    private boolean handleApiKeyUsageEvent(String event) throws APIManagementException {
-
-        APIKeyUsageEvent apiKeyUsageEvent = new Gson().fromJson(event, APIKeyUsageEvent.class);
-        handleApiKeyUsageEvent(apiKeyUsageEvent);
         return true;
     }
 
