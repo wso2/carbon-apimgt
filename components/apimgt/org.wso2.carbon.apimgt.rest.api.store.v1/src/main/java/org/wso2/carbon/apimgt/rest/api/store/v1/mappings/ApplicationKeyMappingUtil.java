@@ -24,11 +24,13 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.ConsumerSecretInfo;
 import org.wso2.carbon.apimgt.api.model.ConsumerSecretRequest;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDTO;
@@ -42,6 +44,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for application key generation related operations
@@ -239,5 +243,19 @@ public class ApplicationKeyMappingUtil {
         consumerSecretListDTO.setCount(consumerSecretDTOs.size());
         consumerSecretListDTO.setList(consumerSecretDTOs);
         return consumerSecretListDTO;
+    }
+
+    public static List<APIKeyInfoDTO> formApiKeyListToDTOList(List<APIKeyInfo> apiKeyInfoList){
+        List<APIKeyInfoDTO> apiKeyInfoDTOList = apiKeyInfoList.stream()
+                .map(src -> {
+                    APIKeyInfoDTO dto = new APIKeyInfoDTO();
+                    dto.setKeyDisplayName(src.getKeyDisplayName());
+                    dto.setIssuedOn(src.getCreatedTime());
+                    dto.setValidityPeriod((int) src.getValidityPeriod());
+                    dto.setLastUsed(src.getLastUsedTime());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        return apiKeyInfoDTOList;
     }
 }

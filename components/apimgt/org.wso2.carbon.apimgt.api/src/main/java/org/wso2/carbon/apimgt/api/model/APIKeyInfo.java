@@ -16,8 +16,11 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.Map;
+
 public class APIKeyInfo {
     private String keyDisplayName;
+    private int appId;
     private String applicationId;
     private String keyType;
     private String lastUsedTime;
@@ -26,8 +29,9 @@ public class APIKeyInfo {
     private String lookupKey;
     private long validityPeriod;
     private byte[] properties;
-    private String additionalProperties;
+    private Map<String, String> additionalProperties;
     private String apiKeyHash;
+    private String apiKey;
     private String authUser;
     private String status;
 
@@ -37,6 +41,14 @@ public class APIKeyInfo {
 
     public void setKeyDisplayName(String keyDisplayName) {
         this.keyDisplayName = keyDisplayName;
+    }
+
+    public int getAppId() {
+        return appId;
+    }
+
+    public void setAppId(int appId) {
+        this.appId = appId;
     }
 
     public String getApplicationId() {
@@ -103,11 +115,11 @@ public class APIKeyInfo {
         this.properties = properties;
     }
 
-    public String getAdditionalProperties() {
+    public Map<String, String> getAdditionalProperties() {
         return additionalProperties;
     }
 
-    public void setAdditionalProperties(String additionalProperties) {
+    public void setAdditionalProperties(Map<String, String> additionalProperties) {
         this.additionalProperties = additionalProperties;
     }
 
@@ -117,6 +129,14 @@ public class APIKeyInfo {
 
     public void setApiKeyHash(String apiKeyHash) {
         this.apiKeyHash = apiKeyHash;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
     }
 
     public String getAuthUser() {

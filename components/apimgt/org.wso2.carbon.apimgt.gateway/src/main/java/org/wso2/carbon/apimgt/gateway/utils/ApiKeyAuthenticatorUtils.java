@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -283,7 +284,7 @@ public class ApiKeyAuthenticatorUtils {
      * @throws APISecurityException If the API Key is not allowed to access the API.
      */
     public static void validateAPIKeyRestrictions(JWTClaimsSet payload, String clientIP, String apiContext,
-                                                  String apiVersion, String referer, byte[] additionalProperties)
+                                                  String apiVersion, String referer, Map<String, String> additionalProperties)
             throws APISecurityException, APIManagementException {
 
         String permittedIPList = null;
@@ -296,15 +297,9 @@ public class ApiKeyAuthenticatorUtils {
                 permittedRefererList = (String) payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_REFERER);
             }
         } else {
-            try {
-                // Taking values from the DB for an opaque API key
-                ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(additionalProperties));
-                Properties props = (Properties) ois.readObject();
-                permittedIPList = props.getProperty("permittedIP");
-                permittedRefererList = props.getProperty("permittedReferer");
-            } catch (IOException | ClassNotFoundException e) {
-                throw new APIManagementException("Error while parsing API key additional properties", e);
-            }
+            // Taking values from the DB for an opaque API key
+            permittedIPList = additionalProperties.get("permittedIP");
+            permittedRefererList = additionalProperties.get("permittedReferer");
         }
         if (StringUtils.isNotEmpty(permittedIPList)) {
             // Validate client IP against permitted IPs

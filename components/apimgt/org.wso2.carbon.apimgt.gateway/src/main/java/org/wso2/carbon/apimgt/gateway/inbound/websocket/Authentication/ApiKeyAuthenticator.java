@@ -112,7 +112,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                             apiContext, apiVersion, inboundMessageContext.getRequestHeaders().
                                     get(APIMgtGatewayConstants.REFERER), null);
                     APIKeyValidationInfoDTO apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext, apiVersion,
-                            payload, splitToken[0]);
+                            payload, null, 0, splitToken[0]);
                     String endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO, jwtConfigurationDto,
                             apiKey, signedJWT, payload, tokenIdentifier, apiContext, apiVersion, isGatewayTokenCacheEnabled);
                     AuthenticationContext authenticationContext = GatewayUtils.generateAuthenticationContext(tokenIdentifier,

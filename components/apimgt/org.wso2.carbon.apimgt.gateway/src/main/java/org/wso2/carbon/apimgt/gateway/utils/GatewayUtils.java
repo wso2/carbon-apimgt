@@ -891,20 +891,29 @@ public class GatewayUtils {
      * @param apiContext API context
      * @param apiVersion API version
      * @param payload    The payload of the JWT token
+     * @param type    The key type
+     * @param applicationId Application Id
      * @param token      The token which was used to invoke the API
      * @return an APIKeyValidationInfoDTO containing APIKey validation information.
      * If the subscription information is not found, return a null object.
      * @throws APISecurityException if the user is not subscribed to the API
      */
     public static APIKeyValidationInfoDTO validateAPISubscription(String apiContext, String apiVersion, JWTClaimsSet payload,
-                                                     String token)
+                                                                  String type, int applicationId, String token)
             throws APISecurityException {
 
         APIKeyValidator apiKeyValidator = new APIKeyValidator();
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
-        String keyType = (String) payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE);
+        String keyType;
+        if (type != null) {
+            keyType = type;
+        } else {
+            keyType = (String) payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE);
+        }
         int appId = 0;
-        if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
+        if (applicationId != 0) {
+            appId = applicationId;
+        } else if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
             try {
                 Map<String, Object> applicationObjMap =
                         payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
@@ -916,8 +925,8 @@ public class GatewayUtils {
                         APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
             }
         }
-        // validate subscription
-        // if the appId is equal to 0 then it's a internal key
+        // Validate subscription
+        // If the appId is equal to 0 then it's a internal key
         if (appId != 0) {
             apiKeyValidationInfoDTO =
                     apiKeyValidator.validateSubscription(apiContext, apiVersion, appId, getTenantDomain(), keyType);
