@@ -223,6 +223,10 @@ public class KeyManagerMappingUtil {
         if (!configurationDto.hasConstraint()) {
             return null;
         }
+        if (configurationDto.getConstraint().getConstraintType() == null ||
+                configurationDto.getConstraint().getDefaultConstraints() == null) {
+            return null;
+        }
         return createConstraintDTO(
                 configurationDto.getConstraint().getConstraintType().toString(),
                 configurationDto.getConstraint().getDefaultConstraints()
