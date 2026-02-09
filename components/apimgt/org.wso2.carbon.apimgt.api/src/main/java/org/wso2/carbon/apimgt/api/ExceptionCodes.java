@@ -181,6 +181,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Cannot delete the environment with UUID %s as active gateway policy deployment exist"),
     GATEWAY_ENVIRONMENT_API_REVISIONS_EXIST(900515, "API Revisions Deployed to Gateway Environment Exist", 409,
             "Cannot delete the environment with UUID %s as API revisions are deployed to it"),
+    PLATFORM_GATEWAY_NAME_ALREADY_EXISTS(900517, "Platform gateway name already exists", 409,
+            "A platform gateway with name '%s' already exists in the organization"),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
