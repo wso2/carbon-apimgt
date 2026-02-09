@@ -49,6 +49,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.BotDetectionDataApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.RolesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.GatewaysApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.TenantConfigApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.TenantConfigSchemaApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.ApisApi"/>
