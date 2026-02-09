@@ -1,0 +1,72 @@
+name: Create PR in product-apim to bump carbon-apimgt version (personal test)
+
+on:
+  push:
+    tags:
+      - "*" # later you can narrow this to release tags only
+
+permissions:
+  contents: read
+
+jobs:
+  bump-product-apim:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Derive version from tag
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          
+          if [[ ! "$VERSION" =~ ^[0-9A-Za-z._-]+$ ]]; then
+            echo "Invalid version derived from tag: $VERSION"
+            exit 1
+          fi
+
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Using VERSION=$VERSION"
+
+      - name: Checkout product-apim (personal repo)
+        uses: actions/checkout@v3
+        with:
+          repository: pasant9/product-apim
+          ref: refs/heads/master
+          fetch-depth: '10'
+          token: ${{ secrets.PRODUCT_APIM_PUSH_TOKEN }}
+          path: product-apim
+
+      - name: Update carbon.apimgt.version in product-apim pom.xml
+        shell: bash
+        run: |
+          FILE="product-apim/all-in-one-apim/pom.xml"
+
+          if [[ ! -f "$FILE" ]]; then
+            echo "Expected file not found: $FILE"
+            exit 1
+          fi
+
+          # Replace <carbon.apimgt.version>...</carbon.apimgt.version>
+          perl -0777 -i -pe 's#(<carbon\.apimgt\.version>)[^<]*(</carbon\.apimgt\.version>)#${1}'"$ENV{VERSION}"'${2}#g' "$FILE"
+
+          echo "Diff:"
+          git -C product-apim diff -- "$FILE"
+
+          # Fail if nothing changed (to avoid creating empty PRs)
+          if git -C product-apim diff --quiet -- "$FILE"; then
+            echo "No change detected (version already set?). Skipping PR."
+            exit 0
+          fi
+
+      - name: Create Pull Request in personal product-apim
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.PRODUCT_APIM_PUSH_TOKEN }}
+          path: product-apim
+          base: master
+          branch: chore/bump-carbon-apimgt-${{ env.VERSION }}
+          commit-message: "Bump carbon-apimgt to ${{ env.VERSION }}"
+          title: "Bump carbon-apimgt to ${{ env.VERSION }}"
+          body: |
+            Automated PR created from carbon-apimgt tag `${{ env.VERSION }}`.
+            Updates `all-in-one-apim/pom.xml` to use the new carbon-apimgt version.
