@@ -314,9 +314,9 @@ public class CertificateMgtDAO {
                 if (apiIdentifier instanceof APIIdentifier) {
                     clientCertificateDTO.setApiIdentifier((APIIdentifier) apiIdentifier);
                 } else {
-                    APIIdentifier apiProdWrapper = new APIIdentifier(apiIdentifier.getProviderName(),
+                    APIIdentifier convertedApiIdentifier = new APIIdentifier(apiIdentifier.getProviderName(),
                             apiIdentifier.getName(), apiIdentifier.getVersion(), apiIdentifier.getUUID());
-                    clientCertificateDTO.setApiIdentifier(apiProdWrapper);
+                    clientCertificateDTO.setApiIdentifier(convertedApiIdentifier);
                 }
                 clientCertificateDTOS.add(clientCertificateDTO);
             }
