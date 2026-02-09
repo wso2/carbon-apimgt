@@ -4380,6 +4380,10 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 Map<String, Environment> environments = getGatewayEnvironmentsByOrganization(organization, username);
                 String environmentsString = String.join(",", environments.keySet());
                 api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentsString, organization));
+                if (log.isDebugEnabled()) {
+                    log.debug("Set API environments for API UUID: " + uuid + " with environments: "
+                            + environmentsString + " for organization: " + organization);
+                }
                 //CORS . if null is returned, set default config from the configuration
                 if (api.getCorsConfiguration() == null) {
                     api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
