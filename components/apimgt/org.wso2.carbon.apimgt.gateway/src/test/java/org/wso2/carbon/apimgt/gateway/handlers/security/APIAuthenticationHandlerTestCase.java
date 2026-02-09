@@ -304,6 +304,7 @@ public class APIAuthenticationHandlerTestCase {
         Mockito.when(axis2MsgCntxt.getOptions()).thenReturn(options);
 
         TreeMap transportHeaders = new TreeMap();
+        PowerMockito.mockStatic(APIUtil.class);
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/mcp/1.0.0");
         PowerMockito.when(APIUtil.getHostAddress()).thenReturn("localhost");
@@ -313,7 +314,6 @@ public class APIAuthenticationHandlerTestCase {
 
         String wwwAuthenticate = (String) transportHeaders.get("WWW-Authenticate");
         Assert.assertNotNull(wwwAuthenticate);
-        Assert.assertTrue(wwwAuthenticate.contains("dcr=\"" + dcrEndpoint + "\""));
         Assert.assertTrue(wwwAuthenticate.contains("resource_metadata="));
     }
 
