@@ -281,7 +281,9 @@ public class ApiKeyAuthenticatorUtils {
      * @param apiContext The API context.
      * @param apiVersion The API version.
      * @param referer    The http referer.
+     * @param additionalProperties Additional properties sent with an opaque API key.
      * @throws APISecurityException If the API Key is not allowed to access the API.
+     * @throws APIManagementException If an error occurs while validating the restrictions.
      */
     public static void validateAPIKeyRestrictions(JWTClaimsSet payload, String clientIP, String apiContext,
                                                   String apiVersion, String referer, Map<String, String> additionalProperties)

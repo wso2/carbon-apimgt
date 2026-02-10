@@ -36,7 +36,12 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.security.*;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
+import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.ApiKeyAuthenticatorUtils;
@@ -54,7 +59,12 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
 
 public class ApiKeyAuthenticator implements Authenticator {
 
@@ -234,6 +244,7 @@ public class ApiKeyAuthenticator implements Authenticator {
     public AuthenticationContext validateOpaqueApiKey(String apiKey, String apiContext, String apiVersion, String referrer, String ip)
             throws APISecurityException, APIManagementException {
 
+        // TODO: Remove lookup secret and use appId:keyType:displayName combination as the lookup key
         String lookupSecret = "s3cR3tXyZ9rP0qA1bC2dEfG4hIjKlMnOpQrStUvWxYz123456";
         String lookupKey = APIUtil.generateLookupKey(apiKey, lookupSecret);
         APIKeyInfo apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKey);
@@ -285,8 +296,8 @@ public class ApiKeyAuthenticator implements Authenticator {
         ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(null, ip,
                 apiContext, apiVersion, referrer, apiKeyInfo.getAdditionalProperties());
 
-        // TO DO: Check for api key expiry and status is ACTIVE
-        // TO DO: Add api key to cache and first check whether the api key is available in cache before doing any DB operations
+        // TODO: Check for api key expiry and status is ACTIVE
+        // TODO: Add api key to cache and first check whether the api key is available in cache before doing any DB operations
 
         updateApiKeyLastUsedTime(apiKeyHash, apiKeyValidationInfoDTO.getSubscriberTenantDomain());
         // Set and return auth context

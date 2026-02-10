@@ -33,7 +33,10 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -149,6 +152,12 @@ public class ApplicationKeyMappingUtil {
         return apiKeyDto;
     }
 
+    /**
+     * Insert the api key related details to a DTO Object
+     *
+     * @param apiKeyInfoList A list of API keys
+     * @return A list of DTO objects with api key related details
+     */
     public static List<APIKeyInfoDTO> formApiKeyListToDTOList(List<APIKeyInfo> apiKeyInfoList){
         List<APIKeyInfoDTO> apiKeyInfoDTOList = apiKeyInfoList.stream()
                 .map(src -> {
