@@ -42,8 +42,13 @@ public class OpaqueApiKeyPublisher {
         Properties realtimeNotifierProperties = APIManagerConfiguration.getRealtimeOpaqueApiKeyNotifierProperties();
         realtimeNotifierEnabled = realtimeNotifierProperties != null;
         opaqueApiKeyNotifier = ServiceReferenceHolder.getInstance().getOpaqueApiKeyNotifier();
-        opaqueApiKeyNotifier.init(realtimeNotifierProperties);
-        log.debug("Opaque API key notifier initialized");
+        if (realtimeNotifierEnabled && opaqueApiKeyNotifier != null) {
+            opaqueApiKeyNotifier.init(realtimeNotifierProperties);
+            log.debug("Opaque API key notifier initialized");
+        } else {
+            log.warn("Opaque API key notifier is not initialized. Realtime notifications will be disabled.");
+            realtimeNotifierEnabled = false;
+        }
     }
 
     public static synchronized OpaqueApiKeyPublisher getInstance() {

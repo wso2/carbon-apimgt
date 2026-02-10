@@ -102,7 +102,8 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
 
     @Override
     public void init(Properties realTimeNotifierProperties) {
-
-        this.realTimeNotifierProperties = (Properties) realTimeNotifierProperties.clone();
+        this.realTimeNotifierProperties = realTimeNotifierProperties != null
+                ? (Properties) realTimeNotifierProperties.clone()
+                : new Properties();
     }
 }
