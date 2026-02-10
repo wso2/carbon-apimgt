@@ -30,11 +30,13 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
+import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceEvaluationScheduler;
 import org.wso2.carbon.apimgt.governance.impl.listener.APIMGovServerStartupShutdownListener;
 import org.wso2.carbon.apimgt.governance.impl.observer.APIMGovernanceConfigDeployer;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil;
+import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineFactory;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineService;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -115,11 +117,18 @@ public class GovernanceComponent {
 
         ValidationEngineService validationEngineService = new ValidationEngineServiceImpl(validationEngine);
         ServiceReferenceHolder.getInstance().setValidationEngineService(validationEngineService);
+
+        // Register Spectral engine as the default and for SPECTRAL category
+        ValidationEngineFactory.setDefaultEngine(validationEngine);
+        ValidationEngineFactory.registerValidationEngine(RuleCategory.SPECTRAL, validationEngine);
+        log.info("Registered SpectralValidationEngine as default and for SPECTRAL category");
     }
 
     protected void unsetValidationEngineService(ValidationEngine validationEngine) {
 
         ServiceReferenceHolder.getInstance().setValidationEngineService(null);
+        ValidationEngineFactory.setDefaultEngine(null);
+        ValidationEngineFactory.unregisterValidationEngine(RuleCategory.SPECTRAL);
     }
 
 }

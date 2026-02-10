@@ -102,9 +102,21 @@ public class SignatureService {
             dto.setFeatureCount(features.size());
             dto.setShingleCount(shingles.size());
 
+            // Warn if signature is likely to produce false positives
+            if (shingles.isEmpty()) {
+                log.warn("API " + apiUuid + " has no shingles - signature will match all other "
+                        + "empty signatures with 100% similarity. Features: " + features.size());
+            } else if (shingles.size() < 10) {
+                log.warn("API " + apiUuid + " has very few shingles (" + shingles.size()
+                        + ") - similarity estimates may be inaccurate. Features: " + features.size());
+            }
+
             if (log.isDebugEnabled()) {
-                log.debug("Generated signature for API " + apiUuid + ": " + 
-                        features.size() + " features, " + shingles.size() + " shingles");
+                log.debug("Generated signature for API " + apiUuid + ": "
+                        + features.size() + " features, " + shingles.size() + " shingles");
+                log.debug("API " + apiUuid + " features: " + features);
+                log.debug("API " + apiUuid + " shingles (first 5): " 
+                        + shingles.stream().limit(5).collect(java.util.stream.Collectors.toList()));
             }
 
             return dto;

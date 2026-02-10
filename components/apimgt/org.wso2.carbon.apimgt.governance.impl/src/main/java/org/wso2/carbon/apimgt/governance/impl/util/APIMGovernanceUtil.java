@@ -260,6 +260,11 @@ public class APIMGovernanceUtil {
         RulesetContent rulesetContent = new RulesetContent();
         rulesetContent.setFileName(fileName);
         rulesetContent.setContent(defaultRuleset.getRulesetContentString().getBytes(StandardCharsets.UTF_8));
+        if (fileName.endsWith(".json")) {
+            rulesetContent.setContentType(RulesetContent.ContentType.JSON);
+        } else {
+            rulesetContent.setContentType(RulesetContent.ContentType.YAML);
+        }
         ruleset.setRulesetContent(rulesetContent);
 
         return ruleset;

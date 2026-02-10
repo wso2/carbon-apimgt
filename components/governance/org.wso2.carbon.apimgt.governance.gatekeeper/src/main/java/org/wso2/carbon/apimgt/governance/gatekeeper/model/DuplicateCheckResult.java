@@ -30,12 +30,14 @@ public class DuplicateCheckResult {
     private String apiId;
     private boolean hasDuplicates;
     private List<SimilarAPI> similarAPIs;
+    private double threshold;
 
     /**
      * Default constructor.
      */
     public DuplicateCheckResult() {
         this.similarAPIs = new ArrayList<>();
+        this.threshold = 0.40; // Default threshold
     }
 
     /**
@@ -90,6 +92,24 @@ public class DuplicateCheckResult {
      */
     public void setSimilarAPIs(List<SimilarAPI> similarAPIs) {
         this.similarAPIs = similarAPIs;
+    }
+
+    /**
+     * Gets the similarity threshold used for this check.
+     *
+     * @return threshold value between 0.0 and 1.0
+     */
+    public double getThreshold() {
+        return threshold;
+    }
+
+    /**
+     * Sets the similarity threshold used for this check.
+     *
+     * @param threshold threshold value between 0.0 and 1.0
+     */
+    public void setThreshold(double threshold) {
+        this.threshold = threshold;
     }
 
     /**

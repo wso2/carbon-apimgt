@@ -44,9 +44,9 @@ import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulesetMgtDAOImpl;
-import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
+import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -498,9 +498,6 @@ public class ComplianceManager {
         AuditLogger.log("New Sync Eval Request", "Starting sync compliance evaluation for artifact %s in organization" +
                 " %s against policies %s", artifactRefId, organization, Arrays.toString(govPolicies.toArray()));
 
-        ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
-                .getValidationEngineService().getValidationEngine();
-
         ArtifactComplianceInfo artifactComplianceInfo = new ArtifactComplianceInfo();
 
         if (artifactProjectContent == null || artifactProjectContent.isEmpty()) {
@@ -560,6 +557,9 @@ public class ComplianceManager {
                         continue;
                     }
 
+                    // Use Factory to get appropriate validation engine for this ruleset
+                    ValidationEngine validationEngine = ValidationEngineFactory.getValidationEngine(ruleset);
+
                     // Send target content and ruleset for validation
                     List<RuleViolation> ruleViolations = validationEngine.validate(
                             contentToValidate, ruleset);
@@ -614,9 +614,6 @@ public class ComplianceManager {
         AuditLogger.log("New Dry Run Eval Request", "Starting dry run compliance evaluation for given artifact in " +
                 "organization %s against policies %s", organization, Arrays.toString(govPolicies.toArray()));
 
-
-        ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
-                .getValidationEngineService().getValidationEngine();
         ArtifactComplianceDryRunInfo artifactComplianceDryRunInfo = new ArtifactComplianceDryRunInfo();
 
         // If artifact content is not provided dry run is not possible
@@ -653,6 +650,9 @@ public class ComplianceManager {
                                 "evaluation for ruleset " + ruleset.getId());
                         continue;
                     }
+
+                    // Use Factory to get appropriate validation engine for this ruleset
+                    ValidationEngine validationEngine = ValidationEngineFactory.getValidationEngine(ruleset);
 
                     // Send target content and ruleset for validation
                     List<RuleViolation> ruleViolations = validationEngine.validate(

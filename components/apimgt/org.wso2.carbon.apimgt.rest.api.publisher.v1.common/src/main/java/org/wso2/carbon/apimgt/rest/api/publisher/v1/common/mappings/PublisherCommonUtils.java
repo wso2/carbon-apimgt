@@ -4790,15 +4790,21 @@ public class PublisherCommonUtils {
      */
     public static void executeGovernanceOnLabelAttach(List<Label> labels, String artifactType, String artifactId,
                                                       String organization) {
+        if (apimGovernanceService == null) {
+            return;
+        }
         List<String> labelsIdList = new ArrayList<>();
         for (Label label : labels) {
             labelsIdList.add(label.getLabelId());
         }
         try {
-            apimGovernanceService.evaluateComplianceOnLabelAttach(artifactId, ArtifactType.fromString(artifactType),
-                    labelsIdList, organization);
+            apimGovernanceService.evaluateComplianceOnLabelAttach(artifactId,
+                    ArtifactType.fromString(artifactType), labelsIdList, organization);
         } catch (APIMGovernanceException e) {
-            log.info("Error occurred while executing governance on attached labels for API " + artifactId, e);
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while executing governance on attached "
+                        + "labels for API " + artifactId, e);
+            }
         }
     }
 
@@ -4810,12 +4816,21 @@ public class PublisherCommonUtils {
      * @param organization Organization of the logged-in user
      */
     public static void clearArtifactComplianceInfo(String artifactId, String artifactType, String organization) {
+        if (apimGovernanceService == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Governance service not available, skipping "
+                        + "compliance info cleanup for artifact: " + artifactId);
+            }
+            return;
+        }
         try {
-            apimGovernanceService.clearArtifactComplianceInfo(artifactId, ArtifactType.fromString(artifactType),
-                    organization);
+            apimGovernanceService.clearArtifactComplianceInfo(artifactId,
+                    ArtifactType.fromString(artifactType), organization);
         } catch (APIMGovernanceException e) {
-            log.info("Error occurred while deleting governance data on deletion of  " + ArtifactType.API +
-                    " " + artifactId, e);
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while deleting governance data on "
+                        + "deletion of " + ArtifactType.API + " " + artifactId, e);
+            }
         }
     }
 
@@ -4846,6 +4861,11 @@ public class PublisherCommonUtils {
 
             List<String> rulesetJsonList = new ArrayList<>();
             for (Ruleset ruleset : rulesets) {
+                // Skip deduplication rulesets - they are not Spectral-compatible
+                if (isDeduplicationRuleset(ruleset)) {
+                    continue;
+                }
+                
                 RulesetContent rulesetContent = ruleset.getRulesetContent();
                 if (rulesetContent == null || rulesetContent.getContentType() == null) {
                     continue;
@@ -4872,6 +4892,57 @@ public class PublisherCommonUtils {
         } catch (APIMGovernanceException e) {
             throw new APIManagementException("Error occurred while getting rulesets for API linter", e);
         }
+    }
+    
+    /**
+     * Checks if a ruleset is a deduplication ruleset that should not be sent to the frontend linter.
+     * Deduplication rulesets have special YAML structure that is not Spectral-compatible.
+     *
+     * @param ruleset The ruleset to check
+     * @return true if this is a deduplication ruleset
+     */
+    private static boolean isDeduplicationRuleset(Ruleset ruleset) {
+        if (ruleset == null) {
+            return false;
+        }
+        
+        // Check by RuleCategory (primary check)
+        // GENERIC category is used for deduplication/non-Spectral rulesets
+        try {
+            if (ruleset.getRuleCategory() != null 
+                    && "GENERIC".equals(ruleset.getRuleCategory().name())) {
+                return true;
+            }
+        } catch (Exception e) {
+            // Ignore any issues with RuleCategory - fall through to fallback checks
+        }
+        
+        // Fallback checks for legacy or incorrectly categorized rulesets
+        String name = ruleset.getName();
+        if (name != null) {
+            String lowerName = name.toLowerCase(Locale.ENGLISH);
+            if (lowerName.contains("deduplication") || lowerName.contains("duplicate")) {
+                return true;
+            }
+        }
+        
+        // Check content for deduplication-specific keys
+        RulesetContent content = ruleset.getRulesetContent();
+        if (content != null && content.getContent() != null) {
+            try {
+                String contentStr = new String(content.getContent(), StandardCharsets.UTF_8);
+                // Quick check for deduplication-specific keys
+                if (contentStr.contains("similarity_threshold") || 
+                        contentStr.contains("deduplication:") ||
+                        contentStr.contains("num_hash_functions")) {
+                    return true;
+                }
+            } catch (Exception e) {
+                // Ignore parsing errors
+            }
+        }
+        
+        return false;
     }
 
     /**

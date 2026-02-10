@@ -62,8 +62,12 @@ public class MinHashDAOImpl implements MinHashDAO {
 
     @Override
     public void storeSignature(APISignature apiSignature) throws APIMGovernanceException {
-        try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement stmt = connection.prepareStatement(MinHashSQLConstants.INSERT_SIGNATURE)) {
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        try {
+            connection = APIMGovernanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            stmt = connection.prepareStatement(MinHashSQLConstants.INSERT_SIGNATURE);
 
             Timestamp now = new Timestamp(System.currentTimeMillis());
 
@@ -74,22 +78,49 @@ public class MinHashDAOImpl implements MinHashDAO {
             stmt.setTimestamp(5, now);
 
             stmt.executeUpdate();
+            connection.commit();
 
             if (log.isDebugEnabled()) {
                 log.debug("Stored MinHash signature for API: " + apiSignature.getApiUuid());
             }
 
         } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackEx) {
+                    log.error("Error rolling back transaction", rollbackEx);
+                }
+            }
             String msg = "Error storing MinHash signature for API: " + apiSignature.getApiUuid();
             log.error(msg, e);
             throw new APIMGovernanceException(msg, e);
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    log.error("Error closing statement", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    log.error("Error closing connection", e);
+                }
+            }
         }
     }
 
     @Override
     public void updateSignature(APISignature apiSignature) throws APIMGovernanceException {
-        try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement stmt = connection.prepareStatement(MinHashSQLConstants.UPDATE_SIGNATURE)) {
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        try {
+            connection = APIMGovernanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            stmt = connection.prepareStatement(MinHashSQLConstants.UPDATE_SIGNATURE);
 
             Timestamp now = new Timestamp(System.currentTimeMillis());
 
@@ -99,6 +130,7 @@ public class MinHashDAOImpl implements MinHashDAO {
             stmt.setString(4, apiSignature.getOrganization());
 
             int updatedRows = stmt.executeUpdate();
+            connection.commit();
 
             if (updatedRows == 0) {
                 log.warn("No signature found to update for API: " + apiSignature.getApiUuid());
@@ -107,9 +139,31 @@ public class MinHashDAOImpl implements MinHashDAO {
             }
 
         } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackEx) {
+                    log.error("Error rolling back transaction", rollbackEx);
+                }
+            }
             String msg = "Error updating MinHash signature for API: " + apiSignature.getApiUuid();
             log.error(msg, e);
             throw new APIMGovernanceException(msg, e);
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    log.error("Error closing statement", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    log.error("Error closing connection", e);
+                }
+            }
         }
     }
 
@@ -183,22 +237,49 @@ public class MinHashDAOImpl implements MinHashDAO {
 
     @Override
     public void deleteSignature(String apiUuid, String organization) throws APIMGovernanceException {
-        try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement stmt = connection.prepareStatement(MinHashSQLConstants.DELETE_SIGNATURE)) {
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        try {
+            connection = APIMGovernanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            stmt = connection.prepareStatement(MinHashSQLConstants.DELETE_SIGNATURE);
 
             stmt.setString(1, apiUuid);
             stmt.setString(2, organization);
 
             int deletedRows = stmt.executeUpdate();
+            connection.commit();
 
             if (log.isDebugEnabled()) {
                 log.debug("Deleted " + deletedRows + " MinHash signature(s) for API: " + apiUuid);
             }
 
         } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackEx) {
+                    log.error("Error rolling back transaction", rollbackEx);
+                }
+            }
             String msg = "Error deleting MinHash signature for API: " + apiUuid;
             log.error(msg, e);
             throw new APIMGovernanceException(msg, e);
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    log.error("Error closing statement", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    log.error("Error closing connection", e);
+                }
+            }
         }
     }
 

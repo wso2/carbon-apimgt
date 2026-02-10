@@ -28,9 +28,9 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulesetMgtDAOImpl;
-import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
+import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -65,8 +65,8 @@ public class RulesetManager {
         }
         ruleset.setId(APIMGovernanceUtil.generateUUID());
 
-        ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
-                getValidationEngineService().getValidationEngine();
+        // Use Factory to get the appropriate validation engine for this ruleset's category
+        ValidationEngine validationEngine = ValidationEngineFactory.getValidationEngine(ruleset);
 
         validationEngine.validateRulesetContent(ruleset);
         List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
@@ -141,8 +141,17 @@ public class RulesetManager {
             throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_ALREADY_EXIST, newName, organization);
         }
 
-        ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
-                getValidationEngineService().getValidationEngine();
+        // Preserve the existing ruleCategory from DB. The category is a fundamental property
+        // of the ruleset (e.g., GENERIC for deduplication, SPECTRAL for Spectral rules) and
+        // should not change during a content update. The REST API may default to SPECTRAL
+        // if the UI doesn't send the ruleCategory field, which would cause the wrong
+        // ValidationEngine to be selected.
+        if (existingRuleset.getRuleCategory() != null) {
+            ruleset.setRuleCategory(existingRuleset.getRuleCategory());
+        }
+
+        // Use Factory to get the appropriate validation engine for this ruleset's category
+        ValidationEngine validationEngine = ValidationEngineFactory.getValidationEngine(ruleset);
 
         validationEngine.validateRulesetContent(ruleset);
         List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);

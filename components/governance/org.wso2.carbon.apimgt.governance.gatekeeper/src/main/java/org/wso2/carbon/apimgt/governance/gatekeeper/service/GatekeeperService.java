@@ -137,10 +137,15 @@ public class GatekeeperService {
             throws APIMGovernanceException {
 
         // Validate threshold
-        if (threshold < GatekeeperConstants.MIN_SIMILARITY_THRESHOLD ||
-                threshold > GatekeeperConstants.MAX_SIMILARITY_THRESHOLD) {
+        if (threshold < GatekeeperConstants.MIN_SIMILARITY_THRESHOLD
+                || threshold > GatekeeperConstants.MAX_SIMILARITY_THRESHOLD) {
+            log.info("Invalid threshold " + threshold + ", using default: "
+                    + GatekeeperConstants.DEFAULT_SIMILARITY_THRESHOLD);
             threshold = GatekeeperConstants.DEFAULT_SIMILARITY_THRESHOLD;
         }
+
+        log.info("Checking for duplicates for API " + apiUuid + " with threshold: "
+                + String.format("%.2f", threshold) + " (%.0f%%) in organization: " + organization);
 
         // Generate signature for the query API
         SignatureService.APISignatureDTO signatureDTO =
@@ -148,12 +153,25 @@ public class GatekeeperService {
 
         int[] querySignature = signatureDTO.getSignatureArray();
 
+        if (log.isDebugEnabled()) {
+            log.debug("Generated signature with " + signatureDTO.getFeatureCount() + " features, "
+                    + signatureDTO.getShingleCount() + " shingles for API: " + apiUuid);
+        }
+
         // Find similar APIs using LSH
         List<LSHIndex.SimilarityResult> similarApis =
                 lshIndex.findSimilar(querySignature, organization, threshold, minHashGenerator);
 
         // Filter out the API itself if it's already in the index
         similarApis.removeIf(r -> r.getApiUuid().equals(apiUuid));
+
+        // Log individual similarity scores for debugging
+        if (!similarApis.isEmpty()) {
+            for (LSHIndex.SimilarityResult sr : similarApis) {
+                log.info(String.format("Similarity match: API %s -> %s = %.4f (%.2f%%)",
+                        apiUuid, sr.getApiUuid(), sr.getSimilarity(), sr.getSimilarity() * 100));
+            }
+        }
 
         if (similarApis.isEmpty()) {
             DeduplicationResult result = DeduplicationResult.unique(apiUuid, organization);
@@ -361,7 +379,20 @@ public class GatekeeperService {
     public org.wso2.carbon.apimgt.governance.gatekeeper.model.DuplicateCheckResult checkForDuplicates(
             String apiId, String apiDefinition, String organization) throws APIMGovernanceException {
         
-        double threshold = GatekeeperConstants.DEFAULT_SIMILARITY_THRESHOLD;
+        // Get threshold from deduplication ruleset configuration
+        DeduplicationConfigService.DeduplicationConfig config = 
+                DeduplicationConfigService.getInstance().getConfig(organization);
+        double threshold = config.getSimilarityThreshold();
+        
+        // Always log the threshold being used (INFO level for visibility)
+        log.info("Deduplication check for API " + apiId + " using threshold: " 
+                + String.format("%.2f", threshold * 100) + "% (org: " + organization + ")");
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Full config - enabled: " + config.isEnabled() + ", mode: " + config.getMode()
+                    + ", numHashFunctions: " + config.getNumHashFunctions() 
+                    + ", numBands: " + config.getNumBands());
+        }
         
         DeduplicationResult result = checkForDuplicates(
                 apiDefinition, apiId, organization, threshold);

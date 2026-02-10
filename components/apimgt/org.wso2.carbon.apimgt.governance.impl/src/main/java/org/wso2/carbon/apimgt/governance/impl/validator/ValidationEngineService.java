@@ -19,12 +19,29 @@
 package org.wso2.carbon.apimgt.governance.impl.validator;
 
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 
 /**
  * This interface represents the Validation Engine Service
  */
 public interface ValidationEngineService {
 
+    /**
+     * Gets the default validation engine.
+     *
+     * @return The default ValidationEngine
+     */
     ValidationEngine getValidationEngine();
+
+    /**
+     * Gets the appropriate validation engine for the given ruleset based on its category.
+     * Uses the ValidationEngineFactory to route to the correct engine.
+     *
+     * @param ruleset The ruleset to get a validation engine for
+     * @return The appropriate ValidationEngine for the ruleset's category
+     */
+    default ValidationEngine getValidationEngine(Ruleset ruleset) {
+        return ValidationEngineFactory.getValidationEngine(ruleset);
+    }
 
 }

@@ -62,9 +62,9 @@ public final class GatekeeperConstants {
     public static final int NGRAM_SIZE = 3;
 
     /**
-     * Rule category for deduplication rulesets.
+     * Rule category for generic/deduplication rulesets.
      */
-    public static final String DEDUPLICATION_RULE_CATEGORY = "DEDUPLICATION";
+    public static final String GENERIC_RULE_CATEGORY = "GENERIC";
 
     /**
      * Mode of operation for duplicate detection.

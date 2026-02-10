@@ -29,7 +29,10 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
+import org.wso2.carbon.apimgt.governance.gatekeeper.GatekeeperValidationEngine;
 import org.wso2.carbon.apimgt.governance.gatekeeper.observer.GatekeeperStartupObserver;
+import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.core.ServerStartupObserver;
 
@@ -44,10 +47,17 @@ import org.wso2.carbon.core.ServerStartupObserver;
 public class GatekeeperComponent {
 
     private static final Log log = LogFactory.getLog(GatekeeperComponent.class);
+    private static volatile boolean activated = false;
     private ServiceRegistration<?> startupObserverRegistration;
+    private GatekeeperValidationEngine gatekeeperValidationEngine;
 
     @Activate
     protected void activate(ComponentContext componentContext) {
+        if (activated) {
+            log.debug("API Gatekeeper component already activated, skipping");
+            return;
+        }
+
         log.info("Activating API Gatekeeper component for API deduplication");
 
         try {
@@ -58,6 +68,12 @@ public class GatekeeperComponent {
             startupObserverRegistration = bundleContext.registerService(
                     ServerStartupObserver.class.getName(), startupObserver, null);
 
+            // Create and register GatekeeperValidationEngine for GENERIC category
+            gatekeeperValidationEngine = new GatekeeperValidationEngine();
+            ValidationEngineFactory.registerValidationEngine(RuleCategory.GENERIC, gatekeeperValidationEngine);
+            log.info("Registered GatekeeperValidationEngine for GENERIC rule category");
+
+            activated = true;
             log.info("API Gatekeeper component activated successfully");
 
         } catch (Exception e) {
@@ -73,6 +89,10 @@ public class GatekeeperComponent {
             startupObserverRegistration.unregister();
         }
 
+        // Unregister the validation engine
+        ValidationEngineFactory.unregisterValidationEngine(RuleCategory.GENERIC);
+
+        activated = false;
         log.info("API Gatekeeper component deactivated");
     }
 

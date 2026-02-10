@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.gatekeeper.model.ConflictReport;
 import org.wso2.carbon.apimgt.governance.gatekeeper.model.DeduplicationResult;
+import org.wso2.carbon.apimgt.governance.gatekeeper.service.DeduplicationConfigService;
 import org.wso2.carbon.apimgt.governance.gatekeeper.service.GatekeeperService;
 
 import java.nio.charset.StandardCharsets;
@@ -64,6 +65,10 @@ public class GatekeeperValidationEngine implements ValidationEngine {
     private static final String DEDUPLICATION_RULE_DESCRIPTION =
             "Checks for duplicate APIs using MinHash and LSH similarity detection";
 
+    // Metadata prefix used by ComplianceEvaluationScheduler to pass context
+    private static final String METADATA_PREFIX = "###GATEKEEPER_CONTEXT:";
+    private static final String METADATA_SUFFIX = "###";
+
     /**
      * Validates the content of a deduplication ruleset.
      * Ensures the YAML configuration is valid and contains required fields.
@@ -91,27 +96,65 @@ public class GatekeeperValidationEngine implements ValidationEngine {
         try {
             Map<String, Object> config = yamlMapper.readValue(contentString, Map.class);
 
-            // Validate similarity_threshold if present
-            if (config.containsKey(GatekeeperConstants.RulesetConfig.SIMILARITY_THRESHOLD)) {
-                Object thresholdObj = config.get(GatekeeperConstants.RulesetConfig.SIMILARITY_THRESHOLD);
-                double threshold = parseDouble(thresholdObj);
+            // Support both root-level and nested 'deduplication:' section
+            Map<String, Object> dedupConfig = config;
+            if (config.containsKey("deduplication") && config.get("deduplication") instanceof Map) {
+                dedupConfig = (Map<String, Object>) config.get("deduplication");
+            }
 
-                if (threshold < GatekeeperConstants.MIN_SIMILARITY_THRESHOLD ||
-                        threshold > GatekeeperConstants.MAX_SIMILARITY_THRESHOLD) {
+            // Validate similarity_threshold if present
+            validateThreshold(dedupConfig, GatekeeperConstants.RulesetConfig.SIMILARITY_THRESHOLD);
+
+            // Validate high_confidence_threshold if present
+            if (dedupConfig.containsKey("high_confidence_threshold")) {
+                Object val = dedupConfig.get("high_confidence_threshold");
+                double hct = parseDouble(val);
+                if (hct < 0.0 || hct > 1.0) {
                     throw new APIMGovernanceException(
-                            String.format("similarity_threshold must be between %.2f and %.2f, got %.2f",
-                                    GatekeeperConstants.MIN_SIMILARITY_THRESHOLD,
-                                    GatekeeperConstants.MAX_SIMILARITY_THRESHOLD,
-                                    threshold));
+                            "high_confidence_threshold must be between 0.0 and 1.0, got " + hct);
                 }
             }
 
-            log.info("Validated deduplication ruleset: " + ruleset.getName());
+            // Validate mode if present
+            if (dedupConfig.containsKey(GatekeeperConstants.RulesetConfig.MODE)) {
+                String mode = String.valueOf(dedupConfig.get(GatekeeperConstants.RulesetConfig.MODE));
+                if (!"audit".equalsIgnoreCase(mode) && !"enforce".equalsIgnoreCase(mode)) {
+                    throw new APIMGovernanceException(
+                            "mode must be 'audit' or 'enforce', got '" + mode + "'");
+                }
+            }
+
+            log.info("Validated deduplication ruleset content: " + ruleset.getName());
+
+            // Invalidate config cache so new threshold/settings take effect immediately
+            // This is called during create/update flows, so the new config will be
+            // picked up on the next dedup check without waiting for cache expiry
+            DeduplicationConfigService.getInstance().invalidateAllCaches();
+            log.info("Invalidated deduplication config cache after ruleset validation");
 
         } catch (APIMGovernanceException e) {
             throw e;
         } catch (Exception e) {
             throw new APIMGovernanceException("Failed to parse deduplication ruleset content: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Validates the threshold value within the config map.
+     */
+    private void validateThreshold(Map<String, Object> config, String key) throws APIMGovernanceException {
+        if (config.containsKey(key)) {
+            Object thresholdObj = config.get(key);
+            double threshold = parseDouble(thresholdObj);
+
+            if (threshold < GatekeeperConstants.MIN_SIMILARITY_THRESHOLD ||
+                    threshold > GatekeeperConstants.MAX_SIMILARITY_THRESHOLD) {
+                throw new APIMGovernanceException(
+                        String.format("similarity_threshold must be between %.2f and %.2f, got %.2f",
+                                GatekeeperConstants.MIN_SIMILARITY_THRESHOLD,
+                                GatekeeperConstants.MAX_SIMILARITY_THRESHOLD,
+                                threshold));
+            }
         }
     }
 
@@ -125,7 +168,7 @@ public class GatekeeperValidationEngine implements ValidationEngine {
      */
     @Override
     public List<Rule> extractRulesFromRuleset(Ruleset ruleset) throws APIMGovernanceException {
-        // Only process DEDUPLICATION category rulesets
+        // Only process GENERIC/deduplication category rulesets
         if (!isDeduplicationRuleset(ruleset)) {
             return Collections.emptyList();
         }
@@ -138,10 +181,16 @@ public class GatekeeperValidationEngine implements ValidationEngine {
         try {
             Map<String, Object> config = yamlMapper.readValue(contentString, Map.class);
 
+            // Support both root-level and nested 'deduplication:' section
+            Map<String, Object> dedupConfig = config;
+            if (config.containsKey("deduplication") && config.get("deduplication") instanceof Map) {
+                dedupConfig = (Map<String, Object>) config.get("deduplication");
+            }
+
             // Get threshold for the rule description
             double threshold = GatekeeperConstants.DEFAULT_SIMILARITY_THRESHOLD;
-            if (config.containsKey(GatekeeperConstants.RulesetConfig.SIMILARITY_THRESHOLD)) {
-                threshold = parseDouble(config.get(GatekeeperConstants.RulesetConfig.SIMILARITY_THRESHOLD));
+            if (dedupConfig.containsKey(GatekeeperConstants.RulesetConfig.SIMILARITY_THRESHOLD)) {
+                threshold = parseDouble(dedupConfig.get(GatekeeperConstants.RulesetConfig.SIMILARITY_THRESHOLD));
             }
 
             // Create the main deduplication rule
@@ -155,10 +204,32 @@ public class GatekeeperValidationEngine implements ValidationEngine {
 
             rules.add(deduplicationRule);
 
-            // If there are custom rules defined in the config, add those too
+            // Check for custom rules in 'rules' section (can be at root or inside deduplication)
+            Map<String, Object> rulesMap = null;
             if (config.containsKey("rules") && config.get("rules") instanceof Map) {
-                Map<String, Object> customRules = (Map<String, Object>) config.get("rules");
-                for (Map.Entry<String, Object> entry : customRules.entrySet()) {
+                rulesMap = (Map<String, Object>) config.get("rules");
+            } else if (dedupConfig.containsKey("rules") && dedupConfig.get("rules") instanceof Map) {
+                rulesMap = (Map<String, Object>) dedupConfig.get("rules");
+            }
+
+            if (rulesMap != null) {
+                for (Map.Entry<String, Object> entry : rulesMap.entrySet()) {
+                    // Skip the main dedup rule if it matches - we already added it above
+                    if (DEDUPLICATION_RULE_NAME.equals(entry.getKey())) {
+                        // Update the main rule description/severity from the YAML config
+                        if (entry.getValue() instanceof Map) {
+                            Map<String, Object> ruleConfig = (Map<String, Object>) entry.getValue();
+                            if (ruleConfig.containsKey("description")) {
+                                deduplicationRule.setDescription((String) ruleConfig.get("description"));
+                            }
+                            if (ruleConfig.containsKey("severity")) {
+                                deduplicationRule.setSeverity(
+                                        RuleSeverity.fromString((String) ruleConfig.get("severity")));
+                            }
+                        }
+                        continue;
+                    }
+
                     Rule customRule = new Rule();
                     customRule.setId(java.util.UUID.randomUUID().toString());
                     customRule.setName(entry.getKey());
@@ -223,15 +294,43 @@ public class GatekeeperValidationEngine implements ValidationEngine {
         }
 
         try {
-            // Extract API UUID and organization from the target
-            // The target format is expected to contain metadata or we use a placeholder
-            // In practice, this would be passed through context
-            String apiUuid = extractApiUuid(target);
-            String organization = extractOrganization(target);
+            // Parse metadata context if present (set by ComplianceEvaluationScheduler)
+            String apiDefinition = target;
+            String apiUuid = null;
+            String organization = null;
+
+            if (target != null && target.startsWith(METADATA_PREFIX)) {
+                int suffixStart = target.indexOf(METADATA_SUFFIX, METADATA_PREFIX.length());
+                if (suffixStart > 0) {
+                    String metadataJson = target.substring(METADATA_PREFIX.length(), suffixStart);
+                    try {
+                        Map<String, String> metadata = jsonMapper.readValue(metadataJson, Map.class);
+                        apiUuid = metadata.get("apiUuid");
+                        organization = metadata.get("organization");
+                        log.debug("Parsed metadata context: apiUuid=" + apiUuid
+                                + ", organization=" + organization);
+                    } catch (Exception e) {
+                        log.debug("Could not parse metadata from target", e);
+                    }
+                    // Strip metadata prefix from the API definition
+                    int contentStart = suffixStart + METADATA_SUFFIX.length();
+                    if (contentStart < target.length()) {
+                        apiDefinition = target.substring(contentStart).trim();
+                    }
+                }
+            }
+
+            // Fallback to placeholder extraction if metadata not present
+            if (apiUuid == null) {
+                apiUuid = extractApiUuid(apiDefinition);
+            }
+            if (organization == null) {
+                organization = extractOrganization(apiDefinition);
+            }
 
             // Perform deduplication check
             DeduplicationResult result = gatekeeperService.checkForDuplicates(
-                    target, apiUuid, organization, threshold);
+                    apiDefinition, apiUuid, organization, threshold);
 
             if (result.isDuplicate()) {
                 // Convert conflict reports to rule violations
@@ -272,7 +371,7 @@ public class GatekeeperValidationEngine implements ValidationEngine {
      */
     private boolean isDeduplicationRuleset(Ruleset ruleset) {
         if (ruleset.getRuleCategory() != null) {
-            return GatekeeperConstants.DEDUPLICATION_RULE_CATEGORY.equalsIgnoreCase(
+            return GatekeeperConstants.GENERIC_RULE_CATEGORY.equalsIgnoreCase(
                     ruleset.getRuleCategory().name());
         }
 
@@ -283,7 +382,7 @@ public class GatekeeperValidationEngine implements ValidationEngine {
                 String contentString = new String(content.getContent(), StandardCharsets.UTF_8);
                 Map<String, Object> config = yamlMapper.readValue(contentString, Map.class);
                 if (config.containsKey("type") &&
-                        GatekeeperConstants.DEDUPLICATION_RULE_CATEGORY.equalsIgnoreCase(
+                        GatekeeperConstants.GENERIC_RULE_CATEGORY.equalsIgnoreCase(
                                 (String) config.get("type"))) {
                     return true;
                 }

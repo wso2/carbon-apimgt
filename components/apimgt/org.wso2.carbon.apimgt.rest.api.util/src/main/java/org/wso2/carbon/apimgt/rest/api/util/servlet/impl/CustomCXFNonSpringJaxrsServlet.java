@@ -533,7 +533,13 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
             } catch (IllegalAccessException var9) {
                 throw new ServletException("Resource class " + cls.getName() + " can not be instantiated due to IllegalAccessException");
             } catch (InvocationTargetException var10) {
-                throw new ServletException("Resource class " + cls.getName() + " can not be instantiated due to InvocationTargetException");
+                Throwable cause = var10.getCause();
+                String errorMsg = "Resource class " + cls.getName() + " can not be instantiated due to InvocationTargetException";
+                if (cause != null) {
+                    errorMsg += ". Root cause: " + cause.getClass().getName() + ": " + cause.getMessage();
+                    cause.printStackTrace(System.err);
+                }
+                throw new ServletException(errorMsg, cause);
             }
         }
     }

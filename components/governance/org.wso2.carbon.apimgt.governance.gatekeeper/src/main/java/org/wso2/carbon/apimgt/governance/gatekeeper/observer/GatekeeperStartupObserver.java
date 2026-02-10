@@ -48,6 +48,18 @@ public class GatekeeperStartupObserver implements ServerStartupObserver {
             log.info("Gatekeeper LSH index hydration completed successfully. " +
                     "Index contains " + gatekeeperService.getIndexSize() + " API signatures.");
 
+            // Index any existing APIs that are not yet in AM_API_MINHASH table
+            // This handles APIs that were created before the deduplication feature was enabled
+            log.info("Checking for existing APIs that need to be indexed for deduplication...");
+            int newlyIndexedCount = gatekeeperService.indexExistingAPIs();
+            
+            if (newlyIndexedCount > 0) {
+                log.info("Indexed " + newlyIndexedCount + " pre-existing APIs for deduplication. " +
+                        "Total index size: " + gatekeeperService.getIndexSize());
+            } else {
+                log.info("All existing APIs are already indexed. No new APIs to index.");
+            }
+
         } catch (Exception e) {
             log.error("Failed to initialize Gatekeeper service during server startup. " +
                     "Deduplication checks may not function correctly.", e);
