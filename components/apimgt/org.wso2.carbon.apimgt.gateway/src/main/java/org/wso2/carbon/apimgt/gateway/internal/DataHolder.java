@@ -171,11 +171,11 @@ public class DataHolder {
     /**
      * Removes an opaque api key info.
      *
-     * @param apiKeyHash the api key hash to remove
+     * @param lookupKey the reference for the api key hash to remove
      */
-    public void removeOpaqueAPIKeyInfo(String apiKeyHash) {
+    public void removeOpaqueAPIKeyInfo(String lookupKey) {
 
-        apiKeyInfoHashMap.remove(apiKeyHash);
+        apiKeyInfoHashMap.remove(lookupKey);
     }
 
     public void addApiToAliasList(String apiId, List<String> aliasList) {

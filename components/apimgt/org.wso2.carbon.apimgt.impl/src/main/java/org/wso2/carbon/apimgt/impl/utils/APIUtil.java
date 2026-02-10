@@ -394,6 +394,7 @@ public final class APIUtil {
 
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private APIUtil() {
 
@@ -9209,7 +9210,9 @@ public final class APIUtil {
     }
 
     public static byte[] generateSalt () {
-        return new byte[16]; // 128-bit salt
+        byte[] salt = new byte[16]; // 128-bit salt
+        SECURE_RANDOM.nextBytes(salt);
+        return salt;
     }
 
     public static String convertBytesToHex(byte[] bytes) {
