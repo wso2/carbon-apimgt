@@ -276,7 +276,7 @@ public class ApiKeyAuthenticator implements Authenticator {
             if (apiKeyValidationInfoDTO != null && apiKeyValidationInfoDTO.isAuthorized()) {
                 if (log.isDebugEnabled()) {
                     log.debug("User is subscribed to the API: " + apiContext + ", " +
-                            "version: " + apiVersion + ". Token: " + apiKey);
+                            "version: " + apiVersion + ". Token: " + apiKeyInfo.getKeyDisplayName());
                 }
             } else {
                 if (log.isDebugEnabled()) {

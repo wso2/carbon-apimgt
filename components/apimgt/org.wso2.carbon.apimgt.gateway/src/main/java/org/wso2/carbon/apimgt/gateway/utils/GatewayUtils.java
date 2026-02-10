@@ -724,7 +724,7 @@ public class GatewayUtils {
             authContext.setGraphQLMaxComplexity(apiKeyValidationInfoDTO.getGraphQLMaxComplexity());
         }
         // Set JWT token sent to the backend
-        if (StringUtils.isNotEmpty(endUserToken) && endUserToken != null) {
+        if (StringUtils.isNotEmpty(endUserToken)) {
             authContext.setCallerToken(endUserToken);
         }
         return authContext;

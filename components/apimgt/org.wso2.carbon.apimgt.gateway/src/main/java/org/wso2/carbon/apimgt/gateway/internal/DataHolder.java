@@ -59,7 +59,7 @@ public class DataHolder {
     private Map<String,Map<String, API>> tenantAPIMap  = new HashMap<>();
     private Map<String, Boolean> tenantDeployStatus = new HashMap<>();
     private Map<String, LLMProviderInfo> llmProviderMap = new HashMap<>();
-    private Map<String, APIKeyInfo> apiKeyInfoHashMap = new HashMap<>();
+    private ConcurrentHashMap<String, APIKeyInfo> apiKeyInfoHashMap = new ConcurrentHashMap<>();
     private final Map<String, Cache<String, Long>> apiSuspendedEndpoints = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, AbstractAPIMgtGatewayJWTGenerator> jwtGeneratorTenantMap =
             new ConcurrentHashMap<>();

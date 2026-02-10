@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
 import javax.jms.JMSException;
@@ -38,11 +38,14 @@ import javax.jms.TextMessage;
 public class APIKeyUsageListener implements MessageListener {
 
     private static final Log log = LogFactory.getLog(APIKeyUsageListener.class);
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void onMessage(Message message) {
 
-        log.info("🔥 API Key Usage JMS message RECEIVED");
+        if (log.isDebugEnabled()) {
+            log.debug("API Key Usage JMS message received");
+        }
 
         try {
             if (message != null) {
@@ -51,25 +54,23 @@ public class APIKeyUsageListener implements MessageListener {
                 }
                 if (message instanceof TextMessage) {
                     String textMessage = ((TextMessage) message).getText();
-                    ObjectMapper objectMapper = new ObjectMapper();
                     // Navigate to payloadData
-                    JsonNode payload = null;
-                    payload = objectMapper.readTree(textMessage)
-                            .path("event")
-                            .path("payloadData");
+                    JsonNode payloadData = objectMapper.readTree(textMessage).path("event").path("payloadData");
 
-                    APIKeyInfo apiKeyInfo = new APIKeyInfo();
-                    apiKeyInfo.setApiKeyHash(payload.path("apiKeyHash").asText());
-                    apiKeyInfo.setLastUsedTime(payload.path("lastUsedTime").asText());
+                    String apiKeyHash = payloadData.get(APIConstants.NotificationEvent.API_KEY_HASH).asText();
+                    String lastUsedTime = payloadData.get(APIConstants.NotificationEvent.LAST_USED_TIME).asText();
 
-                    // Add to AM_API_KEY
-                    ApiMgtDAO.getInstance().updateAPIKeyUsage(apiKeyInfo.getApiKeyHash(), apiKeyInfo.getLastUsedTime());
+                    if (apiKeyHash != null && !apiKeyHash.isEmpty()) {
+                        ApiMgtDAO.getInstance().updateAPIKeyUsage(apiKeyHash, lastUsedTime);
+                    } else {
+                        log.warn("Received API key usage event with empty apiKeyHash.");
+                    }
                 }
             } else {
-                log.warn("Dropping the empty/null event received through jms receiver");
+                log.warn("Dropping the empty/null event received through jms receiver.");
             }
         } catch (JMSException | JsonProcessingException | APIManagementException e) {
-            log.error("JMSException occurred when processing the received message ", e);
+            log.error("Error occurred when processing the API key usage message ", e);
         }
     }
 }

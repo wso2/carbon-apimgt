@@ -83,7 +83,8 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
     public void sendApiKeyInfoOnRealtime(Properties properties) {
 
         String eventId = properties.getProperty(APIConstants.NotificationEvent.EVENT_ID);
-        long validityPeriod = Long.parseLong(properties.getProperty(APIConstants.NotificationEvent.VALIDITY_PERIOD));
+        String validityPeriodStr = properties.getProperty(APIConstants.NotificationEvent.VALIDITY_PERIOD);
+        long validityPeriod = validityPeriodStr != null ? Long.parseLong(validityPeriodStr) : 0L;
         String orgId = properties.getProperty(APIConstants.NotificationEvent.ORG_ID);
         int tenantId = (int) properties.get(APIConstants.NotificationEvent.TENANT_ID);
         int appId = (int) properties.get(APIConstants.NotificationEvent.APPLICATION_ID);
