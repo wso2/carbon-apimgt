@@ -54,6 +54,10 @@ public class OpaqueApiKeyPublisher {
         return opaqueApiKeyPublisher;
     }
 
+    /**
+     * Publish API key usage events
+     * @param properties
+     */
     public void publishApiKeyUsageEvents(Properties properties) {
 
         if (realtimeNotifierEnabled) {
@@ -64,6 +68,10 @@ public class OpaqueApiKeyPublisher {
         }
     }
 
+    /**
+     * Publish API key info events
+     * @param properties
+     */
     public void publishApiKeyInfoEvents(Properties properties) {
 
         if (realtimeNotifierEnabled) {
