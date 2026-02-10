@@ -26,7 +26,7 @@ import java.util.Locale;
 public enum RuleCategory {
     SPECTRAL,
     AI,
-    DEDUPLICATION;
+    GENERIC;
 
     public static RuleCategory fromString(String text) {
         try {

@@ -59,6 +59,10 @@ public class RulesetContent {
         this.content = content != null ? content.clone() : null;
     }
 
+    public void setContentType(ContentType contentType) {
+        this.contentType = contentType;
+    }
+
     public ContentType getContentType() {
         return contentType;
     }

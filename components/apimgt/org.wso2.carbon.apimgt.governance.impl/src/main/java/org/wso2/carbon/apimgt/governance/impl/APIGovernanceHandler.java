@@ -70,6 +70,7 @@ import java.util.zip.ZipInputStream;
 public class APIGovernanceHandler implements ArtifactGovernanceHandler {
 
     private static final Log log = LogFactory.getLog(APIGovernanceHandler.class);
+
     /**
      * This method is used to get all the apis of a given type in a given organization
      *
@@ -310,6 +311,10 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
     public String getName(String apiId, String organization) throws APIMGovernanceException {
         try {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                log.warn("API not found for UUID: " + apiId + ". It may have been deleted.");
+                return null;
+            }
             return apiIdentifier.getApiName();
         } catch (APIManagementException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_INFO, e,
