@@ -163,12 +163,15 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                             APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                     axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, mcpResponse.getStatusCode());
                     axis2MessageContext.setProperty(APIMgtGatewayConstants.MCP_METHOD, mcpMethod);
+                    log.info("MCP request processed successfully. Method: " + mcpMethod +
+                            ", Status: " + mcpResponse.getStatusCode());
                 } catch (AxisFault e) {
                     log.error("Error while generating mcp payload " + axis2MessageContext.getLogIDString(), e);
                 }
             } else {
                 // If no response is generated, set the HTTP status to 204 No Content
                 axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, HttpStatus.SC_NO_CONTENT);
+                log.info("MCP request processed with no content response. Method: " + mcpMethod);
             }
         } else if (StringUtils.equals(mcpMethod, APIConstants.MCP.METHOD_NOTIFICATION_INITIALIZED)) {
             JsonUtil.removeJsonPayload(axis2MessageContext);
@@ -176,6 +179,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             axis2MessageContext.setProperty(APIConstants.NO_ENTITY_BODY, true);
             axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, HttpStatus.SC_ACCEPTED);
             axis2MessageContext.setProperty(APIMgtGatewayConstants.MCP_METHOD, mcpMethod);
+            log.info("Received MCP initialization notification from client. Method: " + mcpMethod);
         }
     }
 
