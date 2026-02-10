@@ -24,7 +24,7 @@ public class ConfigurationDto {
             this.name,
             this.type,
             this.values,
-            this.multiple,
+            true,
             label,
             tooltip,
             constraintType,
