@@ -218,6 +218,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public static final String API_NAME = "apiName";
     public static final String API_VERSION = "apiVersion";
     public static final String API_PROVIDER = "apiProvider";
+
+    // TODO: Remove the lookup secret
+    private static final String lookupSecret = "s3cR3tXyZ9rP0qA1bC2dEfG4hIjKlMnOpQrStUvWxYz123456";
     private static final String PRESERVED_CASE_SENSITIVE_VARIABLE = "preservedCaseSensitive";
 
     private static final String GET_SUB_WORKFLOW_REF_FAILED = "Failed to get external workflow reference for " +
@@ -492,7 +495,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiKeyInfoDTO.setPermittedIP(permittedIP);
         apiKeyInfoDTO.setPermittedReferer(permittedReferer);
         String apiKeyHash = APIUtil.sha256HashWithSalt(apiKey, salt);
-        String lookupSecret = "s3cR3tXyZ9rP0qA1bC2dEfG4hIjKlMnOpQrStUvWxYz123456";
         String lookupKey = APIUtil.generateLookupKey(apiKey, lookupSecret);
         apiMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         sendAPIKeyInfoEvent(apiKeyHash, salt, application, validityPeriod, lookupKey, application.getKeyType(), props);
@@ -3703,7 +3705,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
         apiMgtDAO.revokeAPIKey(applicationId, keyType, keyDisplayName);
-        revocationRequestPublisher.publishRevocationEvents(keyDisplayName, properties);
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(applicationId, keyType, keyDisplayName);
+        // TODO: Modify the receiver side to remove the key hash too. Currently it handles only the actual token, not the hash
+        revocationRequestPublisher.publishRevocationEvents(apiKeyInfo.getApiKeyHash(), properties);
     }
 
     /**
@@ -3720,16 +3724,21 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public APIKeyInfo regenerateAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain,
                                        String username) throws APIManagementException {
 
+        // Load existing metadata before revocation (revocation may remove/alter it)
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(applicationId, keyType, keyDisplayName);
+        if (apiKeyInfo == null) {
+            throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
+        }
         // Revoke the existing key
         revokeAPIKey(applicationId, keyType, keyDisplayName, tenantDomain);
         // Generate a new key with the same display name and other additional properties
-        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(applicationId, keyType, keyDisplayName);
         APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
         apiKeyInfoDTO.setKeyDisplayName(keyDisplayName);
         apiKeyInfoDTO.setApplicationId(applicationId);
         apiKeyInfoDTO.setKeyType(keyType);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         byte[] salt = APIUtil.generateSalt();
+        Properties props = new Properties();
         try {
             byte[] apikeyProperties = apiKeyInfo.getProperties();
             Properties oldProps = new Properties();
@@ -3737,9 +3746,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(apikeyProperties));
                 oldProps = (Properties) ois.readObject();
             }
-            Properties props = new Properties();
-            props.setProperty("permittedIP", oldProps.getProperty("permittedIP"));
-            props.setProperty("permittedReferer", oldProps.getProperty("permittedReferer"));
+            props.setProperty("permittedIP", StringUtils.defaultString(oldProps.getProperty("permittedIP")));
+            props.setProperty("permittedReferer", StringUtils.defaultString(oldProps.getProperty("permittedReferer")));
             props.setProperty("salt", APIUtil.convertBytesToHex(salt));
             ObjectOutputStream oos = new ObjectOutputStream(bos);
             oos.writeObject(props);
@@ -3753,11 +3761,15 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         apiKeyInfoDTO.setLastUsedTime(apiKeyInfo.getLastUsedTime());
         String apiKey = generateOpaqueKey();
         apiKeyInfoDTO.setApiKey(apiKey);
-        apiMgtDAO.addAPIKey(APIUtil.sha256HashWithSalt(apiKey, salt), apiKeyInfoDTO);
+        String apiKeyHash = APIUtil.sha256HashWithSalt(apiKey, salt);
+        apiMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         APIKeyInfo regeneratedApiKeyInfo = new APIKeyInfo();
         regeneratedApiKeyInfo.setKeyDisplayName(keyDisplayName);
         regeneratedApiKeyInfo.setApiKey(apiKey);
         regeneratedApiKeyInfo.setValidityPeriod(apiKeyInfo.getValidityPeriod());
+        String lookupKey = APIUtil.generateLookupKey(apiKey, lookupSecret);
+        sendAPIKeyInfoEvent(apiKeyHash, salt, apiMgtDAO.getApplicationByUUID(applicationId),
+                apiKeyInfo.getValidityPeriod(), lookupKey, keyType, props);
         return regeneratedApiKeyInfo;
     }
 

@@ -164,7 +164,7 @@ public class ApplicationKeyMappingUtil {
                     APIKeyInfoDTO dto = new APIKeyInfoDTO();
                     dto.setKeyDisplayName(src.getKeyDisplayName());
                     dto.setIssuedOn(src.getCreatedTime());
-                    dto.setValidityPeriod((int) src.getValidityPeriod());
+                    dto.setValidityPeriod(Math.toIntExact(src.getValidityPeriod()));
                     dto.setLastUsed(src.getLastUsedTime());
                     return dto;
                 })

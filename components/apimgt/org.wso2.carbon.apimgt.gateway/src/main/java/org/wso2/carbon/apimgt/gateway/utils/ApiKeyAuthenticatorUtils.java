@@ -51,13 +51,9 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
 import javax.cache.Cache;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * This class contains the common utility methods required for API Key authentication.
@@ -299,9 +295,11 @@ public class ApiKeyAuthenticatorUtils {
                 permittedRefererList = (String) payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_REFERER);
             }
         } else {
-            // Taking values from the DB for an opaque API key
-            permittedIPList = additionalProperties.get("permittedIP");
-            permittedRefererList = additionalProperties.get("permittedReferer");
+            if (additionalProperties != null) {
+                // Taking values from the DB for an opaque API key
+                permittedIPList = additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_IP);
+                permittedRefererList = additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_REFERER);
+            }
         }
         if (StringUtils.isNotEmpty(permittedIPList)) {
             // Validate client IP against permitted IPs

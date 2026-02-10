@@ -7104,14 +7104,37 @@ components:
       title: API Key details to invoke APIs
       type: object
       properties:
-        apikey:
+        keyDisplayName:
           type: string
-          description: API Key
-          example: eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=
-        validityTime:
+          description: API Key name
+          example: Test_Key
+        applicationName:
+          type: string
+          description: Application Name
+          example: DefaultApplication
+        keyType:
+          type: string
+          description: Application Key Type
+          example: PRODUCTION
+          enum:
+            - PRODUCTION
+            - SANDBOX
+        user:
+          type: string
+          description: Owner of the Application
+          example: Bob
+        issuedOn:
+          type: string
+          description: Created Time
+          example: 2026-02-06 23:45:07
+        validityPeriod:
           type: integer
           format: int32
           example: 3600
+        lastUsed:
+          type: string
+          description: Last Used Time
+          example: NOT_USED
     APIKeyList:
       title: API Keys List
       type: object
@@ -7481,7 +7504,7 @@ components:
       name: keyDisplayName
       in: path
       description: |
-        Name of the API key.
+        Name of the API key. URL-encode this value if it contains reserved path characters.
       required: true
       schema:
         type: string

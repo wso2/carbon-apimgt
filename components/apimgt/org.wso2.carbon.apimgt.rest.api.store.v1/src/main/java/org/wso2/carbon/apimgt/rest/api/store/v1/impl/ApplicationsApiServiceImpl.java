@@ -771,9 +771,16 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 if (application != null) {
                     if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)
                             || RestAPIStoreUtils.isApplicationSharedtoUser(application)) {
-                        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                        apiConsumer.revokeAPIKey(applicationId, keyType, keyDisplayName, tenantDomain);
-                        return Response.ok().build();
+                        boolean isValidKeyType = APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)
+                                || APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType);
+                        if (!isValidKeyType) {
+                            RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION " +
+                                    "or SANDBOX", log);
+                        } else {
+                            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                            apiConsumer.revokeAPIKey(applicationId, keyType, keyDisplayName, tenantDomain);
+                            return Response.ok().build();
+                        }
                     } else {
                         if (log.isDebugEnabled()) {
                             log.debug("Logged in user " + username + " isn't the owner of the application "
@@ -784,9 +791,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     }
                 } else {
                     if(log.isDebugEnabled()) {
-                        log.debug("Application with given id " + applicationId + " doesn't not exist ");
+                        log.debug("Application with given id " + applicationId + " doesn't exist ");
                     }
-                    RestApiUtil.handleBadRequest("Validation failed for the given token ", log);
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 }
             } catch (APIManagementException e) {
                 String msg = "Error while revoking API Key of application " + applicationId;
@@ -798,7 +805,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         } else {
-            log.debug("Provided API Key " + keyDisplayName + " is not valid");
+            if (log.isDebugEnabled()) {
+                log.debug("Provided API Key display name " + keyDisplayName + " is not valid");
+            }
             RestApiUtil.handleBadRequest("Provided API Key isn't valid ", log);
         }
         return null;
@@ -816,11 +825,18 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 if (application != null) {
                     if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)
                             || RestAPIStoreUtils.isApplicationSharedtoUser(application)) {
-                        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                        APIKeyInfo apiKeyInfo = apiConsumer.regenerateAPIKey(applicationId, keyType, keyDisplayName, tenantDomain, username);
-                        APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKeyInfo.getApiKey(),
-                                (int) apiKeyInfo.getValidityPeriod(), apiKeyInfo.getKeyDisplayName());
-                        return Response.ok().entity(apiKeyDto).build();
+                        boolean isValidKeyType = APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)
+                                || APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType);
+                        if (!isValidKeyType) {
+                            RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION " +
+                                    "or SANDBOX", log);
+                        } else {
+                            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                            APIKeyInfo apiKeyInfo = apiConsumer.regenerateAPIKey(applicationId, keyType, keyDisplayName, tenantDomain, username);
+                            APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKeyInfo.getApiKey(),
+                                    (int) apiKeyInfo.getValidityPeriod(), apiKeyInfo.getKeyDisplayName());
+                            return Response.ok().entity(apiKeyDto).build();
+                        }
                     } else {
                         if (log.isDebugEnabled()) {
                             log.debug("Logged in user " + username + " isn't the owner of the application "
@@ -831,9 +847,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     }
                 } else {
                     if(log.isDebugEnabled()) {
-                        log.debug("Application with given id " + applicationId + " doesn't not exist ");
+                        log.debug("Application with given id " + applicationId + " doesn't exist ");
                     }
-                    RestApiUtil.handleBadRequest("Validation failed for the given API Key ", log);
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 }
             } catch (APIManagementException e) {
                 String msg = "Error while regenerating API Key of application " + applicationId;
@@ -845,7 +861,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         } else {
-            log.debug("Provided API Key " + keyDisplayName + " is not valid");
+            if (log.isDebugEnabled()) {
+                log.debug("Provided API Key display name " + keyDisplayName + " is not valid");
+            }
             RestApiUtil.handleBadRequest("Provided API Key isn't valid ", log);
         }
         return null;

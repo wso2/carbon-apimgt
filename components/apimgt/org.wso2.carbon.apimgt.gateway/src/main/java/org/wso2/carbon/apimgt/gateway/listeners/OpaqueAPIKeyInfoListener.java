@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.text.StringEscapeUtils;
 import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -37,10 +38,13 @@ import java.util.Map;
 public class OpaqueAPIKeyInfoListener implements MessageListener {
 
     private static final Log log = LogFactory.getLog(OpaqueAPIKeyInfoListener.class);
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public void onMessage(Message message) {
 
-        log.info("🔥 Opaque API Key JMS message RECEIVED");
+        if (log.isDebugEnabled()) {
+            log.debug("Opaque API Key Info JMS message received");
+        }
 
         try {
             if (message != null) {
@@ -49,7 +53,6 @@ public class OpaqueAPIKeyInfoListener implements MessageListener {
                 }
                 if (message instanceof TextMessage) {
                     String textMessage = ((TextMessage) message).getText();
-                    ObjectMapper objectMapper = new ObjectMapper();
                     // Navigate to payloadData
                     JsonNode payload = null;
                     payload = objectMapper.readTree(textMessage)
@@ -57,15 +60,16 @@ public class OpaqueAPIKeyInfoListener implements MessageListener {
                                 .path("payloadData");
 
                     APIKeyInfo apiKeyInfo = new APIKeyInfo();
-                    apiKeyInfo.setApiKeyHash(payload.path("apiKeyHash").asText());
-                    apiKeyInfo.setSalt(payload.path("salt").asText());
-                    apiKeyInfo.setKeyType(payload.path("keyType").asText());
-                    apiKeyInfo.setAppId(payload.path("applicationId").asInt());
-                    apiKeyInfo.setStatus(payload.path("status").asText());
-                    apiKeyInfo.setValidityPeriod(payload.path("validityPeriod").asLong());
-                    apiKeyInfo.setLookupKey(payload.path("lookupKey").asText());
+                    apiKeyInfo.setApiKeyHash(payload.path(APIConstants.NotificationEvent.API_KEY_HASH).asText());
+                    apiKeyInfo.setSalt(payload.path(APIConstants.NotificationEvent.SALT).asText());
+                    apiKeyInfo.setKeyType(payload.path(APIConstants.NotificationEvent.KEY_TYPE).asText());
+                    apiKeyInfo.setAppId(payload.path(APIConstants.NotificationEvent.APPLICATION_ID).asInt());
+                    apiKeyInfo.setStatus(payload.path(APIConstants.NotificationEvent.STATUS).asText());
+                    apiKeyInfo.setValidityPeriod(payload.path(APIConstants.NotificationEvent.VALIDITY_PERIOD).asLong());
+                    apiKeyInfo.setLookupKey(payload.path(APIConstants.NotificationEvent.LOOKUP_KEY).asText());
 
-                    String additionalPropsEscaped = payload.path("additionalProperties").asText();
+                    String additionalPropsEscaped = payload.path(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES).
+                            asText(null);
                     Map<String, String> additionalPropsMap = null;
                     if (additionalPropsEscaped != null) {
                         // Unescape and convert back to Map
