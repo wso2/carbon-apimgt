@@ -438,13 +438,24 @@ public class RestApiAdminUtils {
         // Validate each constraint configuration
         for (Map.Entry<String, Map<String, Object>> entry : constraintsMap.entrySet()) {
             String fieldName = entry.getKey();
-            Map<String, Object> constraintConfig = entry.getValue();
-            if (constraintConfig == null) {
+            Object rawConfig = entry.getValue();
+            if (rawConfig == null) {
                 continue;
             }
+            if (!(rawConfig instanceof Map)) {
+                throw new APIManagementException(
+                    "Constraint configuration for field '" + fieldName + "' must be a valid object",
+                     ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES,
+                        "Constraint configuration for field '" + fieldName + "' must be a valid object"));
+            }
+            Map<String, Object> constraintConfig = (Map<String, Object>) rawConfig;
             String constraintTypeStr = (String) constraintConfig.get("type");
             if (constraintTypeStr == null) {
-                continue;
+                throw new APIManagementException(
+                        "Missing constraint type for field '" + fieldName + "'",
+                        ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES,
+                                "Missing constraint type for field '" + fieldName + "'"));
+
             }
             AppConfigConstraintType constraintType = AppConfigConstraintType.fromString(constraintTypeStr);
             if (constraintType == null) {
