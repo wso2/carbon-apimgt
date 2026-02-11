@@ -183,10 +183,20 @@ public class GatekeeperService {
         List<ConflictReport> conflictReports = new ArrayList<>();
         boolean highConfidence = false;
 
+        // Read high confidence threshold from config instead of using hardcoded value
+        double highConfidenceThreshold = 0.95;
+        try {
+            DeduplicationConfigService.DeduplicationConfig conf =
+                    DeduplicationConfigService.getInstance().getConfig(organization);
+            highConfidenceThreshold = conf.getHighConfidenceThreshold();
+        } catch (Exception e) {
+            log.debug("Could not read high confidence threshold from config, using default: 0.95");
+        }
+
         for (LSHIndex.SimilarityResult similar : similarApis) {
             double similarity = similar.getSimilarity();
 
-            if (similarity >= 0.95) {
+            if (similarity >= highConfidenceThreshold) {
                 highConfidence = true;
             }
 
@@ -195,7 +205,7 @@ public class GatekeeperService {
                     .similarityScore(similarity)
                     .message(String.format("API has %.1f%% similarity with existing API",
                             similarity * 100))
-                    .recommendation(similarity >= 0.95
+                    .recommendation(similarity >= highConfidenceThreshold
                             ? "Consider reusing the existing API or creating a new version"
                             : "Review the similar API to ensure this is not a duplicate")
                     .build();
@@ -382,11 +392,25 @@ public class GatekeeperService {
         // Get threshold from deduplication ruleset configuration
         DeduplicationConfigService.DeduplicationConfig config = 
                 DeduplicationConfigService.getInstance().getConfig(organization);
+        
+        // Check if deduplication is enabled in config
+        if (!config.isEnabled()) {
+            log.info("Deduplication is disabled via config for organization: " + organization 
+                    + ". Skipping check for API " + apiId);
+            org.wso2.carbon.apimgt.governance.gatekeeper.model.DuplicateCheckResult skipResult = 
+                    new org.wso2.carbon.apimgt.governance.gatekeeper.model.DuplicateCheckResult();
+            skipResult.setApiId(apiId);
+            skipResult.setHasDuplicates(false);
+            skipResult.setThreshold(config.getSimilarityThreshold());
+            return skipResult;
+        }
+
         double threshold = config.getSimilarityThreshold();
         
         // Always log the threshold being used (INFO level for visibility)
         log.info("Deduplication check for API " + apiId + " using threshold: " 
-                + String.format("%.2f", threshold * 100) + "% (org: " + organization + ")");
+                + String.format("%.2f", threshold * 100) + "% (org: " + organization 
+                + ", mode: " + config.getMode() + ")");
         
         if (log.isDebugEnabled()) {
             log.debug("Full config - enabled: " + config.isEnabled() + ", mode: " + config.getMode()
