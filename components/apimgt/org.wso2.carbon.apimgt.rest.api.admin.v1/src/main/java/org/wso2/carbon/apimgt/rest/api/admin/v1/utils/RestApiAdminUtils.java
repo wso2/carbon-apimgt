@@ -460,7 +460,7 @@ public class RestApiAdminUtils {
                 Map<String, Object> constraintValueMap = null;
                 if (constraintValue instanceof Map) {
                     constraintValueMap = (Map<String, Object>) constraintValue;
-                } else if (constraintValue != null) {
+                } else {
                     throw new APIManagementException(
                         "Constraint value for field '" + fieldName + "' must be a valid object",
                         ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES,
