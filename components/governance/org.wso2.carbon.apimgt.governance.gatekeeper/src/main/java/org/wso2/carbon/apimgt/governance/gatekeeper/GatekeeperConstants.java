@@ -47,19 +47,22 @@ public final class GatekeeperConstants {
     /**
      * Number of hash functions to use for MinHash signature.
      * Higher values increase accuracy but consume more memory.
+     * Tuned from 128 to 256 for better accuracy with large API definitions.
      */
-    public static final int DEFAULT_NUM_HASH_FUNCTIONS = 128;
+    public static final int DEFAULT_NUM_HASH_FUNCTIONS = 256;
 
     /**
      * Number of bands for LSH indexing.
      * More bands = higher recall, fewer bands = higher precision.
+     * Tuned from 16 to 32 (with 256 hash functions: 32 bands x 8 rows).
      */
-    public static final int DEFAULT_NUM_BANDS = 16;
+    public static final int DEFAULT_NUM_BANDS = 32;
 
     /**
      * N-gram size for shingling.
+     * Increased from 3 to 5 to capture more semantic context in large APIs.
      */
-    public static final int NGRAM_SIZE = 3;
+    public static final int NGRAM_SIZE = 5;
 
     /**
      * Rule category for generic/deduplication rulesets.

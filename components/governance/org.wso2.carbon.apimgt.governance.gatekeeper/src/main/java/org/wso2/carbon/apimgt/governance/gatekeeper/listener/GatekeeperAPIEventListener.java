@@ -23,9 +23,11 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.governance.gatekeeper.model.DeduplicationAlert;
 import org.wso2.carbon.apimgt.governance.gatekeeper.model.DuplicateCheckResult;
+import org.wso2.carbon.apimgt.governance.gatekeeper.service.BackgroundHydrationService;
 import org.wso2.carbon.apimgt.governance.gatekeeper.service.DeduplicationAlertService;
 import org.wso2.carbon.apimgt.governance.gatekeeper.service.DeduplicationConfigService;
 import org.wso2.carbon.apimgt.governance.gatekeeper.service.GatekeeperService;
+import org.wso2.carbon.apimgt.governance.gatekeeper.service.SkippedApiTracker;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
@@ -97,7 +99,8 @@ public class GatekeeperAPIEventListener implements Notifier {
 
     /**
      * Handle API create or update events - check for duplicates and index.
-     * The API is ALWAYS indexed (to keep the LSH index hydrated).
+     * Indexing is SKIPPED when deduplication is disabled to save resources.
+     * Skipped APIs are tracked and hydrated when dedup is re-enabled.
      * The dedup CHECK only runs if: config enabled AND policy is associated.
      */
     private void handleAPICreateOrUpdate(GatekeeperService gatekeeperService, APIEvent apiEvent) {
@@ -107,6 +110,32 @@ public class GatekeeperAPIEventListener implements Notifier {
         String organization = apiEvent.getTenantDomain();
 
         try {
+            // Check if the dedup policy is active (enabled + associated with a governance policy)
+            DeduplicationConfigService configService = DeduplicationConfigService.getInstance();
+            DeduplicationConfigService.DeduplicationConfig config = configService.getConfig(organization);
+            boolean policyActive = configService.isDeduplicationPolicyActive(organization);
+
+            if (!config.isEnabled() || !policyActive) {
+                // Skip indexing entirely when dedup is disabled - track for later hydration
+                SkippedApiTracker.getInstance().trackSkipped(apiId, organization);
+                if (!config.isEnabled()) {
+                    log.info("Deduplication is disabled for org: " + organization
+                            + ". Skipping indexing for API: " + apiName + " (tracked for hydration)");
+                } else {
+                    log.info("No governance policy has the deduplication ruleset associated for org: "
+                            + organization + ". Skipping indexing for API: " + apiName);
+                }
+                return;
+            }
+
+            // Dedup is active - check if we need to hydrate skipped APIs first
+            SkippedApiTracker tracker = SkippedApiTracker.getInstance();
+            if (tracker.hasSkippedApis(organization)) {
+                log.info("Dedup re-enabled with " + tracker.getSkippedCount(organization)
+                        + " skipped APIs pending. Triggering background hydration.");
+                BackgroundHydrationService.getInstance().triggerHydration(organization);
+            }
+
             // Get the API definition - we need to fetch it from the registry
             String apiDefinition = fetchAPIDefinition(apiId, organization);
             
@@ -120,21 +149,9 @@ public class GatekeeperAPIEventListener implements Notifier {
                 log.debug("API Definition for " + apiName + " has length: " + apiDefinition.length());
             }
 
-            // Check if the dedup policy is active (enabled + associated with a governance policy)
-            DeduplicationConfigService configService = DeduplicationConfigService.getInstance();
-            DeduplicationConfigService.DeduplicationConfig config = configService.getConfig(organization);
-            boolean policyActive = configService.isDeduplicationPolicyActive(organization);
-            
-            if (!config.isEnabled()) {
-                log.info("Deduplication is disabled in config for org: " + organization 
-                        + ". Skipping dedup check, but still indexing API.");
-            } else if (!policyActive) {
-                log.info("No governance policy has the deduplication ruleset associated for org: " 
-                        + organization + ". Skipping dedup check, but still indexing API.");
-            } else {
-                // Check for duplicates BEFORE indexing
-                DuplicateCheckResult checkResult = gatekeeperService.checkForDuplicates(
-                        apiId, apiDefinition, organization);
+            // Check for duplicates BEFORE indexing
+            DuplicateCheckResult checkResult = gatekeeperService.checkForDuplicates(
+                    apiId, apiDefinition, organization);
 
                 if (checkResult.hasDuplicates()) {
                     List<DuplicateCheckResult.SimilarAPI> similarApis = checkResult.getSimilarAPIs();
@@ -192,11 +209,8 @@ public class GatekeeperAPIEventListener implements Notifier {
                 } else {
                     log.info("No duplicates found for API: " + apiName);
                 }
-            }
 
-            // ALWAYS index the API (add to LSH index and persist to DB)
-            // This keeps the index up-to-date even when the policy is disabled,
-            // so when re-enabled, the index is ready immediately.
+            // ALWAYS index the API when dedup is active
             gatekeeperService.indexAPI(apiId, apiDefinition, organization);
             log.info("Successfully indexed API for deduplication: " + apiName + " (ID: " + apiId + ")");
 
@@ -258,6 +272,9 @@ public class GatekeeperAPIEventListener implements Notifier {
             // Remove from deduplication index
             gatekeeperService.removeAPI(apiId, organization);
             log.info("Removed API from deduplication index: " + apiName + " (ID: " + apiId + ")");
+
+            // Also remove from skipped tracker if it was tracked
+            SkippedApiTracker.getInstance().removeFromSkipped(apiId, organization);
             
             // Auto-resolve any pending alerts for this API
             try {
