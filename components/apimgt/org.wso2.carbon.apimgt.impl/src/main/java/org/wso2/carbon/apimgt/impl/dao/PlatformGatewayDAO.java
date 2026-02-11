@@ -193,6 +193,22 @@ public class PlatformGatewayDAO {
     }
 
     /**
+     * Update gateway active status (e.g. connected/disconnected for control plane WebSocket).
+     */
+    public void updateGatewayActiveStatus(String gatewayId, boolean active) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(
+                     SQLConstants.PlatformGatewaySQLConstants.UPDATE_GATEWAY_ACTIVE_SQL)) {
+            ps.setBoolean(1, active);
+            ps.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+            ps.setString(3, gatewayId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new APIManagementException("Error updating platform gateway active status", e);
+        }
+    }
+
+    /**
      * Load all active tokens with their gateway info (for verification).
      */
     public List<TokenWithGateway> getActiveTokensWithGateway() throws APIManagementException {

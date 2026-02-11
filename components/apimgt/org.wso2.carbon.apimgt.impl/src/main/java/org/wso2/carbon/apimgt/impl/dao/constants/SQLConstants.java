@@ -5171,5 +5171,7 @@ public class SQLConstants {
                 "SELECT t.ID, t.GATEWAY_ID, t.TOKEN_HASH, t.SALT, g.ID AS GATEWAY_UUID, g.ORGANIZATION_ID " +
                         "FROM AM_PLATFORM_GATEWAY_TOKEN t INNER JOIN AM_PLATFORM_GATEWAY g ON t.GATEWAY_ID = g.ID " +
                         "WHERE t.STATUS = 'active'";
+        public static final String UPDATE_GATEWAY_ACTIVE_SQL =
+                "UPDATE AM_PLATFORM_GATEWAY SET IS_ACTIVE = ?, UPDATED_AT = ? WHERE ID = ?";
     }
 }

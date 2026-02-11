@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
@@ -17,7 +16,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+
+
 public class PlatformGatewayDTO   {
   
     private String id = null;
