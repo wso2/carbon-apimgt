@@ -239,7 +239,7 @@ public class RestAPIStoreUtils {
      * @throws APIManagementException If validation fails
      */
     public static void validateKeyManagerAppConfiguration(String keyManager, Object additionalProperties) throws APIManagementException {
-        
+
         KeyManagerConfigurationDTO kmConfig = ApiMgtDAO.getInstance().getKeyManagerConfigurationByUUID(keyManager);
         if (kmConfig == null) {
             return;
@@ -295,6 +295,7 @@ public class RestAPIStoreUtils {
                 }
                 if (!validator.validate(inputValue, constraints)) {
                     String fieldError = "Property '" + fieldName + "' is invalid. " + validator.getErrorMessage();
+                    log.error("Validation failed for property '" + fieldName + "': " + validator.getErrorMessage());
                     throw new APIManagementException(fieldError,
                             ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, fieldError));
                 }

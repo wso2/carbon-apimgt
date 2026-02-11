@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.kmvalidator;
 
 import org.wso2.carbon.apimgt.api.model.AppConfigConstraintType;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationConfigValidator;
+import static org.jboss.util.property.jmx.SystemPropertyClassValue.log;
 
 /**
  * Factory class to retrieve the appropriate validator for a given constraint type.
@@ -35,6 +36,7 @@ public class KeyManagerApplicationConfigValidatorFactory {
      */
     public static KeyManagerApplicationConfigValidator getValidator(AppConfigConstraintType type) {
         if (type == null) {
+            log.debug("Constraint type is null");
             return null;
         }
 
@@ -48,6 +50,7 @@ public class KeyManagerApplicationConfigValidatorFactory {
             case ENUM:
                 return new EnumValidator();
             default:
+                log.warn("No validator found for constraint type: " + type);
                 return null;
         }
     }
