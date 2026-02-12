@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIDefinitionHandler;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -45,6 +46,7 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionHandlerFactory;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
@@ -587,43 +589,16 @@ public class APIMappingUtil {
 
     private static APIURLsDTO extractEndpointUrlsForDiscoveredApi(APIDTO apidto) {
         try {
-            String resolvedUrl = null;
-            if ("WS".equalsIgnoreCase(apidto.getType())
-                    || "WSS".equalsIgnoreCase(apidto.getType())) {
-                resolvedUrl = AsyncApiParserUtil
-                    .getEndpointUrlFromAsyncApiDefinition(apidto.getApiDefinition());
-            } else {
-                if (StringUtils.isBlank(apidto.getApiDefinition())) {
-                    return null;
-                }
-                JsonElement configElement = JsonParser.parseString(apidto.getApiDefinition());
-                if (!configElement.isJsonObject()) {
-                    return null;
-                }
-                JsonObject configObject = configElement.getAsJsonObject();
-                JsonArray servers = configObject.getAsJsonArray("servers");
-                if (servers == null || servers.size() == 0) {
-                    return null;
-                }
-                JsonObject server = servers.get(0).getAsJsonObject();
-                if (server == null || !server.has("url")) {
-                    return null;
-                }
-                resolvedUrl = server.get("url").getAsString();
-                JsonObject variables = server.getAsJsonObject("variables");
-                if (variables != null && variables.has("basePath")) {
-                    JsonObject basePath = variables.getAsJsonObject("basePath");
-                    if (basePath != null && basePath.has("default")) {
-                        String stageName = basePath.get("default").getAsString();
-                        resolvedUrl = resolvedUrl
-                                .replace("/{basePath}", "/" + stageName)
-                                .replace("{basePath}", stageName);
-                    }
-                }
+            if (StringUtils.isBlank(apidto.getApiDefinition())) {
+                return null;
             }
             
+            // Use Strategy Pattern to extract endpoint URL
+            APIDefinitionHandler definitionHandler = APIDefinitionHandlerFactory.getDefinitionHandler(apidto.getType());
+            String resolvedUrl = definitionHandler.extractEndpointUrl(apidto.getApiDefinition());
+            
             if (StringUtils.isBlank(resolvedUrl)) {
-                    return null;
+                return null;
             }
 
             APIURLsDTO urls = new APIURLsDTO();
@@ -689,21 +664,9 @@ public class APIMappingUtil {
         boolean isWs = StringUtils.equalsIgnoreCase("WS", apidto.getType());
         boolean isGQLSubscription = StringUtils.equalsIgnoreCase(APIConstants.GRAPHQL_API, apidto.getType())
                 && isGraphQLSubscriptionsAvailable(apidto);
-        if (!isWs) {
-            if (apidto.isInitiatedFromGateway()) {
-                APIURLsDTO extractedURLs;
-                extractedURLs = extractEndpointUrlsForDiscoveredApi(apidto);
-                if (extractedURLs == null) {
-                    if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
-                        apiurLsDTO.setHttp(vHost.getHttpUrl() + context);
-                    }
-                    if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
-                        apiurLsDTO.setHttps(vHost.getHttpsUrl() + context);
-                    }
-                } else {
-                    apiurLsDTO = extractedURLs;
-                }
-            } else {
+        
+        if (!apidto.isInitiatedFromGateway()){
+            if (!isWs) {
                 String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(apidto.getId(),
                         environment.getUuid());
                 // Retrieve gateway deployer to determine if this is an external gateway deployment
@@ -723,30 +686,31 @@ public class APIMappingUtil {
                 if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
                     apiurLsDTO.setHttps(httpsUrl + contextToAppend);
                 }
-            }
-        } else {
-            if (apidto.isInitiatedFromGateway()) {
-                APIURLsDTO extractedURLs;
-                extractedURLs = extractEndpointUrlsForDiscoveredApi(apidto);
-                if (extractedURLs == null) {
-                    if (apidto.getTransport().contains(APIConstants.WS_PROTOCOL)) {
-                        apiurLsDTO.setWs(vHost.getWsUrl() + context);
-                    }
-                    if (apidto.getTransport().contains(APIConstants.WSS_PROTOCOL)) {
-                        apiurLsDTO.setWss(vHost.getWssUrl() + context);
-                    }
-                } else {
-                    apiurLsDTO = extractedURLs;
-                }
-            } else {
+            } else if (isWs || isGQLSubscription) {
                 apiurLsDTO.setWs(vHost.getWsUrl() + context);
                 apiurLsDTO.setWss(vHost.getWssUrl() + context);
             }
-        }
-        if (isGQLSubscription) {
-            apiurLsDTO.setWs(vHost.getWsUrl() + context);
-            apiurLsDTO.setWss(vHost.getWssUrl() + context);
-        }
+        } else {
+            APIURLsDTO extractedURLs;
+            extractedURLs = extractEndpointUrlsForDiscoveredApi(apidto);
+            if (extractedURLs == null) {
+                if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
+                    apiurLsDTO.setHttp(vHost.getHttpUrl() + context);
+                }
+                if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
+                    apiurLsDTO.setHttps(vHost.getHttpsUrl() + context);
+                }
+                if (apidto.getTransport().contains(APIConstants.WS_PROTOCOL)) {
+                    apiurLsDTO.setWs(vHost.getWsUrl() + context);
+                }
+                if (apidto.getTransport().contains(APIConstants.WSS_PROTOCOL)) {
+                    apiurLsDTO.setWss(vHost.getWssUrl() + context);
+                }
+            } else {
+                apiurLsDTO = extractedURLs;
+            }
+        }        
+        
         apiEndpointURLsDTO.setUrLs(apiurLsDTO);
 
         APIDefaultVersionURLsDTO apiDefaultVersionURLsDTO = new APIDefaultVersionURLsDTO();
