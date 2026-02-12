@@ -91,8 +91,9 @@ public abstract class FederatedAPIBuilder<T> {
     protected abstract String getContext(T sourceApi);
 
     /**
-     * Extracts the context/path of the API from the raw data.
-     *
+     * Extracts the context template of the API from the raw data.
+     * This usually includes a version placeholder (e.g., "/context/{version}").
+     * 
      * @param sourceApi The raw data object.
      * @return The API context template.
      */
