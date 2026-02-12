@@ -971,35 +971,4 @@ public class AsyncApiParserUtil {
         });
         return builder.toString();
     }
-
-    /**
-     * Extracts the endpoint URL from the AsyncAPI definition.
-     *
-     * @param apiDefinition AsyncAPI definition as a string
-     * @return Resolved endpoint URL or null if not found
-     */
-    public static String getEndpointUrlFromAsyncApiDefinition(String apiDefinition) {
-        try {
-            if (apiDefinition == null || apiDefinition.trim().isEmpty()) {
-                return null;
-            }
-            JsonNode rootNode = new ObjectMapper().readTree(apiDefinition);
-            if (rootNode.has("servers")) {
-                JsonNode serversNode = rootNode.get("servers");
-                Iterator<JsonNode> elements = serversNode.elements();
-                if (elements.hasNext()) {
-                // Get the first server defined (e.g., 'production')
-                    JsonNode server = elements.next();
-                
-                // 4. Directly extract the URL
-                    if (server.has("url")) {
-                        return server.get("url").asText();
-                    }
-                }    
-            }
-        } catch (IOException e) {
-            log.error("Error while parsing definition to extract URL", e);
-        }
-        return null;
-    }
 }
