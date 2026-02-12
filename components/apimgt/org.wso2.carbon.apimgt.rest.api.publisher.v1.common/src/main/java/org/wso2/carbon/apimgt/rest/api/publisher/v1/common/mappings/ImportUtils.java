@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.APIDefinitionHandler;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 import org.wso2.carbon.apimgt.api.dto.ImportedAPIDTO;
@@ -75,6 +76,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionHandlerFactory;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -369,7 +371,7 @@ public class ImportUtils {
                     if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                         setOperationsToDTO(importedApiDTO, graphQLValidationResponseDTO);
                     } else {
-                        setOperationsToDTO(importedApiDTO, validationResponse, asyncAPI);
+                        setOperationsToDTO(importedApiDTO, validationResponse);
                     }
                 }
 
@@ -1785,31 +1787,10 @@ public class ImportUtils {
      * @param response API Validation Response
      * @throws APIManagementException If an error occurs when retrieving the URI templates
      */
-    private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response,
-            boolean asyncAPI) throws APIManagementException {
+    private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response) throws APIManagementException {
 
-        List<URITemplate> uriTemplates = new ArrayList<>();
-        String jsonContent = response.getJsonContent();
-        if (asyncAPI) {
-            AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
-                AsyncApiParserUtil.getAsyncApiVersion(jsonContent), 
-                null 
-            );
-            boolean isWebSocket = APIConstants.API_TYPE_WS
-                .equals(apiDto.getType().toString());
-            Set<URITemplate> asyncTemplates = asyncApiParser
-                .getURITemplates(jsonContent, isWebSocket);
-
-            if (asyncTemplates != null) {
-                uriTemplates.addAll(asyncTemplates);
-            }
-        } else {
-            Set<URITemplate> templates = response.getParser()
-                .getURITemplates(jsonContent);
-            if (templates != null) {
-                uriTemplates.addAll(templates);
-            }
-        }
+        APIDefinitionHandler definitionHandler = APIDefinitionHandlerFactory.getDefinitionHandler(apiDto.getType().toString());
+        List<URITemplate> uriTemplates = definitionHandler.extractOperations(response.getJsonContent());
         List<APIOperationsDTO> apiOperationsDtos = APIMappingUtil
             .fromURITemplateListToOprationList(uriTemplates);
         apiDto.setOperations(apiOperationsDtos);
