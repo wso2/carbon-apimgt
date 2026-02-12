@@ -364,6 +364,30 @@ public enum ExceptionCodes implements ErrorHandler {
     ALREADY_ASSIGNED_ADVANCED_POLICY_DELETE_ERROR(900971, "Cannot delete the advanced throttling policy", 403,
             "Cannot delete the advanced policy with the name %s because it is already assigned to an API/Resource"),
 
+    // Multiple client secret related codes
+    OPERATION_NOT_SUPPORTED_FOR_SINGLE_CLIENT_SECRET_MODE(900916,
+            "The requested operation is not supported", 400,
+            "This operation is not supported as the multiple client secret support is disabled" +
+                    " by server configuration."),
+    OPERATION_NOT_SUPPORTED_FOR_MULTIPLE_CLIENT_SECRET_MODE(900917,
+            "The requested operation is not supported", 400,
+            "This operation is not supported as the multiple client secret support is enabled" +
+                    " by server configuration. Use the client secret creation API" +
+                    " (POST /applications/{applicationId}/oauth-keys/{keyMappingId}/generate-secret) to generate" +
+                    " new client secrets."),
+    CLIENT_SECRET_GENERATION_FAILED(900918,
+            "Client secret generation failed", 500,
+            "Error occurred while generating a new client secret for the application with " +
+                    "consumer key %s."),
+    CLIENT_SECRET_DELETION_FAILED(900919,
+            "Client secret deletion failed", 500,
+            "Error occurred while deleting the client secret for the application with " +
+                    "consumer key %s."),
+    CLIENT_SECRET_RETRIEVAL_FAILED(900920,
+            "Client secret retrieval failed", 500,
+            "Error occurred while retrieving the client secret for the application with " +
+                    "consumer key %s."),
+
     //Throttle related codes
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
     ENDPOINT_CONFIG_NOT_FOUND(90070, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +

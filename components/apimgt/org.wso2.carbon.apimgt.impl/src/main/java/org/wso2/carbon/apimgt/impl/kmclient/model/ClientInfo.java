@@ -34,6 +34,10 @@ public class ClientInfo {
     private String tokenType;
     @SerializedName("client_secret_expires_at")
     private Long clientSecretExpiredTime;
+    @SerializedName("ext_client_secret_description")
+    private String clientSecretDescription;
+    @SerializedName("ext_client_secret_expires_in")
+    private Long clientSecretExpiresIn;
     @SerializedName("grant_types")
     private List<String> grantTypes;
     @SerializedName("redirect_uris")
@@ -245,5 +249,21 @@ public class ClientInfo {
     public void setApplicationScopes(List<String> applicationScopes) {
 
         this.applicationScopes = applicationScopes;
+    }
+
+    public String getClientSecretDescription() {
+        return clientSecretDescription;
+    }
+
+    public void setClientSecretDescription(String clientSecretDescription) {
+        this.clientSecretDescription = clientSecretDescription;
+    }
+
+    public Long getClientSecretExpiresIn() {
+        return clientSecretExpiresIn;
+    }
+
+    public void setClientSecretExpiresIn(Long clientSecretExpiresIn) {
+        this.clientSecretExpiresIn = clientSecretExpiresIn;
     }
 }

@@ -66,6 +66,8 @@ import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretInfo;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretRequest;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
@@ -321,6 +323,92 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
         return keyManager.getNewApplicationConsumerSecret(tokenRequest);
+    }
+
+    /**
+     * Generates a new consumer secret for an OAuth application.
+     *
+     * @param keyManagerName         name of the Key Manager associated with the OAuth application
+     * @param consumerSecretRequest  request containing information required to generate the consumer secret
+     * @return {@link ConsumerSecretInfo} containing details of the generated consumer secret
+     * @throws APIManagementException if an error occurs while generating the consumer secret
+     * @throws UnsupportedOperationException if the Key Manager does not support generating consumer secrets
+     */
+    public ConsumerSecretInfo generateConsumerSecret(String keyManagerName, ConsumerSecretRequest consumerSecretRequest)
+            throws APIManagementException {
+
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO =
+                apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+        if (keyManagerConfigurationDTO == null) {
+            keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+            if (keyManagerConfigurationDTO != null) {
+                keyManagerName = keyManagerConfigurationDTO.getName();
+            } else {
+                log.error("Key Manager: " + keyManagerName + " not found in database.");
+                throw new APIManagementException("Key Manager " + keyManagerName + " not found in database.",
+                        ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+            }
+        }
+
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+        return keyManager.generateNewApplicationConsumerSecret(consumerSecretRequest);
+    }
+
+    /**
+     * Retrieves all consumer secrets associated with a given OAuth client.
+     *
+     * @param clientId       client ID of the application
+     * @param keyManagerName name of the Key Manager associated with the OAuth application
+     * @return list of {@link ConsumerSecretInfo} objects associated with the client
+     * @throws APIManagementException if an error occurs while retrieving consumer secrets
+     * @throws UnsupportedOperationException if the Key Manager does not support retrieving consumer secrets
+     */
+    public List<ConsumerSecretInfo> retrieveConsumerSecrets(String clientId, String keyManagerName)
+            throws APIManagementException {
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO =
+                apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+        if (keyManagerConfigurationDTO == null) {
+            keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+            if (keyManagerConfigurationDTO != null) {
+                keyManagerName = keyManagerConfigurationDTO.getName();
+            } else {
+                log.error("Key Manager: " + keyManagerName + " not found in database.");
+                throw new APIManagementException("Key Manager " + keyManagerName + " not found in database.",
+                        ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+            }
+        }
+
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+        return keyManager.retrieveApplicationConsumerSecrets(clientId);
+    }
+
+    /**
+     * Deletes a specific consumer secret associated with an OAuth application.
+     *
+     * @param secretId               identifier of the consumer secret to be deleted
+     * @param keyManagerName         name of the Key Manager associated with the OAuth application
+     * @param consumerSecretRequest  request containing additional information required for deletion
+     * @throws APIManagementException if an error occurs while deleting the consumer secret
+     * @throws UnsupportedOperationException if the Key Manager does not support deleting consumer secrets
+     */
+    public void deleteConsumerSecret(String secretId, String keyManagerName,
+                                     ConsumerSecretRequest consumerSecretRequest)
+            throws APIManagementException {
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO =
+                apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+        if (keyManagerConfigurationDTO == null) {
+            keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+            if (keyManagerConfigurationDTO != null) {
+                keyManagerName = keyManagerConfigurationDTO.getName();
+            } else {
+                log.error("Key Manager: " + keyManagerName + " not found in database.");
+                throw new APIManagementException("Key Manager " + keyManagerName + " not found in database.",
+                        ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+            }
+        }
+
+        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+        keyManager.deleteApplicationConsumerSecret(secretId, consumerSecretRequest);
     }
 
     /**
@@ -2909,7 +2997,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @param sortColumn   The sort column.
      * @param sortOrder    The sort order.
      * @param organization Identifier of an Organization
-     * @param sharedOrganization 
+     * @param sharedOrganization
      * @return Application[] The Applications.
      * @throws APIManagementException
      */
@@ -4104,7 +4192,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     @Override
     public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end)
                                                  throws APIManagementException {
-    	
+
         Organization org = new Organization(organization);
         String userName = (userNameWithoutChange != null) ? userNameWithoutChange : username;
         String[] roles = APIUtil.getListOfRoles(userName);
@@ -4113,7 +4201,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
         return searchPaginatedAPIs(searchQuery, start, end, org, userCtx, null);
     }
-    
+
     @Override
     public Map<String, Object> searchPaginatedAPIs(String searchQuery, OrganizationInfo organizationInfo, int start,
                                                    int end, String sortBy, String sortOrder)

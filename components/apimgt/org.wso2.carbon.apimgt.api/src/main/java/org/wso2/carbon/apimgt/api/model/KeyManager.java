@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -99,6 +100,21 @@ public interface KeyManager {
      * @throws APIManagementException This is the custom exception class for API management.
      */
     String getNewApplicationConsumerSecret(AccessTokenRequest tokenRequest) throws APIManagementException;
+
+    default ConsumerSecretInfo generateNewApplicationConsumerSecret(ConsumerSecretRequest consumerSecretRequest)
+            throws APIManagementException {
+        throw new UnsupportedOperationException("Generating new consumer secret for an application is not supported");
+    }
+
+    default List<ConsumerSecretInfo> retrieveApplicationConsumerSecrets(String clientId)
+            throws APIManagementException {
+        throw new UnsupportedOperationException("Retrieving consumer secrets of an application is not supported");
+    }
+
+    default void deleteApplicationConsumerSecret(String secretId, ConsumerSecretRequest consumerSecretRequest)
+            throws APIManagementException {
+        throw new UnsupportedOperationException("Deleting a consumer secret of an application is not supported");
+    }
 
     /**
      * Get details about an access token. As a part of the response, consumer key against which token was obtained

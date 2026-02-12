@@ -52,4 +52,7 @@ public final class  ApplicationConstants {
     public static final String IMPLICIT_CONST = "implicit";
     public static final String AUTHORIZATION_CODE = "authorization_code";
     public static final String INBOUNT_AUTH_CONSUMER_SECRET = "oauthConsumerSecret";
+    public static final String SECRET_DESCRIPTION = "description";
+    public static final String SECRET_EXPIRES_IN = "expiresIn";
+    public static final String SECRET_EXPIRES_AT = "expiresAt";
 }
