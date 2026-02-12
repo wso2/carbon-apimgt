@@ -3120,6 +3120,10 @@ public final class APIConstants {
         public static final String APPLICATION_GRANT_TYPE = "application";
         public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";
 
+        public static final String CUSTOM_KM_TYPE = "CustomKeyManager";
+        public static final String CUSTOM_KM_DISPLAY_NAME = "Custom Key Manager (Out-of-Band Provisioning)";
+        public static final String DEFAULT_KEY_MANAGER_HOST = "https://localhost:9443";
+
         public static class KeyManagerEvent {
 
             public static final String EVENT_TYPE = "event_type";

@@ -468,6 +468,10 @@ public enum ExceptionCodes implements ErrorHandler {
     TENANT_MISMATCH(901409,"Tenant mismatch", 400, "Tenant mismatch"),
     INVALID_APPLICATION_PROPERTIES(901410, "Invalid additional properties", 400,
             "Invalid additional properties given for application"),
+    OPERATION_NOT_IMPLEMENTED_FOR_CUSTOM_KM(901413, "Operation not implemented for custom Key Manager for Out-of-Band type",
+            501, "Operation not implemented for custom Key Manager for Out-of-Band type"),
+    INVALID_CLIENT_ID_FOR_OOB_MODE(901414, "Invalid client id for Out-of-Band mode", 400,
+            "Client id cannot be empty for Out-of-Band mode"),
 
     //Scope related
     SCOPE_NOT_FOUND_FOR_USER(901500, "Scope does not belong to this user", 404, "Scope not found"),
