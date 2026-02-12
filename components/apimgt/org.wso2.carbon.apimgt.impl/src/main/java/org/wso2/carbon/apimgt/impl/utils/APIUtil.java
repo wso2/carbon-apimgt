@@ -12108,9 +12108,9 @@ public final class APIUtil {
      *
      * @param api The API object whose Swagger definition needs to be updated.
      */
-    public static void updateAPISwaggerWithVersion(API api) {
+    public static void updateAPIDefinitionWithVersion(API api) {
         String swaggerDefinition = api.getSwaggerDefinition();
-
+        
         if (swaggerDefinition != null) {
             JsonObject apiSpec = JsonParser.parseString(swaggerDefinition).getAsJsonObject();
             JsonObject infoObject = apiSpec.has(SWAGGER_INFO) && apiSpec.get(SWAGGER_INFO).isJsonObject() ?

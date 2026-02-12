@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIDefinitionHandler;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscovery;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.dto.ImportedAPIDTO;
@@ -69,6 +70,8 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.DELEM_COLON;
 import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil.fromAPItoDTO;
 import static org.wso2.carbon.apimgt.federated.gateway.util.FederatedGatewayConstants.DISCOVERED_API_LIST;
 import static org.wso2.carbon.apimgt.federated.gateway.util.FederatedGatewayConstants.PUBLISHED_API_LIST;
+
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionHandlerFactory;
 
 /**
  * This class is responsible for scheduling and executing the discovery of APIs in a federated gateway environment.
@@ -292,10 +295,23 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     JsonObject apiJson = (JsonObject) new Gson().toJsonTree(apidto);
                     apiJson = CommonUtil.addTypeAndVersionToFile(ImportExportConstants.TYPE_API,
                             ImportExportConstants.APIM_VERSION, apiJson);
+                    
+                    APIDefinitionHandler definitionHandler = APIDefinitionHandlerFactory.getDefinitionHandler(api);
+                    String definition = definitionHandler.getDefinitionFromAPI(api);
+
+                    if (definition == null || StringUtils.isBlank(definition)) {
+                        log.warn("API definition is empty for: " + apidto.getName() + " version: "
+                            + apidto.getVersion());
+                        if (log.isDebugEnabled()) {
+                            log.debug("API type: " + apidto.getType() + ", API object: " + api.toString());
+                        }
+                        continue;
+                    }
+                    
                     InputStream apiZip = FederatedGatewayUtil.createZipAsInputStream(
-                            apiJson.toString(), api.getSwaggerDefinition(),
+                            apiJson.toString(), definition,
                             FederatedGatewayUtil.createDeploymentYaml(environment),
-                            apidto.getName());
+                            apidto.getName(), definitionHandler.getDefinitionFileName());
 
                     ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
 
