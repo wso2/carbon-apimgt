@@ -49,7 +49,7 @@ public abstract class FederatedBuilderFactory<T> {
      * and returns the first one that can handle the API type.
      * 
      * @param sourceApi The raw API data from the gateway
-     * @return The builder that can handle this API type, or null if unsupported
+     * @return The builder that can handle this API type, or exception if unsupported
      */
     public FederatedAPIBuilder<T> getBuilder(T sourceApi) {
         for (FederatedAPIBuilder<T> builder : builders) {
@@ -59,20 +59,6 @@ public abstract class FederatedBuilderFactory<T> {
         }
         throw new IllegalStateException(
         "No registered builder can handle the given API data");
-    }
-    
-    /**
-     * Checks if the given API type is supported by any registered builder.
-     * 
-     * @param sourceApi The raw API data from the gateway
-     * @return true if a builder can handle this API type, false otherwise
-     */
-    public boolean isSupported(T sourceApi) {
-        try {
-            return getBuilder(sourceApi) != null;
-        } catch (IllegalStateException e) {
-            return false;
-        }
     }
     
     /**
