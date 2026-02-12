@@ -277,12 +277,11 @@ public class ApiKeyAuthenticatorUtils {
      * @param apiContext The API context.
      * @param apiVersion The API version.
      * @param referer    The http referer.
-     * @param additionalProperties Additional properties sent with an opaque API key.
      * @throws APISecurityException If the API Key is not allowed to access the API.
      * @throws APIManagementException If an error occurs while validating the restrictions.
      */
     public static void validateAPIKeyRestrictions(JWTClaimsSet payload, String clientIP, String apiContext,
-                                                  String apiVersion, String referer, Map<String, String> additionalProperties)
+                                                  String apiVersion, String referer)
             throws APISecurityException, APIManagementException {
 
         String permittedIPList = null;
@@ -294,12 +293,69 @@ public class ApiKeyAuthenticatorUtils {
             if (payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_REFERER) != null) {
                 permittedRefererList = (String) payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_REFERER);
             }
-        } else {
-            if (additionalProperties != null) {
-                // Taking values from the DB for an opaque API key
-                permittedIPList = additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_IP);
-                permittedRefererList = additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_REFERER);
+        }
+        if (StringUtils.isNotEmpty(permittedIPList)) {
+            // Validate client IP against permitted IPs
+            if (StringUtils.isNotEmpty(clientIP)) {
+                for (String restrictedIP : permittedIPList.split(",")) {
+                    if (APIUtil.isIpInNetwork(clientIP, restrictedIP.trim())) {
+                        // Client IP is allowed
+                        return;
+                    }
+                }
+                if (log.isDebugEnabled()) {
+                    if (StringUtils.isNotEmpty(clientIP)) {
+                        log.debug("Invocations to API: " + apiContext + ":" + apiVersion +
+                                " is not permitted for client with IP: " + clientIP);
+                    }
+                }
+                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                        "Access forbidden for the invocations");
             }
+        }
+        if (StringUtils.isNotEmpty(permittedRefererList)) {
+            // Validate http referer against the permitted referrers
+            if (StringUtils.isNotEmpty(referer)) {
+                for (String restrictedReferer : permittedRefererList.split(",")) {
+                    String restrictedRefererRegExp = restrictedReferer.trim()
+                            .replace("*", "[^ ]*");
+                    if (referer.matches(restrictedRefererRegExp)) {
+                        // Referer is allowed
+                        return;
+                    }
+                }
+                if (log.isDebugEnabled()) {
+                    if (StringUtils.isNotEmpty(referer)) {
+                        log.debug("Invocations to API: " + apiContext + ":" + apiVersion +
+                                " is not permitted for referer: " + referer);
+                    }
+                }
+            }
+            throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                    "Access forbidden for the invocations");
+        }
+    }
+
+    /**
+     * This method is used to validate the API Key against the given restrictions.
+     * @param clientIP   The client IP.
+     * @param apiContext The API context.
+     * @param apiVersion The API version.
+     * @param referer    The http referer.
+     * @param additionalProperties Additional properties sent with an opaque API key.
+     * @throws APISecurityException If the API Key is not allowed to access the API.
+     * @throws APIManagementException If an error occurs while validating the restrictions.
+     */
+    public static void validateAPIKeyRestrictions(String clientIP, String apiContext,
+                                                  String apiVersion, String referer, Map<String, String> additionalProperties)
+            throws APISecurityException {
+
+        String permittedIPList = null;
+        String permittedRefererList = null;
+        if (additionalProperties != null) {
+            // Taking values from the DB for an opaque API key
+            permittedIPList = additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_IP);
+            permittedRefererList = additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_REFERER);
         }
         if (StringUtils.isNotEmpty(permittedIPList)) {
             // Validate client IP against permitted IPs

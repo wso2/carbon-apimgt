@@ -4610,14 +4610,15 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X GET "https://127.0.0.1:9443/api/am/admin/v4/api-keys"'
 
-  /api-keys/{applicationId}/{keyType}/{keyDisplayName}:
+  /api-keys/{apiId}/{applicationId}/{keyType}/{keyDisplayName}:
     delete:
       tags:
         - API Keys
-      summary: Revoke API Key
+      summary: Revoke an API Key
       description: |
-        Revoke an API Key for the application
+        Revoke an API Key for the API
       parameters:
+        - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'
         - $ref: '#/components/parameters/keyDisplayName'
@@ -4637,7 +4638,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v4/api-keys/d7cf8523-9180-4255-84fa-6cb171c1f779/PRODUCTION/test-key"'
+          "https://127.0.0.1:9443/api/am/admin/v4/api-keys/ght65523-7650-4255-84fa-6cb171c1f779/d7cf8523-9180-4255-84fa-6cb171c1f779/PRODUCTION/test-key"'
 
 components:
   schemas:
@@ -7108,6 +7109,10 @@ components:
           type: string
           description: API Key name
           example: Test_Key
+        apiName:
+          type: string
+          description: API Name
+          example: NotificationsAPI
         applicationName:
           type: string
           description: Application Name

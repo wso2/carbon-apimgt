@@ -20,42 +20,187 @@ import javax.validation.Valid;
 
 public class APIKeyDTO   {
   
-    private String apikey = null;
-    private Integer validityTime = null;
+    private String keyDisplayName = null;
+    private String apiName = null;
+    private String applicationName = null;
+
+    @XmlType(name="KeyTypeEnum")
+    @XmlEnum(String.class)
+    public enum KeyTypeEnum {
+        PRODUCTION("PRODUCTION"),
+        SANDBOX("SANDBOX");
+        private String value;
+
+        KeyTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static KeyTypeEnum fromValue(String v) {
+            for (KeyTypeEnum b : KeyTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private KeyTypeEnum keyType = null;
+    private String user = null;
+    private String issuedOn = null;
+    private Integer validityPeriod = null;
+    private String lastUsed = null;
 
   /**
-   * API Key
+   * API Key name
    **/
-  public APIKeyDTO apikey(String apikey) {
-    this.apikey = apikey;
+  public APIKeyDTO keyDisplayName(String keyDisplayName) {
+    this.keyDisplayName = keyDisplayName;
     return this;
   }
 
   
-  @ApiModelProperty(example = "eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=", value = "API Key")
-  @JsonProperty("apikey")
-  public String getApikey() {
-    return apikey;
+  @ApiModelProperty(example = "Test_Key", value = "API Key name")
+  @JsonProperty("keyDisplayName")
+  public String getKeyDisplayName() {
+    return keyDisplayName;
   }
-  public void setApikey(String apikey) {
-    this.apikey = apikey;
+  public void setKeyDisplayName(String keyDisplayName) {
+    this.keyDisplayName = keyDisplayName;
+  }
+
+  /**
+   * API Name
+   **/
+  public APIKeyDTO apiName(String apiName) {
+    this.apiName = apiName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "NotificationsAPI", value = "API Name")
+  @JsonProperty("apiName")
+  public String getApiName() {
+    return apiName;
+  }
+  public void setApiName(String apiName) {
+    this.apiName = apiName;
+  }
+
+  /**
+   * Application Name
+   **/
+  public APIKeyDTO applicationName(String applicationName) {
+    this.applicationName = applicationName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "DefaultApplication", value = "Application Name")
+  @JsonProperty("applicationName")
+  public String getApplicationName() {
+    return applicationName;
+  }
+  public void setApplicationName(String applicationName) {
+    this.applicationName = applicationName;
+  }
+
+  /**
+   * Application Key Type
+   **/
+  public APIKeyDTO keyType(KeyTypeEnum keyType) {
+    this.keyType = keyType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "PRODUCTION", value = "Application Key Type")
+  @JsonProperty("keyType")
+  public KeyTypeEnum getKeyType() {
+    return keyType;
+  }
+  public void setKeyType(KeyTypeEnum keyType) {
+    this.keyType = keyType;
+  }
+
+  /**
+   * Owner of the Application
+   **/
+  public APIKeyDTO user(String user) {
+    this.user = user;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Bob", value = "Owner of the Application")
+  @JsonProperty("user")
+  public String getUser() {
+    return user;
+  }
+  public void setUser(String user) {
+    this.user = user;
+  }
+
+  /**
+   * Created Time
+   **/
+  public APIKeyDTO issuedOn(String issuedOn) {
+    this.issuedOn = issuedOn;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "2026-02-06 23:45:07", value = "Created Time")
+  @JsonProperty("issuedOn")
+  public String getIssuedOn() {
+    return issuedOn;
+  }
+  public void setIssuedOn(String issuedOn) {
+    this.issuedOn = issuedOn;
   }
 
   /**
    **/
-  public APIKeyDTO validityTime(Integer validityTime) {
-    this.validityTime = validityTime;
+  public APIKeyDTO validityPeriod(Integer validityPeriod) {
+    this.validityPeriod = validityPeriod;
     return this;
   }
 
   
   @ApiModelProperty(example = "3600", value = "")
-  @JsonProperty("validityTime")
-  public Integer getValidityTime() {
-    return validityTime;
+  @JsonProperty("validityPeriod")
+  public Integer getValidityPeriod() {
+    return validityPeriod;
   }
-  public void setValidityTime(Integer validityTime) {
-    this.validityTime = validityTime;
+  public void setValidityPeriod(Integer validityPeriod) {
+    this.validityPeriod = validityPeriod;
+  }
+
+  /**
+   * Last Used Time
+   **/
+  public APIKeyDTO lastUsed(String lastUsed) {
+    this.lastUsed = lastUsed;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "NOT_USED", value = "Last Used Time")
+  @JsonProperty("lastUsed")
+  public String getLastUsed() {
+    return lastUsed;
+  }
+  public void setLastUsed(String lastUsed) {
+    this.lastUsed = lastUsed;
   }
 
 
@@ -68,13 +213,19 @@ public class APIKeyDTO   {
       return false;
     }
     APIKeyDTO apIKey = (APIKeyDTO) o;
-    return Objects.equals(apikey, apIKey.apikey) &&
-        Objects.equals(validityTime, apIKey.validityTime);
+    return Objects.equals(keyDisplayName, apIKey.keyDisplayName) &&
+        Objects.equals(apiName, apIKey.apiName) &&
+        Objects.equals(applicationName, apIKey.applicationName) &&
+        Objects.equals(keyType, apIKey.keyType) &&
+        Objects.equals(user, apIKey.user) &&
+        Objects.equals(issuedOn, apIKey.issuedOn) &&
+        Objects.equals(validityPeriod, apIKey.validityPeriod) &&
+        Objects.equals(lastUsed, apIKey.lastUsed);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apikey, validityTime);
+    return Objects.hash(keyDisplayName, apiName, applicationName, keyType, user, issuedOn, validityPeriod, lastUsed);
   }
 
   @Override
@@ -82,8 +233,14 @@ public class APIKeyDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIKeyDTO {\n");
     
-    sb.append("    apikey: ").append(toIndentedString(apikey)).append("\n");
-    sb.append("    validityTime: ").append(toIndentedString(validityTime)).append("\n");
+    sb.append("    keyDisplayName: ").append(toIndentedString(keyDisplayName)).append("\n");
+    sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
+    sb.append("    applicationName: ").append(toIndentedString(applicationName)).append("\n");
+    sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
+    sb.append("    user: ").append(toIndentedString(user)).append("\n");
+    sb.append("    issuedOn: ").append(toIndentedString(issuedOn)).append("\n");
+    sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
+    sb.append("    lastUsed: ").append(toIndentedString(lastUsed)).append("\n");
     sb.append("}");
     return sb.toString();
   }

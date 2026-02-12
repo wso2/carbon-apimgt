@@ -180,9 +180,9 @@ public class ApiKeyAuthenticator implements Authenticator {
                         ApiKeyAuthenticatorUtils.checkTokenExpired(isGatewayTokenCacheEnabled, cacheKey, tokenIdentifier, apiKey,
                                 tenantDomain, payload);
                         ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(payload, GatewayUtils.getIp(axis2MessageContext),
-                                apiContext, apiVersion, referer, null);
-                        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload,
-                                null, 0, splitToken[0]);
+                                apiContext, apiVersion, referer);
+                        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext,
+                                apiVersion, payload, splitToken[0]);
                         String endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO, jwtConfigurationDto, apiKey,
                                 signedJWT, payload, tokenIdentifier, apiContext, apiVersion, isGatewayTokenCacheEnabled);
                         AuthenticationContext authenticationContext = GatewayUtils.generateAuthenticationContext(tokenIdentifier,
@@ -271,7 +271,7 @@ public class ApiKeyAuthenticator implements Authenticator {
         // Validate subscription
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
         try {
-            apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext, apiVersion, null, apiKeyInfo.getKeyType(),
+            apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext, apiVersion, apiKeyInfo.getKeyType(),
                     apiKeyInfo.getAppId(), apiKey);
             if (apiKeyValidationInfoDTO != null && apiKeyValidationInfoDTO.isAuthorized()) {
                 if (log.isDebugEnabled()) {
@@ -293,7 +293,7 @@ public class ApiKeyAuthenticator implements Authenticator {
         }
 
         // Check for permittedIP and permittedReferrers
-        ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(null, ip,
+        ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(ip,
                 apiContext, apiVersion, referrer, apiKeyInfo.getAdditionalProperties());
 
         // TODO: Check for api key expiry and status is ACTIVE

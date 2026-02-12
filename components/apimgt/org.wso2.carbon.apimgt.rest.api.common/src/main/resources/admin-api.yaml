@@ -4610,14 +4610,15 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X GET "https://127.0.0.1:9443/api/am/admin/v4/api-keys"'
 
-  /api-keys/{applicationId}/{keyType}/{keyDisplayName}:
+  /api-keys/{apiId}/{applicationId}/{keyType}/{keyDisplayName}:
     delete:
       tags:
         - API Keys
-      summary: Revoke API Key
+      summary: Revoke an API Key
       description: |
-        Revoke an API Key for the application
+        Revoke an API Key for the API
       parameters:
+        - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'
         - $ref: '#/components/parameters/keyDisplayName'
@@ -4637,7 +4638,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v4/api-keys/d7cf8523-9180-4255-84fa-6cb171c1f779/PRODUCTION/test-key"'
+          "https://127.0.0.1:9443/api/am/admin/v4/api-keys/ght65523-7650-4255-84fa-6cb171c1f779/d7cf8523-9180-4255-84fa-6cb171c1f779/PRODUCTION/test-key"'
 
 components:
   schemas:
@@ -7104,14 +7105,41 @@ components:
       title: API Key details to invoke APIs
       type: object
       properties:
-        apikey:
+        keyDisplayName:
           type: string
-          description: API Key
-          example: eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=
-        validityTime:
+          description: API Key name
+          example: Test_Key
+        apiName:
+          type: string
+          description: API Name
+          example: NotificationsAPI
+        applicationName:
+          type: string
+          description: Application Name
+          example: DefaultApplication
+        keyType:
+          type: string
+          description: Application Key Type
+          example: PRODUCTION
+          enum:
+            - PRODUCTION
+            - SANDBOX
+        user:
+          type: string
+          description: Owner of the Application
+          example: Bob
+        issuedOn:
+          type: string
+          description: Created Time
+          example: 2026-02-06 23:45:07
+        validityPeriod:
           type: integer
           format: int32
           example: 3600
+        lastUsed:
+          type: string
+          description: Last Used Time
+          example: NOT_USED
     APIKeyList:
       title: API Keys List
       type: object
@@ -7481,7 +7509,7 @@ components:
       name: keyDisplayName
       in: path
       description: |
-        Name of the API key.
+        Name of the API key. URL-encode this value if it contains reserved path characters.
       required: true
       schema:
         type: string

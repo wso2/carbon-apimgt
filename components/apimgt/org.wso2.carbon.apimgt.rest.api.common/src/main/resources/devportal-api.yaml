@@ -3326,7 +3326,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'
-        - $ref: '#/components/parameters/If-Match'
+        - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -3372,6 +3372,8 @@ paths:
           content: { }
         400:
           $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
         412:
           $ref: '#/components/responses/PreconditionFailed'
       security:
@@ -6008,7 +6010,7 @@ components:
           example: 3600
         lastUsed:
           type: string
-          description: Last Used Time
+          description: Last used time as epoch milliseconds, or NOT_USED if never used.
           example: NOT_USED
     APIKeyList:
       title: API Keys List
@@ -7782,10 +7784,11 @@ components:
       name: keyDisplayName
       in: path
       description: |
-        Name of the API key.
+        Name of the API key. URL-encode reserved characters.
       required: true
       schema:
         type: string
+      x-encoded: true
     If-None-Match:
       name: If-None-Match
       in: header
