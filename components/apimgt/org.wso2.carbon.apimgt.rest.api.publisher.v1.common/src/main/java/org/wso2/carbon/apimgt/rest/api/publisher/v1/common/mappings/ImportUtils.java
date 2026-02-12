@@ -1787,7 +1787,8 @@ public class ImportUtils {
      * @param response API Validation Response
      * @throws APIManagementException If an error occurs when retrieving the URI templates
      */
-    private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response) throws APIManagementException {
+    private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response) 
+        throws APIManagementException {
 
         APIDefinitionHandler definitionHandler = APIDefinitionHandlerFactory.getDefinitionHandler(apiDto.getType().toString());
         List<URITemplate> uriTemplates = definitionHandler.extractOperations(response.getJsonContent());
