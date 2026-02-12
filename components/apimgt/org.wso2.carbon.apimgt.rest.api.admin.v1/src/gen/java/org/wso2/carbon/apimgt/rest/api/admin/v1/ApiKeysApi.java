@@ -37,10 +37,10 @@ ApiKeysApiService delegate = new ApiKeysApiServiceImpl();
 
 
     @DELETE
-    @Path("/{applicationId}/{keyType}/{keyDisplayName}")
+    @Path("/{apiId}/{applicationId}/{keyType}/{keyDisplayName}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Revoke API Key", notes = "Revoke an API Key for the application ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Revoke an API Key", notes = "Revoke an API Key for the API ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
@@ -49,8 +49,8 @@ ApiKeysApiService delegate = new ApiKeysApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Api key revoked successfully. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response apiKeysApplicationIdKeyTypeKeyDisplayNameDelete(@ApiParam(value = "Application UUID ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "Name of the API key. ",required=true) @PathParam("keyDisplayName") String keyDisplayName) throws APIManagementException{
-        return delegate.apiKeysApplicationIdKeyTypeKeyDisplayNameDelete(applicationId, keyType, keyDisplayName, securityContext);
+    public Response apiKeysApiIdApplicationIdKeyTypeKeyDisplayNameDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Application UUID ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "Name of the API key. URL-encode this value if it contains reserved path characters. ",required=true) @PathParam("keyDisplayName") String keyDisplayName) throws APIManagementException{
+        return delegate.apiKeysApiIdApplicationIdKeyTypeKeyDisplayNameDelete(apiId, applicationId, keyType, keyDisplayName, securityContext);
     }
 
     @GET

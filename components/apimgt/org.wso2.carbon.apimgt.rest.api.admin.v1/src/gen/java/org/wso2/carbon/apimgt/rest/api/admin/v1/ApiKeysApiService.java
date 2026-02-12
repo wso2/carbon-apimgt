@@ -21,6 +21,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApiKeysApiService {
-      public Response apiKeysApplicationIdKeyTypeKeyDisplayNameDelete(String applicationId, String keyType, String keyDisplayName, MessageContext messageContext) throws APIManagementException;
+      public Response apiKeysApiIdApplicationIdKeyTypeKeyDisplayNameDelete(String apiId, String applicationId, String keyType, String keyDisplayName, MessageContext messageContext) throws APIManagementException;
       public Response apiKeysGet(MessageContext messageContext) throws APIManagementException;
 }

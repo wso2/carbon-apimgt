@@ -891,29 +891,20 @@ public class GatewayUtils {
      * @param apiContext API context
      * @param apiVersion API version
      * @param payload    The payload of the JWT token
-     * @param type    The key type
-     * @param applicationId Application Id
      * @param token      The token which was used to invoke the API
      * @return an APIKeyValidationInfoDTO containing APIKey validation information.
      * If the subscription information is not found, return a null object.
      * @throws APISecurityException if the user is not subscribed to the API
      */
     public static APIKeyValidationInfoDTO validateAPISubscription(String apiContext, String apiVersion, JWTClaimsSet payload,
-                                                                  String type, int applicationId, String token)
+                                                                  String token)
             throws APISecurityException {
 
         APIKeyValidator apiKeyValidator = new APIKeyValidator();
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
-        String keyType;
-        if (type != null) {
-            keyType = type;
-        } else {
-            keyType = (String) payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE);
-        }
+        String keyType = (String) payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE);
         int appId = 0;
-        if (applicationId != 0) {
-            appId = applicationId;
-        } else if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
+        if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
             try {
                 Map<String, Object> applicationObjMap =
                         payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
@@ -940,6 +931,53 @@ public class GatewayUtils {
                 if (log.isDebugEnabled()) {
                     log.debug("User is not subscribed to access the API: " + apiContext +
                             ", version: " + apiVersion + ". Token: " + getMaskedToken(token));
+                }
+                log.error("User is not subscribed to access the API.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                        APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+            }
+        }
+        return apiKeyValidationInfoDTO;
+    }
+
+    /**
+     * Validate whether the user is subscribed to the invoked API. If subscribed, return a APIKeyValidationInfoDTO
+     * object containing the API information to authenticate API Keys.
+     *
+     * @param apiContext API context
+     * @param apiVersion API version
+     * @param keyType    The key type
+     * @param applicationId Application Id
+     * @param apiKey      The api key which was used to invoke the API
+     * @return an APIKeyValidationInfoDTO containing APIKey validation information.
+     * If the subscription information is not found, return a null object.
+     * @throws APISecurityException if the user is not subscribed to the API
+     */
+    public static APIKeyValidationInfoDTO validateAPISubscription(String apiContext, String apiVersion, String keyType,
+                                                                  int applicationId, String apiKey)
+            throws APISecurityException {
+
+        APIKeyValidator apiKeyValidator = new APIKeyValidator();
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
+        int appId = 0;
+        if (applicationId != 0) {
+            appId = applicationId;
+        }
+        // Validate subscription
+        // If the appId is equal to 0 then it's an internal key
+        if (appId != 0) {
+            apiKeyValidationInfoDTO =
+                    apiKeyValidator.validateSubscription(apiContext, apiVersion, appId, getTenantDomain(), keyType);
+            if (apiKeyValidationInfoDTO.isAuthorized()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User is subscribed to the API: " + apiContext + ", " +
+                            "version: " + apiVersion + ". Token: " + getMaskedToken(apiKey));
+                }
+                apiKeyValidationInfoDTO.setType(keyType);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("User is not subscribed to access the API: " + apiContext +
+                            ", version: " + apiVersion + ". Token: " + getMaskedToken(apiKey));
                 }
                 log.error("User is not subscribed to access the API.");
                 throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,

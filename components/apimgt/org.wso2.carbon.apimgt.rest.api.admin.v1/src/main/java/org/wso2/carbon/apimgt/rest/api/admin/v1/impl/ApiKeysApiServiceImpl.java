@@ -18,10 +18,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
-import org.wso2.carbon.apimgt.rest.api.admin.v1.*;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
+import org.wso2.carbon.apimgt.rest.api.admin.v1.ApiKeysApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 
 import javax.ws.rs.core.Response;
@@ -31,14 +32,17 @@ public class ApiKeysApiServiceImpl implements ApiKeysApiService {
 
     /**
      * Delete an api key provided by the display name
+     * @param apiId API ID
      * @param applicationId Application ID
      * @param keyType Application key type
      * @param keyDisplayName API key display name
      * @param messageContext Message context
      * @return API key deletion response
      */
-    public Response apiKeysApplicationIdKeyTypeKeyDisplayNameDelete(String applicationId, String keyType,
-                                                                    String keyDisplayName, MessageContext messageContext) {
+    public Response apiKeysApiIdApplicationIdKeyTypeKeyDisplayNameDelete(String apiId, String applicationId,
+                                                                         String keyType, String keyDisplayName,
+                                                                         MessageContext messageContext)
+            throws APIManagementException {
         // TODO: remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
