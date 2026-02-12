@@ -6863,6 +6863,19 @@ components:
           items:
             type: object
             properties: {}
+        constraint:
+          $ref: '#/components/schemas/ApplicationConfigurationConstraint'
+    ApplicationConfigurationConstraint:
+      title: Application Configuration Constraint
+      type: object
+      properties:
+        type:
+          type: string
+          example: RANGE
+        value:
+          type: object
+          properties: {}
+          example: '{ "min": 60, "max": 3600 }'
     KeyManagerList:
       title: Key Manager List
       type: object

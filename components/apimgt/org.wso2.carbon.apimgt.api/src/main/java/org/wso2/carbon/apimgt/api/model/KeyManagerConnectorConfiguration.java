@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * This Interface providing functionality to register KeyManagerConnector Related Configurations
@@ -142,5 +143,18 @@ public interface KeyManagerConnectorConfiguration {
                 String.format("E.g., %s/oauth2/authorize", APIConstants.DEFAULT_KEY_MANAGER_HOST), "", false, false,
                 Collections.emptyList(), false));
         return configurationDtos;
+    }
+
+    /**
+     * Returns a list of metadata about configurations that has constraints.
+     */
+    default List<ConstraintConfigDto> getAvailableAppConfigConstraints() {
+        if (this.getApplicationConfigurations() == null) {
+            return Collections.emptyList();
+        }
+        return this.getApplicationConfigurations().stream()
+                .filter(ConfigurationDto::hasConstraint)
+                .map(ConfigurationDto::getConstraint)
+                .collect(Collectors.toList());
     }
 }
