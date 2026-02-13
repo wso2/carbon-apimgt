@@ -81,10 +81,6 @@ public class MCPUtils {
             throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
                     APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing method field");
         }
-        if (!APIConstants.MCP.ALLOWED_METHODS.contains(method)) {
-            throw new McpException(APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_CODE,
-                    APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_MESSAGE, "Method " + method + " not found");
-        }
 
         Object id = request.getId();
         if (id == null && !APIConstants.MCP.METHOD_NOTIFICATION_INITIALIZED.equals(method)) {
@@ -150,13 +146,7 @@ public class MCPUtils {
         if (requestObject.getParams() != null) {
             Params params = requestObject.getParams();
             String protocolVersion = params.getProtocolVersion();
-            if (!StringUtils.isEmpty(protocolVersion)) {
-                if (!APIConstants.MCP.SUPPORTED_PROTOCOL_VERSIONS.contains(protocolVersion)) {
-                    throw new McpExceptionWithId(id, APIConstants.MCP.RpcConstants.INVALID_PARAMS_CODE,
-                            APIConstants.MCP.PROTOCOL_MISMATCH_ERROR,
-                            MCPPayloadGenerator.getInitializeErrorBody(protocolVersion));
-                }
-            } else {
+            if (StringUtils.isEmpty(protocolVersion)) {
                 throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
                         APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing protocolVersion field");
             }
