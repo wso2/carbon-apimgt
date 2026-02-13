@@ -1429,6 +1429,238 @@ paths:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v3/apis/268c9e55-3dc1-4f47-82e7-977e5343d077/subscription-policies"
 
+  /apis/{apiId}/api-keys/generate:
+    post:
+      tags:
+        - API Keys
+      summary: Generate API Key
+      description: |
+        Generate a self contained API Key for the API
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        description: |
+          API Key generation request object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIAPIKeyGenerateRequest'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Api key generated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKey'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+            - apim:api_key
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/apis/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/generate"'
+
+  /apis/{apiId}/api-keys/{keyDisplayName}/regenerate:
+    post:
+      tags:
+        - API Keys
+      summary: Regenerate API Key
+      description: |
+        Regenerate a self contained API Key for the API specified by the display name
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/keyDisplayName'
+        - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        description: |
+          API Key renewal request object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIKeyRenewalRequest'
+        required: false
+      responses:
+        200:
+          description: |
+            OK.
+            Api key regenerated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKey'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+            - apim:api_key
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/apis/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/test-key/regenerate"'
+
+  /apis/{apiId}/api-keys:
+    get:
+      tags:
+        - API Keys
+      summary: Get API Key(s) of a Given API
+      description: |
+        Retrieve self contained API Key(s) for the API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            API key(s) of a given API are returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIAPIKeyList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+            - apim:api_key
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X GET "https://localhost:9443/api/am/devportal/v3/apis/16cd2684-9657-4a01-a956-4efd89e96077/api-keys"'
+
+  /apis/{apiId}/api-keys/{keyDisplayName}:
+    delete:
+      tags:
+        - API Keys
+      summary: Revoke API Key
+      description: |
+        Revoke a self contained API Key for the API specified by the display name
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/keyDisplayName'
+        - $ref: '#/components/parameters/If-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Api key revoked successfully.
+          content: { }
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+            - apim:api_key
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -X DELETE "https://localhost:9443/api/am/devportal/v3/apis/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/test-key"'
+
+  /apis/{apiId}/api-keys/{keyDisplayName}/associate:
+    post:
+      tags:
+        - API Keys
+      summary: Create an association for the API Key
+      description: |
+        Create an association for a self contained API Key for the API
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/keyDisplayName'
+        - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        description: |
+          API Key association request object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIAPIKeyAssociationRequest'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Api key associated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyAssociation'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+            - apim:api_key
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/apis/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/test-key/associate"'
+
+  /apis/{apiId}/api-keys/{keyDisplayName}/dissociate:
+    delete:
+      tags:
+        - API Keys
+      summary: Remove an Association for the API Key
+      description: |
+        Remove an association a self contained API Key for the API specified by the display name
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/keyDisplayName'
+        - $ref: '#/components/parameters/If-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Removed association for the Api key successfully.
+          content: { }
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+            - apim:api_key
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -X DELETE "https://localhost:9443/api/am/devportal/v3/apis/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/test-key/dissociate"'
+
   /mcp-servers:
     get:
       tags:
@@ -3250,7 +3482,7 @@ paths:
         200:
           description: |
             OK.
-            apikey generated.
+            Api key generated.
           content:
             application/json:
               schema:
@@ -3409,7 +3641,7 @@ paths:
         200:
           description: |
             OK.
-            apikey revoked successfully.
+            Api key revoked successfully.
           content: {}
         400:
           $ref: '#/components/responses/BadRequest'
@@ -3425,6 +3657,120 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/revoke"'
+
+  /applications/{applicationId}/api-keys/{keyType}/associate:
+    post:
+      tags:
+        - API Keys
+      summary: Associate an API Key to the Application
+      description: |
+        Create an association to a self contained API Key for the application
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/keyType'
+        - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        description: |
+          API Key association request object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppAPIKeyAssociationRequest'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Api key associated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyAssociation'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+            - apim:api_key
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/associate"'
+
+  /applications/{applicationId}/api-keys/{keyType}/{keyDisplayName}/dissociate:
+    delete:
+      tags:
+        - API Keys
+      summary: Remove the association of the API Key to the Application
+      description: |
+        Remove the association to a self contained API Key for the application
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/keyType'
+        - $ref: '#/components/parameters/keyDisplayName'
+        - $ref: '#/components/parameters/If-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Removed association for the API key successfully.
+          content: { }
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+            - apim:api_key
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -X DELETE "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/TestKey/dissociate"'
+
+  /applications/{applicationId}/api-keys/{keyType}/associations:
+    get:
+      tags:
+        - API Keys
+      summary: Get API Key associations of a Given Type
+      description: |
+        Retrieve API key associations for the application specifying the key type in the URI.
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/keyType'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            API key associations of given type are returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyAssociationList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+            - apim:api_key
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X GET "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/associations"'
 
   /applications/export:
     get:
@@ -5992,6 +6338,46 @@ components:
           type: integer
           format: int32
           example: 3600
+    APIKeyAssociation:
+      title: API Key association
+      type: object
+      properties:
+        keyDisplayName:
+          type: string
+          description: API Key name
+          example: Test_Key
+        apiName:
+          type: string
+          description: API name
+          example: NotificationAPI
+        applicationName:
+          type: string
+          description: Application name
+          example: DefaultApplication
+    APIKeyAssociationInfo:
+      title: API Key association
+      type: object
+      properties:
+        keyDisplayName:
+          type: string
+          description: API Key name
+          example: Test_Key
+        apiName:
+          type: string
+          description: API name
+          example: NotificationAPI
+        associatedOn:
+          type: string
+          description: Created Time
+          example: 2026-02-06 23:45:07
+        validityPeriod:
+          type: integer
+          format: int32
+          example: 3600
+        lastUsed:
+          type: string
+          description: Last used time as epoch milliseconds, or NOT_USED if never used.
+          example: NOT_USED
     APIKeyInfo:
       title: API Key details to invoke APIs
       type: object
@@ -6012,6 +6398,43 @@ components:
           type: string
           description: Last used time as epoch milliseconds, or NOT_USED if never used.
           example: NOT_USED
+    APIAPIKeyInfo:
+      title: API Key details to invoke APIs
+      type: object
+      properties:
+        keyDisplayName:
+          type: string
+          description: API Key name
+          example: Test_Key
+        associatedApp:
+          type: string
+          description: Associated application
+          example: DefaultApplication
+        issuedOn:
+          type: string
+          description: Created Time
+          example: 2026-02-06 23:45:07
+        validityPeriod:
+          type: integer
+          format: int32
+          example: 3600
+        lastUsed:
+          type: string
+          description: Last used time as epoch milliseconds, or NOT_USED if never used.
+          example: NOT_USED
+    APIAPIKeyList:
+      title: API Keys List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of API keys returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIAPIKeyInfo'
     APIKeyList:
       title: API Keys List
       type: object
@@ -6025,6 +6448,19 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/APIKeyInfo'
+    APIKeyAssociationList:
+      title: API Key Associations List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of API key associations returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIKeyAssociationInfo'
     ApplicationKey:
       title: Application key details
       type: object
@@ -6228,6 +6664,30 @@ components:
           type: object
           properties: {}
           description: Additional parameters if Authorization server needs any
+    APIAPIKeyGenerateRequest:
+      title: API Key generation request object
+      type: object
+      properties:
+        keyDisplayName:
+          type: string
+          description: API Key name
+          example: Test_Key
+        environmentType:
+          type: string
+          description: Environment type of the API key
+          example: PRODUCTION
+          enum:
+            - PRODUCTION
+            - SANDBOX
+        validityPeriod:
+          type: integer
+          description: API key validity period
+          format: int32
+          example: 3600
+        additionalProperties:
+          type: object
+          properties: { }
+          description: Additional parameters if Authorization server needs any
     APIKeyGenerateRequest:
       title: API Key generation request object
       type: object
@@ -6238,7 +6698,7 @@ components:
           example: Test_Key
         validityPeriod:
           type: integer
-          description: Token validity period
+          description: API key validity period
           format: int32
           example: 3600
         additionalProperties:
@@ -6251,13 +6711,33 @@ components:
       properties:
         validityPeriod:
           type: integer
-          description: Token validity period
+          description: API key validity period
           format: int32
           example: 3600
         additionalProperties:
           type: object
           properties: { }
           description: Additional parameters if Authorization server needs any
+    APIAPIKeyAssociationRequest:
+      title: API Key association request object
+      type: object
+      properties:
+        applicationName:
+          type: string
+          description: Application name to be associated
+          example: DefaultApplication
+    AppAPIKeyAssociationRequest:
+      title: API Key association request object
+      type: object
+      properties:
+        apiName:
+          type: string
+          description: API name of the association
+          example: SampleAPI
+        keyDisplayName:
+          type: string
+          description: API key name
+          example: Test_Key
     APIKeyRevokeRequest:
       title: API Key revoke request object
       type: object

@@ -10,11 +10,14 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRenewalRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRevokeRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AppAPIKeyAssociationRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
@@ -39,9 +42,12 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApplicationsApiService {
+      public Response applicationsApplicationIdApiKeysKeyTypeAssociatePost(String applicationId, String keyType, AppAPIKeyAssociationRequestDTO appAPIKeyAssociationRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdApiKeysKeyTypeAssociationsGet(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(String applicationId, String keyType, String ifMatch, APIKeyGenerateRequestDTO apIKeyGenerateRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdApiKeysKeyTypeGet(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameDelete(String applicationId, String keyType, String keyDisplayName, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameDissociateDelete(String applicationId, String keyType, String keyDisplayName, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameRegeneratePost(String applicationId, String keyType, String keyDisplayName, String ifMatch, APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType, String ifMatch, APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) throws APIManagementException;

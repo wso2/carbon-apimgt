@@ -18,16 +18,48 @@ import javax.validation.Valid;
 
 
 
-public class APIKeyGenerateRequestDTO   {
+public class APIAPIKeyGenerateRequestDTO   {
   
     private String keyDisplayName = null;
+
+    @XmlType(name="EnvironmentTypeEnum")
+    @XmlEnum(String.class)
+    public enum EnvironmentTypeEnum {
+        PRODUCTION("PRODUCTION"),
+        SANDBOX("SANDBOX");
+        private String value;
+
+        EnvironmentTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static EnvironmentTypeEnum fromValue(String v) {
+            for (EnvironmentTypeEnum b : EnvironmentTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private EnvironmentTypeEnum environmentType = null;
     private Integer validityPeriod = null;
     private Object additionalProperties = null;
 
   /**
    * API Key name
    **/
-  public APIKeyGenerateRequestDTO keyDisplayName(String keyDisplayName) {
+  public APIAPIKeyGenerateRequestDTO keyDisplayName(String keyDisplayName) {
     this.keyDisplayName = keyDisplayName;
     return this;
   }
@@ -43,9 +75,27 @@ public class APIKeyGenerateRequestDTO   {
   }
 
   /**
+   * Environment type of the API key
+   **/
+  public APIAPIKeyGenerateRequestDTO environmentType(EnvironmentTypeEnum environmentType) {
+    this.environmentType = environmentType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "PRODUCTION", value = "Environment type of the API key")
+  @JsonProperty("environmentType")
+  public EnvironmentTypeEnum getEnvironmentType() {
+    return environmentType;
+  }
+  public void setEnvironmentType(EnvironmentTypeEnum environmentType) {
+    this.environmentType = environmentType;
+  }
+
+  /**
    * API key validity period
    **/
-  public APIKeyGenerateRequestDTO validityPeriod(Integer validityPeriod) {
+  public APIAPIKeyGenerateRequestDTO validityPeriod(Integer validityPeriod) {
     this.validityPeriod = validityPeriod;
     return this;
   }
@@ -63,7 +113,7 @@ public class APIKeyGenerateRequestDTO   {
   /**
    * Additional parameters if Authorization server needs any
    **/
-  public APIKeyGenerateRequestDTO additionalProperties(Object additionalProperties) {
+  public APIAPIKeyGenerateRequestDTO additionalProperties(Object additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
@@ -88,23 +138,25 @@ public class APIKeyGenerateRequestDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIKeyGenerateRequestDTO apIKeyGenerateRequest = (APIKeyGenerateRequestDTO) o;
-    return Objects.equals(keyDisplayName, apIKeyGenerateRequest.keyDisplayName) &&
-        Objects.equals(validityPeriod, apIKeyGenerateRequest.validityPeriod) &&
-        Objects.equals(additionalProperties, apIKeyGenerateRequest.additionalProperties);
+    APIAPIKeyGenerateRequestDTO apIAPIKeyGenerateRequest = (APIAPIKeyGenerateRequestDTO) o;
+    return Objects.equals(keyDisplayName, apIAPIKeyGenerateRequest.keyDisplayName) &&
+        Objects.equals(environmentType, apIAPIKeyGenerateRequest.environmentType) &&
+        Objects.equals(validityPeriod, apIAPIKeyGenerateRequest.validityPeriod) &&
+        Objects.equals(additionalProperties, apIAPIKeyGenerateRequest.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyDisplayName, validityPeriod, additionalProperties);
+    return Objects.hash(keyDisplayName, environmentType, validityPeriod, additionalProperties);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIKeyGenerateRequestDTO {\n");
+    sb.append("class APIAPIKeyGenerateRequestDTO {\n");
     
     sb.append("    keyDisplayName: ").append(toIndentedString(keyDisplayName)).append("\n");
+    sb.append("    environmentType: ").append(toIndentedString(environmentType)).append("\n");
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");

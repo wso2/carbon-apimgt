@@ -1,11 +1,14 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRenewalRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRevokeRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AppAPIKeyAssociationRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
@@ -55,6 +58,46 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
 
 
     @POST
+    @Path("/{applicationId}/api-keys/{keyType}/associate")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Associate an API Key to the Application", notes = "Create an association to a self contained API Key for the application ", response = APIKeyAssociationDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "API Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Api key associated successfully. ", response = APIKeyAssociationDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdApiKeysKeyTypeAssociatePost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "API Key association request object " ,required=true) AppAPIKeyAssociationRequestDTO appAPIKeyAssociationRequestDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.applicationsApplicationIdApiKeysKeyTypeAssociatePost(applicationId, keyType, appAPIKeyAssociationRequestDTO, ifMatch, securityContext);
+    }
+
+    @GET
+    @Path("/{applicationId}/api-keys/{keyType}/associations")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get API Key associations of a Given Type", notes = "Retrieve API key associations for the application specifying the key type in the URI. ", response = APIKeyAssociationListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "API Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API key associations of given type are returned. ", response = APIKeyAssociationListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdApiKeysKeyTypeAssociationsGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.applicationsApplicationIdApiKeysKeyTypeAssociationsGet(applicationId, keyType, ifNoneMatch, securityContext);
+    }
+
+    @POST
     @Path("/{applicationId}/api-keys/{keyType}/generate")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -66,7 +109,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         })
     }, tags={ "API Keys",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. apikey generated. ", response = APIKeyDTO.class),
+        @ApiResponse(code = 200, message = "OK. Api key generated. ", response = APIKeyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
@@ -114,6 +157,26 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         return delegate.applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameDelete(applicationId, keyType, keyDisplayName, ifMatch, securityContext);
     }
 
+    @DELETE
+    @Path("/{applicationId}/api-keys/{keyType}/{keyDisplayName}/dissociate")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Remove the association of the API Key to the Application", notes = "Remove the association to a self contained API Key for the application ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "API Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Removed association for the API key successfully. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameDissociateDelete(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyDisplayName") String keyDisplayName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameDissociateDelete(applicationId, keyType, keyDisplayName, ifMatch, securityContext);
+    }
+
     @POST
     @Path("/{applicationId}/api-keys/{keyType}/{keyDisplayName}/regenerate")
     @Consumes({ "application/json" })
@@ -146,7 +209,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         })
     }, tags={ "API Keys",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. apikey revoked successfully. ", response = Void.class),
+        @ApiResponse(code = 200, message = "OK. Api key revoked successfully. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
     public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @ApiParam(value = "API Key revoke request object " ) APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO) throws APIManagementException{

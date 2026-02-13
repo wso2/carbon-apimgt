@@ -65,6 +65,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRenewalRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRevokeRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AppAPIKeyAssociationRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO.VisibilityEnum;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
@@ -677,6 +678,16 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
+    public Response applicationsApplicationIdApiKeysKeyTypeAssociatePost(String applicationId, String keyType, AppAPIKeyAssociationRequestDTO appAPIKeyAssociationRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public Response applicationsApplicationIdApiKeysKeyTypeAssociationsGet(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    @Override
     public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(String applicationId, String keyType,
                                     String ifMatch, APIKeyGenerateRequestDTO body, MessageContext messageContext) {
 
@@ -810,6 +821,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
             RestApiUtil.handleBadRequest("Provided API Key isn't valid ", log);
         }
+        return null;
+    }
+
+    @Override
+    public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameDissociateDelete(String applicationId, String keyType, String keyDisplayName, String ifMatch, MessageContext messageContext) throws APIManagementException {
         return null;
     }
 
