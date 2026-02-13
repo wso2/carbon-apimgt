@@ -392,7 +392,8 @@
                         --add-exports java.base/sun.nio.cs=ALL-UNNAMED          
                         --add-opens java.base/java.util.regex=ALL-UNNAMED
                         --add-opens java.base/java.lang=ALL-UNNAMED
-                        --add-opens java.base/java.util.stream=ALL-UNNAMED  
+                        --add-opens java.base/java.util.stream=ALL-UNNAMED
+                        --add-opens java.base/java.lang.reflect=ALL-UNNAMED
                     </argLine>
                     <classpathDependencyExcludes>
                         <classpathDependencyExclude>org.wso2.org.ops4j.pax.logging</classpathDependencyExclude>
