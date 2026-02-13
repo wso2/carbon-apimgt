@@ -659,7 +659,7 @@
                             osgi.service;objectClass=org.wso2.carbon.apimgt.impl.APIManagerConfigurationService,
                             osgi.service;objectClass=org.wso2.carbon.apimgt.impl.jwt.JWTValidationService,
                             osgi.service;objectClass=org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService,
-                            osgi.service;objectClass=org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService,
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService
                         </Provide-Capability>
                     </instructions>
                 </configuration>

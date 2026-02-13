@@ -155,7 +155,7 @@
                         </Export-Package>
                         <Provide-Capability>
                             osgi.service;objectClass=org.wso2.carbon.apimgt.tracing.TracingService,
-                            osgi.service;objectClass=org.wso2.carbon.apimgt.tracing.telemetry.TelemetryService,
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.tracing.telemetry.TelemetryService
                         </Provide-Capability>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
