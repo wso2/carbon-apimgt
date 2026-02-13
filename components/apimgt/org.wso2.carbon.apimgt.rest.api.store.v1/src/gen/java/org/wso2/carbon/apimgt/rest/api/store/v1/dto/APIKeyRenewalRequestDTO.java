@@ -24,7 +24,7 @@ public class APIKeyRenewalRequestDTO   {
     private Object additionalProperties = null;
 
   /**
-   * Token validity period
+   * API key validity period
    **/
   public APIKeyRenewalRequestDTO validityPeriod(Integer validityPeriod) {
     this.validityPeriod = validityPeriod;
@@ -32,7 +32,7 @@ public class APIKeyRenewalRequestDTO   {
   }
 
   
-  @ApiModelProperty(example = "3600", value = "Token validity period")
+  @ApiModelProperty(example = "3600", value = "API key validity period")
   @JsonProperty("validityPeriod")
   public Integer getValidityPeriod() {
     return validityPeriod;
