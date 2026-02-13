@@ -18,16 +18,17 @@ import javax.validation.Valid;
 
 
 
-public class APIKeyGenerateRequestDTO   {
+public class APIKeyInfoDTO   {
   
     private String keyDisplayName = null;
+    private String issuedOn = null;
     private Integer validityPeriod = null;
-    private Object additionalProperties = null;
+    private String lastUsed = null;
 
   /**
    * API Key name
    **/
-  public APIKeyGenerateRequestDTO keyDisplayName(String keyDisplayName) {
+  public APIKeyInfoDTO keyDisplayName(String keyDisplayName) {
     this.keyDisplayName = keyDisplayName;
     return this;
   }
@@ -43,15 +44,32 @@ public class APIKeyGenerateRequestDTO   {
   }
 
   /**
-   * API key validity period
+   * Created Time
    **/
-  public APIKeyGenerateRequestDTO validityPeriod(Integer validityPeriod) {
+  public APIKeyInfoDTO issuedOn(String issuedOn) {
+    this.issuedOn = issuedOn;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "2026-02-06 23:45:07", value = "Created Time")
+  @JsonProperty("issuedOn")
+  public String getIssuedOn() {
+    return issuedOn;
+  }
+  public void setIssuedOn(String issuedOn) {
+    this.issuedOn = issuedOn;
+  }
+
+  /**
+   **/
+  public APIKeyInfoDTO validityPeriod(Integer validityPeriod) {
     this.validityPeriod = validityPeriod;
     return this;
   }
 
   
-  @ApiModelProperty(example = "3600", value = "API key validity period")
+  @ApiModelProperty(example = "3600", value = "")
   @JsonProperty("validityPeriod")
   public Integer getValidityPeriod() {
     return validityPeriod;
@@ -61,22 +79,21 @@ public class APIKeyGenerateRequestDTO   {
   }
 
   /**
-   * Additional parameters if Authorization server needs any
+   * Last used time as epoch milliseconds, or NOT_USED if never used.
    **/
-  public APIKeyGenerateRequestDTO additionalProperties(Object additionalProperties) {
-    this.additionalProperties = additionalProperties;
+  public APIKeyInfoDTO lastUsed(String lastUsed) {
+    this.lastUsed = lastUsed;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Additional parameters if Authorization server needs any")
-      @Valid
-  @JsonProperty("additionalProperties")
-  public Object getAdditionalProperties() {
-    return additionalProperties;
+  @ApiModelProperty(example = "NOT_USED", value = "Last used time as epoch milliseconds, or NOT_USED if never used.")
+  @JsonProperty("lastUsed")
+  public String getLastUsed() {
+    return lastUsed;
   }
-  public void setAdditionalProperties(Object additionalProperties) {
-    this.additionalProperties = additionalProperties;
+  public void setLastUsed(String lastUsed) {
+    this.lastUsed = lastUsed;
   }
 
 
@@ -88,25 +105,27 @@ public class APIKeyGenerateRequestDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIKeyGenerateRequestDTO apIKeyGenerateRequest = (APIKeyGenerateRequestDTO) o;
-    return Objects.equals(keyDisplayName, apIKeyGenerateRequest.keyDisplayName) &&
-        Objects.equals(validityPeriod, apIKeyGenerateRequest.validityPeriod) &&
-        Objects.equals(additionalProperties, apIKeyGenerateRequest.additionalProperties);
+    APIKeyInfoDTO apIKeyInfo = (APIKeyInfoDTO) o;
+    return Objects.equals(keyDisplayName, apIKeyInfo.keyDisplayName) &&
+        Objects.equals(issuedOn, apIKeyInfo.issuedOn) &&
+        Objects.equals(validityPeriod, apIKeyInfo.validityPeriod) &&
+        Objects.equals(lastUsed, apIKeyInfo.lastUsed);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyDisplayName, validityPeriod, additionalProperties);
+    return Objects.hash(keyDisplayName, issuedOn, validityPeriod, lastUsed);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIKeyGenerateRequestDTO {\n");
+    sb.append("class APIKeyInfoDTO {\n");
     
     sb.append("    keyDisplayName: ").append(toIndentedString(keyDisplayName)).append("\n");
+    sb.append("    issuedOn: ").append(toIndentedString(issuedOn)).append("\n");
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
-    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    lastUsed: ").append(toIndentedString(lastUsed)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -18,16 +18,16 @@ import javax.validation.Valid;
 
 
 
-public class APIKeyDTO   {
+public class APIKeyAssociationDTO   {
   
     private String keyDisplayName = null;
-    private String apikey = null;
-    private Integer validityTime = null;
+    private String apiName = null;
+    private String applicationName = null;
 
   /**
    * API Key name
    **/
-  public APIKeyDTO keyDisplayName(String keyDisplayName) {
+  public APIKeyAssociationDTO keyDisplayName(String keyDisplayName) {
     this.keyDisplayName = keyDisplayName;
     return this;
   }
@@ -43,38 +43,39 @@ public class APIKeyDTO   {
   }
 
   /**
-   * API Key
+   * API name
    **/
-  public APIKeyDTO apikey(String apikey) {
-    this.apikey = apikey;
+  public APIKeyAssociationDTO apiName(String apiName) {
+    this.apiName = apiName;
     return this;
   }
 
   
-  @ApiModelProperty(example = "eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=", value = "API Key")
-  @JsonProperty("apikey")
-  public String getApikey() {
-    return apikey;
+  @ApiModelProperty(example = "NotificationAPI", value = "API name")
+  @JsonProperty("apiName")
+  public String getApiName() {
+    return apiName;
   }
-  public void setApikey(String apikey) {
-    this.apikey = apikey;
+  public void setApiName(String apiName) {
+    this.apiName = apiName;
   }
 
   /**
+   * Application name
    **/
-  public APIKeyDTO validityTime(Integer validityTime) {
-    this.validityTime = validityTime;
+  public APIKeyAssociationDTO applicationName(String applicationName) {
+    this.applicationName = applicationName;
     return this;
   }
 
   
-  @ApiModelProperty(example = "3600", value = "")
-  @JsonProperty("validityTime")
-  public Integer getValidityTime() {
-    return validityTime;
+  @ApiModelProperty(example = "DefaultApplication", value = "Application name")
+  @JsonProperty("applicationName")
+  public String getApplicationName() {
+    return applicationName;
   }
-  public void setValidityTime(Integer validityTime) {
-    this.validityTime = validityTime;
+  public void setApplicationName(String applicationName) {
+    this.applicationName = applicationName;
   }
 
 
@@ -86,25 +87,25 @@ public class APIKeyDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIKeyDTO apIKey = (APIKeyDTO) o;
-    return Objects.equals(keyDisplayName, apIKey.keyDisplayName) &&
-        Objects.equals(apikey, apIKey.apikey) &&
-        Objects.equals(validityTime, apIKey.validityTime);
+    APIKeyAssociationDTO apIKeyAssociation = (APIKeyAssociationDTO) o;
+    return Objects.equals(keyDisplayName, apIKeyAssociation.keyDisplayName) &&
+        Objects.equals(apiName, apIKeyAssociation.apiName) &&
+        Objects.equals(applicationName, apIKeyAssociation.applicationName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyDisplayName, apikey, validityTime);
+    return Objects.hash(keyDisplayName, apiName, applicationName);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIKeyDTO {\n");
+    sb.append("class APIKeyAssociationDTO {\n");
     
     sb.append("    keyDisplayName: ").append(toIndentedString(keyDisplayName)).append("\n");
-    sb.append("    apikey: ").append(toIndentedString(apikey)).append("\n");
-    sb.append("    validityTime: ").append(toIndentedString(validityTime)).append("\n");
+    sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
+    sb.append("    applicationName: ").append(toIndentedString(applicationName)).append("\n");
     sb.append("}");
     return sb.toString();
   }

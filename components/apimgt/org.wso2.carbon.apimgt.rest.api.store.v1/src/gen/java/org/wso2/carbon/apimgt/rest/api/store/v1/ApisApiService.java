@@ -9,7 +9,13 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyAssociationRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRenewalRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatResponseDTO;
@@ -38,6 +44,12 @@ import javax.ws.rs.core.SecurityContext;
 public interface ApisApiService {
       public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo, MessageContext messageContext) throws APIManagementException;
       public Response apiChatPost(String apiId, String apiChatAction, ApiChatRequestDTO apiChatRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdApiKeysGeneratePost(String apiId, APIAPIKeyGenerateRequestDTO apIAPIKeyGenerateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdApiKeysGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdApiKeysKeyDisplayNameAssociatePost(String apiId, String keyDisplayName, APIAPIKeyAssociationRequestDTO apIAPIKeyAssociationRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdApiKeysKeyDisplayNameDelete(String apiId, String keyDisplayName, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdApiKeysKeyDisplayNameDissociateDelete(String apiId, String keyDisplayName, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdApiKeysKeyDisplayNameRegeneratePost(String apiId, String keyDisplayName, String ifMatch, APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdAsyncApiSpecificationGet(String apiId, String environmentName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

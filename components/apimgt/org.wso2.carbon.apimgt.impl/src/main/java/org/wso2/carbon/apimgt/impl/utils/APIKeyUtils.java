@@ -46,4 +46,23 @@ public class APIKeyUtils {
         }
         return true;
     }
+
+    /**
+     * Check whether JWT API Key Generation is enabled.
+     *
+     * @return true if JWT API Key Generation is enabled, false otherwise
+     */
+    public static boolean isJWTAPIKeyGenerationEnabled() {
+        try {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            if (config != null) {
+                String jwtAPIKeyGenerationEnabled = config.getFirstProperty(APIConstants.JWT_API_KEY_GENERATION_ENABLED);
+                return Boolean.parseBoolean(jwtAPIKeyGenerationEnabled);
+            }
+        } catch (Exception e) {
+            log.error("Error while reading JWT API Key Generation configuration", e);
+        }
+        return true;
+    }
 }

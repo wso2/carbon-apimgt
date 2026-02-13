@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
@@ -614,11 +615,23 @@ public interface APIConsumer extends APIManager {
      * @param validityPeriod       Requested validity period for the api key.
      * @param permittedIP          Permitted IP addresses for the api key.
      * @param permittedReferer     Permitted referrers for the api key.
+     * @param keyDisplayName       Display name of the api key.
      * @return Generated api key.
      * @throws APIManagementException
      */
     String generateApiKey(Application application, String userName, long validityPeriod, String permittedIP,
-                          String permittedReferer)
+                          String permittedReferer, String keyDisplayName)
+            throws APIManagementException;
+
+    /**
+     * Returns a list of api keys for a given application key type.
+     *
+     * @param applicationId Application Id of the application.
+     * @param keyType Key type of the api keys
+     * @return A List of api keys.
+     * @throws APIManagementException This is the custom exception class for API management.
+     */
+    List<APIKeyInfo> getApiKeys(String applicationId, String keyType)
             throws APIManagementException;
 
     /**
@@ -703,6 +716,28 @@ public interface APIConsumer extends APIManager {
     Set<APIKey> getApplicationKeysOfApplication(int applicationId, String xWso2Tenant) throws APIManagementException;
 
     void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Revoke opaque api key and delete from the DB
+     * @param applicationId Id of the application
+     * @param keyType Key type of the token
+     * @param keyDisplayName Api key name
+     * @param tenantDomain Tenant domain
+     * @throws APIManagementException
+     */
+    void revokeAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Regenerate opaque api key for the given key display name with same properties
+     * @param applicationId Id of the application
+     * @param keyType Key type of the token
+     * @param keyDisplayName Api key name
+     * @param tenantDomain Tenant domain
+     * @param username User name
+     * @return API key info object
+     * @throws APIManagementException
+     */
+    APIKeyInfo regenerateAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain, String username) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.

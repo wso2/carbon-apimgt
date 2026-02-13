@@ -1,6 +1,12 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1;
 
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyAssociationRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRenewalRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatResponseDTO;
@@ -87,6 +93,126 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error. An error occurred while invoking the API Chat service. ", response = Void.class) })
     public Response apiChatPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Action to be performed on API Chat AI Agent. Specifies whether 'prepare' or 'execute' ", allowableValues="PREPARE, EXECUTE")  @QueryParam("apiChatAction") String apiChatAction, @ApiParam(value = "API Chat request body " ) ApiChatRequestDTO apiChatRequestDTO) throws APIManagementException{
         return delegate.apiChatPost(apiId, apiChatAction, apiChatRequestDTO, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/api-keys/generate")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Generate API Key", notes = "Generate a self contained API Key for the API ", response = APIKeyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "API Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Api key generated. ", response = APIKeyDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response apisApiIdApiKeysGeneratePost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "API Key generation request object " ,required=true) APIAPIKeyGenerateRequestDTO apIAPIKeyGenerateRequestDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.apisApiIdApiKeysGeneratePost(apiId, apIAPIKeyGenerateRequestDTO, ifMatch, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/api-keys")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get API Key(s) of a Given API", notes = "Retrieve self contained API Key(s) for the API. ", response = APIAPIKeyListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "API Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API key(s) of a given API are returned. ", response = APIAPIKeyListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response apisApiIdApiKeysGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.apisApiIdApiKeysGet(apiId, ifNoneMatch, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/api-keys/{keyDisplayName}/associate")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Create an association for the API Key", notes = "Create an association for a self contained API Key for the API ", response = APIKeyAssociationDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "API Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Api key associated successfully. ", response = APIKeyAssociationDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response apisApiIdApiKeysKeyDisplayNameAssociatePost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyDisplayName") String keyDisplayName, @ApiParam(value = "API Key association request object " ,required=true) APIAPIKeyAssociationRequestDTO apIAPIKeyAssociationRequestDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.apisApiIdApiKeysKeyDisplayNameAssociatePost(apiId, keyDisplayName, apIAPIKeyAssociationRequestDTO, ifMatch, securityContext);
+    }
+
+    @DELETE
+    @Path("/{apiId}/api-keys/{keyDisplayName}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Revoke API Key", notes = "Revoke a self contained API Key for the API specified by the display name ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "API Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Api key revoked successfully. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response apisApiIdApiKeysKeyDisplayNameDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyDisplayName") String keyDisplayName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.apisApiIdApiKeysKeyDisplayNameDelete(apiId, keyDisplayName, ifMatch, securityContext);
+    }
+
+    @DELETE
+    @Path("/{apiId}/api-keys/{keyDisplayName}/dissociate")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Remove an Association for the API Key", notes = "Remove an association a self contained API Key for the API specified by the display name ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "API Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Removed association for the Api key successfully. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response apisApiIdApiKeysKeyDisplayNameDissociateDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyDisplayName") String keyDisplayName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.apisApiIdApiKeysKeyDisplayNameDissociateDelete(apiId, keyDisplayName, ifMatch, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/api-keys/{keyDisplayName}/regenerate")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Regenerate API Key", notes = "Regenerate a self contained API Key for the API specified by the display name ", response = APIKeyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "API Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Api key regenerated successfully. ", response = APIKeyDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response apisApiIdApiKeysKeyDisplayNameRegeneratePost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyDisplayName") String keyDisplayName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @ApiParam(value = "API Key renewal request object " ) APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO) throws APIManagementException{
+        return delegate.apisApiIdApiKeysKeyDisplayNameRegeneratePost(apiId, keyDisplayName, ifMatch, apIKeyRenewalRequestDTO, securityContext);
     }
 
     @GET

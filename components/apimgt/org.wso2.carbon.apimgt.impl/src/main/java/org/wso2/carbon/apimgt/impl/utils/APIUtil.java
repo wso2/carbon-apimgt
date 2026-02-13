@@ -320,6 +320,8 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLContext;
 import java.security.cert.X509Certificate;
 import java.text.Normalizer;
@@ -392,6 +394,7 @@ public final class APIUtil {
 
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private APIUtil() {
 
@@ -466,6 +469,10 @@ public final class APIUtil {
                     eventPublisherFactory.getEventPublisher(EventPublisherType.NOTIFICATION));
             eventPublishers.putIfAbsent(EventPublisherType.TOKEN_REVOCATION,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.TOKEN_REVOCATION));
+            eventPublishers.putIfAbsent(EventPublisherType.API_KEY_INFO,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.API_KEY_INFO));
+            eventPublishers.putIfAbsent(EventPublisherType.API_KEY_USAGE,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.API_KEY_USAGE));
             eventPublishers.putIfAbsent(EventPublisherType.BLOCKING_EVENT,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.BLOCKING_EVENT));
             eventPublishers.putIfAbsent(EventPublisherType.KEY_TEMPLATE,
@@ -9155,6 +9162,65 @@ public final class APIUtil {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         int apiId = apiMgtDAO.getAPIID(uuid);
         return apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId), workflowType);
+    }
+
+    /**
+     * Generates the hash value with salt using SHA-256 for a given API key.
+     *
+     * @param apiKey api key.
+     * @return the hashed api key.
+     */
+    public static String sha256HashWithSalt(String apiKey, byte[] salt) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            digest.update(salt); // Prepend salt
+            byte[] hash = digest.digest(apiKey.getBytes(StandardCharsets.UTF_8));
+
+            // Convert salt and hash to hex
+            String saltHex = convertBytesToHex(salt);
+            String hashHex = convertBytesToHex(hash);
+
+            // Format: $sha256$<salt_hex>$<hash_hex>
+            return String.format("$sha256$%s$%s", saltHex, hashHex);
+
+        } catch (NoSuchAlgorithmException e) {
+            // SHA-256 is always available in Java
+            throw new IllegalStateException("SHA-256 algorithm not found", e);
+        }
+    }
+
+    /**
+     * Generate deterministic lookup key for an opaque API key.
+     *
+     * @param apiKey        Plain text API key
+     * @param sharedSecret Shared secret (same in CP and GW)
+     * @return Base64 encoded Lookup key
+     */
+    public static String generateLookupKey(String apiKey, String sharedSecret) throws APIManagementException {
+        try {
+            Mac mac = Mac.getInstance(APIConstants.HMAC_SHA_256);
+            SecretKeySpec keySpec = new SecretKeySpec(sharedSecret.getBytes(StandardCharsets.UTF_8),
+                    APIConstants.HMAC_SHA_256);
+            mac.init(keySpec);
+
+            return Base64.encodeBase64URLSafeString(mac.doFinal(apiKey.getBytes(StandardCharsets.UTF_8)));
+        } catch (IllegalStateException | NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new APIManagementException("Error generating API key lookup key", e);
+        }
+    }
+
+    public static byte[] generateSalt () {
+        byte[] salt = new byte[16]; // 128-bit salt
+        SECURE_RANDOM.nextBytes(salt);
+        return salt;
+    }
+
+    public static String convertBytesToHex(byte[] bytes) {
+        StringBuilder hex = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
+            hex.append(String.format("%02x", b));
+        }
+        return hex.toString();
     }
 
     /**

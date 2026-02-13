@@ -410,6 +410,36 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    @Override
+    public Response apisApiIdApiKeysGeneratePost(String apiId, APIAPIKeyGenerateRequestDTO apIAPIKeyGenerateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdApiKeysGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdApiKeysKeyDisplayNameAssociatePost(String apiId, String keyDisplayName, APIAPIKeyAssociationRequestDTO apIAPIKeyAssociationRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdApiKeysKeyDisplayNameDelete(String apiId, String keyDisplayName, String ifMatch, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdApiKeysKeyDisplayNameDissociateDelete(String apiId, String keyDisplayName, String ifMatch, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdApiKeysKeyDisplayNameRegeneratePost(String apiId, String keyDisplayName, String ifMatch, APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
+
     /**
      * Retrieves the async api specification document of an API
      *

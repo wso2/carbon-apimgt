@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
@@ -129,6 +130,7 @@ import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -16564,6 +16566,254 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Add new api key against an Application
+     *
+     * @param apiKeyHash Generated api key value
+     * @param keyInfoDTO JWTTokenInfoDTO object with required data
+     * @throws APIManagementException
+     */
+    public void addAPIKey(String apiKeyHash, APIKeyDTO keyInfoDTO) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // This query to update the AM_API_KEY table
+            String sqlQuery = SQLConstants.ADD_API_KEY_SQL;
+            // Adding data to the AM_API_KEY table
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, keyInfoDTO.getKeyDisplayName());
+            ps.setString(2, keyInfoDTO.getApplicationId());
+            ps.setString(3, apiKeyHash);
+            ps.setString(4, keyInfoDTO.getKeyType());
+            ps.setBytes(5, keyInfoDTO.getApiKeyProperties());
+            ps.setString(6, keyInfoDTO.getAuthUser());
+            ps.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+            ps.setLong(8, keyInfoDTO.getValidityPeriod());
+            if (keyInfoDTO.getLastUsedTime() == null) {
+                ps.setString(9, "NOT_USED");
+            } else {
+                ps.setString(9, keyInfoDTO.getLastUsedTime());
+            }
+            ps.setString(10, "ACTIVE");
+
+            ps.executeUpdate();
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    log.error("Failed to rollback adding API key", rollbackEx);
+                }
+            }
+            handleException("Failed to add generated API keys", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
+    /**
+     * Returns a list of api keys against an Application
+     *
+     * @param applicationId Application ID
+     * @param keyType Key type of the api keys
+     * @return Returns a list of api keys
+     * @throws APIManagementException
+     */
+    public List<APIKeyInfo> getAPIKeys(String applicationId, String keyType) throws APIManagementException {
+
+        List<APIKeyInfo> apiKeyInfoList = new ArrayList<APIKeyInfo>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // This query to access the AM_API_KEY table
+            String sqlQuery = SQLConstants.GET_API_KEY_SQL;
+            // Retrieving data from the AM_API_KEY table
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, applicationId);
+            ps.setString(2, keyType);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                APIKeyInfo keyInfo = new APIKeyInfo();
+                keyInfo.setKeyDisplayName(rs.getString("API_KEY_NAME"));
+                keyInfo.setCreatedTime(rs.getTimestamp("TIME_CREATED").toString());
+                keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
+                keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
+                keyInfo.setApplicationId(applicationId);
+                keyInfo.setKeyType(keyType);
+                apiKeyInfoList.add(keyInfo);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get API keys", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return apiKeyInfoList;
+    }
+
+    /**
+     * Returns a list of all api keys
+     *
+     * @throws APIManagementException
+     */
+    public List<APIKeyInfo> getAllAPIKeys() throws APIManagementException {
+
+        List<APIKeyInfo> apiKeyInfoList = new ArrayList<APIKeyInfo>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            // This query to access the AM_API_KEY table
+            String sqlQuery = SQLConstants.GET_ALL_API_KEYS_SQL;
+            // Retrieving data from the AM_API_KEY table
+            ps = conn.prepareStatement(sqlQuery);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                APIKeyInfo keyInfo = new APIKeyInfo();
+                keyInfo.setKeyDisplayName(rs.getString("API_KEY_NAME"));
+                Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
+                keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
+                keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
+                keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
+                keyInfo.setApplicationId(rs.getString("APPLICATION_ID"));
+                keyInfo.setKeyType(rs.getString("KEY_TYPE"));
+                keyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
+                keyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
+                keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
+                keyInfo.setStatus(rs.getString("STATUS"));
+                apiKeyInfoList.add(keyInfo);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get all API keys", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return apiKeyInfoList;
+    }
+
+    /**
+     * Returns the api key specified by the key display name
+     *
+     * @param applicationId Application ID
+     * @param keyType Key type of the api key
+     * @param keyDisplayName Display name of the api key
+     * @return API key info
+     * @throws APIManagementException
+     */
+    public APIKeyInfo getAPIKey(String applicationId, String keyType, String keyDisplayName) throws APIManagementException {
+
+        APIKeyInfo keyInfo = new APIKeyInfo();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            // This query to access the AM_API_KEY table
+            String sqlQuery = SQLConstants.GET_API_KEY_FROM_DISPLAY_NAME_SQL;
+            // Retrieving data from the AM_API_KEY table
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, applicationId);
+            ps.setString(2, keyType);
+            ps.setString(3, keyDisplayName);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                keyInfo.setKeyDisplayName(keyDisplayName);
+                keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
+                keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
+                keyInfo.setApplicationId(applicationId);
+                keyInfo.setKeyType(keyType);
+                keyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get the API key details for " + keyDisplayName, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return keyInfo;
+    }
+
+    /**
+     * Revoke an api key provided by the key display name
+     *
+     * @param applicationId Id of the application
+     * @param keyType Key type of the token
+     * @param keyDisplayName API key name
+     * @throws APIManagementException
+     */
+    public void revokeAPIKey(String applicationId, String keyType, String keyDisplayName) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // This query to update an entry from the AM_API_KEY table
+            String sqlQuery = SQLConstants.REVOKE_API_KEY_SQL;
+            // Updating data from the AM_API_KEY table by setting STATUS to REVOKED
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, applicationId);
+            ps.setString(2, keyType);
+            ps.setString(3, keyDisplayName);
+
+            ps.executeUpdate();
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    log.error("Failed to rollback revoking API key", rollbackEx);
+                }
+            }
+            handleException("Failed to revoke the API key", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
+    /**
+     * Update last used time of an API key
+     *
+     * @param apiKeyHash Hash value of the API key
+     * @param lastUsedTime Last used time
+     * @throws APIManagementException
+     */
+    public void updateAPIKeyUsage(String apiKeyHash, String lastUsedTime) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // This query to update an entry from the AM_API_KEY table
+            String sqlQuery = SQLConstants.UPDATE_API_KEY_LAST_USED_SQL;
+            // Updating data from the AM_API_KEY table by setting LAST_USED column
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, lastUsedTime);
+            ps.setString(2, apiKeyHash);
+
+            ps.executeUpdate();
+            conn.commit();
+        } catch (SQLException e) {
+            handleException("Failed to update last used time for the API key", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
+    /**
      * Converts all null values for THROTTLING_TIER in AM_API_URL_MAPPING table, to Unlimited.
      * This will be executed only during startup of the server.
      *
@@ -16582,6 +16832,13 @@ public class ApiMgtDAO {
             prepStmt.execute();
             connection.commit();
         } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackEx) {
+                    log.error("Failed to rollback updating last used time of API key", rollbackEx);
+                }
+            }
             handleException(
                     "Error occurred while converting NULL throttling tiers to Unlimited in AM_API_URL_MAPPING table",
                     e);

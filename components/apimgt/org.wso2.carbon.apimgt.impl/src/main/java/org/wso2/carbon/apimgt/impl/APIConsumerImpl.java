@@ -33,6 +33,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -54,6 +55,7 @@ import org.wso2.carbon.apimgt.api.model.APIDefinitionContentSearchResult;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRating;
@@ -64,6 +66,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
+import org.wso2.carbon.apimgt.api.model.ApplicationResponse;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -95,7 +98,7 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
-import org.wso2.carbon.apimgt.api.model.ApplicationResponse;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -114,6 +117,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyResetEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
+import org.wso2.carbon.apimgt.impl.publishers.OpaqueApiKeyPublisher;
 import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
@@ -154,11 +158,18 @@ import org.wso2.carbon.user.mgt.common.UserAdminException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -168,7 +179,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
@@ -208,6 +218,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public static final String API_NAME = "apiName";
     public static final String API_VERSION = "apiVersion";
     public static final String API_PROVIDER = "apiProvider";
+
+    // TODO: Remove the lookup secret
+    private static final String lookupSecret = "s3cR3tXyZ9rP0qA1bC2dEfG4hIjKlMnOpQrStUvWxYz123456";
     private static final String PRESERVED_CASE_SENSITIVE_VARIABLE = "preservedCaseSensitive";
 
     private static final String GET_SUB_WORKFLOW_REF_FAILED = "Failed to get external workflow reference for " +
@@ -224,6 +237,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private long tagCacheValidityTime;
     private volatile long lastUpdatedTime;
     private final Object tagCacheMutex = new Object();
+    private static final SecureRandom secureRandom = new SecureRandom();
     protected String userNameWithoutChange;
 
     boolean orgWideAppUpdateEnabled = Boolean.getBoolean(APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
@@ -398,11 +412,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
+    /**
+     * Generates an API key
+     *
+     * @param application          The Application Object that represents the Application.
+     * @param userName             Username of the user requesting the api key.
+     * @param validityPeriod       Requested validity period for the api key.
+     * @param permittedIP          Permitted IP addresses for the api key.
+     * @param permittedReferer     Permitted referrers for the api key.
+     * @param keyDisplayName       Display name of the api key.
+     * @return
+     * @throws APIManagementException
+     */
     @Override
     public String generateApiKey(Application application, String userName, long validityPeriod,
-                                 String permittedIP, String permittedReferer) throws APIManagementException {
+                                 String permittedIP, String permittedReferer, String keyDisplayName)
+            throws APIManagementException {
 
         JwtTokenInfoDTO jwtTokenInfoDTO;
+        String apiKey;
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setId(application.getId());
         applicationDTO.setUuid(application.getUUID());
@@ -426,12 +454,112 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         jwtTokenInfoDTO.setPermittedIP(permittedIP);
         jwtTokenInfoDTO.setPermittedReferer(permittedReferer);
 
-        ApiKeyGenerator apiKeyGenerator = loadApiKeyGenerator();
-        if (apiKeyGenerator != null) {
-            return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+        if (APIKeyUtils.isJWTAPIKeyGenerationEnabled()) {
+            ApiKeyGenerator apiKeyGenerator = loadApiKeyGenerator();
+            if (apiKeyGenerator != null) {
+                apiKey = apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+            } else {
+                throw new APIManagementException("Failed to generate the API key in JWT format");
+            }
         } else {
-            throw new APIManagementException("Failed to generate the API key");
+            // Generate API key in opaque format
+            apiKey = generateOpaqueKey();
         }
+        APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
+        apiKeyInfoDTO.setKeyDisplayName(keyDisplayName);
+        apiKeyInfoDTO.setApplicationId(application.getUUID());
+        apiKeyInfoDTO.setKeyType(application.getKeyType());
+        Properties props = new Properties();
+        byte[] salt = APIUtil.generateSalt();
+        props.setProperty("salt", APIUtil.convertBytesToHex(salt));
+        if (permittedIP == null) {
+            permittedIP = "";
+        }
+        if (permittedReferer == null) {
+            permittedReferer = "";
+        }
+        props.setProperty("permittedIP", permittedIP);
+        props.setProperty("permittedReferer", permittedReferer);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try {
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(props);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while writing api key properties: ", e);
+        }
+        byte[] serializedProps = bos.toByteArray();
+        apiKeyInfoDTO.setApiKeyProperties(serializedProps);
+        apiKeyInfoDTO.setAuthUser(userName);
+        apiKeyInfoDTO.setValidityPeriod(validityPeriod);
+        apiKeyInfoDTO.setLastUsedTime(null);
+        apiKeyInfoDTO.setPermittedIP(permittedIP);
+        apiKeyInfoDTO.setPermittedReferer(permittedReferer);
+        String apiKeyHash = APIUtil.sha256HashWithSalt(apiKey, salt);
+        String lookupKey = APIUtil.generateLookupKey(apiKey, lookupSecret);
+        apiMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
+        sendAPIKeyInfoEvent(apiKeyHash, salt, application, validityPeriod, lookupKey, application.getKeyType(), props);
+        return apiKey;
+    }
+
+    private void sendAPIKeyInfoEvent(String apiKeyHash, byte[] salt, Application application, long validityPeriod,
+                                     String lookupKey, String keyType, Properties props) throws APIManagementException {
+        OpaqueApiKeyPublisher apiKeyInfoPublisher = OpaqueApiKeyPublisher.getInstance();
+        Properties properties = new Properties();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        String eventID = UUID.randomUUID().toString();
+        properties.put(APIConstants.NotificationEvent.EVENT_ID, eventID);
+        properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
+        properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
+        properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.API_KEY_INFO_STREAM_ID);
+        properties.put(APIConstants.NotificationEvent.API_KEY_HASH, apiKeyHash);
+        properties.put(APIConstants.NotificationEvent.APPLICATION_ID, application.getId());
+        properties.put(APIConstants.NotificationEvent.SALT, Base64.getEncoder().encodeToString(salt));
+        properties.put(APIConstants.NotificationEvent.VALIDITY_PERIOD, String.valueOf(validityPeriod));
+        properties.put(APIConstants.NotificationEvent.LOOKUP_KEY, lookupKey);
+        properties.put(APIConstants.NotificationEvent.KEY_TYPE, keyType);
+        properties.put(APIConstants.NotificationEvent.STATUS, "ACTIVE");
+        // Safely convert additional properties
+        if (props != null && !props.isEmpty()) {
+            Map<String, String> safeProps = new HashMap<>();
+            for (String key : props.stringPropertyNames()) {
+                Object value = props.get(key);
+                if (value instanceof byte[]) {
+                    // Convert byte[] → Base64
+                    safeProps.put(key, Base64.getEncoder().encodeToString((byte[]) value));
+                } else {
+                    safeProps.put(key, value.toString());
+                }
+            }
+            String additionalPropsJson = null;
+            try {
+                additionalPropsJson = new ObjectMapper().writeValueAsString(safeProps);
+            } catch (JsonProcessingException e) {
+                throw new APIManagementException("Error while parsing the additional properties json of the api key.", e);
+            }
+            // Escape quotes, so it can be safely embedded in another JSON
+            String escapedAdditionalProps = StringEscapeUtils.escapeJson(additionalPropsJson);
+            properties.put(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES, escapedAdditionalProps);
+        }
+        apiKeyInfoPublisher.publishApiKeyInfoEvents(properties);
+    }
+
+    /**
+     * Returns a list of API keys
+     * @param applicationId Application Id of the application.
+     * @param keyType Key type of the api keys
+     * @return
+     * @throws APIManagementException
+     */
+    @Override
+    public List<APIKeyInfo> getApiKeys(String applicationId, String keyType) throws APIManagementException {
+        List<APIKeyInfo> apiKeyInfoList;
+        try {
+            apiKeyInfoList  = apiMgtDAO.getAPIKeys(applicationId, keyType);
+        } catch (APIManagementException e) {
+                throw new APIManagementException("Error while getting the api keys for the application: "
+                        + applicationId, e);
+        }
+        return apiKeyInfoList;
     }
 
     private ApiKeyGenerator loadApiKeyGenerator() throws APIManagementException {
@@ -3553,6 +3681,103 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 apiKey, APIConstants.API_KEY_AUTH_TYPE,
                 expiryTime, tenantId);
         revocationRequestPublisher.publishRevocationEvents(apiKey, properties);
+    }
+
+    /**
+     * Revokes an API key
+     * @param applicationId Id of the application
+     * @param keyType Key type of the token
+     * @param keyDisplayName Api key name
+     * @param tenantDomain Tenant domain
+     * @throws APIManagementException
+     */
+    @Override
+    public void revokeAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain) throws APIManagementException {
+
+        RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
+        Properties properties = new Properties();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        String eventID = UUID.randomUUID().toString();
+        properties.put(APIConstants.NotificationEvent.EVENT_ID, eventID);
+        properties.put(APIConstants.NotificationEvent.EVENT_TYPE, APIConstants.API_KEY_AUTH_TYPE);
+        properties.put(APIConstants.NotificationEvent.TOKEN_TYPE, APIConstants.API_KEY_AUTH_TYPE);
+        properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
+        properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
+        properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
+        apiMgtDAO.revokeAPIKey(applicationId, keyType, keyDisplayName);
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(applicationId, keyType, keyDisplayName);
+        // TODO: Modify the receiver side to remove the key hash too. Currently it handles only the actual token, not the hash
+        revocationRequestPublisher.publishRevocationEvents(apiKeyInfo.getApiKeyHash(), properties);
+    }
+
+    /**
+     * Regenerates an API key
+     * @param applicationId Id of the application
+     * @param keyType Key type of the token
+     * @param keyDisplayName Api key name
+     * @param tenantDomain Tenant domain
+     * @param username User name
+     * @return
+     * @throws APIManagementException
+     */
+    @Override
+    public APIKeyInfo regenerateAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain,
+                                       String username) throws APIManagementException {
+
+        // Load existing metadata before revocation (revocation may remove/alter it)
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(applicationId, keyType, keyDisplayName);
+        if (apiKeyInfo == null) {
+            throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
+        }
+        // Revoke the existing key
+        revokeAPIKey(applicationId, keyType, keyDisplayName, tenantDomain);
+        // Generate a new key with the same display name and other additional properties
+        APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
+        apiKeyInfoDTO.setKeyDisplayName(keyDisplayName);
+        apiKeyInfoDTO.setApplicationId(applicationId);
+        apiKeyInfoDTO.setKeyType(keyType);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte[] salt = APIUtil.generateSalt();
+        Properties props = new Properties();
+        try {
+            byte[] apikeyProperties = apiKeyInfo.getProperties();
+            Properties oldProps = new Properties();
+            if (apikeyProperties != null) {
+                ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(apikeyProperties));
+                oldProps = (Properties) ois.readObject();
+            }
+            props.setProperty("permittedIP", StringUtils.defaultString(oldProps.getProperty("permittedIP")));
+            props.setProperty("permittedReferer", StringUtils.defaultString(oldProps.getProperty("permittedReferer")));
+            props.setProperty("salt", APIUtil.convertBytesToHex(salt));
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(props);
+        } catch (ClassNotFoundException | IOException e) {
+            throw new APIManagementException("Error while generating api key properties: ", e);
+        }
+        byte[] serializedProps = bos.toByteArray();
+        apiKeyInfoDTO.setApiKeyProperties(serializedProps);
+        apiKeyInfoDTO.setAuthUser(username);
+        apiKeyInfoDTO.setValidityPeriod(apiKeyInfo.getValidityPeriod());
+        apiKeyInfoDTO.setLastUsedTime(apiKeyInfo.getLastUsedTime());
+        String apiKey = generateOpaqueKey();
+        apiKeyInfoDTO.setApiKey(apiKey);
+        String apiKeyHash = APIUtil.sha256HashWithSalt(apiKey, salt);
+        apiMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
+        APIKeyInfo regeneratedApiKeyInfo = new APIKeyInfo();
+        regeneratedApiKeyInfo.setKeyDisplayName(keyDisplayName);
+        regeneratedApiKeyInfo.setApiKey(apiKey);
+        regeneratedApiKeyInfo.setValidityPeriod(apiKeyInfo.getValidityPeriod());
+        String lookupKey = APIUtil.generateLookupKey(apiKey, lookupSecret);
+        sendAPIKeyInfoEvent(apiKeyHash, salt, apiMgtDAO.getApplicationByUUID(applicationId),
+                apiKeyInfo.getValidityPeriod(), lookupKey, keyType, props);
+        return regeneratedApiKeyInfo;
+    }
+
+    private String generateOpaqueKey() {
+        byte[] randomBytes = new byte[32]; // 256 bits
+        secureRandom.nextBytes(randomBytes);
+        String apiKey = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+        return apiKey;
     }
 
     /**

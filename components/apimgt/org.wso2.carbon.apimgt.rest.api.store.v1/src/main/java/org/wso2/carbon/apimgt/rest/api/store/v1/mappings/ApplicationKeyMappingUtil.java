@@ -24,16 +24,20 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for application key generation related operations
@@ -140,10 +144,31 @@ public class ApplicationKeyMappingUtil {
         return applicationKeyDTO;
     }
 
-    public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime){
+    public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime, String keyDisplayName){
         APIKeyDTO apiKeyDto = new APIKeyDTO();
         apiKeyDto.setApikey(apiKey);
         apiKeyDto.setValidityTime(validityTime);
+        apiKeyDto.setKeyDisplayName(keyDisplayName);
         return apiKeyDto;
+    }
+
+    /**
+     * Insert the api key related details to a DTO Object
+     *
+     * @param apiKeyInfoList A list of API keys
+     * @return A list of DTO objects with api key related details
+     */
+    public static List<APIKeyInfoDTO> formApiKeyListToDTOList(List<APIKeyInfo> apiKeyInfoList){
+        List<APIKeyInfoDTO> apiKeyInfoDTOList = apiKeyInfoList.stream()
+                .map(src -> {
+                    APIKeyInfoDTO dto = new APIKeyInfoDTO();
+                    dto.setKeyDisplayName(src.getKeyDisplayName());
+                    dto.setIssuedOn(src.getCreatedTime());
+                    dto.setValidityPeriod(Math.toIntExact(src.getValidityPeriod()));
+                    dto.setLastUsed(src.getLastUsedTime());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        return apiKeyInfoDTOList;
     }
 }
