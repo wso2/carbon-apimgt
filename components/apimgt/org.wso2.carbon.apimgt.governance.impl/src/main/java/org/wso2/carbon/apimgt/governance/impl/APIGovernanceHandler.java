@@ -414,7 +414,7 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
             try {
                 String tenantAdminUsername = RestApiCommonUtil.getLoggedInUsername();
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-                String userName = apiIdentifier.getProviderName();
+
                 APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(tenantAdminUsername);
                 if (revisionId != null) {
                     apiId = revisionId;
@@ -425,8 +425,9 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
                 apiIdentifier.setUuid(apiId);
                 APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, true, apiProvider);
                 File apiProject = ExportUtils.exportAPI(
-                        apiProvider, apiIdentifier, new APIDTOTypeWrapper(apiDtoToReturn), api, userName,
-                        ExportFormat.YAML, true, true, StringUtils.EMPTY, organization, false
+                        apiProvider, apiIdentifier, new APIDTOTypeWrapper(apiDtoToReturn), api, 
+                        apiIdentifier.getProviderName(), ExportFormat.YAML, true, true, 
+                        StringUtils.EMPTY, organization, false
                 ); // returns zip file
                 return Files.readAllBytes(apiProject.toPath());
             } catch (APIManagementException | APIImportExportException | IOException e) {
