@@ -12053,10 +12053,15 @@ public final class APIUtil {
                 .getInstance().getFederatedAPIDiscoveryService();
         if (APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(environment.getProvider()) &&
                 federatedAPIDiscoveryService != null) {
-            federatedAPIDiscoveryService.stopDiscovery(environment, organization);
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully stopped federated API discovery for environment: " + 
-                environment.getName());
+            try {
+                federatedAPIDiscoveryService.stopDiscovery(environment, organization);
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully stopped federated API discovery for environment: " +
+                            environment.getName());
+                }
+            } catch (Exception e) {
+                log.error("Error while stopping federated API discovery for environment: "
+                        + environment.getName(), e);
             }
         }
     }
