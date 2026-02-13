@@ -228,7 +228,6 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>org.apache.velocity:velocity-engine-core:${velocity.version}</bundleDef>
-                                <bundleDef>org.slf4j:slf4j-api:${slf4j.api.version}</bundleDef>
                                 <bundleDef>io.github.openfeign:feign-core:${openfeign.version}</bundleDef>
                                 <bundleDef>io.github.openfeign:feign-gson:${openfeign.version}</bundleDef>
                                 <bundleDef>io.github.openfeign:feign-okhttp:${openfeign.version}</bundleDef>

@@ -154,7 +154,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>
-            <artifactId>swagger-inflector-oas3</artifactId>
+            <artifactId>swagger-inflector-oas3-jdk21</artifactId>
         </dependency>
         <dependency>
             <groupId>com.damnhandy.wso2</groupId>
@@ -301,7 +301,7 @@
                                 </bundleDef>
                                 <bundleDef>org.wso2.wsdl4j:wsdl4j.wso2:${wsdl4j.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
-                                <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3-jdk21:${swagger.inflector.oas3.version}</bundleDef>
                                 <bundleDef>com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${fasterxml.jackson.version}</bundleDef>
                                 <bundleDef>com.fasterxml.jackson.datatype:jackson-datatype-guava:${fasterxml.jackson.version}</bundleDef>
                                 <bundleDef>com.github.ben-manes.caffeine:caffeine:${caffeine.version}</bundleDef>
@@ -332,7 +332,7 @@
                                     org.wso2.orbit.org.apache.pdfbox:pdfbox-io:${pdfbox.io.version}
                                 </importBundleDef>
                                 <importBundleDef>
-                                    org.wso2.orbit.com.github.dblock.waffle:waffle-jna:${waffle-jna.version}
+                                    org.wso2.orbit.com.github.dblock.waffle:waffle-jna-jdk21:${waffle-jna.version}
                                 </importBundleDef>
                                 <importBundleDef>
                                     org.wso2.carbon.commons:org.wso2.carbon.ganalytics.publisher:${carbon.commons.version}
