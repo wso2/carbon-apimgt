@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -67,6 +69,7 @@ import java.util.zip.ZipInputStream;
  */
 public class APIGovernanceHandler implements ArtifactGovernanceHandler {
 
+    private static final Log log = LogFactory.getLog(APIGovernanceHandler.class);
     /**
      * This method is used to get all the apis of a given type in a given organization
      *
@@ -412,6 +415,10 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
             throws APIMGovernanceException {
         synchronized (apiId.intern()) {
             try {
+                if (log.isDebugEnabled()) {
+                    log.debug("Exporting API with id " + apiId + " in organization " 
+                        + organization + " with revision " + revisionId);     
+                }
                 String tenantAdminUsername = RestApiCommonUtil.getLoggedInUsername();
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
 
@@ -429,6 +436,10 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
                         apiIdentifier.getProviderName(), ExportFormat.YAML, true, true, 
                         StringUtils.EMPTY, organization, false
                 ); // returns zip file
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully exported API with id " + apiId + " in organization " 
+                        + organization + " with revision " + revisionId);     
+                }
                 return Files.readAllBytes(apiProject.toPath());
             } catch (APIManagementException | APIImportExportException | IOException e) {
                 throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_APIM_PROJECT, e,
