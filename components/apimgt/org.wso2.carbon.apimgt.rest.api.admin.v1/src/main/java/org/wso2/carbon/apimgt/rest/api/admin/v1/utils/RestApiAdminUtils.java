@@ -41,17 +41,14 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.Map;
+import java.util.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -435,6 +432,7 @@ public class RestApiAdminUtils {
         } else {
             return;
         }
+        List<String> errorMessages = new ArrayList<>();
         // Validate each constraint configuration
         for (Map.Entry<String, Map<String, Object>> entry : constraintsMap.entrySet()) {
             String fieldName = entry.getKey();
@@ -443,49 +441,51 @@ public class RestApiAdminUtils {
                 continue;
             }
             if (!(rawConfig instanceof Map)) {
-                throw new APIManagementException(
-                    "Constraint configuration for field '" + fieldName + "' must be a valid object",
-                     ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES,
-                        "Constraint configuration for field '" + fieldName + "' must be a valid object"));
+                errorMessages.add("Constraint configuration for field '" + fieldName + "' must be a valid object");
+                continue;
             }
             Map<String, Object> constraintConfig = (Map<String, Object>) rawConfig;
-            String constraintTypeStr = (String) constraintConfig.get("type");
+            String constraintTypeStr = (String) constraintConfig.get(APIConstants.KeyManager.CONSTRAINT_TYPE);
             if (constraintTypeStr == null) {
-                throw new APIManagementException(
-                        "Missing constraint type for field '" + fieldName + "'",
-                        ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES,
-                                "Missing constraint type for field '" + fieldName + "'"));
+                errorMessages.add("Missing constraint type for field '" + fieldName + "'");
+                continue;
 
             }
             AppConfigConstraintType constraintType = AppConfigConstraintType.fromString(constraintTypeStr);
             if (constraintType == null) {
-                throw new APIManagementException(
-                    "Invalid constraint type '" + constraintTypeStr + "' for field '" + fieldName + "'",
-                    ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES,
-                        "Invalid constraint type '" + constraintTypeStr + "' for field '" + fieldName + "'"));
+                errorMessages.add("Invalid constraint type for field '" + fieldName + "'");
+                continue;
             }
             KeyManagerApplicationConfigValidator validator = 
                 KeyManagerApplicationConfigValidatorFactory.getValidator(constraintType);
             if (validator != null) {
-                Object constraintValue = constraintConfig.get("value");
+                Object constraintValue = constraintConfig.get(APIConstants.KeyManager.CONSTRAINT_VALUE);
                 Map<String, Object> constraintValueMap = null;
                 if (constraintValue instanceof Map) {
                     constraintValueMap = (Map<String, Object>) constraintValue;
                 } else {
-                    throw new APIManagementException(
-                        "Constraint value for field '" + fieldName + "' must be a valid object",
-                        ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES,
-                            "Constraint value for field '" + fieldName + "' must be a valid object"));
+                        errorMessages.add("Constraint value for field '" + fieldName + "' must be a valid object");
+                        continue;
                 }
                 try {
                     validator.validateMetadata(constraintValueMap);
                 } catch (APIManagementException e) {
-                    throw new APIManagementException(
-                        "Invalid constraint configuration for field '" + fieldName + "': " + e.getMessage(),
-                        ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES,
-                            "Invalid constraint configuration for field '" + fieldName + "': " + e.getMessage()));
+                    errorMessages.add(
+                            "Invalid constraint configuration for field '" + fieldName + "': " + e.getMessage()
+                    );
                 }
             }
         }
+        if (!errorMessages.isEmpty()) {
+            String combinedMessage = String.join("; ", errorMessages);
+            throw new APIManagementException(
+                    "Constraint validation failed: " + combinedMessage,
+                    ExceptionCodes.from(
+                            ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES,
+                            combinedMessage
+                    )
+            );
+        }
     }
+
 }

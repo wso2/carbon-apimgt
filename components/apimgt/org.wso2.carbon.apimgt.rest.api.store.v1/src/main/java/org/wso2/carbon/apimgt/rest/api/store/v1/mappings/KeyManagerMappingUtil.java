@@ -210,8 +210,8 @@ public class KeyManagerMappingUtil {
         }
         Map<String, Object> constraintMap = (Map<String, Object>) constraintObj;
         return createConstraintDTO(
-                (String) constraintMap.get("type"),
-                constraintMap.get("value")
+                (String) constraintMap.get(APIConstants.KeyManager.CONSTRAINT_TYPE),
+                constraintMap.get(APIConstants.KeyManager.CONSTRAINT_VALUE)
         );
     }
 
