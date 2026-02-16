@@ -156,8 +156,8 @@ public class ConfigurationDto {
     }
 
     /**
-     * @deprecated Use {@link #ConfigurationDto(String, String, String, String, Object, boolean, boolean,
-     * List, boolean, boolean, AppConfigConstraintType, Map<String, Object>, String, String)} instead.
+     * @deprecated Use {@link #ConfigurationDto(String, String, String, String, Object, boolean, boolean, List,
+     * boolean, boolean, AppConfigConstraintType, Map, String, String)} instead.
      */
     @Deprecated
     public ConfigurationDto(String name, String label, String type, String tooltip, Object defaultValue,

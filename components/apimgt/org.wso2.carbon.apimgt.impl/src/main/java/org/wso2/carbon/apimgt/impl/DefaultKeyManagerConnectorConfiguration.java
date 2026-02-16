@@ -65,29 +65,30 @@ public class DefaultKeyManagerConnectorConfiguration implements KeyManagerConnec
                 .add(new ConfigurationDto(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME,
                         "Application Access Token Expiry Time ", "input", "Type Application Access Token Expiry Time " +
                         "in seconds ", APIConstants.KeyManager.NOT_APPLICABLE_VALUE, false, false,
-                        Collections.EMPTY_LIST, false)
-                        .withConstraint(AppConfigConstraintType.RANGE_MAX, null, "Maximum Application Access Token Expiry Time",
-                                "Maximum expiry time for application access tokens (in seconds)."));
+                        Collections.EMPTY_LIST, false, false, AppConfigConstraintType.RANGE_MAX,
+                        null, "Maximum Application Access Token Expiry Time",
+                        "Maximum expiry time for application access tokens (in seconds)."));
         applicationConfigurationsList
                 .add(new ConfigurationDto(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME,
                         "User Access Token Expiry Time ", "input", "Type User Access Token Expiry Time " +
                         "in seconds ", APIConstants.KeyManager.NOT_APPLICABLE_VALUE, false, false,
-                        Collections.EMPTY_LIST, false)
-                        .withConstraint(AppConfigConstraintType.RANGE_MAX, null, "Maximum User Access Token Expiry Time",
-                                "Maximum expiry time for user access tokens (in seconds)."));
+                        Collections.EMPTY_LIST, false, false, AppConfigConstraintType.RANGE_MAX,
+                        null, "Maximum User Access Token Expiry Time",
+                        "Maximum expiry time for user access tokens (in seconds)."));
         applicationConfigurationsList
                 .add(new ConfigurationDto(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME,
                         "Refresh Token Expiry Time ", "input", "Type Refresh Token Expiry Time " +
                         "in seconds ", APIConstants.KeyManager.NOT_APPLICABLE_VALUE, false, false,
-                        Collections.EMPTY_LIST, false)
-                        .withConstraint(AppConfigConstraintType.RANGE_MAX, null, "Maximum Refresh Token Expiry Time",
-                                "Maximum expiry time for refresh tokens (in seconds)."));
-
+                        Collections.EMPTY_LIST, false, false, AppConfigConstraintType.RANGE_MAX,
+                        null, "Maximum Refresh Token Expiry Time",
+                        "Maximum expiry time for refresh tokens (in seconds)."));
         applicationConfigurationsList
                 .add(new ConfigurationDto(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME,
                         "Id Token Expiry Time", "input", "Type ID Token Expiry Time " +
                         "in seconds ", APIConstants.KeyManager.NOT_APPLICABLE_VALUE, false, false,
-                        Collections.EMPTY_LIST, false));
+                        Collections.EMPTY_LIST, false, false, AppConfigConstraintType.RANGE_MAX,
+                        null, "Maximum ID Token Expiry Time",
+                        "Maximum expiry time for ID tokens (in seconds)."));
 
         ConfigurationDto configurationDtoPkceMandatory = new ConfigurationDto(APIConstants.KeyManager.PKCE_MANDATORY,
                 "Enable PKCE", "checkbox", "Enable PKCE", String.valueOf(false), false, false,
