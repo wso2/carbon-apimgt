@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AppConfigConstraintsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConfigurationConstraintDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerConfigurationDTO;
 import javax.validation.constraints.*;
 
@@ -31,7 +31,7 @@ public class SettingsKeyManagerConfigurationDTO   {
     private List<KeyManagerConfigurationDTO> authConfigurations = new ArrayList<KeyManagerConfigurationDTO>();
     private List<KeyManagerConfigurationDTO> configurations = new ArrayList<KeyManagerConfigurationDTO>();
     private List<KeyManagerConfigurationDTO> endpointConfigurations = new ArrayList<KeyManagerConfigurationDTO>();
-    private List<AppConfigConstraintsDTO> availableAppConfigConstraints = new ArrayList<AppConfigConstraintsDTO>();
+    private List<ConfigurationConstraintDTO> configurationConstraints = new ArrayList<ConfigurationConstraintDTO>();
 
   /**
    **/
@@ -157,20 +157,20 @@ public class SettingsKeyManagerConfigurationDTO   {
 
   /**
    **/
-  public SettingsKeyManagerConfigurationDTO availableAppConfigConstraints(List<AppConfigConstraintsDTO> availableAppConfigConstraints) {
-    this.availableAppConfigConstraints = availableAppConfigConstraints;
+  public SettingsKeyManagerConfigurationDTO configurationConstraints(List<ConfigurationConstraintDTO> configurationConstraints) {
+    this.configurationConstraints = configurationConstraints;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("availableAppConfigConstraints")
-  public List<AppConfigConstraintsDTO> getAvailableAppConfigConstraints() {
-    return availableAppConfigConstraints;
+  @JsonProperty("configurationConstraints")
+  public List<ConfigurationConstraintDTO> getConfigurationConstraints() {
+    return configurationConstraints;
   }
-  public void setAvailableAppConfigConstraints(List<AppConfigConstraintsDTO> availableAppConfigConstraints) {
-    this.availableAppConfigConstraints = availableAppConfigConstraints;
+  public void setConfigurationConstraints(List<ConfigurationConstraintDTO> configurationConstraints) {
+    this.configurationConstraints = configurationConstraints;
   }
 
 
@@ -190,12 +190,12 @@ public class SettingsKeyManagerConfigurationDTO   {
         Objects.equals(authConfigurations, settingsKeyManagerConfiguration.authConfigurations) &&
         Objects.equals(configurations, settingsKeyManagerConfiguration.configurations) &&
         Objects.equals(endpointConfigurations, settingsKeyManagerConfiguration.endpointConfigurations) &&
-        Objects.equals(availableAppConfigConstraints, settingsKeyManagerConfiguration.availableAppConfigConstraints);
+        Objects.equals(configurationConstraints, settingsKeyManagerConfiguration.configurationConstraints);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, displayName, defaultConsumerKeyClaim, defaultScopesClaim, authConfigurations, configurations, endpointConfigurations, availableAppConfigConstraints);
+    return Objects.hash(type, displayName, defaultConsumerKeyClaim, defaultScopesClaim, authConfigurations, configurations, endpointConfigurations, configurationConstraints);
   }
 
   @Override
@@ -210,7 +210,7 @@ public class SettingsKeyManagerConfigurationDTO   {
     sb.append("    authConfigurations: ").append(toIndentedString(authConfigurations)).append("\n");
     sb.append("    configurations: ").append(toIndentedString(configurations)).append("\n");
     sb.append("    endpointConfigurations: ").append(toIndentedString(endpointConfigurations)).append("\n");
-    sb.append("    availableAppConfigConstraints: ").append(toIndentedString(availableAppConfigConstraints)).append("\n");
+    sb.append("    configurationConstraints: ").append(toIndentedString(configurationConstraints)).append("\n");
     sb.append("}");
     return sb.toString();
   }

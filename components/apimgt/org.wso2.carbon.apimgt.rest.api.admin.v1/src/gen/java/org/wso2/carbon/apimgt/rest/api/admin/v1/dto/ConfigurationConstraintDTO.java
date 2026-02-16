@@ -20,7 +20,7 @@ import javax.validation.Valid;
 
 
 
-public class AppConfigConstraintsDTO   {
+public class ConfigurationConstraintDTO   {
   
     private String name = null;
     private String label = null;
@@ -33,7 +33,7 @@ public class AppConfigConstraintsDTO   {
 
   /**
    **/
-  public AppConfigConstraintsDTO name(String name) {
+  public ConfigurationConstraintDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -50,7 +50,7 @@ public class AppConfigConstraintsDTO   {
 
   /**
    **/
-  public AppConfigConstraintsDTO label(String label) {
+  public ConfigurationConstraintDTO label(String label) {
     this.label = label;
     return this;
   }
@@ -67,7 +67,7 @@ public class AppConfigConstraintsDTO   {
 
   /**
    **/
-  public AppConfigConstraintsDTO type(String type) {
+  public ConfigurationConstraintDTO type(String type) {
     this.type = type;
     return this;
   }
@@ -84,7 +84,7 @@ public class AppConfigConstraintsDTO   {
 
   /**
    **/
-  public AppConfigConstraintsDTO multiple(Boolean multiple) {
+  public ConfigurationConstraintDTO multiple(Boolean multiple) {
     this.multiple = multiple;
     return this;
   }
@@ -101,7 +101,7 @@ public class AppConfigConstraintsDTO   {
 
   /**
    **/
-  public AppConfigConstraintsDTO tooltip(String tooltip) {
+  public ConfigurationConstraintDTO tooltip(String tooltip) {
     this.tooltip = tooltip;
     return this;
   }
@@ -118,7 +118,7 @@ public class AppConfigConstraintsDTO   {
 
   /**
    **/
-  public AppConfigConstraintsDTO constraintType(String constraintType) {
+  public ConfigurationConstraintDTO constraintType(String constraintType) {
     this.constraintType = constraintType;
     return this;
   }
@@ -135,7 +135,7 @@ public class AppConfigConstraintsDTO   {
 
   /**
    **/
-  public AppConfigConstraintsDTO values(List<Object> values) {
+  public ConfigurationConstraintDTO values(List<Object> values) {
     this.values = values;
     return this;
   }
@@ -152,7 +152,7 @@ public class AppConfigConstraintsDTO   {
 
   /**
    **/
-  public AppConfigConstraintsDTO _default(Object _default) {
+  public ConfigurationConstraintDTO _default(Object _default) {
     this._default = _default;
     return this;
   }
@@ -177,15 +177,15 @@ public class AppConfigConstraintsDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    AppConfigConstraintsDTO appConfigConstraints = (AppConfigConstraintsDTO) o;
-    return Objects.equals(name, appConfigConstraints.name) &&
-        Objects.equals(label, appConfigConstraints.label) &&
-        Objects.equals(type, appConfigConstraints.type) &&
-        Objects.equals(multiple, appConfigConstraints.multiple) &&
-        Objects.equals(tooltip, appConfigConstraints.tooltip) &&
-        Objects.equals(constraintType, appConfigConstraints.constraintType) &&
-        Objects.equals(values, appConfigConstraints.values) &&
-        Objects.equals(_default, appConfigConstraints._default);
+    ConfigurationConstraintDTO configurationConstraint = (ConfigurationConstraintDTO) o;
+    return Objects.equals(name, configurationConstraint.name) &&
+        Objects.equals(label, configurationConstraint.label) &&
+        Objects.equals(type, configurationConstraint.type) &&
+        Objects.equals(multiple, configurationConstraint.multiple) &&
+        Objects.equals(tooltip, configurationConstraint.tooltip) &&
+        Objects.equals(constraintType, configurationConstraint.constraintType) &&
+        Objects.equals(values, configurationConstraint.values) &&
+        Objects.equals(_default, configurationConstraint._default);
   }
 
   @Override
@@ -196,7 +196,7 @@ public class AppConfigConstraintsDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class AppConfigConstraintsDTO {\n");
+    sb.append("class ConfigurationConstraintDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    label: ").append(toIndentedString(label)).append("\n");
