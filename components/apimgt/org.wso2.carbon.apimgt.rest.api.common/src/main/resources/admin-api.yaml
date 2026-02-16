@@ -6119,10 +6119,10 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/KeyManagerConfiguration'
-              availableAppConfigConstraints:
+              configurationConstraints:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AppConfigConstraints'
+                  $ref: '#/components/schemas/ConfigurationConstraint'
         gatewayConfiguration:
           type: array
           items:
@@ -6480,8 +6480,8 @@ components:
           description: Indicates that this configuration field cannot be modified once the Key Manager is created.
           default: false
           example: true
-    AppConfigConstraints:
-      title: Configurable 'Application Configuration' Constraints
+    ConfigurationConstraint:
+      title: Configurable Configuration Constraints
       type: object
       properties:
         name:
