@@ -79,6 +79,7 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.util.ArrayList;
@@ -685,8 +686,25 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException if error occurred when generating API Definition
      */
     @Override
+    @Deprecated
     public String generateAPIDefinition(SwaggerData swaggerData, String swagger) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(swagger);
+        return generateAPIDefinition(swaggerData, openAPI);
+    }
+
+    /**
+     * This method generates API definition using the given api's URI templates and the swagger with parser options.
+     *
+     * @param swaggerData api
+     * @param swagger     swagger definition
+     * @param options OASParserOptions
+     * @return API definition in string format
+     * @throws APIManagementException if error occurred when generating API Definition
+     */
+    @Override
+    public String generateAPIDefinition(SwaggerData swaggerData, String swagger, OASParserOptions options)
+            throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(swagger, options);
         return generateAPIDefinition(swaggerData, openAPI);
     }
 
@@ -1037,9 +1055,26 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException If an error occurred
      */
     @Override
+    @Deprecated
     public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData)
             throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(oasDefinition);
+        removePublisherSpecificInfo(openAPI);
+        return generateAPIDefinition(swaggerData, openAPI);
+    }
+
+    /**
+     * Populate definition with wso2 APIM specific information
+     *
+     * @param oasDefinition OAS definition
+     * @param swaggerData   API related Swagger data
+     * @return Generated OAS definition
+     * @throws APIManagementException If an error occurred
+     */
+    @Override
+    public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData, OASParserOptions options)
+            throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(oasDefinition, options);
         removePublisherSpecificInfo(openAPI);
         return generateAPIDefinition(swaggerData, openAPI);
     }
@@ -1071,11 +1106,34 @@ public class OAS3Parser extends APIDefinition {
      * @return OAS definition
      */
     @Override
+    @Deprecated
     public String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes,
                                            KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
 
         OpenAPI openAPI = getOpenAPI(oasDefinition);
+        updateOperations(openAPI);
+        updateEndpoints(api, hostsWithSchemes, openAPI);
+        return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(api), hostsWithSchemes,
+                keyManagerConfigurationDTO);
+    }
+
+    /**
+     * Update OAS definition for store with parser options
+     *
+     * @param api                        API
+     * @param oasDefinition              OAS definition
+     * @param hostsWithSchemes           host addresses with protocol mapping
+     * @param keyManagerConfigurationDTO configuration details of the Key Manager
+     * @param options                    OASParserOptions
+     * @return OAS definition
+     */
+    @Override
+    public String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes,
+            KeyManagerConfigurationDTO keyManagerConfigurationDTO, OASParserOptions options)
+            throws APIManagementException {
+
+        OpenAPI openAPI = getOpenAPI(oasDefinition, options);
         updateOperations(openAPI);
         updateEndpoints(api, hostsWithSchemes, openAPI);
         return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(api), hostsWithSchemes,
@@ -1092,12 +1150,36 @@ public class OAS3Parser extends APIDefinition {
      * @return OAS definition
      */
     @Override
+    @Deprecated
     public String getOASDefinitionForStore(APIProduct product, String oasDefinition,
                                            Map<String, String> hostsWithSchemes,
                                            KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
 
         OpenAPI openAPI = getOpenAPI(oasDefinition);
+        updateOperations(openAPI);
+        updateEndpoints(product, hostsWithSchemes, openAPI);
+        return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(product), hostsWithSchemes,
+                keyManagerConfigurationDTO);
+    }
+
+    /**
+     * Update OAS definition for store with parser options
+     *
+     * @param product                    APIProduct
+     * @param oasDefinition              OAS definition
+     * @param hostsWithSchemes           host addresses with protocol mapping
+     * @param keyManagerConfigurationDTO configuration details of the Key Manager
+     * @param options                    OASParserOptions
+     * @return OAS definition
+     */
+    @Override
+    public String getOASDefinitionForStore(APIProduct product, String oasDefinition,
+            Map<String, String> hostsWithSchemes,
+            KeyManagerConfigurationDTO keyManagerConfigurationDTO, OASParserOptions options)
+            throws APIManagementException {
+
+        OpenAPI openAPI = getOpenAPI(oasDefinition, options);
         updateOperations(openAPI);
         updateEndpoints(product, hostsWithSchemes, openAPI);
         return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(product), hostsWithSchemes,
@@ -1113,8 +1195,28 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException throws if an error occurred
      */
     @Override
+    @Deprecated
     public String getOASDefinitionForPublisher(API api, String oasDefinition) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(oasDefinition);
+        return getOASDefinitionForPublisherCore(api, openAPI);
+    }
+
+    /**
+     * Update OAS definition for API Publisher with parser options
+     *
+     * @param api           API
+     * @param oasDefinition
+     * @param options       OASParserOptions
+     * @return OAS definition
+     * @throws APIManagementException throws if an error occurred
+     */
+    @Override
+    public String getOASDefinitionForPublisher(API api, String oasDefinition, OASParserOptions options) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(oasDefinition, options);
+        return getOASDefinitionForPublisherCore(api, openAPI);
+    }
+
+    private String getOASDefinitionForPublisherCore(API api, OpenAPI openAPI) throws APIManagementException {
         if (openAPI.getComponents() == null) {
             openAPI.setComponents(new Components());
         }
@@ -1889,6 +1991,29 @@ public class OAS3Parser extends APIDefinition {
     }
 
     /**
+     * Get parsed OpenAPI object with options
+     *
+     * @param oasDefinition OAS definition
+     * @param options       OAS parser options
+     * @return OpenAPI
+     */
+    OpenAPI getOpenAPI(String oasDefinition, OASParserOptions options) {
+        OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+        ParseOptions parserOptions = options != null ? convertOptionsToParseOptions(options) : new ParseOptions();
+        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(oasDefinition, null, parserOptions);
+        if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
+            log.debug("Errors found when parsing OAS definition");
+        }
+        return parseAttemptForV3.getOpenAPI();
+    }
+
+    private ParseOptions convertOptionsToParseOptions(OASParserOptions options) {
+        ParseOptions parserOptions = new ParseOptions();
+        parserOptions.setExplicitStyleAndExplode(options.isExplicitStyleAndExplode());
+        return parserOptions;
+    }
+
+    /**
      * Construct openAPI definition for graphQL. Add get and post operations
      *
      * @param openAPI OpenAPI
@@ -2006,8 +2131,27 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException
      */
     @Override
+    @Deprecated
     public String processOtherSchemeScopes(String swaggerContent) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
+        return processOtherSchemeScopesCore(swaggerContent, openAPI);
+    }
+
+    /**
+     * This method will inject scopes of other schemes to the swagger definition with options
+     *
+     * @param swaggerContent resource json
+     * @param options        OAS parser options
+     * @return String
+     * @throws APIManagementException
+     */
+    @Override
+    public String processOtherSchemeScopes(String swaggerContent, OASParserOptions options) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(swaggerContent, options);
+        return processOtherSchemeScopesCore(swaggerContent, openAPI);
+    }
+
+    private String processOtherSchemeScopesCore(String swaggerContent, OpenAPI openAPI) throws APIManagementException {
         Set<Scope> legacyScopes = getScopesFromExtensions(openAPI);
 
         //In case default scheme already exists we check whether the legacy x-wso2-scopes are there in the default scheme
@@ -2063,8 +2207,27 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException
      */
     @Override
+    @Deprecated
     public String injectMgwThrottlingExtensionsToDefault(String swaggerContent) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
+        return injectMgwThrottlingExtensionsToDefaultCore(openAPI);
+    }
+
+    /**
+     * This method returns openAPI definition which replaced X-WSO2-throttling-tier extension comes from
+     * mgw with X-throttling-tier extensions in openAPI file(openAPI version 3)
+     *
+     * @param swaggerContent String
+     * @return String
+     * @throws APIManagementException
+     */
+    @Override
+    public String injectMgwThrottlingExtensionsToDefault(String swaggerContent, OASParserOptions options) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(swaggerContent, options);
+        return injectMgwThrottlingExtensionsToDefaultCore(openAPI);
+    }
+
+    private String injectMgwThrottlingExtensionsToDefaultCore(OpenAPI openAPI){
         Paths paths = openAPI.getPaths();
         for (String pathKey : paths.keySet()) {
             Map<PathItem.HttpMethod, Operation> operationsMap = paths.get(pathKey).readOperationsMap();
@@ -2081,11 +2244,39 @@ public class OAS3Parser extends APIDefinition {
         return prettifyOAS3ToJson(openAPI);
     }
 
+    /**
+     * This method will copy vendor extensions from existing OAS to updated OAS
+     *
+     * @param existingOASContent existing OAS content
+     * @param updatedOASContent  updated OAS content
+     * @return updated OAS content with vendor extensions copied from existing OAS
+     */
     @Override
+    @Deprecated
     public String copyVendorExtensions(String existingOASContent, String updatedOASContent) {
 
         OpenAPI existingOpenAPI = getOpenAPI(existingOASContent);
         OpenAPI updatedOpenAPI = getOpenAPI(updatedOASContent);
+        return copyVendorExtensionsCore(existingOpenAPI, updatedOpenAPI);
+    }
+
+    /**
+     * This method will copy vendor extensions from existing OAS to updated OAS, with parser options
+     *
+     * @param existingOASContent existing OAS content
+     * @param updatedOASContent  updated OAS content
+     * @param options            OAS parser options
+     * @return updated OAS content with vendor extensions copied from existing OAS
+     */
+    @Override
+    public String copyVendorExtensions(String existingOASContent, String updatedOASContent, OASParserOptions options) {
+
+        OpenAPI existingOpenAPI = getOpenAPI(existingOASContent, options);
+        OpenAPI updatedOpenAPI = getOpenAPI(updatedOASContent, options);
+        return copyVendorExtensionsCore(existingOpenAPI, updatedOpenAPI);
+    }
+
+    private String copyVendorExtensionsCore(OpenAPI existingOpenAPI, OpenAPI updatedOpenAPI) {
         Paths updatedPaths = updatedOpenAPI.getPaths();
         Paths existingPaths = existingOpenAPI.getPaths();
 
@@ -2523,8 +2714,30 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException
      */
     @Override
+    @Deprecated
     public String processDisableSecurityExtension(String swaggerContent) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
+        return processDisableSecurityExtensionsCore(openAPI, swaggerContent);
+    }
+
+    /**
+     * This method will extract X-WSO2-disable-security extension provided in API level
+     * by mgw and inject that extension to all resources in OAS file with options
+     *
+     * @param swaggerContent String
+     * @param options        OAS parser options
+     * @return String
+     * @throws APIManagementException
+     */
+    @Override
+    public String processDisableSecurityExtension(String swaggerContent, OASParserOptions options)
+            throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(swaggerContent, options);
+        return processDisableSecurityExtensionsCore(openAPI, swaggerContent);
+    }
+
+    private String processDisableSecurityExtensionsCore(OpenAPI openAPI, String swaggerContent)
+            throws APIManagementException {
         Map<String, Object> apiExtensions = openAPI.getExtensions();
         if (apiExtensions == null) {
             return swaggerContent;

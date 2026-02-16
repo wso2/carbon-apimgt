@@ -2228,7 +2228,7 @@
         <pdfbox.io.version>3.0.1.wso2v1</pdfbox.io.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
         <swagger.inflector.oas3.version>2.0.5.wso2v2</swagger.inflector.oas3.version>
-        <swagger.parser.v3.version>2.1.25.wso2v2</swagger.parser.v3.version>
+        <swagger.parser.v3.version>2.1.36.wso2v1</swagger.parser.v3.version>
         <swagger.core.version>1.6.11.wso2v1</swagger.core.version>
         <swagger.models.version>1.6.11</swagger.models.version>
         <swagger.annotations.version>1.6.11</swagger.annotations.version>
