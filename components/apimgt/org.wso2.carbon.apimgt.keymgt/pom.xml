@@ -16,7 +16,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.32.178-SNAPSHOT</version>
+        <version>9.33.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -210,7 +210,9 @@
                         --add-opens java.base/java.util=ALL-UNNAMED 
                         --add-opens java.base/java.security=ALL-UNNAMED 
                         --add-opens java.base/sun.security.x509=ALL-UNNAMED
-                        --add-opens java.base/java.security.cert=ALL-UNNAMED                   
+                        --add-opens java.base/java.security.cert=ALL-UNNAMED
+                        --add-opens java.base/java.util.regex=ALL-UNNAMED
+                        --add-opens java.base/java.lang=ALL-UNNAMED
                     </argLine>
                     <excludes>
                         <exclude>**/Abstract*</exclude>
