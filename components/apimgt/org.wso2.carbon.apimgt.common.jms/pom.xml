@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.32.160-SNAPSHOT</version>
+        <version>9.33.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -65,7 +65,7 @@
                         </Export-Package>
                         <Import-Package>
                             com.google.gson.annotations.*,
-                            javax.transaction.*,
+                            javax.transaction.*; resolution:=optional,
                             org.apache.axis2.*,
                             org.apache.commons.*,
                             *;resolution:=optional

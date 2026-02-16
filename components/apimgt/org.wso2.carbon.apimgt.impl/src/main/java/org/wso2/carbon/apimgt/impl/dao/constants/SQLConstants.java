@@ -1880,20 +1880,25 @@ public class SQLConstants {
                     " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
     public static final String GET_API_PRODUCT_URI_TEMPLATE_ASSOCIATION_SQL =
-            " SELECT " +
-            "  API.API_PROVIDER," +
-            "  API.API_NAME," +
-            "  API.API_VERSION," +
-            "  APM.URL_MAPPING_ID  " +
-            "  FROM " +
-            "  AM_API API " +
-            "  INNER JOIN AM_API_PRODUCT_MAPPING APM ON API.API_ID = APM.API_ID " +
-            "  WHERE APM.URL_MAPPING_ID IN " +
-            "   (SELECT AUM.URL_MAPPING_ID " +
-            "   FROM AM_API_URL_MAPPING AUM " +
-            "   INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
-            "   WHERE API.API_UUID = ? AND " +
-            "   AUM.REVISION_UUID IS NULL AND APM.REVISION_UUID = 'Current API')";
+            "SELECT " +
+                    "    PROD.API_PROVIDER, " +
+                    "    PROD.API_NAME, " +
+                    "    PROD.API_VERSION, " +
+                    "    AUM_ORIG.URL_MAPPING_ID " +
+                    "FROM AM_API API_SRC " +
+                    "INNER JOIN AM_API_URL_MAPPING AUM " +
+                    "    ON AUM.API_ID = API_SRC.API_ID " +
+                    "INNER JOIN AM_API_PRODUCT_MAPPING APM " +
+                    "    ON APM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
+                    "INNER JOIN AM_API PROD " +
+                    "    ON PROD.API_ID = APM.API_ID " +
+                    "INNER JOIN AM_API_URL_MAPPING AUM_ORIG " +
+                    "    ON AUM_ORIG.API_ID = AUM.API_ID " +
+                    "   AND AUM_ORIG.HTTP_METHOD = AUM.HTTP_METHOD " +
+                    "   AND AUM_ORIG.URL_PATTERN = AUM.URL_PATTERN " +
+                    "WHERE API_SRC.API_UUID = ?" +
+                    "  AND APM.REVISION_UUID = 'Current API' " +
+                    "  AND AUM_ORIG.REVISION_UUID IS NULL";
 
     public static final String GET_ASSOCIATED_API_PRODUCT_URL_TEMPLATES_SQL =
             " SELECT " +

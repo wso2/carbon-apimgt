@@ -3,7 +3,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>9.32.160-SNAPSHOT</version>
+        <version>9.33.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -72,6 +72,7 @@
                         --add-opens java.base/java.io=ALL-UNNAMED 
                         --add-opens java.base/java.util=ALL-UNNAMED 
                         --add-opens java.base/java.time=ALL-UNNAMED
+                        --add-opens java.base/java.nio.charset=ALL-UNNAMED
                     </argLine>
                 </configuration>
                 <dependencies>

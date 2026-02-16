@@ -242,49 +242,46 @@ public class OAuthAuthenticator implements Authenticator {
             if (StringUtils.isNotEmpty(accessToken) && accessToken.contains(APIConstants.DOT)) {
                 try {
                     String[] JWTElements = accessToken.split("\\.");
-                    if (JWTElements.length != 3){
-                        log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
-                        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                "Invalid JWT token");
-                    }
 
-                    signedJWTInfo = getSignedJwt(accessToken);
-                    if (GatewayUtils.isInternalKey(signedJWTInfo.getJwtClaimsSet())
-                            || GatewayUtils.isAPIKey(signedJWTInfo.getJwtClaimsSet())) {
-                        log.debug("Invalid Token Provided");
-                        return new AuthenticationResponse(false, isMandatory, true,
-                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-                    }
-                    String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
-                            .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
-                    if (StringUtils.isNotEmpty(keyManager)) {
-                        if (log.isDebugEnabled()){
-                            log.debug("KeyManager " + keyManager + "found for authenticate token " + GatewayUtils.getMaskedToken(accessToken));
-                        }
-                        if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
-                                keyManagerList.contains(keyManager)) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Elected KeyManager " + keyManager + "found in API level list " + String.join(",", keyManagerList));
-                            }
-                            isJwtToken = true;
-                        } else {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Elected KeyManager " + keyManager + " not found in API level list " + String.join(",", keyManagerList));
-                            }
+                    if (JWTElements.length == 3) {
+                        signedJWTInfo = getSignedJwt(accessToken);
+                        if (GatewayUtils.isInternalKey(signedJWTInfo.getJwtClaimsSet())
+                                || GatewayUtils.isAPIKey(signedJWTInfo.getJwtClaimsSet())) {
+                            log.debug("Invalid Token Provided");
                             return new AuthenticationResponse(false, isMandatory, true,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                         }
-                    }else{
-                        if (log.isDebugEnabled()) {
-                            log.debug("KeyManager not found for accessToken " + GatewayUtils.getMaskedToken(accessToken));
+                        String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
+                                .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
+                        if (StringUtils.isNotEmpty(keyManager)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("KeyManager " + keyManager + " found for authenticate token " + GatewayUtils.getMaskedToken(accessToken));
+                            }
+                            if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
+                                    keyManagerList.contains(keyManager)) {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Elected KeyManager " + keyManager + "found in API level list " + String.join(",", keyManagerList));
+                                }
+                                isJwtToken = true;
+                            } else {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Elected KeyManager " + keyManager + " not found in API level list " + String.join(",", keyManagerList));
+                                }
+                                return new AuthenticationResponse(false, isMandatory, true,
+                                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                            }
+                        } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("KeyManager not found for accessToken " + GatewayUtils.getMaskedToken(accessToken));
+                            }
                         }
                     }
                 } catch ( ParseException | IllegalArgumentException e) {
                     log.debug("Not a JWT token. Failed to decode the token header.", e);
                 } catch (APIManagementException e) {
-                    log.error("error while check validation of JWt", e);
+                    log.error("Error while validating JWT token. ", e);
                     return new AuthenticationResponse(false, isMandatory, true,
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
