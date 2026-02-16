@@ -141,11 +141,11 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             }
         }
         try {
-            RestApiAdminUtils.validateKeyManagerConstraints((Map<String, Object>) body.getAdditionalProperties());
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                     KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
             KeyManagerPermissionConfigurationDTO keyManagerPermissionConfigurationDTO =
                     keyManagerConfigurationDTO.getPermissions();
+            RestApiAdminUtils.validateKeyManagerConstraints(keyManagerConfigurationDTO.getAdditionalProperties());
             this.validatePermissions(keyManagerPermissionConfigurationDTO);
             keyManagerConfigurationDTO.setUuid(keyManagerId);
             KeyManagerConfigurationDTO oldKeyManagerConfigurationDTO =
@@ -223,11 +223,11 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
-            RestApiAdminUtils.validateKeyManagerConstraints((Map<String, Object>) body.getAdditionalProperties());      
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                     KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);
             KeyManagerPermissionConfigurationDTO keyManagerPermissionConfigurationDTO =
                     keyManagerConfigurationDTO.getPermissions();
+            RestApiAdminUtils.validateKeyManagerConstraints(keyManagerConfigurationDTO.getAdditionalProperties());
             this.validatePermissions(keyManagerPermissionConfigurationDTO);
             KeyManagerConfigurationDTO createdKeyManagerConfiguration =
                     apiAdmin.addKeyManagerConfiguration(keyManagerConfigurationDTO);

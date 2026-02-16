@@ -912,7 +912,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         keyManagerName = body.getKeyManager();
                     }
                     String organization = RestApiUtil.getValidatedOrganization(messageContext);
-                    RestAPIStoreUtils.validateKeyManagerAppConfiguration(keyManagerName, body.getAdditionalProperties());
                     Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
                             username, application, body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes,
@@ -1471,7 +1470,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             jsonParams.addProperty(APIConstants.JSON_ADDITIONAL_PROPERTIES, jsonContent);
                         }
                     }
-                    RestAPIStoreUtils.validateKeyManagerAppConfiguration(appKey.getKeyManager(), body.getAdditionalProperties());
                     OAuthApplicationInfo updatedData = apiConsumer.updateAuthClient(username, application,
                             appKey.getKeyType().value(), body.getCallbackUrl(), null, null, null,
                             body.getGroupId(),new Gson().toJson(jsonParams),appKey.getKeyManager());
