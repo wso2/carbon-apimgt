@@ -60,7 +60,7 @@ public class RangeValidator implements KeyManagerApplicationConfigValidator {
             double min = ((Number) constraints.get("min")).doubleValue();
             double max = ((Number) constraints.get("max")).doubleValue();
             if (min > max) {
-                throw new APIManagementException("Minimum value (" + min + ") cannot be greater than maximum value (" + max + ").");
+                throw new APIManagementException("Minimum value cannot be greater than maximum value.");
             }
         }
     }
@@ -82,7 +82,7 @@ public class RangeValidator implements KeyManagerApplicationConfigValidator {
             if (constraints.containsKey("min")) {
                 double min = ((Number) constraints.get("min")).doubleValue();
                 if (val < min) {
-                    errorMessage = "Value " + val + " is less than minimum " + min;
+                    errorMessage = "Value is less than minimum";
                     return false;
                 }
             }
@@ -92,7 +92,7 @@ public class RangeValidator implements KeyManagerApplicationConfigValidator {
             if (constraints.containsKey("max")) {
                 double max = ((Number) constraints.get("max")).doubleValue();
                 if (val > max) {
-                    errorMessage = "Value " + val + " is greater than maximum " + max;
+                    errorMessage = "Value is greater than maximum";
                     return false;
                 }
             }

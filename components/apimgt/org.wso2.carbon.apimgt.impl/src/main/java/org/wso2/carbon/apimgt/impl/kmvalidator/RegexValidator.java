@@ -42,7 +42,7 @@ public class RegexValidator implements KeyManagerApplicationConfigValidator {
         try {
             Pattern.compile(regex);
         } catch (PatternSyntaxException e) {
-            throw new APIManagementException("Invalid regex pattern: " + regex, e);
+            throw new APIManagementException("Invalid regex pattern");
         }
     }
 
@@ -62,7 +62,7 @@ public class RegexValidator implements KeyManagerApplicationConfigValidator {
         String regex = regexObj.toString();
 
         if (!Pattern.matches(regex, value)) {
-            errorMessage = "Value '" + value + "' does not match pattern '" + regex + "'.";
+            errorMessage = "Value does not match pattern.";
             return false;
         }
 

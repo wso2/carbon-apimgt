@@ -67,7 +67,7 @@ public class EnumValidator implements KeyManagerApplicationConfigValidator {
                     return false;
                 }
                 if (!isValueAllowed(item, allowedValues)) {
-                    errorMessage = "Value '" + item + "' is not among the allowed values: " + allowedValues;
+                    errorMessage = "Given Values are not among the allowed values.";
                     return false;
                 }
             }
@@ -75,7 +75,7 @@ public class EnumValidator implements KeyManagerApplicationConfigValidator {
         } else {
             // in case if the inputValue is a single string , not a list 
             if (!isValueAllowed(inputValue, allowedValues)) {
-                errorMessage = "Value '" + inputValue + "' is not among the allowed values: " + allowedValues;
+                errorMessage = "Given Values are not among the allowed values.";
                 return false;
             }
             return true;
