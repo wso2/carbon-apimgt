@@ -159,7 +159,7 @@ public class SettingsMappingUtil {
         }
         if (availableAppConfigConstraints != null) {
             for (ConstraintConfigDto constraintConfig : availableAppConfigConstraints) {
-                AppConfigConstraintsDTO constraintDTO = new AppConfigConstraintsDTO();
+                ConfigurationConstraintDTO constraintDTO = new ConfigurationConstraintDTO();
                 constraintDTO.setName(constraintConfig.getName());
                 constraintDTO.setLabel(constraintConfig.getLabel());
                 constraintDTO.setType(constraintConfig.getType());
@@ -168,7 +168,7 @@ public class SettingsMappingUtil {
                 constraintDTO.setValues(constraintConfig.getValues());
                 constraintDTO.setDefault(constraintConfig.getDefaultConstraints());
                 constraintDTO.setConstraintType(constraintConfig.getConstraintType().toString());
-                settingsKeyManagerConfigurationDTO.getAvailableAppConfigConstraints().add(constraintDTO);
+                settingsKeyManagerConfigurationDTO.getConfigurationConstraints().add(constraintDTO);
             }
         }
         return settingsKeyManagerConfigurationDTO;
