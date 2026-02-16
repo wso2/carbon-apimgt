@@ -219,9 +219,15 @@ public class APIMgtGatewayConstants {
     public static final String MCP_METHOD = "api.ut.MCP_METHOD";
     public static final String MCP_REQUEST_BODY = "MCP_REQUEST_BODY";
     public static final String MCP_NO_AUTH_REQUEST = "MCP_NO_AUTH_REQUEST";
+    public static final String MCP_TOOL_NAME_KEY = "MCP_TOOL_NAME";
     public static final String MCP_HTTP_METHOD_KEY = "MCP_HTTP_METHOD";
+    public static final String MCP_SESSION_ID_KEY = "MCP_SESSION_ID";
+    public static final String MCP_PROTOCOL_VERSION_KEY = "MCP_PROTOCOL_VERSION";
+    public static final String MCP_CLIENT_CAPABILITIES_KEY = "MCP_CLIENT_CAPABILITIES";
+    public static final String MCP_CLIENT_INFO_KEY = "MCP_CLIENT_INFO";
+    public static final String MCP_REQUEST_SIZE_KEY = "MCP_REQUEST_SIZE";
+    public static final String MCP_API_ELECTED_RESOURCE_KEY = "MCP_API_ELECTED_RESOURCE";
     public static final String MCP_API_ELECTED_RESOURCE = "resource";
-    public static final String MCP_API_ELECTED_RESOURCE_KEY = "MCP_API_ELECTED_RESOURCE_KEY";
     public static final String MCP_RESOURCE = "/mcp";
     public static final String MCP_WELL_KNOWN_RESOURCE = "/.well-known/oauth-protected-resource";
     public static final String MCP_AUTH_CLAIM = "MCP_AUTHENTICATED";
@@ -229,6 +235,11 @@ public class APIMgtGatewayConstants {
     public static final String MCP_ANALYTICS = "mcpAnalytics";
     public static final String MCP_TOOL_NAME = "toolName";
     public static final String MCP_HTTP_METHOD = "httpMethod";
+    public static final String MCP_SESSION_ID = "sessionId";
+    public static final String MCP_PROTOCOL_VERSION = "protocolVersion";
+    public static final String MCP_REQUEST_SIZE = "requestSize";
+    public static final String MCP_CLIENT_CAPABILITIES = "clientCapabilities";
+    public static final String MCP_CLIENT_INFO = "clientInfo";
 
     /**
      * JWT Claim related Constants

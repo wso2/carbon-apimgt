@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.mcp.request.Params;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
@@ -80,11 +81,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
-import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.API_OBJECT;
-import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE;
-import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE_KEY;
-import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.MCP_HTTP_METHOD;
-import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.MCP_TOOL_NAME;
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.*;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.MASK_VALUE;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.MCP_METHOD;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_HEADERS;
@@ -566,6 +563,33 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         mcpAnalytics.put(MCP_API_ELECTED_RESOURCE, messageContext.getProperty(MCP_API_ELECTED_RESOURCE_KEY));
         mcpAnalytics.put(MCP_HTTP_METHOD, messageContext.getProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY));
         mcpAnalytics.put(MCP_TOOL_NAME, messageContext.getProperty(MCP_TOOL_NAME));
+        mcpAnalytics.put(MCP_SESSION_ID, messageContext.getProperty(MCP_SESSION_ID_KEY));
+        mcpAnalytics.put(MCP_PROTOCOL_VERSION, messageContext.getProperty(MCP_PROTOCOL_VERSION_KEY));
+        mcpAnalytics.put(MCP_REQUEST_SIZE, messageContext.getProperty(MCP_REQUEST_SIZE_KEY));
+
+        // Deserialize capabilities
+        Object capabilitiesObj = messageContext.getProperty(MCP_CLIENT_CAPABILITIES_KEY);
+        if (capabilitiesObj != null) {
+            try {
+                Params.Capabilities capabilities = gson.fromJson(capabilitiesObj.toString(), Params.Capabilities.class);
+                mcpAnalytics.put(MCP_CLIENT_CAPABILITIES, capabilities);
+            } catch (Exception e) {
+                log.warn("Failed to parse MCP client capabilities", e);
+                mcpAnalytics.put(MCP_CLIENT_CAPABILITIES, capabilitiesObj);
+            }
+        }
+
+        // Deserialize client info
+        Object clientInfoObj = messageContext.getProperty(MCP_CLIENT_INFO_KEY);
+        if (clientInfoObj != null) {
+            try {
+                Params.ClientInfo clientInfo = gson.fromJson(clientInfoObj.toString(), Params.ClientInfo.class);
+                mcpAnalytics.put(MCP_CLIENT_INFO, clientInfo);
+            } catch (Exception e) {
+                log.warn("Failed to parse MCP client info", e);
+                mcpAnalytics.put(MCP_CLIENT_INFO, clientInfoObj);
+            }
+        }
         customProperties.put(APIMgtGatewayConstants.MCP_ANALYTICS, mcpAnalytics);
     }
 
