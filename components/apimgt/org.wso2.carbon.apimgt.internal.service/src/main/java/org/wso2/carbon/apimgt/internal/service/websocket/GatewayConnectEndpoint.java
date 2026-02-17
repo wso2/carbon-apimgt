@@ -75,6 +75,9 @@ public class GatewayConnectEndpoint {
     /** Interval for server-to-client WebSocket PING (client timeout is 35s). */
     private static final long HEARTBEAT_INTERVAL_MS = 15_000;
 
+    /** Reusable empty payload for PING (avoids allocating a new ByteBuffer every interval). */
+    private static final ByteBuffer EMPTY_PING_PAYLOAD = ByteBuffer.allocate(0);
+
     @OnOpen
     public void onOpen(Session session, EndpointConfig config) {
         String apiKey = (String) config.getUserProperties().get(GatewayConnectConfigurator.API_KEY_PROPERTY);
@@ -110,7 +113,8 @@ public class GatewayConnectEndpoint {
         try {
             PlatformGatewayDAO.getInstance().updateGatewayActiveStatus(gateway.id, true);
         } catch (APIManagementException e) {
-            log.warn("Failed to update gateway active status to true: gatewayId=" + gateway.id + ", error=" + e.getMessage());
+            log.warn("Failed to update gateway active status to true: gatewayId=" + gateway.id + ", error="
+                    + e.getMessage());
         }
 
         sendConnectionAck(session, gateway.id);
@@ -141,7 +145,7 @@ public class GatewayConnectEndpoint {
                     break;
                 }
                 try {
-                    session.getBasicRemote().sendPing(ByteBuffer.allocate(0));
+                    session.getBasicRemote().sendPing(EMPTY_PING_PAYLOAD);
                 } catch (IOException e) {
                     if (log.isDebugEnabled()) {
                         log.debug("Heartbeat ping failed: " + e.getMessage());
@@ -160,7 +164,8 @@ public class GatewayConnectEndpoint {
     private static void sendConnectionAck(Session session, String gatewayId) {
         String connectionId = UUID.randomUUID().toString();
         String timestamp = Instant.now().toString();
-        String json = "{\"type\":\"connection.ack\",\"gatewayId\":\"" + escapeJson(gatewayId) + "\",\"connectionId\":\"" + escapeJson(connectionId) + "\",\"timestamp\":\"" + escapeJson(timestamp) + "\"}";
+        String json = "{\"type\":\"connection.ack\",\"gatewayId\":\"" + escapeJson(gatewayId) + "\",\"connectionId\":\""
+                + escapeJson(connectionId) + "\",\"timestamp\":\"" + escapeJson(timestamp) + "\"}";
         try {
             session.getBasicRemote().sendText(json);
         } catch (IOException e) {
@@ -193,7 +198,8 @@ public class GatewayConnectEndpoint {
     private static boolean isConnectionClosedError(Throwable t) {
         for (Throwable c = t; c != null; c = c.getCause()) {
             String msg = c.getMessage();
-            if (msg != null && (msg.contains("CLOSED") || msg.contains("Unable to wrap") || msg.contains("Unable to unwrap"))) {
+            if (msg != null && (msg.contains("CLOSED") || msg.contains("Unable to wrap") || msg.contains(
+                    "Unable to unwrap"))) {
                 return true;
             }
         }
@@ -212,10 +218,12 @@ public class GatewayConnectEndpoint {
             try {
                 PlatformGatewayDAO.getInstance().updateGatewayActiveStatus(gateway.id, false);
             } catch (APIManagementException e) {
-                log.warn("Failed to update gateway active status to false: gatewayId=" + gateway.id + ", error=" + e.getMessage());
+                log.warn("Failed to update gateway active status to false: gatewayId=" + gateway.id + ", error="
+                        + e.getMessage());
             }
             if (log.isInfoEnabled()) {
-                log.info("Gateway WebSocket connection closed: gatewayId=" + gateway.id + " closeCode=" + reason.getCloseCode().getCode());
+                log.info("Gateway WebSocket connection closed: gatewayId=" + gateway.id + " closeCode="
+                        + reason.getCloseCode().getCode());
             }
         }
     }

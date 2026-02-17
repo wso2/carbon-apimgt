@@ -4,8 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.validation.constraints.*;
 
+/**
+ * Platform gateway response. On create, registrationToken is returned once for the gateway to connect to the control plane WebSocket.
+ **/
 
 import io.swagger.annotations.*;
 import java.util.Objects;
@@ -16,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-
+@ApiModel(description = "Platform gateway response. On create, registrationToken is returned once for the gateway to connect to the control plane WebSocket.")
 
 public class PlatformGatewayDTO   {
   
@@ -25,9 +31,42 @@ public class PlatformGatewayDTO   {
     private String name = null;
     private String displayName = null;
     private String description = null;
+    private Map<String, Object> properties = new HashMap<String, Object>();
     private String vhost = null;
     private Boolean isCritical = null;
-    private String functionalityType = null;
+
+    @XmlType(name="FunctionalityTypeEnum")
+    @XmlEnum(String.class)
+    public enum FunctionalityTypeEnum {
+        REGULAR("regular"),
+        AI("ai"),
+        EVENT("event");
+        private String value;
+
+        FunctionalityTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static FunctionalityTypeEnum fromValue(String v) {
+            for (FunctionalityTypeEnum b : FunctionalityTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private FunctionalityTypeEnum functionalityType = null;
     private Boolean isActive = null;
     private java.util.Date createdAt = null;
     private java.util.Date updatedAt = null;
@@ -120,6 +159,24 @@ public class PlatformGatewayDTO   {
   }
 
   /**
+   * Custom key-value properties
+   **/
+  public PlatformGatewayDTO properties(Map<String, Object> properties) {
+    this.properties = properties;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Custom key-value properties")
+  @JsonProperty("properties")
+  public Map<String, Object> getProperties() {
+    return properties;
+  }
+  public void setProperties(Map<String, Object> properties) {
+    this.properties = properties;
+  }
+
+  /**
    **/
   public PlatformGatewayDTO vhost(String vhost) {
     this.vhost = vhost;
@@ -155,7 +212,7 @@ public class PlatformGatewayDTO   {
 
   /**
    **/
-  public PlatformGatewayDTO functionalityType(String functionalityType) {
+  public PlatformGatewayDTO functionalityType(FunctionalityTypeEnum functionalityType) {
     this.functionalityType = functionalityType;
     return this;
   }
@@ -163,14 +220,15 @@ public class PlatformGatewayDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("functionalityType")
-  public String getFunctionalityType() {
+  public FunctionalityTypeEnum getFunctionalityType() {
     return functionalityType;
   }
-  public void setFunctionalityType(String functionalityType) {
+  public void setFunctionalityType(FunctionalityTypeEnum functionalityType) {
     this.functionalityType = functionalityType;
   }
 
   /**
+   * Indicates if the gateway is currently connected to the control plane via WebSocket
    **/
   public PlatformGatewayDTO isActive(Boolean isActive) {
     this.isActive = isActive;
@@ -178,7 +236,7 @@ public class PlatformGatewayDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Indicates if the gateway is currently connected to the control plane via WebSocket")
   @JsonProperty("isActive")
   public Boolean isIsActive() {
     return isActive;
@@ -254,6 +312,7 @@ public class PlatformGatewayDTO   {
         Objects.equals(name, platformGateway.name) &&
         Objects.equals(displayName, platformGateway.displayName) &&
         Objects.equals(description, platformGateway.description) &&
+        Objects.equals(properties, platformGateway.properties) &&
         Objects.equals(vhost, platformGateway.vhost) &&
         Objects.equals(isCritical, platformGateway.isCritical) &&
         Objects.equals(functionalityType, platformGateway.functionalityType) &&
@@ -265,7 +324,7 @@ public class PlatformGatewayDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, organizationId, name, displayName, description, vhost, isCritical, functionalityType, isActive, createdAt, updatedAt, registrationToken);
+    return Objects.hash(id, organizationId, name, displayName, description, properties, vhost, isCritical, functionalityType, isActive, createdAt, updatedAt, registrationToken);
   }
 
   @Override
@@ -278,6 +337,7 @@ public class PlatformGatewayDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
     sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
     sb.append("    isCritical: ").append(toIndentedString(isCritical)).append("\n");
     sb.append("    functionalityType: ").append(toIndentedString(functionalityType)).append("\n");

@@ -2249,7 +2249,7 @@ paths:
           "https://127.0.0.1:9443/api/am/admin/v4/environments/8d263942-a6df-4cc2-a804-7a2525501450/gateways"'
 
   ######################################################
-  # The "Platform Gateways" resource API (self-hosted / API Platform gateway registration)
+  # The "Platform Gateways" resource API (platform / self-hosted gateway registration)
   ######################################################
   /gateways:
     get:
@@ -2257,7 +2257,7 @@ paths:
         - Platform Gateways
       summary: Get all platform gateways
       description: |
-        Get all registered API Platform / self-hosted gateways for the organization.
+        Get all registered platform gateways for the organization.
       responses:
         200:
           description: |
@@ -2281,7 +2281,7 @@ paths:
         - Platform Gateways
       summary: Register a platform gateway
       description: |
-        Register a new API Platform / self-hosted gateway. A registration token is generated and returned
+        Register a new platform gateway. A registration token is generated and returned
         once in the response; store it (e.g. as GATEWAY_CONTROL_PLANE_TOKEN in Docker Compose) for the
         gateway to connect to the control plane WebSocket. The token is stored hashed and cannot be retrieved later.
       requestBody:
@@ -5655,6 +5655,7 @@ components:
             - EXPIRED
     CreatePlatformGatewayRequest:
       title: Create Platform Gateway Request
+      description: Request body for creating a platform gateway (name pattern, functionalityType enum, optional properties).
       required:
         - name
         - displayName
@@ -5664,16 +5665,17 @@ components:
       properties:
         name:
           type: string
-          maxLength: 255
-          minLength: 1
-          description: Unique name for the gateway within the organization
-          example: my-self-hosted-gw
+          pattern: '^[a-z0-9-]+$'
+          minLength: 3
+          maxLength: 64
+          description: URL-friendly gateway identifier (lowercase alphanumeric with hyphens, unique per organization)
+          example: prod-gateway-01
         displayName:
           type: string
-          maxLength: 255
           minLength: 1
-          description: Human-readable display name
-          example: My Self-Hosted Gateway
+          maxLength: 128
+          description: Human-readable gateway name
+          example: Production Gateway 01
         description:
           type: string
           maxLength: 1023
@@ -5682,18 +5684,26 @@ components:
           type: string
           maxLength: 255
           minLength: 1
-          description: Virtual host for the gateway
-          example: default
+          description: Virtual host (domain name) for the gateway
+          example: mg.wso2.com
         isCritical:
           type: boolean
           default: false
           description: Whether the gateway is marked as critical
         functionalityType:
           type: string
+          enum: [regular, ai, event]
+          default: regular
           description: Type of gateway functionality
-          example: full
+          example: regular
+        properties:
+          type: object
+          additionalProperties: true
+          description: Custom key-value properties for the gateway
+          example: {"region": "us-west", "tier": "premium"}
     PlatformGateway:
       title: Platform Gateway
+      description: Platform gateway response. On create, registrationToken is returned once for the gateway to connect to the control plane WebSocket.
       type: object
       properties:
         id:
@@ -5709,14 +5719,20 @@ components:
           type: string
         description:
           type: string
+        properties:
+          type: object
+          additionalProperties: true
+          description: Custom key-value properties
         vhost:
           type: string
         isCritical:
           type: boolean
         functionalityType:
           type: string
+          enum: [regular, ai, event]
         isActive:
           type: boolean
+          description: Indicates if the gateway is currently connected to the control plane via WebSocket
         createdAt:
           type: string
           format: date-time

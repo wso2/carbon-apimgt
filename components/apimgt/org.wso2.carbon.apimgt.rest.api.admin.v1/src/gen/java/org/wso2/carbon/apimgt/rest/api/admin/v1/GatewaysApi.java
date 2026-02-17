@@ -42,7 +42,7 @@ GatewaysApiService delegate = new GatewaysApiServiceImpl();
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all platform gateways", notes = "Get all registered API Platform / self-hosted gateways for the organization. ", response = PlatformGatewayListDTO.class, authorizations = {
+    @ApiOperation(value = "Get all platform gateways", notes = "Get all registered platform gateways for the organization. ", response = PlatformGatewayListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
@@ -58,7 +58,7 @@ GatewaysApiService delegate = new GatewaysApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Register a platform gateway", notes = "Register a new API Platform / self-hosted gateway. A registration token is generated and returned once in the response; store it (e.g. as GATEWAY_CONTROL_PLANE_TOKEN in Docker Compose) for the gateway to connect to the control plane WebSocket. The token is stored hashed and cannot be retrieved later. ", response = PlatformGatewayDTO.class, authorizations = {
+    @ApiOperation(value = "Register a platform gateway", notes = "Register a new platform gateway. A registration token is generated and returned once in the response; store it (e.g. as GATEWAY_CONTROL_PLANE_TOKEN in Docker Compose) for the gateway to connect to the control plane WebSocket. The token is stored hashed and cannot be retrieved later. ", response = PlatformGatewayDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })

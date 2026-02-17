@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * DAO for API Platform / self-hosted gateway registration (AM_PLATFORM_GATEWAY, AM_PLATFORM_GATEWAY_TOKEN).
+ * DAO for platform gateway registration (AM_PLATFORM_GATEWAY, AM_PLATFORM_GATEWAY_TOKEN).
  */
 public class PlatformGatewayDAO {
 
@@ -46,6 +46,7 @@ public class PlatformGatewayDAO {
 
     /**
      * Result of a platform gateway row.
+     * properties: JSON string (optional) for custom key-value properties.
      */
     public static class PlatformGateway {
         public final String id;
@@ -56,13 +57,14 @@ public class PlatformGatewayDAO {
         public final String vhost;
         public final boolean isCritical;
         public final String functionalityType;
+        public final String properties;
         public final boolean isActive;
         public final Timestamp createdAt;
         public final Timestamp updatedAt;
 
         public PlatformGateway(String id, String organizationId, String name, String displayName,
                                String description, String vhost, boolean isCritical, String functionalityType,
-                               boolean isActive, Timestamp createdAt, Timestamp updatedAt) {
+                               String properties, boolean isActive, Timestamp createdAt, Timestamp updatedAt) {
             this.id = id;
             this.organizationId = organizationId;
             this.name = name;
@@ -71,6 +73,7 @@ public class PlatformGatewayDAO {
             this.vhost = vhost;
             this.isCritical = isCritical;
             this.functionalityType = functionalityType;
+            this.properties = properties;
             this.isActive = isActive;
             this.createdAt = createdAt;
             this.updatedAt = updatedAt;
@@ -108,9 +111,10 @@ public class PlatformGatewayDAO {
             ps.setString(6, gateway.vhost);
             ps.setBoolean(7, gateway.isCritical);
             ps.setString(8, gateway.functionalityType);
-            ps.setBoolean(9, gateway.isActive);
-            ps.setTimestamp(10, gateway.createdAt);
-            ps.setTimestamp(11, gateway.updatedAt);
+            ps.setString(9, gateway.properties);
+            ps.setBoolean(10, gateway.isActive);
+            ps.setTimestamp(11, gateway.createdAt);
+            ps.setTimestamp(12, gateway.updatedAt);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new APIManagementException("Error inserting platform gateway", e);
@@ -241,6 +245,7 @@ public class PlatformGatewayDAO {
                 rs.getString("VHOST"),
                 rs.getBoolean("IS_CRITICAL"),
                 rs.getString("FUNCTIONALITY_TYPE"),
+                rs.getString("PROPERTIES"),
                 rs.getBoolean("IS_ACTIVE"),
                 rs.getTimestamp("CREATED_AT"),
                 rs.getTimestamp("UPDATED_AT")
