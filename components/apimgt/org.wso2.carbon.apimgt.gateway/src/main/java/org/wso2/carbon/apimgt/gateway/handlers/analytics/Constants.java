@@ -35,6 +35,7 @@ public class Constants {
     public static final String API_USER_NAME_KEY = "userName";
     public static final String API_CONTEXT_KEY = "apiContext";
     public static final String RESPONSE_SIZE = "responseSize";
+    public static final String REQUEST_SIZE = "requestSize";
     public static final String RESPONSE_CONTENT_TYPE = "responseContentType";
     public static final String API_ANALYTICS_CUSTOM_DATA_PROVIDER_CLASS = "publisher.custom.data.provider.class";
 

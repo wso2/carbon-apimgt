@@ -435,6 +435,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         custom.put(Constants.API_USER_NAME_KEY, getUserName());
         custom.put(Constants.API_CONTEXT_KEY, getApiContext());
         custom.put(Constants.RESPONSE_SIZE, getResponseSize());
+        custom.put(Constants.REQUEST_SIZE, getRequestSize());
         custom.put(Constants.RESPONSE_CONTENT_TYPE, getResponseContentType());
         custom.put(Constants.CERTIFICATE_COMMON_NAME, getCommonName());
 
@@ -562,7 +563,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         mcpAnalytics.put(MCP_METHOD, messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
         mcpAnalytics.put(MCP_API_ELECTED_RESOURCE, messageContext.getProperty(MCP_API_ELECTED_RESOURCE_KEY));
         mcpAnalytics.put(MCP_HTTP_METHOD, messageContext.getProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY));
-        mcpAnalytics.put(MCP_TOOL_NAME, messageContext.getProperty(MCP_TOOL_NAME));
+        mcpAnalytics.put(MCP_TOOL_NAME, messageContext.getProperty(MCP_TOOL_NAME_KEY));
         mcpAnalytics.put(MCP_SESSION_ID, messageContext.getProperty(MCP_SESSION_ID_KEY));
         mcpAnalytics.put(MCP_PROTOCOL_VERSION, messageContext.getProperty(MCP_PROTOCOL_VERSION_KEY));
         mcpAnalytics.put(MCP_REQUEST_SIZE, messageContext.getProperty(MCP_REQUEST_SIZE_KEY));
@@ -743,6 +744,39 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             return (String) messageContext.getProperty(APIConstants.CERTIFICATE_COMMON_NAME);
         }
         return Constants.NOT_APPLICABLE_VALUE;
+    }
+
+    public long getRequestSize() {
+
+        if (APIConstants.AI.MCP.equals(messageContext.getProperty(APIConstants.API_TYPE))) {
+            Object mcpRequestSize = messageContext.getProperty(APIMgtGatewayConstants.MCP_REQUEST_SIZE_KEY);
+            if (mcpRequestSize != null) {
+                try {
+                    return Long.parseLong(mcpRequestSize.toString());
+                } catch (NumberFormatException e) {
+                    log.warn("Invalid MCP request size value", e);
+                }
+            }
+        }
+
+        org.apache.axis2.context.MessageContext axis2MC =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+
+        Map headers = (Map) axis2MC.getProperty(TRANSPORT_HEADERS);
+
+        if (headers != null) {
+            Object contentLength = headers.get(HttpHeaders.CONTENT_LENGTH);
+            if (contentLength != null) {
+                try {
+                    return Long.parseLong(contentLength.toString());
+                } catch (NumberFormatException e) {
+                    log.warn("Invalid Content-Length header value", e);
+                }
+            }
+        }
+
+        // If chunked encoding or header missing, return -1 to indicate unknown
+        return -1L;
     }
 
     /**
