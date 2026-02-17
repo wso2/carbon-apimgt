@@ -2064,14 +2064,14 @@
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
 
-        <carbon.analytics.common.version>5.3.27</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.3.30</carbon.analytics.common.version>
 
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.9.33</carbon.kernel.version>
+        <carbon.kernel.version>4.11.0</carbon.kernel.version>
         <carbon.kernel.feature.version>${carbon.kernel.version}</carbon.kernel.feature.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
-        <carbon.commons.version>4.9.18</carbon.commons.version>
+        <carbon.commons.version>4.9.21</carbon.commons.version>
 
         <carbon.registry.version>4.9.1</carbon.registry.version>
         <carbon.mediation.version>4.8.0</carbon.mediation.version>
@@ -2095,7 +2095,7 @@
 
         <carbon.governance.version>4.9.0</carbon.governance.version>
         <carbon.deployment.version>4.11.24</carbon.deployment.version>
-        <carbon.multitenancy.version>4.9.42</carbon.multitenancy.version>
+        <carbon.multitenancy.version>4.9.43</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
         <apimserver.version>1.10.0</apimserver.version>
         <siddhi.version>3.2.15</siddhi.version>
@@ -2311,7 +2311,7 @@
         <version.checkstyle>8.34</version.checkstyle>
         <org.wso2.orbit.org.mapstruct.version>1.4.1.wso2v1</org.wso2.orbit.org.mapstruct.version>
         <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
-        <analytics.event.publisher.client.version>1.2.32</analytics.event.publisher.client.version>
+        <analytics.event.publisher.client.version>1.2.33</analytics.event.publisher.client.version>
         <analytics.event.publisher.client.version.range>[1.0.0,2.0.0)</analytics.event.publisher.client.version.range>
         <org.wso2.orbit.atlassian.oai.version>2.12.1.wso2v2</org.wso2.orbit.atlassian.oai.version>
         <maven.spotbugsplugin.exclude.file>${project.parent.basedir}/../../spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>
