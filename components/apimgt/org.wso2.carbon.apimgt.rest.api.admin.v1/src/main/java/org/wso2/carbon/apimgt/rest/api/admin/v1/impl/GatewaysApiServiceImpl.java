@@ -35,6 +35,10 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
@@ -43,7 +47,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
@@ -54,6 +60,11 @@ import javax.ws.rs.core.Response;
 public class GatewaysApiServiceImpl implements GatewaysApiService {
 
     private static final Log log = LogFactory.getLog(GatewaysApiServiceImpl.class);
+
+    /** Name pattern: lowercase alphanumeric and hyphens only. */
+    private static final Pattern GATEWAY_NAME_PATTERN = Pattern.compile("^[a-z0-9-]+$");
+    private static final Gson GSON = new Gson();
+    private static final Type MAP_TYPE = new TypeToken<Map<String, Object>>() { }.getType();
 
     @Override
     public Response gatewaysPost(CreatePlatformGatewayRequestDTO body, MessageContext messageContext)
@@ -79,6 +90,9 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         }
         String saltHex = org.apache.commons.codec.binary.Hex.encodeHexString(saltBytes);
 
+        String functionalityType = body.getFunctionalityType().value();
+        String propertiesJson = serializeProperties(body.getProperties());
+
         Timestamp now = Timestamp.from(Instant.now());
         PlatformGatewayDAO.PlatformGateway gateway = new PlatformGatewayDAO.PlatformGateway(
                 gatewayId,
@@ -88,8 +102,9 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                 body.getDescription(),
                 body.getVhost(),
                 body.isIsCritical() != null && body.isIsCritical(),
-                body.getFunctionalityType(),
-                true,
+                functionalityType,
+                propertiesJson,
+                false,  // isActive: set to true only when gateway connects via WebSocket (GatewayConnectEndpoint.onOpen)
                 now,
                 now
         );
@@ -148,15 +163,52 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (StringUtils.isBlank(body.getName())) {
             throw RestApiUtil.buildBadRequestException("name is required");
         }
+        if (body.getName().length() < 3 || body.getName().length() > 64) {
+            throw RestApiUtil.buildBadRequestException("name must be between 3 and 64 characters");
+        }
+        if (!GATEWAY_NAME_PATTERN.matcher(body.getName()).matches()) {
+            throw RestApiUtil.buildBadRequestException("name must contain only lowercase letters, numbers and hyphens (pattern: ^[a-z0-9-]+$)");
+        }
         if (StringUtils.isBlank(body.getDisplayName())) {
             throw RestApiUtil.buildBadRequestException("displayName is required");
+        }
+        if (body.getDisplayName().length() > 128) {
+            throw RestApiUtil.buildBadRequestException("displayName must be at most 128 characters");
         }
         if (StringUtils.isBlank(body.getVhost())) {
             throw RestApiUtil.buildBadRequestException("vhost is required");
         }
-        if (StringUtils.isBlank(body.getFunctionalityType())) {
-            throw RestApiUtil.buildBadRequestException("functionalityType is required");
+        // functionalityType is required and validated by CreatePlatformGatewayRequestDTO.FunctionalityTypeEnum
+    }
+
+    /** Serialize properties map to JSON string for DB storage; null if empty/null. */
+    private static String serializeProperties(Map<String, Object> properties) {
+        if (properties == null || properties.isEmpty()) {
+            return null;
         }
+        return GSON.toJson(properties);
+    }
+
+    /** Deserialize properties JSON from DB to Map for response; null if empty/null. */
+    private static Map<String, Object> deserializeProperties(String propertiesJson) {
+        if (propertiesJson == null || propertiesJson.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return GSON.fromJson(propertiesJson, MAP_TYPE);
+        } catch (Exception e) {
+            log.warn("Failed to parse gateway properties JSON, returning null", e);
+            return null;
+        }
+    }
+
+    /** Convert DB functionalityType string to response enum; defaults to REGULAR if unknown. */
+    private static PlatformGatewayDTO.FunctionalityTypeEnum functionalityTypeFromString(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return PlatformGatewayDTO.FunctionalityTypeEnum.REGULAR;
+        }
+        PlatformGatewayDTO.FunctionalityTypeEnum e = PlatformGatewayDTO.FunctionalityTypeEnum.fromValue(value.trim());
+        return e != null ? e : PlatformGatewayDTO.FunctionalityTypeEnum.REGULAR;
     }
 
     private PlatformGatewayDTO toDTO(PlatformGatewayDAO.PlatformGateway g) {
@@ -166,9 +218,10 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         dto.setName(g.name);
         dto.setDisplayName(g.displayName);
         dto.setDescription(g.description);
+        dto.setProperties(deserializeProperties(g.properties));
         dto.setVhost(g.vhost);
         dto.setIsCritical(g.isCritical);
-        dto.setFunctionalityType(g.functionalityType);
+        dto.setFunctionalityType(functionalityTypeFromString(g.functionalityType));
         dto.setIsActive(g.isActive);
         dto.setCreatedAt(g.createdAt);
         dto.setUpdatedAt(g.updatedAt);
