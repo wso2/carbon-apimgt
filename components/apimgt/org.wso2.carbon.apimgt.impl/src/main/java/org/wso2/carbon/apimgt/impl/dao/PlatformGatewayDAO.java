@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.dao;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -35,6 +37,7 @@ import java.util.List;
  */
 public class PlatformGatewayDAO {
 
+    private static final Log log = LogFactory.getLog(PlatformGatewayDAO.class);
     private static final PlatformGatewayDAO INSTANCE = new PlatformGatewayDAO();
 
     private PlatformGatewayDAO() {
@@ -101,6 +104,10 @@ public class PlatformGatewayDAO {
      * Insert a platform gateway. Caller must open transaction if also inserting token.
      */
     public void createGateway(Connection connection, PlatformGateway gateway) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Creating platform gateway with name: " + gateway.name + " for organization: "
+                    + gateway.organizationId);
+        }
         try (PreparedStatement ps = connection.prepareStatement(
                 SQLConstants.PlatformGatewaySQLConstants.INSERT_GATEWAY_SQL)) {
             ps.setString(1, gateway.id);
@@ -117,6 +124,7 @@ public class PlatformGatewayDAO {
             ps.setTimestamp(12, gateway.updatedAt);
             ps.executeUpdate();
         } catch (SQLException e) {
+            log.error("Failed to create platform gateway with name: " + gateway.name + ". Error: " + e.getMessage());
             throw new APIManagementException("Error inserting platform gateway", e);
         }
     }
