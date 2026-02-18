@@ -52,6 +52,7 @@
             org.wso2.carbon.apimgt.rest.api.admin.v1.BotDetectionDataApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.RolesApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApi,
+            org.wso2.carbon.apimgt.rest.api.admin.v1.GatewaysApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.LlmProvidersApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.TenantConfigApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.TenantConfigSchemaApi,
