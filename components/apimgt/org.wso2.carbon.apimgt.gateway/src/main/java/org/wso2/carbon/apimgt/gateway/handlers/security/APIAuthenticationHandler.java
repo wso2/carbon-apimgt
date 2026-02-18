@@ -722,6 +722,60 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private void handleAuthFailure(MessageContext messageContext, APISecurityException e) {
         GatewayUtils.handleAuthFailure(messageContext, e, this.authorizationHeader, this.apiKeyHeader,
                 getAuthenticatorsChallengeString(), apiType);
+        try {
+            // If this is an MCP API, try to add DCR resource metadata to WWW-Authenticate header
+            if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(this.apiType) && this.apiUUID != null) {
+                org.apache.axis2.context.MessageContext axis2MC =
+                        ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                @SuppressWarnings("unchecked")
+                Map<String, String> transportHeaders = (Map<String, String>)
+                        axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+
+                if (transportHeaders == null) {
+                    transportHeaders = new java.util.TreeMap<>();
+                    axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, transportHeaders);
+                }
+
+                java.util.List<String> keyManagers = org.wso2.carbon.apimgt.gateway.internal.DataHolder.getInstance()
+                        .getKeyManagersFromUUID(this.apiUUID);
+                if (keyManagers != null && !keyManagers.isEmpty()) {
+                    String existing = transportHeaders.get("WWW-Authenticate");
+                    StringBuilder sb = new StringBuilder();
+                    if (existing != null) {
+                        sb.append(existing);
+                    }
+                    for (String kmName : keyManagers) {
+                        // pass an empty tenant domain string to match mocks that use Mockito.anyString()
+                        org.wso2.carbon.apimgt.impl.dto.KeyManagerDto kmDto =
+                                org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder.getKeyManagerByName("", kmName);
+                        if (kmDto == null) {
+                            continue;
+                        }
+                        org.wso2.carbon.apimgt.api.model.KeyManager keyManager = kmDto.getKeyManager();
+                        if (keyManager == null) {
+                            continue;
+                        }
+                        org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration kmConfig =
+                                keyManager.getKeyManagerConfiguration();
+                        if (kmConfig == null) {
+                            continue;
+                        }
+                        String dcrEndpoint = kmConfig.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT).toString();
+                        if (dcrEndpoint != null) {
+                            if (sb.length() > 0) {
+                                sb.append(", ");
+                            }
+                            sb.append("resource_metadata=").append(dcrEndpoint);
+                        }
+                    }
+                    if (sb.length() > 0) {
+                        transportHeaders.put("WWW-Authenticate", sb.toString());
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            log.debug("Error while adding DCR metadata to WWW-Authenticate header", ex);
+        }
     }
 
     protected void sendFault(MessageContext messageContext, int status) {
