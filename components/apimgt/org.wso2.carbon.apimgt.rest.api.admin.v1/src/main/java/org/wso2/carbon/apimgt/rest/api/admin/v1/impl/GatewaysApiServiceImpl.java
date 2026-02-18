@@ -119,6 +119,15 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             dao.createGateway(connection, gateway);
             dao.createToken(connection, UUID.randomUUID().toString(), gatewayId, tokenHash, saltHex, now);
             connection.commit();
+        } catch (APIManagementException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackEx) {
+                    log.warn("Rollback failed", rollbackEx);
+                }
+            }
+            throw e;
         } catch (SQLException e) {
             log.error("Database error while creating platform gateway: " + e.getMessage());
             if (connection != null) {
@@ -182,7 +191,9 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (StringUtils.isBlank(body.getVhost())) {
             throw RestApiUtil.buildBadRequestException("vhost is required");
         }
-        // functionalityType is required and validated by CreatePlatformGatewayRequestDTO.FunctionalityTypeEnum
+        if (body.getFunctionalityType() == null) {
+            throw RestApiUtil.buildBadRequestException("functionalityType is required");
+        }
     }
 
     /** Serialize properties map to JSON string for DB storage; null if empty/null. */
