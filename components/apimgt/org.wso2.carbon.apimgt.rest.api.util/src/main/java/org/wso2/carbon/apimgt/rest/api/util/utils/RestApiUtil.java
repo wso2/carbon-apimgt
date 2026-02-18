@@ -208,12 +208,11 @@ public class RestApiUtil {
             contentType = APIConstants.APPLICATION_ZIP;
             extension = APIConstants.ZIP_FILE_EXTENSION;
         } else {
-            contentType = APIConstants.APPLICATION_WSDL_MEDIA_TYPE;
+            contentType = APIConstants.APPLICATION_XML_MEDIA_TYPE;
             extension = APIConstants.WSDL_FILE_EXTENSION;
         }
         String filename = fileNameWithoutExtension + extension;
-        return Response.ok(resourceFile.getContent(), contentType).header("Content-Disposition",
-                "attachment; filename=\"" + filename + "\"" ).build();
+        return Response.ok(resourceFile.getContent(), contentType).header("filename", filename).build();
     }
 
     /**

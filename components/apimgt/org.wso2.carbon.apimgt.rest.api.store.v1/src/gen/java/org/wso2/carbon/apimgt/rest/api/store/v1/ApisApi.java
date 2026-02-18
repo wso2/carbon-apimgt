@@ -265,6 +265,23 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
+    @Path("/{apiId}/soap-operations")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get SOAP operations of an API", notes = "Retrieve SOAP operations, payload and headers from the API WSDL", response = Object.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. SOAP operations returned", response = Object.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response apisApiIdSoapOperationsGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.apisApiIdSoapOperationsGet(apiId, securityContext);
+    }
+
+    @GET
     @Path("/{apiId}/subscription-policies")
     
     @Produces({ "application/json" })
@@ -512,7 +529,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response getWSDLOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Name of the API gateway environment. ")  @QueryParam("environmentName") String environmentName,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
-        return delegate.getWSDLOfAPI(apiId, environmentName, ifNoneMatch, xWSO2Tenant, securityContext);
+    public Response getWSDLOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Name of the API gateway environment. ")  @QueryParam("environmentName") String environmentName,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Time of expiration of the generated URL. ")  @QueryParam("exp") Long exp,  @ApiParam(value = "Signature to validate of the generated URL. ")  @QueryParam("sig") String sig) throws APIManagementException{
+        return delegate.getWSDLOfAPI(apiId, environmentName, ifNoneMatch, xWSO2Tenant, exp, sig, securityContext);
     }
 }

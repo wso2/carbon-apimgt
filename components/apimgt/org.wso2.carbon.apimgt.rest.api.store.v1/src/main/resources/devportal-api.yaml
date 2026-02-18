@@ -627,6 +627,8 @@ paths:
         - $ref: '#/components/parameters/environmentName'
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/requestedTenant'
+        - $ref: '#/components/parameters/exp'
+        - $ref: '#/components/parameters/sig'
       responses:
         200:
           description: |
@@ -642,6 +644,10 @@ paths:
               description: |
                 Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            filename:
+              description: The filename for the WSDL/ZIP file
               schema:
                 type: string
           content: {}
@@ -1428,6 +1434,29 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v3/apis/268c9e55-3dc1-4f47-82e7-977e5343d077/subscription-policies"
+
+  /apis/{apiId}/soap-operations:
+    get:
+      summary: Get SOAP operations of an API
+      description: Retrieve SOAP operations, payload and headers from the API WSDL
+      operationId: apisApiIdSoapOperationsGet
+      tags:
+        - APIs
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: OK. SOAP operations returned
+          content:
+            application/json:
+              schema:
+                type: object
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security: []
 
   /mcp-servers:
     get:
@@ -4732,6 +4761,50 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -d request.json "https://localhost:9443/api/am/devportal/v3/apis/marketplace-assistant/chat"'
 
+  '/resources/{resourceType}':
+    post:
+      tags:
+        - Resources
+      summary: Generate a URL to download a resource for an API
+      description: >-
+        Generate a download URL for an API resource (WSDL / Swagger / OpenAPI).
+        For public APIs the URL will be returned without `exp`/`sig` query params.
+      operationId: generateUrlToDownloadResource
+      parameters:
+        - name: resourceType
+          in: path
+          description: Type of the resource (wsdl, swagger, openapi)
+          required: true
+          schema:
+            type: string
+            enum:
+              - wsdl
+              - swagger
+              - openapi
+        - name: apiId
+          in: query
+          description: API identifier
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/environmentName'
+      responses:
+        '200':
+          description: OK. Returns JSON with the generated download URL.
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security: [ ]
 
 components:
   schemas:
@@ -7565,6 +7638,21 @@ components:
       in: query
       description: |
         Name of the API gateway environment.
+      schema:
+        type: string
+    exp:
+      name: exp
+      in: query
+      description: |
+        Time of expiration of the generated URL.
+      schema:
+        type: integer
+        format: int64
+    sig:
+      name: sig
+      in: query
+      description: |
+        Signature to validate of the generated URL.
       schema:
         type: string
     limit:

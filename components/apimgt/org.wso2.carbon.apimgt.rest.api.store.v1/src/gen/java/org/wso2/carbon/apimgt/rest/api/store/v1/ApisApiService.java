@@ -48,6 +48,7 @@ public interface ApisApiService {
       public Response apisApiIdGraphqlSchemaGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdRatingsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdSdksLanguageGet(String apiId, String language, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdSoapOperationsGet(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdSwaggerGet(String apiId, String environmentName, String ifNoneMatch, String xWSO2Tenant, String xWSO2TenantQ, String query, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdThumbnailGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
@@ -61,5 +62,5 @@ public interface ApisApiService {
       public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException;
       public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset, MessageContext messageContext) throws APIManagementException;
       public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit, Integer offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException;
-      public Response getWSDLOfAPI(String apiId, String environmentName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
+      public Response getWSDLOfAPI(String apiId, String environmentName, String ifNoneMatch, String xWSO2Tenant, Long exp, String sig, MessageContext messageContext) throws APIManagementException;
 }
