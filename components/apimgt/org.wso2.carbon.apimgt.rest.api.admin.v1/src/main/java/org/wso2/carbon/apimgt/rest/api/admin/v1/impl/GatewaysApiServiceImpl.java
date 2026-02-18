@@ -71,6 +71,9 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         validateCreateBody(body);
+        if (log.isInfoEnabled()) {
+            log.info("Creating new platform gateway with name: " + body.getName());
+        }
 
         PlatformGatewayDAO dao = PlatformGatewayDAO.getInstance();
         if (dao.getGatewayByNameAndOrganization(body.getName(), organization) != null) {
@@ -117,6 +120,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             dao.createToken(connection, UUID.randomUUID().toString(), gatewayId, tokenHash, saltHex, now);
             connection.commit();
         } catch (SQLException e) {
+            log.error("Database error while creating platform gateway: " + e.getMessage());
             if (connection != null) {
                 try {
                     connection.rollback();

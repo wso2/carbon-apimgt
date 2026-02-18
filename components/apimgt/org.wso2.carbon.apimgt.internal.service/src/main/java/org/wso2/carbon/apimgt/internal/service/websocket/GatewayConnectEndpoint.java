@@ -112,6 +112,9 @@ public class GatewayConnectEndpoint {
 
         try {
             PlatformGatewayDAO.getInstance().updateGatewayActiveStatus(gateway.id, true);
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway active status updated to true: gatewayId=" + gateway.id);
+            }
         } catch (APIManagementException e) {
             log.warn("Failed to update gateway active status to true: gatewayId=" + gateway.id + ", error="
                     + e.getMessage());

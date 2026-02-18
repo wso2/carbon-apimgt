@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.internal.service.websocket;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import javax.websocket.HandshakeResponse;
 import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpointConfig;
@@ -30,6 +33,8 @@ import java.util.Map;
  */
 public class GatewayConnectConfigurator extends ServerEndpointConfig.Configurator {
 
+    private static final Log log = LogFactory.getLog(GatewayConnectConfigurator.class);
+
     /**
      * User property key for the api-key header value (gateway registration token).
      */
@@ -37,11 +42,19 @@ public class GatewayConnectConfigurator extends ServerEndpointConfig.Configurato
 
     @Override
     public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
+        if (log.isDebugEnabled()) {
+            log.debug("Modifying WebSocket handshake for gateway connection");
+        }
         Map<String, List<String>> headers = request.getHeaders();
         if (headers != null) {
             String apiKey = getFirstHeader(headers, "api-key");
             if (apiKey != null && !apiKey.isEmpty()) {
                 sec.getUserProperties().put(API_KEY_PROPERTY, apiKey);
+                if (log.isDebugEnabled()) {
+                    log.debug("API key found in handshake request headers");
+                }
+            } else {
+                log.warn("No api-key header found in WebSocket handshake request");
             }
         }
     }

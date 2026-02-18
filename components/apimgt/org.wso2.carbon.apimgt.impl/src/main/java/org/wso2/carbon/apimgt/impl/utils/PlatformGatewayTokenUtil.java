@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -36,6 +38,7 @@ import java.util.List;
  */
 public final class PlatformGatewayTokenUtil {
 
+    private static final Log log = LogFactory.getLog(PlatformGatewayTokenUtil.class);
     private static final int TOKEN_BYTES = 32;
     private static final int SALT_BYTES = 32;
     private static final String SHA_256 = "SHA-256";
@@ -48,6 +51,9 @@ public final class PlatformGatewayTokenUtil {
      * Returned only in the create response; never stored in DB.
      */
     public static String generateToken() {
+        if (log.isDebugEnabled()) {
+            log.debug("Generating new platform gateway registration token");
+        }
         SecureRandom random = new SecureRandom();
         byte[] bytes = new byte[TOKEN_BYTES];
         random.nextBytes(bytes);
@@ -81,6 +87,9 @@ public final class PlatformGatewayTokenUtil {
      */
     public static PlatformGatewayDAO.PlatformGateway verifyToken(String plainToken)
             throws APIManagementException, NoSuchAlgorithmException, DecoderException {
+        if (log.isDebugEnabled()) {
+            log.debug("Verifying platform gateway token");
+        }
         PlatformGatewayDAO dao = PlatformGatewayDAO.getInstance();
         List<PlatformGatewayDAO.TokenWithGateway> tokens = dao.getActiveTokensWithGateway();
         byte[] inputBytes = plainToken.getBytes(StandardCharsets.UTF_8);
@@ -94,9 +103,13 @@ public final class PlatformGatewayTokenUtil {
             byte[] computedHash = md.digest();
             byte[] storedHash = Hex.decodeHex(t.tokenHash.toCharArray());
             if (computedHash.length == storedHash.length && MessageDigest.isEqual(computedHash, storedHash)) {
+                if (log.isInfoEnabled()) {
+                    log.info("Platform gateway token verified successfully for gateway: " + t.gatewayId);
+                }
                 return dao.getGatewayById(t.gatewayId);
             }
         }
+        log.warn("Failed to verify platform gateway token - no matching token found");
         return null;
     }
 }
