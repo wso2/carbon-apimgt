@@ -30,7 +30,10 @@ import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
@@ -68,15 +71,23 @@ public class GatewayConnectEndpoint {
     public static final String GATEWAY_PROPERTY = "platformGateway";
 
     /**
-     * Session user property key for the heartbeat thread stop flag.
+     * Session user property key for the heartbeat scheduled future (cancel on close).
      */
-    private static final String HEARTBEAT_RUNNING_PROPERTY = "heartbeatRunning";
+    private static final String HEARTBEAT_FUTURE_PROPERTY = "heartbeatFuture";
 
     /** Interval for server-to-client WebSocket PING (client timeout is 35s). */
     private static final long HEARTBEAT_INTERVAL_MS = 15_000;
 
     /** Reusable empty payload for PING (avoids allocating a new ByteBuffer every interval). */
     private static final ByteBuffer EMPTY_PING_PAYLOAD = ByteBuffer.allocate(0);
+
+    /** Shared scheduler for all gateway heartbeat pings (bounded thread count). */
+    private static final ScheduledExecutorService HEARTBEAT_SCHEDULER =
+            Executors.newScheduledThreadPool(2, r -> {
+                Thread t = new Thread(r, "gateway-ws-heartbeat");
+                t.setDaemon(true);
+                return t;
+            });
 
     @OnOpen
     public void onOpen(Session session, EndpointConfig config) {
@@ -130,35 +141,28 @@ public class GatewayConnectEndpoint {
     }
 
     /**
-     * Start a background thread that sends WebSocket PING frames periodically so the gateway
+     * Schedule periodic WebSocket PING frames via a shared scheduler so the gateway
      * client can update its heartbeat timestamp (avoids "Heartbeat timeout detected" and 35s disconnect).
+     * The scheduled task is cancelled when the session closes.
      */
     private static void startHeartbeat(Session session) {
-        AtomicBoolean running = new AtomicBoolean(true);
-        session.getUserProperties().put(HEARTBEAT_RUNNING_PROPERTY, running);
-        Thread t = new Thread(() -> {
-            while (running.get() && session.isOpen()) {
-                try {
-                    Thread.sleep(HEARTBEAT_INTERVAL_MS);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-                if (!running.get() || !session.isOpen()) {
-                    break;
-                }
-                try {
-                    session.getBasicRemote().sendPing(EMPTY_PING_PAYLOAD);
-                } catch (IOException e) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Heartbeat ping failed: " + e.getMessage());
+        ScheduledFuture<?> future = HEARTBEAT_SCHEDULER.scheduleAtFixedRate(
+                () -> {
+                    if (!session.isOpen()) {
+                        return;
                     }
-                    break;
-                }
-            }
-        }, "gateway-ws-heartbeat-" + session.getId());
-        t.setDaemon(true);
-        t.start();
+                    try {
+                        session.getBasicRemote().sendPing(EMPTY_PING_PAYLOAD);
+                    } catch (IOException e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Heartbeat ping failed: " + e.getMessage());
+                        }
+                    }
+                },
+                HEARTBEAT_INTERVAL_MS,
+                HEARTBEAT_INTERVAL_MS,
+                TimeUnit.MILLISECONDS);
+        session.getUserProperties().put(HEARTBEAT_FUTURE_PROPERTY, future);
     }
 
     /**
@@ -211,9 +215,9 @@ public class GatewayConnectEndpoint {
 
     @OnClose
     public void onClose(Session session, CloseReason reason) {
-        Object running = session.getUserProperties().get(HEARTBEAT_RUNNING_PROPERTY);
-        if (running instanceof AtomicBoolean) {
-            ((AtomicBoolean) running).set(false);
+        Object futureObj = session.getUserProperties().get(HEARTBEAT_FUTURE_PROPERTY);
+        if (futureObj instanceof ScheduledFuture) {
+            ((ScheduledFuture<?>) futureObj).cancel(false);
         }
         PlatformGatewayDAO.PlatformGateway gateway =
                 (PlatformGatewayDAO.PlatformGateway) session.getUserProperties().get(GATEWAY_PROPERTY);

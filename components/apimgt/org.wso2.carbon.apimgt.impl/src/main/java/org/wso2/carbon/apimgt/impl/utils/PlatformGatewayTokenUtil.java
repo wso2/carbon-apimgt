@@ -81,14 +81,24 @@ public final class PlatformGatewayTokenUtil {
         return Hex.encodeHexString(hash);
     }
 
+    /** Maximum length for a plain token (base64url 32 bytes = 43 chars; allow headroom to avoid DoS). */
+    private static final int MAX_PLAIN_TOKEN_LENGTH = 512;
+
     /**
      * Verify a plain token against stored tokens. Loads all active tokens, computes hash for each
      * and constant-time compares. Returns the gateway (id, organizationId) if match, else null.
+     * Rejects null or oversized tokens early to limit DoS (memory and hash cost).
      */
     public static PlatformGatewayDAO.PlatformGateway verifyToken(String plainToken)
             throws APIManagementException, NoSuchAlgorithmException, DecoderException {
         if (log.isDebugEnabled()) {
             log.debug("Verifying platform gateway token");
+        }
+        if (plainToken == null || plainToken.length() > MAX_PLAIN_TOKEN_LENGTH) {
+            if (log.isDebugEnabled()) {
+                log.debug("Token verification skipped: null or length exceeds " + MAX_PLAIN_TOKEN_LENGTH);
+            }
+            return null;
         }
         PlatformGatewayDAO dao = PlatformGatewayDAO.getInstance();
         List<PlatformGatewayDAO.TokenWithGateway> tokens = dao.getActiveTokensWithGateway();
