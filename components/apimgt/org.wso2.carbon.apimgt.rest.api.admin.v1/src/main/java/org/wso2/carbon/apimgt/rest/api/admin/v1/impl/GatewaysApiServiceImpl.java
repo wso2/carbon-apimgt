@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.GatewaysApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CreatePlatformGatewayRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayWithTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -83,15 +84,14 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         }
 
         String gatewayId = UUID.randomUUID().toString();
+        String tokenId = PlatformGatewayTokenUtil.generateTokenId();
         String plainToken = PlatformGatewayTokenUtil.generateToken();
-        byte[] saltBytes = PlatformGatewayTokenUtil.generateSalt();
         String tokenHash;
         try {
-            tokenHash = PlatformGatewayTokenUtil.hashToken(plainToken, saltBytes);
+            tokenHash = PlatformGatewayTokenUtil.hashToken(plainToken);
         } catch (NoSuchAlgorithmException e) {
             throw new APIManagementException("Error hashing gateway token", e);
         }
-        String saltHex = org.apache.commons.codec.binary.Hex.encodeHexString(saltBytes);
 
         String functionalityType = body.getFunctionalityType().value();
         String propertiesJson = serializeProperties(body.getProperties());
@@ -117,7 +117,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             dao.createGateway(connection, gateway);
-            dao.createToken(connection, UUID.randomUUID().toString(), gatewayId, tokenHash, saltHex, now);
+            dao.createToken(connection, tokenId, gatewayId, tokenHash, now);
             connection.commit();
         } catch (APIManagementException e) {
             if (connection != null) {
@@ -148,8 +148,8 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             }
         }
 
-        PlatformGatewayDTO dto = toDTO(gateway);
-        dto.setRegistrationToken(plainToken);
+        PlatformGatewayWithTokenDTO dto = toDTOWithToken(gateway,
+                tokenId + PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR + plainToken);
         try {
             URI location = new URI(RestApiConstants.RESOURCE_PATH_PLATFORM_GATEWAYS + "/" + gatewayId);
             return Response.created(location).entity(dto).build();
@@ -247,5 +247,32 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         dto.setCreatedAt(g.createdAt);
         dto.setUpdatedAt(g.updatedAt);
         return dto;
+    }
+
+    private PlatformGatewayWithTokenDTO toDTOWithToken(PlatformGatewayDAO.PlatformGateway g, String registrationToken) {
+        PlatformGatewayWithTokenDTO dto = new PlatformGatewayWithTokenDTO();
+        dto.setId(g.id);
+        dto.setOrganizationId(g.organizationId);
+        dto.setName(g.name);
+        dto.setDisplayName(g.displayName);
+        dto.setDescription(g.description);
+        dto.setProperties(deserializeProperties(g.properties));
+        dto.setVhost(g.vhost);
+        dto.setIsCritical(g.isCritical);
+        dto.setFunctionalityType(functionalityTypeFromStringWithToken(g.functionalityType));
+        dto.setIsActive(g.isActive);
+        dto.setCreatedAt(g.createdAt);
+        dto.setUpdatedAt(g.updatedAt);
+        dto.setRegistrationToken(registrationToken);
+        return dto;
+    }
+
+    private static PlatformGatewayWithTokenDTO.FunctionalityTypeEnum functionalityTypeFromStringWithToken(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return PlatformGatewayWithTokenDTO.FunctionalityTypeEnum.REGULAR;
+        }
+        PlatformGatewayWithTokenDTO.FunctionalityTypeEnum e =
+                PlatformGatewayWithTokenDTO.FunctionalityTypeEnum.fromValue(value.trim());
+        return e != null ? e : PlatformGatewayWithTokenDTO.FunctionalityTypeEnum.REGULAR;
     }
 }

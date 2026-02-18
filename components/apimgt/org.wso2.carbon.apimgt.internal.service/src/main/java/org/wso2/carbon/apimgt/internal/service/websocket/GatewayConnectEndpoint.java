@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.internal.service.websocket;
 
-import org.apache.commons.codec.DecoderException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -103,7 +102,7 @@ public class GatewayConnectEndpoint {
         PlatformGatewayDAO.PlatformGateway gateway;
         try {
             gateway = PlatformGatewayTokenUtil.verifyToken(apiKey);
-        } catch (APIManagementException | NoSuchAlgorithmException | DecoderException e) {
+        } catch (APIManagementException | NoSuchAlgorithmException e) {
             if (log.isDebugEnabled()) {
                 log.debug("Gateway WebSocket token verification failed: " + e.getMessage());
             }

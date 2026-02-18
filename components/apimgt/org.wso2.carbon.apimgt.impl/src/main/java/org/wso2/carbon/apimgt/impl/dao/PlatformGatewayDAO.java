@@ -89,13 +89,11 @@ public class PlatformGatewayDAO {
      */
     public static class TokenWithGateway {
         public final String tokenHash;
-        public final String salt;
         public final String gatewayId;
         public final String organizationId;
 
-        public TokenWithGateway(String tokenHash, String salt, String gatewayId, String organizationId) {
+        public TokenWithGateway(String tokenHash, String gatewayId, String organizationId) {
             this.tokenHash = tokenHash;
-            this.salt = salt;
             this.gatewayId = gatewayId;
             this.organizationId = organizationId;
         }
@@ -146,17 +144,16 @@ public class PlatformGatewayDAO {
     }
 
     /**
-     * Insert a gateway registration token.
+     * Insert a gateway registration token (deterministic hash only, no salt).
      */
     public void createToken(Connection connection, String tokenId, String gatewayId, String tokenHash,
-                            String salt, Timestamp createdAt) throws APIManagementException {
+                            Timestamp createdAt) throws APIManagementException {
         try (PreparedStatement ps = connection.prepareStatement(
                 SQLConstants.PlatformGatewaySQLConstants.INSERT_TOKEN_SQL)) {
             ps.setString(1, tokenId);
             ps.setString(2, gatewayId);
             ps.setString(3, tokenHash);
-            ps.setString(4, salt);
-            ps.setTimestamp(5, createdAt);
+            ps.setTimestamp(4, createdAt);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new APIManagementException("Error inserting platform gateway token", e);
@@ -237,26 +234,43 @@ public class PlatformGatewayDAO {
     }
 
     /**
-     * Load all active tokens with their gateway info (for verification).
+     * Get a single active token by its hash (deterministic SHA-256(plainToken)). Used for direct lookup on verify.
      */
-    public List<TokenWithGateway> getActiveTokensWithGateway() throws APIManagementException {
-        List<TokenWithGateway> list = new ArrayList<>();
+    public TokenWithGateway getActiveTokenByHash(String tokenHash) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(
-                     SQLConstants.PlatformGatewaySQLConstants.SELECT_ACTIVE_TOKENS_WITH_GATEWAY_SQL);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                list.add(new TokenWithGateway(
-                        rs.getString("TOKEN_HASH"),
-                        rs.getString("SALT"),
-                        rs.getString("GATEWAY_UUID"),
-                        rs.getString("ORGANIZATION_ID")
-                ));
+                     SQLConstants.PlatformGatewaySQLConstants.SELECT_ACTIVE_TOKEN_BY_HASH_SQL)) {
+            ps.setString(1, tokenHash);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapRowToTokenWithGateway(rs) : null;
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error loading active platform gateway tokens", e);
+            throw new APIManagementException("Error getting platform gateway token by hash", e);
         }
-        return list;
+    }
+
+    /**
+     * Get a single active token by its ID (for combined format tokenId.plainToken).
+     */
+    public TokenWithGateway getActiveTokenById(String tokenId) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(
+                     SQLConstants.PlatformGatewaySQLConstants.SELECT_ACTIVE_TOKEN_BY_ID_SQL)) {
+            ps.setString(1, tokenId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapRowToTokenWithGateway(rs) : null;
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error getting platform gateway token by id", e);
+        }
+    }
+
+    private static TokenWithGateway mapRowToTokenWithGateway(ResultSet rs) throws SQLException {
+        return new TokenWithGateway(
+                rs.getString("TOKEN_HASH"),
+                rs.getString("GATEWAY_UUID"),
+                rs.getString("ORGANIZATION_ID")
+        );
     }
 
     private static PlatformGateway mapRowToGateway(ResultSet rs) throws SQLException {

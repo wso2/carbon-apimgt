@@ -18,32 +18,46 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
+
+import com.fasterxml.uuid.Generators;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.List;
 
 /**
- * Utility for platform gateway registration token: generate (plain + salt + hash), verify.
- * Same semantics as API Platform : SHA-256(plainToken + salt), constant-time compare.
+ * Utility for platform gateway registration token: generate, hash (deterministic, no salt), verify.
+ * Aligned with API Platform: SHA-256(plainToken) only, enabling direct DB lookup by TOKEN_HASH.
+ * Supports combined format {@code tokenId.plainToken} for direct lookup by token row ID.
  */
 public final class PlatformGatewayTokenUtil {
 
     private static final Log log = LogFactory.getLog(PlatformGatewayTokenUtil.class);
     private static final int TOKEN_BYTES = 32;
-    private static final int SALT_BYTES = 32;
     private static final String SHA_256 = "SHA-256";
 
+    /** Separator for combined format: tokenId.plainToken (enables lookup by ID). */
+    public static final String COMBINED_TOKEN_SEPARATOR = ".";
+
+    /** Maximum length for api-key value: combined format uuid7.plainToken = 36+1+43 = 80; small headroom for DoS safety. */
+    private static final int MAX_PLAIN_TOKEN_LENGTH = 128;
+
     private PlatformGatewayTokenUtil() {
+    }
+
+    /**
+     * Generate a time-ordered token row ID (UUIDv7, RFC 9562). Sortable by creation time, good for DB indexes.
+     */
+    public static String generateTokenId() {
+        return Generators.timeBasedEpochGenerator().generate().toString();
     }
 
     /**
@@ -61,65 +75,83 @@ public final class PlatformGatewayTokenUtil {
     }
 
     /**
-     * Generate a salt (32 bytes random). Store in DB as hex.
+     * Hash token deterministically: SHA-256(plainToken) only, hex-encoded.
+     * No salt — same as API Platform; allows direct DB lookup by TOKEN_HASH.
      */
-    public static byte[] generateSalt() {
-        SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[SALT_BYTES];
-        random.nextBytes(salt);
-        return salt;
-    }
-
-    /**
-     * Hash token: SHA-256(plainToken UTF-8 bytes + salt bytes), return hex.
-     */
-    public static String hashToken(String plainToken, byte[] salt) throws NoSuchAlgorithmException {
+    public static String hashToken(String plainToken) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance(SHA_256);
-        md.update(plainToken.getBytes(StandardCharsets.UTF_8));
-        md.update(salt);
-        byte[] hash = md.digest();
-        return Hex.encodeHexString(hash);
+        byte[] hash = md.digest(plainToken.getBytes(StandardCharsets.UTF_8));
+        return org.apache.commons.codec.binary.Hex.encodeHexString(hash);
     }
 
-    /** Maximum length for a plain token (base64url 32 bytes = 43 chars; allow headroom to avoid DoS). */
-    private static final int MAX_PLAIN_TOKEN_LENGTH = 512;
-
     /**
-     * Verify a plain token against stored tokens. Loads all active tokens, computes hash for each
-     * and constant-time compares. Returns the gateway (id, organizationId) if match, else null.
-     * Rejects null or oversized tokens early to limit DoS (memory and hash cost).
+     * Verify the api-key value (plain token or combined tokenId.plainToken).
+     * Uses single-row lookup: by TOKEN_HASH (if plain token) or by token ID (if combined).
+     *
+     * @param apiKeyValue either the plain token, or combined format {@code tokenId.plainToken}
+     * @return the associated platform gateway, or null if invalid/not found
      */
-    public static PlatformGatewayDAO.PlatformGateway verifyToken(String plainToken)
-            throws APIManagementException, NoSuchAlgorithmException, DecoderException {
+    public static PlatformGatewayDAO.PlatformGateway verifyToken(String apiKeyValue)
+            throws APIManagementException, NoSuchAlgorithmException {
         if (log.isDebugEnabled()) {
             log.debug("Verifying platform gateway token");
         }
-        if (plainToken == null || plainToken.length() > MAX_PLAIN_TOKEN_LENGTH) {
+        if (apiKeyValue == null || apiKeyValue.length() > MAX_PLAIN_TOKEN_LENGTH) {
             if (log.isDebugEnabled()) {
                 log.debug("Token verification skipped: null or length exceeds " + MAX_PLAIN_TOKEN_LENGTH);
             }
             return null;
         }
-        PlatformGatewayDAO dao = PlatformGatewayDAO.getInstance();
-        List<PlatformGatewayDAO.TokenWithGateway> tokens = dao.getActiveTokensWithGateway();
-        byte[] inputBytes = plainToken.getBytes(StandardCharsets.UTF_8);
-        MessageDigest md = MessageDigest.getInstance(SHA_256);
 
-        for (PlatformGatewayDAO.TokenWithGateway t : tokens) {
-            byte[] salt = Hex.decodeHex(t.salt.toCharArray());
-            md.reset();
-            md.update(inputBytes);
-            md.update(salt);
-            byte[] computedHash = md.digest();
-            byte[] storedHash = Hex.decodeHex(t.tokenHash.toCharArray());
-            if (computedHash.length == storedHash.length && MessageDigest.isEqual(computedHash, storedHash)) {
-                if (log.isInfoEnabled()) {
-                    log.info("Platform gateway token verified successfully for gateway: " + t.gatewayId);
+        PlatformGatewayDAO dao = PlatformGatewayDAO.getInstance();
+        PlatformGatewayDAO.TokenWithGateway tokenRow;
+
+        if (apiKeyValue.contains(COMBINED_TOKEN_SEPARATOR)) {
+            // Combined format: tokenId.plainToken — lookup by ID then verify hash
+            int firstDot = apiKeyValue.indexOf(COMBINED_TOKEN_SEPARATOR);
+            String tokenId = apiKeyValue.substring(0, firstDot);
+            String plainToken = apiKeyValue.substring(firstDot + 1);
+            if (tokenId.isEmpty() || plainToken.isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Token verification skipped: invalid combined format");
                 }
-                return dao.getGatewayById(t.gatewayId);
+                return null;
+            }
+            tokenRow = dao.getActiveTokenById(tokenId);
+            if (tokenRow == null) {
+                return null;
+            }
+            String computedHash = hashToken(plainToken);
+            byte[] computedBytes;
+            byte[] storedBytes;
+            try {
+                computedBytes = Hex.decodeHex(computedHash.toCharArray());
+                storedBytes = Hex.decodeHex(tokenRow.tokenHash.toCharArray());
+            } catch (DecoderException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Token verification failed: invalid hash encoding for token id=" + tokenId);
+                }
+                return null;
+            }
+            if (computedBytes.length != storedBytes.length || !MessageDigest.isEqual(computedBytes, storedBytes)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Token verification failed: hash mismatch for token id=" + tokenId);
+                }
+                return null;
+            }
+        } else {
+            // Plain token — lookup by hash
+            String tokenHash = hashToken(apiKeyValue);
+            tokenRow = dao.getActiveTokenByHash(tokenHash);
+            if (tokenRow == null) {
+                log.warn("Failed to verify platform gateway token - no matching token found");
+                return null;
             }
         }
-        log.warn("Failed to verify platform gateway token - no matching token found");
-        return null;
+
+        if (log.isInfoEnabled()) {
+            log.info("Platform gateway token verified successfully for gateway: " + tokenRow.gatewayId);
+        }
+        return dao.getGatewayById(tokenRow.gatewayId);
     }
 }

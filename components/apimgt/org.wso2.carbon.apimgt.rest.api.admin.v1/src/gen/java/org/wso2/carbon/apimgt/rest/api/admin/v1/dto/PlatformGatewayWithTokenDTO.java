@@ -7,10 +7,12 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayWithTokenAllOfDTO;
 import javax.validation.constraints.*;
 
 /**
- * Platform gateway response (without registration token). Used for list and get.
+ * Platform gateway response including the one-time registration token (POST create only).
  **/
 
 import io.swagger.annotations.*;
@@ -22,9 +24,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Platform gateway response (without registration token). Used for list and get.")
+@ApiModel(description = "Platform gateway response including the one-time registration token (POST create only).")
 
-public class PlatformGatewayDTO   {
+public class PlatformGatewayWithTokenDTO   {
   
     private String id = null;
     private String organizationId = null;
@@ -70,11 +72,12 @@ return null;
     private Boolean isActive = null;
     private java.util.Date createdAt = null;
     private java.util.Date updatedAt = null;
+    private String registrationToken = null;
 
   /**
    * Gateway UUID
    **/
-  public PlatformGatewayDTO id(String id) {
+  public PlatformGatewayWithTokenDTO id(String id) {
     this.id = id;
     return this;
   }
@@ -91,7 +94,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayDTO organizationId(String organizationId) {
+  public PlatformGatewayWithTokenDTO organizationId(String organizationId) {
     this.organizationId = organizationId;
     return this;
   }
@@ -108,7 +111,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayDTO name(String name) {
+  public PlatformGatewayWithTokenDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -125,7 +128,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayDTO displayName(String displayName) {
+  public PlatformGatewayWithTokenDTO displayName(String displayName) {
     this.displayName = displayName;
     return this;
   }
@@ -142,7 +145,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayDTO description(String description) {
+  public PlatformGatewayWithTokenDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -160,7 +163,7 @@ return null;
   /**
    * Custom key-value properties
    **/
-  public PlatformGatewayDTO properties(Map<String, Object> properties) {
+  public PlatformGatewayWithTokenDTO properties(Map<String, Object> properties) {
     this.properties = properties;
     return this;
   }
@@ -177,7 +180,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayDTO vhost(String vhost) {
+  public PlatformGatewayWithTokenDTO vhost(String vhost) {
     this.vhost = vhost;
     return this;
   }
@@ -194,7 +197,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayDTO isCritical(Boolean isCritical) {
+  public PlatformGatewayWithTokenDTO isCritical(Boolean isCritical) {
     this.isCritical = isCritical;
     return this;
   }
@@ -211,7 +214,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayDTO functionalityType(FunctionalityTypeEnum functionalityType) {
+  public PlatformGatewayWithTokenDTO functionalityType(FunctionalityTypeEnum functionalityType) {
     this.functionalityType = functionalityType;
     return this;
   }
@@ -229,7 +232,7 @@ return null;
   /**
    * Indicates if the gateway is currently connected to the control plane via WebSocket
    **/
-  public PlatformGatewayDTO isActive(Boolean isActive) {
+  public PlatformGatewayWithTokenDTO isActive(Boolean isActive) {
     this.isActive = isActive;
     return this;
   }
@@ -246,7 +249,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayDTO createdAt(java.util.Date createdAt) {
+  public PlatformGatewayWithTokenDTO createdAt(java.util.Date createdAt) {
     this.createdAt = createdAt;
     return this;
   }
@@ -263,7 +266,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayDTO updatedAt(java.util.Date updatedAt) {
+  public PlatformGatewayWithTokenDTO updatedAt(java.util.Date updatedAt) {
     this.updatedAt = updatedAt;
     return this;
   }
@@ -278,6 +281,24 @@ return null;
     this.updatedAt = updatedAt;
   }
 
+  /**
+   * Registration token (returned only once on create). Use as api-key when connecting the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN. 
+   **/
+  public PlatformGatewayWithTokenDTO registrationToken(String registrationToken) {
+    this.registrationToken = registrationToken;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Registration token (returned only once on create). Use as api-key when connecting the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN. ")
+  @JsonProperty("registrationToken")
+  public String getRegistrationToken() {
+    return registrationToken;
+  }
+  public void setRegistrationToken(String registrationToken) {
+    this.registrationToken = registrationToken;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -287,30 +308,31 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PlatformGatewayDTO platformGateway = (PlatformGatewayDTO) o;
-    return Objects.equals(id, platformGateway.id) &&
-        Objects.equals(organizationId, platformGateway.organizationId) &&
-        Objects.equals(name, platformGateway.name) &&
-        Objects.equals(displayName, platformGateway.displayName) &&
-        Objects.equals(description, platformGateway.description) &&
-        Objects.equals(properties, platformGateway.properties) &&
-        Objects.equals(vhost, platformGateway.vhost) &&
-        Objects.equals(isCritical, platformGateway.isCritical) &&
-        Objects.equals(functionalityType, platformGateway.functionalityType) &&
-        Objects.equals(isActive, platformGateway.isActive) &&
-        Objects.equals(createdAt, platformGateway.createdAt) &&
-        Objects.equals(updatedAt, platformGateway.updatedAt);
+    PlatformGatewayWithTokenDTO platformGatewayWithToken = (PlatformGatewayWithTokenDTO) o;
+    return Objects.equals(id, platformGatewayWithToken.id) &&
+        Objects.equals(organizationId, platformGatewayWithToken.organizationId) &&
+        Objects.equals(name, platformGatewayWithToken.name) &&
+        Objects.equals(displayName, platformGatewayWithToken.displayName) &&
+        Objects.equals(description, platformGatewayWithToken.description) &&
+        Objects.equals(properties, platformGatewayWithToken.properties) &&
+        Objects.equals(vhost, platformGatewayWithToken.vhost) &&
+        Objects.equals(isCritical, platformGatewayWithToken.isCritical) &&
+        Objects.equals(functionalityType, platformGatewayWithToken.functionalityType) &&
+        Objects.equals(isActive, platformGatewayWithToken.isActive) &&
+        Objects.equals(createdAt, platformGatewayWithToken.createdAt) &&
+        Objects.equals(updatedAt, platformGatewayWithToken.updatedAt) &&
+        Objects.equals(registrationToken, platformGatewayWithToken.registrationToken);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, organizationId, name, displayName, description, properties, vhost, isCritical, functionalityType, isActive, createdAt, updatedAt);
+    return Objects.hash(id, organizationId, name, displayName, description, properties, vhost, isCritical, functionalityType, isActive, createdAt, updatedAt, registrationToken);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PlatformGatewayDTO {\n");
+    sb.append("class PlatformGatewayWithTokenDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    organizationId: ").append(toIndentedString(organizationId)).append("\n");
@@ -324,6 +346,7 @@ return null;
     sb.append("    isActive: ").append(toIndentedString(isActive)).append("\n");
     sb.append("    createdAt: ").append(toIndentedString(createdAt)).append("\n");
     sb.append("    updatedAt: ").append(toIndentedString(updatedAt)).append("\n");
+    sb.append("    registrationToken: ").append(toIndentedString(registrationToken)).append("\n");
     sb.append("}");
     return sb.toString();
   }

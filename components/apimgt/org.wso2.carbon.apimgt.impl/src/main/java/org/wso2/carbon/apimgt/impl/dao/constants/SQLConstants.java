@@ -5165,12 +5165,18 @@ public class SQLConstants {
                 "SELECT ID, ORGANIZATION_ID, NAME, DISPLAY_NAME, DESCRIPTION, VHOST, IS_CRITICAL, " +
                         "FUNCTIONALITY_TYPE, PROPERTIES, IS_ACTIVE, CREATED_AT, UPDATED_AT FROM AM_PLATFORM_GATEWAY WHERE ORGANIZATION_ID = ? ORDER BY CREATED_AT";
         public static final String INSERT_TOKEN_SQL =
-                "INSERT INTO AM_PLATFORM_GATEWAY_TOKEN (ID, GATEWAY_ID, TOKEN_HASH, SALT, STATUS, CREATED_AT, REVOKED_AT) " +
-                        "VALUES (?, ?, ?, ?, 'active', ?, NULL)";
-        public static final String SELECT_ACTIVE_TOKENS_WITH_GATEWAY_SQL =
-                "SELECT t.ID, t.GATEWAY_ID, t.TOKEN_HASH, t.SALT, g.ID AS GATEWAY_UUID, g.ORGANIZATION_ID " +
+                "INSERT INTO AM_PLATFORM_GATEWAY_TOKEN (ID, GATEWAY_ID, TOKEN_HASH, STATUS, CREATED_AT, REVOKED_AT) " +
+                        "VALUES (?, ?, ?, 'active', ?, NULL)";
+        /** Single-row lookup by token hash (deterministic SHA-256(plainToken)). */
+        public static final String SELECT_ACTIVE_TOKEN_BY_HASH_SQL =
+                "SELECT t.ID, t.GATEWAY_ID, t.TOKEN_HASH, g.ID AS GATEWAY_UUID, g.ORGANIZATION_ID " +
                         "FROM AM_PLATFORM_GATEWAY_TOKEN t INNER JOIN AM_PLATFORM_GATEWAY g ON t.GATEWAY_ID = g.ID " +
-                        "WHERE t.STATUS = 'active'";
+                        "WHERE t.TOKEN_HASH = ? AND t.STATUS = 'active'";
+        /** Single-row lookup by token ID (for combined format tokenId.plainToken). */
+        public static final String SELECT_ACTIVE_TOKEN_BY_ID_SQL =
+                "SELECT t.ID, t.GATEWAY_ID, t.TOKEN_HASH, g.ID AS GATEWAY_UUID, g.ORGANIZATION_ID " +
+                        "FROM AM_PLATFORM_GATEWAY_TOKEN t INNER JOIN AM_PLATFORM_GATEWAY g ON t.GATEWAY_ID = g.ID " +
+                        "WHERE t.ID = ? AND t.STATUS = 'active'";
         public static final String UPDATE_GATEWAY_ACTIVE_SQL =
                 "UPDATE AM_PLATFORM_GATEWAY SET IS_ACTIVE = ?, UPDATED_AT = ? WHERE ID = ?";
     }
