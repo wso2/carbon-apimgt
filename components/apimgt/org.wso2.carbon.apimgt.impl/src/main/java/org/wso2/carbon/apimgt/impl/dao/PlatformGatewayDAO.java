@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.dao;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
@@ -124,9 +125,24 @@ public class PlatformGatewayDAO {
             ps.setTimestamp(12, gateway.updatedAt);
             ps.executeUpdate();
         } catch (SQLException e) {
+            if (isUniqueOrDuplicateViolation(e)) {
+                String msg = String.format(
+                        ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS.getErrorDescription(), gateway.name);
+                throw new APIManagementException(msg, ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS);
+            }
             log.error("Failed to create platform gateway with name: " + gateway.name + ". Error: " + e.getMessage());
             throw new APIManagementException("Error inserting platform gateway", e);
         }
+    }
+
+    private static boolean isUniqueOrDuplicateViolation(SQLException e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            String msg = t.getMessage();
+            if (msg != null && (msg.toUpperCase().contains("UNIQUE") || msg.toUpperCase().contains("DUPLICATE"))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

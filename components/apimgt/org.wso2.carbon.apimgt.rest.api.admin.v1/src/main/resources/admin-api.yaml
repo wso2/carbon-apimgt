@@ -2298,7 +2298,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlatformGateway'
+                $ref: '#/components/schemas/PlatformGatewayWithToken'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -5703,7 +5703,7 @@ components:
           example: {"region": "us-west", "tier": "premium"}
     PlatformGateway:
       title: Platform Gateway
-      description: Platform gateway response. On create, registrationToken is returned once for the gateway to connect to the control plane WebSocket.
+      description: Platform gateway response (without registration token). Used for list and get.
       type: object
       properties:
         id:
@@ -5741,11 +5741,23 @@ components:
           type: string
           format: date-time
           readOnly: true
-        registrationToken:
-          type: string
-          description: |
-            Registration token (returned only once on create). Use as api-key when connecting
-            the gateway to the control plane WebSocket. Store e.g. as GATEWAY_CONTROL_PLANE_TOKEN.
+      readOnly:
+        - id
+        - organizationId
+        - createdAt
+        - updatedAt
+    PlatformGatewayWithToken:
+      title: Platform Gateway (Create Response)
+      description: Platform gateway response including the one-time registration token (POST create only).
+      allOf:
+        - $ref: '#/components/schemas/PlatformGateway'
+        - type: object
+          properties:
+            registrationToken:
+              type: string
+              description: |
+                Registration token (returned only once on create). Use as api-key when connecting
+                the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN.
       readOnly:
         - id
         - organizationId
