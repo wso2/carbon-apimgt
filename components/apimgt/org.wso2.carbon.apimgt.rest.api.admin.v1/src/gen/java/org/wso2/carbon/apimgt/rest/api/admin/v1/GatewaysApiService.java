@@ -11,8 +11,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CreatePlatformGatewayRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayWithTokenDTO;
 
 import java.util.List;
 
