@@ -22,8 +22,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
+import org.wso2.carbon.apimgt.api.model.PlatformGateway;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.GatewaysApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CreatePlatformGatewayRequestDTO;
@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -42,14 +41,8 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -76,82 +69,23 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             log.info("Creating new platform gateway with name: " + body.getName());
         }
 
-        PlatformGatewayDAO dao = PlatformGatewayDAO.getInstance();
-        if (dao.getGatewayByNameAndOrganization(body.getName(), organization) != null) {
-            throw new APIManagementException(
-                    String.format("A platform gateway with name '%s' already exists in the organization", body.getName()),
-                    ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS);
-        }
-
-        String gatewayId = UUID.randomUUID().toString();
-        String tokenId = PlatformGatewayTokenUtil.generateTokenId();
-        String plainToken = PlatformGatewayTokenUtil.generateToken();
-        String tokenHash;
-        try {
-            tokenHash = PlatformGatewayTokenUtil.hashToken(plainToken);
-        } catch (NoSuchAlgorithmException e) {
-            throw new APIManagementException("Error hashing gateway token", e);
-        }
-
-        String functionalityType = body.getFunctionalityType().value();
+        org.wso2.carbon.apimgt.api.PlatformGatewayService service =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
         String propertiesJson = serializeProperties(body.getProperties());
-
-        Timestamp now = Timestamp.from(Instant.now());
-        PlatformGatewayDAO.PlatformGateway gateway = new PlatformGatewayDAO.PlatformGateway(
-                gatewayId,
+        org.wso2.carbon.apimgt.api.model.CreatePlatformGatewayResult result = service.createGateway(
                 organization,
                 body.getName(),
                 body.getDisplayName(),
                 body.getDescription(),
                 body.getVhost(),
                 body.isIsCritical() != null && body.isIsCritical(),
-                functionalityType,
-                propertiesJson,
-                false,  // isActive: set to true only when gateway connects via WebSocket (GatewayConnectEndpoint.onOpen)
-                now,
-                now
-        );
+                body.getFunctionalityType().value(),
+                propertiesJson);
 
-        Connection connection = null;
+        PlatformGateway gateway = result.getGateway();
+        PlatformGatewayWithTokenDTO dto = toDTOWithToken(gateway, result.getRegistrationToken());
         try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            dao.createGateway(connection, gateway);
-            dao.createToken(connection, tokenId, gatewayId, tokenHash, now);
-            connection.commit();
-        } catch (APIManagementException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException rollbackEx) {
-                    log.warn("Rollback failed", rollbackEx);
-                }
-            }
-            throw e;
-        } catch (SQLException e) {
-            log.error("Database error while creating platform gateway: " + e.getMessage());
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException rollbackEx) {
-                    log.warn("Rollback failed", rollbackEx);
-                }
-            }
-            throw new APIManagementException("Error creating platform gateway", e);
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    log.warn("Error closing connection", e);
-                }
-            }
-        }
-
-        PlatformGatewayWithTokenDTO dto = toDTOWithToken(gateway,
-                tokenId + PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR + plainToken);
-        try {
-            URI location = new URI(RestApiConstants.RESOURCE_PATH_PLATFORM_GATEWAYS + "/" + gatewayId);
+            URI location = new URI(RestApiConstants.RESOURCE_PATH_PLATFORM_GATEWAYS + "/" + gateway.getId());
             return Response.created(location).entity(dto).build();
         } catch (URISyntaxException e) {
             return Response.status(Response.Status.CREATED).entity(dto).build();
@@ -161,8 +95,9 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
     @Override
     public Response gatewaysGet(MessageContext messageContext) throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        PlatformGatewayDAO dao = PlatformGatewayDAO.getInstance();
-        List<PlatformGatewayDAO.PlatformGateway> gateways = dao.listGatewaysByOrganization(organization);
+        org.wso2.carbon.apimgt.api.PlatformGatewayService service =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        List<PlatformGateway> gateways = service.listGatewaysByOrganization(organization);
         PlatformGatewayListDTO listDTO = new PlatformGatewayListDTO();
         listDTO.setCount(gateways.size());
         listDTO.setList(gateways.stream().map(this::toDTO).collect(Collectors.toList()));
@@ -232,37 +167,37 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         return e != null ? e : PlatformGatewayDTO.FunctionalityTypeEnum.REGULAR;
     }
 
-    private PlatformGatewayDTO toDTO(PlatformGatewayDAO.PlatformGateway g) {
+    private PlatformGatewayDTO toDTO(PlatformGateway g) {
         PlatformGatewayDTO dto = new PlatformGatewayDTO();
-        dto.setId(g.id);
-        dto.setOrganizationId(g.organizationId);
-        dto.setName(g.name);
-        dto.setDisplayName(g.displayName);
-        dto.setDescription(g.description);
-        dto.setProperties(deserializeProperties(g.properties));
-        dto.setVhost(g.vhost);
-        dto.setIsCritical(g.isCritical);
-        dto.setFunctionalityType(functionalityTypeFromString(g.functionalityType));
-        dto.setIsActive(g.isActive);
-        dto.setCreatedAt(g.createdAt);
-        dto.setUpdatedAt(g.updatedAt);
+        dto.setId(g.getId());
+        dto.setOrganizationId(g.getOrganizationId());
+        dto.setName(g.getName());
+        dto.setDisplayName(g.getDisplayName());
+        dto.setDescription(g.getDescription());
+        dto.setProperties(deserializeProperties(g.getProperties()));
+        dto.setVhost(g.getVhost());
+        dto.setIsCritical(g.isCritical());
+        dto.setFunctionalityType(functionalityTypeFromString(g.getFunctionalityType()));
+        dto.setIsActive(g.isActive());
+        dto.setCreatedAt(g.getCreatedAt());
+        dto.setUpdatedAt(g.getUpdatedAt());
         return dto;
     }
 
-    private PlatformGatewayWithTokenDTO toDTOWithToken(PlatformGatewayDAO.PlatformGateway g, String registrationToken) {
+    private PlatformGatewayWithTokenDTO toDTOWithToken(PlatformGateway g, String registrationToken) {
         PlatformGatewayWithTokenDTO dto = new PlatformGatewayWithTokenDTO();
-        dto.setId(g.id);
-        dto.setOrganizationId(g.organizationId);
-        dto.setName(g.name);
-        dto.setDisplayName(g.displayName);
-        dto.setDescription(g.description);
-        dto.setProperties(deserializeProperties(g.properties));
-        dto.setVhost(g.vhost);
-        dto.setIsCritical(g.isCritical);
-        dto.setFunctionalityType(functionalityTypeFromStringWithToken(g.functionalityType));
-        dto.setIsActive(g.isActive);
-        dto.setCreatedAt(g.createdAt);
-        dto.setUpdatedAt(g.updatedAt);
+        dto.setId(g.getId());
+        dto.setOrganizationId(g.getOrganizationId());
+        dto.setName(g.getName());
+        dto.setDisplayName(g.getDisplayName());
+        dto.setDescription(g.getDescription());
+        dto.setProperties(deserializeProperties(g.getProperties()));
+        dto.setVhost(g.getVhost());
+        dto.setIsCritical(g.isCritical());
+        dto.setFunctionalityType(functionalityTypeFromStringWithToken(g.getFunctionalityType()));
+        dto.setIsActive(g.isActive());
+        dto.setCreatedAt(g.getCreatedAt());
+        dto.setUpdatedAt(g.getUpdatedAt());
         dto.setRegistrationToken(registrationToken);
         return dto;
     }

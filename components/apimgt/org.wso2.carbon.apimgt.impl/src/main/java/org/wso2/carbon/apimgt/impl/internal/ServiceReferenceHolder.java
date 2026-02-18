@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
+import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
@@ -31,6 +32,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigServiceImpl;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
@@ -424,5 +426,10 @@ public class ServiceReferenceHolder {
     public FederatedAPIDiscoveryService getFederatedAPIDiscoveryService() {
 
         return federatedAPIDiscoveryService;
+    }
+
+    public PlatformGatewayService getPlatformGatewayService() {
+
+        return PlatformGatewayServiceImpl.getInstance();
     }
 }
