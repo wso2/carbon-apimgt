@@ -191,6 +191,12 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (StringUtils.isBlank(body.getVhost())) {
             throw RestApiUtil.buildBadRequestException("vhost is required");
         }
+        if (body.getVhost().length() > 255) {
+            throw RestApiUtil.buildBadRequestException("vhost must be at most 255 characters");
+        }
+        if (StringUtils.isNotBlank(body.getDescription()) && body.getDescription().length() > 1023) {
+            throw RestApiUtil.buildBadRequestException("description must be at most 1023 characters");
+        }
         if (body.getFunctionalityType() == null) {
             throw RestApiUtil.buildBadRequestException("functionalityType is required");
         }
