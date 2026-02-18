@@ -273,6 +273,10 @@ public class PlatformGatewayDAO {
         );
     }
 
+    /**
+     * Map a result set row to PlatformGateway. PROPERTIES is stored as string (VARCHAR/TEXT/MEDIUMTEXT/CLOB)
+     * across DB types; JDBC getString() returns the value for all of these (drivers map CLOB to string).
+     */
     private static PlatformGateway mapRowToGateway(ResultSet rs) throws SQLException {
         return new PlatformGateway(
                 rs.getString("ID"),
