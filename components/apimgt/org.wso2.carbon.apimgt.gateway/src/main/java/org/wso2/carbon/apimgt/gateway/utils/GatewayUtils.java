@@ -60,7 +60,6 @@ import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyConfigDTO;
 import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyDeploymentConfigDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.ModelEndpointDTO;
-import org.wso2.carbon.apimgt.api.gateway.RBPolicyConfigDTO;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
@@ -72,6 +71,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
@@ -79,6 +79,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
@@ -133,6 +135,8 @@ public class GatewayUtils {
     private static final String HTTP_SC = "HTTP_SC";
     private static final String HTTP_SC_DESC = "HTTP_SC_DESC";
     private static final Gson gson = new Gson();
+    private static String apiUUID;
+    private static final String apiType = String.valueOf(APIConstants.ApiTypes.API);
     private static final Pattern validHostHeaderPattern =
             Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
 
@@ -1990,6 +1994,21 @@ public class GatewayUtils {
                             headers.put(HttpHeaders.WWW_AUTHENTICATE,
                                     "Bearer resource_metadata=" + "\"" + resourceMetadata + "\"," + " error=\"invalid_token\"," + " error_description=\"Access token is missing or expired\"");
                         }
+
+                        String resourceMetadata = APIConstants.HTTPS_PROTOCOL + APIConstants.URL_SCHEME_SEPARATOR +
+                                hostHeader + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
+                        String dcrEndpoint = getDcrEndpoint();
+                        String wwwAuthenticate = "Bearer resource_metadata=\"" + resourceMetadata + "\"";
+                        if (StringUtils.isNotEmpty(dcrEndpoint)) {
+                            wwwAuthenticate += ", dcr=\"" + dcrEndpoint + "\"";
+                        }
+                        wwwAuthenticate += ", error=\"invalid_token\", error_description=\"Access token is missing or expired\"";
+                        headers.put(HttpHeaders.WWW_AUTHENTICATE, wwwAuthenticate);
+                    }
+                } else {
+                    headers.put(HttpHeaders.WWW_AUTHENTICATE, APIAuthenticationHandler.getAuthenticatorsChallengeString() +
+                            " error=\"invalid_token\"" +
+                            ", error_description=\"The provided token is invalid\"");
                     }
                 } else {
                     headers.put(HttpHeaders.WWW_AUTHENTICATE,
@@ -2013,5 +2032,37 @@ public class GatewayUtils {
 
     protected static void sendFault(org.apache.synapse.MessageContext messageContext, int status) {
         Utils.sendFault(messageContext, status);
+    }
+
+    private static String getDcrEndpoint() {
+        if (StringUtils.isEmpty(apiUUID)) {
+            return null;
+        }
+        List<String> keyManagers = DataHolder.getInstance().getKeyManagersFromUUID(apiUUID);
+        if (keyManagers == null || keyManagers.isEmpty()) {
+            return null;
+        }
+
+        String tenantDomain = GatewayUtils.getTenantDomain();
+        KeyManagerDto keyManagerDto = null;
+        if (APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManagers.get(0))) {
+            Map<String, KeyManagerDto> keyManagerMap = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
+            if (keyManagerMap.size() == 1) {
+                keyManagerDto = keyManagerMap.values().iterator().next();
+            }
+        } else if (keyManagers.size() == 1) {
+            keyManagerDto = KeyManagerHolder.getKeyManagerByName(tenantDomain, keyManagers.get(0));
+        }
+
+        if (keyManagerDto != null && keyManagerDto.getKeyManager() != null) {
+            try {
+                org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration config =
+                        keyManagerDto.getKeyManager().getKeyManagerConfiguration();
+                return (String) config.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
+            } catch (APIManagementException e) {
+                log.error("Error while retrieving key manager configuration for MCP DCR support", e);
+            }
+        }
+        return null;
     }
 }

@@ -63,6 +63,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.cache.Cache;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.MCP_HTTP_METHOD;
+
 /**
  * An API consumer authenticator which authenticates user requests using
  * the OAuth protocol. This implementation uses some default token/delimiter

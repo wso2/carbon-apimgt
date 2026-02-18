@@ -52,6 +52,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.MCP_HTTP_METHOD;
+
 public class McpInitHandler extends AbstractHandler implements ManagedLifecycle {
     private static final Log log = LogFactory.getLog(McpInitHandler.class);
 
@@ -160,6 +162,7 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
 
                 method = request.getMethod();
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_METHOD, method);
+                messageContext.setProperty(MCP_HTTP_METHOD, method);
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY, request);
                 if (headers != null) {
                     messageContext.setProperty(APIMgtGatewayConstants.MCP_SESSION_ID_KEY,
@@ -198,10 +201,15 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                             }
                         }
                         if (backendOperation != null) {
+                            messageContext.setProperty(MCP_HTTP_METHOD, backendOperation.getVerb());
                             messageContext.setProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY, backendOperation.getVerb());
                             messageContext.setProperty(APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE_KEY, backendOperation.getTarget());
                         }
                     }
+                } else if (StringUtils.equals(method, APIConstants.MCP.METHOD_INITIALIZE)) {
+                    Map<String, String> transportHeaderMap = (Map<String, String>) axis2MC.getProperty
+                            (org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                    transportHeaderMap.remove(APIConstants.MCP.HEADER_MCP_SESSION_ID);
                 }
             } else {
                 throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
@@ -227,14 +235,9 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
 
             case APIConstants.MCP.METHOD_TOOL_LIST:
             case APIConstants.MCP.METHOD_TOOL_CALL:
-                return false;
 
             default:
-                throw new McpException(
-                        APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_CODE,
-                        APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_MESSAGE,
-                        "Method not found"
-                );
+                return false;
         }
     }
 }
