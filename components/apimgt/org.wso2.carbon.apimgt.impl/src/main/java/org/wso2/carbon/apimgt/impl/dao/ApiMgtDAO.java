@@ -16817,7 +16817,8 @@ public class ApiMgtDAO {
                 keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                 keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
-                keyInfo.setApplicationId(rs.getString("APPLICATION_ID"));
+                keyInfo.setApplicationName(rs.getString("APPLICATION_NAME"));
+                keyInfo.setApiName(rs.getString("API_NAME"));
                 keyInfo.setKeyType(rs.getString("KEY_TYPE"));
                 keyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
                 keyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
@@ -16939,6 +16940,52 @@ public class ApiMgtDAO {
             ps.setString(1, applicationId);
             ps.setString(2, keyType);
             ps.setString(3, keyDisplayName);
+
+            ps.executeUpdate();
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    log.error("Failed to rollback revoking API key", rollbackEx);
+                }
+            }
+            handleException("Failed to revoke the API key", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
+    /**
+     * Revoke an api key provided by the key display name
+     *
+     * @param apiId Id of the API
+     * @param applicationId Id of the application
+     * @param keyType Key type of the token
+     * @param keyDisplayName API key name
+     * @throws APIManagementException
+     */
+    public void revokeAPIKeyFromAdmin(String apiId, String applicationId, String keyType, String keyDisplayName) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // This query to update an entry from the AM_API_KEY table
+            String sqlQuery = SQLConstants.ADMIN_REVOKE_API_KEY_SQL;
+            // Updating data from the AM_API_KEY table by setting STATUS to REVOKED
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, apiId);
+            if (applicationId.equalsIgnoreCase("NO_ASSOCIATION")) {
+                ps.setString(2, null);
+            } else {
+                ps.setString(2, applicationId);
+            }
+            ps.setString(3, keyType);
+            ps.setString(4, keyDisplayName);
 
             ps.executeUpdate();
             conn.commit();
