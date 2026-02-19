@@ -18,15 +18,19 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ApiKeysApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APIKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APIKeyMappingUtil;
 
 import javax.ws.rs.core.Response;
-
+import java.util.List;
 
 public class ApiKeysApiServiceImpl implements ApiKeysApiService {
 
@@ -43,13 +47,9 @@ public class ApiKeysApiServiceImpl implements ApiKeysApiService {
                                                                          String keyType, String keyDisplayName,
                                                                          MessageContext messageContext)
             throws APIManagementException {
-        // TODO: remove errorObject and add implementation code!
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+        APIAdmin apiAdmin = new APIAdminImpl();
+        apiAdmin.revokeAPIKey(apiId, applicationId, keyType, keyDisplayName);
+        return Response.ok().build();
     }
 
     /**
@@ -57,13 +57,11 @@ public class ApiKeysApiServiceImpl implements ApiKeysApiService {
      * @param messageContext Message context
      * @return A list of all api keys response
      */
-    public Response apiKeysGet(MessageContext messageContext) {
-        // TODO: remove errorObject and add implementation code!
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+    public Response apiKeysGet(MessageContext messageContext) throws APIManagementException {
+        APIAdmin apiAdmin = new APIAdminImpl();
+        List<APIKeyInfo> apiKeyInfoList = apiAdmin.getAllApiKeys();
+        List<APIKeyDTO> apiKeyDTOList =
+                APIKeyMappingUtil.fromAPIKeyInfoListToAPIKeyListDTO(apiKeyInfoList);
+        return Response.ok().entity(apiKeyDTOList).build();
     }
 }

@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
@@ -76,6 +77,23 @@ public interface APIAdmin  {
      * @throws APIManagementException If failed to delete environment
      */
     void deleteEnvironment(String tenantDomain, String uuid) throws APIManagementException;
+
+    /**
+     * Returns api keys of a given tenant
+     *
+     * @return List of api keys related to the given tenant
+     */
+    List<APIKeyInfo> getAllApiKeys() throws APIManagementException;
+
+    /**
+     * Revokes a given api key
+     *
+     * @param apiId Id of the API
+     * @param applicationId Id of the Application
+     * @param keyType Key type
+     * @param keyDisplayName API key name
+     */
+    void revokeAPIKey(String apiId, String applicationId, String keyType, String keyDisplayName) throws APIManagementException;
 
     /**
      * Checks whether the given environment has active gateway policy deployments.

@@ -87,10 +87,18 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
         long validityPeriod = validityPeriodStr != null ? Long.parseLong(validityPeriodStr) : 0L;
         String orgId = properties.getProperty(APIConstants.NotificationEvent.ORG_ID);
         int tenantId = (int) properties.get(APIConstants.NotificationEvent.TENANT_ID);
-        int appId = (int) properties.get(APIConstants.NotificationEvent.APPLICATION_ID);
+        int originId = 0;
+        String origin = null;
+        if (properties.get(APIConstants.NotificationEvent.APPLICATION_ID) != null) {
+            originId  = (int) properties.get(APIConstants.NotificationEvent.APPLICATION_ID);
+            origin = "APP";
+        } else if (properties.get(APIConstants.NotificationEvent.API_ID) != null) {
+            originId = (int) properties.get(APIConstants.NotificationEvent.API_ID);
+            origin = "API";
+        }
         Object[] objects = new Object[]{eventId, properties.getProperty(APIConstants.NotificationEvent.API_KEY_HASH),
                         properties.getProperty(APIConstants.NotificationEvent.SALT),
-                        properties.getProperty(APIConstants.NotificationEvent.KEY_TYPE), appId,
+                        properties.getProperty(APIConstants.NotificationEvent.KEY_TYPE), origin, originId,
                         properties.getProperty(APIConstants.NotificationEvent.STATUS), validityPeriod,
                         properties.getProperty(APIConstants.NotificationEvent.LOOKUP_KEY),
                         properties.getProperty(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES), tenantId};
