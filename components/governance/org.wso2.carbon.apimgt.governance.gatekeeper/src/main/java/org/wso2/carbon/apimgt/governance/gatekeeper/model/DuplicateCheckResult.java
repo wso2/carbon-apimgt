@@ -117,6 +117,7 @@ public class DuplicateCheckResult {
      */
     public static class SimilarAPI {
         private String apiId;
+        private String apiName;
         private double similarityScore;
 
         /**
@@ -127,6 +128,19 @@ public class DuplicateCheckResult {
          */
         public SimilarAPI(String apiId, double similarityScore) {
             this.apiId = apiId;
+            this.similarityScore = similarityScore;
+        }
+
+        /**
+         * Constructor with API name.
+         *
+         * @param apiId           The similar API's ID
+         * @param apiName         The similar API's name
+         * @param similarityScore The similarity score (0.0 to 1.0)
+         */
+        public SimilarAPI(String apiId, String apiName, double similarityScore) {
+            this.apiId = apiId;
+            this.apiName = apiName;
             this.similarityScore = similarityScore;
         }
 
@@ -146,6 +160,24 @@ public class DuplicateCheckResult {
          */
         public void setApiId(String apiId) {
             this.apiId = apiId;
+        }
+
+        /**
+         * Gets the similar API's name.
+         *
+         * @return API name
+         */
+        public String getApiName() {
+            return apiName;
+        }
+
+        /**
+         * Sets the similar API's name.
+         *
+         * @param apiName API name
+         */
+        public void setApiName(String apiName) {
+            this.apiName = apiName;
         }
 
         /**
@@ -170,6 +202,7 @@ public class DuplicateCheckResult {
         public String toString() {
             return "SimilarAPI{" 
                     + "apiId='" + apiId + '\'' 
+                    + ", apiName='" + apiName + '\'' 
                     + ", similarityScore=" + similarityScore 
                     + '}';
         }
