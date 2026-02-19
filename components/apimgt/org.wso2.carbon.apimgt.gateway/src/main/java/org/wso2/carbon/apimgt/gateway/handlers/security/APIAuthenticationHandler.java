@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
 import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
@@ -769,7 +770,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                         }
                     }
                     if (sb.length() > 0) {
-                        transportHeaders.put("WWW-Authenticate", sb.toString());
+                        transportHeaders.put(HttpHeaders.WWW_AUTHENTICATE, sb.toString());
                     }
                 }
             }

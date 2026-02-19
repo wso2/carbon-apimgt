@@ -209,7 +209,9 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                 } else if (StringUtils.equals(method, APIConstants.MCP.METHOD_INITIALIZE)) {
                     Map<String, String> transportHeaderMap = (Map<String, String>) axis2MC.getProperty
                             (org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-                    transportHeaderMap.remove(APIConstants.MCP.HEADER_MCP_SESSION_ID);
+                    if (transportHeaderMap != null) {
+                        transportHeaderMap.remove(APIConstants.MCP.HEADER_MCP_SESSION_ID);
+                    }
                 }
             } else {
                 throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
