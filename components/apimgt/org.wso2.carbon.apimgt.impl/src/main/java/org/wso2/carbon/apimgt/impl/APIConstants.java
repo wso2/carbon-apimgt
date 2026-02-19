@@ -3380,6 +3380,8 @@ public final class APIConstants {
         public static final String KEY_TYPE = "keyType";
         public static final String ADDITIONAL_PROPERTIES = "additionalProperties";
         public static final String APPLICATION_ID = "applicationId";
+        public static final String API_ID = "apiId";
+        public static final String ORIGIN = "origin";
         public static final String VALIDITY_PERIOD = "validityPeriod";
         public static final String STATUS = "status";
         public static final String EVENT_ID = "eventId";
