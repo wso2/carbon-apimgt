@@ -63,6 +63,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.cache.Cache;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.MCP_HTTP_METHOD;
+
 /**
  * An API consumer authenticator which authenticates user requests using
  * the OAuth protocol. This implementation uses some default token/delimiter
@@ -224,7 +226,7 @@ public class OAuthAuthenticator implements Authenticator {
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
 
         if (StringUtils.equals(APIConstants.API_TYPE_MCP, apiType)) {
-            httpMethod = synCtx.getProperty("MCP_HTTP_METHOD").toString();
+            httpMethod = synCtx.getProperty(MCP_HTTP_METHOD).toString();
             matchingResource = (String) synCtx.getProperty("MCP_API_ELECTED_RESOURCE");
         }
         SignedJWTInfo signedJWTInfo = null;
