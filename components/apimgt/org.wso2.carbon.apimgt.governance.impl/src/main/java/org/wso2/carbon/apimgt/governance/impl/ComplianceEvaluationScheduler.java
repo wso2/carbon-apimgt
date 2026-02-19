@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationRequest;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
-import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
@@ -34,7 +33,6 @@ import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineFactory;
@@ -43,10 +41,6 @@ import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -301,32 +295,19 @@ public class ComplianceEvaluationScheduler {
         for (Ruleset ruleset : rulesets) {
             List<RuleViolation> ruleViolations = new ArrayList<>();
 
-            // Handle GENERIC rulesets by checking for pending alerts (deduplication)
+            // Handle GENERIC rulesets by performing real-time deduplication check
+            // via GatekeeperValidationEngine (writes violations to GOV_RULE_VIOLATION)
             if (RuleCategory.GENERIC.equals(ruleset.getRuleCategory())) {
                 log.debug("Processing GENERIC ruleset " + ruleset.getId() + 
-                        " for artifact " + artifactRefId + ". Checking for pending alerts.");
-                List<RuleViolation> deduplicationViolations = getDeduplicationViolations(
-                        artifactRefId, ruleset, organization);
-                if (!deduplicationViolations.isEmpty()) {
-                    rulesetViolationsMap.put(ruleset.getId(), deduplicationViolations);
-                    AuditLogger.log("Async Eval Request", "Found %d deduplication violations for artifact %s " +
-                                    "in organization %s against ruleset %s", deduplicationViolations.size(),
-                            artifactRefId, organization, ruleset.getId());
-                } else {
-                    // No pending alerts found. Perform a real-time dedup check through the
-                    // ValidationEngine. This handles APIs that were created while the dedup
-                    // policy was disabled - they were indexed but never checked for duplicates.
-                    log.debug("No pending deduplication alerts for artifact " + artifactRefId
-                            + ". Performing real-time dedup check via ValidationEngine.");
-                    List<RuleViolation> realTimeViolations = performRealTimeDedupCheck(
-                            artifactRefId, ruleset, artifactProjectContentMap, organization);
-                    rulesetViolationsMap.put(ruleset.getId(), realTimeViolations);
-                    if (!realTimeViolations.isEmpty()) {
-                        AuditLogger.log("Async Eval Request",
-                                "Real-time dedup check found %d violations for artifact %s " +
-                                        "in organization %s against ruleset %s",
-                                realTimeViolations.size(), artifactRefId, organization, ruleset.getId());
-                    }
+                        " for artifact " + artifactRefId + ". Performing real-time dedup check.");
+                List<RuleViolation> realTimeViolations = performRealTimeDedupCheck(
+                        artifactRefId, ruleset, artifactProjectContentMap, organization);
+                rulesetViolationsMap.put(ruleset.getId(), realTimeViolations);
+                if (!realTimeViolations.isEmpty()) {
+                    AuditLogger.log("Async Eval Request",
+                            "Dedup check found %d violations for artifact %s " +
+                                    "in organization %s against ruleset %s",
+                            realTimeViolations.size(), artifactRefId, organization, ruleset.getId());
                 }
                 continue;
             }
@@ -531,84 +512,5 @@ public class ComplianceEvaluationScheduler {
     private static String buildEnrichedContent(String content, String artifactRefId, String organization) {
         return "###GATEKEEPER_CONTEXT:{\"apiUuid\":\"" + artifactRefId
                 + "\",\"organization\":\"" + organization + "\"}###\n" + content;
-    }
-
-    /**
-     * Get deduplication violations for an artifact by querying the AM_DEDUP_ALERT table.
-     *
-     * @param artifactRefId The artifact UUID
-     * @param ruleset       The deduplication ruleset
-     * @param organization  The organization
-     * @return List of rule violations for pending deduplication alerts
-     */
-    private static List<RuleViolation> getDeduplicationViolations(String artifactRefId, Ruleset ruleset,
-                                                                   String organization) {
-        List<RuleViolation> violations = new ArrayList<>();
-        
-        String query = "SELECT ALERT_ID, NEW_API_NAME, NEW_API_VERSION, HIGHEST_SIMILARITY, SEVERITY, " +
-                "MESSAGE, RECOMMENDATION FROM AM_DEDUP_ALERT " +
-                "WHERE NEW_API_UUID = ? AND ORGANIZATION = ? AND STATUS = 'PENDING'";
-        
-        try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement stmt = connection.prepareStatement(query)) {
-            
-            stmt.setString(1, artifactRefId);
-            stmt.setString(2, organization);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    String alertId = rs.getString("ALERT_ID");
-                    String apiName = rs.getString("NEW_API_NAME");
-                    String apiVersion = rs.getString("NEW_API_VERSION");
-                    double similarity = rs.getDouble("HIGHEST_SIMILARITY");
-                    String severityStr = rs.getString("SEVERITY");
-                    String message = rs.getString("MESSAGE");
-                    String recommendation = rs.getString("RECOMMENDATION");
-                    
-                    // Create a rule violation from the alert
-                    RuleViolation violation = new RuleViolation();
-                    violation.setArtifactRefId(artifactRefId);
-                    violation.setArtifactType(ArtifactType.API);
-                    violation.setRuleName("api-deduplication-check");
-                    violation.setRulesetId(ruleset.getId());
-                    violation.setRuleType(RuleType.API_DEFINITION);
-                    violation.setOrganization(organization);
-                    
-                    // Map severity from alert to RuleSeverity
-                    RuleSeverity ruleSeverity = RuleSeverity.ERROR; // Default to ERROR
-                    if (severityStr != null) {
-                        if ("LOW".equalsIgnoreCase(severityStr)) {
-                            ruleSeverity = RuleSeverity.INFO;
-                        } else if ("MEDIUM".equalsIgnoreCase(severityStr)) {
-                            ruleSeverity = RuleSeverity.WARN;
-                        } else if ("HIGH".equalsIgnoreCase(severityStr) || 
-                                   "CRITICAL".equalsIgnoreCase(severityStr)) {
-                            ruleSeverity = RuleSeverity.ERROR;
-                        }
-                    }
-                    violation.setSeverity(ruleSeverity);
-                    
-                    // Build the violation message
-                    String violationMessage = message != null ? message : 
-                            String.format("Duplicate API detected: '%s:%s' has %.1f%% similarity with existing APIs",
-                                    apiName, apiVersion, similarity * 100);
-                    violation.setRuleMessage(violationMessage);
-                    
-                    // Add path info for context
-                    violation.setViolatedPath(recommendation != null ? recommendation : 
-                            "Review API for potential duplication");
-                    
-                    violations.add(violation);
-                    
-                    log.debug("Created deduplication violation from alert " + alertId + 
-                            " for API " + apiName + " with " + (similarity * 100) + "% similarity");
-                }
-            }
-            
-        } catch (SQLException e) {
-            log.error("Error querying deduplication alerts for artifact " + artifactRefId, e);
-        }
-        
-        return violations;
     }
 }

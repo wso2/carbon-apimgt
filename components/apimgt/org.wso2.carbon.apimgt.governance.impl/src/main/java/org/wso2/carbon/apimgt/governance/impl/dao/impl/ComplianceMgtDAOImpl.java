@@ -105,7 +105,25 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                         prepStmnt.setString(2, artifactKey);
                         Timestamp requestedTime = new Timestamp(System.currentTimeMillis());
                         prepStmnt.setTimestamp(3, requestedTime);
-                        prepStmnt.executeUpdate();
+                        try {
+                            prepStmnt.executeUpdate();
+                        } catch (SQLException constraintEx) {
+                            // Handle race condition: concurrent async calls may both pass the
+                            // getPendingEvalRequest check and try to INSERT a PENDING request for
+                            // the same artifact. The EVAL_CONSTRAINT (UNIQUE on STATUS, ARTIFACT_KEY)
+                            // prevents duplicates. When this happens, rollback the partial transaction,
+                            // find the existing pending request, and use it instead.
+                            connection.rollback();
+                            connection.setAutoCommit(false);
+                            requestId = getPendingEvalRequest(connection, artifactRefId,
+                                    artifactType, organization);
+                            if (requestId == null) {
+                                // If there's truly no pending request either, re-throw the original error
+                                throw constraintEx;
+                            }
+                            log.debug("Concurrent PENDING request detected for artifact " + artifactRefId
+                                    + ". Using existing request " + requestId);
+                        }
                     }
                 }
                 addRequestPolicyMappings(connection, requestId, policyIds);
@@ -1157,5 +1175,78 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         } finally {
             resultWrtiteDelLock.unlock();
         }
+    }
+
+    /**
+     * Delete violations from other APIs that reference the given API UUID in their violation messages.
+     * Used during API deletion to clean up stale deduplication violation records.
+     *
+     * @param apiUuid      UUID of the deleted API
+     * @param organization Organization
+     * @throws APIMGovernanceException If an error occurs during cleanup
+     */
+    @Override
+    public void deleteViolationsByReferencedApiUuid(String apiUuid, String organization)
+            throws APIMGovernanceException {
+        resultWrtiteDelLock.lock();
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                String uuidPattern = "%" + apiUuid + "%";
+                try (PreparedStatement prepStmnt = connection.prepareStatement(
+                        SQLConstants.DELETE_VIOLATIONS_BY_REFERENCED_API_UUID)) {
+                    prepStmnt.setString(1, uuidPattern);
+                    prepStmnt.setString(2, uuidPattern);
+                    prepStmnt.setString(3, organization);
+                    int deleted = prepStmnt.executeUpdate();
+                    if (deleted > 0) {
+                        log.info("Cleaned up " + deleted + " stale violation records referencing "
+                                + "deleted API UUID: " + apiUuid);
+                    }
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new APIMGovernanceException(
+                    "Error while cleaning up violations referencing deleted API: " + apiUuid, e);
+        } finally {
+            resultWrtiteDelLock.unlock();
+        }
+    }
+
+    /**
+     * Get the list of artifact reference IDs whose violations reference the given API UUID.
+     * Used to identify which APIs need re-evaluation after an API is deleted.
+     *
+     * @param apiUuid      UUID of the deleted API
+     * @param organization Organization
+     * @return List of artifact reference IDs (API UUIDs) that have violations referencing the given API
+     * @throws APIMGovernanceException If an error occurs during the query
+     */
+    @Override
+    public List<String> getAffectedArtifactsByReferencedApiUuid(String apiUuid, String organization)
+            throws APIMGovernanceException {
+        List<String> affectedArtifacts = new ArrayList<>();
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
+            String uuidPattern = "%" + apiUuid + "%";
+            try (PreparedStatement prepStmnt = connection.prepareStatement(
+                    SQLConstants.GET_AFFECTED_ARTIFACTS_BY_REFERENCED_API_UUID)) {
+                prepStmnt.setString(1, uuidPattern);
+                prepStmnt.setString(2, uuidPattern);
+                prepStmnt.setString(3, organization);
+                try (ResultSet rs = prepStmnt.executeQuery()) {
+                    while (rs.next()) {
+                        affectedArtifacts.add(rs.getString("ARTIFACT_REF_ID"));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIMGovernanceException(
+                    "Error while getting affected artifacts referencing API: " + apiUuid, e);
+        }
+        return affectedArtifacts;
     }
 }

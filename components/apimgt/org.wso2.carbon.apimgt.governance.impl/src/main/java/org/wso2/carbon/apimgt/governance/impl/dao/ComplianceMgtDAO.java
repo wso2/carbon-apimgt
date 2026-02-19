@@ -276,4 +276,26 @@ public interface ComplianceMgtDAO {
     void deleteArtifact(String artifactRefId, ArtifactType artifactType,
                         String organization) throws APIMGovernanceException;
 
+    /**
+     * Delete violations from other APIs that reference the given API UUID in their violation messages.
+     * Used during API deletion to clean up stale deduplication violation records.
+     *
+     * @param apiUuid      UUID of the deleted API
+     * @param organization Organization
+     * @throws APIMGovernanceException If an error occurs during cleanup
+     */
+    void deleteViolationsByReferencedApiUuid(String apiUuid, String organization) throws APIMGovernanceException;
+
+    /**
+     * Get the list of artifact reference IDs whose violations reference the given API UUID.
+     * Used to identify which APIs need re-evaluation after an API is deleted.
+     *
+     * @param apiUuid      UUID of the deleted API
+     * @param organization Organization
+     * @return List of artifact reference IDs (API UUIDs) that have violations referencing the given API
+     * @throws APIMGovernanceException If an error occurs during the query
+     */
+    List<String> getAffectedArtifactsByReferencedApiUuid(String apiUuid, String organization)
+            throws APIMGovernanceException;
+
 }
