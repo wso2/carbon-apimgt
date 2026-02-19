@@ -73,7 +73,7 @@ public class OASDefinitionHandler implements APIDefinitionHandler {
     public void updateAPIDefinitionWithVersion(API api) throws APIManagementException {
         String swaggerDefinition = api.getSwaggerDefinition();
 
-        if (swaggerDefinition != null) {
+        if (swaggerDefinition != null && !swaggerDefinition.trim().isEmpty()) {
             JsonObject apiSpec = JsonParser.parseString(swaggerDefinition).getAsJsonObject();
             JsonObject infoObject = apiSpec.has(SWAGGER_INFO) && apiSpec.get(SWAGGER_INFO).isJsonObject() ?
                     apiSpec.getAsJsonObject(SWAGGER_INFO) : null;
@@ -88,9 +88,10 @@ public class OASDefinitionHandler implements APIDefinitionHandler {
             }
             api.setSwaggerDefinition(apiSpec.toString());
         } else {
-            String errorMsg = "Swagger definition is null for API: " + api.getId().getApiName();
-            log.error(errorMsg);
-            throw new APIManagementException(errorMsg);
+            if (log.isDebugEnabled()) {
+                log.debug("Swagger definition is null or empty for API: " + api.getId().getApiName() 
+                        + ". Skipping version update.");
+            }
         }
     }
 

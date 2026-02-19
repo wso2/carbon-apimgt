@@ -75,7 +75,7 @@ public class AsyncAPIDefinitionHandler implements APIDefinitionHandler {
     public void updateAPIDefinitionWithVersion(API api) throws APIManagementException {
         String asyncApiDefinition = api.getAsyncApiDefinition();
 
-        if (asyncApiDefinition != null) {
+        if (asyncApiDefinition != null && !asyncApiDefinition.trim().isEmpty()) {
             JsonObject apiSpec = JsonParser.parseString(asyncApiDefinition).getAsJsonObject();
             JsonObject infoObject = apiSpec.has(SWAGGER_INFO) && apiSpec.get(SWAGGER_INFO).isJsonObject() ?
                     apiSpec.getAsJsonObject(SWAGGER_INFO) : null;
@@ -90,9 +90,10 @@ public class AsyncAPIDefinitionHandler implements APIDefinitionHandler {
             }
             api.setAsyncApiDefinition(apiSpec.toString());
         } else {
-            String errorMsg = "AsyncAPI definition is null for API: " + api.getId().getApiName();
-            log.error(errorMsg);
-            throw new APIManagementException(errorMsg);
+            if (log.isDebugEnabled()) {
+                log.debug("AsyncAPI definition is null or empty for API: " + api.getId().getApiName() 
+                        + ". Skipping version update.");
+            }
         }
     }
 
