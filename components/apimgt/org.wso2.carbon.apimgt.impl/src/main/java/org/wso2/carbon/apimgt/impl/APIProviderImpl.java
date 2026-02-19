@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.FaultyGatewayDeploymentException;
+import org.wso2.carbon.apimgt.api.APIDefinitionHandler;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
@@ -130,6 +131,7 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionHandlerFactory;
 import org.wso2.carbon.apimgt.impl.dto.APIRevisionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
@@ -1338,7 +1340,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         .forEach(validKeyManagers::add);
             }
         }
-        if (validKeyManagers.isEmpty()) {
+        if (validKeyManagers.isEmpty() && !api.isInitiatedFromGateway()) {
             throw new APIManagementException(
                     "API must have at least one valid and enabled key manager configured",
                     ExceptionCodes.KEY_MANAGER_NOT_FOUND);
@@ -2623,7 +2625,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         existingAPI.setOrganization(organization);
         APIIdentifier existingAPIId = existingAPI.getId();
-        String existingAPISwaggerDefinition = existingAPI.getSwaggerDefinition();
+        APIDefinitionHandler definitionHandler = APIDefinitionHandlerFactory.getDefinitionHandler(existingAPI);
+        String existingApiDefinition = definitionHandler.getDefinitionFromAPI(existingAPI);
         String existingAPICreatedTime = existingAPI.getCreatedTime();
         String existingAPIStatus = existingAPI.getStatus();
         boolean isExsitingAPIdefaultVersion = existingAPI.isDefaultVersion();
@@ -2646,7 +2649,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<OperationPolicy> apiLevelPolicies = extractAndDropAPILevelPoliciesFromAPI(existingAPI);
         updateMCPServerBackends(existingAPI, existingApiId, organization);
         //update swagger definition with version
-        APIUtil.updateAPISwaggerWithVersion(existingAPI);
+        definitionHandler.updateAPIDefinitionWithVersion(existingAPI);
         API newAPI = addAPI(existingAPI);
         String newAPIId = newAPI.getUuid();
         cloneAPIPoliciesForNewAPIVersion(existingApiId, newAPI, operationPoliciesMap, apiLevelPolicies);
@@ -2703,7 +2706,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         existingAPI.setId(existingAPIId);
         existingAPI.setContext(existingContext);
         existingAPI.setCreatedTime(existingAPICreatedTime);
-        existingAPI.setSwaggerDefinition(existingAPISwaggerDefinition);
+        definitionHandler.setDefinitionToAPI(existingAPI, existingApiDefinition);
         // update existing api with the original timestamp
         existingAPI.setVersionTimestamp(existingVersionTimestamp);
         if (isDefaultVersion) {

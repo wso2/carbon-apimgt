@@ -106,9 +106,9 @@ public class FederatedGatewayUtil {
         return provider.createNewAPIVersion(apiUUID, newVersion, true, organization);
     }
 
-    public static InputStream createZipAsInputStream(String apiYaml, String swaggerYaml, String deploymentYaml,
-                                                     String zipName) throws IOException {
-        if (apiYaml == null || swaggerYaml == null || deploymentYaml == null) {
+    public static InputStream createZipAsInputStream(String apiYaml, String apiDefinition, String deploymentYaml,
+                                                     String zipName, String definitionFileName) throws IOException {
+        if (apiYaml == null || apiDefinition == null || deploymentYaml == null) {
             throw new IllegalArgumentException("Input parameters cannot be null for API: " + zipName);
         }
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -117,8 +117,8 @@ public class FederatedGatewayUtil {
             // Add api.yaml
             addToZip(zos, zipName + "/" + API_YAML_FILE_NAME, apiYaml);
 
-            // Add Definitions/swagger.yaml
-            addToZip(zos, zipName + "/" + SWAGGER_YAML_FILE_NAME, swaggerYaml);
+            // Add Definitions/swagger.yaml or Definitions/asyncapi.yaml
+            addToZip(zos, zipName + "/" + definitionFileName, apiDefinition);
 
             // Add deployment_environments.yaml
             addToZip(zos, zipName + "/" + DEPLOYMENT_ENVIRONMENTS_FILE_NAME, deploymentYaml);

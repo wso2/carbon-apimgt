@@ -36,6 +36,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIComplianceException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIDefinitionHandler;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
@@ -75,6 +76,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionHandlerFactory;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -1783,12 +1785,14 @@ public class ImportUtils {
      * @param response API Validation Response
      * @throws APIManagementException If an error occurs when retrieving the URI templates
      */
-    private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response)
-            throws APIManagementException {
+    private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response) 
+        throws APIManagementException {
 
-        List<URITemplate> uriTemplates = new ArrayList<>();
-        uriTemplates.addAll(response.getParser().getURITemplates(response.getJsonContent()));
-        List<APIOperationsDTO> apiOperationsDtos = APIMappingUtil.fromURITemplateListToOprationList(uriTemplates);
+        APIDefinitionHandler definitionHandler =
+                APIDefinitionHandlerFactory.getDefinitionHandler(apiDto.getType().toString());
+        List<URITemplate> uriTemplates = definitionHandler.extractOperations(response.getJsonContent());
+        List<APIOperationsDTO> apiOperationsDtos = APIMappingUtil
+            .fromURITemplateListToOprationList(uriTemplates);
         apiDto.setOperations(apiOperationsDtos);
     }
 
