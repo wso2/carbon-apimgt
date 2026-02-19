@@ -84,7 +84,7 @@ import java.util.regex.Pattern;
 public class APIAuthenticationHandler extends AbstractHandler implements ManagedLifecycle {
     private static final Log log = LogFactory.getLog(APIAuthenticationHandler.class);
 
-    protected static ArrayList<Authenticator> authenticators = new ArrayList<>();
+    protected ArrayList<Authenticator> authenticators = new ArrayList<>();
     protected boolean isAuthenticatorsInitialized = false;
     private SynapseEnvironment synapseEnvironment;
 
@@ -761,7 +761,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                         if (kmConfig == null) {
                             continue;
                         }
-                        String dcrEndpoint = kmConfig.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT).toString();
+                        Object dcrEndpointParam =
+                                kmConfig.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
+                        String dcrEndpoint = dcrEndpointParam != null ? dcrEndpointParam.toString() : null;
                         if (dcrEndpoint != null) {
                             if (sb.length() > 0) {
                                 sb.append(", ");

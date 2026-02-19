@@ -148,7 +148,7 @@ public class MCPUtils {
             String protocolVersion = params.getProtocolVersion();
             if (StringUtils.isEmpty(protocolVersion)) {
                 throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
-                        APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing params field");
+                        APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing or empty protocolVersion field");
             }
         }
     }
