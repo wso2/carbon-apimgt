@@ -21,10 +21,8 @@ package org.wso2.carbon.apimgt.governance.gatekeeper.listener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
-import org.wso2.carbon.apimgt.governance.gatekeeper.model.DeduplicationAlert;
 import org.wso2.carbon.apimgt.governance.gatekeeper.model.DuplicateCheckResult;
 import org.wso2.carbon.apimgt.governance.gatekeeper.service.BackgroundHydrationService;
-import org.wso2.carbon.apimgt.governance.gatekeeper.service.DeduplicationAlertService;
 import org.wso2.carbon.apimgt.governance.gatekeeper.service.DeduplicationConfigService;
 import org.wso2.carbon.apimgt.governance.gatekeeper.service.GatekeeperService;
 import org.wso2.carbon.apimgt.governance.gatekeeper.service.SkippedApiTracker;
@@ -70,8 +68,10 @@ public class GatekeeperAPIEventListener implements Notifier {
         String apiVersion = apiEvent.getApiVersion();
         String organization = apiEvent.getTenantDomain();
 
-        log.info(String.format("Gatekeeper received API event: type=%s, apiId=%s, name=%s, version=%s, org=%s",
-                eventType, apiId, apiName, apiVersion, organization));
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Gatekeeper received API event: type=%s, apiId=%s, name=%s, version=%s, org=%s",
+                    eventType, apiId, apiName, apiVersion, organization));
+        }
 
         try {
             GatekeeperService gatekeeperService = GatekeeperService.getInstance();
@@ -102,6 +102,8 @@ public class GatekeeperAPIEventListener implements Notifier {
      * Indexing is SKIPPED when deduplication is disabled to save resources.
      * Skipped APIs are tracked and hydrated when dedup is re-enabled.
      * The dedup CHECK only runs if: config enabled AND policy is associated.
+     * Note: Violations are recorded via GOV_RULE_VIOLATION during compliance evaluation,
+     * not via AM_DEDUP_ALERT alerts.
      */
     private void handleAPICreateOrUpdate(GatekeeperService gatekeeperService, APIEvent apiEvent) {
         String apiId = apiEvent.getUuid();
@@ -118,12 +120,14 @@ public class GatekeeperAPIEventListener implements Notifier {
             if (!config.isEnabled() || !policyActive) {
                 // Skip indexing entirely when dedup is disabled - track for later hydration
                 SkippedApiTracker.getInstance().trackSkipped(apiId, organization);
-                if (!config.isEnabled()) {
-                    log.info("Deduplication is disabled for org: " + organization
-                            + ". Skipping indexing for API: " + apiName + " (tracked for hydration)");
-                } else {
-                    log.info("No governance policy has the deduplication ruleset associated for org: "
-                            + organization + ". Skipping indexing for API: " + apiName);
+                if (log.isDebugEnabled()) {
+                    if (!config.isEnabled()) {
+                        log.debug("Deduplication disabled for org: " + organization
+                                + ". Skipping indexing for API: " + apiName + " (tracked for hydration)");
+                    } else {
+                        log.debug("No governance policy has the deduplication ruleset associated for org: "
+                                + organization + ". Skipping indexing for API: " + apiName);
+                    }
                 }
                 return;
             }
@@ -131,16 +135,17 @@ public class GatekeeperAPIEventListener implements Notifier {
             // Dedup is active - check if we need to hydrate skipped APIs first
             SkippedApiTracker tracker = SkippedApiTracker.getInstance();
             if (tracker.hasSkippedApis(organization)) {
-                log.info("Dedup re-enabled with " + tracker.getSkippedCount(organization)
+                log.debug("Dedup re-enabled with " + tracker.getSkippedCount(organization)
                         + " skipped APIs pending. Triggering background hydration.");
                 BackgroundHydrationService.getInstance().triggerHydration(organization);
             }
 
-            // Get the API definition - we need to fetch it from the registry
+            // Get the API definition - try OpenAPI first, then Async API
             String apiDefinition = fetchAPIDefinition(apiId, organization);
             
             if (apiDefinition == null || apiDefinition.isEmpty()) {
-                log.warn("Could not fetch API definition for API: " + apiId + ". Skipping deduplication check.");
+                log.debug("Could not fetch API definition for API: " + apiName + " (" + apiId
+                        + "). Skipping deduplication check.");
                 return;
             }
 
@@ -153,66 +158,36 @@ public class GatekeeperAPIEventListener implements Notifier {
             DuplicateCheckResult checkResult = gatekeeperService.checkForDuplicates(
                     apiId, apiDefinition, organization);
 
-                if (checkResult.hasDuplicates()) {
-                    List<DuplicateCheckResult.SimilarAPI> similarApis = checkResult.getSimilarAPIs();
+            if (checkResult.hasDuplicates()) {
+                List<DuplicateCheckResult.SimilarAPI> similarApis = checkResult.getSimilarAPIs();
 
-                    StringBuilder warningMsg = new StringBuilder();
-                    warningMsg.append("\n╔════════════════════════════════════════════════════════════════════════╗\n");
-                    warningMsg.append("║                      DUPLICATE API DETECTED                            ║\n");
-                    warningMsg.append("╠════════════════════════════════════════════════════════════════════════╣\n");
-                    warningMsg.append("║ New API: ").append(apiName).append(" v").append(apiVersion).append("\n");
-                    warningMsg.append("║ Similar APIs found:\n");
-
+                if (log.isDebugEnabled()) {
+                    StringBuilder debugMsg = new StringBuilder();
+                    debugMsg.append("Duplicate API detected - New API: ")
+                            .append(apiName).append(" v").append(apiVersion)
+                            .append(" | Similar APIs: ");
                     for (DuplicateCheckResult.SimilarAPI similar : similarApis) {
-                        warningMsg.append(String.format("║   • API UUID: %s%n", similar.getApiId()));
-                        warningMsg.append(String.format("║     Similarity: %.2f%% (threshold: %.2f%%)%n",
-                                similar.getSimilarityScore() * 100,
-                                checkResult.getThreshold() * 100));
+                        debugMsg.append(String.format("[%s (%s) %.1f%%] ",
+                                similar.getApiName() != null ? similar.getApiName() : "unknown",
+                                similar.getApiId(),
+                                similar.getSimilarityScore() * 100));
                     }
-                    warningMsg.append("╠════════════════════════════════════════════════════════════════════════╣\n");
-                    warningMsg.append("║ MODE: ").append(config.getMode().toUpperCase())
-                            .append(" - API was created but flagged for review                  ║\n");
-                    warningMsg.append("║ ACTION REQUIRED: Review pending alerts in Governance dashboard        ║\n");
-                    warningMsg.append("╚════════════════════════════════════════════════════════════════════════╝\n");
-
-                    log.warn(warningMsg.toString());
-                    
-                    // Create a deduplication alert for user decision
-                    try {
-                        DeduplicationAlertService alertService = DeduplicationAlertService.getInstance();
-                        
-                        // Get API context if available
-                        String apiContext = getApiContext(apiId, organization);
-                        String createdBy = getApiCreator(apiId, organization);
-                        
-                        DeduplicationAlert alert = alertService.createAlertFromCheckResult(
-                                checkResult, apiName, apiVersion, apiContext, createdBy, organization);
-                        
-                        if (alert != null) {
-                            log.info("Created deduplication alert: " + alert.getAlertId() + 
-                                    " with severity: " + alert.getSeverity() +
-                                    " for API: " + apiName);
-                            
-                            // Log available actions for visibility
-                            log.info("Available actions for alert " + alert.getAlertId() + ": " +
-                                    alert.getAvailableActions());
-                            
-                            // Log instructions for resolving the alert
-                            log.info("To resolve this alert, use the Governance API: " +
-                                    "POST /api/am/governance/deduplication/alerts/" + alert.getAlertId() + "/decision");
-                        }
-                    } catch (Exception e) {
-                        log.error("Failed to create deduplication alert for API " + apiName + 
-                                ": " + e.getMessage(), e);
-                        // Continue with indexing even if alert creation fails
-                    }
-                } else {
-                    log.info("No duplicates found for API: " + apiName);
+                    debugMsg.append("| Mode: ").append(config.getMode().toUpperCase());
+                    log.debug(debugMsg.toString());
                 }
+                // Violations will be recorded in GOV_RULE_VIOLATION during the next
+                // compliance evaluation cycle via the GatekeeperValidationEngine
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("No duplicates found for API: " + apiName);
+                }
+            }
 
             // ALWAYS index the API when dedup is active
             gatekeeperService.indexAPI(apiId, apiDefinition, organization);
-            log.info("Successfully indexed API for deduplication: " + apiName + " (ID: " + apiId + ")");
+            if (log.isDebugEnabled()) {
+                log.debug("Indexed API for deduplication: " + apiName + " (ID: " + apiId + ")");
+            }
 
         } catch (Exception e) {
             log.error("Error during deduplication check for API " + apiName + ": " + e.getMessage(), e);
@@ -220,48 +195,9 @@ public class GatekeeperAPIEventListener implements Notifier {
     }
 
     /**
-     * Get API context from the API Manager.
-     */
-    private String getApiContext(String apiId, String organization) {
-        try {
-            org.wso2.carbon.apimgt.api.APIProvider apiProvider = 
-                    org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance()
-                            .getAPIProvider(getAdminUsername(organization));
-            if (apiProvider != null) {
-                org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPIbyUUID(apiId, organization);
-                if (api != null) {
-                    return api.getContext();
-                }
-            }
-        } catch (Exception e) {
-            log.debug("Could not fetch API context for API " + apiId + ": " + e.getMessage());
-        }
-        return null;
-    }
-
-    /**
-     * Get API creator from the API Manager.
-     */
-    private String getApiCreator(String apiId, String organization) {
-        try {
-            org.wso2.carbon.apimgt.api.APIProvider apiProvider = 
-                    org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance()
-                            .getAPIProvider(getAdminUsername(organization));
-            if (apiProvider != null) {
-                org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPIbyUUID(apiId, organization);
-                if (api != null && api.getId() != null) {
-                    return api.getId().getProviderName();
-                }
-            }
-        } catch (Exception e) {
-            log.debug("Could not fetch API creator for API " + apiId + ": " + e.getMessage());
-        }
-        return null;
-    }
-
-
-    /**
      * Handle API delete events - remove from index.
+     * The next compliance evaluation cycle will find no duplicates for
+     * APIs that previously matched the deleted API, clearing violations naturally.
      */
     private void handleAPIDelete(GatekeeperService gatekeeperService, APIEvent apiEvent) {
         String apiId = apiEvent.getUuid();
@@ -271,26 +207,21 @@ public class GatekeeperAPIEventListener implements Notifier {
         try {
             // Remove from deduplication index
             gatekeeperService.removeAPI(apiId, organization);
-            log.info("Removed API from deduplication index: " + apiName + " (ID: " + apiId + ")");
+            if (log.isDebugEnabled()) {
+                log.debug("Removed API from deduplication index: " + apiName + " (ID: " + apiId + ")");
+            }
 
             // Also remove from skipped tracker if it was tracked
             SkippedApiTracker.getInstance().removeFromSkipped(apiId, organization);
-            
-            // Auto-resolve any pending alerts for this API
-            try {
-                DeduplicationAlertService alertService = DeduplicationAlertService.getInstance();
-                alertService.autoResolveAlertsForDeletedApi(apiId, organization);
-            } catch (Exception e) {
-                log.warn("Failed to auto-resolve alerts for deleted API " + apiId + ": " + e.getMessage());
-            }
         } catch (Exception e) {
             log.error("Error removing API from index: " + e.getMessage(), e);
         }
     }
 
     /**
-     * Fetch the OpenAPI definition for an API.
-     * This retrieves the swagger/OpenAPI spec from the API Manager.
+     * Fetch the API definition for an API.
+     * Tries OpenAPI (REST) definition first, then falls back to AsyncAPI definition
+     * for Async APIs (WebSocket, SSE, WebSub etc.).
      * Includes retry logic for newly created APIs where the definition
      * may not be immediately available (e.g., APIs created from scratch).
      */
@@ -307,9 +238,18 @@ public class GatekeeperAPIEventListener implements Notifier {
                 if (apiProvider != null) {
                     org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPIbyUUID(apiId, organization);
                     if (api != null) {
+                        // Try OpenAPI definition first (REST APIs)
                         String swagger = apiProvider.getOpenAPIDefinition(api.getUuid(), organization);
                         if (swagger != null && !swagger.isEmpty()) {
                             return swagger;
+                        }
+                        // Fallback: try AsyncAPI definition for async APIs
+                        String asyncDef = apiProvider.getAsyncAPIDefinition(api.getUuid(), organization);
+                        if (asyncDef != null && !asyncDef.isEmpty()) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Using AsyncAPI definition for API: " + apiId);
+                            }
+                            return asyncDef;
                         }
                     }
                 }

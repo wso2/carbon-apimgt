@@ -118,9 +118,10 @@ public class GatekeeperValidationEngine implements ValidationEngine {
             // Validate mode if present
             if (dedupConfig.containsKey(GatekeeperConstants.RulesetConfig.MODE)) {
                 String mode = String.valueOf(dedupConfig.get(GatekeeperConstants.RulesetConfig.MODE));
-                if (!"audit".equalsIgnoreCase(mode) && !"enforce".equalsIgnoreCase(mode)) {
+                if (!"audit".equalsIgnoreCase(mode) && !"warn".equalsIgnoreCase(mode)
+                        && !"block".equalsIgnoreCase(mode)) {
                     throw new APIMGovernanceException(
-                            "mode must be 'audit' or 'enforce', got '" + mode + "'");
+                            "mode must be 'audit', 'warn', or 'block', got '" + mode + "'");
                 }
             }
 
@@ -282,6 +283,21 @@ public class GatekeeperValidationEngine implements ValidationEngine {
             return violations;
         }
 
+        // Read mode from config - determines enforcement behavior and severity
+        // All modes (audit/warn/block) produce violations so they appear in the compliance dashboard.
+        // The mode only affects severity and blocking behavior:
+        //   audit → WARN severity, non-blocking (informational)
+        //   warn  → WARN severity, non-blocking (alerts user)
+        //   block → ERROR severity, blocks deployment at API_DEPLOY state
+        String mode = getMode(ruleset);
+        log.info("Deduplication mode for ruleset '" + ruleset.getName() + "': " + mode);
+
+        // Read custom message from YAML rules section
+        String customMessage = getCustomRuleMessage(ruleset);
+
+        // Read custom severity from YAML rules section
+        RuleSeverity configuredSeverity = getConfiguredSeverity(ruleset);
+
         // Get threshold from ruleset config
         double threshold = getThreshold(ruleset);
 
@@ -338,18 +354,28 @@ public class GatekeeperValidationEngine implements ValidationEngine {
                     RuleViolation violation = new RuleViolation();
                     violation.setRulesetId(ruleset.getId());
                     violation.setRuleName(DEDUPLICATION_RULE_NAME);
-                    violation.setViolatedPath("/");
 
-                    // Set severity based on confidence
-                    if (result.isHighConfidence()) {
+                    // Set violatedPath to the system-generated details (similarity, matched API info)
+                    String systemDetails = buildSystemDetails(conflict);
+                    violation.setViolatedPath(systemDetails);
+
+                    // Determine severity based on mode:
+                    // - mode=block → ERROR severity (ensures policy BLOCK actions match)
+                    // - mode=warn → use configured severity from YAML, or WARN as default
+                    if ("block".equalsIgnoreCase(mode)) {
                         violation.setSeverity(RuleSeverity.ERROR);
                     } else {
-                        violation.setSeverity(RuleSeverity.WARN);
+                        // mode=warn: use YAML-configured severity or WARN default
+                        violation.setSeverity(configuredSeverity != null
+                                ? configuredSeverity : RuleSeverity.WARN);
                     }
 
-                    // Build detailed message
-                    String message = buildViolationMessage(conflict);
-                    violation.setRuleMessage(message);
+                    // Set the message: use custom YAML message if available, else system message
+                    if (customMessage != null && !customMessage.isEmpty()) {
+                        violation.setRuleMessage(customMessage);
+                    } else {
+                        violation.setRuleMessage(buildViolationMessage(conflict));
+                    }
 
                     violations.add(violation);
                 }
@@ -486,5 +512,135 @@ public class GatekeeperValidationEngine implements ValidationEngine {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Builds system detail string for the violatedPath field.
+     * Contains similarity score, matched API name/version, and UUID for frontend parsing.
+     */
+    private String buildSystemDetails(ConflictReport conflict) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("Similarity: %.1f%%", conflict.getSimilarityScore() * 100));
+
+        if (conflict.getMatchedApiName() != null) {
+            sb.append(" | Matched API: ").append(conflict.getMatchedApiName());
+            if (conflict.getMatchedApiVersion() != null) {
+                sb.append(" v").append(conflict.getMatchedApiVersion());
+            }
+        }
+
+        if (conflict.getMatchedApiUuid() != null) {
+            sb.append(" | API_UUID:").append(conflict.getMatchedApiUuid());
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Gets the mode (audit/warn/block) from the ruleset YAML configuration.
+     */
+    private String getMode(Ruleset ruleset) {
+        try {
+            RulesetContent content = ruleset.getRulesetContent();
+            if (content != null && content.getContent() != null) {
+                String contentString = new String(content.getContent(), StandardCharsets.UTF_8);
+                Map<String, Object> config = yamlMapper.readValue(contentString, Map.class);
+
+                // Check root level
+                if (config.containsKey(GatekeeperConstants.RulesetConfig.MODE)) {
+                    return String.valueOf(config.get(GatekeeperConstants.RulesetConfig.MODE));
+                }
+
+                // Check nested deduplication section
+                if (config.containsKey("deduplication") && config.get("deduplication") instanceof Map) {
+                    Map<String, Object> dedupConfig = (Map<String, Object>) config.get("deduplication");
+                    if (dedupConfig.containsKey(GatekeeperConstants.RulesetConfig.MODE)) {
+                        return String.valueOf(dedupConfig.get(GatekeeperConstants.RulesetConfig.MODE));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Could not parse mode from ruleset", e);
+        }
+        return "audit"; // Default to audit mode
+    }
+
+    /**
+     * Gets the custom violation message from the ruleset YAML rules section.
+     * Looks for rules.api-deduplication-check.message in the YAML.
+     */
+    @SuppressWarnings("unchecked")
+    private String getCustomRuleMessage(Ruleset ruleset) {
+        try {
+            RulesetContent content = ruleset.getRulesetContent();
+            if (content != null && content.getContent() != null) {
+                String contentString = new String(content.getContent(), StandardCharsets.UTF_8);
+                Map<String, Object> config = yamlMapper.readValue(contentString, Map.class);
+
+                // Check for rules section at root or inside deduplication
+                Map<String, Object> rulesMap = null;
+                if (config.containsKey("rules") && config.get("rules") instanceof Map) {
+                    rulesMap = (Map<String, Object>) config.get("rules");
+                } else if (config.containsKey("deduplication") && config.get("deduplication") instanceof Map) {
+                    Map<String, Object> dedupConfig = (Map<String, Object>) config.get("deduplication");
+                    if (dedupConfig.containsKey("rules") && dedupConfig.get("rules") instanceof Map) {
+                        rulesMap = (Map<String, Object>) dedupConfig.get("rules");
+                    }
+                }
+
+                if (rulesMap != null && rulesMap.containsKey(DEDUPLICATION_RULE_NAME)) {
+                    Object ruleObj = rulesMap.get(DEDUPLICATION_RULE_NAME);
+                    if (ruleObj instanceof Map) {
+                        Map<String, Object> ruleConfig = (Map<String, Object>) ruleObj;
+                        if (ruleConfig.containsKey("message")) {
+                            return String.valueOf(ruleConfig.get("message"));
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Could not parse custom rule message from ruleset", e);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the configured severity from the ruleset YAML rules section.
+     * Looks for rules.api-deduplication-check.severity in the YAML.
+     */
+    @SuppressWarnings("unchecked")
+    private RuleSeverity getConfiguredSeverity(Ruleset ruleset) {
+        try {
+            RulesetContent content = ruleset.getRulesetContent();
+            if (content != null && content.getContent() != null) {
+                String contentString = new String(content.getContent(), StandardCharsets.UTF_8);
+                Map<String, Object> config = yamlMapper.readValue(contentString, Map.class);
+
+                // Check for rules section at root or inside deduplication
+                Map<String, Object> rulesMap = null;
+                if (config.containsKey("rules") && config.get("rules") instanceof Map) {
+                    rulesMap = (Map<String, Object>) config.get("rules");
+                } else if (config.containsKey("deduplication") && config.get("deduplication") instanceof Map) {
+                    Map<String, Object> dedupConfig = (Map<String, Object>) config.get("deduplication");
+                    if (dedupConfig.containsKey("rules") && dedupConfig.get("rules") instanceof Map) {
+                        rulesMap = (Map<String, Object>) dedupConfig.get("rules");
+                    }
+                }
+
+                if (rulesMap != null && rulesMap.containsKey(DEDUPLICATION_RULE_NAME)) {
+                    Object ruleObj = rulesMap.get(DEDUPLICATION_RULE_NAME);
+                    if (ruleObj instanceof Map) {
+                        Map<String, Object> ruleConfig = (Map<String, Object>) ruleObj;
+                        if (ruleConfig.containsKey("severity")) {
+                            return RuleSeverity.fromString(
+                                    String.valueOf(ruleConfig.get("severity")));
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Could not parse configured severity from ruleset", e);
+        }
+        return null;
     }
 }

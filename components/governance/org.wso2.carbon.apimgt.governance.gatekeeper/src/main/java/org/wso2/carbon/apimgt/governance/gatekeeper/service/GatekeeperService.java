@@ -96,10 +96,68 @@ public class GatekeeperService {
             return;
         }
 
+        log.info("Initializing GatekeeperService - ensuring database tables exist");
+        ensureTablesExist();
+
         log.info("Initializing GatekeeperService - hydrating LSH index from database");
         hydrateIndex();
         initialized = true;
         log.info("GatekeeperService initialization complete. LSH index contains " + lshIndex.size() + " APIs");
+    }
+
+    /**
+     * Ensures the required database tables exist.
+     * Creates them if they don't exist (H2-compatible CREATE TABLE IF NOT EXISTS).
+     */
+    private void ensureTablesExist() {
+        java.sql.Connection connection = null;
+        java.sql.Statement stmt = null;
+        try {
+            connection = org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            stmt = connection.createStatement();
+
+            // Create AM_API_MINHASH table if not exists
+            stmt.execute("CREATE TABLE IF NOT EXISTS AM_API_MINHASH (" +
+                    "API_UUID VARCHAR(36) NOT NULL, " +
+                    "SIGNATURE_BLOB BLOB NOT NULL, " +
+                    "ORGANIZATION VARCHAR(128) NOT NULL, " +
+                    "CREATED_TIME TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
+                    "UPDATED_TIME TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
+                    "PRIMARY KEY (API_UUID, ORGANIZATION))");
+
+            // MySQL does not support CREATE INDEX IF NOT EXISTS. Use a try-catch to silently
+            // handle the case where the index already exists (error code 1061 = Duplicate key name).
+            try {
+                stmt.execute("CREATE INDEX IDX_AM_API_MINHASH_ORG ON AM_API_MINHASH(ORGANIZATION)");
+            } catch (java.sql.SQLException indexEx) {
+                // 1061 = ER_DUP_KEYNAME (MySQL), or similar for other DBs — index already exists
+                if (!indexEx.getMessage().contains("Duplicate") && !indexEx.getMessage().contains("already exists")) {
+                    log.warn("Could not create index IDX_AM_API_MINHASH_ORG: " + indexEx.getMessage());
+                }
+            }
+
+            connection.commit();
+            log.info("Gatekeeper database tables verified/created successfully");
+
+        } catch (Exception e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (java.sql.SQLException rollbackEx) {
+                    log.error("Error rolling back table creation", rollbackEx);
+                }
+            }
+            log.error("Error ensuring Gatekeeper tables exist. " +
+                    "Deduplication signatures may not persist across restarts.", e);
+        } finally {
+            if (stmt != null) {
+                try { stmt.close(); } catch (java.sql.SQLException e) { /* ignore */ }
+            }
+            if (connection != null) {
+                try { connection.close(); } catch (java.sql.SQLException e) { /* ignore */ }
+            }
+        }
     }
 
     /**
@@ -179,7 +237,9 @@ public class GatekeeperService {
             return result;
         }
 
-        // Build conflict reports
+        // Build conflict reports using "First-In" rule:
+        // Only report conflicts where the matched API was created BEFORE the query API.
+        // The older (original) API remains compliant; only the newer API gets violations.
         List<ConflictReport> conflictReports = new ArrayList<>();
         boolean highConfidence = false;
 
@@ -193,24 +253,98 @@ public class GatekeeperService {
             log.debug("Could not read high confidence threshold from config, using default: 0.95");
         }
 
+        // Resolve the creation time of the query API for First-In comparison
+        String queryApiCreatedTime = null;
+        try {
+            String adminUsername = getAdminUsername(organization);
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(adminUsername);
+            if (apiProvider != null) {
+                API queryApi = apiProvider.getAPIbyUUID(apiUuid, organization);
+                if (queryApi != null) {
+                    queryApiCreatedTime = queryApi.getCreatedTime();
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Could not resolve creation time for query API " + apiUuid + ": " + e.getMessage());
+        }
+
         for (LSHIndex.SimilarityResult similar : similarApis) {
             double similarity = similar.getSimilarity();
+
+            // Resolve matched API name, version, and creation time from UUID
+            String matchedApiName = null;
+            String matchedApiVersion = null;
+            String matchedApiCreatedTime = null;
+            try {
+                String adminUsername = getAdminUsername(organization);
+                APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(adminUsername);
+                if (apiProvider != null) {
+                    API matchedApi = apiProvider.getAPIbyUUID(similar.getApiUuid(), organization);
+                    if (matchedApi != null && matchedApi.getId() != null) {
+                        matchedApiName = matchedApi.getId().getApiName();
+                        matchedApiVersion = matchedApi.getId().getVersion();
+                        matchedApiCreatedTime = matchedApi.getCreatedTime();
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("Could not resolve API name for UUID " + similar.getApiUuid()
+                        + ": " + e.getMessage());
+            }
+
+            // First-In rule: Only report this conflict if the matched API is OLDER than the query API.
+            // If the query API is older (or same age), skip — the query API is the "original" and
+            // should not receive violations. The newer API (matched) will get its own violations
+            // when it is evaluated separately.
+            if (queryApiCreatedTime != null && matchedApiCreatedTime != null) {
+                int timeComparison = queryApiCreatedTime.compareTo(matchedApiCreatedTime);
+                if (timeComparison < 0) {
+                    // Query API was created BEFORE the matched API → query is the original, skip
+                    log.info(String.format("First-In rule: Skipping match %s -> %s (query created at %s is older " +
+                                    "than match created at %s)",
+                            apiUuid, similar.getApiUuid(), queryApiCreatedTime, matchedApiCreatedTime));
+                    continue;
+                } else if (timeComparison == 0) {
+                    // Same creation time — use UUID lexicographic order as tiebreaker.
+                    // The "smaller" UUID is considered the original.
+                    if (apiUuid.compareTo(similar.getApiUuid()) < 0) {
+                        log.info(String.format("First-In rule: Skipping match %s -> %s (same creation time, " +
+                                        "query UUID is lexicographically smaller)",
+                                apiUuid, similar.getApiUuid()));
+                        continue;
+                    }
+                }
+            }
 
             if (similarity >= highConfidenceThreshold) {
                 highConfidence = true;
             }
 
+            String displayName = matchedApiName != null ? matchedApiName : similar.getApiUuid();
+
             ConflictReport report = new ConflictReport.Builder()
                     .matchedApiUuid(similar.getApiUuid())
+                    .matchedApiName(matchedApiName)
+                    .matchedApiVersion(matchedApiVersion)
                     .similarityScore(similarity)
-                    .message(String.format("API has %.1f%% similarity with existing API",
-                            similarity * 100))
+                    .message(String.format("API '%s' has %.1f%% similarity",
+                            displayName, similarity * 100))
                     .recommendation(similarity >= highConfidenceThreshold
-                            ? "Consider reusing the existing API or creating a new version"
-                            : "Review the similar API to ensure this is not a duplicate")
+                            ? "STRONGLY RECOMMENDED: Consider reusing '" + displayName
+                              + "' or creating a new version instead"
+                            : "Review '" + displayName
+                              + "' to ensure this is not a duplicate")
                     .build();
 
             conflictReports.add(report);
+        }
+
+        // If all conflicts were skipped by the First-In rule, the query API is the original
+        if (conflictReports.isEmpty()) {
+            log.info("First-In rule: All matches skipped for API " + apiUuid
+                    + " (this API is the original/oldest). Marking as unique.");
+            DeduplicationResult result = DeduplicationResult.unique(apiUuid, organization);
+            result.setThreshold(threshold);
+            return result;
         }
 
         DeduplicationResult result = DeduplicationResult.duplicate(
@@ -436,7 +570,9 @@ public class GatekeeperService {
             for (ConflictReport report : result.getConflictReports()) {
                 org.wso2.carbon.apimgt.governance.gatekeeper.model.DuplicateCheckResult.SimilarAPI similar = 
                         new org.wso2.carbon.apimgt.governance.gatekeeper.model.DuplicateCheckResult.SimilarAPI(
-                                report.getMatchedApiUuid(), report.getSimilarityScore());
+                                report.getMatchedApiUuid(),
+                                report.getMatchedApiName(),
+                                report.getSimilarityScore());
                 similarApis.add(similar);
             }
             checkResult.setSimilarAPIs(similarApis);
