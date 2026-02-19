@@ -4666,6 +4666,7 @@ public class PublisherCommonUtils {
             String> artifactProjectContent) throws APIManagementException {
         Map<String, String> responseMap = new HashMap<>(2);
 
+        boolean syncEvalPerformed = false;
         try {
             if (apimGovernanceService.isPoliciesWithBlockingActionExist(artifactID, type, state, organization)) {
                 if (log.isDebugEnabled()) {
@@ -4673,6 +4674,7 @@ public class PublisherCommonUtils {
                 }
                 ArtifactComplianceInfo artifactComplianceInfo = apimGovernanceService.evaluateComplianceSync(artifactID,
                         revisionId, type, state, artifactProjectContent, organization);
+                syncEvalPerformed = true; // evaluateComplianceSync already triggers async internally
                 if (artifactComplianceInfo.isBlockingNecessary()) {
                     responseMap.put(GOVERNANCE_COMPLIANCE_KEY, "false");
                     responseMap.put(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE,
@@ -4683,6 +4685,14 @@ public class PublisherCommonUtils {
         } catch (APIMGovernanceException e) {
             log.error("Error occurred while executing governance compliance validation for API " + artifactID, e);
         }
+
+        // If sync evaluation was not triggered, queue async evaluation for compliance tracking.
+        // When sync eval runs, it already triggers async internally via evaluateComplianceAsync(),
+        // so we only need to queue async when sync was skipped to avoid redundant evaluations.
+        if (!syncEvalPerformed) {
+            checkGovernanceComplianceAsync(artifactID, state, type, organization);
+        }
+
         return responseMap;
     }
 
@@ -4830,6 +4840,50 @@ public class PublisherCommonUtils {
             if (log.isDebugEnabled()) {
                 log.debug("Error occurred while deleting governance data on "
                         + "deletion of " + ArtifactType.API + " " + artifactId, e);
+            }
+        }
+    }
+
+    /**
+     * Clean up stale violations from other APIs that reference the given deleted API UUID.
+     * When an API is deleted, other APIs may still have deduplication violations referencing
+     * the deleted API. This method removes those stale violation records.
+     *
+     * @param apiUuid      UUID of the deleted API
+     * @param organization Organization
+     */
+    public static void cleanupViolationsReferencingApi(String apiUuid, String organization) {
+        if (apimGovernanceService == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Governance service not available, skipping "
+                        + "violation cleanup for deleted API: " + apiUuid);
+            }
+            return;
+        }
+        try {
+            List<String> affectedApis = apimGovernanceService
+                    .cleanupViolationsReferencingApi(apiUuid, organization);
+            // Trigger async re-evaluation for affected APIs so their compliance state is updated
+            if (affectedApis != null && !affectedApis.isEmpty()) {
+                for (String affectedApiId : affectedApis) {
+                    try {
+                        checkGovernanceComplianceAsync(affectedApiId, APIMGovernableState.API_UPDATE,
+                                ArtifactType.API, organization);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Triggered compliance re-evaluation for affected API: " + affectedApiId
+                                    + " after deletion of API: " + apiUuid);
+                        }
+                    } catch (Exception ex) {
+                        log.warn("Failed to trigger re-evaluation for affected API: " + affectedApiId, ex);
+                    }
+                }
+                log.info("Triggered compliance re-evaluation for " + affectedApis.size()
+                        + " APIs affected by deletion of API: " + apiUuid);
+            }
+        } catch (APIMGovernanceException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while cleaning up violations referencing "
+                        + "deleted API: " + apiUuid, e);
             }
         }
     }

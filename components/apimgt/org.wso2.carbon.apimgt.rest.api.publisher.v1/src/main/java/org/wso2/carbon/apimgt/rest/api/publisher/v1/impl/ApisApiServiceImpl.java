@@ -901,8 +901,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .entity(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE)).build();
             }
             apiProvider.updateAPI(updatedAPI, existingAPI);
-            PublisherCommonUtils.checkGovernanceComplianceAsync(updatedAPI.getUuid(), APIMGovernableState.API_UPDATE,
-                    ArtifactType.API, organization);
+            // Async compliance evaluation is now handled internally by checkGovernanceComplianceSync
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1056,8 +1055,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     PublisherCommonUtils.updateApi(originalAPI, new APIDTOTypeWrapper(body), apiProvider, tokenScopes,
                             organizationInfo);
 
-            PublisherCommonUtils.checkGovernanceComplianceAsync(originalAPI.getUuid(), APIMGovernableState.API_UPDATE,
-                    ArtifactType.API, originalAPI.getOrganization());
+            // Async compliance evaluation is now handled internally by checkGovernanceComplianceSync
             return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
@@ -1685,6 +1683,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 return null;
             }
             PublisherCommonUtils.clearArtifactComplianceInfo(apiId, RestApiConstants.RESOURCE_API , organization);
+            // Clean up stale deduplication violations on OTHER APIs that reference this deleted API
+            PublisherCommonUtils.cleanupViolationsReferencingApi(apiId, organization);
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
@@ -2875,8 +2875,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                             .getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);
                     ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
                             .fromResourcePolicyStrToInfoDTO(updatedPolicyContent);
-                    PublisherCommonUtils.checkGovernanceComplianceAsync(api.getUuid(), APIMGovernableState.API_UPDATE,
-                            ArtifactType.API, organization);
+                    // Async compliance evaluation is now handled internally by checkGovernanceComplianceSync
                     return Response.ok().entity(resourcePolicyInfoDTO).build();
                 } else {
                     String errorMessage =
@@ -3526,8 +3525,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
             //This URI used to set the location header of the POST response
             createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
-            PublisherCommonUtils.checkGovernanceComplianceAsync(createdApi.getUuid(), APIMGovernableState.API_CREATE,
-                    ArtifactType.API, organization);
+            // Async compliance evaluation is now handled internally by checkGovernanceComplianceSync
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (IOException | URISyntaxException e) {
             RestApiUtil.handleInternalServerError("Error occurred while importing WSDL", e, log);
@@ -3602,8 +3600,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String apiDefinition = ApisApiServiceImplUtils.generateSOAPAPIDefinition(apiToAdd, soapOperation);
             apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition, organization);
             //Retrieve the newly added API to send in the response payload
-            PublisherCommonUtils.checkGovernanceComplianceAsync(apiToAdd.getUuid(), APIMGovernableState.API_CREATE,
-                    ArtifactType.API, organization);
+            // Async compliance evaluation is now handled internally by checkGovernanceComplianceSync
             return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization, APIConstants.API_IDENTIFIER_TYPE);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while importing WSDL to create a SOAP API", e, log);
@@ -3637,8 +3634,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             API createdApi = apiProvider.addAPI(apiToAdd);
 
-            PublisherCommonUtils.checkGovernanceComplianceAsync(apiToAdd.getUuid(), APIMGovernableState.API_CREATE,
-                    ArtifactType.API, organization);
+            // Async compliance evaluation is now handled internally by checkGovernanceComplianceSync
             String filename = null;
             if (fileDetail != null) {
                 filename = fileDetail.getContentDisposition().getFilename();
@@ -4260,8 +4256,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS
                     + "/" + createdApiRevisionDTO.getApiInfo().getId() + "/"
                     + RestApiConstants.RESOURCE_PATH_REVISIONS + "/" + createdApiRevisionDTO.getId());
-            PublisherCommonUtils.checkGovernanceComplianceAsync(apiId, APIMGovernableState.API_DEPLOY,
-                    ArtifactType.API, organization);
+            // Async compliance evaluation is now handled internally by checkGovernanceComplianceSync
             return Response.created(createdApiUri).entity(createdApiRevisionDTO).build();
         } catch (APIManagementException e) {
             if (e instanceof APIComplianceException) {
@@ -4399,8 +4394,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevisionDeploymentDTOS.add(APIMappingUtil.fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
         }
         Response.Status status = Response.Status.CREATED;
-        PublisherCommonUtils.checkGovernanceComplianceAsync(apiId, APIMGovernableState.API_DEPLOY,
-                ArtifactType.API, organization);
+        // Async compliance evaluation is now handled internally by checkGovernanceComplianceSync
+        // to avoid redundant duplicate dedup checks that caused 2-3 minute latency
         return Response.status(status).entity(apiRevisionDeploymentDTOS).build();
     }
 

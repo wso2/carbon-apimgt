@@ -80,9 +80,34 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                                                      String organization)
             throws APIMGovernanceException {
 
+        log.info("[BLOCK-CHECK] isPoliciesWithBlockingActionExist called for artifact " + artifactRefId
+                + " at state " + state + " in org " + organization);
+
         List<String> applicablePolicyIds = APIMGovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactRefId,
                 artifactType, state, organization);
-        return APIMGovernanceUtil.isBlockingActionsPresent(applicablePolicyIds, state, organization);
+        log.info("[BLOCK-CHECK] State-filtered policies (" + state + "): " + applicablePolicyIds.size()
+                + " -> " + applicablePolicyIds);
+
+        // Check for explicit BLOCK actions in the GOV_POLICY_ACTION table
+        if (APIMGovernanceUtil.isBlockingActionsPresent(applicablePolicyIds, state, organization)) {
+            log.info("[BLOCK-CHECK] Explicit BLOCK action found in policy action table. Returning true.");
+            return true;
+        }
+
+        // For GENERIC rulesets (e.g., deduplication), check ALL applicable policies WITHOUT state filter.
+        // GENERIC rulesets define blocking behavior (mode=block) in their YAML content independently of
+        // per-state action configuration in GOV_POLICY_GOVERNABLE_STATE. If the dedup policy is not
+        // listed under the API_DEPLOY state in that table, the state-filtered query returns empty,
+        // so we must query ALL policies for the artifact to detect GENERIC block-mode rulesets.
+        Map<String, String> allPolicies = APIMGovernanceUtil.getApplicablePoliciesForArtifact(artifactRefId,
+                artifactType, organization);
+        List<String> allPolicyIds = new ArrayList<>(allPolicies.keySet());
+        log.info("[BLOCK-CHECK] All policies (no state filter): " + allPolicyIds.size()
+                + " -> " + allPolicyIds);
+
+        boolean hasGenericBlock = complianceManager.hasGenericBlockModeRulesets(allPolicyIds, state, organization);
+        log.info("[BLOCK-CHECK] hasGenericBlockModeRulesets result: " + hasGenericBlock);
+        return hasGenericBlock;
     }
 
     /**
@@ -160,10 +185,31 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
 
         List<String> applicablePolicyIds = APIMGovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactRefId,
                 artifactType, state, organization);
+        log.info("[SYNC-EVAL] State-filtered policies for " + artifactRefId + " at " + state
+                + ": " + applicablePolicyIds.size() + " -> " + applicablePolicyIds);
+
+        // For deploy state and higher, merge ALL applicable policies (without state filter)
+        // so that GENERIC rulesets (e.g., deduplication with mode=block) are included in the sync
+        // evaluation. GENERIC rulesets define blocking behavior in YAML independently of per-state
+        // action configuration in GOV_POLICY_GOVERNABLE_STATE, so the state-filtered query may
+        // miss them. By merging, we ensure they are processed in handleComplianceEvalSync.
+        if (state.ordinal() >= APIMGovernableState.API_DEPLOY.ordinal()) {
+            Map<String, String> allPolicies = APIMGovernanceUtil.getApplicablePoliciesForArtifact(artifactRefId,
+                    artifactType, organization);
+            Set<String> mergedPolicies = new HashSet<>(applicablePolicyIds);
+            mergedPolicies.addAll(allPolicies.keySet());
+            applicablePolicyIds = new ArrayList<>(mergedPolicies);
+            log.info("[SYNC-EVAL] After merging all policies for " + artifactRefId
+                    + ": " + applicablePolicyIds.size() + " -> " + applicablePolicyIds);
+        }
 
         ArtifactComplianceInfo artifactComplianceInfo = complianceManager.handleComplianceEvalSync
                 (artifactRefId, revisionId, artifactType, applicablePolicyIds,
                         artifactProjectContent, state, organization);
+        log.info("[SYNC-EVAL] Sync eval complete for " + artifactRefId
+                + ". blockingNecessary=" + artifactComplianceInfo.isBlockingNecessary()
+                + ", blockingViolations=" + artifactComplianceInfo.getBlockingRuleViolations().size()
+                + ", nonBlockingViolations=" + artifactComplianceInfo.getNonBlockingViolations().size());
 
         // Though compliance is evaluated sync , we need to evaluate the compliance for all dependent states async to
         // update results in the database. Hence, calling the async method here and this won't take time as it is async
@@ -275,6 +321,22 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
             throws APIMGovernanceException {
 
         complianceManager.deleteArtifact(artifactRefId, artifactType, organization);
+    }
+
+    /**
+     * Clean up violations from other APIs that reference the given API UUID.
+     * Used during API deletion to remove stale deduplication violations.
+     * Returns the list of affected artifact reference IDs so they can be re-evaluated.
+     *
+     * @param apiUuid      UUID of the deleted API
+     * @param organization Organization
+     * @return List of artifact reference IDs (API UUIDs) whose violations were cleaned up
+     * @throws APIMGovernanceException If an error occurs during cleanup
+     */
+    @Override
+    public List<String> cleanupViolationsReferencingApi(String apiUuid, String organization)
+            throws APIMGovernanceException {
+        return complianceManager.cleanupViolationsReferencingApi(apiUuid, organization);
     }
 
     /**
