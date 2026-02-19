@@ -122,6 +122,19 @@ public interface APIMGovernanceService {
     void clearArtifactComplianceInfo(String artifactRefId, ArtifactType artifactType, String organization)
             throws APIMGovernanceException;
 
+    /**
+     * Clean up violations from other APIs that reference the given API UUID.
+     * Used during API deletion to remove stale deduplication violations.
+     * Returns the list of affected artifact reference IDs so they can be re-evaluated.
+     *
+     * @param apiUuid      UUID of the deleted API
+     * @param organization Organization
+     * @return List of artifact reference IDs (API UUIDs) whose violations were cleaned up
+     * @throws APIMGovernanceException If an error occurs during cleanup
+     */
+    List<String> cleanupViolationsReferencingApi(String apiUuid, String organization)
+            throws APIMGovernanceException;
+
 
     /**
      * Get applicable rulesets for the artifact

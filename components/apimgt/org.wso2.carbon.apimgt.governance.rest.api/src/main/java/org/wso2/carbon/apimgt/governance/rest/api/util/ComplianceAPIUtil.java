@@ -520,7 +520,6 @@ public class ComplianceAPIUtil {
         RulesetValidationResultDTO rulesetValidationResultDTO = new RulesetValidationResultDTO();
         rulesetValidationResultDTO.setId(rulesetId);
         rulesetValidationResultDTO.setName(rulesetInfo.getName());
-
         // If the ruleset has not been evaluated, set the ruleset validation status to unapplied
         boolean isRulesetEvaluatedForArtifact = complianceManager
                 .isRulesetEvaluatedForArtifact(artifactRefId, artifactType, rulesetId, organization);
