@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.32.175-SNAPSHOT</version>
+        <version>9.33.9-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -190,6 +190,8 @@
                         --add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED  
                         --add-opens java.base/java.math=ALL-UNNAMED
                         --add-opens java.base/java.nio.charset=ALL-UNNAMED
+                        --add-opens java.base/java.util.regex=ALL-UNNAMED
+                        --add-opens java.base/java.lang=ALL-UNNAMED
                     </argLine>
                 </configuration>
                 <dependencies>

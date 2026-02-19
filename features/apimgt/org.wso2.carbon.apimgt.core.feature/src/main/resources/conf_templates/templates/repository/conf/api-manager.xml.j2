@@ -1721,6 +1721,9 @@
         {% if apimgt.mutual_ssl.client_certificate_encode is defined %}
         <ClientCertificateEncode>{{apimgt.mutual_ssl.client_certificate_encode}}</ClientCertificateEncode>
         {% endif %}
+        {% if apimgt.mutual_ssl.forward_client_certificate_header is defined %}
+        <ForwardClientCertificateHeader>{{apimgt.mutual_ssl.forward_client_certificate_header}}</ForwardClientCertificateHeader>
+        {% endif %}
      </MutualSSL>
 
      <GlobalCacheInvalidation>
@@ -2092,4 +2095,14 @@
 
       <EnableFailoverInLoadbalancedEndpoints>{{apim.endpoint_config.loadbalanced.enable_failover}}</EnableFailoverInLoadbalancedEndpoints>
       <EnableCertificateManagementEventListening>{{apim.certificate_manager.events_enabled}}</EnableCertificateManagementEventListening>
+
+      <AWSLambdaConnector>
+          <HttpClient>
+              <MaxConnections>{{apim.aws_lambda.http_client.max_connections}}</MaxConnections>
+              <ConnectionTimeout>{{apim.aws_lambda.http_client.connection_timeout}}</ConnectionTimeout>
+              <SocketTimeout>{{apim.aws_lambda.http_client.socket_timeout}}</SocketTimeout>
+              <ConnectionAcquisitionTimeout>{{apim.aws_lambda.http_client.connection_acquisition_timeout}}</ConnectionAcquisitionTimeout>
+          </HttpClient>
+      </AWSLambdaConnector>
+
 </APIManager>

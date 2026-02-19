@@ -497,6 +497,11 @@ public class Utils {
         String certificate = (String) headers.get(Utils.getClientCertificateHeader());
         byte[] bytes;
         if (certificate != null) {
+            if (!isForwardClientCertificateHeaderEnabled()) {
+                // Remove the client certificate header to avoid forwarding to the backend services
+                headers.remove(Utils.getClientCertificateHeader());
+            }
+
             if (!isClientCertificateEncoded()) {
                 // Remove invalid characters, restructure line separators, and reconstruct the certificate
                 certificate = certificate
@@ -581,6 +586,21 @@ public class Utils {
             }
         }
         return true;
+    }
+
+    /**
+     * Checks whether forwarding client certificate header is enabled or not from API-M configurations.
+     * @return Boolean indicating forwarding client certificate header enable/disable state
+     */
+    public static boolean isForwardClientCertificateHeaderEnabled() {
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        if (apiManagerConfiguration != null) {
+            String firstProperty = apiManagerConfiguration
+                    .getFirstProperty(APIConstants.MutualSSL.FORWARD_CLIENT_CERTIFICATE_HEADER);
+            return Boolean.parseBoolean(firstProperty);
+        }
+        return false;
     }
 
 

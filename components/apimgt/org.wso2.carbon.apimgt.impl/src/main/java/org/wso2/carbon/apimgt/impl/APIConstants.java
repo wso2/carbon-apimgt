@@ -2926,6 +2926,12 @@ public final class APIConstants {
     public static final String JWT_AUTHENTICATION_SUBSCRIPTION_VALIDATION =
             JWT_AUTHENTICATION_CONFIG + ".EnableSubscriptionValidationViaKeyManager";
     public static final String APPLICATION_TOKEN_TYPE_JWT = "JWT";
+    // AWS Lambda: HTTP Client Configuration Constants
+    public static final String AWS_LAMBDA_HTTP_CLIENT = "AWSLambdaConnector.HttpClient.";
+    public static final String MAX_CONNECTIONS = "MaxConnections";
+    public static final String CONNECTION_TIMEOUT = "ConnectionTimeout";
+    public static final String SOCKET_TIMEOUT = "SocketTimeout";
+    public static final String ACQUISITION_TIMEOUT = "ConnectionAcquisitionTimeout";
     /**
      * Constants for the recommendation system
      */
@@ -2990,6 +2996,8 @@ public final class APIConstants {
                 ".EnableClientCertificateValidation";
         public static final String ENABLE_CERTIFICATE_CHAIN_VALIDATION = MUTUAL_SSL_CONFIG_ROOT +
                 ".EnableCertificateChainValidation";
+        public static final String FORWARD_CLIENT_CERTIFICATE_HEADER = MUTUAL_SSL_CONFIG_ROOT +
+                ".ForwardClientCertificateHeader";
     }
 
     public static final String DEFAULT_SCOPE_TYPE = "OAUTH2";
@@ -3114,6 +3122,10 @@ public final class APIConstants {
         public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
         public static final String APPLICATION_GRANT_TYPE = "application";
         public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";
+
+        public static final String CUSTOM_KM_TYPE = "CustomKeyManager";
+        public static final String CUSTOM_KM_DISPLAY_NAME = "Custom Key Manager (Out-of-Band Provisioning)";
+        public static final String DEFAULT_KEY_MANAGER_HOST = "https://localhost:9443";
 
         public static class KeyManagerEvent {
 
