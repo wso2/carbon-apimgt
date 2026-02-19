@@ -87,8 +87,10 @@ public class OASDefinitionHandler implements APIDefinitionHandler {
                 apiSpec.add(SWAGGER_INFO, newInfoObject);
             }
             api.setSwaggerDefinition(apiSpec.toString());
-        }else {
-            log.error("Swagger definition is null for API: " + api.getId().getApiName());
+        } else {
+            String errorMsg = "Swagger definition is null for API: " + api.getId().getApiName();
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg);
         }
     }
 

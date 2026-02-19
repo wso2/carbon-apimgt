@@ -89,8 +89,10 @@ public class AsyncAPIDefinitionHandler implements APIDefinitionHandler {
                 apiSpec.add(SWAGGER_INFO, newInfoObject);
             }
             api.setAsyncApiDefinition(apiSpec.toString());
-        }else {
-            log.error("Async definition is null for API: " + api.getId().getApiName());
+        } else {
+            String errorMsg = "AsyncAPI definition is null for API: " + api.getId().getApiName();
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg);
         }
     }
 
