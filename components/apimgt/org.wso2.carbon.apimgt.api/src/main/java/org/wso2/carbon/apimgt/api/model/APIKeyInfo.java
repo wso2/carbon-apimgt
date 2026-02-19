@@ -24,9 +24,15 @@ public class APIKeyInfo {
     private String keyDisplayName;
     private int appId;
     private String applicationId;
+    private String applicationName;
+    private int apiId;
+    private String apiName;
+    private String apiUUId;
+    private String origin;
     private String keyType;
     private String lastUsedTime;
     private String createdTime;
+    private String AssociatedOn;
     private String salt;
     private String lookupKey;
     private long validityPeriod;
@@ -61,6 +67,46 @@ public class APIKeyInfo {
         this.applicationId = applicationId;
     }
 
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
+
+    public int getApiId() {
+        return apiId;
+    }
+
+    public void setApiId(int apiId) {
+        this.apiId = apiId;
+    }
+
+    public String getApiName() {
+        return apiName;
+    }
+
+    public void setApiName(String apiName) {
+        this.apiName = apiName;
+    }
+
+    public String getApiUUId() {
+        return apiUUId;
+    }
+
+    public void setApiUUId(String apiUUId) {
+        this.apiUUId = apiUUId;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
+
     public String getKeyType() {
         return keyType;
     }
@@ -83,6 +129,14 @@ public class APIKeyInfo {
 
     public void setCreatedTime(String createdTime) {
         this.createdTime = createdTime;
+    }
+
+    public String getAssociatedOn() {
+        return AssociatedOn;
+    }
+
+    public void setAssociatedOn(String associatedOn) {
+        AssociatedOn = associatedOn;
     }
 
     public String getSalt() {

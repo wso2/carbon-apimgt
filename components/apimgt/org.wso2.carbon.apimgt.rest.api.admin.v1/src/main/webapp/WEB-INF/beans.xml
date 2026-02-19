@@ -55,6 +55,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.TransactionCountApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.LabelsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.AiServiceProvidersApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.ApiKeysApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

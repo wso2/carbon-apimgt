@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import java.io.File;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscribedAPIWithApiKeyListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.WorkflowResponseDTO;
 
 import java.util.List;
@@ -50,6 +51,7 @@ public interface ApplicationsApiService {
       public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameDissociateDelete(String applicationId, String keyType, String keyDisplayName, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameRegeneratePost(String applicationId, String keyType, String keyDisplayName, String ifMatch, APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType, String ifMatch, APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdApiKeysKeyTypeSubscriptionsGet(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO applicationKeyGenerateRequestDTO, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;

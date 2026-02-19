@@ -3658,6 +3658,42 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/revoke"'
 
+  /applications/{applicationId}/api-keys/{keyType}/subscriptions:
+    get:
+      tags:
+        - API Keys
+      summary: Get Subscribed APIs with API Key(s) of a Given Type
+      description: |
+        Retrieve subscribed APIs with non-associated API Key(s) for the application specifying the key type in the URI.
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/keyType'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Subscribed APIs along with the non-associated API key(s) of given type are returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscribedAPIWithApiKeyList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+            - apim:api_key
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X GET "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/subscriptions"'
+
   /applications/{applicationId}/api-keys/{keyType}/associate:
     post:
       tags:
@@ -6398,6 +6434,21 @@ components:
           type: string
           description: Last used time as epoch milliseconds, or NOT_USED if never used.
           example: NOT_USED
+    APIWithKeyInfo:
+      title: API with API Key
+      type: object
+      properties:
+        keyDisplayName:
+          type: string
+          description: API Key name
+          example: Test_Key
+        apiName:
+          type: string
+          description: API name
+          example: NotificationAPI
+        apiUUID:
+          type: string
+          description: The UUID of the associated API
     APIAPIKeyInfo:
       title: API Key details to invoke APIs
       type: object
@@ -6448,6 +6499,19 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/APIKeyInfo'
+    SubscribedAPIWithApiKeyList:
+      title: Subscribed APIs with non-associated API keys
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of subscribed APIs with API keys returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIWithKeyInfo'
     APIKeyAssociationList:
       title: API Key Associations List
       type: object
@@ -6732,8 +6796,12 @@ components:
       properties:
         apiName:
           type: string
-          description: API name of the association
+          description: API name
           example: SampleAPI
+        apiId:
+          type: string
+          description: The unique identifier of the API.
+          example: 2962f3bb-8330-438e-baee-0ee1d6434ba4
         keyDisplayName:
           type: string
           description: API key name

@@ -60,11 +60,14 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRenewalRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRevokeRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIWithKeyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AppAPIKeyAssociationRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO.VisibilityEnum;
@@ -678,12 +681,76 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdApiKeysKeyTypeAssociatePost(String applicationId, String keyType, AppAPIKeyAssociationRequestDTO appAPIKeyAssociationRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException {
+    public Response applicationsApplicationIdApiKeysKeyTypeAssociatePost(String applicationId, String keyType,
+                                                                         AppAPIKeyAssociationRequestDTO body,
+                                                                         String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        Application application;
+        String apiName = null, keyDisplayName = null;
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
+            if ((application = apiConsumer.getApplicationByUUID(applicationId)) == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            } else {
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                } else {
+                    if (APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)) {
+                        application.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+                    } else if (APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType)) {
+                        application.setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
+                    } else {
+                        RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
+                    }
+                    if (body != null && body.getApiName() != null) {
+                        apiName = body.getApiName();
+                    }
+                    if (body != null && body.getKeyDisplayName() != null) {
+                        keyDisplayName = body.getKeyDisplayName();
+                    }
+                    apiConsumer.createAssociationToApp(body.getApiId(), applicationId, keyDisplayName);
+                    APIKeyAssociationDTO apiKeyAssociationDTO = ApplicationKeyMappingUtil.formApiAssociationToDTO(apiName,
+                            application.getName(), keyDisplayName);
+                    return Response.ok().entity(apiKeyAssociationDTO).build();
+                }
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while creating an association to the API Key " + keyDisplayName, e, log);
+        }
         return null;
     }
 
     @Override
-    public Response applicationsApplicationIdApiKeysKeyTypeAssociationsGet(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+    public Response applicationsApplicationIdApiKeysKeyTypeAssociationsGet(String applicationId,
+                                                                           String keyType, String ifNoneMatch,
+                                                                           MessageContext messageContext)
+            throws APIManagementException {
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        Application application;
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
+            if ((application = apiConsumer.getApplicationByUUID(applicationId)) == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            } else {
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                } else {
+                    boolean isValidKeyType = APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)
+                            || APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType);
+                    if (!isValidKeyType) {
+                        RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
+                    } else {
+                        List<APIKeyInfo> apiKeyAssociationsList = apiConsumer.getApiKeyAssociations(applicationId, keyType);
+                        List<APIKeyAssociationInfoDTO> apiKeyAssociationInfoDTOList =
+                                ApplicationKeyMappingUtil.formApiKeyAssociationListToDTOList(apiKeyAssociationsList);
+                        return Response.ok().entity(apiKeyAssociationInfoDTOList).build();
+                    }
+                }
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving API Key associations for application " + applicationId, e, log);
+        }
         return null;
     }
 
@@ -825,7 +892,36 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameDissociateDelete(String applicationId, String keyType, String keyDisplayName, String ifMatch, MessageContext messageContext) throws APIManagementException {
+    public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameDissociateDelete(String applicationId,
+                                                                                          String keyType,
+                                                                                          String keyDisplayName,
+                                                                                          String ifMatch,
+                                                                                          MessageContext messageContext)
+            throws APIManagementException {
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        Application application;
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
+            if ((application = apiConsumer.getApplicationByUUID(applicationId)) == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            } else {
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                } else {
+                    if (APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)) {
+                        application.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+                    } else if (APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType)) {
+                        application.setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
+                    } else {
+                        RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
+                    }
+                    apiConsumer.removeAPIKeyAssociationViaApp(applicationId, keyDisplayName);
+                    return Response.ok().build();
+                }
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while removing an association to the API Key " + keyDisplayName, e, log);
+        }
         return null;
     }
 
@@ -967,6 +1063,35 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         } else {
             log.debug("Provided API Key " + APIUtil.getMaskedToken(apiKey) + " is not valid");
             RestApiUtil.handleBadRequest("Provided API Key isn't valid ", log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response applicationsApplicationIdApiKeysKeyTypeSubscriptionsGet(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        Application application;
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
+            if ((application = apiConsumer.getApplicationByUUID(applicationId)) == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            } else {
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                } else {
+                    boolean isValidKeyType = APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)
+                            || APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType);
+                    if (!isValidKeyType) {
+                        RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
+                    } else {
+                        List<APIKeyInfo> apiKeyList = apiConsumer.getApisWithApiKeys(applicationId, keyType);
+                        List<APIWithKeyInfoDTO> apiApiKeyInfoDTOList = ApplicationKeyMappingUtil.formApiWithApiKeyListToDTOList(apiKeyList);
+                        return Response.ok().entity(apiApiKeyInfoDTOList).build();
+                    }
+                }
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving APIs with API Keys for application " + applicationId, e, log);
         }
         return null;
     }

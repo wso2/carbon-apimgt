@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import java.io.File;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscribedAPIWithApiKeyListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.impl.ApplicationsApiServiceImpl;
@@ -214,6 +215,26 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
     public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @ApiParam(value = "API Key revoke request object " ) APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO) throws APIManagementException{
         return delegate.applicationsApplicationIdApiKeysKeyTypeRevokePost(applicationId, keyType, ifMatch, apIKeyRevokeRequestDTO, securityContext);
+    }
+
+    @GET
+    @Path("/{applicationId}/api-keys/{keyType}/subscriptions")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get Subscribed APIs with API Key(s) of a Given Type", notes = "Retrieve subscribed APIs with non-associated API Key(s) for the application specifying the key type in the URI. ", response = SubscribedAPIWithApiKeyListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "API Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Subscribed APIs along with the non-associated API key(s) of given type are returned. ", response = SubscribedAPIWithApiKeyListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdApiKeysKeyTypeSubscriptionsGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.applicationsApplicationIdApiKeysKeyTypeSubscriptionsGet(applicationId, keyType, ifNoneMatch, securityContext);
     }
 
     @DELETE
