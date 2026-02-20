@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -2021,12 +2022,36 @@ public class APIAdminImpl implements APIAdmin {
 
     public void updateApiProvider(String apiId, String provider, String organisation) throws APIManagementException {
         APIPersistence apiPersistenceInstance = PersistenceFactory.getAPIPersistenceInstance();
+        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(username);
+        API api;
+        try {
+            api = apiProvider.getAPIbyUUID(apiId, organisation);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while retrieving API for id: " + apiId, e);
+        }
+        if (api == null) {
+            throw new APIMgtResourceNotFoundException("API not found for id: " + apiId);
+        }
+
+        String oldProvider = api.getId() != null ? api.getId().getProviderName() : null;
+
         try {
             ApiMgtDAO.getInstance().updateApiProvider(apiId, provider);
             apiPersistenceInstance.changeApiProvider(provider, apiId, organisation);
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while changing the API provider", e);
         }
+
+        JSONObject apiLogObject = new JSONObject();
+        apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+        apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+        apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+        apiLogObject.put(APIConstants.AuditLogConstants.OLD_PROVIDER, oldProvider);
+        apiLogObject.put(APIConstants.AuditLogConstants.NEW_PROVIDER, provider);
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                APIConstants.AuditLogConstants.PROVIDER_CHANGED, username);
     }
 
     /**

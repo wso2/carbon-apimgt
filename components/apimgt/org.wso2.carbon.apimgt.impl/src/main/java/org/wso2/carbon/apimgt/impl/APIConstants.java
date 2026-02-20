@@ -2475,6 +2475,7 @@ public final class APIConstants {
         public static final String DEPLOYED = "deployed";
         public static final String UNDEPLOYED = "undeployed";
         public static final String LIFECYCLE_CHANGED = "lifecycle-changed";
+        public static final String PROVIDER_CHANGED = "provider-changed";
 
         public static final String API = "API";
         public static final String SYSTEM = "SYSTEM";
@@ -2492,6 +2493,8 @@ public final class APIConstants {
         public static final String VERSION = "version";
         public static final String CONTEXT = "context";
         public static final String PROVIDER = "provider";
+        public static final String OLD_PROVIDER = "oldProvider";
+        public static final String NEW_PROVIDER = "newProvider";
         public static final String OWNER = "owner";
         public static final String TIER = "tier";
         public static final String API_ID = "apiId";
