@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.api.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ConfigurationDto {
 
@@ -15,6 +16,15 @@ public class ConfigurationDto {
     private List values = new ArrayList<>();
     private boolean multiple;
     private boolean updateDisabled = false;
+    private ConstraintConfigDto constraint;
+
+    public boolean hasConstraint() {
+        return this.constraint != null;
+    }
+
+    public ConstraintConfigDto getConstraint() {
+        return this.constraint;
+    }
 
     public String getName() {
 
@@ -145,6 +155,11 @@ public class ConfigurationDto {
         this(name, label, type, tooltip, defaultValue, required, mask, values, multiple, false);
     }
 
+    /**
+     * @deprecated Use {@link #ConfigurationDto(String, String, String, String, Object, boolean, boolean, List,
+     * boolean, boolean, AppConfigConstraintType, Map, String, String)} instead.
+     */
+    @Deprecated
     public ConfigurationDto(String name, String label, String type, String tooltip, Object defaultValue,
                             boolean required,
                             boolean mask, List values, boolean multiple, boolean updateDisabled) {
@@ -160,4 +175,34 @@ public class ConfigurationDto {
         this.multiple = multiple;
         this.updateDisabled = updateDisabled;
     }
+
+    public ConfigurationDto(String name, String label, String type, String tooltip, Object defaultValue,
+                            boolean required, boolean mask, List values, boolean multiple, boolean updateDisabled,
+                            AppConfigConstraintType constraintType, Map<String, Object> defaultConstraints,
+                            String constraintLabel, String constraintTooltip) {
+
+        this.name = name;
+        this.label = label;
+        this.type = type;
+        this.tooltip = tooltip;
+        this.defaultValue = defaultValue;
+        this.required = required;
+        this.mask = mask;
+        this.values = values;
+        this.multiple = multiple;
+        this.updateDisabled = updateDisabled;
+        if (constraintType != null) {
+            this.constraint = new ConstraintConfigDto(
+                name,
+                type,
+                values,
+                true,
+                constraintLabel,
+                constraintTooltip,
+                constraintType,
+                defaultConstraints
+            );
+        }
+    }
+
 }

@@ -24,12 +24,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.AppConfigConstraintType;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
+import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationConfigValidator;
 import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.kmvalidator.KeyManagerApplicationConfigValidatorFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AIAPIQuotaLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
@@ -38,15 +41,14 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.*;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -406,4 +408,84 @@ public class RestApiAdminUtils {
         FileUtils.deleteDirectory(backupDirectory);
         apiAdmin.updateTenantTheme(tenantId, existingTenantTheme);
     }
+
+    /**
+     * Validates Key Manager constraint configurations (meta-validation).
+     * Ensures that constraint definitions themselves are valid before persisting.
+     *
+     * @param additionalProperties Key Manager additional properties containing constraints
+     * @throws APIManagementException if constraint metadata validation fails
+     */
+    public static void validateKeyManagerConstraints(Map<String, Object> additionalProperties)
+            throws APIManagementException {
+
+        if (additionalProperties == null) {
+            return;
+        }
+        Object constraintsObj = additionalProperties.get(APIConstants.KeyManager.CONSTRAINTS);
+        if (constraintsObj == null) {
+            return;
+        }
+        Map<String, Map<String, Object>> constraintsMap;
+        if (constraintsObj instanceof Map) {
+            constraintsMap = (Map<String, Map<String, Object>>) constraintsObj;
+        } else {
+            return;
+        }
+        List<String> errorMessages = new ArrayList<>();
+        // Validate each constraint configuration
+        for (Map.Entry<String, Map<String, Object>> entry : constraintsMap.entrySet()) {
+            String fieldName = entry.getKey();
+            Object rawConfig = entry.getValue();
+            if (rawConfig == null) {
+                continue;
+            }
+            if (!(rawConfig instanceof Map)) {
+                errorMessages.add("Constraint configuration for field '" + fieldName + "' must be a valid object");
+                continue;
+            }
+            Map<String, Object> constraintConfig = (Map<String, Object>) rawConfig;
+            String constraintTypeStr = (String) constraintConfig.get(APIConstants.KeyManager.CONSTRAINT_TYPE);
+            if (constraintTypeStr == null) {
+                errorMessages.add("Missing constraint type for field '" + fieldName + "'");
+                continue;
+
+            }
+            AppConfigConstraintType constraintType = AppConfigConstraintType.fromString(constraintTypeStr);
+            if (constraintType == null) {
+                errorMessages.add("Invalid constraint type for field '" + fieldName + "'");
+                continue;
+            }
+            KeyManagerApplicationConfigValidator validator = 
+                KeyManagerApplicationConfigValidatorFactory.getValidator(constraintType);
+            if (validator != null) {
+                Object constraintValue = constraintConfig.get(APIConstants.KeyManager.CONSTRAINT_VALUE);
+                Map<String, Object> constraintValueMap = null;
+                if (constraintValue instanceof Map) {
+                    constraintValueMap = (Map<String, Object>) constraintValue;
+                } else {
+                        errorMessages.add("Constraint value for field '" + fieldName + "' must be a valid object");
+                        continue;
+                }
+                try {
+                    validator.validateMetadata(constraintValueMap);
+                } catch (APIManagementException e) {
+                    errorMessages.add(
+                            "Invalid constraint configuration for field '" + fieldName + "': " + e.getMessage()
+                    );
+                }
+            }
+        }
+        if (!errorMessages.isEmpty()) {
+            String combinedMessage = String.join("; ", errorMessages);
+            throw new APIManagementException(
+                    "Constraint validation failed: " + combinedMessage,
+                    ExceptionCodes.from(
+                            ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES,
+                            combinedMessage
+                    )
+            );
+        }
+    }
+
 }

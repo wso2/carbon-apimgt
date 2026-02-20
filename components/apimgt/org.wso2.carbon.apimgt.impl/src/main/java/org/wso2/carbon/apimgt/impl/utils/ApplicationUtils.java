@@ -20,22 +20,30 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.kmvalidator.KeyManagerApplicationConfigValidatorFactory;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Utility class for performing Operations related to Applications, OAuth clients.
@@ -192,5 +200,111 @@ public class ApplicationUtils {
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
         Application application = apiConsumer.getApplicationById(applicationId);
         return isUserOwnerOfApplication(application, username);
+    }
+    /**
+     * Validates the application configuration against the constraints defined in the Key Manager.
+     *
+     * @param keyManager           KeyManagerConfigurationDTO
+     * @param jsonInput            Map that contains Additional properties from the request (JSON string)
+     * @throws APIManagementException If validation fails
+     */
+    public static void validateKeyManagerAppConfiguration(KeyManagerConfigurationDTO keyManager, String jsonInput)
+            throws APIManagementException {
+
+        Map<String, Object> kmProps = keyManager.getAdditionalProperties();
+        if (kmProps == null) {
+            return;
+        }
+
+        Object constraintsObj = kmProps.get(APIConstants.KeyManager.CONSTRAINTS);
+        if (!(constraintsObj instanceof Map)) {
+            return;
+        }
+
+        //noinspection unchecked
+        Map<String, Map<String, Object>> constraintsMap = (Map<String, Map<String, Object>>) constraintsObj;
+
+        // Parse input JSON
+        Map<String, Object> inputProps;
+        try {
+            JSONParser parser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) parser.parse(jsonInput);
+            if (jsonObject == null) {
+                return;
+            }
+
+            // Get additionalProperties from input JSON
+            Object additionalProperties = jsonObject.get(APIConstants.JSON_ADDITIONAL_PROPERTIES);
+            if (additionalProperties == null) {
+                return;
+            }
+
+            if (additionalProperties instanceof Map) {
+                inputProps = (Map<String, Object>) additionalProperties;
+            } else {
+                inputProps = new Gson().fromJson(additionalProperties.toString(), Map.class);
+            }
+
+        } catch (ParseException e) {
+            throw new APIManagementException("Failed to parse input JSON", e);
+        }
+
+        // Collect all error messages
+        List<String> errorMessages = new ArrayList<>();
+
+        // Validate each constraint
+        for (Map.Entry<String, Map<String, Object>> entry : constraintsMap.entrySet()) {
+            String fieldName = entry.getKey();
+            Map<String, Object> constraintConfig = entry.getValue();
+            if (constraintConfig == null) {
+                continue;
+            }
+
+            if (!inputProps.containsKey(fieldName)) {
+                errorMessages.add("Missing input for constrained property: " + fieldName);
+                continue;
+            }
+
+            Object inputValue = inputProps.get(fieldName);
+            String constraintTypeStr = (String) constraintConfig.get(APIConstants.KeyManager.CONSTRAINT_TYPE);
+            AppConfigConstraintType constraintType = AppConfigConstraintType.fromString(constraintTypeStr);
+
+            if (constraintType == null) {
+                // Ignore unknown types
+                continue;
+            }
+
+            KeyManagerApplicationConfigValidator validator =
+                    KeyManagerApplicationConfigValidatorFactory.getValidator(constraintType);
+
+            if (validator != null) {
+                Object constraintValue = constraintConfig.get(APIConstants.KeyManager.CONSTRAINT_VALUE);
+                Map<String, Object> constraints = Collections.emptyMap();
+
+                if (constraintValue instanceof Map) {
+                    constraints = (Map<String, Object>) constraintValue;
+                } else if (constraintValue != null) {
+                    constraints = new Gson().fromJson(constraintValue.toString(), Map.class);
+                }
+
+                if (!validator.validate(inputValue, constraints)) {
+                    String fieldError = "Property '" + fieldName + "' is invalid. " + validator.getErrorMessage();
+                    log.error("Validation failed for property '" + fieldName + "': " + validator.getErrorMessage());
+                    errorMessages.add(fieldError);
+                }
+            }
+        }
+
+        // Throw combined exception if there were any errors
+        if (!errorMessages.isEmpty()) {
+            String combinedMessage = String.join("; ", errorMessages);
+            throw new APIManagementException(
+                    "Constraint validation failed: " + combinedMessage,
+                    ExceptionCodes.from(
+                            ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES,
+                            combinedMessage
+                    )
+            );
+        }
     }
 }

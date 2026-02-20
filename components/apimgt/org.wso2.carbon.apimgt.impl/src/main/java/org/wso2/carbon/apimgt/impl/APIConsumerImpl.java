@@ -2425,6 +2425,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
                         ExceptionCodes.KEY_MANAGER_NOT_REGISTERED);
             }
+            ApplicationUtils.validateKeyManagerAppConfiguration(keyManagerConfiguration, jsonString);
             if (KeyManagerConfiguration.TokenType.EXCHANGED.toString().equals(keyManagerConfiguration.getTokenType())) {
                 throw new APIManagementException("Key Manager " + keyManagerName + " doesn't support to generate" +
                         " Client Application", ExceptionCodes.KEY_MANAGER_NOT_SUPPORT_OAUTH_APP_CREATION);
@@ -3009,6 +3010,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 }
             }
 
+            ApplicationUtils.validateKeyManagerAppConfiguration(keyManagerConfiguration, jsonString);
             if (!keyManagerConfiguration.isEnabled()) {
                 throw new APIManagementException("Key Manager " + keyManagerName + " not activated in the requested " +
                         "Tenant", ExceptionCodes.KEY_MANAGER_NOT_ENABLED);
