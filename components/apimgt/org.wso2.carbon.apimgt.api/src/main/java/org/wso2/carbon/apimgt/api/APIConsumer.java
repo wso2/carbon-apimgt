@@ -926,4 +926,28 @@ public interface APIConsumer extends APIManager {
      */
     Map<String, Object> searchPaginatedContent(String searchQuery, OrganizationInfo organizationInfo, int start, int end)
             throws APIManagementException;
+
+    /**
+     * This method is used to generate a URL to download API resources such as WSDL, Swagger, OpenAPI etc.
+     *
+     * @param apiId          API UUID
+     * @param resourceType    Type of the resource (wsdl, swagger, openapi)
+     * @param organization    Identifier of an organization
+     * @param environmentName Name of the API gateway environment.
+     * @return Generated URL as a string
+     * @throws APIManagementException if an error occurs while generating the URL
+     */
+    String generateUrlToWSDL(String apiId, String resourceType, String organization, String environmentName) throws APIManagementException;
+
+    /**
+     * This method is used to validate the signed URL and retrieve the API information related to the URL.
+     *
+     * @param exp            Expiry time of the signed URL
+     * @param sig            Signature of the signed URL
+     * @param apiId          API UUID
+     * @param organization    Identifier of an organization
+     * @return API information related to the signed URL
+     * @throws APIManagementException if an error occurs while validating the signed URL or retrieving API information
+     */
+    API getAPIBySignedUrlValidation(long exp, String sig, String apiId, String organization) throws APIManagementException;
 }

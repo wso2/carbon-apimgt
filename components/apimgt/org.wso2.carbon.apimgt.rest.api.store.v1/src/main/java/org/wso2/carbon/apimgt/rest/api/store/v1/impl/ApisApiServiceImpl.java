@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
+import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
+import org.wso2.carbon.apimgt.impl.wsdl.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,22 +57,18 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
+import org.wso2.carbon.apimgt.rest.api.store.v1.utils.APIUtils;
 import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashMap;
-import java.util.Arrays;
+import java.util.*;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
@@ -1123,11 +1122,18 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getWSDLOfAPI(String apiId, String environmentName, String ifNoneMatch,
-                                 String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+    public Response getWSDLOfAPI(String apiId, String environmentName, String ifNoneMatch, String xWSO2Tenant, Long exp,
+            String sig, MessageContext messageContext) throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
+        API api;
+        if (exp != null && exp != 0L && StringUtils.isNotEmpty(sig)) {
+            // private API path: validate signature and get the API bypassing normal visibility checks
+            api = apiConsumer.getAPIBySignedUrlValidation(exp, sig, apiId, organization);
+        } else {
+            // Public API path: visibility checks applied inside getLightweightAPIByUUID
+            api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
+        }
         APIIdentifier apiIdentifier = api.getId();
 
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
@@ -1201,7 +1207,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             if (!api.isAPIProduct() && !StringUtils.isEmpty(userOrgInfo.getOrganizationId())) {
-                org.wso2.carbon.apimgt.rest.api.store.v1.utils.APIUtils.updateAvailableTiersByOrganization(
+                APIUtils.updateAvailableTiersByOrganization(
                         api.getApi(), userOrgInfo.getOrganizationId());
             }
 
@@ -1241,4 +1247,65 @@ public class ApisApiServiceImpl implements ApisApiService {
         String errorMessage = e.getMessage();
         return errorMessage != null && errorMessage.contains(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE);
     }
+
+    private String getStringContentFromResourceFile(ResourceFile resourceFile)
+            throws APIManagementException, IOException {
+        WSDLValidationResponse validationResponse = APIMWSDLReader.extractAndValidateWSDLArchive(resourceFile.getContent());
+        String wsdlArchiveExtractedPath = validationResponse.getWsdlArchiveInfo().getLocation()
+                + File.separator + APIConstants.API_WSDL_EXTRACTED_DIRECTORY;
+        File extractedDir = new File(wsdlArchiveExtractedPath);
+        Collection<File> wsdlFiles = APIFileUtil.searchFilesWithMatchingExtension(extractedDir, "wsdl");
+        File mainWsdlFile = wsdlFiles.iterator().next();
+        return readFileContent(mainWsdlFile);
+    }
+
+    private String readFileContent(File file) throws IOException {
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(file);
+            byte[] data = new byte[(int) file.length()];
+            fis.read(data);
+            return new String(data, "UTF-8");
+        } finally {
+            if (fis != null) {
+                fis.close();
+            }
+        }
+    }
+
+    @Override
+    public Response apisApiIdSoapOperationsGet(String apiId, MessageContext messageContext) {
+
+        try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
+            ResourceFile wsdlResource =  apiConsumer.getWSDL(api.getUuid(), organization);
+            SOAPOperationParser wsdlParser;
+
+            if (wsdlResource.getContentType().contains(APIConstants.APPLICATION_ZIP)) {
+                wsdlParser = new SOAPOperationParser(getStringContentFromResourceFile(wsdlResource));
+            } else {
+                wsdlParser = new SOAPOperationParser(wsdlResource.getContent());
+            }
+
+            // Get SOAP operations
+            List<SOAPOperationParser.SOAPApiOperation> operations = wsdlParser.getAllOperations();
+            return Response.ok().entity(operations).build();
+
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error while extracting SOAP operations for API " + apiId, e, log);
+            }
+        } catch (Exception e) {
+            RestApiUtil.handleInternalServerError("Error while extracting SOAP operations for API " + apiId, e, log);
+        }
+        return null;
+
+    }
+
 }

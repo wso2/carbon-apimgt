@@ -157,6 +157,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -179,6 +182,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.cache.Cache;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 import static org.wso2.carbon.apimgt.api.ExceptionCodes.APPLICATION_INACTIVE;
 import static org.wso2.carbon.apimgt.api.ExceptionCodes.WORKFLOW_PENDING;
@@ -3611,7 +3616,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         } else {
             api.setContext(getBasePath(apiTenantDomain, api.getContext()));
         }
-        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, keyManagerConfigurationDTO);
+        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, keyManagerConfigurationDTO,
+                ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                        .getAPIMDependencyConfigurations().getOasParserOptions());
         return updatedDefinition;
     }
 
@@ -5111,5 +5118,104 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         } else {
             api.setSubtype(apiMgtDAO.retrieveAPISubtypeWithUUID(api.getUuid()));
         }
+    }
+
+    @Override
+    public String generateUrlToWSDL(String apiId, String resourceType, String organization, String environmentName)
+            throws APIManagementException {
+
+        ApiTypeWrapper apiTypeWrapper = getAPIorAPIProductByUUIDWithoutPermissionCheck(apiId, organization);
+        API api = apiTypeWrapper.getApi();
+        APIIdentifier apiIdentifier = api.getId();
+        if (apiIdentifier == null) {
+            throw new APIManagementException("API identifier is null");
+        }
+
+        StringBuilder generatedURL = new StringBuilder();
+        String wsdlRetrievingBaseURL = APIUtil.getServerURL() + "/" + APIConstants.RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT + "/" + APIConstants.RestApiConstants.REST_API_DEVELOPER_PORTAL_VERSION +
+                "/apis/" + apiId + "/" + resourceType + "?environmentName=" + environmentName;
+        // {serverURL}/api/am/devportal/v3/apis/{apiId}/wsdl?environmentName={environmentName}
+        generatedURL.append(wsdlRetrievingBaseURL);
+
+        // if API is public, return plain URL with no exp/sig params
+        String visibility = api.getVisibility();
+        if (APIConstants.PERMISSION_NOT_RESTRICTED.equalsIgnoreCase(visibility)) {
+            return generatedURL.toString();
+        }
+
+        try {
+            // URL expires in 15 minutes
+            long timeOfExpiration = (System.currentTimeMillis() + (15 * 60 * 1000)) / 1000;
+            byte[] signedString = hmacSHA256((apiId + ":" + timeOfExpiration), getHmacKeyBytes());
+            String signature = hexFromBytes(signedString);
+            generatedURL.append("&exp=").append(timeOfExpiration);
+            generatedURL.append("&sig=").append(signature);
+            return generatedURL.toString();
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            String msg = "Error generating HMAC signature for API resource URL: " + apiId;
+            throw new APIManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Unexpected error generating URL for API resource: " + apiId;
+            throw new APIManagementException(msg, e);
+        }
+
+    }
+
+    @Override
+    public API getAPIBySignedUrlValidation(long exp, String sig, String apiId, String org)
+            throws APIManagementException {
+        long now = System.currentTimeMillis() / 1000L;
+        if (exp <= now) {
+            String msg = "Provided URL is expired for api with uuid " + apiId;
+            throw new APIMgtAuthorizationFailedException(msg);
+        }
+        try {
+            byte[] signedString = hmacSHA256((apiId + ":" + exp), getHmacKeyBytes());
+            String expectedSignature = hexFromBytes(signedString);
+            if (expectedSignature.equals(sig)) {
+                ApiTypeWrapper apiTypeWrapper = getAPIorAPIProductByUUIDWithoutPermissionCheck(apiId, org);
+                API api = apiTypeWrapper.getApi();
+                if (api != null) {
+                    return api;
+                } else {
+                    String msg = "Failed to get API. API artifact corresponding to artifactId " + apiId + " does not exist";
+                    throw new APIMgtResourceNotFoundException(msg);
+                }
+            } else {
+                String msg = "Provided URL is unauthorized with uuid " + apiId;
+                throw new APIMgtAuthorizationFailedException(msg);
+            }
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            String msg = "Error validating HMAC signature for API resource URL: " + apiId;
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    private byte[] getHmacKeyBytes() throws APIManagementException {
+        String base64Key =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().getHmacSecret();
+        if (StringUtils.isEmpty(base64Key)) {
+            throw new APIManagementException("HMAC key not found in secure vault or environment variable API_HMAC_KEY_BASE64");
+        }
+        try {
+            return base64Key.getBytes(StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            throw new APIManagementException("HMAC key is not valid Base64", e);
+        }
+    }
+
+    public static byte[] hmacSHA256(String data, byte[] key) throws NoSuchAlgorithmException, InvalidKeyException {
+        Mac mac = Mac.getInstance(APIConstants.AWSConstants.HMAC_SHA_256);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, APIConstants.AWSConstants.HMAC_SHA_256);
+        mac.init(secretKeySpec);
+        return mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static String hexFromBytes(byte[] bytes) {
+        StringBuilder result = new StringBuilder();
+        for (byte b : bytes) {
+            result.append(String.format("%02x", b));
+        }
+        return result.toString();
     }
 }

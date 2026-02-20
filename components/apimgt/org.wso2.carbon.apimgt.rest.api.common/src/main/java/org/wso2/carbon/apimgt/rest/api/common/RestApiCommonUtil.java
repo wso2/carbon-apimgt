@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -823,7 +824,9 @@ public class RestApiCommonUtil {
 
         String apiSwagger = apiProvider.getOpenAPIDefinition(uuid, api.getOrganization());
         APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
-        return parser.getOASDefinitionForPublisher(api, apiSwagger);
+        return parser.getOASDefinitionForPublisher(api, apiSwagger,
+                ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                        .getAPIMDependencyConfigurations().getOasParserOptions());
     }
 
     /**

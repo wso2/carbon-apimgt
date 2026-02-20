@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal;
 import lombok.Getter;
 import lombok.Setter;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -41,6 +42,7 @@ public class ServiceReferenceHolder {
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
 
     private APIManagerConfiguration apimConfiguration;
+    private APIMDependencyConfigurationService dependencyConfigurationService;
     /**
      * -- GETTER --
      *  Retrieves the current instance of the RealmService.
@@ -95,5 +97,13 @@ public class ServiceReferenceHolder {
 
     public APIMGovernanceService getAPIMGovernanceService() {
         return apimGovernanceService;
+    }
+
+    public void setAPIMDependencyConfigurationService(APIMDependencyConfigurationService service) {
+        this.dependencyConfigurationService = service;
+    }
+
+    public APIMDependencyConfigurationService getAPIMDependencyConfigurationService() {
+        return dependencyConfigurationService;
     }
 }
