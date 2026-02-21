@@ -248,6 +248,8 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                     new GatewayTokenRevocationMessageListener());
             jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_OPAQUE_API_KEY_INFO,
                     new OpaqueAPIKeyInfoListener());
+            jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_OPAQUE_API_KEY_ASSOCIATION_INFO,
+                    new OpaqueAPIKeyAssociationInfoListener());
             jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_CACHE_INVALIDATION,
                     new APIMgtGatewayCacheMessageListener());
             jmsTransportHandlerForEventHub
