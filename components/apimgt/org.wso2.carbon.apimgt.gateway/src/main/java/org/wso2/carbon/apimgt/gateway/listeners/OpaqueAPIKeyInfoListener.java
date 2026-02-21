@@ -60,19 +60,22 @@ public class OpaqueAPIKeyInfoListener implements MessageListener {
                                 .path("payloadData");
 
                     APIKeyInfo apiKeyInfo = new APIKeyInfo();
+                    String lookupKey = null;
                     apiKeyInfo.setApiKeyHash(payload.path(APIConstants.NotificationEvent.API_KEY_HASH).asText());
-                    apiKeyInfo.setSalt(payload.path(APIConstants.NotificationEvent.SALT).asText());
                     apiKeyInfo.setKeyType(payload.path(APIConstants.NotificationEvent.KEY_TYPE).asText());
+                    apiKeyInfo.setKeyDisplayName(payload.path(APIConstants.NotificationEvent.KEY_DISPLAY_NAME).asText());
                     apiKeyInfo.setOrigin(payload.path(APIConstants.NotificationEvent.ORIGIN).asText());
                     if (apiKeyInfo.getOrigin().equalsIgnoreCase("APP")) {
-                        apiKeyInfo.setAppId(payload.path(APIConstants.NotificationEvent.APPLICATION_ID).asInt());
+                        apiKeyInfo.setApplicationId(payload.path(APIConstants.NotificationEvent.ORIGIN_UUID).asText());
+                        lookupKey = "App|" + payload.path(APIConstants.NotificationEvent.API_KEY_HASH).asText();
                     } else if (apiKeyInfo.getOrigin().equalsIgnoreCase("API")) {
-                        apiKeyInfo.setApiId(payload.path(APIConstants.NotificationEvent.API_ID).asInt());
+                        apiKeyInfo.setApiUUId(payload.path(APIConstants.NotificationEvent.ORIGIN_UUID).asText());
+                        lookupKey = "Api|" + payload.path(APIConstants.NotificationEvent.API_KEY_HASH).asText();
                     }
+                    apiKeyInfo.setAppId(payload.path(APIConstants.NotificationEvent.APPLICATION_ID).asInt());
                     apiKeyInfo.setStatus(payload.path(APIConstants.NotificationEvent.STATUS).asText());
                     apiKeyInfo.setValidityPeriod(payload.path(APIConstants.NotificationEvent.VALIDITY_PERIOD).asLong());
-                    apiKeyInfo.setLookupKey(payload.path(APIConstants.NotificationEvent.LOOKUP_KEY).asText());
-
+                    apiKeyInfo.setLookupKey(lookupKey);
                     String additionalPropsEscaped = payload.path(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES).
                             asText(null);
                     Map<String, String> additionalPropsMap = null;

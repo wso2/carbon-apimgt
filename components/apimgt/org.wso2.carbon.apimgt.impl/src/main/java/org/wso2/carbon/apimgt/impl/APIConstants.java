@@ -828,6 +828,7 @@ public final class APIConstants {
     public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.apimgt.token.revocation.stream:1.0.0";
     public static final String API_KEY_USAGE_STREAM_ID = "org.wso2.apimgt.api.key.usage.stream:1.0.0";
     public static final String API_KEY_INFO_STREAM_ID = "org.wso2.apimgt.api.key.info.stream:1.0.0";
+    public static final String API_KEY_ASSOCIATION_INFO_STREAM_ID = "org.wso2.apimgt.api.key.association.info.stream:1.0.0";
     public static final String CACHE_INVALIDATION_STREAM_ID = "org.wso2.apimgt.cache.invalidation.stream:1.0.0";
     public static final String NOTIFICATION_STREAM_ID = "org.wso2.apimgt.notification.stream:1.0.0";
     public static final String WEBHOOKS_SUBSCRIPTION_STREAM_ID = "org.wso2.apimgt.webhooks.request.stream:1.0.0";
@@ -3289,6 +3290,7 @@ public final class APIConstants {
         public static final String TOPIC_KEY_MANAGER = "keyManager";
         public static final String TOPIC_NOTIFICATION = "notification";
         public static final String TOPIC_OPAQUE_API_KEY_INFO = "opaqueAPIKeyInfo";
+        public static final String TOPIC_OPAQUE_API_KEY_ASSOCIATION_INFO = "opaqueAPIKeyAssociationInfo";
         public static final String TOPIC_API_KEY_USAGE = "apiKeyUsage";
         public static final String TOPIC_ASYNC_WEBHOOKS_DATA = "asyncWebhooksData";
     }
@@ -3375,13 +3377,15 @@ public final class APIConstants {
         public static final String CONSUMER_KEY = "consumer_key";
         public static final String API_KEY_HASH = "apiKeyHash";
         public static final String API_KEY = "apiKey";
-        public static final String SALT = "salt";
-        public static final String LOOKUP_KEY = "lookupKey";
         public static final String KEY_TYPE = "keyType";
+        public static final String ASSOCIATION_TYPE = "associationType";
+        public static final String KEY_DISPLAY_NAME = "keyDisplayName";
         public static final String ADDITIONAL_PROPERTIES = "additionalProperties";
         public static final String APPLICATION_ID = "applicationId";
-        public static final String API_ID = "apiId";
+        public static final String APPLICATION_UUID = "applicationUUId";
+        public static final String API_UUID = "apiUUId";
         public static final String ORIGIN = "origin";
+        public static final String ORIGIN_UUID = "originUUId";
         public static final String VALIDITY_PERIOD = "validityPeriod";
         public static final String STATUS = "status";
         public static final String EVENT_ID = "eventId";

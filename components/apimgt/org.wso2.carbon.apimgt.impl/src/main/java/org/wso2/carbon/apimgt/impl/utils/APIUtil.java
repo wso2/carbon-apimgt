@@ -471,6 +471,8 @@ public final class APIUtil {
                     eventPublisherFactory.getEventPublisher(EventPublisherType.TOKEN_REVOCATION));
             eventPublishers.putIfAbsent(EventPublisherType.API_KEY_INFO,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.API_KEY_INFO));
+            eventPublishers.putIfAbsent(EventPublisherType.API_KEY_ASSOCIATION_INFO,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.API_KEY_ASSOCIATION_INFO));
             eventPublishers.putIfAbsent(EventPublisherType.API_KEY_USAGE,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.API_KEY_USAGE));
             eventPublishers.putIfAbsent(EventPublisherType.BLOCKING_EVENT,
@@ -9165,54 +9167,26 @@ public final class APIUtil {
     }
 
     /**
-     * Generates the hash value with salt using SHA-256 for a given API key.
+     * Generates the hash value using SHA-256 for a given API key.
      *
      * @param apiKey api key.
      * @return the hashed api key.
      */
-    public static String sha256HashWithSalt(String apiKey, byte[] salt) {
+    public static String sha256Hash(String apiKey) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            digest.update(salt); // Prepend salt
             byte[] hash = digest.digest(apiKey.getBytes(StandardCharsets.UTF_8));
 
-            // Convert salt and hash to hex
-            String saltHex = convertBytesToHex(salt);
+            // Convert hash to hex
             String hashHex = convertBytesToHex(hash);
 
-            // Format: $sha256$<salt_hex>$<hash_hex>
-            return String.format("$sha256$%s$%s", saltHex, hashHex);
+            // Format: $sha256$<hash_hex>
+            return String.format("$sha256$%s", hashHex);
 
         } catch (NoSuchAlgorithmException e) {
             // SHA-256 is always available in Java
             throw new IllegalStateException("SHA-256 algorithm not found", e);
         }
-    }
-
-    /**
-     * Generate deterministic lookup key for an opaque API key.
-     *
-     * @param apiKey        Plain text API key
-     * @param sharedSecret Shared secret (same in CP and GW)
-     * @return Base64 encoded Lookup key
-     */
-    public static String generateLookupKey(String apiKey, String sharedSecret) throws APIManagementException {
-        try {
-            Mac mac = Mac.getInstance(APIConstants.HMAC_SHA_256);
-            SecretKeySpec keySpec = new SecretKeySpec(sharedSecret.getBytes(StandardCharsets.UTF_8),
-                    APIConstants.HMAC_SHA_256);
-            mac.init(keySpec);
-
-            return Base64.encodeBase64URLSafeString(mac.doFinal(apiKey.getBytes(StandardCharsets.UTF_8)));
-        } catch (IllegalStateException | NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new APIManagementException("Error generating API key lookup key", e);
-        }
-    }
-
-    public static byte[] generateSalt () {
-        byte[] salt = new byte[16]; // 128-bit salt
-        SECURE_RANDOM.nextBytes(salt);
-        return salt;
     }
 
     public static String convertBytesToHex(byte[] bytes) {

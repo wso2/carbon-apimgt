@@ -179,6 +179,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
@@ -465,16 +466,21 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // Generate API key in opaque format
             apiKey = generateOpaqueKey();
         }
+        if (permittedIP == null) {
+            permittedIP = "";
+        }
+        if (permittedReferer == null) {
+            permittedReferer = "";
+        }
         Properties props = new Properties();
-        byte[] salt = APIUtil.generateSalt();
-        props.setProperty("salt", APIUtil.convertBytesToHex(salt));
+        props.setProperty("permittedIP", permittedIP);
+        props.setProperty("permittedReferer", permittedReferer);
         APIKeyDTO apiKeyInfoDTO = generateAPIKeyInfoDTO(userName, validityPeriod, keyDisplayName, application.getKeyType(),
                 permittedIP, permittedReferer, props);
         apiKeyInfoDTO.setApplicationId(application.getUUID());
-        String apiKeyHash = APIUtil.sha256HashWithSalt(apiKey, salt);
-        String lookupKey = APIUtil.generateLookupKey(apiKey, lookupSecret);
+        String apiKeyHash = APIUtil.sha256Hash(apiKey);
         apiMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
-        sendAPIKeyInfoEvent(apiKeyHash, salt, application, null, validityPeriod, lookupKey, application.getKeyType(), props);
+        sendAPIKeyInfoEvent(apiKeyHash, application, null, validityPeriod, application.getKeyType(), keyDisplayName, props);
         return apiKey;
     }
 
@@ -498,17 +504,22 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         String apiKey;
         // Generate API key in opaque format
-        byte[] salt = APIUtil.generateSalt();
         apiKey = generateOpaqueKey();
-        String apiKeyHash = APIUtil.sha256HashWithSalt(apiKey, salt);
-        String lookupKey = APIUtil.generateLookupKey(apiKey, lookupSecret);
+        String apiKeyHash = APIUtil.sha256Hash(apiKey);
+        if (permittedIP == null) {
+            permittedIP = "";
+        }
+        if (permittedReferer == null) {
+            permittedReferer = "";
+        }
         Properties props = new Properties();
-        props.setProperty("salt", APIUtil.convertBytesToHex(salt));
+        props.setProperty("permittedIP", permittedIP);
+        props.setProperty("permittedReferer", permittedReferer);
         APIKeyDTO apiKeyInfoDTO = generateAPIKeyInfoDTO(userName, validityPeriod, keyDisplayName, keyType, permittedIP,
                 permittedReferer, props);
         apiKeyInfoDTO.setApiId(api.getUUID());
         apiMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
-        sendAPIKeyInfoEvent(apiKeyHash, salt, null, api, validityPeriod, lookupKey, keyType, props);
+        sendAPIKeyInfoEvent(apiKeyHash,null, api, validityPeriod, keyType, keyDisplayName, props);
         return apiKey;
     }
 
@@ -518,14 +529,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
         apiKeyInfoDTO.setKeyDisplayName(keyDisplayName);
         apiKeyInfoDTO.setKeyType(keyType);
-        if (permittedIP == null) {
-            permittedIP = "";
-        }
-        if (permittedReferer == null) {
-            permittedReferer = "";
-        }
-        props.setProperty("permittedIP", permittedIP);
-        props.setProperty("permittedReferer", permittedReferer);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
             ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -543,8 +546,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return apiKeyInfoDTO;
     }
 
-    private void sendAPIKeyInfoEvent(String apiKeyHash, byte[] salt, Application application, API api, long validityPeriod,
-                                     String lookupKey, String keyType, Properties props) throws APIManagementException {
+    private void sendAPIKeyInfoEvent(String apiKeyHash, Application application, API api, long validityPeriod,
+                                     String keyType, String keyDisplayName, Properties props) throws APIManagementException {
         OpaqueApiKeyPublisher apiKeyInfoPublisher = OpaqueApiKeyPublisher.getInstance();
         Properties properties = new Properties();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -555,14 +558,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.API_KEY_INFO_STREAM_ID);
         properties.put(APIConstants.NotificationEvent.API_KEY_HASH, apiKeyHash);
         if (application != null) {
+            properties.put(APIConstants.NotificationEvent.APPLICATION_UUID, application.getUUID());
             properties.put(APIConstants.NotificationEvent.APPLICATION_ID, application.getId());
         } else if (api != null) {
-            properties.put(APIConstants.NotificationEvent.API_ID, api.getId().getId());
+            properties.put(APIConstants.NotificationEvent.API_UUID, api.getUUID());
+            properties.put(APIConstants.NotificationEvent.APPLICATION_ID, 0);
         }
-        properties.put(APIConstants.NotificationEvent.SALT, Base64.getEncoder().encodeToString(salt));
         properties.put(APIConstants.NotificationEvent.VALIDITY_PERIOD, String.valueOf(validityPeriod));
-        properties.put(APIConstants.NotificationEvent.LOOKUP_KEY, lookupKey);
         properties.put(APIConstants.NotificationEvent.KEY_TYPE, keyType);
+        properties.put(APIConstants.NotificationEvent.KEY_DISPLAY_NAME, keyDisplayName);
         properties.put(APIConstants.NotificationEvent.STATUS, "ACTIVE");
         // Safely convert additional properties
         if (props != null && !props.isEmpty()) {
@@ -3873,7 +3877,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         apiKeyInfoDTO.setApplicationId(applicationId);
         apiKeyInfoDTO.setKeyType(keyType);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        byte[] salt = APIUtil.generateSalt();
         Properties props = new Properties();
         try {
             byte[] apikeyProperties = apiKeyInfo.getProperties();
@@ -3884,7 +3887,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
             props.setProperty("permittedIP", StringUtils.defaultString(oldProps.getProperty("permittedIP")));
             props.setProperty("permittedReferer", StringUtils.defaultString(oldProps.getProperty("permittedReferer")));
-            props.setProperty("salt", APIUtil.convertBytesToHex(salt));
             ObjectOutputStream oos = new ObjectOutputStream(bos);
             oos.writeObject(props);
         } catch (ClassNotFoundException | IOException e) {
@@ -3897,15 +3899,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         apiKeyInfoDTO.setLastUsedTime(apiKeyInfo.getLastUsedTime());
         String apiKey = generateOpaqueKey();
         apiKeyInfoDTO.setApiKey(apiKey);
-        String apiKeyHash = APIUtil.sha256HashWithSalt(apiKey, salt);
+        String apiKeyHash = APIUtil.sha256Hash(apiKey);
         apiMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         APIKeyInfo regeneratedApiKeyInfo = new APIKeyInfo();
         regeneratedApiKeyInfo.setKeyDisplayName(keyDisplayName);
         regeneratedApiKeyInfo.setApiKey(apiKey);
         regeneratedApiKeyInfo.setValidityPeriod(apiKeyInfo.getValidityPeriod());
-        String lookupKey = APIUtil.generateLookupKey(apiKey, lookupSecret);
-        sendAPIKeyInfoEvent(apiKeyHash, salt, apiMgtDAO.getApplicationByUUID(applicationId),
-                null, apiKeyInfo.getValidityPeriod(), lookupKey, keyType, props);
+        sendAPIKeyInfoEvent(apiKeyHash, apiMgtDAO.getApplicationByUUID(applicationId),
+                null, apiKeyInfo.getValidityPeriod(), keyType, keyDisplayName, props);
         return regeneratedApiKeyInfo;
     }
 
@@ -3936,7 +3937,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         apiKeyInfoDTO.setApiId(apiId);
         apiKeyInfoDTO.setKeyType(apiKeyInfo.getKeyType());
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        byte[] salt = APIUtil.generateSalt();
         Properties props = new Properties();
         try {
             byte[] apikeyProperties = apiKeyInfo.getProperties();
@@ -3947,7 +3947,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
             props.setProperty("permittedIP", StringUtils.defaultString(oldProps.getProperty("permittedIP")));
             props.setProperty("permittedReferer", StringUtils.defaultString(oldProps.getProperty("permittedReferer")));
-            props.setProperty("salt", APIUtil.convertBytesToHex(salt));
             ObjectOutputStream oos = new ObjectOutputStream(bos);
             oos.writeObject(props);
         } catch (ClassNotFoundException | IOException e) {
@@ -3960,16 +3959,15 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         apiKeyInfoDTO.setLastUsedTime(apiKeyInfo.getLastUsedTime());
         String apiKey = generateOpaqueKey();
         apiKeyInfoDTO.setApiKey(apiKey);
-        String apiKeyHash = APIUtil.sha256HashWithSalt(apiKey, salt);
+        String apiKeyHash = APIUtil.sha256Hash(apiKey);
         apiMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         APIKeyInfo regeneratedApiKeyInfo = new APIKeyInfo();
         regeneratedApiKeyInfo.setKeyDisplayName(keyDisplayName);
         regeneratedApiKeyInfo.setApiKey(apiKey);
         regeneratedApiKeyInfo.setValidityPeriod(apiKeyInfo.getValidityPeriod());
-        String lookupKey = APIUtil.generateLookupKey(apiKey, lookupSecret);
-        sendAPIKeyInfoEvent(apiKeyHash, salt, null,
-                getLightweightAPIByUUID(apiId, organization), apiKeyInfo.getValidityPeriod(), lookupKey,
-                apiKeyInfo.getKeyType(), props);
+        sendAPIKeyInfoEvent(apiKeyHash,null,
+                getLightweightAPIByUUID(apiId, organization), apiKeyInfo.getValidityPeriod(),
+                apiKeyInfo.getKeyType(), keyDisplayName, props);
         return regeneratedApiKeyInfo;
     }
 
@@ -3983,51 +3981,84 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     /**
      * Creates an association for a given API key.
      *
-     * @param apiId          API Id of the API.
+     * @param apiUUId          API Id of the API.
      * @param appName        Name of the Application.
      * @param keyDisplayName Display name of API key.
      * @param userName       User name
      * @throws APIManagementException This is the custom exception class for API management.
      */
     @Override
-    public void createAssociationToApp(String apiId, String keyDisplayName, String appName, String userName)
+    public void createAssociationToApp(String apiUUId, String keyDisplayName, String appName, String userName)
             throws APIManagementException {
-        String appId = APIUtil.getApplicationUUID(appName, userName);
-        apiMgtDAO.createAssociationToApiKey(keyDisplayName, apiId, appId);
+        String applicationUUID = APIUtil.getApplicationUUID(appName, userName);
+        int appId = APIUtil.getApplicationId(appName, userName);
+        apiMgtDAO.createAssociationToApiKey(keyDisplayName, apiUUId, applicationUUID);
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, keyDisplayName);
+        sendAPIKeyAssociationInfoEvent(keyDisplayName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
+                apiUUId, applicationUUID, appId, "CREATE_ASSOCIATION");
     }
 
     /**
      * Creates an association for a given API key.
      *
-     * @param apiId      Id of the API
-     * @param appId        Id of the Application.
+     * @param apiUUId      UUId of the API
+     * @param appUUId        UUId of the Application.
      * @param keyDisplayName Display name of API key.
      * @throws APIManagementException This is the custom exception class for API management.
      */
     @Override
-    public void createAssociationToApp(String apiId, String appId, String keyDisplayName)
+    public void createAssociationToApp(String apiUUId, String appUUId, String keyDisplayName)
             throws APIManagementException {
-        apiMgtDAO.createAssociationToApiKey(keyDisplayName, apiId, appId);
+        apiMgtDAO.createAssociationToApiKey(keyDisplayName, apiUUId, appUUId);
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, appUUId, keyDisplayName);
+        sendAPIKeyAssociationInfoEvent(keyDisplayName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
+                apiUUId, appUUId, apiKeyInfo.getAppId(), "CREATE_ASSOCIATION");
     }
 
     /**
      * Remove association of an opaque api key
-     * @param apiId Id of the API
+     * @param apiUUId Id of the API
      * @param keyDisplayName Api key name
      * @throws APIManagementException
      */
-    public void removeAPIKeyAssociation(String apiId, String keyDisplayName) throws APIManagementException {
-        apiMgtDAO.removeAssociationOfAPIKey(apiId, keyDisplayName);
+    public void removeAPIKeyAssociation(String apiUUId, String keyDisplayName) throws APIManagementException {
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, keyDisplayName);
+        apiMgtDAO.removeAssociationOfAPIKey(apiUUId, keyDisplayName);
+        sendAPIKeyAssociationInfoEvent(keyDisplayName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(), apiUUId,
+                null, 0, "REMOVE_ASSOCIATION");
     }
 
     /**
      * Remove association of an opaque api key
-     * @param appId Id of the Application
+     * @param appUUId UUId of the Application
      * @param keyDisplayName Api key name
      * @throws APIManagementException
      */
-    public void removeAPIKeyAssociationViaApp(String appId, String keyDisplayName) throws APIManagementException {
-        apiMgtDAO.removeAssociationOfAPIKeyViaApp(appId, keyDisplayName);
+    public void removeAPIKeyAssociationViaApp(String appUUId, String keyDisplayName) throws APIManagementException {
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKeyDataByKeyNameAndAppUUID(appUUId, keyDisplayName);
+        apiMgtDAO.removeAssociationOfAPIKeyViaApp(appUUId, keyDisplayName);
+        sendAPIKeyAssociationInfoEvent(keyDisplayName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
+                apiKeyInfo.getApiUUId(), appUUId, apiKeyInfo.getAppId(), "REMOVE_ASSOCIATION");
+    }
+
+    private void sendAPIKeyAssociationInfoEvent(String keyDisplayName, String keyType, String apiKeyHash, String apiUUId,
+                                                String appUUId, int appId, String type) throws APIManagementException {
+        OpaqueApiKeyPublisher apiKeyInfoPublisher = OpaqueApiKeyPublisher.getInstance();
+        Properties properties = new Properties();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        String eventID = UUID.randomUUID().toString();
+        properties.put(APIConstants.NotificationEvent.EVENT_ID, eventID);
+        properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
+        properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
+        properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.API_KEY_ASSOCIATION_INFO_STREAM_ID);
+        properties.put(APIConstants.NotificationEvent.KEY_DISPLAY_NAME, keyDisplayName);
+        properties.put(APIConstants.NotificationEvent.KEY_TYPE, keyType);
+        properties.put(APIConstants.NotificationEvent.API_KEY_HASH, apiKeyHash);
+        properties.put(APIConstants.NotificationEvent.API_UUID, apiUUId);
+        properties.put(APIConstants.NotificationEvent.APPLICATION_UUID, Objects.requireNonNullElse(appUUId, "N/A"));
+        properties.put(APIConstants.NotificationEvent.APPLICATION_ID, Objects.requireNonNullElse(appId, 0));
+        properties.put(APIConstants.NotificationEvent.ASSOCIATION_TYPE, type);
+        apiKeyInfoPublisher.publishApiKeyAssociationInfoEvents(properties);
     }
 
     /**

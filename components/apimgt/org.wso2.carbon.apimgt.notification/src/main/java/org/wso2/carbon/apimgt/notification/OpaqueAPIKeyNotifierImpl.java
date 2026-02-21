@@ -87,26 +87,51 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
         long validityPeriod = validityPeriodStr != null ? Long.parseLong(validityPeriodStr) : 0L;
         String orgId = properties.getProperty(APIConstants.NotificationEvent.ORG_ID);
         int tenantId = (int) properties.get(APIConstants.NotificationEvent.TENANT_ID);
-        int originId = 0;
+        int appId = (int) properties.get(APIConstants.NotificationEvent.APPLICATION_ID);
+        String originUUId = null;
         String origin = null;
-        if (properties.get(APIConstants.NotificationEvent.APPLICATION_ID) != null) {
-            originId  = (int) properties.get(APIConstants.NotificationEvent.APPLICATION_ID);
+        if (properties.getProperty(APIConstants.NotificationEvent.APPLICATION_UUID) != null) {
+            originUUId  = properties.getProperty(APIConstants.NotificationEvent.APPLICATION_UUID);
             origin = "APP";
-        } else if (properties.get(APIConstants.NotificationEvent.API_ID) != null) {
-            originId = (int) properties.get(APIConstants.NotificationEvent.API_ID);
+        } else if (properties.getProperty(APIConstants.NotificationEvent.API_UUID) != null) {
+            originUUId = properties.getProperty(APIConstants.NotificationEvent.API_UUID);
             origin = "API";
         }
         Object[] objects = new Object[]{eventId, properties.getProperty(APIConstants.NotificationEvent.API_KEY_HASH),
-                        properties.getProperty(APIConstants.NotificationEvent.SALT),
-                        properties.getProperty(APIConstants.NotificationEvent.KEY_TYPE), origin, originId,
+                        properties.getProperty(APIConstants.NotificationEvent.KEY_TYPE),
+                        properties.getProperty(APIConstants.NotificationEvent.KEY_DISPLAY_NAME),
+                        origin, originUUId, appId,
                         properties.getProperty(APIConstants.NotificationEvent.STATUS), validityPeriod,
-                        properties.getProperty(APIConstants.NotificationEvent.LOOKUP_KEY),
                         properties.getProperty(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES), tenantId};
         EventPublisherEvent apiKeyInfoEvent = new EventPublisherEvent(APIConstants.API_KEY_INFO_STREAM_ID,
                 System.currentTimeMillis(), objects);
         apiKeyInfoEvent.setOrgId(orgId);
         APIUtil.publishEvent(EventPublisherType.API_KEY_INFO, apiKeyInfoEvent,
                 apiKeyInfoEvent.toString());
+    }
+
+    /**
+     * Method to send the api key association info on realtime
+     * @param properties additional properties to send
+     */
+    @Override
+    public void sendApiKeyAssociationInfoOnRealtime(Properties properties) {
+        String eventId = properties.getProperty(APIConstants.NotificationEvent.EVENT_ID);
+        String orgId = properties.getProperty(APIConstants.NotificationEvent.ORG_ID);
+        int tenantId = (int) properties.get(APIConstants.NotificationEvent.TENANT_ID);
+        int appId = (int) properties.get(APIConstants.NotificationEvent.APPLICATION_ID);
+        Object[] objects = new Object[]{eventId,
+                properties.getProperty(APIConstants.NotificationEvent.KEY_DISPLAY_NAME),
+                properties.getProperty(APIConstants.NotificationEvent.KEY_TYPE),
+                properties.getProperty(APIConstants.NotificationEvent.API_KEY_HASH),
+                properties.getProperty(APIConstants.NotificationEvent.API_UUID),
+                properties.getProperty(APIConstants.NotificationEvent.APPLICATION_UUID), appId,
+                properties.getProperty(APIConstants.NotificationEvent.ASSOCIATION_TYPE), tenantId};
+        EventPublisherEvent apiKeyAssociationInfoEvent = new EventPublisherEvent(
+                APIConstants.API_KEY_ASSOCIATION_INFO_STREAM_ID, System.currentTimeMillis(), objects);
+        apiKeyAssociationInfoEvent.setOrgId(orgId);
+        APIUtil.publishEvent(EventPublisherType.API_KEY_ASSOCIATION_INFO, apiKeyAssociationInfoEvent,
+                apiKeyAssociationInfoEvent.toString());
     }
 
     @Override

@@ -86,4 +86,18 @@ public class OpaqueApiKeyPublisher {
             log.debug("Realtime message sending isn't enabled or configured properly");
         }
     }
+
+    /**
+     * Publish API key association info events
+     * @param properties
+     */
+    public void publishApiKeyAssociationInfoEvents(Properties properties) {
+
+        if (realtimeNotifierEnabled) {
+            log.debug("Realtime message sending is enabled");
+            opaqueApiKeyNotifier.sendApiKeyAssociationInfoOnRealtime(properties);
+        } else {
+            log.debug("Realtime message sending isn't enabled or configured properly");
+        }
+    }
 }

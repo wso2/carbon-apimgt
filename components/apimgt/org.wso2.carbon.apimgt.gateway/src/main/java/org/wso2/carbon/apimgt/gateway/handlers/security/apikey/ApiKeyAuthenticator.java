@@ -244,20 +244,21 @@ public class ApiKeyAuthenticator implements Authenticator {
     public AuthenticationContext validateOpaqueApiKey(String apiKey, String apiContext, String apiVersion, String referrer, String ip)
             throws APISecurityException, APIManagementException {
 
-        // TODO: Remove lookup secret and use appId:keyType:displayName combination as the lookup key
-        String lookupSecret = "s3cR3tXyZ9rP0qA1bC2dEfG4hIjKlMnOpQrStUvWxYz123456";
-        String lookupKey = APIUtil.generateLookupKey(apiKey, lookupSecret);
-        APIKeyInfo apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKey);
+        // Hash the provided API key
+        String apiKeyHash = APIUtil.sha256Hash(apiKey);
+        String lookupKeyApi = "Api|" + apiKeyHash;
+        APIKeyInfo apiKeyInfo;
+        apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKeyApi);
+        if (apiKeyInfo == null) {
+            String lookupKeyApp = "App|" + apiKeyHash;
+            apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKeyApp);
+        }
 
         if (apiKeyInfo == null || !"ACTIVE".equals(apiKeyInfo.getStatus())) {
             log.error("Invalid Api Key. Active API key information not available.");
             throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                     APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
         }
-
-        // Hash the provided API key
-        byte[] salt = Base64.getDecoder().decode(apiKeyInfo.getSalt());
-        String apiKeyHash = APIUtil.sha256HashWithSalt(apiKey, salt);
 
         // Check whether the provided API key is already there in the stored list and return false otherwise
         if (!MessageDigest.isEqual(
@@ -268,7 +269,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                     APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
         }
 
-        // Validate subscription
+        // Validate subscriptions
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
         try {
             apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext, apiVersion, apiKeyInfo.getKeyType(),
@@ -281,7 +282,7 @@ public class ApiKeyAuthenticator implements Authenticator {
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("User is not subscribed to access the API: " + apiContext +
-                            ", version: " + apiVersion + ". Token: " + lookupKey);
+                            ", version: " + apiVersion + ". Token: " + apiKeyInfo.getKeyDisplayName());
                 }
                 log.error("User is not subscribed to access the API.");
                 throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
@@ -296,7 +297,7 @@ public class ApiKeyAuthenticator implements Authenticator {
         ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(ip,
                 apiContext, apiVersion, referrer, apiKeyInfo.getAdditionalProperties());
 
-        // TODO: Check for api key expiry and status is ACTIVE
+        // TODO: Check for api key expiry
         // TODO: Add api key to cache and first check whether the api key is available in cache before doing any DB operations
 
         updateApiKeyLastUsedTime(apiKeyHash, apiKeyValidationInfoDTO.getSubscriberTenantDomain());

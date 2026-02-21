@@ -38,6 +38,12 @@ public interface OpaqueAPIKeyNotifier {
     void sendApiKeyInfoOnRealtime(Properties properties);
 
     /**
+     * Method to send the api key association info on realtime
+     * @param properties additional properties to send
+     */
+    void sendApiKeyAssociationInfoOnRealtime(Properties properties);
+
+    /**
      * Initialization properties from configuration
      * @param realTimeNotifierProperties
      */
