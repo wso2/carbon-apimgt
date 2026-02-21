@@ -4577,6 +4577,69 @@ paths:
           "https://127.0.0.1:9443/api/am/admin/v4/labels/d7cf8523-9180-4255-84fa-6cb171c1f779/usage"'
       operationId: getLabelUsage
 
+  ######################################################
+  # The "API Key Collection" resource API
+  ######################################################
+  /api-keys:
+    get:
+      tags:
+        - API Keys (Collection)
+      summary: Get all API Keys
+      description: |
+        Retrieve all API Keys.
+      responses:
+        200:
+          description: |
+            OK.
+            API keys returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X GET "https://127.0.0.1:9443/api/am/admin/v4/api-keys"'
+
+  /api-keys/{apiId}/{applicationId}/{keyType}/{keyDisplayName}:
+    delete:
+      tags:
+        - API Keys
+      summary: Revoke an API Key
+      description: |
+        Revoke an API Key for the API
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/keyType'
+        - $ref: '#/components/parameters/keyDisplayName'
+      responses:
+        200:
+          description: |
+            OK.
+            Api key revoked successfully.
+          content: { }
+        400:
+          $ref: '#/components/responses/BadRequest'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/api-keys/ght65523-7650-4255-84fa-6cb171c1f779/d7cf8523-9180-4255-84fa-6cb171c1f779/PRODUCTION/test-key"'
+
 components:
   schemas:
     Error:
@@ -7038,6 +7101,58 @@ components:
               description: List of APIs associated with the label.
               items:
                 $ref: '#/components/schemas/ApiResult'
+    APIKey:
+      title: API Key details to invoke APIs
+      type: object
+      properties:
+        keyDisplayName:
+          type: string
+          description: API Key name
+          example: Test_Key
+        apiName:
+          type: string
+          description: API Name
+          example: NotificationsAPI
+        applicationName:
+          type: string
+          description: Application Name
+          example: DefaultApplication
+        keyType:
+          type: string
+          description: Application Key Type
+          example: PRODUCTION
+          enum:
+            - PRODUCTION
+            - SANDBOX
+        user:
+          type: string
+          description: Owner of the Application
+          example: Bob
+        issuedOn:
+          type: string
+          description: Created Time
+          example: 2026-02-06 23:45:07
+        validityPeriod:
+          type: integer
+          format: int32
+          example: 3600
+        lastUsed:
+          type: string
+          description: Last Used Time
+          example: NOT_USED
+    APIKeyList:
+      title: API Keys List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of API keys returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIKey'
 
   responses:
     BadRequest:
@@ -7376,6 +7491,25 @@ components:
       in: path
       description: |
         Label UUID
+      required: true
+      schema:
+        type: string
+    keyType:
+      name: keyType
+      in: path
+      description: |
+        **Application Key Type** standing for the type of the keys (i.e. Production or Sandbox).
+      required: true
+      schema:
+        type: string
+        enum:
+          - PRODUCTION
+          - SANDBOX
+    keyDisplayName:
+      name: keyDisplayName
+      in: path
+      description: |
+        Name of the API key. URL-encode this value if it contains reserved path characters.
       required: true
       schema:
         type: string

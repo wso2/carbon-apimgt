@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
@@ -355,6 +356,32 @@ public class APIAdminImpl implements APIAdmin {
     public Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws APIManagementException {
 
         return apiMgtDAO.getAllApplicationsOfTenantForMigration(appTenantDomain);
+    }
+
+    /**
+     * Returns api keys of a given tenant
+     *
+     * @param tenantDomain Tenant Domain
+     * @return List of api keys related to the given tenant
+     */
+    @Override
+    public List<APIKeyInfo> getAllApiKeys(String tenantDomain) throws APIManagementException {
+
+        return apiMgtDAO.getAllAPIKeys(tenantDomain);
+    }
+
+    /**
+     * Revokes a given api key
+     *
+     * @param apiId Id of the API
+     * @param applicationId Id of the Application
+     * @param keyType Key type
+     * @param keyDisplayName API key name
+     */
+    @Override
+    public void revokeAPIKey(String apiId, String applicationId, String keyType, String keyDisplayName) throws APIManagementException {
+
+        apiMgtDAO.revokeAPIKeyFromAdmin(apiId, applicationId, keyType, keyDisplayName);
     }
 
     /**

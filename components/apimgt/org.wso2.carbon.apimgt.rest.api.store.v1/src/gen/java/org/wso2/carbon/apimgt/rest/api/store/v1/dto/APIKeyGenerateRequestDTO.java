@@ -20,11 +20,30 @@ import javax.validation.Valid;
 
 public class APIKeyGenerateRequestDTO   {
   
+    private String keyDisplayName = null;
     private Integer validityPeriod = null;
     private Object additionalProperties = null;
 
   /**
-   * Token validity period
+   * API Key name
+   **/
+  public APIKeyGenerateRequestDTO keyDisplayName(String keyDisplayName) {
+    this.keyDisplayName = keyDisplayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Test_Key", value = "API Key name")
+  @JsonProperty("keyDisplayName")
+  public String getKeyDisplayName() {
+    return keyDisplayName;
+  }
+  public void setKeyDisplayName(String keyDisplayName) {
+    this.keyDisplayName = keyDisplayName;
+  }
+
+  /**
+   * API key validity period
    **/
   public APIKeyGenerateRequestDTO validityPeriod(Integer validityPeriod) {
     this.validityPeriod = validityPeriod;
@@ -32,7 +51,7 @@ public class APIKeyGenerateRequestDTO   {
   }
 
   
-  @ApiModelProperty(example = "3600", value = "Token validity period")
+  @ApiModelProperty(example = "3600", value = "API key validity period")
   @JsonProperty("validityPeriod")
   public Integer getValidityPeriod() {
     return validityPeriod;
@@ -70,13 +89,14 @@ public class APIKeyGenerateRequestDTO   {
       return false;
     }
     APIKeyGenerateRequestDTO apIKeyGenerateRequest = (APIKeyGenerateRequestDTO) o;
-    return Objects.equals(validityPeriod, apIKeyGenerateRequest.validityPeriod) &&
+    return Objects.equals(keyDisplayName, apIKeyGenerateRequest.keyDisplayName) &&
+        Objects.equals(validityPeriod, apIKeyGenerateRequest.validityPeriod) &&
         Objects.equals(additionalProperties, apIKeyGenerateRequest.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(validityPeriod, additionalProperties);
+    return Objects.hash(keyDisplayName, validityPeriod, additionalProperties);
   }
 
   @Override
@@ -84,6 +104,7 @@ public class APIKeyGenerateRequestDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIKeyGenerateRequestDTO {\n");
     
+    sb.append("    keyDisplayName: ").append(toIndentedString(keyDisplayName)).append("\n");
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
