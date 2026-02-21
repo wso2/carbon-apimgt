@@ -16644,7 +16644,8 @@ public class ApiMgtDAO {
             while (rs.next()) {
                 APIKeyInfo keyInfo = new APIKeyInfo();
                 keyInfo.setKeyDisplayName(rs.getString("API_KEY_NAME"));
-                keyInfo.setCreatedTime(rs.getTimestamp("TIME_CREATED").toString());
+                Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
+                keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                 keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
                 keyInfo.setApplicationId(applicationUUId);
@@ -16688,7 +16689,8 @@ public class ApiMgtDAO {
                 APIKeyInfo keyInfo = new APIKeyInfo();
                 keyInfo.setKeyDisplayName(rs.getString("API_KEY_NAME"));
                 keyInfo.setApiName(rs.getString("API_NAME"));
-                keyInfo.setAssociatedOn(rs.getTimestamp("ASSOCIATED_ON").toString());
+                Timestamp associatedOn = rs.getTimestamp("ASSOCIATED_ON");
+                keyInfo.setAssociatedOn(associatedOn != null ? associatedOn.toString() : null);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                 keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
                 keyInfo.setApplicationId(applicationUUId);
@@ -16729,12 +16731,13 @@ public class ApiMgtDAO {
             while (rs.next()) {
                 APIKeyInfo keyInfo = new APIKeyInfo();
                 keyInfo.setKeyDisplayName(rs.getString("API_KEY_NAME"));
-                keyInfo.setCreatedTime(rs.getTimestamp("TIME_CREATED").toString());
+                Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
+                keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                 keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
                 keyInfo.setApplicationId(rs.getString("APPLICATION_UUID"));
                 if (keyInfo.getApplicationId() == null) {
-                    keyInfo.setApplicationName("NO_ASSOCIATION");
+                    keyInfo.setApplicationName(APIConstants.NO_ASSOCIATION);
                 } else {
                     keyInfo.setApplicationName(rs.getString("APPLICATION_NAME"));
                 }
@@ -16794,9 +16797,10 @@ public class ApiMgtDAO {
     /**
      * Returns a list of all api keys
      *
+     * @param tenantDomain Tenant domain
      * @throws APIManagementException
      */
-    public List<APIKeyInfo> getAllAPIKeys() throws APIManagementException {
+    public List<APIKeyInfo> getAllAPIKeys(String tenantDomain) throws APIManagementException {
 
         List<APIKeyInfo> apiKeyInfoList = new ArrayList<APIKeyInfo>();
         Connection conn = null;
@@ -16809,6 +16813,8 @@ public class ApiMgtDAO {
             String sqlQuery = SQLConstants.GET_ALL_API_KEYS_SQL;
             // Retrieving data from the AM_API_KEY table
             ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, tenantDomain);
+            ps.setString(2, tenantDomain);
             rs = ps.executeQuery();
             while (rs.next()) {
                 APIKeyInfo keyInfo = new APIKeyInfo();
@@ -17092,13 +17098,15 @@ public class ApiMgtDAO {
             // Updating data from the AM_API_KEY table by setting STATUS to REVOKED
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, apiUUId);
-            if (applicationUUId.equalsIgnoreCase("NO_ASSOCIATION")) {
-                ps.setString(2, null);
+            if (applicationUUId == null || applicationUUId.equalsIgnoreCase(APIConstants.NO_ASSOCIATION)) {
+                ps.setNull(2, java.sql.Types.VARCHAR);
+                ps.setNull(3, java.sql.Types.VARCHAR);
             } else {
                 ps.setString(2, applicationUUId);
+                ps.setString(3, applicationUUId);
             }
-            ps.setString(3, keyType);
-            ps.setString(4, keyDisplayName);
+            ps.setString(4, keyType);
+            ps.setString(5, keyDisplayName);
 
             ps.executeUpdate();
             conn.commit();
@@ -17179,6 +17187,13 @@ public class ApiMgtDAO {
             ps.executeUpdate();
             conn.commit();
         } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    log.error("Failed to rollback updating API key last used time", rollbackEx);
+                }
+            }
             handleException("Failed to update last used time for the API key", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
@@ -17203,7 +17218,7 @@ public class ApiMgtDAO {
 
             // This query to update an entry from the AM_API_KEY table
             String sqlQuery = SQLConstants.UPDATE_API_KEY_ASSOCIATION_SQL;
-            // Updating data from the AM_API_KEY table by setting LAST_USED column
+            // Updating data from the AM_API_KEY table by setting APPLICATION_UUID column
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, appUUId);
             ps.setString(2, apiUUId);
@@ -17212,6 +17227,13 @@ public class ApiMgtDAO {
             ps.executeUpdate();
             conn.commit();
         } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    log.error("Failed to rollback creating API key association", rollbackEx);
+                 }
+            }
             handleException("Failed to update association of " + appUUId + " for the API key " + keyDisplayName, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);

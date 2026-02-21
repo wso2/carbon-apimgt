@@ -44,10 +44,10 @@ public class APIKeyMappingUtil {
                     dto.setKeyDisplayName(src.getKeyDisplayName());
                     dto.setApiName(src.getApiName());
                     dto.setApplicationName(src.getApplicationName());
-                    dto.setKeyType(APIKeyDTO.KeyTypeEnum.valueOf(src.getKeyType()));
+                    dto.setKeyType(src.getKeyType() != null ? APIKeyDTO.KeyTypeEnum.fromValue(src.getKeyType()) : null);
                     dto.setUser(src.getAuthUser());
                     dto.setIssuedOn(src.getCreatedTime());
-                    dto.setValidityPeriod(Math.toIntExact(src.getValidityPeriod()));
+                    dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
                     dto.setLastUsed(src.getLastUsedTime());
                     return dto;
                 })

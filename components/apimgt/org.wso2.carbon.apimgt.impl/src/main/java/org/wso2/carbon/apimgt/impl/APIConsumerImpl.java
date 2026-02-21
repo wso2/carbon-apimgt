@@ -3940,7 +3940,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         return getOpenAPIDefinitionForDeployment(api, environmentName, kmId);
     }
 
-    public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
+    public void revokeApiKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
 
         RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
         Properties properties = new Properties();
@@ -3968,7 +3968,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @throws APIManagementException
      */
     @Override
-    public void revokeAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain)
+    public void revokeApiKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain)
             throws APIManagementException {
 
         RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
@@ -3982,6 +3982,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
         APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(applicationId, keyType, keyDisplayName);
+        if (apiKeyInfo == null) {
+            throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
+        }
         apiMgtDAO.revokeAPIKey(applicationId, keyType, keyDisplayName);
         // TODO: Modify the receiver side to remove the key hash too. Currently it handles only the actual token, not the hash
         revocationRequestPublisher.publishRevocationEvents(apiKeyInfo.getApiKeyHash(), properties);
@@ -3995,7 +3998,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @throws APIManagementException
      */
     @Override
-    public void revokeAPIAPIKey(String apiId, String keyDisplayName, String tenantDomain) throws APIManagementException {
+    public void revokeApiApiKey(String apiId, String keyDisplayName, String tenantDomain) throws APIManagementException {
         RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
         Properties properties = new Properties();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -4007,6 +4010,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
         APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(apiId, keyDisplayName);
+        if (apiKeyInfo == null) {
+            throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
+        }
         apiMgtDAO.revokeAPIKey(apiId, keyDisplayName);
         // TODO: Modify the receiver side to remove the key hash too. Currently it handles only the actual token, not the hash
         revocationRequestPublisher.publishRevocationEvents(apiKeyInfo.getApiKeyHash(), properties);
@@ -4023,7 +4029,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @throws APIManagementException
      */
     @Override
-    public APIKeyInfo regenerateAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain,
+    public APIKeyInfo regenerateApiKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain,
                                        String username) throws APIManagementException {
 
         // Load existing metadata before revocation (revocation may remove/alter it)
@@ -4032,7 +4038,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
         }
         // Revoke the existing key
-        revokeAPIKey(applicationId, keyType, keyDisplayName, tenantDomain);
+        revokeApiKey(applicationId, keyType, keyDisplayName, tenantDomain);
         // Generate a new key with the same display name and other additional properties
         APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
         apiKeyInfoDTO.setKeyDisplayName(keyDisplayName);
@@ -4082,7 +4088,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @throws APIManagementException
      */
     @Override
-    public APIKeyInfo regenerateAPIAPIKey(String apiId, String keyDisplayName, String tenantDomain, String organization,
+    public APIKeyInfo regenerateApiApiKey(String apiId, String keyDisplayName, String tenantDomain, String organization,
                                           String username)
             throws APIManagementException {
         // Load existing metadata before revocation (revocation may remove/alter it)
@@ -4091,7 +4097,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
         }
         // Revoke the existing key
-        revokeAPIAPIKey(apiId, keyDisplayName, tenantDomain);
+        revokeApiApiKey(apiId, keyDisplayName, tenantDomain);
         // Generate a new key with the same display name and other additional properties
         APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
         apiKeyInfoDTO.setKeyDisplayName(keyDisplayName);
@@ -4143,7 +4149,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     /**
      * Creates an association for a given API key.
      *
-     * @param apiUUId          API Id of the API.
+     * @param apiUUId          API UUId of the API.
      * @param appName        Name of the Application.
      * @param keyDisplayName Display name of API key.
      * @param userName       User name
@@ -4156,6 +4162,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         int appId = APIUtil.getApplicationId(appName, userName);
         apiMgtDAO.createAssociationToApiKey(keyDisplayName, apiUUId, applicationUUID);
         APIKeyInfo apiKeyInfo = apiMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, keyDisplayName);
+        if (apiKeyInfo == null) {
+            throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
+        }
         sendAPIKeyAssociationInfoEvent(keyDisplayName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
                 apiUUId, applicationUUID, appId, "CREATE_ASSOCIATION");
     }
@@ -4173,6 +4182,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             throws APIManagementException {
         apiMgtDAO.createAssociationToApiKey(keyDisplayName, apiUUId, appUUId);
         APIKeyInfo apiKeyInfo = apiMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, appUUId, keyDisplayName);
+        if (apiKeyInfo == null) {
+            throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
+        }
         sendAPIKeyAssociationInfoEvent(keyDisplayName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
                 apiUUId, appUUId, apiKeyInfo.getAppId(), "CREATE_ASSOCIATION");
     }
@@ -4183,8 +4195,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @param keyDisplayName Api key name
      * @throws APIManagementException
      */
-    public void removeAPIKeyAssociation(String apiUUId, String keyDisplayName) throws APIManagementException {
+    public void removeApiKeyAssociation(String apiUUId, String keyDisplayName) throws APIManagementException {
         APIKeyInfo apiKeyInfo = apiMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, keyDisplayName);
+        if (apiKeyInfo == null) {
+            throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
+        }
         apiMgtDAO.removeAssociationOfAPIKey(apiUUId, keyDisplayName);
         sendAPIKeyAssociationInfoEvent(keyDisplayName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(), apiUUId,
                 null, 0, "REMOVE_ASSOCIATION");
@@ -4196,8 +4211,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @param keyDisplayName Api key name
      * @throws APIManagementException
      */
-    public void removeAPIKeyAssociationViaApp(String appUUId, String keyDisplayName) throws APIManagementException {
+    public void removeApiKeyAssociationViaApp(String appUUId, String keyDisplayName) throws APIManagementException {
         APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKeyDataByKeyNameAndAppUUID(appUUId, keyDisplayName);
+        if (apiKeyInfo == null) {
+            throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
+        }
         apiMgtDAO.removeAssociationOfAPIKeyViaApp(appUUId, keyDisplayName);
         sendAPIKeyAssociationInfoEvent(keyDisplayName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
                 apiKeyInfo.getApiUUId(), appUUId, apiKeyInfo.getAppId(), "REMOVE_ASSOCIATION");

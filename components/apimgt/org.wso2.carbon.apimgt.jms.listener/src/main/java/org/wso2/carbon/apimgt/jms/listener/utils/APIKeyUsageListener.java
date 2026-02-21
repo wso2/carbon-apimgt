@@ -56,9 +56,10 @@ public class APIKeyUsageListener implements MessageListener {
                     String textMessage = ((TextMessage) message).getText();
                     // Navigate to payloadData
                     JsonNode payloadData = objectMapper.readTree(textMessage).path("event").path("payloadData");
-
-                    String apiKeyHash = payloadData.get(APIConstants.NotificationEvent.API_KEY_HASH).asText();
-                    String lastUsedTime = payloadData.get(APIConstants.NotificationEvent.LAST_USED_TIME).asText();
+                    JsonNode apiKeyHashNode = payloadData.path(APIConstants.NotificationEvent.API_KEY_HASH);
+                    JsonNode lastUsedTimeNode = payloadData.path(APIConstants.NotificationEvent.LAST_USED_TIME);
+                    String apiKeyHash = apiKeyHashNode.asText(null);
+                    String lastUsedTime = lastUsedTimeNode.asText(null);
 
                     if (apiKeyHash != null && !apiKeyHash.isEmpty()) {
                         ApiMgtDAO.getInstance().updateAPIKeyUsage(apiKeyHash, lastUsedTime);

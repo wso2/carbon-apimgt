@@ -81,9 +81,10 @@ public interface APIAdmin  {
     /**
      * Returns api keys of a given tenant
      *
+     * @param tenantDomain Tenant domain
      * @return List of api keys related to the given tenant
      */
-    List<APIKeyInfo> getAllApiKeys() throws APIManagementException;
+    List<APIKeyInfo> getAllApiKeys(String tenantDomain) throws APIManagementException;
 
     /**
      * Revokes a given api key

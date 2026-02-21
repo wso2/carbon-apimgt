@@ -697,9 +697,11 @@ public class GatewayUtils {
         authContext.setAuthenticated(true);
         authContext.setApiKey(tokenSignature);
         if (payload != null) {
-        authContext.setUsername(payload.getSubject());
-        } else {
+            authContext.setUsername(payload.getSubject());
+        } else if (apiKeyValidationInfoDTO != null) {
             authContext.setUsername(apiKeyValidationInfoDTO.getEndUserName());
+        } else {
+            authContext.setUsername(null);
         }
 
         if (apiKeyValidationInfoDTO != null) {

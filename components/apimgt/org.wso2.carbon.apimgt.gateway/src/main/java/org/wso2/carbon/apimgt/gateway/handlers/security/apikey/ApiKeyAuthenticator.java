@@ -190,7 +190,6 @@ public class ApiKeyAuthenticator implements Authenticator {
                         APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext,
                                 jwtGenerationEnabled ? getContextHeader() : null);
                         synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, authenticationContext.getUsername());
-                        updateApiKeyLastUsedTime(apiKey, tenantDomain);
                         log.debug("User is authorized to access the resource using Api Key.");
                         return new AuthenticationResponse(true, isMandatory, false,
                                 0, null);
