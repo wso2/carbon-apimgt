@@ -62,8 +62,10 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
             type = properties.getProperty(APIConstants.NotificationEvent.EVENT_TYPE);
         }
         String orgId = properties.getProperty(APIConstants.NotificationEvent.ORG_ID);
-        int tenantId = (int) properties.get(APIConstants.NotificationEvent.TENANT_ID);
-        long lastUsedTime = (Long) properties.get(APIConstants.NotificationEvent.LAST_USED_TIME);
+        Object tenantIdObj = properties.get(APIConstants.NotificationEvent.TENANT_ID);
+        int tenantId = tenantIdObj instanceof Integer ? (Integer) tenantIdObj : 0;
+        Object lastUsedTimeObj = properties.get(APIConstants.NotificationEvent.LAST_USED_TIME);
+        long lastUsedTime = lastUsedTimeObj instanceof Long ? (Long) lastUsedTimeObj : 0L;
         Object[] objects =
                 new Object[]{eventId, properties.getProperty(APIConstants.NotificationEvent.API_KEY_HASH), lastUsedTime,
                         realtimeNotifierTTL, expiryTimeForJWT, type, tenantId};
@@ -86,8 +88,10 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
         String validityPeriodStr = properties.getProperty(APIConstants.NotificationEvent.VALIDITY_PERIOD);
         long validityPeriod = validityPeriodStr != null ? Long.parseLong(validityPeriodStr) : 0L;
         String orgId = properties.getProperty(APIConstants.NotificationEvent.ORG_ID);
-        int tenantId = (int) properties.get(APIConstants.NotificationEvent.TENANT_ID);
-        int appId = (int) properties.get(APIConstants.NotificationEvent.APPLICATION_ID);
+        Object tenantIdObj = properties.get(APIConstants.NotificationEvent.TENANT_ID);
+        int tenantId = tenantIdObj instanceof Integer ? (Integer) tenantIdObj : 0;
+        Object appIdObj = properties.get(APIConstants.NotificationEvent.APPLICATION_ID);
+        int appId = appIdObj instanceof Integer ? (Integer) appIdObj : 0;
         String originUUId = null;
         String origin = null;
         if (properties.getProperty(APIConstants.NotificationEvent.APPLICATION_UUID) != null) {
@@ -118,8 +122,10 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
     public void sendApiKeyAssociationInfoOnRealtime(Properties properties) {
         String eventId = properties.getProperty(APIConstants.NotificationEvent.EVENT_ID);
         String orgId = properties.getProperty(APIConstants.NotificationEvent.ORG_ID);
-        int tenantId = (int) properties.get(APIConstants.NotificationEvent.TENANT_ID);
-        int appId = (int) properties.get(APIConstants.NotificationEvent.APPLICATION_ID);
+        Object tenantIdObj = properties.get(APIConstants.NotificationEvent.TENANT_ID);
+        int tenantId = tenantIdObj instanceof Integer ? (Integer) tenantIdObj : 0;
+        Object appIdObj = properties.get(APIConstants.NotificationEvent.APPLICATION_ID);
+        int appId = appIdObj instanceof Integer ? (Integer) appIdObj : 0;
         Object[] objects = new Object[]{eventId,
                 properties.getProperty(APIConstants.NotificationEvent.KEY_DISPLAY_NAME),
                 properties.getProperty(APIConstants.NotificationEvent.KEY_TYPE),

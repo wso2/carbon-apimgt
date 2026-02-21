@@ -856,7 +856,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                     "or SANDBOX", log);
                         } else {
                             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                            apiConsumer.revokeAPIKey(applicationId, keyType, keyDisplayName, tenantDomain);
+                            apiConsumer.revokeApiKey(applicationId, keyType, keyDisplayName, tenantDomain);
                             return Response.ok().build();
                         }
                     } else {
@@ -915,7 +915,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     } else {
                         RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
                     }
-                    apiConsumer.removeAPIKeyAssociationViaApp(applicationId, keyDisplayName);
+                    apiConsumer.removeApiKeyAssociationViaApp(applicationId, keyDisplayName);
                     return Response.ok().build();
                 }
             }
@@ -944,7 +944,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                     "or SANDBOX", log);
                         } else {
                             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                            APIKeyInfo apiKeyInfo = apiConsumer.regenerateAPIKey(applicationId, keyType, keyDisplayName, tenantDomain, username);
+                            APIKeyInfo apiKeyInfo = apiConsumer.regenerateApiKey(applicationId, keyType, keyDisplayName, tenantDomain, username);
                             APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKeyInfo.getApiKey(),
                                     (int) apiKeyInfo.getValidityPeriod(), apiKeyInfo.getKeyDisplayName());
                             return Response.ok().entity(apiKeyDto).build();
@@ -1013,7 +1013,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                     }
                                     String tokenIdentifier = payload.getString(APIConstants.JwtTokenConstants.JWT_ID);
                                     String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                                    apiConsumer.revokeAPIKey(tokenIdentifier, expiryTime, tenantDomain);
+                                    apiConsumer.revokeApiKey(tokenIdentifier, expiryTime, tenantDomain);
                                     return Response.ok().build();
                                 } else {
                                     if (log.isDebugEnabled()) {

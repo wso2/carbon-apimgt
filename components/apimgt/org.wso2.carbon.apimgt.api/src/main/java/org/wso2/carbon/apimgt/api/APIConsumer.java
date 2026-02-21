@@ -787,7 +787,7 @@ public interface APIConsumer extends APIManager {
 
     Set<APIKey> getApplicationKeysOfApplication(int applicationId, String xWso2Tenant) throws APIManagementException;
 
-    void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException;
+    void revokeApiKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException;
 
     /**
      * Revoke opaque api key and delete from the DB
@@ -797,7 +797,7 @@ public interface APIConsumer extends APIManager {
      * @param tenantDomain Tenant domain
      * @throws APIManagementException
      */
-    void revokeAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain) throws APIManagementException;
+    void revokeApiKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain) throws APIManagementException;
 
     /**
      * Revoke opaque api key and delete from the DB
@@ -806,7 +806,7 @@ public interface APIConsumer extends APIManager {
      * @param tenantDomain Tenant domain
      * @throws APIManagementException
      */
-    void revokeAPIAPIKey(String apiId, String keyDisplayName, String tenantDomain) throws APIManagementException;
+    void revokeApiApiKey(String apiId, String keyDisplayName, String tenantDomain) throws APIManagementException;
 
     /**
      * Remove association of an opaque api key
@@ -814,7 +814,7 @@ public interface APIConsumer extends APIManager {
      * @param keyDisplayName Api key name
      * @throws APIManagementException
      */
-    void removeAPIKeyAssociation(String apiId, String keyDisplayName) throws APIManagementException;
+    void removeApiKeyAssociation(String apiId, String keyDisplayName) throws APIManagementException;
 
     /**
      * Remove association of an opaque api key
@@ -822,7 +822,7 @@ public interface APIConsumer extends APIManager {
      * @param keyDisplayName Api key name
      * @throws APIManagementException
      */
-    void removeAPIKeyAssociationViaApp(String appId, String keyDisplayName) throws APIManagementException;
+    void removeApiKeyAssociationViaApp(String appId, String keyDisplayName) throws APIManagementException;
 
     /**
      * Regenerate opaque api key for the given key display name with same properties
@@ -834,7 +834,7 @@ public interface APIConsumer extends APIManager {
      * @return API key info object
      * @throws APIManagementException
      */
-    APIKeyInfo regenerateAPIKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain, String username) throws APIManagementException;
+    APIKeyInfo regenerateApiKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain, String username) throws APIManagementException;
 
     /**
      * Regenerate opaque api key for the given key display name with same properties
@@ -845,7 +845,7 @@ public interface APIConsumer extends APIManager {
      * @return API key info object
      * @throws APIManagementException
      */
-    APIKeyInfo regenerateAPIAPIKey(String apiId, String keyDisplayName, String tenantDomain, String organization, String username)
+    APIKeyInfo regenerateApiApiKey(String apiId, String keyDisplayName, String tenantDomain, String organization, String username)
             throws APIManagementException;
 
     /**

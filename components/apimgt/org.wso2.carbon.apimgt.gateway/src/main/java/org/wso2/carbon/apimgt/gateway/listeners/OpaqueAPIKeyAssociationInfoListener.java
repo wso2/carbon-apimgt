@@ -62,19 +62,33 @@ public class OpaqueAPIKeyAssociationInfoListener implements MessageListener {
                             equalsIgnoreCase("CREATE_ASSOCIATION")) {
                         apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKey);
                         if (apiKeyInfo != null) {
-                            apiKeyInfo.setApplicationId(payload.path(APIConstants.NotificationEvent.APPLICATION_UUID).asText());
-                            apiKeyInfo.setAppId(payload.path(APIConstants.NotificationEvent.APPLICATION_ID).asInt());
-                            DataHolder.getInstance().removeOpaqueAPIKeyInfo(lookupKey);
-                            DataHolder.getInstance().addOpaqueAPIKeyInfo(apiKeyInfo);
+                            APIKeyInfo updated = new APIKeyInfo();
+                            updated.setKeyDisplayName(apiKeyInfo.getKeyDisplayName());
+                            updated.setApiKeyHash(apiKeyInfo.getApiKeyHash());
+                            updated.setLookupKey(apiKeyInfo.getLookupKey());
+                            updated.setKeyType(apiKeyInfo.getKeyType());
+                            updated.setAuthUser(apiKeyInfo.getAuthUser());
+                            updated.setCreatedTime(apiKeyInfo.getCreatedTime());
+                            updated.setValidityPeriod(apiKeyInfo.getValidityPeriod());
+                            updated.setApplicationId(payload.path(APIConstants.NotificationEvent.APPLICATION_UUID).asText());
+                            updated.setAppId(payload.path(APIConstants.NotificationEvent.APPLICATION_ID).asInt());
+                            DataHolder.getInstance().addOpaqueAPIKeyInfo(updated);
                         }
                     } else if (payload.path(APIConstants.NotificationEvent.ASSOCIATION_TYPE).asText().
                             equalsIgnoreCase("REMOVE_ASSOCIATION")) {
                         apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKey);
                         if (apiKeyInfo != null) {
-                            apiKeyInfo.setApplicationId(null);
-                            apiKeyInfo.setAppId(0);
-                            DataHolder.getInstance().removeOpaqueAPIKeyInfo(lookupKey);
-                            DataHolder.getInstance().addOpaqueAPIKeyInfo(apiKeyInfo);
+                            APIKeyInfo updated = new APIKeyInfo();
+                            updated.setKeyDisplayName(apiKeyInfo.getKeyDisplayName());
+                            updated.setApiKeyHash(apiKeyInfo.getApiKeyHash());
+                            updated.setLookupKey(apiKeyInfo.getLookupKey());
+                            updated.setKeyType(apiKeyInfo.getKeyType());
+                            updated.setAuthUser(apiKeyInfo.getAuthUser());
+                            updated.setCreatedTime(apiKeyInfo.getCreatedTime());
+                            updated.setValidityPeriod(apiKeyInfo.getValidityPeriod());
+                            updated.setApplicationId(null);
+                            updated.setAppId(0);
+                            DataHolder.getInstance().addOpaqueAPIKeyInfo(updated);
                         }
                     }
                 }

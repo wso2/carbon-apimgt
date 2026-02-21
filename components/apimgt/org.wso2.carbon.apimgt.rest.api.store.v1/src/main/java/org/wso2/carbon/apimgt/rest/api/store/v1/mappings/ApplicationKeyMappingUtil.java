@@ -176,7 +176,7 @@ public class ApplicationKeyMappingUtil {
                     APIKeyInfoDTO dto = new APIKeyInfoDTO();
                     dto.setKeyDisplayName(src.getKeyDisplayName());
                     dto.setIssuedOn(src.getCreatedTime());
-                    dto.setValidityPeriod(Math.toIntExact(src.getValidityPeriod()));
+                    dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
                     dto.setLastUsed(src.getLastUsedTime());
                     return dto;
                 })
@@ -197,7 +197,7 @@ public class ApplicationKeyMappingUtil {
                     dto.setKeyDisplayName(src.getKeyDisplayName());
                     dto.setApiName(src.getApiName());
                     dto.setAssociatedOn(src.getAssociatedOn());
-                    dto.setValidityPeriod(Math.toIntExact(src.getValidityPeriod()));
+                    dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
                     dto.setLastUsed(src.getLastUsedTime());
                     return dto;
                 })
@@ -217,7 +217,7 @@ public class ApplicationKeyMappingUtil {
                     APIAPIKeyInfoDTO dto = new APIAPIKeyInfoDTO();
                     dto.setKeyDisplayName(src.getKeyDisplayName());
                     dto.setIssuedOn(src.getCreatedTime());
-                    dto.setValidityPeriod(Math.toIntExact(src.getValidityPeriod()));
+                    dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
                     dto.setLastUsed(src.getLastUsedTime());
                     dto.setAssociatedApp(src.getApplicationName());
                     return dto;

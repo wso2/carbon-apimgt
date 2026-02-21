@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ApiKeysApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APIKeyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -59,7 +60,8 @@ public class ApiKeysApiServiceImpl implements ApiKeysApiService {
      */
     public Response apiKeysGet(MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
-        List<APIKeyInfo> apiKeyInfoList = apiAdmin.getAllApiKeys();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        List<APIKeyInfo> apiKeyInfoList = apiAdmin.getAllApiKeys(organization);
         List<APIKeyDTO> apiKeyDTOList =
                 APIKeyMappingUtil.fromAPIKeyInfoListToAPIKeyListDTO(apiKeyInfoList);
         return Response.ok().entity(apiKeyDTOList).build();

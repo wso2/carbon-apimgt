@@ -32,7 +32,7 @@ public class APIKeyInfo {
     private String keyType;
     private String lastUsedTime;
     private String createdTime;
-    private String AssociatedOn;
+    private String associatedOn;
     private String lookupKey;
     private long validityPeriod;
     private byte[] properties;
@@ -131,11 +131,11 @@ public class APIKeyInfo {
     }
 
     public String getAssociatedOn() {
-        return AssociatedOn;
+        return associatedOn;
     }
 
     public void setAssociatedOn(String associatedOn) {
-        AssociatedOn = associatedOn;
+        this.associatedOn = associatedOn;
     }
 
     public String getLookupKey() {

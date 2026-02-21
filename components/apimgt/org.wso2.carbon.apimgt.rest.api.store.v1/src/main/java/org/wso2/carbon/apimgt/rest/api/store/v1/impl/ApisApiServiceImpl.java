@@ -38,7 +38,6 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -423,7 +422,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String keyDisplayName = null;
         try {
             // Determine whether the request body is valid. Request body should have a request UUID.
-            if (StringUtils.isEmpty(apiId) || StringUtils.isEmpty(body.getKeyDisplayName())) {
+            if (StringUtils.isEmpty(apiId) || body == null || StringUtils.isEmpty(body.getKeyDisplayName())) {
                 String errorMessage = "Error while executing the prepare statement as request is badly formatted";
                 RestApiUtil.handleBadRequest(errorMessage, log);
                 return null;
@@ -502,7 +501,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                                 String ifMatch, MessageContext messageContext)
             throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        if (!StringUtils.isEmpty(keyDisplayName)) {
+        if (!StringUtils.isEmpty(keyDisplayName) && body != null && StringUtils.isNotEmpty(body.getApplicationName())) {
             try {
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -531,7 +530,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (log.isDebugEnabled()) {
                 log.debug("Provided API Key display name " + keyDisplayName + " is not valid");
             }
-            RestApiUtil.handleBadRequest("Provided API Key isn't valid ", log);
+            RestApiUtil.handleBadRequest("Application name, and key display name are required", log);
         }
         return null;
     }
@@ -550,7 +549,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
                     } else {
                         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                        apiConsumer.revokeAPIAPIKey(apiId, keyDisplayName, tenantDomain);
+                        apiConsumer.revokeApiApiKey(apiId, keyDisplayName, tenantDomain);
                         return Response.ok().build();
                     }
                 }
@@ -584,7 +583,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiId, organization)) {
                         RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
                     } else {
-                        apiConsumer.removeAPIKeyAssociation(apiId, keyDisplayName);
+                        apiConsumer.removeApiKeyAssociation(apiId, keyDisplayName);
                         return Response.ok().build();
                     }
                 }
@@ -619,7 +618,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
                     } else {
                             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                            APIKeyInfo apiKeyInfo = apiConsumer.regenerateAPIAPIKey(apiId, keyDisplayName, tenantDomain, organization, username);
+                            APIKeyInfo apiKeyInfo = apiConsumer.regenerateApiApiKey(apiId, keyDisplayName, tenantDomain, organization, username);
                             APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKeyInfo.getApiKey(),
                                     (int) apiKeyInfo.getValidityPeriod(), apiKeyInfo.getKeyDisplayName());
                             return Response.ok().entity(apiKeyDto).build();

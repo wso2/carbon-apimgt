@@ -361,12 +361,13 @@ public class APIAdminImpl implements APIAdmin {
     /**
      * Returns api keys of a given tenant
      *
+     * @param tenantDomain Tenant Domain
      * @return List of api keys related to the given tenant
      */
     @Override
-    public List<APIKeyInfo> getAllApiKeys() throws APIManagementException {
+    public List<APIKeyInfo> getAllApiKeys(String tenantDomain) throws APIManagementException {
 
-        return apiMgtDAO.getAllAPIKeys();
+        return apiMgtDAO.getAllAPIKeys(tenantDomain);
     }
 
     /**

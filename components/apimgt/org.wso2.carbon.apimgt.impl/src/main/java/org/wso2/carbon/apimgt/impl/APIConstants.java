@@ -101,6 +101,7 @@ public final class APIConstants {
     public static final String WSDL_ELEMENT_LOCAL_NAME = "Address";
 
     public static final String API_TENANT_CONF = "tenant-conf.json";
+    public static final String NO_ASSOCIATION = "NO_ASSOCIATION";
 
     public static final String API_TENANT_CONF_LOCATION = API_APPLICATION_DATA_LOCATION + "/" + API_TENANT_CONF;
 
