@@ -29,6 +29,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.APIMThreatAnalyzerException;
 import org.wso2.carbon.apimgt.gateway.threatprotection.AnalyzerHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.analyzer.APIMThreatAnalyzer;
@@ -37,6 +38,7 @@ import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatExceptionHand
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
@@ -59,6 +61,9 @@ import java.nio.charset.StandardCharsets;
  */
 public class XMLSchemaValidator extends AbstractMediator {
     private static final Log logger = LogFactory.getLog(XMLSchemaValidator.class);
+    private static final String APPLICATION_BUILDER_ALLOW_DTD = "ApplicationXMLBuilder.allowDTD";
+    APIManagerConfiguration apiManagerConfiguration;
+    boolean isSecureXMLProcessingEnabled = false;
 
     /**
      * This mediate method validates the xml request message.
@@ -77,6 +82,15 @@ public class XMLSchemaValidator extends AbstractMediator {
         String requestMethod;
         String contentType = "";
         boolean isValid = true;
+        apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfiguration();
+        if (apiManagerConfiguration != null) {
+            isSecureXMLProcessingEnabled = apiManagerConfiguration.isEnableSecureXMLProcessing();
+        }
+        if (!isSecureXMLProcessingEnabled) {
+            ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                    .setProperty(APPLICATION_BUILDER_ALLOW_DTD, "true");
+        }
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
         requestMethod = axis2MC.getProperty(ThreatProtectorConstants.HTTP_REQUEST_METHOD).toString();
@@ -174,6 +188,12 @@ public class XMLSchemaValidator extends AbstractMediator {
             ThreatExceptionHandler.handleException(messageContext, message);
         }
 
+        // Override the user defined properties if the secure XML processing is enabled
+        if (isSecureXMLProcessingEnabled) {
+            dtdEnabled = false;
+            externalEntitiesEnabled = false;
+        }
+
         messageProperty = messageContext.getProperty(ThreatProtectorConstants.MAX_ELEMENT_COUNT);
         if (messageProperty != null) {
             elementCount = Integer.parseInt(messageProperty.toString());
@@ -265,6 +285,12 @@ public class XMLSchemaValidator extends AbstractMediator {
         Schema schema;
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         try {
+            if (isSecureXMLProcessingEnabled) {
+                schemaFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+                schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            }
+
             Object messageProperty = messageContext.getProperty(APIMgtGatewayConstants.XSD_URL);
             if (messageProperty == null) {
                 return true;
@@ -277,6 +303,11 @@ public class XMLSchemaValidator extends AbstractMediator {
                     schema = schemaFactory.newSchema(schemaFile);
                     Source xmlFile = new StreamSource(bufferedInputStream);
                     Validator validator = schema.newValidator();
+                    if (isSecureXMLProcessingEnabled) {
+                        validator.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                        validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+                        validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+                    }
                     validator.validate(xmlFile);
                 }
             }

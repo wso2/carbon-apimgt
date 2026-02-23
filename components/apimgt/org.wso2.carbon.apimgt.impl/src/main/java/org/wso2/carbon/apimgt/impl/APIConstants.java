@@ -1831,6 +1831,10 @@ public final class APIConstants {
     public static final String SOLACE_APIM_API_ENDPOINT = "SolaceApimApiEndpoint";
     public static final String SOLACE_TOKEN = "SolaceToken";
 
+    // Mediation Configuration
+    public static final String MEDIATION_CONFIG = "Mediation";
+    public static final String ENABLE_SECURE_XML_PROCESSING = "EnableSecureXMLProcessing";
+
     // Primary/Secondary Login configuration
     public static final String USERID_LOGIN = "UserIdLogin";
     public static final String EMAIL_LOGIN = "EmailLogin";

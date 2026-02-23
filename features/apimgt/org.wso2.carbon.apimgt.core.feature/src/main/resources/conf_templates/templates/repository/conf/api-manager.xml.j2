@@ -2116,5 +2116,8 @@
               <ConnectionAcquisitionTimeout>{{apim.aws_lambda.http_client.connection_acquisition_timeout}}</ConnectionAcquisitionTimeout>
           </HttpClient>
       </AWSLambdaConnector>
-
+      
+      <Mediation>
+        <EnableSecureXMLProcessing>{{apim.mediation.enable_secure_xml_processing}}</EnableSecureXMLProcessing>
+      </Mediation>
 </APIManager>
