@@ -208,6 +208,8 @@ public final class APIConstants {
     public static final String FILE_URI_PREFIX = "file://";
     public static final String API_DOC_RESOURCE_NAME = "api-doc.json";
 
+    public static final String WSDL = "wsdl";
+
     public static final String WSDL_VERSION_11 = "1.1";
     public static final String WSDL_VERSION_20 = "2.0";
 
@@ -2877,6 +2879,8 @@ public final class APIConstants {
         public static final String PUB_API_RESPONSE_PARAMS_ID = "id";
         public static final String DYNAMIC_CLIENT_REGISTRATION_URL_SUFFIX =
                 "/client-registration/" + REST_API_OLD_VERSION + "/register";
+        public static final String REST_API_DEVELOPER_PORTAL_VERSION ="v3";
+        public static final String REST_API_DEVELOPER_PORTAL_CONTEXT = "api/am/devportal";
     }
 
     public static final int MAX_LENGTH_API_NAME = 60;
@@ -3797,6 +3801,7 @@ public final class APIConstants {
         public static final String GATEWAY_ID = "gatewayId";
         public static final String  LOADING_TENANTS = "loadingTenants";
         public static final String ENVIRONMENT_LABELS = "environmentLabels";
+        public static final String ENVIRONMENT_NAME = "environmentName";
         public static final String GATEWAY_PROPERTIES = "gatewayProperties";
         public static final String TIMESTAMP = "timeStamp";
         public static final String GATEWAY_NOTIFICATION_ENDPOINT = INTERNAL_WEB_APP_EP + "/notify-gateway";

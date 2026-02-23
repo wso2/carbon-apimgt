@@ -623,10 +623,20 @@ paths:
         This operation can be used to retrieve the swagger definition of an API.
       operationId: getWSDLOfAPI
       parameters:
+        - name: includeMainWSDLContent
+          in: query
+          description: |
+            If true, send the content of the main WSDL file and not the zip file.
+          required: false
+          schema:
+            type: boolean
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/environmentName'
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/requestedTenant'
+        - $ref: '#/components/parameters/exp'
+        - $ref: '#/components/parameters/sig'
+        - $ref: '#/components/parameters/requestedTenant-Q'
       responses:
         200:
           description: |
@@ -642,6 +652,10 @@ paths:
               description: |
                 Date and time the resource has been modifed the last time.
                 Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            filename:
+              description: The filename for the WSDL/ZIP file
               schema:
                 type: string
           content: {}
@@ -4594,6 +4608,47 @@ paths:
           source: 'curl -k -X POST -H "Content-Type: application/json" -d @request.json
           "https://localhost:9443/api/am/devportal/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/api-chat?apiChatAction=EXECUTE"'
 
+  /apis/{apiId}/generate-url:
+    post:
+      tags:
+        - APIs
+      summary: Generate a URL to download a resource for an API
+      description: >-
+        Generate a download URL for an API resource (WSDL / Swagger / OpenAPI).
+        For public APIs the URL will be returned without `exp`/`sig` query params.
+      operationId: generateUrlToDownloadResource
+      parameters:
+        - name: type
+          in: query
+          description: Type of the resource (wsdl, swagger, openapi)
+          required: true
+          schema:
+            type: string
+            enum:
+              - wsdl
+              - swagger
+              - openapi
+        - $ref: '#/components/parameters/environmentName'
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/requestedTenant'
+      responses:
+        '200':
+          description: OK. Returns JSON with the generated download URL.
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+          - OAuth2Security: [ ]
+
   ######################################################
   # User resource APIs
   ######################################################
@@ -7565,6 +7620,23 @@ components:
       in: query
       description: |
         Name of the API gateway environment.
+      schema:
+        type: string
+    exp:
+      name: exp
+      in: query
+      description: |
+        Time of expiration of the generated URL.
+      required: false
+      schema:
+        type: integer
+        format: int64
+    sig:
+      name: sig
+      in: query
+      description: |
+        Signature to validate of the generated URL.
+      required: false
       schema:
         type: string
     limit:

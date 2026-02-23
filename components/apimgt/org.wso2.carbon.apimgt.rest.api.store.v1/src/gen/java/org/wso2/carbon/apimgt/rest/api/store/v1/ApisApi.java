@@ -443,6 +443,25 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.editCommentOfAPI(commentId, apiId, patchRequestBodyDTO, securityContext);
     }
 
+    @POST
+    @Path("/{apiId}/generate-url")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Generate a URL to download a resource for an API", notes = "Generate a download URL for an API resource (WSDL / Swagger / OpenAPI). For public APIs the URL will be returned without `exp`/`sig` query params.", response = String.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Returns JSON with the generated download URL.", response = String.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response generateUrlToDownloadResource( @NotNull @ApiParam(value = "Type of the resource (wsdl, swagger, openapi)",required=true, allowableValues="wsdl, swagger, openapi")  @QueryParam("type") String type, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Name of the API gateway environment. ")  @QueryParam("environmentName") String environmentName,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.generateUrlToDownloadResource(type, apiId, environmentName, xWSO2Tenant, securityContext);
+    }
+
     @GET
     @Path("/{apiId}/comments")
     
@@ -512,7 +531,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response getWSDLOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Name of the API gateway environment. ")  @QueryParam("environmentName") String environmentName,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
-        return delegate.getWSDLOfAPI(apiId, environmentName, ifNoneMatch, xWSO2Tenant, securityContext);
+    public Response getWSDLOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "If true, send the content of the main WSDL file and not the zip file. ")  @QueryParam("includeMainWSDLContent") Boolean includeMainWSDLContent,  @ApiParam(value = "Name of the API gateway environment. ")  @QueryParam("environmentName") String environmentName,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Time of expiration of the generated URL. ")  @QueryParam("exp") Long exp,  @ApiParam(value = "Signature to validate of the generated URL. ")  @QueryParam("sig") String sig,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. ")  @QueryParam("X-WSO2-Tenant-Q") String xWSO2TenantQ) throws APIManagementException{
+        return delegate.getWSDLOfAPI(apiId, includeMainWSDLContent, environmentName, ifNoneMatch, xWSO2Tenant, exp, sig, xWSO2TenantQ, securityContext);
     }
 }

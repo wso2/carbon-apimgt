@@ -30,10 +30,12 @@ import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
@@ -85,6 +87,7 @@ import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -109,6 +112,7 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
         ApplicationUtils.class, KeyManagerHolder.class, WorkflowExecutorFactory.class,
         AbstractApplicationRegistrationWorkflowExecutor.class, ServiceReferenceHolder.class, MultitenantUtils.class,
         RegistryUtils.class, Caching.class, APIPersistence.class, ApiMgtDAO.class })
+@PowerMockIgnore({"javax.crypto.*"})
 @SuppressStaticInitializationFor({"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
 public class APIConsumerImplTest {
 
@@ -1009,4 +1013,48 @@ public class APIConsumerImplTest {
         assertEquals(apiKeySet.size(), 2);
         assertNotNull(apiKeySet.iterator().next().getAccessToken());
     }
+
+    private static final String TEST_HMAC_KEY = "dGVzdC1obWFjLWtleS10ZXN0aW5nLTEyMzQ1Njc4";
+
+    @Test
+    public void testGenerateAndValidateSignedUrl() throws Exception {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO) {
+            @Override
+            protected byte[] getHmacKeyBytes() {
+                return TEST_HMAC_KEY.getBytes(StandardCharsets.UTF_8);
+            }
+        };
+
+        String apiUUID = UUID.randomUUID().toString();
+        String basePath = "https://localhost:9443/api/am/devportal/v3/apis/" + apiUUID + "/wsdl?";
+
+        String url = apiConsumer.generateSignedUrl(basePath, "&", apiUUID);
+
+        // test whether generated URL contains the required query params
+        Assert.assertTrue(url.contains("exp="));
+        Assert.assertTrue(url.contains("sig="));
+
+        long exp = Long.parseLong(extractParam(url, "exp"));
+        String sig = extractParam(url, "sig");
+
+        // test whether generated ULR is valid
+        apiConsumer.validateSignedUrl(exp, sig, apiUUID);
+
+        // Test Validation (Tampered signature)
+        try {
+            apiConsumer.validateSignedUrl(exp, "wrong-sig", apiUUID);
+            Assert.fail("Should have thrown APIMgtAuthorizationFailedException for tampered UUID");
+        } catch (APIMgtAuthorizationFailedException e) {
+            Assert.assertTrue(e.getMessage().contains("unauthorized"));
+        }
+    }
+
+    /** Helper to extract query params from the generated URL string */
+    private String extractParam(String url, String param) {
+        String search = param + "=";
+        int start = url.indexOf(search) + search.length();
+        int end = url.indexOf("&", start);
+        return (end == -1) ? url.substring(start) : url.substring(start, end);
+    }
+
 }

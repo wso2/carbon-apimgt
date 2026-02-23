@@ -317,6 +317,7 @@ public enum ExceptionCodes implements ErrorHandler {
     ACCESS_TOKEN_INACTIVE(900904, "Access Token Error", 401, " Access token is inactive."),
     USER_NOT_AUTHENTICATED(900905, "User is not Authenticated", 401, " User is not authenticated."),
     ACCESS_TOKEN_INVALID(900906, "Invalid Credentials", 401, " Access token is invalid."),
+    WSDL_URL_INVALID(900916, "Authorization Error", 401, " WSDL access URL is invalid."),
 
     INVALID_SCOPE(900910, "Invalid Scope", 403, " You are not authorized to access the resource."),
     INVALID_AUTHORIZATION_HEADER(900911, "Invalid Authorization header", 401,
