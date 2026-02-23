@@ -604,6 +604,11 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     private boolean isSuccessRequest() {
 
+        Object resourcePath = messageContext.getProperty(Constants.RESOURCE_PATH);
+        if (resourcePath != null && MCP_RESOURCE.equals(resourcePath.toString())) {
+            return !messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE);
+        }
+
         return !messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE)
                 && APISecurityUtils.getAuthenticationContext(messageContext) != null;
     }
