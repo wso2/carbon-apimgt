@@ -253,6 +253,7 @@ public class APIAdminImpl implements APIAdmin {
                     + " as API revisions are deployed to it", ExceptionCodes.from(
                     ExceptionCodes.GATEWAY_ENVIRONMENT_API_REVISIONS_EXIST, String.format("UUID '%s'", uuid)));
         }
+        APIUtil.stopFederatedGatewayAPIDiscovery(existingEnv, tenantDomain);
         apiMgtDAO.deleteEnvironment(uuid);
     }
 
