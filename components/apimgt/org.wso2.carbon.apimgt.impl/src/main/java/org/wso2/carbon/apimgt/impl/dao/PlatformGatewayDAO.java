@@ -274,8 +274,11 @@ public class PlatformGatewayDAO {
     }
 
     /**
-     * Map a result set row to PlatformGateway. PROPERTIES is stored as string (VARCHAR/TEXT/MEDIUMTEXT/CLOB)
-     * across DB types; JDBC getString() returns the value for all of these (drivers map CLOB to string).
+     * Map a result set row to PlatformGateway.
+     * <p>PROPERTIES is stored as a string type (VARCHAR/TEXT/MEDIUMTEXT/CLOB depending on DB). For moderate
+     * sizes (typical for gateway custom JSON), {@link ResultSet#getString(String)} is standard and works for
+     * VARCHAR/TEXT/CLOB in modern drivers (Oracle 10g+, MySQL, PostgreSQL, H2). If a driver required CLOB-
+     * specific handling or very large values, use {@code getClob()} and stream via {@code getCharacterStream()}.</p>
      */
     private static PlatformGateway mapRowToGateway(ResultSet rs) throws SQLException {
         return new PlatformGateway(

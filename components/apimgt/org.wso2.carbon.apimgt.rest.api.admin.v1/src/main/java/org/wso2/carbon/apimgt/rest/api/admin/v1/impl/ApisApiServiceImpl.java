@@ -18,24 +18,33 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.APIGatewayManager;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApiResultDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.DeployToPlatformGatewaysRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SearchResultListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.SearchApiServiceImplUtil;
@@ -151,6 +160,72 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while changing the API provider. " + e.getMessage(), e,
                     ExceptionCodes.CHANGE_API_PROVIDER_FAILED);
+        }
+        return Response.ok().build();
+    }
+
+    /**
+     * Deploy API (or API Product) to the specified platform gateways.
+     * Resolves platformGatewayNames to IDs for the organization and sends deploy event.
+     *
+     * @param apiId    API UUID
+     * @param body     Request with platformGatewayIds and/or platformGatewayNames
+     * @param messageContext message context
+     * @return 200 OK
+     * @throws APIManagementException if validation fails, API not found, or deploy fails
+     */
+    public Response apisApiIdDeployPlatformGatewaysPost(String apiId,
+            DeployToPlatformGatewaysRequestDTO body, MessageContext messageContext) throws APIManagementException {
+        String organization = RestApiUtil.getOrganization(messageContext);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        if (organization == null) {
+            organization = tenantDomain;
+        }
+
+        if (body == null) {
+            throw RestApiUtil.buildBadRequestException("Request body is required");
+        }
+        Set<String> gatewayIds = new HashSet<>();
+        if (body.getPlatformGatewayIds() != null && !body.getPlatformGatewayIds().isEmpty()) {
+            gatewayIds.addAll(body.getPlatformGatewayIds());
+        }
+        if (body.getPlatformGatewayNames() != null && !body.getPlatformGatewayNames().isEmpty()) {
+            org.wso2.carbon.apimgt.api.PlatformGatewayService gatewayService =
+                    ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+            if (gatewayService == null) {
+                throw new APIManagementException("Platform gateway service is not available");
+            }
+            for (String name : body.getPlatformGatewayNames()) {
+                if (StringUtils.isBlank(name)) {
+                    continue;
+                }
+                org.wso2.carbon.apimgt.api.model.PlatformGateway gw =
+                        gatewayService.getGatewayByNameAndOrganization(name.trim(), organization);
+                if (gw == null) {
+                    throw RestApiUtil.buildNotFoundException(
+                            "Platform gateway not found for name: " + name + " in organization: " + organization);
+                }
+                gatewayIds.add(gw.getId());
+            }
+        }
+        if (gatewayIds.isEmpty()) {
+            throw RestApiUtil.buildBadRequestException(
+                    "At least one of platformGatewayIds or platformGatewayNames must be non-empty");
+        }
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        ApiTypeWrapper wrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
+        if (wrapper == null) {
+            throw RestApiUtil.buildNotFoundException("API or API Product not found for id: " + apiId);
+        }
+
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        if (wrapper.isAPIProduct()) {
+            APIProduct product = wrapper.getApiProduct();
+            gatewayManager.deployToGateway(product, tenantDomain, Collections.emptySet(), gatewayIds);
+        } else {
+            API api = wrapper.getApi();
+            gatewayManager.deployToGateway(api, tenantDomain, Collections.emptySet(), gatewayIds);
         }
         return Response.ok().build();
     }

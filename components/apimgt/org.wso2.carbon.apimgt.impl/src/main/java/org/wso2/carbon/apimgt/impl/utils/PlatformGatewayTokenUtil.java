@@ -25,8 +25,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
 
-import com.fasterxml.uuid.Generators;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -47,17 +45,31 @@ public final class PlatformGatewayTokenUtil {
     /** Separator for combined format: tokenId.plainToken (enables lookup by ID). */
     public static final String COMBINED_TOKEN_SEPARATOR = ".";
 
-    /** Maximum length for api-key value: combined format uuid7.plainToken = 36+1+43 = 80; small headroom for DoS safety. */
+    /** Maximum length for api-key value: combined format tokenId.plainToken = 36+1+43 = 80; small headroom for DoS safety. */
     private static final int MAX_PLAIN_TOKEN_LENGTH = 128;
+
+    private static final SecureRandom UUID7_RANDOM = new SecureRandom();
 
     private PlatformGatewayTokenUtil() {
     }
 
     /**
-     * Generate a time-ordered token row ID (UUIDv7, RFC 9562). Sortable by creation time, good for DB indexes.
+     * Generate a time-ordered token row ID (UUID v7, RFC 9562). JDK-only implementation; no external
+     * dependency. Sortable by creation time.
+     * TODO: When Java 26+ is adopted and the JDK provides native UUID v7 support (e.g. java.util.UUID),
+     * replace this implementation with the native API.
      */
+    
     public static String generateTokenId() {
-        return Generators.timeBasedEpochGenerator().generate().toString();
+        long ts = System.currentTimeMillis() & 0xFFFF_FFFF_FFFFL;  // 48-bit unix_ts_ms
+        int randA = (int) (UUID7_RANDOM.nextLong() & 0xFFFL);     // 12 bits
+        long randB = UUID7_RANDOM.nextLong() & 0x3FFF_FFFF_FFFF_FFFFL;  // 62 bits
+        long timeLow = (ts >> 16) & 0xFFFFFFFFL;
+        int timeMid = (int) (ts & 0xFFFF);
+        int timeHighAndVersion = 0x7000 | randA;   // version 7 in high nibble
+        int variantAndSeq = (int) (0x8000 | ((randB >> 48) & 0x3FFF));  // variant 10
+        long node = randB & 0xFFFF_FFFF_FFFFL;
+        return String.format("%08x-%04x-%04x-%04x-%012x", timeLow, timeMid, timeHighAndVersion, variantAndSeq, node);
     }
 
     /**

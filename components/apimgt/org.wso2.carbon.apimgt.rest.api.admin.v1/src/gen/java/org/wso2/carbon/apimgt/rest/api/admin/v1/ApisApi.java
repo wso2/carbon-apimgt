@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1;
 
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.DeployToPlatformGatewaysRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SearchResultListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ApisApiService;
@@ -35,6 +36,23 @@ public class ApisApi  {
 
 ApisApiService delegate = new ApisApiServiceImpl();
 
+
+    @POST
+    @Path("/{apiId}/deploy-platform-gateways")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Deploy API to platform gateways", notes = "Deploy the given API to the specified platform gateways. Connected gateways will receive an api.deployed WebSocket message (API Platform–compatible) and can fetch the API definition and deploy. Provide either platformGatewayIds (UUIDs from GET /gateways) or platformGatewayNames (e.g. prod-gateway-02), or both; at least one must be non-empty. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+        })
+    }, tags={ "Platform Gateways",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Deploy event sent to the specified platform gateways. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response apisApiIdDeployPlatformGatewaysPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "" ,required=true) DeployToPlatformGatewaysRequestDTO deployToPlatformGatewaysRequestDTO) throws APIManagementException{
+        return delegate.apisApiIdDeployPlatformGatewaysPost(apiId, deployToPlatformGatewaysRequestDTO, securityContext);
+    }
 
     @GET
     

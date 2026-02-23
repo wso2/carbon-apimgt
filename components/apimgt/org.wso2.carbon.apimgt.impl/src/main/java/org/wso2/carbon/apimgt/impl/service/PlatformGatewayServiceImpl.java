@@ -120,7 +120,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
     public List<PlatformGateway> listGatewaysByOrganization(String organizationId) throws APIManagementException {
         List<PlatformGatewayDAO.PlatformGateway> list = PlatformGatewayDAO.getInstance()
                 .listGatewaysByOrganization(organizationId);
-        return list.stream().map(this::toApiModel).collect(Collectors.toList());
+        return list.stream().map(PlatformGatewayServiceImpl::toApiModel).collect(Collectors.toList());
     }
 
     @Override

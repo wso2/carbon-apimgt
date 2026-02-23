@@ -171,6 +171,115 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /apis/{apiId}:
+    get:
+      tags:
+        - Subscription Validation
+      summary: Get API by ID (path)
+      description: |
+        Get a single API by UUID. When Accept is application/zip, returns a zip archive
+        containing api.yaml in API Platform Gateway format (for platform gateway fetch after api.deployed).
+      parameters:
+        - name: xWSO2Tenant
+          in: header
+          required: true
+          description: Tenant/organization domain.
+          schema:
+            type: string
+        - name: apiId
+          in: path
+          required: true
+          description: API UUID.
+          schema:
+            type: string
+        - name: Accept
+          in: header
+          description: application/zip for API Platform gateway format; application/json for APIList.
+          schema:
+            type: string
+            default: application/json
+      responses:
+        '200':
+          description: API definition (zip with api.yaml when Accept application/zip, else JSON).
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIList'
+        '404':
+          description: API not found
+        default:
+          description: Unexpected error
+  /apis/{apiId}/gateway-deployments:
+    post:
+      tags:
+        - Gateway Monitoring
+      summary: Notify API deployment (API Platform gateway format)
+      description: |
+        Invoked by the API Platform gateway when an API is successfully deployed.
+        Uses the same path and JSON body as the platform control plane so the gateway
+        can call this endpoint when connected to on-prem (BaseURL/apis/{apiId}/gateway-deployments).
+        Authenticated via api-key header (platform gateway registration token).
+      operationId: apisApiIdGatewayDeploymentsPost
+      parameters:
+        - name: xWSO2Tenant
+          in: header
+          required: false
+          description: Tenant/organization (optional; gateway identity from api-key).
+          schema:
+            type: string
+        - name: apiId
+          in: path
+          required: true
+          description: API UUID (must match the deployed API).
+          schema:
+            type: string
+        - name: deploymentId
+          in: query
+          required: false
+          description: Deployment/revision identifier.
+          schema:
+            type: string
+        - name: api-key
+          in: header
+          required: true
+          description: Platform gateway registration token.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformGatewayDeploymentNotification'
+      responses:
+        '200':
+          description: Deployment notification received.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentAcknowledgmentResponse'
+        '401':
+          description: Invalid or missing api-key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /applications:
     get:
       tags:
@@ -2369,6 +2478,34 @@ components:
         errorMessage:
           type: string
           description: A descriptive error message, present only if deploymentStatus is 'FAILURE'.
+    PlatformGatewayDeploymentNotification:
+      description: API Platform gateway deployment notification (sent by gateway after deploy).
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+          description: API ID (deployed API).
+        status:
+          type: string
+          description: Deployment status (e.g. DEPLOYED).
+        configuration:
+          type: object
+          description: API configuration snapshot.
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deployedAt:
+          type: string
+          format: date-time
+        deployedVersion:
+          type: integer
+          format: int64
+        projectIdentifier:
+          type: string
     DeploymentAcknowledgmentResponse:
       type: object
       required:
