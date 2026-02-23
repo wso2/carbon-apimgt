@@ -21292,12 +21292,14 @@ public class ApiMgtDAO {
                 // Retrieve API ID
                 int apiId = getAPIID(apiRevision.getApiUUID(), connection);
 
+                // Get URI templates of the API revision before deleting the API revision entry from AM_REVISION table, as we need to remove related entries in backend and API operation mapping tables based on URI templates
+                Set<URITemplate> uriTemplates = getURITemplatesOfAPIRevision(apiRevision);
+
                 // Removing related revision entries from AM_REVISION table
                 PreparedStatement removeAMRevisionStatement = connection.prepareStatement(DELETE_API_REVISION);
                 removeAMRevisionStatement.setString(1, apiRevision.getRevisionUUID());
                 removeAMRevisionStatement.executeUpdate();
 
-                Set<URITemplate> uriTemplates = getURITemplatesOfAPIRevision(apiRevision);
                 removeBackendOperationMapping(connection, uriTemplates);
                 removeApiOperationMapping(connection, uriTemplates);
 
