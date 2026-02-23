@@ -92,9 +92,9 @@ public interface APIAdmin  {
      * @param apiId Id of the API
      * @param applicationId Id of the Application
      * @param keyType Key type
-     * @param keyDisplayName API key name
+     * @param keyName API key name
      */
-    void revokeAPIKey(String apiId, String applicationId, String keyType, String keyDisplayName) throws APIManagementException;
+    void revokeAPIKey(String apiId, String applicationId, String keyType, String keyName) throws APIManagementException;
 
     /**
      * Checks whether the given environment has active gateway policy deployments.

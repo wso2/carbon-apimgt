@@ -22,7 +22,7 @@ public class AppAPIKeyAssociationRequestDTO   {
   
     private String apiName = null;
     private String apiId = null;
-    private String keyDisplayName = null;
+    private String keyName = null;
 
   /**
    * API name
@@ -63,19 +63,19 @@ public class AppAPIKeyAssociationRequestDTO   {
   /**
    * API key name
    **/
-  public AppAPIKeyAssociationRequestDTO keyDisplayName(String keyDisplayName) {
-    this.keyDisplayName = keyDisplayName;
+  public AppAPIKeyAssociationRequestDTO keyName(String keyName) {
+    this.keyName = keyName;
     return this;
   }
 
   
   @ApiModelProperty(example = "Test_Key", value = "API key name")
-  @JsonProperty("keyDisplayName")
-  public String getKeyDisplayName() {
-    return keyDisplayName;
+  @JsonProperty("keyName")
+  public String getKeyName() {
+    return keyName;
   }
-  public void setKeyDisplayName(String keyDisplayName) {
-    this.keyDisplayName = keyDisplayName;
+  public void setKeyName(String keyName) {
+    this.keyName = keyName;
   }
 
 
@@ -90,12 +90,12 @@ public class AppAPIKeyAssociationRequestDTO   {
     AppAPIKeyAssociationRequestDTO appAPIKeyAssociationRequest = (AppAPIKeyAssociationRequestDTO) o;
     return Objects.equals(apiName, appAPIKeyAssociationRequest.apiName) &&
         Objects.equals(apiId, appAPIKeyAssociationRequest.apiId) &&
-        Objects.equals(keyDisplayName, appAPIKeyAssociationRequest.keyDisplayName);
+        Objects.equals(keyName, appAPIKeyAssociationRequest.keyName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiName, apiId, keyDisplayName);
+    return Objects.hash(apiName, apiId, keyName);
   }
 
   @Override
@@ -105,7 +105,7 @@ public class AppAPIKeyAssociationRequestDTO   {
     
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
-    sb.append("    keyDisplayName: ").append(toIndentedString(keyDisplayName)).append("\n");
+    sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("}");
     return sb.toString();
   }

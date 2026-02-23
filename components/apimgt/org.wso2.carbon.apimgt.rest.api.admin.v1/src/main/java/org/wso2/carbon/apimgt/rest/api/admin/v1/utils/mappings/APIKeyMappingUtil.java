@@ -41,7 +41,7 @@ public class APIKeyMappingUtil {
         List<APIKeyDTO> apiKeyDTOList = apiKeyInfoList.stream()
                 .map(src -> {
                     APIKeyDTO dto = new APIKeyDTO();
-                    dto.setKeyDisplayName(src.getKeyDisplayName());
+                    dto.setKeyName(src.getKeyName());
                     dto.setApiName(src.getApiName());
                     dto.setApplicationName(src.getApplicationName());
                     dto.setKeyType(src.getKeyType() != null ? APIKeyDTO.KeyTypeEnum.fromValue(src.getKeyType()) : null);

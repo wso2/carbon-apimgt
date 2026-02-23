@@ -46,10 +46,10 @@ public interface ApisApiService {
       public Response apiChatPost(String apiId, String apiChatAction, ApiChatRequestDTO apiChatRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdApiKeysGeneratePost(String apiId, APIAPIKeyGenerateRequestDTO apIAPIKeyGenerateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdApiKeysGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdApiKeysKeyDisplayNameAssociatePost(String apiId, String keyDisplayName, APIAPIKeyAssociationRequestDTO apIAPIKeyAssociationRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdApiKeysKeyDisplayNameDelete(String apiId, String keyDisplayName, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdApiKeysKeyDisplayNameDissociateDelete(String apiId, String keyDisplayName, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdApiKeysKeyDisplayNameRegeneratePost(String apiId, String keyDisplayName, String ifMatch, APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdApiKeysKeyNameAssociatePost(String apiId, String keyName, APIAPIKeyAssociationRequestDTO apIAPIKeyAssociationRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdApiKeysKeyNameDelete(String apiId, String keyName, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdApiKeysKeyNameDissociateDelete(String apiId, String keyName, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdApiKeysKeyNameRegeneratePost(String apiId, String keyName, String ifMatch, APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdAsyncApiSpecificationGet(String apiId, String environmentName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

@@ -20,7 +20,7 @@ import javax.validation.Valid;
 
 public class APIAPIKeyInfoDTO   {
   
-    private String keyDisplayName = null;
+    private String keyName = null;
     private String associatedApp = null;
     private String issuedOn = null;
     private Integer validityPeriod = null;
@@ -29,19 +29,19 @@ public class APIAPIKeyInfoDTO   {
   /**
    * API Key name
    **/
-  public APIAPIKeyInfoDTO keyDisplayName(String keyDisplayName) {
-    this.keyDisplayName = keyDisplayName;
+  public APIAPIKeyInfoDTO keyName(String keyName) {
+    this.keyName = keyName;
     return this;
   }
 
   
   @ApiModelProperty(example = "Test_Key", value = "API Key name")
-  @JsonProperty("keyDisplayName")
-  public String getKeyDisplayName() {
-    return keyDisplayName;
+  @JsonProperty("keyName")
+  public String getKeyName() {
+    return keyName;
   }
-  public void setKeyDisplayName(String keyDisplayName) {
-    this.keyDisplayName = keyDisplayName;
+  public void setKeyName(String keyName) {
+    this.keyName = keyName;
   }
 
   /**
@@ -125,7 +125,7 @@ public class APIAPIKeyInfoDTO   {
       return false;
     }
     APIAPIKeyInfoDTO apIAPIKeyInfo = (APIAPIKeyInfoDTO) o;
-    return Objects.equals(keyDisplayName, apIAPIKeyInfo.keyDisplayName) &&
+    return Objects.equals(keyName, apIAPIKeyInfo.keyName) &&
         Objects.equals(associatedApp, apIAPIKeyInfo.associatedApp) &&
         Objects.equals(issuedOn, apIAPIKeyInfo.issuedOn) &&
         Objects.equals(validityPeriod, apIAPIKeyInfo.validityPeriod) &&
@@ -134,7 +134,7 @@ public class APIAPIKeyInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyDisplayName, associatedApp, issuedOn, validityPeriod, lastUsed);
+    return Objects.hash(keyName, associatedApp, issuedOn, validityPeriod, lastUsed);
   }
 
   @Override
@@ -142,7 +142,7 @@ public class APIAPIKeyInfoDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIAPIKeyInfoDTO {\n");
     
-    sb.append("    keyDisplayName: ").append(toIndentedString(keyDisplayName)).append("\n");
+    sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    associatedApp: ").append(toIndentedString(associatedApp)).append("\n");
     sb.append("    issuedOn: ").append(toIndentedString(issuedOn)).append("\n");
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");

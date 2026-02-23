@@ -27,7 +27,7 @@ public class APIKeyDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String apiKey;
-    private String keyDisplayName;
+    private String keyName;
     private String applicationId;
     private String apiId;
     private String keyType;
@@ -46,12 +46,12 @@ public class APIKeyDTO implements Serializable {
         this.apiKey = apiKey;
     }
 
-    public String getKeyDisplayName() {
-        return keyDisplayName;
+    public String getKeyName() {
+        return keyName;
     }
 
-    public void setKeyDisplayName(String keyDisplayName) {
-        this.keyDisplayName = keyDisplayName;
+    public void setKeyName(String keyName) {
+        this.keyName = keyName;
     }
 
     public String getApplicationId() {

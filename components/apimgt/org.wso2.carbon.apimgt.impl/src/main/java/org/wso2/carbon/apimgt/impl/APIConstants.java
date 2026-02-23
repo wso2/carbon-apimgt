@@ -3410,7 +3410,7 @@ public final class APIConstants {
         public static final String API_KEY = "apiKey";
         public static final String KEY_TYPE = "keyType";
         public static final String ASSOCIATION_TYPE = "associationType";
-        public static final String KEY_DISPLAY_NAME = "keyDisplayName";
+        public static final String KEY_NAME = "keyName";
         public static final String ADDITIONAL_PROPERTIES = "additionalProperties";
         public static final String APPLICATION_ID = "applicationId";
         public static final String APPLICATION_UUID = "applicationUUId";

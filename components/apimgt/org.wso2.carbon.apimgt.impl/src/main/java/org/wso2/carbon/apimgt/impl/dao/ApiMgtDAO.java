@@ -16584,7 +16584,7 @@ public class ApiMgtDAO {
             String sqlQuery = SQLConstants.ADD_API_KEY_SQL;
             // Adding data to the AM_API_KEY table
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, keyInfoDTO.getKeyDisplayName());
+            ps.setString(1, keyInfoDTO.getKeyName());
             ps.setString(2, keyInfoDTO.getApiId());
             ps.setString(3, keyInfoDTO.getApplicationId());
             ps.setString(4, apiKeyHash);
@@ -16643,7 +16643,7 @@ public class ApiMgtDAO {
             rs = ps.executeQuery();
             while (rs.next()) {
                 APIKeyInfo keyInfo = new APIKeyInfo();
-                keyInfo.setKeyDisplayName(rs.getString("API_KEY_NAME"));
+                keyInfo.setKeyName(rs.getString("NAME"));
                 Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
                 keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
@@ -16687,7 +16687,7 @@ public class ApiMgtDAO {
             rs = ps.executeQuery();
             while (rs.next()) {
                 APIKeyInfo keyInfo = new APIKeyInfo();
-                keyInfo.setKeyDisplayName(rs.getString("API_KEY_NAME"));
+                keyInfo.setKeyName(rs.getString("NAME"));
                 keyInfo.setApiName(rs.getString("API_NAME"));
                 Timestamp associatedOn = rs.getTimestamp("ASSOCIATED_ON");
                 keyInfo.setAssociatedOn(associatedOn != null ? associatedOn.toString() : null);
@@ -16730,7 +16730,7 @@ public class ApiMgtDAO {
             rs = ps.executeQuery();
             while (rs.next()) {
                 APIKeyInfo keyInfo = new APIKeyInfo();
-                keyInfo.setKeyDisplayName(rs.getString("API_KEY_NAME"));
+                keyInfo.setKeyName(rs.getString("NAME"));
                 Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
                 keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
@@ -16779,7 +16779,7 @@ public class ApiMgtDAO {
             rs = ps.executeQuery();
             while (rs.next()) {
                 APIKeyInfo keyInfo = new APIKeyInfo();
-                keyInfo.setKeyDisplayName(rs.getString("API_KEY_NAME"));
+                keyInfo.setKeyName(rs.getString("NAME"));
                 keyInfo.setApiUUId(rs.getString("API_UUID"));
                 keyInfo.setApiName(rs.getString("API_NAME"));
                 keyInfo.setApplicationId(applicationUUId);
@@ -16818,7 +16818,7 @@ public class ApiMgtDAO {
             rs = ps.executeQuery();
             while (rs.next()) {
                 APIKeyInfo keyInfo = new APIKeyInfo();
-                keyInfo.setKeyDisplayName(rs.getString("API_KEY_NAME"));
+                keyInfo.setKeyName(rs.getString("NAME"));
                 Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
                 keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
@@ -16841,15 +16841,15 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Returns the api key specified by the key display name
+     * Returns the api key specified by the key name
      *
      * @param applicationUUId Application UUID
      * @param keyType Key type of the api key
-     * @param keyDisplayName Display name of the api key
+     * @param keyName Name of the api key
      * @return API key info
      * @throws APIManagementException
      */
-    public APIKeyInfo getAPIKey(String applicationUUId, String keyType, String keyDisplayName) throws APIManagementException {
+    public APIKeyInfo getAPIKey(String applicationUUId, String keyType, String keyName) throws APIManagementException {
 
         APIKeyInfo keyInfo = new APIKeyInfo();
         Connection conn = null;
@@ -16864,10 +16864,10 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, applicationUUId);
             ps.setString(2, keyType);
-            ps.setString(3, keyDisplayName);
+            ps.setString(3, keyName);
             rs = ps.executeQuery();
             if (rs.next()) {
-                keyInfo.setKeyDisplayName(keyDisplayName);
+                keyInfo.setKeyName(keyName);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                 keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
                 keyInfo.setApplicationId(applicationUUId);
@@ -16875,7 +16875,7 @@ public class ApiMgtDAO {
                 keyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
             }
         } catch (SQLException e) {
-            handleException("Failed to get the API key details for " + keyDisplayName, e);
+            handleException("Failed to get the API key details for " + keyName, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -16883,14 +16883,14 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Returns the API bound api key specified by the key display name
+     * Returns the API bound api key specified by the key name
      *
      * @param apiUUId API UUID
-     * @param keyDisplayName Display name of the api key
+     * @param keyName Name of the api key
      * @return API key info
      * @throws APIManagementException
      */
-    public APIKeyInfo getAPIKey(String apiUUId, String keyDisplayName) throws APIManagementException {
+    public APIKeyInfo getAPIKey(String apiUUId, String keyName) throws APIManagementException {
 
         APIKeyInfo keyInfo = new APIKeyInfo();
         Connection conn = null;
@@ -16904,10 +16904,10 @@ public class ApiMgtDAO {
             // Retrieving data from the AM_API_KEY table
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, apiUUId);
-            ps.setString(2, keyDisplayName);
+            ps.setString(2, keyName);
             rs = ps.executeQuery();
             if (rs.next()) {
-                keyInfo.setKeyDisplayName(keyDisplayName);
+                keyInfo.setKeyName(keyName);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                 keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
                 keyInfo.setApplicationId(rs.getString("APPLICATION_UUID"));
@@ -16916,7 +16916,7 @@ public class ApiMgtDAO {
                 keyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
             }
         } catch (SQLException e) {
-            handleException("Failed to get the API key details for " + keyDisplayName, e);
+            handleException("Failed to get the API key details for " + keyName, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -16924,14 +16924,14 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Returns the API UUID for an API bound API key specified by the key display name and application Id
+     * Returns the API UUID for an API bound API key specified by the key name and application Id
      *
      * @param appUUId Application UUID
-     * @param keyDisplayName Display name of the api key
+     * @param keyName Name of the api key
      * @return APIKeyInfo
      * @throws APIManagementException
      */
-    public APIKeyInfo getAPIKeyDataByKeyNameAndAppUUID(String appUUId, String keyDisplayName) throws APIManagementException {
+    public APIKeyInfo getAPIKeyDataByKeyNameAndAppUUID(String appUUId, String keyName) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -16945,7 +16945,7 @@ public class ApiMgtDAO {
             // Retrieving data from the AM_API_KEY table
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, appUUId);
-            ps.setString(2, keyDisplayName);
+            ps.setString(2, keyName);
             rs = ps.executeQuery();
             if (rs.next()) {
                 apiKeyInfo.setApiUUId(rs.getString("API_UUID"));
@@ -16954,7 +16954,7 @@ public class ApiMgtDAO {
                 apiKeyInfo.setAppId(rs.getInt("APPLICATION_ID"));
             }
         } catch (SQLException e) {
-            handleException("Failed to get the API UUID for " + keyDisplayName, e);
+            handleException("Failed to get the API UUID for " + keyName, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -16962,15 +16962,15 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Returns the key type of an API bound API key specified by the key display name and api Id
+     * Returns the key type of an API bound API key specified by the key name and api Id
      *
      * @param apiUUId API UUID
      * @param appUUId Application UUID
-     * @param keyDisplayName Display name of the api key
+     * @param keyName Name of the api key
      * @return APIKeyInfo
      * @throws APIManagementException
      */
-    public APIKeyInfo getKeyTypeByAPIUUIDAndKeyName(String apiUUId, String appUUId, String keyDisplayName) throws APIManagementException {
+    public APIKeyInfo getKeyTypeByAPIUUIDAndKeyName(String apiUUId, String appUUId, String keyName) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -16984,7 +16984,7 @@ public class ApiMgtDAO {
             // Retrieving data from the AM_API_KEY table
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, apiUUId);
-            ps.setString(2, keyDisplayName);
+            ps.setString(2, keyName);
             ps.setString(3, appUUId);
             rs = ps.executeQuery();
             if (rs.next()) {
@@ -16993,7 +16993,7 @@ public class ApiMgtDAO {
                 apiKeyInfo.setAppId(rs.getInt("APPLICATION_ID"));
             }
         } catch (SQLException e) {
-            handleException("Failed to get the key type for " + keyDisplayName, e);
+            handleException("Failed to get the key type for " + keyName, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -17001,14 +17001,14 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Returns the key type of an API bound API key specified by the key display name and api Id
+     * Returns the key type of an API bound API key specified by the key name and api Id
      *
      * @param apiUUId API UUID
-     * @param keyDisplayName Display name of the api key
+     * @param keyName Name of the api key
      * @return APIKeyInfo
      * @throws APIManagementException
      */
-    public APIKeyInfo getKeyTypeByAPIUUIDAndKeyName(String apiUUId, String keyDisplayName) throws APIManagementException {
+    public APIKeyInfo getKeyTypeByAPIUUIDAndKeyName(String apiUUId, String keyName) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -17022,14 +17022,14 @@ public class ApiMgtDAO {
             // Retrieving data from the AM_API_KEY table
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, apiUUId);
-            ps.setString(2, keyDisplayName);
+            ps.setString(2, keyName);
             rs = ps.executeQuery();
             if (rs.next()) {
                 apiKeyInfo.setKeyType(rs.getString("KEY_TYPE"));
                 apiKeyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
             }
         } catch (SQLException e) {
-            handleException("Failed to get the key type for " + keyDisplayName, e);
+            handleException("Failed to get the key type for " + keyName, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -17037,14 +17037,14 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Revoke an api key provided by the key display name
+     * Revoke an api key provided by the key name
      *
      * @param applicationUUId UUId of the application
      * @param keyType Key type of the token
-     * @param keyDisplayName API key name
+     * @param keyName API key name
      * @throws APIManagementException
      */
-    public void revokeAPIKey(String applicationUUId, String keyType, String keyDisplayName) throws APIManagementException {
+    public void revokeAPIKey(String applicationUUId, String keyType, String keyName) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -17058,7 +17058,7 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, applicationUUId);
             ps.setString(2, keyType);
-            ps.setString(3, keyDisplayName);
+            ps.setString(3, keyName);
 
             ps.executeUpdate();
             conn.commit();
@@ -17077,15 +17077,15 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Revoke an api key provided by the key display name
+     * Revoke an api key provided by the key name
      *
      * @param apiUUId UUId of the API
      * @param applicationUUId UUId of the application
      * @param keyType Key type of the token
-     * @param keyDisplayName API key name
+     * @param keyName API key name
      * @throws APIManagementException
      */
-    public void revokeAPIKeyFromAdmin(String apiUUId, String applicationUUId, String keyType, String keyDisplayName) throws APIManagementException {
+    public void revokeAPIKeyFromAdmin(String apiUUId, String applicationUUId, String keyType, String keyName) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -17106,7 +17106,7 @@ public class ApiMgtDAO {
                 ps.setString(3, applicationUUId);
             }
             ps.setString(4, keyType);
-            ps.setString(5, keyDisplayName);
+            ps.setString(5, keyName);
 
             ps.executeUpdate();
             conn.commit();
@@ -17125,13 +17125,13 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Revoke an API bound api key provided by the key display name
+     * Revoke an API bound api key provided by the key name
      *
      * @param apiUUId UUId of the API
-     * @param keyDisplayName API key name
+     * @param keyName API key name
      * @throws APIManagementException
      */
-    public void revokeAPIKey(String apiUUId, String keyDisplayName) throws APIManagementException {
+    public void revokeAPIKey(String apiUUId, String keyName) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -17144,7 +17144,7 @@ public class ApiMgtDAO {
             // Updating data from the AM_API_KEY table by setting STATUS to REVOKED
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, apiUUId);
-            ps.setString(2, keyDisplayName);
+            ps.setString(2, keyName);
 
             ps.executeUpdate();
             conn.commit();
@@ -17203,12 +17203,12 @@ public class ApiMgtDAO {
     /**
      * Update application association of an API key
      *
-     * @param keyDisplayName Display name of the API key
+     * @param keyName Name of the API key
      * @param apiUUId API UUId
      * @param appUUId Application UUId
      * @throws APIManagementException
      */
-    public void createAssociationToApiKey(String keyDisplayName, String apiUUId, String appUUId) throws APIManagementException {
+    public void createAssociationToApiKey(String keyName, String apiUUId, String appUUId) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -17222,7 +17222,7 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, appUUId);
             ps.setString(2, apiUUId);
-            ps.setString(3, keyDisplayName);
+            ps.setString(3, keyName);
 
             ps.executeUpdate();
             conn.commit();
@@ -17234,20 +17234,20 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback creating API key association", rollbackEx);
                  }
             }
-            handleException("Failed to update association of " + appUUId + " for the API key " + keyDisplayName, e);
+            handleException("Failed to update association of " + appUUId + " for the API key " + keyName, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
     }
 
     /**
-     * Remove association of an api key provided by the key display name
+     * Remove association of an api key provided by the key name
      *
      * @param apiUUId UUId of the API
-     * @param keyDisplayName API key name
+     * @param keyName API key name
      * @throws APIManagementException
      */
-    public void removeAssociationOfAPIKey(String apiUUId, String keyDisplayName) throws APIManagementException {
+    public void removeAssociationOfAPIKey(String apiUUId, String keyName) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -17260,7 +17260,7 @@ public class ApiMgtDAO {
             // Updating data from the AM_API_KEY table by setting APPLICATION_ID to NULL
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, apiUUId);
-            ps.setString(2, keyDisplayName);
+            ps.setString(2, keyName);
 
             ps.executeUpdate();
             conn.commit();
@@ -17279,13 +17279,13 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Remove association of an api key provided by the key display name and app Id
+     * Remove association of an api key provided by the key name and app Id
      *
      * @param appUUId UUId of the Application
-     * @param keyDisplayName API key name
+     * @param keyName API key name
      * @throws APIManagementException
      */
-    public void removeAssociationOfAPIKeyViaApp(String appUUId, String keyDisplayName) throws APIManagementException {
+    public void removeAssociationOfAPIKeyViaApp(String appUUId, String keyName) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -17298,7 +17298,7 @@ public class ApiMgtDAO {
             // Updating data from the AM_API_KEY table by setting APPLICATION_ID to NULL
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, appUUId);
-            ps.setString(2, keyDisplayName);
+            ps.setString(2, keyName);
 
             ps.executeUpdate();
             conn.commit();

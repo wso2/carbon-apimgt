@@ -63,7 +63,7 @@ public class OpaqueAPIKeyInfoListener implements MessageListener {
                     String lookupKey = null;
                     apiKeyInfo.setApiKeyHash(payload.path(APIConstants.NotificationEvent.API_KEY_HASH).asText());
                     apiKeyInfo.setKeyType(payload.path(APIConstants.NotificationEvent.KEY_TYPE).asText());
-                    apiKeyInfo.setKeyDisplayName(payload.path(APIConstants.NotificationEvent.KEY_DISPLAY_NAME).asText());
+                    apiKeyInfo.setKeyName(payload.path(APIConstants.NotificationEvent.KEY_NAME).asText());
                     apiKeyInfo.setOrigin(payload.path(APIConstants.NotificationEvent.ORIGIN).asText());
                     if (apiKeyInfo.getOrigin().equalsIgnoreCase("APP")) {
                         apiKeyInfo.setApplicationId(payload.path(APIConstants.NotificationEvent.ORIGIN_UUID).asText());

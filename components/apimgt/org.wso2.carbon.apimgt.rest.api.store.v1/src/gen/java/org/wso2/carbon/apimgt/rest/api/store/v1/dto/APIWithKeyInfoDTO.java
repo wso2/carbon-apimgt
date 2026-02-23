@@ -20,26 +20,26 @@ import javax.validation.Valid;
 
 public class APIWithKeyInfoDTO   {
   
-    private String keyDisplayName = null;
+    private String keyName = null;
     private String apiName = null;
     private String apiUUID = null;
 
   /**
    * API Key name
    **/
-  public APIWithKeyInfoDTO keyDisplayName(String keyDisplayName) {
-    this.keyDisplayName = keyDisplayName;
+  public APIWithKeyInfoDTO keyName(String keyName) {
+    this.keyName = keyName;
     return this;
   }
 
   
   @ApiModelProperty(example = "Test_Key", value = "API Key name")
-  @JsonProperty("keyDisplayName")
-  public String getKeyDisplayName() {
-    return keyDisplayName;
+  @JsonProperty("keyName")
+  public String getKeyName() {
+    return keyName;
   }
-  public void setKeyDisplayName(String keyDisplayName) {
-    this.keyDisplayName = keyDisplayName;
+  public void setKeyName(String keyName) {
+    this.keyName = keyName;
   }
 
   /**
@@ -88,14 +88,14 @@ public class APIWithKeyInfoDTO   {
       return false;
     }
     APIWithKeyInfoDTO apIWithKeyInfo = (APIWithKeyInfoDTO) o;
-    return Objects.equals(keyDisplayName, apIWithKeyInfo.keyDisplayName) &&
+    return Objects.equals(keyName, apIWithKeyInfo.keyName) &&
         Objects.equals(apiName, apIWithKeyInfo.apiName) &&
         Objects.equals(apiUUID, apIWithKeyInfo.apiUUID);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyDisplayName, apiName, apiUUID);
+    return Objects.hash(keyName, apiName, apiUUID);
   }
 
   @Override
@@ -103,7 +103,7 @@ public class APIWithKeyInfoDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIWithKeyInfoDTO {\n");
     
-    sb.append("    keyDisplayName: ").append(toIndentedString(keyDisplayName)).append("\n");
+    sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
     sb.append("    apiUUID: ").append(toIndentedString(apiUUID)).append("\n");
     sb.append("}");

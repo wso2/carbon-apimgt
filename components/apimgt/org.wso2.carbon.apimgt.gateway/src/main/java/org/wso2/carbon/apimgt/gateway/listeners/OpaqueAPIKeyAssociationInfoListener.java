@@ -63,7 +63,7 @@ public class OpaqueAPIKeyAssociationInfoListener implements MessageListener {
                         apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKey);
                         if (apiKeyInfo != null) {
                             APIKeyInfo updated = new APIKeyInfo();
-                            updated.setKeyDisplayName(apiKeyInfo.getKeyDisplayName());
+                            updated.setKeyName(apiKeyInfo.getKeyName());
                             updated.setApiKeyHash(apiKeyInfo.getApiKeyHash());
                             updated.setLookupKey(apiKeyInfo.getLookupKey());
                             updated.setKeyType(apiKeyInfo.getKeyType());
@@ -79,7 +79,7 @@ public class OpaqueAPIKeyAssociationInfoListener implements MessageListener {
                         apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKey);
                         if (apiKeyInfo != null) {
                             APIKeyInfo updated = new APIKeyInfo();
-                            updated.setKeyDisplayName(apiKeyInfo.getKeyDisplayName());
+                            updated.setKeyName(apiKeyInfo.getKeyName());
                             updated.setApiKeyHash(apiKeyInfo.getApiKeyHash());
                             updated.setLookupKey(apiKeyInfo.getLookupKey());
                             updated.setKeyType(apiKeyInfo.getKeyType());

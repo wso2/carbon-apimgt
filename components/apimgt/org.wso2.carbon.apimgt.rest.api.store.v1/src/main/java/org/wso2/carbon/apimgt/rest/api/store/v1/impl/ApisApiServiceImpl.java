@@ -420,10 +420,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         API api;
         int validityPeriod;
-        String keyDisplayName = null;
+        String keyName = null;
         try {
             // Determine whether the request body is valid. Request body should have a request UUID.
-            if (StringUtils.isEmpty(apiId) || body == null || StringUtils.isEmpty(body.getKeyDisplayName())) {
+            if (StringUtils.isEmpty(apiId) || body == null || StringUtils.isEmpty(body.getKeyName())) {
                 String errorMessage = "Error while executing the prepare statement as request is badly formatted";
                 RestApiUtil.handleBadRequest(errorMessage, log);
                 return null;
@@ -446,8 +446,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     } else {
                         validityPeriod = -1;
                     }
-                    if (body != null && body.getKeyDisplayName() != null) {
-                        keyDisplayName = body.getKeyDisplayName();
+                    if (body != null && body.getKeyName() != null) {
+                        keyName = body.getKeyName();
                     }
                     String restrictedIP = null;
                     String restrictedReferer = null;
@@ -462,8 +462,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                         }
                     }
                     String apiKey = apiConsumer.generateApiApiKey(api, userName, validityPeriod,
-                            restrictedIP, restrictedReferer, keyDisplayName, String.valueOf(body.getEnvironmentType()));
-                    APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKey, validityPeriod, keyDisplayName);
+                            restrictedIP, restrictedReferer, keyName, String.valueOf(body.getEnvironmentType()));
+                    APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKey, validityPeriod, keyName);
                     return Response.ok().entity(apiKeyDto).build();
                 }
             }
@@ -497,12 +497,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdApiKeysKeyDisplayNameAssociatePost(String apiId, String keyDisplayName,
+    public Response apisApiIdApiKeysKeyNameAssociatePost(String apiId, String keyName,
                                                                 APIAPIKeyAssociationRequestDTO body,
                                                                 String ifMatch, MessageContext messageContext)
             throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        if (!StringUtils.isEmpty(keyDisplayName) && body != null && StringUtils.isNotEmpty(body.getApplicationName())) {
+        if (!StringUtils.isEmpty(keyName) && body != null && StringUtils.isNotEmpty(body.getApplicationName())) {
             try {
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -513,33 +513,33 @@ public class ApisApiServiceImpl implements ApisApiService {
                     if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiId, organization)) {
                         RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
                     } else {
-                        apiConsumer.createAssociationToApp(apiId, keyDisplayName, body.getApplicationName(), username);
+                        apiConsumer.createAssociationToApp(apiId, keyName, body.getApplicationName(), username);
                         APIKeyAssociationDTO apiKeyAssociationDTO = ApplicationKeyMappingUtil.formApiAssociationToDTO(api.getDisplayName(),
-                                body.getApplicationName(), keyDisplayName);
+                                body.getApplicationName(), keyName);
                         return Response.ok().entity(apiKeyAssociationDTO).build();
                     }
                 }
             } catch (APIManagementException e) {
-                String msg = "Error while creating an association to the API Key " + keyDisplayName;
+                String msg = "Error while creating an association to the API Key " + keyName;
                 if(log.isDebugEnabled()) {
-                    log.debug("Error while creating an association to the API " + apiId + " and API key " + keyDisplayName);
+                    log.debug("Error while creating an association to the API " + apiId + " and API key " + keyName);
                 }
                 log.error(msg, e);
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Provided API Key display name " + keyDisplayName + " is not valid");
+                log.debug("Provided API Key name " + keyName + " is not valid");
             }
-            RestApiUtil.handleBadRequest("Application name, and key display name are required", log);
+            RestApiUtil.handleBadRequest("Application name, and key name are required", log);
         }
         return null;
     }
 
     @Override
-    public Response apisApiIdApiKeysKeyDisplayNameDelete(String apiId, String keyDisplayName, String ifMatch, MessageContext messageContext) throws APIManagementException {
+    public Response apisApiIdApiKeysKeyNameDelete(String apiId, String keyName, String ifMatch, MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        if (!StringUtils.isEmpty(keyDisplayName)) {
+        if (!StringUtils.isEmpty(keyName)) {
             try {
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -550,21 +550,21 @@ public class ApisApiServiceImpl implements ApisApiService {
                         RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
                     } else {
                         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                        apiConsumer.revokeApiApiKey(apiId, keyDisplayName, tenantDomain);
+                        apiConsumer.revokeApiApiKey(apiId, keyName, tenantDomain);
                         return Response.ok().build();
                     }
                 }
             } catch (APIManagementException e) {
                 String msg = "Error while revoking API Key of API " + apiId;
                 if(log.isDebugEnabled()) {
-                    log.debug("Error while revoking API Key of API " + apiId + " and api key " + keyDisplayName);
+                    log.debug("Error while revoking API Key of API " + apiId + " and api key " + keyName);
                 }
                 log.error(msg, e);
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Provided API Key display name " + keyDisplayName + " is not valid");
+                log.debug("Provided API Key name " + keyName + " is not valid");
             }
             RestApiUtil.handleBadRequest("Provided API Key isn't valid ", log);
         }
@@ -572,9 +572,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdApiKeysKeyDisplayNameDissociateDelete(String apiId, String keyDisplayName, String ifMatch, MessageContext messageContext) throws APIManagementException {
+    public Response apisApiIdApiKeysKeyNameDissociateDelete(String apiId, String keyName, String ifMatch, MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        if (!StringUtils.isEmpty(keyDisplayName)) {
+        if (!StringUtils.isEmpty(keyName)) {
             try {
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -584,21 +584,21 @@ public class ApisApiServiceImpl implements ApisApiService {
                     if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiId, organization)) {
                         RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
                     } else {
-                        apiConsumer.removeApiKeyAssociation(apiId, keyDisplayName);
+                        apiConsumer.removeApiKeyAssociation(apiId, keyName);
                         return Response.ok().build();
                     }
                 }
             } catch (APIManagementException e) {
                 String msg = "Error while removing API Key association of API " + apiId;
                 if(log.isDebugEnabled()) {
-                    log.debug("Error while removing association of API " + apiId + " and api key " + keyDisplayName);
+                    log.debug("Error while removing association of API " + apiId + " and api key " + keyName);
                 }
                 log.error(msg, e);
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Provided API Key display name " + keyDisplayName + " is not valid");
+                log.debug("Provided API Key name " + keyName + " is not valid");
             }
             RestApiUtil.handleBadRequest("Provided API Key isn't valid ", log);
         }
@@ -606,10 +606,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdApiKeysKeyDisplayNameRegeneratePost(String apiId, String keyDisplayName, String ifMatch,
+    public Response apisApiIdApiKeysKeyNameRegeneratePost(String apiId, String keyName, String ifMatch,
                                                                  APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO, MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        if (!StringUtils.isEmpty(keyDisplayName)) {
+        if (!StringUtils.isEmpty(keyName)) {
             try {
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -619,9 +619,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                         RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
                     } else {
                             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                            APIKeyInfo apiKeyInfo = apiConsumer.regenerateApiApiKey(apiId, keyDisplayName, tenantDomain, organization, username);
+                            APIKeyInfo apiKeyInfo = apiConsumer.regenerateApiApiKey(apiId, keyName, tenantDomain, organization, username);
                             APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKeyInfo.getApiKey(),
-                                    (int) apiKeyInfo.getValidityPeriod(), apiKeyInfo.getKeyDisplayName());
+                                    (int) apiKeyInfo.getValidityPeriod(), apiKeyInfo.getKeyName());
                             return Response.ok().entity(apiKeyDto).build();
                     }
                 } else {
@@ -633,14 +633,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             } catch (APIManagementException e) {
                 String msg = "Error while regenerating API Key of API " + apiId;
                 if(log.isDebugEnabled()) {
-                    log.debug("Error while regenerating API Key of API " + apiId + " and API Key " + keyDisplayName);
+                    log.debug("Error while regenerating API Key of API " + apiId + " and API Key " + keyName);
                 }
                 log.error(msg, e);
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Provided API Key display name " + keyDisplayName + " is not valid");
+                log.debug("Provided API Key name " + keyName + " is not valid");
             }
             RestApiUtil.handleBadRequest("Provided API Key isn't valid ", log);
         }

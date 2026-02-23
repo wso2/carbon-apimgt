@@ -20,7 +20,7 @@ import javax.validation.Valid;
 
 public class APIKeyInfoDTO   {
   
-    private String keyDisplayName = null;
+    private String keyName = null;
     private String issuedOn = null;
     private Integer validityPeriod = null;
     private String lastUsed = null;
@@ -28,19 +28,19 @@ public class APIKeyInfoDTO   {
   /**
    * API Key name
    **/
-  public APIKeyInfoDTO keyDisplayName(String keyDisplayName) {
-    this.keyDisplayName = keyDisplayName;
+  public APIKeyInfoDTO keyName(String keyName) {
+    this.keyName = keyName;
     return this;
   }
 
   
   @ApiModelProperty(example = "Test_Key", value = "API Key name")
-  @JsonProperty("keyDisplayName")
-  public String getKeyDisplayName() {
-    return keyDisplayName;
+  @JsonProperty("keyName")
+  public String getKeyName() {
+    return keyName;
   }
-  public void setKeyDisplayName(String keyDisplayName) {
-    this.keyDisplayName = keyDisplayName;
+  public void setKeyName(String keyName) {
+    this.keyName = keyName;
   }
 
   /**
@@ -106,7 +106,7 @@ public class APIKeyInfoDTO   {
       return false;
     }
     APIKeyInfoDTO apIKeyInfo = (APIKeyInfoDTO) o;
-    return Objects.equals(keyDisplayName, apIKeyInfo.keyDisplayName) &&
+    return Objects.equals(keyName, apIKeyInfo.keyName) &&
         Objects.equals(issuedOn, apIKeyInfo.issuedOn) &&
         Objects.equals(validityPeriod, apIKeyInfo.validityPeriod) &&
         Objects.equals(lastUsed, apIKeyInfo.lastUsed);
@@ -114,7 +114,7 @@ public class APIKeyInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyDisplayName, issuedOn, validityPeriod, lastUsed);
+    return Objects.hash(keyName, issuedOn, validityPeriod, lastUsed);
   }
 
   @Override
@@ -122,7 +122,7 @@ public class APIKeyInfoDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIKeyInfoDTO {\n");
     
-    sb.append("    keyDisplayName: ").append(toIndentedString(keyDisplayName)).append("\n");
+    sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    issuedOn: ").append(toIndentedString(issuedOn)).append("\n");
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
     sb.append("    lastUsed: ").append(toIndentedString(lastUsed)).append("\n");

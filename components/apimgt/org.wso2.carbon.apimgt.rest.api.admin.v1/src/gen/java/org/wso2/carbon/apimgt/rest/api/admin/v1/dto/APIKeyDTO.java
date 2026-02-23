@@ -20,7 +20,7 @@ import javax.validation.Valid;
 
 public class APIKeyDTO   {
   
-    private String keyDisplayName = null;
+    private String keyName = null;
     private String apiName = null;
     private String applicationName = null;
 
@@ -63,19 +63,19 @@ return null;
   /**
    * API Key name
    **/
-  public APIKeyDTO keyDisplayName(String keyDisplayName) {
-    this.keyDisplayName = keyDisplayName;
+  public APIKeyDTO keyName(String keyName) {
+    this.keyName = keyName;
     return this;
   }
 
   
   @ApiModelProperty(example = "Test_Key", value = "API Key name")
-  @JsonProperty("keyDisplayName")
-  public String getKeyDisplayName() {
-    return keyDisplayName;
+  @JsonProperty("keyName")
+  public String getKeyName() {
+    return keyName;
   }
-  public void setKeyDisplayName(String keyDisplayName) {
-    this.keyDisplayName = keyDisplayName;
+  public void setKeyName(String keyName) {
+    this.keyName = keyName;
   }
 
   /**
@@ -213,7 +213,7 @@ return null;
       return false;
     }
     APIKeyDTO apIKey = (APIKeyDTO) o;
-    return Objects.equals(keyDisplayName, apIKey.keyDisplayName) &&
+    return Objects.equals(keyName, apIKey.keyName) &&
         Objects.equals(apiName, apIKey.apiName) &&
         Objects.equals(applicationName, apIKey.applicationName) &&
         Objects.equals(keyType, apIKey.keyType) &&
@@ -225,7 +225,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyDisplayName, apiName, applicationName, keyType, user, issuedOn, validityPeriod, lastUsed);
+    return Objects.hash(keyName, apiName, applicationName, keyType, user, issuedOn, validityPeriod, lastUsed);
   }
 
   @Override
@@ -233,7 +233,7 @@ return null;
     StringBuilder sb = new StringBuilder();
     sb.append("class APIKeyDTO {\n");
     
-    sb.append("    keyDisplayName: ").append(toIndentedString(keyDisplayName)).append("\n");
+    sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
     sb.append("    applicationName: ").append(toIndentedString(applicationName)).append("\n");
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");

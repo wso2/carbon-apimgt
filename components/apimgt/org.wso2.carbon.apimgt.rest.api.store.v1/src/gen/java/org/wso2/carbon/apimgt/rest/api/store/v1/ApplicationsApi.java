@@ -143,7 +143,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     }
 
     @DELETE
-    @Path("/{applicationId}/api-keys/{keyType}/{keyDisplayName}")
+    @Path("/{applicationId}/api-keys/{keyType}/{keyName}")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Revoke API Key", notes = "Revoke a self contained API Key for the application specified by the display name ", response = Void.class, authorizations = {
@@ -158,12 +158,12 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameDelete(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyDisplayName") String keyDisplayName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameDelete(applicationId, keyType, keyDisplayName, ifMatch, securityContext);
+    public Response applicationsApplicationIdApiKeysKeyTypeKeyNameDelete(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyName") String keyName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.applicationsApplicationIdApiKeysKeyTypeKeyNameDelete(applicationId, keyType, keyName, ifMatch, securityContext);
     }
 
     @DELETE
-    @Path("/{applicationId}/api-keys/{keyType}/{keyDisplayName}/dissociate")
+    @Path("/{applicationId}/api-keys/{keyType}/{keyName}/dissociate")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Remove the association of the API Key to the Application", notes = "Remove the association to a self contained API Key for the application ", response = Void.class, authorizations = {
@@ -178,12 +178,12 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameDissociateDelete(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyDisplayName") String keyDisplayName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameDissociateDelete(applicationId, keyType, keyDisplayName, ifMatch, securityContext);
+    public Response applicationsApplicationIdApiKeysKeyTypeKeyNameDissociateDelete(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyName") String keyName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.applicationsApplicationIdApiKeysKeyTypeKeyNameDissociateDelete(applicationId, keyType, keyName, ifMatch, securityContext);
     }
 
     @POST
-    @Path("/{applicationId}/api-keys/{keyType}/{keyDisplayName}/regenerate")
+    @Path("/{applicationId}/api-keys/{keyType}/{keyName}/regenerate")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Regenerate API Key", notes = "Regenerate a self contained API Key for the application specified by the display name ", response = APIKeyDTO.class, authorizations = {
@@ -198,8 +198,8 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameRegeneratePost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyDisplayName") String keyDisplayName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @ApiParam(value = "API Key renewal request object " ) APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO) throws APIManagementException{
-        return delegate.applicationsApplicationIdApiKeysKeyTypeKeyDisplayNameRegeneratePost(applicationId, keyType, keyDisplayName, ifMatch, apIKeyRenewalRequestDTO, securityContext);
+    public Response applicationsApplicationIdApiKeysKeyTypeKeyNameRegeneratePost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyName") String keyName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @ApiParam(value = "API Key renewal request object " ) APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO) throws APIManagementException{
+        return delegate.applicationsApplicationIdApiKeysKeyTypeKeyNameRegeneratePost(applicationId, keyType, keyName, ifMatch, apIKeyRenewalRequestDTO, securityContext);
     }
 
     @POST

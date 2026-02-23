@@ -60,7 +60,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -276,12 +275,12 @@ public class ApiKeyAuthenticator implements Authenticator {
             if (apiKeyValidationInfoDTO != null && apiKeyValidationInfoDTO.isAuthorized()) {
                 if (log.isDebugEnabled()) {
                     log.debug("User is subscribed to the API: " + apiContext + ", " +
-                            "version: " + apiVersion + ". Token: " + apiKeyInfo.getKeyDisplayName());
+                            "version: " + apiVersion + ". Token: " + apiKeyInfo.getKeyName());
                 }
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("User is not subscribed to access the API: " + apiContext +
-                            ", version: " + apiVersion + ". Token: " + apiKeyInfo.getKeyDisplayName());
+                            ", version: " + apiVersion + ". Token: " + apiKeyInfo.getKeyName());
                 }
                 log.error("User is not subscribed to access the API.");
                 throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,

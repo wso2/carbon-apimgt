@@ -136,7 +136,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @POST
-    @Path("/{apiId}/api-keys/{keyDisplayName}/associate")
+    @Path("/{apiId}/api-keys/{keyName}/associate")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Create an association for the API Key", notes = "Create an association for a self contained API Key for the API ", response = APIKeyAssociationDTO.class, authorizations = {
@@ -151,12 +151,12 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response apisApiIdApiKeysKeyDisplayNameAssociatePost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyDisplayName") String keyDisplayName, @ApiParam(value = "API Key association request object " ,required=true) APIAPIKeyAssociationRequestDTO apIAPIKeyAssociationRequestDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.apisApiIdApiKeysKeyDisplayNameAssociatePost(apiId, keyDisplayName, apIAPIKeyAssociationRequestDTO, ifMatch, securityContext);
+    public Response apisApiIdApiKeysKeyNameAssociatePost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyName") String keyName, @ApiParam(value = "API Key association request object " ,required=true) APIAPIKeyAssociationRequestDTO apIAPIKeyAssociationRequestDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.apisApiIdApiKeysKeyNameAssociatePost(apiId, keyName, apIAPIKeyAssociationRequestDTO, ifMatch, securityContext);
     }
 
     @DELETE
-    @Path("/{apiId}/api-keys/{keyDisplayName}")
+    @Path("/{apiId}/api-keys/{keyName}")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Revoke API Key", notes = "Revoke a self contained API Key for the API specified by the display name ", response = Void.class, authorizations = {
@@ -171,12 +171,12 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response apisApiIdApiKeysKeyDisplayNameDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyDisplayName") String keyDisplayName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.apisApiIdApiKeysKeyDisplayNameDelete(apiId, keyDisplayName, ifMatch, securityContext);
+    public Response apisApiIdApiKeysKeyNameDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyName") String keyName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.apisApiIdApiKeysKeyNameDelete(apiId, keyName, ifMatch, securityContext);
     }
 
     @DELETE
-    @Path("/{apiId}/api-keys/{keyDisplayName}/dissociate")
+    @Path("/{apiId}/api-keys/{keyName}/dissociate")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Remove an Association for the API Key", notes = "Remove an association a self contained API Key for the API specified by the display name ", response = Void.class, authorizations = {
@@ -191,12 +191,12 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response apisApiIdApiKeysKeyDisplayNameDissociateDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyDisplayName") String keyDisplayName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.apisApiIdApiKeysKeyDisplayNameDissociateDelete(apiId, keyDisplayName, ifMatch, securityContext);
+    public Response apisApiIdApiKeysKeyNameDissociateDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyName") String keyName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.apisApiIdApiKeysKeyNameDissociateDelete(apiId, keyName, ifMatch, securityContext);
     }
 
     @POST
-    @Path("/{apiId}/api-keys/{keyDisplayName}/regenerate")
+    @Path("/{apiId}/api-keys/{keyName}/regenerate")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Regenerate API Key", notes = "Regenerate a self contained API Key for the API specified by the display name ", response = APIKeyDTO.class, authorizations = {
@@ -211,8 +211,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response apisApiIdApiKeysKeyDisplayNameRegeneratePost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyDisplayName") String keyDisplayName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @ApiParam(value = "API Key renewal request object " ) APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO) throws APIManagementException{
-        return delegate.apisApiIdApiKeysKeyDisplayNameRegeneratePost(apiId, keyDisplayName, ifMatch, apIKeyRenewalRequestDTO, securityContext);
+    public Response apisApiIdApiKeysKeyNameRegeneratePost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Name of the API key. URL-encode reserved characters. ",required=true) @PathParam("keyName") String keyName,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @ApiParam(value = "API Key renewal request object " ) APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO) throws APIManagementException{
+        return delegate.apisApiIdApiKeysKeyNameRegeneratePost(apiId, keyName, ifMatch, apIKeyRenewalRequestDTO, securityContext);
     }
 
     @GET

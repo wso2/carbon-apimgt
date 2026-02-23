@@ -40,16 +40,16 @@ public class ApiKeysApiServiceImpl implements ApiKeysApiService {
      * @param apiId API ID
      * @param applicationId Application ID
      * @param keyType Application key type
-     * @param keyDisplayName API key display name
+     * @param keyName API key name
      * @param messageContext Message context
      * @return API key deletion response
      */
-    public Response apiKeysApiIdApplicationIdKeyTypeKeyDisplayNameDelete(String apiId, String applicationId,
-                                                                         String keyType, String keyDisplayName,
+    public Response apiKeysApiIdApplicationIdKeyTypeKeyNameDelete(String apiId, String applicationId,
+                                                                         String keyType, String keyName,
                                                                          MessageContext messageContext)
             throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
-        apiAdmin.revokeAPIKey(apiId, applicationId, keyType, keyDisplayName);
+        apiAdmin.revokeAPIKey(apiId, applicationId, keyType, keyName);
         return Response.ok().build();
     }
 

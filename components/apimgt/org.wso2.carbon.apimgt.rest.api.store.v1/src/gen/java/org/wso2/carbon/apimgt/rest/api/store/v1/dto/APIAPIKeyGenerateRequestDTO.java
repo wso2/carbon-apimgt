@@ -20,7 +20,7 @@ import javax.validation.Valid;
 
 public class APIAPIKeyGenerateRequestDTO   {
   
-    private String keyDisplayName = null;
+    private String keyName = null;
 
     @XmlType(name="EnvironmentTypeEnum")
     @XmlEnum(String.class)
@@ -59,19 +59,19 @@ return null;
   /**
    * API Key name
    **/
-  public APIAPIKeyGenerateRequestDTO keyDisplayName(String keyDisplayName) {
-    this.keyDisplayName = keyDisplayName;
+  public APIAPIKeyGenerateRequestDTO keyName(String keyName) {
+    this.keyName = keyName;
     return this;
   }
 
   
   @ApiModelProperty(example = "Test_Key", value = "API Key name")
-  @JsonProperty("keyDisplayName")
-  public String getKeyDisplayName() {
-    return keyDisplayName;
+  @JsonProperty("keyName")
+  public String getKeyName() {
+    return keyName;
   }
-  public void setKeyDisplayName(String keyDisplayName) {
-    this.keyDisplayName = keyDisplayName;
+  public void setKeyName(String keyName) {
+    this.keyName = keyName;
   }
 
   /**
@@ -139,7 +139,7 @@ return null;
       return false;
     }
     APIAPIKeyGenerateRequestDTO apIAPIKeyGenerateRequest = (APIAPIKeyGenerateRequestDTO) o;
-    return Objects.equals(keyDisplayName, apIAPIKeyGenerateRequest.keyDisplayName) &&
+    return Objects.equals(keyName, apIAPIKeyGenerateRequest.keyName) &&
         Objects.equals(environmentType, apIAPIKeyGenerateRequest.environmentType) &&
         Objects.equals(validityPeriod, apIAPIKeyGenerateRequest.validityPeriod) &&
         Objects.equals(additionalProperties, apIAPIKeyGenerateRequest.additionalProperties);
@@ -147,7 +147,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyDisplayName, environmentType, validityPeriod, additionalProperties);
+    return Objects.hash(keyName, environmentType, validityPeriod, additionalProperties);
   }
 
   @Override
@@ -155,7 +155,7 @@ return null;
     StringBuilder sb = new StringBuilder();
     sb.append("class APIAPIKeyGenerateRequestDTO {\n");
     
-    sb.append("    keyDisplayName: ").append(toIndentedString(keyDisplayName)).append("\n");
+    sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    environmentType: ").append(toIndentedString(environmentType)).append("\n");
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");

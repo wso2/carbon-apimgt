@@ -535,13 +535,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param validityPeriod       Requested validity period for the api key.
      * @param permittedIP          Permitted IP addresses for the api key.
      * @param permittedReferer     Permitted referrers for the api key.
-     * @param keyDisplayName       Display name of the api key.
+     * @param keyName       Name of the api key.
      * @return
      * @throws APIManagementException
      */
     @Override
     public String generateApiKey(Application application, String userName, long validityPeriod,
-                                 String permittedIP, String permittedReferer, String keyDisplayName)
+                                 String permittedIP, String permittedReferer, String keyName)
             throws APIManagementException {
 
         JwtTokenInfoDTO jwtTokenInfoDTO;
@@ -589,12 +589,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Properties props = new Properties();
         props.setProperty("permittedIP", permittedIP);
         props.setProperty("permittedReferer", permittedReferer);
-        APIKeyDTO apiKeyInfoDTO = generateAPIKeyInfoDTO(userName, validityPeriod, keyDisplayName, application.getKeyType(),
+        APIKeyDTO apiKeyInfoDTO = generateAPIKeyInfoDTO(userName, validityPeriod, keyName, application.getKeyType(),
                 permittedIP, permittedReferer, props);
         apiKeyInfoDTO.setApplicationId(application.getUUID());
         String apiKeyHash = APIUtil.sha256Hash(apiKey);
         apiMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
-        sendAPIKeyInfoEvent(apiKeyHash, application, null, validityPeriod, application.getKeyType(), keyDisplayName, props);
+        sendAPIKeyInfoEvent(apiKeyHash, application, null, validityPeriod, application.getKeyType(), keyName, props);
         return apiKey;
     }
 
@@ -606,14 +606,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param validityPeriod       Requested validity period for the api key.
      * @param permittedIP          Permitted IP addresses for the api key.
      * @param permittedReferer     Permitted referrers for the api key.
-     * @param keyDisplayName       Display name of the api key.
+     * @param keyName       Name of the api key.
      * @param keyType              Key type of the api key.
      * @return Generated api key.
      * @throws APIManagementException
      */
     @Override
     public String generateApiApiKey(API api, String userName, long validityPeriod,
-                                 String permittedIP, String permittedReferer, String keyDisplayName, String keyType)
+                                 String permittedIP, String permittedReferer, String keyName, String keyType)
             throws APIManagementException {
 
         String apiKey;
@@ -629,19 +629,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Properties props = new Properties();
         props.setProperty("permittedIP", permittedIP);
         props.setProperty("permittedReferer", permittedReferer);
-        APIKeyDTO apiKeyInfoDTO = generateAPIKeyInfoDTO(userName, validityPeriod, keyDisplayName, keyType, permittedIP,
+        APIKeyDTO apiKeyInfoDTO = generateAPIKeyInfoDTO(userName, validityPeriod, keyName, keyType, permittedIP,
                 permittedReferer, props);
         apiKeyInfoDTO.setApiId(api.getUUID());
         apiMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
-        sendAPIKeyInfoEvent(apiKeyHash,null, api, validityPeriod, keyType, keyDisplayName, props);
+        sendAPIKeyInfoEvent(apiKeyHash,null, api, validityPeriod, keyType, keyName, props);
         return apiKey;
     }
 
-    private APIKeyDTO generateAPIKeyInfoDTO(String userName, long validityPeriod, String keyDisplayName, String keyType,
+    private APIKeyDTO generateAPIKeyInfoDTO(String userName, long validityPeriod, String keyName, String keyType,
                                             String permittedIP, String permittedReferer, Properties props)
             throws APIManagementException {
         APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
-        apiKeyInfoDTO.setKeyDisplayName(keyDisplayName);
+        apiKeyInfoDTO.setKeyName(keyName);
         apiKeyInfoDTO.setKeyType(keyType);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
@@ -661,7 +661,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     private void sendAPIKeyInfoEvent(String apiKeyHash, Application application, API api, long validityPeriod,
-                                     String keyType, String keyDisplayName, Properties props) throws APIManagementException {
+                                     String keyType, String keyName, Properties props) throws APIManagementException {
         OpaqueApiKeyPublisher apiKeyInfoPublisher = OpaqueApiKeyPublisher.getInstance();
         Properties properties = new Properties();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -680,7 +680,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         properties.put(APIConstants.NotificationEvent.VALIDITY_PERIOD, String.valueOf(validityPeriod));
         properties.put(APIConstants.NotificationEvent.KEY_TYPE, keyType);
-        properties.put(APIConstants.NotificationEvent.KEY_DISPLAY_NAME, keyDisplayName);
+        properties.put(APIConstants.NotificationEvent.KEY_NAME, keyName);
         properties.put(APIConstants.NotificationEvent.STATUS, "ACTIVE");
         // Safely convert additional properties
         if (props != null && !props.isEmpty()) {
@@ -3963,12 +3963,12 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * Revokes an API key
      * @param applicationId Id of the application
      * @param keyType Key type of the token
-     * @param keyDisplayName Api key name
+     * @param keyName Api key name
      * @param tenantDomain Tenant domain
      * @throws APIManagementException
      */
     @Override
-    public void revokeApiKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain)
+    public void revokeApiKey(String applicationId, String keyType, String keyName, String tenantDomain)
             throws APIManagementException {
 
         RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
@@ -3981,11 +3981,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
-        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(applicationId, keyType, keyDisplayName);
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(applicationId, keyType, keyName);
         if (apiKeyInfo == null) {
-            throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
+            throw new APIMgtResourceNotFoundException("API key not found for name: " + keyName);
         }
-        apiMgtDAO.revokeAPIKey(applicationId, keyType, keyDisplayName);
+        apiMgtDAO.revokeAPIKey(applicationId, keyType, keyName);
         // TODO: Modify the receiver side to remove the key hash too. Currently it handles only the actual token, not the hash
         revocationRequestPublisher.publishRevocationEvents(apiKeyInfo.getApiKeyHash(), properties);
     }
@@ -3993,12 +3993,12 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     /**
      * Revoke opaque api key and delete from the DB
      * @param apiId Id of the API
-     * @param keyDisplayName Api key name
+     * @param keyName Api key name
      * @param tenantDomain Tenant domain
      * @throws APIManagementException
      */
     @Override
-    public void revokeApiApiKey(String apiId, String keyDisplayName, String tenantDomain) throws APIManagementException {
+    public void revokeApiApiKey(String apiId, String keyName, String tenantDomain) throws APIManagementException {
         RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
         Properties properties = new Properties();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -4009,11 +4009,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
-        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(apiId, keyDisplayName);
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(apiId, keyName);
         if (apiKeyInfo == null) {
-            throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
+            throw new APIMgtResourceNotFoundException("API key not found for name: " + keyName);
         }
-        apiMgtDAO.revokeAPIKey(apiId, keyDisplayName);
+        apiMgtDAO.revokeAPIKey(apiId, keyName);
         // TODO: Modify the receiver side to remove the key hash too. Currently it handles only the actual token, not the hash
         revocationRequestPublisher.publishRevocationEvents(apiKeyInfo.getApiKeyHash(), properties);
     }
@@ -4022,26 +4022,26 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * Regenerates an API key
      * @param applicationId Id of the application
      * @param keyType Key type of the token
-     * @param keyDisplayName Api key name
+     * @param keyName Api key name
      * @param tenantDomain Tenant domain
      * @param username User name
      * @return
      * @throws APIManagementException
      */
     @Override
-    public APIKeyInfo regenerateApiKey(String applicationId, String keyType, String keyDisplayName, String tenantDomain,
+    public APIKeyInfo regenerateApiKey(String applicationId, String keyType, String keyName, String tenantDomain,
                                        String username) throws APIManagementException {
 
         // Load existing metadata before revocation (revocation may remove/alter it)
-        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(applicationId, keyType, keyDisplayName);
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(applicationId, keyType, keyName);
         if (apiKeyInfo == null) {
-            throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
+            throw new APIMgtResourceNotFoundException("API key not found for name: " + keyName);
         }
         // Revoke the existing key
-        revokeApiKey(applicationId, keyType, keyDisplayName, tenantDomain);
-        // Generate a new key with the same display name and other additional properties
+        revokeApiKey(applicationId, keyType, keyName, tenantDomain);
+        // Generate a new key with the same name and other additional properties
         APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
-        apiKeyInfoDTO.setKeyDisplayName(keyDisplayName);
+        apiKeyInfoDTO.setKeyName(keyName);
         apiKeyInfoDTO.setApplicationId(applicationId);
         apiKeyInfoDTO.setKeyType(keyType);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -4070,37 +4070,37 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         String apiKeyHash = APIUtil.sha256Hash(apiKey);
         apiMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         APIKeyInfo regeneratedApiKeyInfo = new APIKeyInfo();
-        regeneratedApiKeyInfo.setKeyDisplayName(keyDisplayName);
+        regeneratedApiKeyInfo.setKeyName(keyName);
         regeneratedApiKeyInfo.setApiKey(apiKey);
         regeneratedApiKeyInfo.setValidityPeriod(apiKeyInfo.getValidityPeriod());
         sendAPIKeyInfoEvent(apiKeyHash, apiMgtDAO.getApplicationByUUID(applicationId),
-                null, apiKeyInfo.getValidityPeriod(), keyType, keyDisplayName, props);
+                null, apiKeyInfo.getValidityPeriod(), keyType, keyName, props);
         return regeneratedApiKeyInfo;
     }
 
     /**
-     * Regenerate opaque api key for the given key display name with same properties
+     * Regenerate opaque api key for the given key name with same properties
      * @param apiId Id of the API
-     * @param keyDisplayName Api key name
+     * @param keyName Api key name
      * @param tenantDomain Tenant domain
      * @param username User name
      * @return API key info object
      * @throws APIManagementException
      */
     @Override
-    public APIKeyInfo regenerateApiApiKey(String apiId, String keyDisplayName, String tenantDomain, String organization,
+    public APIKeyInfo regenerateApiApiKey(String apiId, String keyName, String tenantDomain, String organization,
                                           String username)
             throws APIManagementException {
         // Load existing metadata before revocation (revocation may remove/alter it)
-        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(apiId, keyDisplayName);
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKey(apiId, keyName);
         if (apiKeyInfo == null) {
-            throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
+            throw new APIMgtResourceNotFoundException("API key not found for name: " + keyName);
         }
         // Revoke the existing key
-        revokeApiApiKey(apiId, keyDisplayName, tenantDomain);
-        // Generate a new key with the same display name and other additional properties
+        revokeApiApiKey(apiId, keyName, tenantDomain);
+        // Generate a new key with the same name and other additional properties
         APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
-        apiKeyInfoDTO.setKeyDisplayName(keyDisplayName);
+        apiKeyInfoDTO.setKeyName(keyName);
         apiKeyInfoDTO.setApplicationId(apiKeyInfo.getApplicationId());
         apiKeyInfoDTO.setApiId(apiId);
         apiKeyInfoDTO.setKeyType(apiKeyInfo.getKeyType());
@@ -4130,12 +4130,12 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         String apiKeyHash = APIUtil.sha256Hash(apiKey);
         apiMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         APIKeyInfo regeneratedApiKeyInfo = new APIKeyInfo();
-        regeneratedApiKeyInfo.setKeyDisplayName(keyDisplayName);
+        regeneratedApiKeyInfo.setKeyName(keyName);
         regeneratedApiKeyInfo.setApiKey(apiKey);
         regeneratedApiKeyInfo.setValidityPeriod(apiKeyInfo.getValidityPeriod());
         sendAPIKeyInfoEvent(apiKeyHash,null,
                 getLightweightAPIByUUID(apiId, organization), apiKeyInfo.getValidityPeriod(),
-                apiKeyInfo.getKeyType(), keyDisplayName, props);
+                apiKeyInfo.getKeyType(), keyName, props);
         return regeneratedApiKeyInfo;
     }
 
@@ -4151,21 +4151,21 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      *
      * @param apiUUId          API UUId of the API.
      * @param appName        Name of the Application.
-     * @param keyDisplayName Display name of API key.
+     * @param keyName Name of API key.
      * @param userName       User name
      * @throws APIManagementException This is the custom exception class for API management.
      */
     @Override
-    public void createAssociationToApp(String apiUUId, String keyDisplayName, String appName, String userName)
+    public void createAssociationToApp(String apiUUId, String keyName, String appName, String userName)
             throws APIManagementException {
         String applicationUUID = APIUtil.getApplicationUUID(appName, userName);
         int appId = APIUtil.getApplicationId(appName, userName);
-        apiMgtDAO.createAssociationToApiKey(keyDisplayName, apiUUId, applicationUUID);
-        APIKeyInfo apiKeyInfo = apiMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, keyDisplayName);
+        apiMgtDAO.createAssociationToApiKey(keyName, apiUUId, applicationUUID);
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, keyName);
         if (apiKeyInfo == null) {
-            throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
+            throw new APIMgtResourceNotFoundException("API key not found for name: " + keyName);
         }
-        sendAPIKeyAssociationInfoEvent(keyDisplayName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
+        sendAPIKeyAssociationInfoEvent(keyName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
                 apiUUId, applicationUUID, appId, "CREATE_ASSOCIATION");
     }
 
@@ -4174,54 +4174,54 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      *
      * @param apiUUId      UUId of the API
      * @param appUUId        UUId of the Application.
-     * @param keyDisplayName Display name of API key.
+     * @param keyName Name of API key.
      * @throws APIManagementException This is the custom exception class for API management.
      */
     @Override
-    public void createAssociationToApp(String apiUUId, String appUUId, String keyDisplayName)
+    public void createAssociationToApp(String apiUUId, String appUUId, String keyName)
             throws APIManagementException {
-        apiMgtDAO.createAssociationToApiKey(keyDisplayName, apiUUId, appUUId);
-        APIKeyInfo apiKeyInfo = apiMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, appUUId, keyDisplayName);
+        apiMgtDAO.createAssociationToApiKey(keyName, apiUUId, appUUId);
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, appUUId, keyName);
         if (apiKeyInfo == null) {
-            throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
+            throw new APIMgtResourceNotFoundException("API key not found for name: " + keyName);
         }
-        sendAPIKeyAssociationInfoEvent(keyDisplayName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
+        sendAPIKeyAssociationInfoEvent(keyName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
                 apiUUId, appUUId, apiKeyInfo.getAppId(), "CREATE_ASSOCIATION");
     }
 
     /**
      * Remove association of an opaque api key
      * @param apiUUId Id of the API
-     * @param keyDisplayName Api key name
+     * @param keyName Api key name
      * @throws APIManagementException
      */
-    public void removeApiKeyAssociation(String apiUUId, String keyDisplayName) throws APIManagementException {
-        APIKeyInfo apiKeyInfo = apiMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, keyDisplayName);
+    public void removeApiKeyAssociation(String apiUUId, String keyName) throws APIManagementException {
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, keyName);
         if (apiKeyInfo == null) {
-            throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
+            throw new APIMgtResourceNotFoundException("API key not found for name: " + keyName);
         }
-        apiMgtDAO.removeAssociationOfAPIKey(apiUUId, keyDisplayName);
-        sendAPIKeyAssociationInfoEvent(keyDisplayName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(), apiUUId,
+        apiMgtDAO.removeAssociationOfAPIKey(apiUUId, keyName);
+        sendAPIKeyAssociationInfoEvent(keyName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(), apiUUId,
                 null, 0, "REMOVE_ASSOCIATION");
     }
 
     /**
      * Remove association of an opaque api key
      * @param appUUId UUId of the Application
-     * @param keyDisplayName Api key name
+     * @param keyName Api key name
      * @throws APIManagementException
      */
-    public void removeApiKeyAssociationViaApp(String appUUId, String keyDisplayName) throws APIManagementException {
-        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKeyDataByKeyNameAndAppUUID(appUUId, keyDisplayName);
+    public void removeApiKeyAssociationViaApp(String appUUId, String keyName) throws APIManagementException {
+        APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKeyDataByKeyNameAndAppUUID(appUUId, keyName);
         if (apiKeyInfo == null) {
-            throw new APIMgtResourceNotFoundException("API key not found for display name: " + keyDisplayName);
+            throw new APIMgtResourceNotFoundException("API key not found for name: " + keyName);
         }
-        apiMgtDAO.removeAssociationOfAPIKeyViaApp(appUUId, keyDisplayName);
-        sendAPIKeyAssociationInfoEvent(keyDisplayName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
+        apiMgtDAO.removeAssociationOfAPIKeyViaApp(appUUId, keyName);
+        sendAPIKeyAssociationInfoEvent(keyName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
                 apiKeyInfo.getApiUUId(), appUUId, apiKeyInfo.getAppId(), "REMOVE_ASSOCIATION");
     }
 
-    private void sendAPIKeyAssociationInfoEvent(String keyDisplayName, String keyType, String apiKeyHash, String apiUUId,
+    private void sendAPIKeyAssociationInfoEvent(String keyName, String keyType, String apiKeyHash, String apiUUId,
                                                 String appUUId, int appId, String type) throws APIManagementException {
         OpaqueApiKeyPublisher apiKeyInfoPublisher = OpaqueApiKeyPublisher.getInstance();
         Properties properties = new Properties();
@@ -4231,7 +4231,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.API_KEY_ASSOCIATION_INFO_STREAM_ID);
-        properties.put(APIConstants.NotificationEvent.KEY_DISPLAY_NAME, keyDisplayName);
+        properties.put(APIConstants.NotificationEvent.KEY_NAME, keyName);
         properties.put(APIConstants.NotificationEvent.KEY_TYPE, keyType);
         properties.put(APIConstants.NotificationEvent.API_KEY_HASH, apiKeyHash);
         properties.put(APIConstants.NotificationEvent.API_UUID, apiUUId);

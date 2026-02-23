@@ -159,17 +159,17 @@ public class ApplicationKeyMappingUtil {
         return applicationKeyDTO;
     }
 
-    public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime, String keyDisplayName){
+    public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime, String keyName){
         APIKeyDTO apiKeyDto = new APIKeyDTO();
         apiKeyDto.setApikey(apiKey);
         apiKeyDto.setValidityTime(validityTime);
-        apiKeyDto.setKeyDisplayName(keyDisplayName);
+        apiKeyDto.setKeyName(keyName);
         return apiKeyDto;
     }
 
-    public static APIKeyAssociationDTO formApiAssociationToDTO(String apiName, String appName, String keyDisplayName){
+    public static APIKeyAssociationDTO formApiAssociationToDTO(String apiName, String appName, String keyName){
         APIKeyAssociationDTO apiKeyAssociationDTO = new APIKeyAssociationDTO();
-        apiKeyAssociationDTO.setKeyDisplayName(keyDisplayName);
+        apiKeyAssociationDTO.setKeyName(keyName);
         apiKeyAssociationDTO.setApiName(apiName);
         apiKeyAssociationDTO.setApplicationName(appName);
         return apiKeyAssociationDTO;
@@ -270,7 +270,7 @@ public class ApplicationKeyMappingUtil {
         List<APIKeyInfoDTO> apiKeyInfoDTOList = apiKeyInfoList.stream()
                 .map(src -> {
                     APIKeyInfoDTO dto = new APIKeyInfoDTO();
-                    dto.setKeyDisplayName(src.getKeyDisplayName());
+                    dto.setKeyName(src.getKeyName());
                     dto.setIssuedOn(src.getCreatedTime());
                     dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
                     dto.setLastUsed(src.getLastUsedTime());
@@ -290,7 +290,7 @@ public class ApplicationKeyMappingUtil {
         List<APIKeyAssociationInfoDTO> apiKeyAssociationInfoDTOList = apiKeyInfoList.stream()
                 .map(src -> {
                     APIKeyAssociationInfoDTO dto = new APIKeyAssociationInfoDTO();
-                    dto.setKeyDisplayName(src.getKeyDisplayName());
+                    dto.setKeyName(src.getKeyName());
                     dto.setApiName(src.getApiName());
                     dto.setAssociatedOn(src.getAssociatedOn());
                     dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
@@ -311,7 +311,7 @@ public class ApplicationKeyMappingUtil {
         List<APIAPIKeyInfoDTO> apiKeyInfoDTOList = apiKeyInfoList.stream()
                 .map(src -> {
                     APIAPIKeyInfoDTO dto = new APIAPIKeyInfoDTO();
-                    dto.setKeyDisplayName(src.getKeyDisplayName());
+                    dto.setKeyName(src.getKeyName());
                     dto.setIssuedOn(src.getCreatedTime());
                     dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
                     dto.setLastUsed(src.getLastUsedTime());
@@ -332,7 +332,7 @@ public class ApplicationKeyMappingUtil {
         List<APIWithKeyInfoDTO> apiApiKeyInfoDTOList = apiKeyInfoList.stream()
                 .map(src -> {
                     APIWithKeyInfoDTO dto = new APIWithKeyInfoDTO();
-                    dto.setKeyDisplayName(src.getKeyDisplayName());
+                    dto.setKeyName(src.getKeyName());
                     dto.setApiUUID(src.getApiUUId());
                     dto.setApiName(src.getApiName());
                     return dto;

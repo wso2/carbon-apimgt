@@ -20,7 +20,7 @@ import javax.validation.Valid;
 
 public class APIKeyAssociationInfoDTO   {
   
-    private String keyDisplayName = null;
+    private String keyName = null;
     private String apiName = null;
     private String associatedOn = null;
     private Integer validityPeriod = null;
@@ -29,19 +29,19 @@ public class APIKeyAssociationInfoDTO   {
   /**
    * API Key name
    **/
-  public APIKeyAssociationInfoDTO keyDisplayName(String keyDisplayName) {
-    this.keyDisplayName = keyDisplayName;
+  public APIKeyAssociationInfoDTO keyName(String keyName) {
+    this.keyName = keyName;
     return this;
   }
 
   
   @ApiModelProperty(example = "Test_Key", value = "API Key name")
-  @JsonProperty("keyDisplayName")
-  public String getKeyDisplayName() {
-    return keyDisplayName;
+  @JsonProperty("keyName")
+  public String getKeyName() {
+    return keyName;
   }
-  public void setKeyDisplayName(String keyDisplayName) {
-    this.keyDisplayName = keyDisplayName;
+  public void setKeyName(String keyName) {
+    this.keyName = keyName;
   }
 
   /**
@@ -125,7 +125,7 @@ public class APIKeyAssociationInfoDTO   {
       return false;
     }
     APIKeyAssociationInfoDTO apIKeyAssociationInfo = (APIKeyAssociationInfoDTO) o;
-    return Objects.equals(keyDisplayName, apIKeyAssociationInfo.keyDisplayName) &&
+    return Objects.equals(keyName, apIKeyAssociationInfo.keyName) &&
         Objects.equals(apiName, apIKeyAssociationInfo.apiName) &&
         Objects.equals(associatedOn, apIKeyAssociationInfo.associatedOn) &&
         Objects.equals(validityPeriod, apIKeyAssociationInfo.validityPeriod) &&
@@ -134,7 +134,7 @@ public class APIKeyAssociationInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyDisplayName, apiName, associatedOn, validityPeriod, lastUsed);
+    return Objects.hash(keyName, apiName, associatedOn, validityPeriod, lastUsed);
   }
 
   @Override
@@ -142,7 +142,7 @@ public class APIKeyAssociationInfoDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIKeyAssociationInfoDTO {\n");
     
-    sb.append("    keyDisplayName: ").append(toIndentedString(keyDisplayName)).append("\n");
+    sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
     sb.append("    associatedOn: ").append(toIndentedString(associatedOn)).append("\n");
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");

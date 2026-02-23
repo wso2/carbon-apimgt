@@ -103,7 +103,7 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
         }
         Object[] objects = new Object[]{eventId, properties.getProperty(APIConstants.NotificationEvent.API_KEY_HASH),
                         properties.getProperty(APIConstants.NotificationEvent.KEY_TYPE),
-                        properties.getProperty(APIConstants.NotificationEvent.KEY_DISPLAY_NAME),
+                        properties.getProperty(APIConstants.NotificationEvent.KEY_NAME),
                         origin, originUUId, appId,
                         properties.getProperty(APIConstants.NotificationEvent.STATUS), validityPeriod,
                         properties.getProperty(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES), tenantId};
@@ -127,7 +127,7 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
         Object appIdObj = properties.get(APIConstants.NotificationEvent.APPLICATION_ID);
         int appId = appIdObj instanceof Integer ? (Integer) appIdObj : 0;
         Object[] objects = new Object[]{eventId,
-                properties.getProperty(APIConstants.NotificationEvent.KEY_DISPLAY_NAME),
+                properties.getProperty(APIConstants.NotificationEvent.KEY_NAME),
                 properties.getProperty(APIConstants.NotificationEvent.KEY_TYPE),
                 properties.getProperty(APIConstants.NotificationEvent.API_KEY_HASH),
                 properties.getProperty(APIConstants.NotificationEvent.API_UUID),
