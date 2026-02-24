@@ -31,6 +31,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
+import java.sql.Timestamp;
 
 /**
  * API key usage listener to handle API key usage events.
@@ -59,10 +60,12 @@ public class APIKeyUsageListener implements MessageListener {
                     JsonNode apiKeyHashNode = payloadData.path(APIConstants.NotificationEvent.API_KEY_HASH);
                     JsonNode lastUsedTimeNode = payloadData.path(APIConstants.NotificationEvent.LAST_USED_TIME);
                     String apiKeyHash = apiKeyHashNode.asText(null);
-                    String lastUsedTime = lastUsedTimeNode.asText(null);
+                    Long epoch = lastUsedTimeNode.isMissingNode() || lastUsedTimeNode.isNull()
+                            ? null : lastUsedTimeNode.asLong();
+                    Timestamp lastUsedTimestamp = epoch != null ? new Timestamp(epoch) : null;
 
                     if (apiKeyHash != null && !apiKeyHash.isEmpty()) {
-                        ApiMgtDAO.getInstance().updateAPIKeyUsage(apiKeyHash, lastUsedTime);
+                        ApiMgtDAO.getInstance().updateAPIKeyUsage(apiKeyHash, lastUsedTimestamp);
                     } else {
                         log.warn("Received API key usage event with empty apiKeyHash.");
                     }

@@ -16594,7 +16594,7 @@ public class ApiMgtDAO {
             ps.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
             ps.setLong(9, keyInfoDTO.getValidityPeriod());
             if (keyInfoDTO.getLastUsedTime() == null) {
-                ps.setString(10, "NOT_USED");
+                ps.setNull(10, Types.TIMESTAMP);
             } else {
                 ps.setString(10, keyInfoDTO.getLastUsedTime());
             }
@@ -16647,7 +16647,8 @@ public class ApiMgtDAO {
                 Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
                 keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
-                keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
+                Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
+                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : "NOT_USED");
                 keyInfo.setApplicationId(applicationUUId);
                 keyInfo.setKeyType(keyType);
                 apiKeyInfoList.add(keyInfo);
@@ -16689,10 +16690,9 @@ public class ApiMgtDAO {
                 APIKeyInfo keyInfo = new APIKeyInfo();
                 keyInfo.setKeyName(rs.getString("NAME"));
                 keyInfo.setApiName(rs.getString("API_NAME"));
-                Timestamp associatedOn = rs.getTimestamp("ASSOCIATED_ON");
-                keyInfo.setAssociatedOn(associatedOn != null ? associatedOn.toString() : null);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
-                keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
+                Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
+                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : "NOT_USED");
                 keyInfo.setApplicationId(applicationUUId);
                 keyInfo.setKeyType(keyType);
                 apiKeyInfoList.add(keyInfo);
@@ -16734,7 +16734,8 @@ public class ApiMgtDAO {
                 Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
                 keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
-                keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
+                Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
+                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : "NOT_USED");
                 keyInfo.setApplicationId(rs.getString("APPLICATION_UUID"));
                 if (keyInfo.getApplicationId() == null) {
                     keyInfo.setApplicationName(APIConstants.NO_ASSOCIATION);
@@ -16822,7 +16823,8 @@ public class ApiMgtDAO {
                 Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
                 keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
-                keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
+                Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
+                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : "NOT_USED");
                 keyInfo.setApplicationName(rs.getString("APPLICATION_NAME"));
                 keyInfo.setApiName(rs.getString("API_NAME"));
                 keyInfo.setKeyType(rs.getString("KEY_TYPE"));
@@ -16869,7 +16871,8 @@ public class ApiMgtDAO {
             if (rs.next()) {
                 keyInfo.setKeyName(keyName);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
-                keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
+                Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
+                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : "NOT_USED");
                 keyInfo.setApplicationId(applicationUUId);
                 keyInfo.setKeyType(keyType);
                 keyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
@@ -16909,7 +16912,8 @@ public class ApiMgtDAO {
             if (rs.next()) {
                 keyInfo.setKeyName(keyName);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
-                keyInfo.setLastUsedTime(rs.getString("LAST_USED"));
+                Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
+                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : "NOT_USED");
                 keyInfo.setApplicationId(rs.getString("APPLICATION_UUID"));
                 keyInfo.setApiUUId(apiUUId);
                 keyInfo.setKeyType(rs.getString("KEY_TYPE"));
@@ -16962,7 +16966,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Returns the key type of an API bound API key specified by the key name and api Id
+     * Returns the key type of an API bound API key specified by the key name and api UUId
      *
      * @param apiUUId API UUID
      * @param appUUId Application UUID
@@ -17166,10 +17170,10 @@ public class ApiMgtDAO {
      * Update last used time of an API key
      *
      * @param apiKeyHash Hash value of the API key
-     * @param lastUsedTime Last used time
+     * @param lastUsedTimestamp Last used timestamp
      * @throws APIManagementException
      */
-    public void updateAPIKeyUsage(String apiKeyHash, String lastUsedTime) throws APIManagementException {
+    public void updateAPIKeyUsage(String apiKeyHash, Timestamp lastUsedTimestamp) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -17181,7 +17185,7 @@ public class ApiMgtDAO {
             String sqlQuery = SQLConstants.UPDATE_API_KEY_LAST_USED_SQL;
             // Updating data from the AM_API_KEY table by setting LAST_USED column
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, lastUsedTime);
+            ps.setTimestamp(1, lastUsedTimestamp);
             ps.setString(2, apiKeyHash);
 
             ps.executeUpdate();

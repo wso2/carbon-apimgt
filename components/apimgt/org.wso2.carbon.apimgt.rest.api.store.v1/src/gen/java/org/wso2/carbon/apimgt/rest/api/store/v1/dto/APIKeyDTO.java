@@ -22,7 +22,7 @@ public class APIKeyDTO   {
   
     private String keyName = null;
     private String apikey = null;
-    private Integer validityTime = null;
+    private Integer validityPeriod = null;
 
   /**
    * API Key name
@@ -62,19 +62,19 @@ public class APIKeyDTO   {
 
   /**
    **/
-  public APIKeyDTO validityTime(Integer validityTime) {
-    this.validityTime = validityTime;
+  public APIKeyDTO validityPeriod(Integer validityPeriod) {
+    this.validityPeriod = validityPeriod;
     return this;
   }
 
   
   @ApiModelProperty(example = "3600", value = "")
-  @JsonProperty("validityTime")
-  public Integer getValidityTime() {
-    return validityTime;
+  @JsonProperty("validityPeriod")
+  public Integer getValidityPeriod() {
+    return validityPeriod;
   }
-  public void setValidityTime(Integer validityTime) {
-    this.validityTime = validityTime;
+  public void setValidityPeriod(Integer validityPeriod) {
+    this.validityPeriod = validityPeriod;
   }
 
 
@@ -89,12 +89,12 @@ public class APIKeyDTO   {
     APIKeyDTO apIKey = (APIKeyDTO) o;
     return Objects.equals(keyName, apIKey.keyName) &&
         Objects.equals(apikey, apIKey.apikey) &&
-        Objects.equals(validityTime, apIKey.validityTime);
+        Objects.equals(validityPeriod, apIKey.validityPeriod);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyName, apikey, validityTime);
+    return Objects.hash(keyName, apikey, validityPeriod);
   }
 
   @Override
@@ -104,7 +104,7 @@ public class APIKeyDTO   {
     
     sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    apikey: ").append(toIndentedString(apikey)).append("\n");
-    sb.append("    validityTime: ").append(toIndentedString(validityTime)).append("\n");
+    sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
     sb.append("}");
     return sb.toString();
   }

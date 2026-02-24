@@ -6564,7 +6564,7 @@ components:
           type: string
           description: API Key
           example: eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=
-        validityTime:
+        validityPeriod:
           type: integer
           format: int32
           example: 3600
@@ -6596,10 +6596,6 @@ components:
           type: string
           description: API name
           example: NotificationAPI
-        associatedOn:
-          type: string
-          description: Created Time
-          example: 2026-02-06 23:45:07
         validityPeriod:
           type: integer
           format: int32

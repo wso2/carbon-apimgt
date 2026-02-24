@@ -22,7 +22,6 @@ public class APIKeyAssociationInfoDTO   {
   
     private String keyName = null;
     private String apiName = null;
-    private String associatedOn = null;
     private Integer validityPeriod = null;
     private String lastUsed = null;
 
@@ -60,24 +59,6 @@ public class APIKeyAssociationInfoDTO   {
   }
   public void setApiName(String apiName) {
     this.apiName = apiName;
-  }
-
-  /**
-   * Created Time
-   **/
-  public APIKeyAssociationInfoDTO associatedOn(String associatedOn) {
-    this.associatedOn = associatedOn;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "2026-02-06 23:45:07", value = "Created Time")
-  @JsonProperty("associatedOn")
-  public String getAssociatedOn() {
-    return associatedOn;
-  }
-  public void setAssociatedOn(String associatedOn) {
-    this.associatedOn = associatedOn;
   }
 
   /**
@@ -127,14 +108,13 @@ public class APIKeyAssociationInfoDTO   {
     APIKeyAssociationInfoDTO apIKeyAssociationInfo = (APIKeyAssociationInfoDTO) o;
     return Objects.equals(keyName, apIKeyAssociationInfo.keyName) &&
         Objects.equals(apiName, apIKeyAssociationInfo.apiName) &&
-        Objects.equals(associatedOn, apIKeyAssociationInfo.associatedOn) &&
         Objects.equals(validityPeriod, apIKeyAssociationInfo.validityPeriod) &&
         Objects.equals(lastUsed, apIKeyAssociationInfo.lastUsed);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyName, apiName, associatedOn, validityPeriod, lastUsed);
+    return Objects.hash(keyName, apiName, validityPeriod, lastUsed);
   }
 
   @Override
@@ -144,7 +124,6 @@ public class APIKeyAssociationInfoDTO   {
     
     sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
-    sb.append("    associatedOn: ").append(toIndentedString(associatedOn)).append("\n");
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
     sb.append("    lastUsed: ").append(toIndentedString(lastUsed)).append("\n");
     sb.append("}");

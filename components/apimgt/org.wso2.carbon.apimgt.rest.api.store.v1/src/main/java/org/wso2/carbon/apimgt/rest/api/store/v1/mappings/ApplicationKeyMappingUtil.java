@@ -162,8 +162,10 @@ public class ApplicationKeyMappingUtil {
     public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime, String keyName){
         APIKeyDTO apiKeyDto = new APIKeyDTO();
         apiKeyDto.setApikey(apiKey);
-        apiKeyDto.setValidityTime(validityTime);
-        apiKeyDto.setKeyName(keyName);
+        apiKeyDto.setValidityPeriod(validityTime);
+        if (keyName != null) {
+            apiKeyDto.setKeyName(keyName);
+        }
         return apiKeyDto;
     }
 
@@ -292,7 +294,6 @@ public class ApplicationKeyMappingUtil {
                     APIKeyAssociationInfoDTO dto = new APIKeyAssociationInfoDTO();
                     dto.setKeyName(src.getKeyName());
                     dto.setApiName(src.getApiName());
-                    dto.setAssociatedOn(src.getAssociatedOn());
                     dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
                     dto.setLastUsed(src.getLastUsedTime());
                     return dto;
