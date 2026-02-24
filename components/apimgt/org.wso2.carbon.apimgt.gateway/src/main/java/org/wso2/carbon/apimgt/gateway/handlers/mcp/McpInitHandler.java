@@ -162,25 +162,27 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                 method = request.getMethod();
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_METHOD, method);
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY, request);
-                messageContext.setProperty(APIMgtGatewayConstants.MCP_SESSION_ID_KEY, headers.get(APIConstants.MCP.HEADER_MCP_SESSION_ID));
-                messageContext.setProperty(APIMgtGatewayConstants.MCP_PROTOCOL_VERSION_KEY, headers.get(APIConstants.MCP.HEADER_MCP_PROTOCOL_VERSION));//check
-                messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUEST_SIZE_KEY, headers.get(APIConstants.HEADER_CONTENT_LENGTH));
+                messageContext.setProperty(APIMgtGatewayConstants.MCP_SESSION_ID_KEY,
+                        headers.get(APIConstants.MCP.HEADER_MCP_SESSION_ID)); //TODO: not this. get from notification/initialize response
+                messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUESTED_PROTOCOL_VERSION_KEY,
+                        headers.get(APIConstants.MCP.HEADER_MCP_PROTOCOL_VERSION));
+                messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUEST_SIZE_KEY,
+                        headers.get(APIConstants.HEADER_CONTENT_LENGTH));
 
                 if (StringUtils.equals(method, APIConstants.MCP.METHOD_INITIALIZE)) {
                     Params params = request.getParams();
-                    messageContext.setProperty(APIMgtGatewayConstants.MCP_PROTOCOL_VERSION_KEY, params.getProtocolVersion());
-                    messageContext.setProperty(APIMgtGatewayConstants.MCP_CLIENT_CAPABILITIES_KEY, params.getCapabilities());
+                    messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUESTED_PROTOCOL_VERSION_KEY, params.getProtocolVersion());
                     messageContext.setProperty(APIMgtGatewayConstants.MCP_CLIENT_INFO_KEY, params.getClientInfo());
                 }
 
                 if (StringUtils.equals(method, APIConstants.MCP.METHOD_TOOL_CALL)) {
                     Params params = request.getParams();
-                    String toolName = params.getToolName();
-                    messageContext.setProperty(APIMgtGatewayConstants.MCP_TOOL_NAME_KEY, toolName);
+                    String capabilityName = params.getToolName();
+                    messageContext.setProperty(APIMgtGatewayConstants.MCP_CAPABILITY_NAME_KEY, capabilityName);
                     API api = GatewayUtils.getAPI(messageContext);
                     URLMapping extendedOperation = api.getUrlMappings()
                             .stream()
-                            .filter(operation -> operation.getUrlPattern().equals(toolName))
+                            .filter(operation -> operation.getUrlPattern().equals(capabilityName))
                             .findFirst()
                             .orElse(null);
 
@@ -196,7 +198,7 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                             }
                         }
                         if (backendOperation != null) {
-                            messageContext.setProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY, backendOperation.getVerb());
+                            messageContext.setProperty(APIMgtGatewayConstants.MCP_CAPABILITY_KEY, backendOperation.getVerb());
                             messageContext.setProperty(APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE_KEY, backendOperation.getTarget());
                         }
                     }

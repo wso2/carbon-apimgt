@@ -98,6 +98,6 @@ public class Constants {
     public static final String IS_EGRESS = "isEgress";
     public static final String SUBTYPE = "subtype";
 
-    public static final String MCP_METHOD = "method";
+    public static final String MCP_METHOD = "jsonRpcMethod";
 
 }

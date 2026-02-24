@@ -440,7 +440,6 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         custom.put(Constants.CERTIFICATE_COMMON_NAME, getCommonName());
 
         // Headers (optional)
-        // Headers (optional)
         if (shouldSendHeaders()) {
             log.debug("Including headers in analytics event");
             if (messageContext instanceof Axis2MessageContext) {
@@ -494,6 +493,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             getAiAnalyticsData((Map) aiMeta, startHourUtc, custom);
         }
         if (MCP.equals(messageContext.getProperty(API_TYPE))) {
+            custom.put(Constants.REQUEST_SIZE, messageContext.getProperty(MCP_REQUEST_SIZE_KEY));
             getMCPAnalyticsData(custom);
         }
 
@@ -558,38 +558,32 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     private void getMCPAnalyticsData(Map<String, Object> customProperties) {
-        log.debug("Extracting MCP analytics data from message context");
+        if (log.isDebugEnabled()) {
+            log.debug("Extracting MCP analytics data from message context");
+        }
         Map<String, Object> mcpAnalytics = new HashMap<>();
-        mcpAnalytics.put(MCP_METHOD, messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
-        mcpAnalytics.put(MCP_API_ELECTED_RESOURCE, messageContext.getProperty(MCP_API_ELECTED_RESOURCE_KEY));
-        mcpAnalytics.put(MCP_HTTP_METHOD, messageContext.getProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY));
-        mcpAnalytics.put(MCP_TOOL_NAME, messageContext.getProperty(MCP_TOOL_NAME_KEY));
-        mcpAnalytics.put(MCP_SESSION_ID, messageContext.getProperty(MCP_SESSION_ID_KEY));
-        mcpAnalytics.put(MCP_PROTOCOL_VERSION, messageContext.getProperty(MCP_PROTOCOL_VERSION_KEY));
-        mcpAnalytics.put(MCP_REQUEST_SIZE, messageContext.getProperty(MCP_REQUEST_SIZE_KEY));
+        Map<String, Object> clientInfo = new HashMap<>();
 
-        // Deserialize capabilities
-        Object capabilitiesObj = messageContext.getProperty(MCP_CLIENT_CAPABILITIES_KEY);
-        if (capabilitiesObj != null) {
-            try {
-                Params.Capabilities capabilities = gson.fromJson(capabilitiesObj.toString(), Params.Capabilities.class);
-                mcpAnalytics.put(MCP_CLIENT_CAPABILITIES, capabilities);
-            } catch (Exception e) {
-                log.warn("Failed to parse MCP client capabilities", e);
-                mcpAnalytics.put(MCP_CLIENT_CAPABILITIES, capabilitiesObj);
-            }
+        Params.ClientInfo clientInfoObj = (Params.ClientInfo) messageContext.getProperty(MCP_CLIENT_INFO_KEY);
+        if (clientInfoObj != null) {
+            clientInfo.put("name", clientInfoObj.getName());
+            clientInfo.put("version", clientInfoObj.getVersion());
+            clientInfo.put(MCP_REQUESTED_PROTOCOL_VERSION,
+                    messageContext.getProperty(MCP_REQUESTED_PROTOCOL_VERSION_KEY));
         }
 
-        // Deserialize client info
-        Object clientInfoObj = messageContext.getProperty(MCP_CLIENT_INFO_KEY);
-        if (clientInfoObj != null) {
-            try {
-                Params.ClientInfo clientInfo = gson.fromJson(clientInfoObj.toString(), Params.ClientInfo.class);
-                mcpAnalytics.put(MCP_CLIENT_INFO, clientInfo);
-            } catch (Exception e) {
-                log.warn("Failed to parse MCP client info", e);
-                mcpAnalytics.put(MCP_CLIENT_INFO, clientInfoObj);
-            }
+        String sessionId = (String) messageContext.getProperty(MCP_SESSION_ID_KEY);
+        if (sessionId != null) {
+            mcpAnalytics.put(MCP_SESSION_ID, sessionId);
+        }
+
+        mcpAnalytics.put(MCP_METHOD, messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
+        mcpAnalytics.put(MCP_CAPABILITY, messageContext.getProperty(MCP_CAPABILITY_KEY));
+        mcpAnalytics.put(MCP_CAPABILITY_NAME, messageContext.getProperty(MCP_CAPABILITY_NAME_KEY));
+        mcpAnalytics.put(MCP_CLIENT_INFO, clientInfo);
+
+        if (log.isDebugEnabled()) {
+            log.debug("MCP analytics data extracted: " + gson.toJson(mcpAnalytics));
         }
         customProperties.put(APIMgtGatewayConstants.MCP_ANALYTICS, mcpAnalytics);
     }
