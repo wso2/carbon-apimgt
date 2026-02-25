@@ -18,15 +18,34 @@ import javax.validation.Valid;
 
 
 
-public class APIKeyRenewalRequestDTO   {
+public class APIKeyRenewRequestDTO   {
   
+    private String keyName = null;
     private Integer validityPeriod = null;
     private Object additionalProperties = null;
 
   /**
+   * API Key name
+   **/
+  public APIKeyRenewRequestDTO keyName(String keyName) {
+    this.keyName = keyName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Test_Key", value = "API Key name")
+  @JsonProperty("keyName")
+  public String getKeyName() {
+    return keyName;
+  }
+  public void setKeyName(String keyName) {
+    this.keyName = keyName;
+  }
+
+  /**
    * API key validity period
    **/
-  public APIKeyRenewalRequestDTO validityPeriod(Integer validityPeriod) {
+  public APIKeyRenewRequestDTO validityPeriod(Integer validityPeriod) {
     this.validityPeriod = validityPeriod;
     return this;
   }
@@ -44,7 +63,7 @@ public class APIKeyRenewalRequestDTO   {
   /**
    * Additional parameters if Authorization server needs any
    **/
-  public APIKeyRenewalRequestDTO additionalProperties(Object additionalProperties) {
+  public APIKeyRenewRequestDTO additionalProperties(Object additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
@@ -69,21 +88,23 @@ public class APIKeyRenewalRequestDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIKeyRenewalRequestDTO apIKeyRenewalRequest = (APIKeyRenewalRequestDTO) o;
-    return Objects.equals(validityPeriod, apIKeyRenewalRequest.validityPeriod) &&
-        Objects.equals(additionalProperties, apIKeyRenewalRequest.additionalProperties);
+    APIKeyRenewRequestDTO apIKeyRenewRequest = (APIKeyRenewRequestDTO) o;
+    return Objects.equals(keyName, apIKeyRenewRequest.keyName) &&
+        Objects.equals(validityPeriod, apIKeyRenewRequest.validityPeriod) &&
+        Objects.equals(additionalProperties, apIKeyRenewRequest.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(validityPeriod, additionalProperties);
+    return Objects.hash(keyName, validityPeriod, additionalProperties);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIKeyRenewalRequestDTO {\n");
+    sb.append("class APIKeyRenewRequestDTO {\n");
     
+    sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");

@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
+package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -18,26 +18,26 @@ import javax.validation.Valid;
 
 
 
-public class APIAPIKeyAssociationRequestDTO   {
+public class APIKeyRevokeRequestDTO   {
   
-    private String applicationName = null;
+    private String keyName = null;
 
   /**
-   * Application name to be associated
+   * API Key name
    **/
-  public APIAPIKeyAssociationRequestDTO applicationName(String applicationName) {
-    this.applicationName = applicationName;
+  public APIKeyRevokeRequestDTO keyName(String keyName) {
+    this.keyName = keyName;
     return this;
   }
 
   
-  @ApiModelProperty(example = "DefaultApplication", value = "Application name to be associated")
-  @JsonProperty("applicationName")
-  public String getApplicationName() {
-    return applicationName;
+  @ApiModelProperty(example = "Test_Key", value = "API Key name")
+  @JsonProperty("keyName")
+  public String getKeyName() {
+    return keyName;
   }
-  public void setApplicationName(String applicationName) {
-    this.applicationName = applicationName;
+  public void setKeyName(String keyName) {
+    this.keyName = keyName;
   }
 
 
@@ -49,21 +49,21 @@ public class APIAPIKeyAssociationRequestDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIAPIKeyAssociationRequestDTO apIAPIKeyAssociationRequest = (APIAPIKeyAssociationRequestDTO) o;
-    return Objects.equals(applicationName, apIAPIKeyAssociationRequest.applicationName);
+    APIKeyRevokeRequestDTO apIKeyRevokeRequest = (APIKeyRevokeRequestDTO) o;
+    return Objects.equals(keyName, apIKeyRevokeRequest.keyName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationName);
+    return Objects.hash(keyName);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIAPIKeyAssociationRequestDTO {\n");
+    sb.append("class APIKeyRevokeRequestDTO {\n");
     
-    sb.append("    applicationName: ").append(toIndentedString(applicationName)).append("\n");
+    sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("}");
     return sb.toString();
   }

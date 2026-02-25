@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 
 
-public class AppAPIKeyAssociationRequestDTO   {
+public class AppAPIKeyAssociateRequestDTO   {
   
     private String apiName = null;
     private String apiId = null;
@@ -27,7 +27,7 @@ public class AppAPIKeyAssociationRequestDTO   {
   /**
    * API name
    **/
-  public AppAPIKeyAssociationRequestDTO apiName(String apiName) {
+  public AppAPIKeyAssociateRequestDTO apiName(String apiName) {
     this.apiName = apiName;
     return this;
   }
@@ -45,7 +45,7 @@ public class AppAPIKeyAssociationRequestDTO   {
   /**
    * The unique identifier of the API.
    **/
-  public AppAPIKeyAssociationRequestDTO apiId(String apiId) {
+  public AppAPIKeyAssociateRequestDTO apiId(String apiId) {
     this.apiId = apiId;
     return this;
   }
@@ -63,7 +63,7 @@ public class AppAPIKeyAssociationRequestDTO   {
   /**
    * API key name
    **/
-  public AppAPIKeyAssociationRequestDTO keyName(String keyName) {
+  public AppAPIKeyAssociateRequestDTO keyName(String keyName) {
     this.keyName = keyName;
     return this;
   }
@@ -87,10 +87,10 @@ public class AppAPIKeyAssociationRequestDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    AppAPIKeyAssociationRequestDTO appAPIKeyAssociationRequest = (AppAPIKeyAssociationRequestDTO) o;
-    return Objects.equals(apiName, appAPIKeyAssociationRequest.apiName) &&
-        Objects.equals(apiId, appAPIKeyAssociationRequest.apiId) &&
-        Objects.equals(keyName, appAPIKeyAssociationRequest.keyName);
+    AppAPIKeyAssociateRequestDTO appAPIKeyAssociateRequest = (AppAPIKeyAssociateRequestDTO) o;
+    return Objects.equals(apiName, appAPIKeyAssociateRequest.apiName) &&
+        Objects.equals(apiId, appAPIKeyAssociateRequest.apiId) &&
+        Objects.equals(keyName, appAPIKeyAssociateRequest.keyName);
   }
 
   @Override
@@ -101,7 +101,7 @@ public class AppAPIKeyAssociationRequestDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class AppAPIKeyAssociationRequestDTO {\n");
+    sb.append("class AppAPIKeyAssociateRequestDTO {\n");
     
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");

@@ -10,6 +10,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APIKeyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APIKeyRevokeRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 
 import java.util.List;
@@ -21,6 +22,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApiKeysApiService {
-      public Response apiKeysApiIdApplicationIdKeyTypeKeyNameDelete(String apiId, String applicationId, String keyType, String keyName, MessageContext messageContext) throws APIManagementException;
+      public Response apiKeysApiIdApplicationIdKeyTypeRevokePost(String apiId, String applicationId, String keyType, APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response apiKeysGet(MessageContext messageContext) throws APIManagementException;
 }

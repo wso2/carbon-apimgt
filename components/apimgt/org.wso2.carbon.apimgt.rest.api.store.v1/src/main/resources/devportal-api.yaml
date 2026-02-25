@@ -1476,16 +1476,15 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/apis/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/generate"'
 
-  /apis/{apiId}/api-keys/{keyName}/regenerate:
+  /apis/{apiId}/api-keys/regenerate:
     post:
       tags:
         - API Keys
       summary: Regenerate API Key
       description: |
-        Regenerate a self contained API Key for the API specified by the display name
+        Regenerate a self contained API Key for the API specified by the key name
       parameters:
         - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/keyName'
         - $ref: '#/components/parameters/If-Match'
       requestBody:
         description: |
@@ -1493,7 +1492,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/APIKeyRenewalRequest'
+              $ref: '#/components/schemas/APIKeyRenewRequest'
         required: false
       responses:
         200:
@@ -1518,7 +1517,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/apis/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/test-key/regenerate"'
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/apis/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/regenerate"'
 
   /apis/{apiId}/api-keys:
     get:
@@ -1555,17 +1554,24 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X GET "https://localhost:9443/api/am/devportal/v3/apis/16cd2684-9657-4a01-a956-4efd89e96077/api-keys"'
 
-  /apis/{apiId}/api-keys/{keyName}:
-    delete:
+  /apis/{apiId}/api-keys/revoke:
+    post:
       tags:
         - API Keys
       summary: Revoke API Key
       description: |
-        Revoke a self contained API Key for the API specified by the display name
+        Revoke a self contained API Key for the API specified by the key name
       parameters:
         - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/keyName'
         - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        description: |
+          API Key revocation request object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIAPIKeyRevokeRequest'
+        required: true
       responses:
         200:
           description: |
@@ -1586,9 +1592,9 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -X DELETE "https://localhost:9443/api/am/devportal/v3/apis/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/test-key"'
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/apis/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/revoke"'
 
-  /apis/{apiId}/api-keys/{keyName}/associate:
+  /apis/{apiId}/api-keys/associate:
     post:
       tags:
         - API Keys
@@ -1597,7 +1603,6 @@ paths:
         Create an association for a self contained API Key for the API
       parameters:
         - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/keyName'
         - $ref: '#/components/parameters/If-Match'
       requestBody:
         description: |
@@ -1605,7 +1610,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/APIAPIKeyAssociationRequest'
+              $ref: '#/components/schemas/APIAPIKeyAssociateRequest'
         required: true
       responses:
         200:
@@ -1630,19 +1635,26 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/apis/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/test-key/associate"'
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/apis/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/associate"'
 
-  /apis/{apiId}/api-keys/{keyName}/dissociate:
-    delete:
+  /apis/{apiId}/api-keys/dissociate:
+    post:
       tags:
         - API Keys
       summary: Remove an Association for the API Key
       description: |
-        Remove an association a self contained API Key for the API specified by the display name
+        Remove an association a self contained API Key for the API specified by the key name
       parameters:
         - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/keyName'
         - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        description: |
+          API Key dissociation request object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIKeyDissociateRequest'
+        required: true
       responses:
         200:
           description: |
@@ -1663,7 +1675,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -X DELETE "https://localhost:9443/api/am/devportal/v3/apis/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/test-key/dissociate"'
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/apis/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/dissociate"'
 
   /mcp-servers:
     get:
@@ -3666,17 +3678,16 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/generate"'
 
-  /applications/{applicationId}/api-keys/{keyType}/{keyName}/regenerate:
+  /applications/{applicationId}/api-keys/{keyType}/regenerate:
     post:
       tags:
         - API Keys
       summary: Regenerate API Key
       description: |
-        Regenerate a self contained API Key for the application specified by the display name
+        Regenerate a self contained API Key for the application specified by the key name
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'
-        - $ref: '#/components/parameters/keyName'
         - $ref: '#/components/parameters/If-Match'
       requestBody:
         description: |
@@ -3684,7 +3695,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/APIKeyRenewalRequest'
+              $ref: '#/components/schemas/APIKeyRenewRequest'
         required: false
       responses:
         200:
@@ -3709,7 +3720,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/test-key/regenerate"'
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/regenerate"'
 
   /applications/{applicationId}/api-keys/{keyType}:
     get:
@@ -3746,40 +3757,6 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X GET "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION"'
-
-  /applications/{applicationId}/api-keys/{keyType}/{keyName}:
-    delete:
-      tags:
-        - API Keys
-      summary: Revoke API Key
-      description: |
-        Revoke a self contained API Key for the application specified by the display name
-      parameters:
-        - $ref: '#/components/parameters/applicationId'
-        - $ref: '#/components/parameters/keyType'
-        - $ref: '#/components/parameters/keyName'
-        - $ref: '#/components/parameters/If-Match'
-      responses:
-        200:
-          description: |
-            OK.
-            Api key revoked successfully.
-          content: { }
-        400:
-          $ref: '#/components/responses/BadRequest'
-        404:
-          $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
-      security:
-        - OAuth2Security:
-            - apim:subscribe
-            - apim:app_manage
-            - apim:api_key
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -X DELETE "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/test-key"'
 
   /applications/{applicationId}/api-keys/{keyType}/revoke:
     post:
@@ -3874,7 +3851,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AppAPIKeyAssociationRequest'
+              $ref: '#/components/schemas/AppAPIKeyAssociateRequest'
         required: true
       responses:
         200:
@@ -3901,8 +3878,8 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/associate"'
 
-  /applications/{applicationId}/api-keys/{keyType}/{keyName}/dissociate:
-    delete:
+  /applications/{applicationId}/api-keys/{keyType}/dissociate:
+    post:
       tags:
         - API Keys
       summary: Remove the association of the API Key to the Application
@@ -3911,8 +3888,15 @@ paths:
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'
-        - $ref: '#/components/parameters/keyName'
         - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        description: |
+          API Key dissociation request object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIKeyDissociateRequest'
+        required: true
       responses:
         200:
           description: |
@@ -3933,7 +3917,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -X DELETE "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/TestKey/dissociate"'
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/dissociate"'
 
   /applications/{applicationId}/api-keys/{keyType}/associations:
     get:
@@ -6959,10 +6943,14 @@ components:
           type: object
           properties: {}
           description: Additional parameters if Authorization server needs any
-    APIKeyRenewalRequest:
+    APIKeyRenewRequest:
       title: API Key renewal request object
       type: object
       properties:
+        keyName:
+          type: string
+          description: API Key name
+          example: Test_Key
         validityPeriod:
           type: integer
           description: API key validity period
@@ -6972,15 +6960,27 @@ components:
           type: object
           properties: { }
           description: Additional parameters if Authorization server needs any
-    APIAPIKeyAssociationRequest:
+    APIAPIKeyAssociateRequest:
       title: API Key association request object
       type: object
       properties:
+        keyName:
+          type: string
+          description: API Key name
+          example: Test_Key
         applicationName:
           type: string
           description: Application name to be associated
           example: DefaultApplication
-    AppAPIKeyAssociationRequest:
+    APIKeyDissociateRequest:
+      title: API Key dissociation request object
+      type: object
+      properties:
+        keyName:
+          type: string
+          description: API Key name
+          example: Test_Key
+    AppAPIKeyAssociateRequest:
       title: API Key association request object
       type: object
       properties:
@@ -7004,6 +7004,18 @@ components:
           type: string
           description: API Key to revoke
           example: eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=
+        keyName:
+          type: string
+          description: API Key name
+          example: Test_Key
+    APIAPIKeyRevokeRequest:
+      title: API Key revoke request object
+      type: object
+      properties:
+        keyName:
+          type: string
+          description: API Key name
+          example: Test_Key
     ScopeInfo:
       title: API Scope info object with scope details
       type: object

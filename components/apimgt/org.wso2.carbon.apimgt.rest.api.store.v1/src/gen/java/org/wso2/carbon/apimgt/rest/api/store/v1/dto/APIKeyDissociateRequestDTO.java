@@ -18,33 +18,14 @@ import javax.validation.Valid;
 
 
 
-public class APIKeyRevokeRequestDTO   {
+public class APIKeyDissociateRequestDTO   {
   
-    private String apikey = null;
     private String keyName = null;
-
-  /**
-   * API Key to revoke
-   **/
-  public APIKeyRevokeRequestDTO apikey(String apikey) {
-    this.apikey = apikey;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=", value = "API Key to revoke")
-  @JsonProperty("apikey")
-  public String getApikey() {
-    return apikey;
-  }
-  public void setApikey(String apikey) {
-    this.apikey = apikey;
-  }
 
   /**
    * API Key name
    **/
-  public APIKeyRevokeRequestDTO keyName(String keyName) {
+  public APIKeyDissociateRequestDTO keyName(String keyName) {
     this.keyName = keyName;
     return this;
   }
@@ -68,22 +49,20 @@ public class APIKeyRevokeRequestDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIKeyRevokeRequestDTO apIKeyRevokeRequest = (APIKeyRevokeRequestDTO) o;
-    return Objects.equals(apikey, apIKeyRevokeRequest.apikey) &&
-        Objects.equals(keyName, apIKeyRevokeRequest.keyName);
+    APIKeyDissociateRequestDTO apIKeyDissociateRequest = (APIKeyDissociateRequestDTO) o;
+    return Objects.equals(keyName, apIKeyDissociateRequest.keyName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apikey, keyName);
+    return Objects.hash(keyName);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIKeyRevokeRequestDTO {\n");
+    sb.append("class APIKeyDissociateRequestDTO {\n");
     
-    sb.append("    apikey: ").append(toIndentedString(apikey)).append("\n");
     sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("}");
     return sb.toString();

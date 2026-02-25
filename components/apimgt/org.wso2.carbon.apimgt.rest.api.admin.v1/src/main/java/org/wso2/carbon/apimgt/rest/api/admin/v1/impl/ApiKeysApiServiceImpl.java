@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ApiKeysApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APIKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APIKeyRevokeRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APIKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -40,16 +41,15 @@ public class ApiKeysApiServiceImpl implements ApiKeysApiService {
      * @param apiId API ID
      * @param applicationId Application ID
      * @param keyType Application key type
-     * @param keyName API key name
      * @param messageContext Message context
      * @return API key deletion response
      */
-    public Response apiKeysApiIdApplicationIdKeyTypeKeyNameDelete(String apiId, String applicationId,
-                                                                         String keyType, String keyName,
+    public Response apiKeysApiIdApplicationIdKeyTypeRevokePost(String apiId, String applicationId,
+                                                                         String keyType, APIKeyRevokeRequestDTO body,
                                                                          MessageContext messageContext)
             throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
-        apiAdmin.revokeAPIKey(apiId, applicationId, keyType, keyName);
+        apiAdmin.revokeAPIKey(apiId, applicationId, keyType, body.getKeyName());
         return Response.ok().build();
     }
 

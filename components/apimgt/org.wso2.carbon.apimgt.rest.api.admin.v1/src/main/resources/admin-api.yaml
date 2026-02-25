@@ -4610,8 +4610,8 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X GET "https://127.0.0.1:9443/api/am/admin/v4/api-keys"'
 
-  /api-keys/{apiId}/{applicationId}/{keyType}/{keyName}:
-    delete:
+  /api-keys/{apiId}/{applicationId}/{keyType}/revoke:
+    post:
       tags:
         - API Keys
       summary: Revoke an API Key
@@ -4621,7 +4621,14 @@ paths:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'
-        - $ref: '#/components/parameters/keyName'
+      requestBody:
+        description: |
+          API key revoke object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIKeyRevokeRequest'
+        required: true
       responses:
         200:
           description: |
@@ -4637,8 +4644,8 @@ paths:
             - apim:admin
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v4/api-keys/ght65523-7650-4255-84fa-6cb171c1f779/d7cf8523-9180-4255-84fa-6cb171c1f779/PRODUCTION/test-key"'
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST -d @data.json 
+          "https://127.0.0.1:9443/api/am/admin/v4/api-keys/ght65523-7650-4255-84fa-6cb171c1f779/d7cf8523-9180-4255-84fa-6cb171c1f779/PRODUCTION/revoke"'
 
 components:
   schemas:
@@ -7187,6 +7194,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/APIKey'
+    APIKeyRevokeRequest:
+      title: API Key revoke request object
+      type: object
+      properties:
+        keyName:
+          type: string
+          description: API Key name
+          example: Test_Key
 
   responses:
     BadRequest:

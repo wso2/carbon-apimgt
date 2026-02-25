@@ -497,11 +497,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdApiKeysKeyNameAssociatePost(String apiId, String keyName,
-                                                                APIAPIKeyAssociationRequestDTO body,
+    public Response apisApiIdApiKeysAssociatePost(String apiId, APIAPIKeyAssociateRequestDTO body,
                                                                 String ifMatch, MessageContext messageContext)
             throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
+        String keyName = body.getKeyName();
         if (!StringUtils.isEmpty(keyName) && body != null && StringUtils.isNotEmpty(body.getApplicationName())) {
             try {
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -537,8 +537,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdApiKeysKeyNameDelete(String apiId, String keyName, String ifMatch, MessageContext messageContext) throws APIManagementException {
+    public Response apisApiIdApiKeysRevokePost(String apiId, APIAPIKeyRevokeRequestDTO body, String ifMatch,
+                                               MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
+        String keyName = body.getKeyName();
         if (!StringUtils.isEmpty(keyName)) {
             try {
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -572,8 +574,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdApiKeysKeyNameDissociateDelete(String apiId, String keyName, String ifMatch, MessageContext messageContext) throws APIManagementException {
+    public Response apisApiIdApiKeysDissociatePost(String apiId, APIKeyDissociateRequestDTO body, String ifMatch,
+                                                            MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
+        String keyName = body.getKeyName();
         if (!StringUtils.isEmpty(keyName)) {
             try {
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -606,9 +610,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdApiKeysKeyNameRegeneratePost(String apiId, String keyName, String ifMatch,
-                                                                 APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO, MessageContext messageContext) throws APIManagementException {
+    public Response apisApiIdApiKeysRegeneratePost(String apiId, String ifMatch, APIKeyRenewRequestDTO body,
+                                                   MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
+        String keyName = body.getKeyName();
         if (!StringUtils.isEmpty(keyName)) {
             try {
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);

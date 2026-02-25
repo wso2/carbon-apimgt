@@ -9,13 +9,15 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyAssociationRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyAssociateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyRevokeRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRenewalRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDissociateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRenewRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatResponseDTO;
@@ -44,12 +46,12 @@ import javax.ws.rs.core.SecurityContext;
 public interface ApisApiService {
       public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo, MessageContext messageContext) throws APIManagementException;
       public Response apiChatPost(String apiId, String apiChatAction, ApiChatRequestDTO apiChatRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdApiKeysAssociatePost(String apiId, APIAPIKeyAssociateRequestDTO apIAPIKeyAssociateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdApiKeysDissociatePost(String apiId, APIKeyDissociateRequestDTO apIKeyDissociateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdApiKeysGeneratePost(String apiId, APIAPIKeyGenerateRequestDTO apIAPIKeyGenerateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdApiKeysGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdApiKeysKeyNameAssociatePost(String apiId, String keyName, APIAPIKeyAssociationRequestDTO apIAPIKeyAssociationRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdApiKeysKeyNameDelete(String apiId, String keyName, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdApiKeysKeyNameDissociateDelete(String apiId, String keyName, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdApiKeysKeyNameRegeneratePost(String apiId, String keyName, String ifMatch, APIKeyRenewalRequestDTO apIKeyRenewalRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdApiKeysRegeneratePost(String apiId, String ifMatch, APIKeyRenewRequestDTO apIKeyRenewRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdApiKeysRevokePost(String apiId, APIAPIKeyRevokeRequestDTO apIAPIKeyRevokeRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdAsyncApiSpecificationGet(String apiId, String environmentName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
