@@ -70,6 +70,7 @@ import org.wso2.carbon.apimgt.impl.restapi.publisher.OperationPoliciesApiService
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.AsyncApiParserImplUtil;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -4374,6 +4375,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
+        addPlatformGatewaysToEnvironmentsMap(environments, organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
             String environment = apiRevisionDeploymentDTO.getName();
@@ -4400,6 +4402,44 @@ public class ApisApiServiceImpl implements ApisApiService {
         PublisherCommonUtils.checkGovernanceComplianceAsync(apiId, APIMGovernableState.API_DEPLOY,
                 ArtifactType.API, organization);
         return Response.status(status).entity(apiRevisionDeploymentDTOS).build();
+    }
+
+    /**
+     * Merge platform gateways into the environments map so deploy/undeploy revision
+     * accepts them by name (same as in GET /environments). Each platform gateway is
+     * added as an Environment with one VHost so vhost validation passes.
+     */
+    private void addPlatformGatewaysToEnvironmentsMap(Map<String, Environment> environments, String organization) {
+        org.wso2.carbon.apimgt.api.PlatformGatewayService platformGatewayService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        if (platformGatewayService == null) {
+            return;
+        }
+        try {
+            List<PlatformGateway> gateways = platformGatewayService.listGatewaysByOrganization(organization);
+            if (gateways == null) {
+                return;
+            }
+            for (PlatformGateway gw : gateways) {
+                if (gw == null || StringUtils.isBlank(gw.getName()) || environments.containsKey(gw.getName())) {
+                    continue;
+                }
+                Environment env = new Environment();
+                env.setName(gw.getName());
+                env.setDisplayName(gw.getDisplayName() != null ? gw.getDisplayName() : gw.getName());
+                env.setMode(GatewayMode.WRITE_ONLY.getMode());
+                String vhostHost = StringUtils.isNotBlank(gw.getVhost()) ? gw.getVhost() : "default";
+                VHost vhost = new VHost();
+                vhost.setHost(vhostHost);
+                vhost.setWsHost(vhostHost);
+                env.setVhosts(Collections.singletonList(vhost));
+                environments.put(gw.getName(), env);
+            }
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Could not add platform gateways to environments map", e);
+            }
+        }
     }
 
     /**
@@ -4444,6 +4484,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
+        addPlatformGatewaysToEnvironmentsMap(environments, organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (allEnvironments) {
             apiRevisionDeployments = apiProvider.getAPIRevisionDeploymentList(revisionId);

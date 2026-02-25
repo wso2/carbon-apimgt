@@ -4438,45 +4438,6 @@ paths:
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
               -H "Content-Type: application/json" "https://127.0.0.1:9443/api/am/admin/v4/provider/admin/apis/33662a62-8db1-4d75-af08-afd63c6bd0b4/change-provider?provider=user1"'
   ######################################################
-  # Deploy API to Platform Gateways
-  ######################################################
-  /apis/{apiId}/deploy-platform-gateways:
-    post:
-      tags:
-        - Platform Gateways
-      summary: Deploy API to platform gateways
-      description: |
-        Deploy the given API to the specified platform gateways. Connected gateways will receive
-        an api.deployed WebSocket message (API Platform–compatible) and can fetch the API definition
-        and deploy. Provide either platformGatewayIds (UUIDs from GET /gateways) or platformGatewayNames
-        (e.g. prod-gateway-02), or both; at least one must be non-empty.
-      operationId: apisApiIdDeployPlatformGatewaysPost
-      parameters:
-        - $ref: '#/components/parameters/apiId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DeployToPlatformGatewaysRequest'
-      responses:
-        200:
-          description: |
-            OK.
-            Deploy event sent to the specified platform gateways.
-        400:
-          $ref: '#/components/responses/BadRequest'
-        404:
-          $ref: '#/components/responses/NotFound'
-      security:
-        - OAuth2Security:
-            - apim:admin
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-              -H "Content-Type: application/json" -d "{\"platformGatewayNames\":[\"prod-gateway-02\"]}"
-              "https://127.0.0.1:9443/api/am/admin/v4/apis/API_UUID_HERE/deploy-platform-gateways"'
-  ######################################################
   # The "Transaction Count" resource API
   ######################################################
   /transaction-count:
@@ -5692,26 +5653,6 @@ components:
           enum:
             - ACTIVE
             - EXPIRED
-    DeployToPlatformGatewaysRequest:
-      title: Deploy API to Platform Gateways Request
-      description: |
-        Request body for deploying an API to platform gateways. Provide either platformGatewayIds
-        (UUIDs from GET /gateways) or platformGatewayNames (e.g. prod-gateway-02), or both.
-        At least one of the two arrays must be non-empty.
-      type: object
-      properties:
-        platformGatewayIds:
-          type: array
-          items:
-            type: string
-          description: Platform gateway UUIDs (from GET /gateways).
-        platformGatewayNames:
-          type: array
-          items:
-            type: string
-          description: Platform gateway names (e.g. prod-gateway-02). Resolved to IDs for the organization.
-      example:
-        platformGatewayNames: ["prod-gateway-02"]
     CreatePlatformGatewayRequest:
       title: Create Platform Gateway Request
       description: Request body for creating a platform gateway (name pattern, functionalityType enum, optional properties).

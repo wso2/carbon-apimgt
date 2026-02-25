@@ -5193,4 +5193,16 @@ public class SQLConstants {
         public static final String UPDATE_GATEWAY_ACTIVE_SQL =
                 "UPDATE AM_PLATFORM_GATEWAY SET IS_ACTIVE = ?, UPDATED_AT = ? WHERE ID = ?";
     }
+
+    /** SQL for platform gateway API artifact storage (Scenario 1: platform-only api.yaml). */
+    public static class PlatformGatewayArtifactSQLConstants {
+        public static final String INSERT_ARTIFACT_SQL =
+                "INSERT INTO AM_PLATFORM_GATEWAY_API_ARTIFACT (API_UUID, ORGANIZATION_ID, YAML_CONTENT, CREATED_AT, UPDATED_AT) VALUES (?, ?, ?, ?, ?)";
+        public static final String UPDATE_ARTIFACT_SQL =
+                "UPDATE AM_PLATFORM_GATEWAY_API_ARTIFACT SET YAML_CONTENT = ?, UPDATED_AT = ? WHERE API_UUID = ? AND ORGANIZATION_ID = ?";
+        public static final String SELECT_ARTIFACT_SQL =
+                "SELECT YAML_CONTENT FROM AM_PLATFORM_GATEWAY_API_ARTIFACT WHERE API_UUID = ? AND ORGANIZATION_ID = ?";
+        public static final String DELETE_ARTIFACT_SQL =
+                "DELETE FROM AM_PLATFORM_GATEWAY_API_ARTIFACT WHERE API_UUID = ? AND ORGANIZATION_ID = ?";
+    }
 }

@@ -46,9 +46,11 @@ import org.wso2.carbon.apimgt.internal.service.dto.DeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeployedEnvInfoDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeploymentAcknowledgmentResponseDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
+import org.wso2.carbon.apimgt.api.PlatformGatewayArtifactService;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayAPIYamlConverter;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
-import org.wso2.carbon.apimgt.internal.service.utils.PlatformGatewayAPIYamlConverter;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -163,7 +165,15 @@ public class ApisApiServiceImpl implements ApisApiService {
                     .build();
         }
         org.wso2.carbon.apimgt.api.model.API api = wrapper.getApi();
-        String yaml = PlatformGatewayAPIYamlConverter.toPlatformGatewayYaml(api, organization, "default");
+        String yaml = null;
+        PlatformGatewayArtifactService artifactService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
+        if (artifactService != null) {
+            yaml = artifactService.getStoredPlatformArtifact(apiId, organization);
+        }
+        if (yaml == null) {
+            yaml = PlatformGatewayAPIYamlConverter.toPlatformGatewayYaml(api, organization, "default");
+        }
         byte[] zipBytes = buildZipWithYaml(yaml);
         return Response.ok(zipBytes)
                 .type("application/zip")

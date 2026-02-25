@@ -8,7 +8,10 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.PlatformGateway;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApiService;
 
@@ -32,6 +35,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
@@ -151,6 +155,30 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         List<Environment> envList = apiAdmin.getAllEnvironments(organization);
         EnvironmentListDTO envListDTO = EnvironmentMappingUtil.fromEnvListToEnvListDTO(envList);
+
+        // Include platform gateways in the same list so UI gets one unified deploy-target list
+        // (no separate GET /gateways call needed for deploy dropdown)
+        org.wso2.carbon.apimgt.api.PlatformGatewayService platformGatewayService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        if (platformGatewayService != null) {
+            try {
+                List<PlatformGateway> platformGateways = platformGatewayService.listGatewaysByOrganization(organization);
+                if (platformGateways != null && !platformGateways.isEmpty()) {
+                    List<EnvironmentDTO> list = new ArrayList<>(envListDTO.getList());
+                    list.addAll(platformGateways.stream()
+                            .map(gw -> EnvironmentMappingUtil.fromPlatformGatewayToEnvDTO(gw,
+                                    APIConstants.WSO2_API_PLATFORM_GATEWAY))
+                            .collect(Collectors.toList()));
+                    envListDTO.setList(list);
+                    envListDTO.setCount(list.size());
+                }
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Could not append platform gateways to environments list", e);
+                }
+            }
+        }
+
         return Response.ok().entity(envListDTO).build();
     }
 

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.internal.service.utils;
+package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;

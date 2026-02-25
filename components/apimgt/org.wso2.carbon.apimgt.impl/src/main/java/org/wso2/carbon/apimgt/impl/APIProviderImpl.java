@@ -128,6 +128,8 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.gateway.DeploymentModeResolver;
+import org.wso2.carbon.apimgt.impl.gateway.DeploymentModeResolver.DeploymentTargets;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRevisionWorkflowDTO;
@@ -2597,8 +2599,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
         }
         environmentsToRemove.removeAll(environmentsToAdd);
+        DeploymentTargets targets = DeploymentModeResolver.resolve(api.getOrganization(), environmentsToRemove);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        gatewayManager.unDeployFromGateway(api, tenantDomain, environmentsToRemove, onDeleteOrRetire);
+        gatewayManager.unDeployFromGateway(api, tenantDomain, targets.getSynapseLabels(), onDeleteOrRetire,
+                targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds());
         if (log.isDebugEnabled()) {
             log.debug("Removing API: " + api.getId().getApiName() + " from gateways. onDeleteOrRetire: " +
                     onDeleteOrRetire);
@@ -7275,9 +7279,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handlePendingDeployments(apiId, apiRevisionUUID, apiRevisionDeployments);
         }
 
-        apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, apiRevisionDeployments);
+        // Only insert deployments that are not already recorded (idempotent deploy; unique key NAME, REVISION_UUID)
+        List<APIRevisionDeployment> existingForRevision = apiMgtDAO.getAPIRevisionDeploymentByRevisionUUID(apiRevisionUUID);
+        Set<String> existingNames = existingForRevision.stream()
+                .map(APIRevisionDeployment::getDeployment)
+                .collect(Collectors.toSet());
+        List<APIRevisionDeployment> newDeploymentsOnly = apiRevisionDeployments.stream()
+                .filter(d -> !existingNames.contains(d.getDeployment()))
+                .collect(Collectors.toList());
+        if (!newDeploymentsOnly.isEmpty()) {
+            apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, newDeploymentsOnly);
+        }
 
-        for (APIRevisionDeployment deployment : apiRevisionDeployments) {
+        for (APIRevisionDeployment deployment : newDeploymentsOnly) {
             if (!isInitiatedFromGateway) {
                 apiMgtDAO.updateAPIRevisionDeploymentStatus(apiRevisionUUID,
                         APIConstants.APIRevisionStatus.API_REVISION_CREATED, deployment.getDeployment());
@@ -7478,7 +7492,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         .addAndRemovePublishedGatewayLabels(apiId, revisionUUID,
                                 targetEnvironments, gatewayVhosts, deploymentsToRemove);
                 try {
-                    gatewayManager.deployToGateway(api, organization, targetEnvironments);
+                    DeploymentTargets targets = DeploymentModeResolver.resolve(organization, targetEnvironments);
+                    gatewayManager.deployToGateway(api, organization, targets.getSynapseLabels(),
+                            targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds());
                 } catch (RuntimeException e) {
                     if (e instanceof FaultyGatewayDeploymentException) {
                         Set<String> environments = ((FaultyGatewayDeploymentException) e).getEnvironments();
@@ -7968,7 +7984,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
 
         if (environmentsToAdd.size() > 0) {
-            gatewayManager.deployToGateway(product, tenantDomain, environmentsToAdd);
+            String org = product.getOrganization() != null ? product.getOrganization() : tenantDomain;
+            DeploymentTargets targets = DeploymentModeResolver.resolve(org, environmentsToAdd);
+            gatewayManager.deployToGateway(product, tenantDomain, targets.getSynapseLabels(),
+                    targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds());
         }
 
         String publishedDefaultVersion = getPublishedDefaultVersion(apiProductIdentifier);

@@ -9,7 +9,6 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.DeployToPlatformGatewaysRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SearchResultListDTO;
 
@@ -22,7 +21,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApisApiService {
-      public Response apisApiIdDeployPlatformGatewaysPost(String apiId, DeployToPlatformGatewaysRequestDTO deployToPlatformGatewaysRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response getAllAPIs(Integer limit, Integer offset, String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response providerNamePost(String provider, String apiId, MessageContext messageContext) throws APIManagementException;
 }

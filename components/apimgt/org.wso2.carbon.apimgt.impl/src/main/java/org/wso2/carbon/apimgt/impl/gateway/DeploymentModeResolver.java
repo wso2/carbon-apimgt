@@ -1,0 +1,104 @@
+/*
+ * Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com).
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package org.wso2.carbon.apimgt.impl.gateway;
+
+import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.PlatformGatewayService;
+import org.wso2.carbon.apimgt.api.model.PlatformGateway;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Resolves deployment target environment names into Synapse gateway labels and platform gateway IDs.
+ * Used by the Publisher REST flow so that a single "deploy to these environments" request can
+ * target both Synapse and platform gateways via {@link org.wso2.carbon.apimgt.impl.APIGatewayManager#deployToGateway}.
+ * <p>
+ * For each environment name: if it matches a registered platform gateway name for the organization,
+ * it is added to platform gateway IDs; otherwise it is treated as a Synapse gateway label.
+ */
+public final class DeploymentModeResolver {
+
+    private DeploymentModeResolver() {
+    }
+
+    /**
+     * Resolves the given environment names into Synapse labels and platform gateway IDs for the organization.
+     *
+     * @param organization     tenant/organization domain
+     * @param environmentNames selected environment names (e.g. from Publisher deploy request)
+     * @return resolution result with {@link DeploymentTargets#getSynapseLabels()} and
+     *         {@link DeploymentTargets#getPlatformGatewayIds()}
+     */
+    public static DeploymentTargets resolve(String organization, Set<String> environmentNames) {
+        Set<String> synapseLabels = new HashSet<>();
+        Set<String> platformGatewayIds = new HashSet<>();
+
+        if (environmentNames == null || environmentNames.isEmpty()) {
+            return new DeploymentTargets(synapseLabels, platformGatewayIds);
+        }
+
+        PlatformGatewayService platformGatewayService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+
+        for (String name : environmentNames) {
+            if (StringUtils.isBlank(name)) {
+                continue;
+            }
+            String trimmed = name.trim();
+            if (platformGatewayService != null) {
+                try {
+                    PlatformGateway gw = platformGatewayService.getGatewayByNameAndOrganization(trimmed, organization);
+                    if (gw != null && gw.getId() != null) {
+                        platformGatewayIds.add(gw.getId());
+                        continue;
+                    }
+                } catch (APIManagementException e) {
+                    // Treat as Synapse label if lookup fails
+                }
+            }
+            synapseLabels.add(trimmed);
+        }
+
+        return new DeploymentTargets(synapseLabels, platformGatewayIds);
+    }
+
+    /**
+     * Result of resolving deployment targets: Synapse gateway labels and platform gateway IDs.
+     */
+    public static final class DeploymentTargets {
+        private final Set<String> synapseLabels;
+        private final Set<String> platformGatewayIds;
+
+        public DeploymentTargets(Set<String> synapseLabels, Set<String> platformGatewayIds) {
+            this.synapseLabels = synapseLabels != null ? new HashSet<>(synapseLabels) : new HashSet<>();
+            this.platformGatewayIds = platformGatewayIds != null ? new HashSet<>(platformGatewayIds) : new HashSet<>();
+        }
+
+        public Set<String> getSynapseLabels() {
+            return new HashSet<>(synapseLabels);
+        }
+
+        public Set<String> getPlatformGatewayIds() {
+            return new HashSet<>(platformGatewayIds);
+        }
+    }
+}

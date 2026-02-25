@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdditionalPropertyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
@@ -80,6 +81,29 @@ public class EnvironmentMappingUtil {
             environmentPermissionsDTO.setRoles(permissions.getRoles());
             envDTO.setPermissions(environmentPermissionsDTO);
         }
+        return envDTO;
+    }
+
+    /**
+     * Convert a Platform Gateway to EnvironmentDTO so it can be included in the unified
+     * GET /environments list (deploy targets). UI can use gatewayType to distinguish from
+     * traditional gateway environments.
+     *
+     * @param gateway       PlatformGateway from AM_PLATFORM_GATEWAY
+     * @param gatewayType   gateway type constant (e.g. wso2/api-platform)
+     * @return EnvironmentDTO suitable for deploy-target list
+     */
+    public static EnvironmentDTO fromPlatformGatewayToEnvDTO(PlatformGateway gateway, String gatewayType) {
+        EnvironmentDTO envDTO = new EnvironmentDTO();
+        envDTO.setId(gateway.getId());
+        envDTO.setName(gateway.getName());
+        envDTO.setDisplayName(gateway.getDisplayName());
+        envDTO.setDescription(gateway.getDescription());
+        envDTO.setGatewayType(gatewayType);
+        envDTO.setIsReadOnly(true);
+        envDTO.setMode(EnvironmentDTO.ModeEnum.WRITE_ONLY);
+        envDTO.setType("hybrid");
+        envDTO.setVhosts(new ArrayList<>());
         return envDTO;
     }
 
