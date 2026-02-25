@@ -36,7 +36,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIComplianceException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.api.APIDefinitionHandler;
+import org.wso2.carbon.apimgt.api.APIDefinitionProcessor;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
@@ -76,7 +76,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionHandlerFactory;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionProcessorFactory;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -1788,8 +1788,8 @@ public class ImportUtils {
     private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response) 
         throws APIManagementException {
 
-        APIDefinitionHandler definitionHandler =
-                APIDefinitionHandlerFactory.getDefinitionHandler(apiDto.getType().toString());
+        APIDefinitionProcessor definitionHandler =
+                APIDefinitionProcessorFactory.getDefinitionProcessor(apiDto.getType().toString());
         List<URITemplate> uriTemplates = definitionHandler.extractOperations(response.getJsonContent());
         List<APIOperationsDTO> apiOperationsDtos = APIMappingUtil
             .fromURITemplateListToOprationList(uriTemplates);

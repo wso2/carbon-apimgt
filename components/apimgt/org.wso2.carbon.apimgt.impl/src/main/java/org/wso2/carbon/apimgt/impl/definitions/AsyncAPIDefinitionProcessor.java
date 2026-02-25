@@ -38,11 +38,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * DefinitionHandler implementation for AsyncAPI specifications (WebSocket, WebSub, SSE).
+ * DefinitionProcessor implementation for AsyncAPI specifications (WebSocket, WebSub, SSE).
  */
-public class AsyncAPIDefinitionHandler implements APIDefinitionProcessor {
+public class AsyncAPIDefinitionProcessor implements APIDefinitionProcessor {
 
-    private static final Log log = LogFactory.getLog(AsyncAPIDefinitionHandler.class);
+    private static final Log log = LogFactory.getLog(AsyncAPIDefinitionProcessor.class);
 
     @Override
     public String getType(API api) {

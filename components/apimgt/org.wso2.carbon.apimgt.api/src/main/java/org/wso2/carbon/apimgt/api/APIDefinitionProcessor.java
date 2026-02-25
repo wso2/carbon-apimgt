@@ -24,10 +24,10 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import java.util.List;
 
 /**
- * DefinitionHandler interface for handling different API definition types (OpenAPI, AsyncAPI, GraphQL).
+ * DefinitionProcessor interface for handling different API definition types (OpenAPI, AsyncAPI, GraphQL).
  * This allows extensibility without modifying core logic.
  */
-public interface APIDefinitionHandler {
+public interface APIDefinitionProcessor {
 
     /**
      * Returns the API type identifier (e.g., "HTTP", "WS", "GRAPHQL").
@@ -58,15 +58,6 @@ public interface APIDefinitionHandler {
      * @param definition The definition string.
      */
     void setDefinitionToAPI(API api, String definition);
-
-    /**
-     * Updates the version in the definition string.
-     *
-     * @param api The API object containing the definition and version.
-     * @return The updated definition string.
-     * @throws APIManagementException If an error occurs during update.
-     */
-    void updateAPIDefinitionWithVersion(API api) throws APIManagementException;
 
     /**
      * Extracts endpoint URL from the definition for discovered APIs.

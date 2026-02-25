@@ -36,11 +36,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * DefinitionHandler implementation for OpenAPI (Swagger) specifications.
+ * DefinitionProcessor implementation for OpenAPI (Swagger) specifications.
  */
-public class OASDefinitionHandler implements APIDefinitionProcessor {
+public class OASDefinitionProcessor implements APIDefinitionProcessor {
 
-    private static final Log log = LogFactory.getLog(OASDefinitionHandler.class);
+    private static final Log log = LogFactory.getLog(OASDefinitionProcessor.class);
 
     @Override
     public String getType(API api) {

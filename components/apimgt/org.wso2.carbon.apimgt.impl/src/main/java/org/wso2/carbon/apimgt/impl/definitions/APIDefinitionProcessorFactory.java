@@ -18,48 +18,48 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
-import org.wso2.carbon.apimgt.api.APIDefinitionHandler;
+import org.wso2.carbon.apimgt.api.APIDefinitionProcessor;
 import org.wso2.carbon.apimgt.api.model.API;
 
 /**
- * Factory class for obtaining the appropriate APIDefinitionHandler based on API type.
- * Supports extension by adding new definition handler implementations.
+ * Factory class for obtaining the appropriate APIDefinitionProcessor based on API type.
+ * Supports extension by adding new definition processor implementations.
  */
-public class APIDefinitionHandlerFactory {
+public class APIDefinitionProcessorFactory {
 
-    private static final APIDefinitionHandler OAS_HANDLER = new OASDefinitionHandler();
-    private static final APIDefinitionHandler ASYNC_HANDLER = new AsyncAPIDefinitionHandler();
+    private static final APIDefinitionProcessor OAS_PROCESSOR = new OASDefinitionProcessor();
+    private static final APIDefinitionProcessor ASYNC_PROCESSOR = new AsyncAPIDefinitionProcessor();
 
-    private APIDefinitionHandlerFactory() {
+    private APIDefinitionProcessorFactory() {
         // Prevent instantiation
     }
 
     /**
-     * Gets the appropriate definition handler from an API object.
+     * Gets the appropriate definition processor from an API object.
      *
      * @param api The API object.
-     * @return The corresponding definition handler implementation.
+     * @return The corresponding definition processor implementation.
      */
-    public static APIDefinitionHandler getDefinitionHandler(API api) {
+    public static APIDefinitionProcessor getDefinitionProcessor(API api) {
         if (api != null && api.isAsync()) {
-            return ASYNC_HANDLER;
+            return ASYNC_PROCESSOR;
         }
-        return OAS_HANDLER;
+        return OAS_PROCESSOR;
     }
 
     /**
-     * Gets the appropriate definition handler from an API type string.
+     * Gets the appropriate definition processor from an API type string.
      *
      * @param apiType The API type (e.g. "HTTP", "WS", "WEBSUB", "SSE", "ASYNC").
-     * @return The corresponding definition handler implementation.
+     * @return The corresponding definition processor implementation.
      */
-    public static APIDefinitionHandler getDefinitionHandler(String apiType) {
+    public static APIDefinitionProcessor getDefinitionProcessor(String apiType) {
         if ("WS".equalsIgnoreCase(apiType) ||
             "WEBSUB".equalsIgnoreCase(apiType) ||
             "SSE".equalsIgnoreCase(apiType) ||
             "ASYNC".equalsIgnoreCase(apiType)) {
-            return ASYNC_HANDLER;
+            return ASYNC_PROCESSOR;
         }
-        return OAS_HANDLER;
+        return OAS_PROCESSOR;
     }
 }

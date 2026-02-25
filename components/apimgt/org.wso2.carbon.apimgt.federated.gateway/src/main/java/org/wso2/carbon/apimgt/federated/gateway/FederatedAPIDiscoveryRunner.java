@@ -27,7 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIDefinitionHandler;
+import org.wso2.carbon.apimgt.api.APIDefinitionProcessor;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscovery;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.dto.ImportedAPIDTO;
@@ -71,7 +71,7 @@ import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMa
 import static org.wso2.carbon.apimgt.federated.gateway.util.FederatedGatewayConstants.DISCOVERED_API_LIST;
 import static org.wso2.carbon.apimgt.federated.gateway.util.FederatedGatewayConstants.PUBLISHED_API_LIST;
 
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionHandlerFactory;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionProcessorFactory;
 
 /**
  * This class is responsible for scheduling and executing the discovery of APIs in a federated gateway environment.
@@ -296,7 +296,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     apiJson = CommonUtil.addTypeAndVersionToFile(ImportExportConstants.TYPE_API,
                             ImportExportConstants.APIM_VERSION, apiJson);
                     
-                    APIDefinitionHandler definitionHandler = APIDefinitionHandlerFactory.getDefinitionHandler(api);
+                    APIDefinitionProcessor definitionHandler = APIDefinitionProcessorFactory.getDefinitionProcessor(api);
                     String definition = definitionHandler.getDefinitionFromAPI(api);
 
                     if (definition == null || StringUtils.isBlank(definition)) {

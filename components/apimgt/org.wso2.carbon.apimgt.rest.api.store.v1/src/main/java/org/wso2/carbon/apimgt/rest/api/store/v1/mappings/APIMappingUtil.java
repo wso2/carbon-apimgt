@@ -27,7 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIDefinitionHandler;
+import org.wso2.carbon.apimgt.api.APIDefinitionProcessor;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -46,7 +46,7 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionHandlerFactory;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionProcessorFactory;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
@@ -594,7 +594,7 @@ public class APIMappingUtil {
             }
             
             // Use Strategy Pattern to extract endpoint URL
-            APIDefinitionHandler definitionHandler = APIDefinitionHandlerFactory.getDefinitionHandler(apidto.getType());
+            APIDefinitionProcessor definitionHandler = APIDefinitionProcessorFactory.getDefinitionProcessor(apidto.getType());
             String resolvedUrl = definitionHandler.extractEndpointUrl(apidto.getApiDefinition());
             
             if (StringUtils.isBlank(resolvedUrl)) {
