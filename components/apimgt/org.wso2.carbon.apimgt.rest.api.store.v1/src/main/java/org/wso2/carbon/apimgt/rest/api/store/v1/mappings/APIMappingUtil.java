@@ -594,8 +594,8 @@ public class APIMappingUtil {
             }
             
             // Use Strategy Pattern to extract endpoint URL
-            APIDefinitionProcessor definitionHandler = APIDefinitionProcessorFactory.getDefinitionProcessor(apidto.getType());
-            String resolvedUrl = definitionHandler.extractEndpointUrl(apidto.getApiDefinition());
+            APIDefinitionProcessor definitionProcessor = APIDefinitionProcessorFactory.getDefinitionProcessor(apidto.getType());
+            String resolvedUrl = definitionProcessor.extractEndpointUrl(apidto.getApiDefinition());
             
             if (StringUtils.isBlank(resolvedUrl)) {
                 return null;

@@ -1788,9 +1788,9 @@ public class ImportUtils {
     private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response) 
         throws APIManagementException {
 
-        APIDefinitionProcessor definitionHandler =
+        APIDefinitionProcessor definitionProcessor =
                 APIDefinitionProcessorFactory.getDefinitionProcessor(apiDto.getType().toString());
-        List<URITemplate> uriTemplates = definitionHandler.extractOperations(response.getJsonContent());
+        List<URITemplate> uriTemplates = definitionProcessor.extractOperations(response.getJsonContent());
         List<APIOperationsDTO> apiOperationsDtos = APIMappingUtil
             .fromURITemplateListToOprationList(uriTemplates);
         apiDto.setOperations(apiOperationsDtos);

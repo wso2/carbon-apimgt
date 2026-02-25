@@ -296,8 +296,8 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     apiJson = CommonUtil.addTypeAndVersionToFile(ImportExportConstants.TYPE_API,
                             ImportExportConstants.APIM_VERSION, apiJson);
                     
-                    APIDefinitionProcessor definitionHandler = APIDefinitionProcessorFactory.getDefinitionProcessor(api);
-                    String definition = definitionHandler.getDefinitionFromAPI(api);
+                    APIDefinitionProcessor definitionProcessor = APIDefinitionProcessorFactory.getDefinitionProcessor(api);
+                    String definition = definitionProcessor.getDefinitionFromAPI(api);
 
                     if (definition == null || StringUtils.isBlank(definition)) {
                         log.warn("API definition is empty for: " + apidto.getName() + " version: "
@@ -311,7 +311,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     InputStream apiZip = FederatedGatewayUtil.createZipAsInputStream(
                             apiJson.toString(), definition,
                             FederatedGatewayUtil.createDeploymentYaml(environment),
-                            apidto.getName(), definitionHandler.getDefinitionFileName());
+                            apidto.getName(), definitionProcessor.getDefinitionFileName());
 
                     ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
 
