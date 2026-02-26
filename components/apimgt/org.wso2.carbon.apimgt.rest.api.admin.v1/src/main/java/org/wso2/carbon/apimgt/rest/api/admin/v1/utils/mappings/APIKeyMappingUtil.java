@@ -48,7 +48,11 @@ public class APIKeyMappingUtil {
                     dto.setUser(src.getAuthUser());
                     dto.setIssuedOn(src.getCreatedTime());
                     dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
-                    dto.setLastUsed(src.getLastUsedTime());
+                    if (src.getLastUsedTime() == null) {
+                        dto.setLastUsed("NOT_USED");
+                    } else {
+                        dto.setLastUsed(src.getLastUsedTime());
+                    }
                     return dto;
                 })
                 .collect(Collectors.toList());

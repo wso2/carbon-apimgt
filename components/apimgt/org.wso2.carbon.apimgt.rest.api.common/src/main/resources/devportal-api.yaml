@@ -6580,13 +6580,17 @@ components:
           type: string
           description: API name
           example: NotificationAPI
+        issuedOn:
+          type: string
+          description: Created Time
+          example: 2026-02-06 23:45:07
         validityPeriod:
           type: integer
           format: int32
           example: 3600
         lastUsed:
           type: string
-          description: Last used time as epoch milliseconds, or NOT_USED if never used.
+          description: Last used time as epoch milliseconds, or NULL if never used.
           example: NOT_USED
     APIKeyInfo:
       title: API Key details to invoke APIs
@@ -6606,7 +6610,7 @@ components:
           example: 3600
         lastUsed:
           type: string
-          description: Last used time as epoch milliseconds, or NOT_USED if never used.
+          description: Last used time as epoch milliseconds, or NULL if never used.
           example: NOT_USED
     APIWithKeyInfo:
       title: API with API Key
@@ -6645,7 +6649,7 @@ components:
           example: 3600
         lastUsed:
           type: string
-          description: Last used time as epoch milliseconds, or NOT_USED if never used.
+          description: Last used time as epoch milliseconds, or NULL if never used.
           example: NOT_USED
     APIAPIKeyList:
       title: API Keys List
@@ -6910,9 +6914,9 @@ components:
           type: string
           description: API Key name
           example: Test_Key
-        environmentType:
+        keyType:
           type: string
-          description: Environment type of the API key
+          description: Type of the API key
           example: PRODUCTION
           enum:
             - PRODUCTION

@@ -70,8 +70,12 @@ public class OpaqueAPIKeyAssociationInfoListener implements MessageListener {
                             updated.setAuthUser(apiKeyInfo.getAuthUser());
                             updated.setCreatedTime(apiKeyInfo.getCreatedTime());
                             updated.setValidityPeriod(apiKeyInfo.getValidityPeriod());
+                            updated.setOrigin(apiKeyInfo.getOrigin());
                             updated.setApplicationId(payload.path(APIConstants.NotificationEvent.APPLICATION_UUID).asText());
                             updated.setAppId(payload.path(APIConstants.NotificationEvent.APPLICATION_ID).asInt());
+                            updated.setApiUUId(apiKeyInfo.getApiUUId());
+                            updated.setStatus(apiKeyInfo.getStatus());
+                            updated.setAdditionalProperties(apiKeyInfo.getAdditionalProperties());
                             DataHolder.getInstance().addOpaqueAPIKeyInfo(updated);
                         }
                     } else if (payload.path(APIConstants.NotificationEvent.ASSOCIATION_TYPE).asText().
@@ -86,8 +90,12 @@ public class OpaqueAPIKeyAssociationInfoListener implements MessageListener {
                             updated.setAuthUser(apiKeyInfo.getAuthUser());
                             updated.setCreatedTime(apiKeyInfo.getCreatedTime());
                             updated.setValidityPeriod(apiKeyInfo.getValidityPeriod());
+                            updated.setOrigin(apiKeyInfo.getOrigin());
                             updated.setApplicationId(null);
                             updated.setAppId(0);
+                            updated.setApiUUId(apiKeyInfo.getApiUUId());
+                            updated.setStatus(apiKeyInfo.getStatus());
+                            updated.setAdditionalProperties(apiKeyInfo.getAdditionalProperties());
                             DataHolder.getInstance().addOpaqueAPIKeyInfo(updated);
                         }
                     }

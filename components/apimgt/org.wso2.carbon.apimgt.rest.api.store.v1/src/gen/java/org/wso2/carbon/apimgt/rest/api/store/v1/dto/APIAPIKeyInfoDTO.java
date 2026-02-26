@@ -98,7 +98,7 @@ public class APIAPIKeyInfoDTO   {
   }
 
   /**
-   * Last used time as epoch milliseconds, or NOT_USED if never used.
+   * Last used time as epoch milliseconds, or NULL if never used.
    **/
   public APIAPIKeyInfoDTO lastUsed(String lastUsed) {
     this.lastUsed = lastUsed;
@@ -106,7 +106,7 @@ public class APIAPIKeyInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "NOT_USED", value = "Last used time as epoch milliseconds, or NOT_USED if never used.")
+  @ApiModelProperty(example = "2026-02-06 23:45:07", value = "Last used time as epoch milliseconds, or NULL if never used.")
   @JsonProperty("lastUsed")
   public String getLastUsed() {
     return lastUsed;

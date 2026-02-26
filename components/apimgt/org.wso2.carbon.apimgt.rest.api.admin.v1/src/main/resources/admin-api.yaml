@@ -7180,7 +7180,7 @@ components:
         lastUsed:
           type: string
           description: Last Used Time
-          example: NOT_USED
+          example: 2026-02-06 23:45:07
     APIKeyList:
       title: API Keys List
       type: object

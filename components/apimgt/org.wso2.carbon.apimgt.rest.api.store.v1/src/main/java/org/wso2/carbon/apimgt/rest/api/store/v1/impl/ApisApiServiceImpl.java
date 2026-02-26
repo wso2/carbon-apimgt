@@ -415,7 +415,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdApiKeysGeneratePost(String apiId, APIAPIKeyGenerateRequestDTO body,
+    public Response generateApiBoundApiKey(String apiId, APIAPIKeyGenerateRequestDTO body,
                                                  String ifMatch, MessageContext messageContext) throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         API api;
@@ -436,8 +436,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiId, organization)) {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
                 } else {
-                    boolean isValidKeyType = APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(String.valueOf(body.getEnvironmentType()))
-                            || APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(String.valueOf(body.getEnvironmentType()));
+                    boolean isValidKeyType = APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(String.valueOf(body.getKeyType()))
+                            || APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(String.valueOf(body.getKeyType()));
                     if (!isValidKeyType) {
                         RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
                     }
@@ -462,7 +462,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         }
                     }
                     String apiKey = apiConsumer.generateApiApiKey(api, userName, validityPeriod,
-                            restrictedIP, restrictedReferer, keyName, String.valueOf(body.getEnvironmentType()));
+                            restrictedIP, restrictedReferer, keyName, String.valueOf(body.getKeyType()));
                     APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKey, validityPeriod, keyName);
                     return Response.ok().entity(apiKeyDto).build();
                 }
@@ -474,7 +474,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdApiKeysGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+    public Response getAPIBoundAPIKeys(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
@@ -497,7 +497,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdApiKeysAssociatePost(String apiId, APIAPIKeyAssociateRequestDTO body,
+    public Response associateAPIKey(String apiId, APIAPIKeyAssociateRequestDTO body,
                                                                 String ifMatch, MessageContext messageContext)
             throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
@@ -537,7 +537,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdApiKeysRevokePost(String apiId, APIAPIKeyRevokeRequestDTO body, String ifMatch,
+    public Response revokeAPIBoundAPIKey(String apiId, APIAPIKeyRevokeRequestDTO body, String ifMatch,
                                                MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String keyName = body.getKeyName();
@@ -574,7 +574,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdApiKeysDissociatePost(String apiId, APIKeyDissociateRequestDTO body, String ifMatch,
+    public Response dissociateAPIKey(String apiId, APIKeyDissociateRequestDTO body, String ifMatch,
                                                             MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String keyName = body.getKeyName();
@@ -610,7 +610,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdApiKeysRegeneratePost(String apiId, String ifMatch, APIKeyRenewRequestDTO body,
+    public Response regenerateAPIBoundAPIKey(String apiId, String ifMatch, APIKeyRenewRequestDTO body,
                                                    MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String keyName = body.getKeyName();

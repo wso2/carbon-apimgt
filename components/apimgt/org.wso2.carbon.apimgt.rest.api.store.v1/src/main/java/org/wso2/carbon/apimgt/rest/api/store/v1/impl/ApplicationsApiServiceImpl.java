@@ -688,7 +688,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdApiKeysKeyTypeAssociatePost(String applicationId, String keyType,
+    public Response associateAPIKeyToApp(String applicationId, String keyType,
                                                                          AppAPIKeyAssociateRequestDTO body,
                                                                          String ifMatch, MessageContext messageContext)
             throws APIManagementException {
@@ -729,7 +729,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdApiKeysKeyTypeAssociationsGet(String applicationId,
+    public Response getAPIKeyAssociationsForApp(String applicationId,
                                                                            String keyType, String ifNoneMatch,
                                                                            MessageContext messageContext)
             throws APIManagementException {
@@ -762,7 +762,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(String applicationId, String keyType,
+    public Response generateAppBoundAPIKey(String applicationId, String keyType,
                                     String ifMatch, APIKeyGenerateRequestDTO body, MessageContext messageContext) {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
@@ -817,7 +817,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdApiKeysKeyTypeGet(String applicationId, String keyType, String ifMatch,
+    public Response getAppBoundAPIKeys(String applicationId, String keyType, String ifMatch,
                                                                MessageContext messageContext) {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         Application application;
@@ -847,7 +847,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdApiKeysKeyTypeDissociatePost(String applicationId, String keyType, APIKeyDissociateRequestDTO body,
+    public Response dissociateAPIKeyFromApp(String applicationId, String keyType, APIKeyDissociateRequestDTO body,
                                                                           String ifMatch, MessageContext messageContext)
             throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
@@ -879,7 +879,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdApiKeysKeyTypeRegeneratePost(String applicationId,
+    public Response regenerateAppBoundAPIKey(String applicationId,
                                                                           String keyType, String ifMatch,
                                                                           APIKeyRenewRequestDTO body, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
@@ -936,7 +936,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType,
+    public Response revokeAppBoundAPIKey(String applicationId, String keyType,
                                   String ifMatch, APIKeyRevokeRequestDTO body, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String apiKey = body.getApikey();
@@ -1045,7 +1045,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdApiKeysKeyTypeSubscriptionsGet(String applicationId, String keyType,
+    public Response getSubscribedAPIsWithAPIKeys(String applicationId, String keyType,
                                                                             String ifNoneMatch, MessageContext messageContext)
             throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();

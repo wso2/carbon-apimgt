@@ -22,6 +22,7 @@ public class APIKeyAssociationInfoDTO   {
   
     private String keyName = null;
     private String apiName = null;
+    private String issuedOn = null;
     private Integer validityPeriod = null;
     private String lastUsed = null;
 
@@ -62,6 +63,24 @@ public class APIKeyAssociationInfoDTO   {
   }
 
   /**
+   * Created Time
+   **/
+  public APIKeyAssociationInfoDTO issuedOn(String issuedOn) {
+    this.issuedOn = issuedOn;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "2026-02-06 23:45:07", value = "Created Time")
+  @JsonProperty("issuedOn")
+  public String getIssuedOn() {
+    return issuedOn;
+  }
+  public void setIssuedOn(String issuedOn) {
+    this.issuedOn = issuedOn;
+  }
+
+  /**
    **/
   public APIKeyAssociationInfoDTO validityPeriod(Integer validityPeriod) {
     this.validityPeriod = validityPeriod;
@@ -79,7 +98,7 @@ public class APIKeyAssociationInfoDTO   {
   }
 
   /**
-   * Last used time as epoch milliseconds, or NOT_USED if never used.
+   * Last used time as epoch milliseconds, or NULL if never used.
    **/
   public APIKeyAssociationInfoDTO lastUsed(String lastUsed) {
     this.lastUsed = lastUsed;
@@ -87,7 +106,7 @@ public class APIKeyAssociationInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "NOT_USED", value = "Last used time as epoch milliseconds, or NOT_USED if never used.")
+  @ApiModelProperty(example = "2026-02-06 23:45:07", value = "Last used time as epoch milliseconds, or NULL if never used.")
   @JsonProperty("lastUsed")
   public String getLastUsed() {
     return lastUsed;
@@ -108,13 +127,14 @@ public class APIKeyAssociationInfoDTO   {
     APIKeyAssociationInfoDTO apIKeyAssociationInfo = (APIKeyAssociationInfoDTO) o;
     return Objects.equals(keyName, apIKeyAssociationInfo.keyName) &&
         Objects.equals(apiName, apIKeyAssociationInfo.apiName) &&
+        Objects.equals(issuedOn, apIKeyAssociationInfo.issuedOn) &&
         Objects.equals(validityPeriod, apIKeyAssociationInfo.validityPeriod) &&
         Objects.equals(lastUsed, apIKeyAssociationInfo.lastUsed);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyName, apiName, validityPeriod, lastUsed);
+    return Objects.hash(keyName, apiName, issuedOn, validityPeriod, lastUsed);
   }
 
   @Override
@@ -124,6 +144,7 @@ public class APIKeyAssociationInfoDTO   {
     
     sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
+    sb.append("    issuedOn: ").append(toIndentedString(issuedOn)).append("\n");
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
     sb.append("    lastUsed: ").append(toIndentedString(lastUsed)).append("\n");
     sb.append("}");

@@ -48,14 +48,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApplicationsApiService {
-      public Response applicationsApplicationIdApiKeysKeyTypeAssociatePost(String applicationId, String keyType, AppAPIKeyAssociateRequestDTO appAPIKeyAssociateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdApiKeysKeyTypeAssociationsGet(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdApiKeysKeyTypeDissociatePost(String applicationId, String keyType, APIKeyDissociateRequestDTO apIKeyDissociateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(String applicationId, String keyType, String ifMatch, APIKeyGenerateRequestDTO apIKeyGenerateRequestDTO, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdApiKeysKeyTypeGet(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdApiKeysKeyTypeRegeneratePost(String applicationId, String keyType, String ifMatch, APIKeyRenewRequestDTO apIKeyRenewRequestDTO, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType, String ifMatch, APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdApiKeysKeyTypeSubscriptionsGet(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO applicationKeyGenerateRequestDTO, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
@@ -82,4 +74,12 @@ public interface ApplicationsApiService {
       public Response generateConsumerSecret(String applicationId, String keyMappingId, ConsumerSecretCreationRequestDTO consumerSecretCreationRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response getConsumerSecrets(String applicationId, String keyMappingId, MessageContext messageContext) throws APIManagementException;
       public Response revokeConsumerSecret(String applicationId, String keyMappingId, ConsumerSecretDeletionRequestDTO consumerSecretDeletionRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response associateAPIKeyToApp(String applicationId, String keyType, AppAPIKeyAssociateRequestDTO appAPIKeyAssociateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response dissociateAPIKeyFromApp(String applicationId, String keyType, APIKeyDissociateRequestDTO apIKeyDissociateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response generateAppBoundAPIKey(String applicationId, String keyType, String ifMatch, APIKeyGenerateRequestDTO apIKeyGenerateRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIKeyAssociationsForApp(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getAppBoundAPIKeys(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getSubscribedAPIsWithAPIKeys(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response regenerateAppBoundAPIKey(String applicationId, String keyType, String ifMatch, APIKeyRenewRequestDTO apIKeyRenewRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response revokeAppBoundAPIKey(String applicationId, String keyType, String ifMatch, APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO, MessageContext messageContext) throws APIManagementException;
 }

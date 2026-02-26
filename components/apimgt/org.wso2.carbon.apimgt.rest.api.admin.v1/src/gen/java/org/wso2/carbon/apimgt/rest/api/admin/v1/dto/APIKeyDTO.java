@@ -194,7 +194,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "NOT_USED", value = "Last Used Time")
+  @ApiModelProperty(example = "2026-02-06 23:45:07", value = "Last Used Time")
   @JsonProperty("lastUsed")
   public String getLastUsed() {
     return lastUsed;

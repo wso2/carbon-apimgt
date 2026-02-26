@@ -16648,7 +16648,7 @@ public class ApiMgtDAO {
                 keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                 Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
-                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : "NOT_USED");
+                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
                 keyInfo.setApplicationId(applicationUUId);
                 keyInfo.setKeyType(keyType);
                 apiKeyInfoList.add(keyInfo);
@@ -16690,9 +16690,11 @@ public class ApiMgtDAO {
                 APIKeyInfo keyInfo = new APIKeyInfo();
                 keyInfo.setKeyName(rs.getString("NAME"));
                 keyInfo.setApiName(rs.getString("API_NAME"));
+                Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
+                keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                 Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
-                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : "NOT_USED");
+                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
                 keyInfo.setApplicationId(applicationUUId);
                 keyInfo.setKeyType(keyType);
                 apiKeyInfoList.add(keyInfo);
@@ -16735,7 +16737,7 @@ public class ApiMgtDAO {
                 keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                 Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
-                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : "NOT_USED");
+                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
                 keyInfo.setApplicationId(rs.getString("APPLICATION_UUID"));
                 if (keyInfo.getApplicationId() == null) {
                     keyInfo.setApplicationName(APIConstants.NO_ASSOCIATION);
@@ -16824,7 +16826,7 @@ public class ApiMgtDAO {
                 keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                 Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
-                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : "NOT_USED");
+                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
                 keyInfo.setApplicationName(rs.getString("APPLICATION_NAME"));
                 keyInfo.setApiName(rs.getString("API_NAME"));
                 keyInfo.setKeyType(rs.getString("KEY_TYPE"));
@@ -16872,7 +16874,7 @@ public class ApiMgtDAO {
                 keyInfo.setKeyName(keyName);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                 Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
-                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : "NOT_USED");
+                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
                 keyInfo.setApplicationId(applicationUUId);
                 keyInfo.setKeyType(keyType);
                 keyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
@@ -16913,7 +16915,7 @@ public class ApiMgtDAO {
                 keyInfo.setKeyName(keyName);
                 keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                 Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
-                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : "NOT_USED");
+                keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
                 keyInfo.setApplicationId(rs.getString("APPLICATION_UUID"));
                 keyInfo.setApiUUId(apiUUId);
                 keyInfo.setKeyType(rs.getString("KEY_TYPE"));

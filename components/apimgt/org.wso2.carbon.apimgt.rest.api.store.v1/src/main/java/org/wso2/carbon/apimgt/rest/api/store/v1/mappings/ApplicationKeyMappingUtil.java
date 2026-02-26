@@ -275,7 +275,11 @@ public class ApplicationKeyMappingUtil {
                     dto.setKeyName(src.getKeyName());
                     dto.setIssuedOn(src.getCreatedTime());
                     dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
-                    dto.setLastUsed(src.getLastUsedTime());
+                    if (src.getLastUsedTime() == null) {
+                        dto.setLastUsed("NOT_USED");
+                    } else {
+                        dto.setLastUsed(src.getLastUsedTime());
+                    }
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -294,8 +298,13 @@ public class ApplicationKeyMappingUtil {
                     APIKeyAssociationInfoDTO dto = new APIKeyAssociationInfoDTO();
                     dto.setKeyName(src.getKeyName());
                     dto.setApiName(src.getApiName());
+                    dto.setIssuedOn(src.getCreatedTime());
                     dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
-                    dto.setLastUsed(src.getLastUsedTime());
+                    if (src.getLastUsedTime() == null) {
+                        dto.setLastUsed("NOT_USED");
+                    } else {
+                        dto.setLastUsed(src.getLastUsedTime());
+                    }
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -315,7 +324,11 @@ public class ApplicationKeyMappingUtil {
                     dto.setKeyName(src.getKeyName());
                     dto.setIssuedOn(src.getCreatedTime());
                     dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
-                    dto.setLastUsed(src.getLastUsedTime());
+                    if (src.getLastUsedTime() == null) {
+                        dto.setLastUsed("NOT_USED");
+                    } else {
+                        dto.setLastUsed(src.getLastUsedTime());
+                    }
                     dto.setAssociatedApp(src.getApplicationName());
                     return dto;
                 })

@@ -22,14 +22,14 @@ public class APIAPIKeyGenerateRequestDTO   {
   
     private String keyName = null;
 
-    @XmlType(name="EnvironmentTypeEnum")
+    @XmlType(name="KeyTypeEnum")
     @XmlEnum(String.class)
-    public enum EnvironmentTypeEnum {
+    public enum KeyTypeEnum {
         PRODUCTION("PRODUCTION"),
         SANDBOX("SANDBOX");
         private String value;
 
-        EnvironmentTypeEnum (String v) {
+        KeyTypeEnum (String v) {
             value = v;
         }
 
@@ -43,8 +43,8 @@ public class APIAPIKeyGenerateRequestDTO   {
         }
 
         @JsonCreator
-        public static EnvironmentTypeEnum fromValue(String v) {
-            for (EnvironmentTypeEnum b : EnvironmentTypeEnum.values()) {
+        public static KeyTypeEnum fromValue(String v) {
+            for (KeyTypeEnum b : KeyTypeEnum.values()) {
                 if (String.valueOf(b.value).equals(v)) {
                     return b;
                 }
@@ -52,7 +52,7 @@ public class APIAPIKeyGenerateRequestDTO   {
 return null;
         }
     }
-    private EnvironmentTypeEnum environmentType = null;
+    private KeyTypeEnum keyType = null;
     private Integer validityPeriod = null;
     private Object additionalProperties = null;
 
@@ -75,21 +75,21 @@ return null;
   }
 
   /**
-   * Environment type of the API key
+   * Type of the API key
    **/
-  public APIAPIKeyGenerateRequestDTO environmentType(EnvironmentTypeEnum environmentType) {
-    this.environmentType = environmentType;
+  public APIAPIKeyGenerateRequestDTO keyType(KeyTypeEnum keyType) {
+    this.keyType = keyType;
     return this;
   }
 
   
-  @ApiModelProperty(example = "PRODUCTION", value = "Environment type of the API key")
-  @JsonProperty("environmentType")
-  public EnvironmentTypeEnum getEnvironmentType() {
-    return environmentType;
+  @ApiModelProperty(example = "PRODUCTION", value = "Type of the API key")
+  @JsonProperty("keyType")
+  public KeyTypeEnum getKeyType() {
+    return keyType;
   }
-  public void setEnvironmentType(EnvironmentTypeEnum environmentType) {
-    this.environmentType = environmentType;
+  public void setKeyType(KeyTypeEnum keyType) {
+    this.keyType = keyType;
   }
 
   /**
@@ -140,14 +140,14 @@ return null;
     }
     APIAPIKeyGenerateRequestDTO apIAPIKeyGenerateRequest = (APIAPIKeyGenerateRequestDTO) o;
     return Objects.equals(keyName, apIAPIKeyGenerateRequest.keyName) &&
-        Objects.equals(environmentType, apIAPIKeyGenerateRequest.environmentType) &&
+        Objects.equals(keyType, apIAPIKeyGenerateRequest.keyType) &&
         Objects.equals(validityPeriod, apIAPIKeyGenerateRequest.validityPeriod) &&
         Objects.equals(additionalProperties, apIAPIKeyGenerateRequest.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyName, environmentType, validityPeriod, additionalProperties);
+    return Objects.hash(keyName, keyType, validityPeriod, additionalProperties);
   }
 
   @Override
@@ -156,7 +156,7 @@ return null;
     sb.append("class APIAPIKeyGenerateRequestDTO {\n");
     
     sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
-    sb.append("    environmentType: ").append(toIndentedString(environmentType)).append("\n");
+    sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
