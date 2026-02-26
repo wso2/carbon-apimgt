@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.impl.workflow;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -31,11 +32,9 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import static org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils.*;
 
 /**
@@ -45,6 +44,19 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
 
     private static final Log log = LogFactory.getLog(ApplicationUpdateApprovalWorkflowExecutor.class);
     private static final ApiMgtDAO dao = ApiMgtDAO.getInstance();
+    private boolean applicationAttributesVisibility = true;
+    private static final String APPLICATION_NAME_PROPERTY = "applicationName";
+    private static final String APPLICATION_OWNER_PROPERTY = "applicationOwner";
+    private static final String APPLICATION_TIER_PROPERTY = "applicationTier";
+    private static final String UPDATES_PROPERTY = "updates";
+    private static final String REQUESTED_APPLICATION_NAME_PROPERTY = "requestedApplicationName";
+    private static final String REQUESTED_TIER_PROPERTY = "requestedTier";
+    private static final String REQUESTED_DESCRIPTION_PROPERTY = "requestedDescription";
+    private static final String REQUESTED_SHARED_ORGANIZATION_PROPERTY = "requestedSharedOrganization";
+    private static final String REQUESTED_GROUP_IDS_PROPERTY = "requestedGroupIDs";
+    private static final String REQUESTED_CUSTOM_ATTRIBUTES_PROPERTY = "requestedCustomAttributes";
+    private static final String EXISTING_APPLICATION_ATTRIBUTES_PROPERTY = "existingApplicationAttributes";
+    private static final String APPLICATION_DESCRIPTION_PROPERTY = "applicationDescription";
 
     @Override
     public String getWorkflowType() {
@@ -73,9 +85,13 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         Application pendingApplication = applicationWorkflowDTO.getApplication();
         Application existingApplication = applicationWorkflowDTO.getExistingApplication();
 
-        workflowDTO.setProperties("applicationName", existingApplication.getName());
-        workflowDTO.setProperties("userName", existingApplication.getOwner());
-        workflowDTO.setProperties("applicationTier", existingApplication.getTier());
+        workflowDTO.setProperties(APPLICATION_NAME_PROPERTY, existingApplication.getName());
+        workflowDTO.setProperties(APPLICATION_TIER_PROPERTY, existingApplication.getTier());
+        workflowDTO.setProperties(APPLICATION_OWNER_PROPERTY, existingApplication.getOwner());
+
+        if (!StringUtils.isEmpty(String.valueOf(existingApplication.getDescription()))) {
+            workflowDTO.setProperties(APPLICATION_DESCRIPTION_PROPERTY, String.valueOf(existingApplication.getDescription()));
+        }
 
         List<Map<String, String>> applicationUpdateDiffs = new ArrayList<>();
 
@@ -111,16 +127,16 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
                 log.error(msg, e);
                 throw new WorkflowException(msg, e);
             }
-            workflowDTO.setProperties("applicationUpdateDiff", applicationUpdateDiffJson);
+            workflowDTO.setProperties(UPDATES_PROPERTY, applicationUpdateDiffJson);
         }
 
-        workflowDTO.setMetadata("requestedApplicationName", pendingApplication.getName());
-        workflowDTO.setMetadata("requestedTier", pendingApplication.getTier());
-        workflowDTO.setMetadata("requestedDescription", pendingApplication.getDescription());
-        workflowDTO.setMetadata("requestedSharedOrganization", pendingApplication.getSharedOrganization());
+        workflowDTO.setMetadata(REQUESTED_APPLICATION_NAME_PROPERTY, pendingApplication.getName());
+        workflowDTO.setMetadata(REQUESTED_TIER_PROPERTY, pendingApplication.getTier());
+        workflowDTO.setMetadata(REQUESTED_DESCRIPTION_PROPERTY, pendingApplication.getDescription());
+        workflowDTO.setMetadata(REQUESTED_SHARED_ORGANIZATION_PROPERTY, pendingApplication.getSharedOrganization());
 
         if (pendingApplication.getGroupId() != null) {
-            workflowDTO.setMetadata("requestedGroupIDs", pendingApplication.getGroupId());
+            workflowDTO.setMetadata(REQUESTED_GROUP_IDS_PROPERTY, pendingApplication.getGroupId());
         }
 
         String requestedCustomAttributes;
@@ -132,11 +148,22 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
                 log.error(msg, e);
                 throw new WorkflowException(msg, e);
             }
-            workflowDTO.setMetadata("requestedCustomAttributes", requestedCustomAttributes);
+            workflowDTO.setMetadata(REQUESTED_CUSTOM_ATTRIBUTES_PROPERTY, requestedCustomAttributes);
         }
 
         String message = "Approve update request for application '" + pendingApplication.getName() +
                 "' submitted by user: " + applicationWorkflowDTO.getUserName();
+
+        if (applicationAttributesVisibility && !existingApplication.getApplicationAttributes().isEmpty()) {
+            try {
+                workflowDTO.setProperties(EXISTING_APPLICATION_ATTRIBUTES_PROPERTY, objectMapper.writeValueAsString(existingApplication.getApplicationAttributes()));
+            } catch (JsonProcessingException e) {
+                String msg = "Failed to serialize custom attributes of application";
+                log.error(msg, e);
+                throw new WorkflowException(msg, e);
+            }
+        }
+
         workflowDTO.setWorkflowDescription(message);
 
         super.execute(workflowDTO);
@@ -158,22 +185,22 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         try {
             Application application = dao.getApplicationById(Integer.parseInt(workFlowDTO.getWorkflowReference()));
             if (WorkflowStatus.APPROVED.equals(workFlowDTO.getStatus())) {
-                application.setName(workFlowDTO.getMetadata("requestedApplicationName"));
-                application.setTier(workFlowDTO.getMetadata("requestedTier"));
-                application.setDescription(workFlowDTO.getMetadata("requestedDescription"));
+                application.setName(workFlowDTO.getMetadata(REQUESTED_APPLICATION_NAME_PROPERTY));
+                application.setTier(workFlowDTO.getMetadata(REQUESTED_TIER_PROPERTY));
+                application.setDescription(workFlowDTO.getMetadata(REQUESTED_DESCRIPTION_PROPERTY));
 
-                if (workFlowDTO.getMetadata().containsKey("requestedCustomAttributes")) {
+                if (workFlowDTO.getMetadata().containsKey(REQUESTED_CUSTOM_ATTRIBUTES_PROPERTY)) {
                     ObjectMapper objectMapper = new ObjectMapper();
                     Map<String, String> applicationAttributes =
-                            objectMapper.readValue(workFlowDTO.getMetadata("requestedCustomAttributes"), Map.class);
+                            objectMapper.readValue(workFlowDTO.getMetadata(REQUESTED_CUSTOM_ATTRIBUTES_PROPERTY), Map.class);
                     application.setApplicationAttributes(applicationAttributes);
                 }
 
-                if (workFlowDTO.getMetadata().containsKey("requestedGroupIDs")) {
-                    application.setGroupId(workFlowDTO.getMetadata("requestedGroupIDs"));
+                if (workFlowDTO.getMetadata().containsKey(REQUESTED_GROUP_IDS_PROPERTY)) {
+                    application.setGroupId(workFlowDTO.getMetadata(REQUESTED_GROUP_IDS_PROPERTY));
                 }
 
-                application.setSharedOrganization(workFlowDTO.getMetadata("requestedSharedOrganization"));
+                application.setSharedOrganization(workFlowDTO.getMetadata(REQUESTED_SHARED_ORGANIZATION_PROPERTY));
                 dao.updateApplicationStatus(application.getId(), APIConstants.ApplicationStatus.APPLICATION_APPROVED);
                 dao.updateApplication(application);
             } else {
@@ -216,6 +243,16 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
                     axisFault.getMessage();
             throw new WorkflowException(errorMsg, axisFault);
         }
+    }
+
+    public boolean getApplicationAttributesVisibility() {
+
+        return applicationAttributesVisibility;
+    }
+
+    public void setApplicationAttributesVisibility(boolean applicationAttributesVisibility) {
+
+        this.applicationAttributesVisibility = applicationAttributesVisibility;
     }
 }
 

@@ -15,6 +15,11 @@
  */
 package org.wso2.carbon.apimgt.impl.workflow;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -27,6 +32,15 @@ import java.util.*;
 
 public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecutor {
 
+    private static final Log log = LogFactory.getLog(ApplicationDeletionApprovalWorkflowExecutor.class);
+    private boolean applicationAttributesVisibility = true;
+    private static final String APPLICATION_NAME_PROPERTY = "applicationName";
+    private static final String APPLICATION_OWNER_PROPERTY = "applicationOwner";
+    private static final String APPLICATION_TIER_PROPERTY = "applicationTier";
+    private static final String APPLICATION_STATUS_PROPERTY = "applicationStatus";
+    private static final String APPLICATION_ATTRIBUTES_PROPERTY = "applicationAttributes";
+    private static final String APPLICATION_DESCRIPTION_PROPERTY = "applicationDescription";
+
     @Override
     public String getWorkflowType() {
 
@@ -37,14 +51,31 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         ApplicationWorkflowDTO appWorkFlowDTO = (ApplicationWorkflowDTO) workflowDTO;
+        ObjectMapper objectMapper = new ObjectMapper();
+
         Application application = appWorkFlowDTO.getApplication();
-        String message = "Approve application " + application.getName() + " delete request from application creator -"
+        String message = "Approve application " + application.getName() + " delete request from application creator - "
                 + appWorkFlowDTO.getUserName() + " with throttling tier - " + application.getTier();
         workflowDTO.setWorkflowDescription(message);
-        workflowDTO.setProperties("applicationName", application.getName());
-        workflowDTO.setProperties("userName", appWorkFlowDTO.getUserName());
-        workflowDTO.setProperties("applicationTier", application.getTier());
-        workflowDTO.setMetadata("applicationStatus",application.getStatus());
+        workflowDTO.setProperties(APPLICATION_NAME_PROPERTY, application.getName());
+        workflowDTO.setProperties(APPLICATION_TIER_PROPERTY, application.getTier());
+        workflowDTO.setProperties(APPLICATION_OWNER_PROPERTY, appWorkFlowDTO.getUserName());
+        workflowDTO.setMetadata(APPLICATION_STATUS_PROPERTY,application.getStatus());
+
+        if (!StringUtils.isEmpty(String.valueOf(application.getDescription()))) {
+            workflowDTO.setProperties(APPLICATION_DESCRIPTION_PROPERTY, String.valueOf(application.getDescription()));
+        }
+
+        if (applicationAttributesVisibility && !application.getApplicationAttributes().isEmpty()) {
+            try {
+                workflowDTO.setProperties(APPLICATION_ATTRIBUTES_PROPERTY, objectMapper.writeValueAsString(application.getApplicationAttributes()));
+            } catch (JsonProcessingException e) {
+                String msg = "Failed to serialize custom attributes of application";
+                log.error(msg, e);
+                throw new WorkflowException(msg, e);
+            }
+        }
+
         super.execute(workflowDTO);
 
         return new GeneralWorkflowResponse();
@@ -97,5 +128,13 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
     public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
 
         return Collections.emptyList();
+    }
+
+    public boolean getApplicationAttributesVisibility() {
+        return applicationAttributesVisibility;
+    }
+
+    public void setApplicationAttributesVisibility(boolean applicationAttributesVisibility) {
+        this.applicationAttributesVisibility = applicationAttributesVisibility;
     }
 }

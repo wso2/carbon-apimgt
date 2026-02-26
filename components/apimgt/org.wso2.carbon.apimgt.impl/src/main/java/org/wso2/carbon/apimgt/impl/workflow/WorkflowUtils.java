@@ -276,11 +276,13 @@ public class WorkflowUtils {
         apiStateWorkFlowDTO.setMetadata("Invoker", apiStateWorkFlowDTO.getInvoker());
         apiStateWorkFlowDTO.setMetadata("TenantId", String.valueOf(apiStateWorkFlowDTO.getTenantId()));
 
-        apiStateWorkFlowDTO.setProperties("action", apiStateWorkFlowDTO.getApiLCAction());
         apiStateWorkFlowDTO.setProperties("apiName", apiStateWorkFlowDTO.getApiName());
         apiStateWorkFlowDTO.setProperties("apiVersion", apiStateWorkFlowDTO.getApiVersion());
         apiStateWorkFlowDTO.setProperties("apiProvider", apiStateWorkFlowDTO.getApiProvider());
+        apiStateWorkFlowDTO.setProperties("invoker", apiStateWorkFlowDTO.getInvoker());
         apiStateWorkFlowDTO.setProperties("currentState", apiStateWorkFlowDTO.getApiCurrentState());
+        apiStateWorkFlowDTO.setProperties("requestedState", apiStateWorkFlowDTO.getApiLCAction());
+
     }
 
     /**
@@ -446,5 +448,41 @@ public class WorkflowUtils {
         return APIConstants.DEFAULT_APP_SHARING_KEYWORD.equals(org)
                 ? APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_DISABLED
                 : APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_ENABLED;
+    }
+
+    /**
+     * Compare the current and the new value for a given attribute (ie: Subscription Tier) and add it to the list
+     * if there is a difference.
+     *
+     * @param diffs    The list that collects detected subscription update differences
+     * @param label    The display label or attribute name being compared
+     * @param oldValue The current value of the attribute
+     * @param newValue The proposed updated value of the attribute
+     */
+    protected static void compareAndAddToSubscriptionUpdateDiffs (
+            List<Map<String, String>> diffs,
+            String label,
+            String oldValue,
+            String newValue
+    ) {
+        if (!Objects.equals(oldValue, newValue)) {
+            diffs.add(constructSubscriptionUpdateRecord(label, oldValue, newValue));
+        }
+    }
+
+    /**
+     * Constructs a subscription update record representing a change in a specific attribute.
+     *
+     * @param attributeName The name of the attribute being updated
+     * @param current       The existing value of the attribute
+     * @param expected      The updated value of the attribute
+     * @return A map representing the subscription update record
+     */
+    protected static Map<String, String> constructSubscriptionUpdateRecord(String attributeName, String current, String expected) {
+        return Map.of(
+                "attributeName", attributeName,
+                "current", current == null ? "" : current,
+                "expected", expected == null ? "" : expected
+        );
     }
 }

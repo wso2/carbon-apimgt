@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -44,6 +45,8 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
     private static final String USERNAME_PROPERTY = "userName";
     private static final String API_PROVIDER_PROPERTY = "apiProvider";
     private static final String API_ID_PROPERTY = "apiId";
+    private static final String INVOKER_PROPERTY = "invoker";
+    private static final String REVISION_DESCRIPTION_PROPERTY = "revisionDescription";
 
     @Override
     public String getWorkflowType() {
@@ -72,12 +75,16 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
         workflowDTO.setWorkflowDescription(message);
 
         // set properties for Admin UI rendering
-        workflowDTO.setProperties(REVISION_ID_PROPERTY, String.valueOf(revision.getId()));
         workflowDTO.setProperties(API_NAME_PROPERTY, revisionWorkFlowDTO.getApiName());
         workflowDTO.setProperties(API_VERSION_PROPERTY, revisionWorkFlowDTO.getApiVersion());
+        workflowDTO.setProperties(API_PROVIDER_PROPERTY, revisionWorkFlowDTO.getApiProvider());
+        workflowDTO.setProperties(INVOKER_PROPERTY, revisionWorkFlowDTO.getInvoker());
         workflowDTO.setProperties(ENVIRONMENT_PROPERTY, revisionWorkFlowDTO.getEnvironment());
-        workflowDTO.setProperties(USERNAME_PROPERTY, revisionWorkFlowDTO.getUserName());
+        workflowDTO.setProperties(REVISION_ID_PROPERTY, String.valueOf(revision.getId()));
 
+        if (!StringUtils.isEmpty(String.valueOf(revision.getDescription()))) {
+            workflowDTO.setProperties(REVISION_DESCRIPTION_PROPERTY, String.valueOf(revision.getDescription()));
+        }
         // set properties for Admin backend logic
         workflowDTO.setMetadata(REVISION_ID_PROPERTY, revisionWorkFlowDTO.getRevisionId());
         workflowDTO.setMetadata(ENVIRONMENT_PROPERTY, revisionWorkFlowDTO.getEnvironment());

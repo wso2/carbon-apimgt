@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.impl.workflow;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -26,6 +27,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.util.List;
 
@@ -35,6 +38,12 @@ import java.util.List;
 public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(ApplicationCreationApprovalWorkflowExecutor.class);
+    private boolean applicationAttributesVisibility = true;
+    private static final String APPLICATION_NAME_PROPERTY = "applicationName";
+    private static final String APPLICATION_OWNER_PROPERTY = "applicationOwner";
+    private static final String APPLICATION_TIER_PROPERTY = "applicationTier";
+    private static final String APPLICATION_ATTRIBUTES_PROPERTY = "applicationAttributes";
+    private static final String APPLICATION_DESCRIPTION_PROPERTY = "applicationDescription";
 
     @Override
     public String getWorkflowType() {
@@ -51,14 +60,30 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
         if (log.isDebugEnabled()) {
             log.debug("Executing Application creation Workflow.");
         }
+        ObjectMapper objectMapper = new ObjectMapper();
         ApplicationWorkflowDTO appWorkFlowDTO = (ApplicationWorkflowDTO) workflowDTO;
         Application application = appWorkFlowDTO.getApplication();
-        String message = "Approve application " + application.getName() + " creation request from application creator -"
+        String message = "Approve application " + application.getName() + " creation request from application creator - "
                 + appWorkFlowDTO.getUserName() + " with throttling tier - " + application.getTier();
         workflowDTO.setWorkflowDescription(message);
-        workflowDTO.setProperties("applicationName", application.getName());
-        workflowDTO.setProperties("userName", appWorkFlowDTO.getUserName());
-        workflowDTO.setProperties("applicationTier", application.getTier());
+        workflowDTO.setProperties(APPLICATION_NAME_PROPERTY, application.getName());
+        workflowDTO.setProperties(APPLICATION_TIER_PROPERTY, application.getTier());
+        workflowDTO.setProperties(APPLICATION_OWNER_PROPERTY, appWorkFlowDTO.getUserName());
+
+        if (!StringUtils.isEmpty(String.valueOf(application.getDescription()))) {
+            workflowDTO.setProperties(APPLICATION_DESCRIPTION_PROPERTY, String.valueOf(application.getDescription()));
+        }
+
+        if (applicationAttributesVisibility && !application.getApplicationAttributes().isEmpty()) {
+                try {
+                    workflowDTO.setProperties(APPLICATION_ATTRIBUTES_PROPERTY, objectMapper.writeValueAsString(application.getApplicationAttributes()));
+                } catch (JsonProcessingException e) {
+                    String msg = "Failed to serialize custom attributes of application";
+                    log.error(msg, e);
+                    throw new WorkflowException(msg, e);
+                }
+        }
+
         super.execute(workflowDTO);
 
         return new GeneralWorkflowResponse();
@@ -139,5 +164,15 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
                     .getMessage();
             throw new WorkflowException(errorMsg, axisFault);
         }
+    }
+
+    public boolean getApplicationAttributesVisibility() {
+
+        return applicationAttributesVisibility;
+    }
+
+    public void setApplicationAttributesVisibility(boolean applicationAttributesVisibility) {
+
+        this.applicationAttributesVisibility = applicationAttributesVisibility;
     }
 }

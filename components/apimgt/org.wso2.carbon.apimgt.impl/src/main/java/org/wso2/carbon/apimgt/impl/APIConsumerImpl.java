@@ -155,6 +155,7 @@ import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserAdmin;
 import org.wso2.carbon.user.mgt.common.UserAdminException;
@@ -216,6 +217,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public static final String API_VERSION = "apiVersion";
     public static final String API_PROVIDER = "apiProvider";
     private static final String PRESERVED_CASE_SENSITIVE_VARIABLE = "preservedCaseSensitive";
+    private static final String EMAIL_CLAIM_URI = UserCoreConstants.ClaimTypeURIs.EMAIL_ADDRESS;
+    private static final String SUBSCRIBER_EMAIL = "subscriberEmail";
+    private static final String APPLICATION_OWNER_EMAIL = "applicationOwnerEmail";
 
     private static final String GET_SUB_WORKFLOW_REF_FAILED = "Failed to get external workflow reference for " +
             "subscription ";
@@ -1289,6 +1293,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setApplicationId(application.getId());
                 workflowDTO.setSubscriber(userId);
 
+                // Retrieve email claim value for the subscriber
+                String subscriberEmail = getEmailClaimValue(username, tenantId);
+                if (StringUtils.isNotBlank(subscriberEmail)) {
+                    workflowDTO.setProperties(SUBSCRIBER_EMAIL, subscriberEmail);
+                }
+
+                String workflowDescription = "Approve API " + workflowDTO.getApiName() + " - " + workflowDTO.getApiVersion() +
+                        " subscription creation request from subscriber - " + workflowDTO.getSubscriber() +
+                        " for the application - " + workflowDTO.getApplicationName();
+                workflowDTO.setWorkflowDescription(workflowDescription);
+
                 Tier tier = null;
                 Set<Tier> policies = Collections.emptySet();
                 if (!isApiProduct) {
@@ -1482,6 +1497,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setApplicationId(application.getId());
                 workflowDTO.setSubscriber(userId);
 
+                // Retrieve email claim value for the subscriber
+                String subscriberEmail = getEmailClaimValue(username, tenantId);
+                if (StringUtils.isNotBlank(subscriberEmail)) {
+                    workflowDTO.setProperties(SUBSCRIBER_EMAIL, subscriberEmail);
+                }
+
+                String workflowDescription = "Approve API " + workflowDTO.getApiName() + " - " + workflowDTO.getApiVersion() +
+                        " subscription update request from subscriber - " + workflowDTO.getSubscriber() +
+                        " for the application - " + workflowDTO.getApplicationName();
+                workflowDTO.setWorkflowDescription(workflowDescription);
+
                 Tier tier = null;
                 Set<Tier> policies = Collections.emptySet();
                 if (!isApiProduct) {
@@ -1652,6 +1678,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             } else {
                 workflowDTO = (SubscriptionWorkflowDTO) apiMgtDAO.retrieveWorkflow(workflowExtRef);
 
+                // clear inherited properties from the subscription creation workflow to avoid using outdated values if the subscription or application was updated.
+                workflowDTO.getProperties().clear();
+
                 // set tiername to the workflowDTO only when workflows are enabled
                 SubscribedAPI subscription = apiMgtDAO
                         .getSubscriptionById(Integer.parseInt(workflowDTO.getWorkflowReference()));
@@ -1746,6 +1775,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
             workflowDTO.setCreatedTime(System.currentTimeMillis());
             workflowDTO.setExternalWorkflowReference(removeSubscriptionWFExecutor.generateUUID());
+
+            // Retrieve email claim value for the subscriber
+            String subscriberEmail = getEmailClaimValue(username, tenantId);
+            if (StringUtils.isNotBlank(subscriberEmail)) {
+                workflowDTO.setProperties(SUBSCRIBER_EMAIL, subscriberEmail);
+            }
+
+            String workflowDescription = "Approve API " + workflowDTO.getApiName() + " - " + workflowDTO.getApiVersion() +
+                    " subscription delete request from subscriber - " + workflowDTO.getSubscriber() +
+                    " for the application - " + workflowDTO.getApplicationName();
+            workflowDTO.setWorkflowDescription(workflowDescription);
 
             Tier tier = null;
             if (api != null) {
@@ -2092,6 +2132,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appWFDto.setTenantId(tenantId);
             appWFDto.setUserName(userId);
             appWFDto.setCreatedTime(System.currentTimeMillis());
+
+            // Retrieve email claim value for the application owner
+            String applicationOwnerEmail = getEmailClaimValue(username, tenantId);
+            if (StringUtils.isNotBlank(applicationOwnerEmail)) {
+                appWFDto.setProperties(APPLICATION_OWNER_EMAIL, applicationOwnerEmail);
+            }
+
+            String workflowDescription = "Approve application " + appWFDto.getApplication().getName() + " creation request from application creator - "
+                    + appWFDto.getUserName() + " with throttling tier - " + appWFDto.getApplication().getTier();
+            appWFDto.setWorkflowDescription(workflowDescription);
+
             appCreationWFExecutor.execute(appWFDto);
         } catch (WorkflowException e) {
             //If the workflow execution fails, roll back transaction by removing the application entry.
@@ -2317,6 +2368,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appWFDto.setTenantId(tenantId);
             appWFDto.setUserName(existingApp.getOwner());
             appWFDto.setCreatedTime(System.currentTimeMillis());
+
+            // Retrieve email claim value for the application owner
+            String applicationOwnerEmail = getEmailClaimValue(username, tenantId);
+            if (StringUtils.isNotBlank(applicationOwnerEmail)) {
+                appWFDto.setProperties(APPLICATION_OWNER_EMAIL, applicationOwnerEmail);
+            }
+
+            String workflowDescription = "Approve update request for application '" + appWFDto.getExistingApplication().getName() +
+                    "' submitted by user: " + appWFDto.getUserName();
+            appWFDto.setWorkflowDescription(workflowDescription);
+
             workflowResponse = updateApplicationWFExecutor.execute(appWFDto);
 
         } catch (WorkflowException e) {
@@ -2493,6 +2555,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setCreatedTime(System.currentTimeMillis());
             workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
             workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
+
+            // Retrieve email claim value for the application owner
+            String applicationOwnerEmail = getEmailClaimValue(username, tenantId);
+            if (StringUtils.isNotBlank(applicationOwnerEmail)) {
+                workflowDTO.setProperties(APPLICATION_OWNER_EMAIL, applicationOwnerEmail);
+            }
+
+            String workflowDescription = "Approve application " + workflowDTO.getApplication().getName() + " delete request from application creator - "
+                    + workflowDTO.getUserName() + " with throttling tier - " + workflowDTO.getApplication().getTier();
+            workflowDTO.setWorkflowDescription(workflowDescription);
 
             if (!(removeApplicationWFExecutor instanceof ApplicationDeletionApprovalWorkflowExecutor)) {
                 cleanupPendingTasksForApplicationDeletion(applicationId);
@@ -2922,6 +2994,15 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             appRegWFDto.setAppInfoDTO(request);
             appRegWFDto.setDomainList(allowedDomains);
 
+            // Retrieve email claim value for the application owner
+            String applicationOwnerEmail = getEmailClaimValue(username, tenantId);
+            if (StringUtils.isNotBlank(applicationOwnerEmail)) {
+                appRegWFDto.setProperties(APPLICATION_OWNER_EMAIL, applicationOwnerEmail);
+            }
+
+            String workflowDescription = "Approve request to create " + appRegWFDto.getKeyType() + " keys for " + appRegWFDto.getApplication().getName() +
+                    " from application creator - " + appRegWFDto.getUserName() + " with throttling tier - " + appRegWFDto.getApplication().getTier();
+            appRegWFDto.setWorkflowDescription(workflowDescription);
             appRegWFDto.setKeyDetails(appKeysDto);
             appRegistrationWorkflow.execute(appRegWFDto);
 
@@ -5788,6 +5869,28 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public API getAPIWithoutPermissionCheck(String apiId, String organization)
             throws APIManagementException {
         return (getAPIorAPIProductByUUIDWithoutPermissionCheck(apiId, organization)).getApi();
+    }
 
+    /**
+     * Retrieve the email claim value for the given user. Returns null if unavailable or on failure.
+     * This method intentionally does not throw, because claim lookup failures should not block workflow execution.
+     */
+    private String getEmailClaimValue(String username, int tenantId) {
+
+        try {
+            UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance()
+                    .getRealmService()
+                    .getTenantUserRealm(tenantId)
+                    .getUserStoreManager();
+
+            return userStoreManager.getUserClaimValue(
+                    MultitenantUtils.getTenantAwareUsername(username),
+                    EMAIL_CLAIM_URI,
+                    UserCoreConstants.DEFAULT_PROFILE
+            );
+        } catch (UserStoreException e) {
+            log.warn("Error while retrieving email claim for user in tenantId : " + tenantId, e);
+            return null;
+        }
     }
 }

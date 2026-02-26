@@ -221,6 +221,7 @@ import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
@@ -273,6 +274,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private static final Log log = LogFactory.getLog(APIProviderImpl.class);
     private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX = "endpointConfig:";
     private ServiceCatalogDAO serviceCatalogDAO = ServiceCatalogDAO.getInstance();
+    private static final String PROVIDER_EMAIL = "providerEmail";
+    private static final String INVOKER_EMAIL = "invokerEmail";
+    private static final String EMAIL_CLAIM_URI = UserCoreConstants.ClaimTypeURIs.EMAIL_ADDRESS;
 
     private final String userNameWithoutChange;
     private CertificateManager certificateManager;
@@ -4035,8 +4039,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         stateWorkflowDTO.setWorkflowReference(Integer.toString(apiOrApiProductId));
         stateWorkflowDTO.setInvoker(this.username);
         stateWorkflowDTO.setApiUUID(uuid);
-        String workflowDescription = "Pending lifecycle state change action: " + action;
+        String workflowDescription = "Approval request for " + apiType + " state change action " + stateWorkflowDTO.getApiLCAction() + " " +
+                "from " + stateWorkflowDTO.getApiCurrentState() + " state for the " + apiType + " "
+                + stateWorkflowDTO.getApiName() + " : " + stateWorkflowDTO.getApiVersion() + " by "
+                + stateWorkflowDTO.getApiProvider() + "";
         stateWorkflowDTO.setWorkflowDescription(workflowDescription);
+
+        // Retrieve email claim values for the provider and the invoker
+        String providerEmail = getEmailClaimValue(providerName, tenantId);
+        String invokerEmail = null;
+
+        // If the invoker and provider are the same user, avoid retrieving the email again.
+        if (!this.username.equals(providerName)) {
+            invokerEmail = getEmailClaimValue(this.username, tenantId);
+        }
+
+        if (StringUtils.isNotBlank(providerEmail)) {
+            stateWorkflowDTO.setProperties(PROVIDER_EMAIL, providerEmail);
+        }
+
+        if (StringUtils.isNotBlank(invokerEmail)) {
+            stateWorkflowDTO.setProperties(INVOKER_EMAIL, invokerEmail);
+        }
+
         return stateWorkflowDTO;
     }
 
@@ -7372,6 +7397,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             workflowDTO.setApiProvider(apiIdentifier.getProviderName());
             workflowDTO.setEnvironment(deployment.getDeployment());
             workflowDTO.setRevisionId(String.valueOf(revisionId));
+            workflowDTO.setInvoker(this.username);
+            String workflowDescription = "Approve revision " + workflowDTO.getRevisionId() + " deployment request from the user "
+                    + workflowDTO.getUserName() + " for the environment " + workflowDTO.getEnvironment()
+                    + " of the API " + workflowDTO.getApiName();
+            workflowDTO.setWorkflowDescription(workflowDescription);
+
+            // Retrieve email claim values for the provider and the invoker
+            String providerEmail = getEmailClaimValue(apiIdentifier.getProviderName(), tenantId);
+            String invokerEmail = null;
+
+            // If the invoker and provider are the same user, avoid retrieving the email again.
+            if (!this.username.equals(apiIdentifier.getProviderName())) {
+                invokerEmail = getEmailClaimValue(this.username, tenantId);
+            }
+
+            if (StringUtils.isNotBlank(providerEmail)) {
+                workflowDTO.setProperties(PROVIDER_EMAIL, providerEmail);
+            }
+
+            if (StringUtils.isNotBlank(invokerEmail)) {
+                workflowDTO.setProperties(INVOKER_EMAIL, invokerEmail);
+            }
 
             executor.execute(workflowDTO);
 
@@ -9497,4 +9544,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
     }
+
+    /**
+     * Retrieve the email claim value for the given user. Returns null if unavailable or on failure.
+     * This method intentionally does not throw, because claim lookup failures should not block workflow execution.
+     */
+    private String getEmailClaimValue(String username, int tenantId) {
+
+        try {
+            UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance()
+                    .getRealmService()
+                    .getTenantUserRealm(tenantId)
+                    .getUserStoreManager();
+
+            return userStoreManager.getUserClaimValue(
+                    MultitenantUtils.getTenantAwareUsername(username),
+                    EMAIL_CLAIM_URI,
+                    UserCoreConstants.DEFAULT_PROFILE
+            );
+        } catch (UserStoreException e) {
+            log.warn("Error while retrieving email claim for user in tenantId : " + tenantId, e);
+            return null;
+        }
+    }
+
 }

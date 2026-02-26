@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.impl.workflow;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -25,8 +27,10 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import static org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils.*;
 
 /**
  * Approval workflow for API Subscription Tier Update.
@@ -34,6 +38,12 @@ import java.util.List;
 public class SubscriptionUpdateApprovalWorkflowExecutor extends WorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(SubscriptionUpdateApprovalWorkflowExecutor.class);
+    private static final String API_NAME_PROPERTY = "apiName";
+    private static final String API_VERSION_PROPERTY = "apiVersion";
+    private static final String SUBSCRIBER_PROPERTY = "subscriber";
+    private static final String APPLICATION_NAME_PROPERTY = "applicationName";
+    private static final String SUBSCRIPTION_TIER_PROPERTY = "Subscription Tier";
+    private static final String UPDATES_PROPERTY = "updates";
 
     @Override
     public String getWorkflowType() {
@@ -58,15 +68,30 @@ public class SubscriptionUpdateApprovalWorkflowExecutor extends WorkflowExecutor
         }
         SubscriptionWorkflowDTO subsWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
         String message = "Approve API " + subsWorkflowDTO.getApiName() + " - " + subsWorkflowDTO.getApiVersion() +
-                " subscription creation request from subscriber - " + subsWorkflowDTO.getSubscriber() +
+                " subscription update request from subscriber - " + subsWorkflowDTO.getSubscriber() +
                 " for the application - " + subsWorkflowDTO.getApplicationName();
         workflowDTO.setWorkflowDescription(message);
-        workflowDTO.setProperties("apiName", subsWorkflowDTO.getApiName());
-        workflowDTO.setProperties("apiVersion", subsWorkflowDTO.getApiVersion());
-        workflowDTO.setProperties("subscriber", subsWorkflowDTO.getSubscriber());
-        workflowDTO.setProperties("applicationName", subsWorkflowDTO.getApplicationName());
-        workflowDTO.setProperties("currentTier", subsWorkflowDTO.getTierName());
-        workflowDTO.setProperties("requestedTier", subsWorkflowDTO.getRequestedTierName());
+        workflowDTO.setProperties(API_NAME_PROPERTY, subsWorkflowDTO.getApiName());
+        workflowDTO.setProperties(API_VERSION_PROPERTY, subsWorkflowDTO.getApiVersion());
+        workflowDTO.setProperties(APPLICATION_NAME_PROPERTY, subsWorkflowDTO.getApplicationName());
+        workflowDTO.setProperties(SUBSCRIPTION_TIER_PROPERTY, subsWorkflowDTO.getTierName());
+        workflowDTO.setProperties(SUBSCRIBER_PROPERTY, subsWorkflowDTO.getSubscriber());
+
+        List<Map<String, String>> subscriptionUpdateDiffs = new ArrayList<>();
+
+        compareAndAddToSubscriptionUpdateDiffs(subscriptionUpdateDiffs, SUBSCRIPTION_TIER_PROPERTY,
+                subsWorkflowDTO.getTierName(), subsWorkflowDTO.getRequestedTierName());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        if (!subscriptionUpdateDiffs.isEmpty()) {
+            try {
+                workflowDTO.setProperties(UPDATES_PROPERTY, objectMapper.writeValueAsString(subscriptionUpdateDiffs));
+            } catch (JsonProcessingException e) {
+                throw new WorkflowException(
+                        "Failed to serialize subscription update differences to JSON", e);
+            }
+        }
+
         super.execute(workflowDTO);
 
         return new GeneralWorkflowResponse();

@@ -34,6 +34,8 @@ import java.util.List;
 public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(UserSignUpWSWorkflowExecutor.class);
+    private static final String TENANT_AWARE_USER_NAME_PROPERTY = "tenantAwareUserName";
+    private static final String TENANT_DOMAIN_PROPERTY = "tenantDomain";
 
     @Override
     public String getWorkflowType() {
@@ -55,8 +57,8 @@ public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecut
         String message = "Approve APIStore signup request done by " + tenantAwareUserName + " from the tenant domain " +
                 workflowDTO.getTenantDomain();
         workflowDTO.setWorkflowDescription(message);
-        workflowDTO.setProperties("tenantAwareUserName", tenantAwareUserName);
-        workflowDTO.setProperties("tenantDomain", workflowDTO.getTenantDomain());
+        workflowDTO.setProperties(TENANT_AWARE_USER_NAME_PROPERTY, tenantAwareUserName);
+        workflowDTO.setProperties(TENANT_DOMAIN_PROPERTY, workflowDTO.getTenantDomain());
         super.execute(workflowDTO);
         return new GeneralWorkflowResponse();
     }

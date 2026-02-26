@@ -40,6 +40,8 @@ import org.wso2.carbon.identity.recovery.util.Utils;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.user.core.UserCoreConstants;
 
 import java.util.List;
 
@@ -54,6 +56,10 @@ public class UserPostSelfRegistrationHandler extends AbstractEventHandler {
     private static final String SUBSCRIBER_ROLE = "Internal/subscriber";
     private static final String SELF_SIGNUP_ROLE = "Internal/selfsignup";
     private static final int HIGH_PRIORITY = 250;
+    private static final String EMAIL = "email";
+    private static final String FIRST_NAME = "firstName";
+    private static final String ORGANIZATION = "organization";
+    private static final String COUNTRY = "country";
 
     @Override
     public String getName() {
@@ -111,6 +117,22 @@ public class UserPostSelfRegistrationHandler extends AbstractEventHandler {
                     WorkflowExecutor userSignUpWFExecutor = WorkflowExecutorFactory.getInstance()
                             .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
 
+                    // Retrieve first name claim value of the user
+                    String firstName = userStoreManager.getUserClaimValue(userName, UserCoreConstants.ClaimTypeURIs.GIVEN_NAME,
+                            UserCoreConstants.DEFAULT_PROFILE);
+
+                    // Retrieve email claim value of the user
+                    String email = userStoreManager.getUserClaimValue(userName, UserCoreConstants.ClaimTypeURIs.EMAIL_ADDRESS,
+                            UserCoreConstants.DEFAULT_PROFILE);
+
+                    // Retrieve organization claim value of the user
+                    String organization = userStoreManager.getUserClaimValue(userName, UserCoreConstants.ClaimTypeURIs.ORGANIZATION,
+                            UserCoreConstants.DEFAULT_PROFILE);
+
+                    // Retrieve country claim value of the user
+                    String country = userStoreManager.getUserClaimValue(userName, UserCoreConstants.ClaimTypeURIs.COUNTRY,
+                            UserCoreConstants.DEFAULT_PROFILE);
+
                     //initiate a new signup workflow
                     WorkflowDTO signUpWFDto = new WorkflowDTO();
                     signUpWFDto.setWorkflowReference(userName);
@@ -121,6 +143,24 @@ public class UserPostSelfRegistrationHandler extends AbstractEventHandler {
                     signUpWFDto.setExternalWorkflowReference(userSignUpWFExecutor.generateUUID());
                     signUpWFDto.setWorkflowType(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
                     signUpWFDto.setCallbackUrl(userSignUpWFExecutor.getCallbackURL());
+
+                    if (StringUtils.isNotBlank(email)) {
+                        signUpWFDto.setProperties(EMAIL, email);
+                    }
+                    if (StringUtils.isNotBlank(firstName)) {
+                        signUpWFDto.setProperties(FIRST_NAME, firstName);
+                    }
+                    if (StringUtils.isNotBlank(organization)) {
+                        signUpWFDto.setProperties(ORGANIZATION, organization);
+                    }
+                    if (StringUtils.isNotBlank(country)) {
+                        signUpWFDto.setProperties(COUNTRY, country);
+                    }
+
+                    String workflowDescription = "Approve APIStore signup request done by " + userName + " from the tenant domain " +
+                            signUpWFDto.getTenantDomain();
+                    signUpWFDto.setWorkflowDescription(workflowDescription);
+
                     userSignUpWFExecutor.execute(signUpWFDto);
 
                 }
