@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import com.google.gson.Gson;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
@@ -149,6 +152,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
         McpResponseDto mcpResponse = McpRequestProcessor.processRequest(messageContext, matchedAPI, requestBody);
+
         if (APIConstants.MCP.METHOD_INITIALIZE.equals(mcpMethod) || APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod)
             || APIConstants.MCP.METHOD_PING.equals(mcpMethod) || APIConstants.MCP.METHOD_PROMPTS_LIST.equals(mcpMethod)
             || (APIConstants.MCP.METHOD_TOOL_CALL.equals(mcpMethod) && mcpResponse != null)) {
@@ -163,6 +167,12 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                             APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                     axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, mcpResponse.getStatusCode());
                     axis2MessageContext.setProperty(APIMgtGatewayConstants.MCP_METHOD, mcpMethod);
+
+                    // Extract and set serverInfo properties for analytics on initialize
+                    if (APIConstants.MCP.METHOD_INITIALIZE.equals(mcpMethod)) {
+                        setServerInfoProperties(messageContext, mcpResponse.getResponse());
+                    }
+
                     log.info("MCP request processed successfully. Method: " + mcpMethod +
                             ", Status: " + mcpResponse.getStatusCode());
                 } catch (AxisFault e) {
@@ -346,5 +356,42 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             }
         }
         return allScopes;
+    }
+
+    /**
+     * Parses the MCP initialize response JSON and sets serverInfo fields
+     * (protocolVersion, name, version) as properties on the axis2MessageContext
+     * for use in downstream analytics.
+     */
+    private void setServerInfoProperties(MessageContext messageContext,
+            String responseJson) {
+        try {
+            JsonObject responseObject = JsonParser.parseString(responseJson).getAsJsonObject();
+            JsonObject result = responseObject.getAsJsonObject("result");
+            if (result != null) {
+                // protocolVersion lives at result level
+                if (result.has("protocolVersion")) {
+                    messageContext.setProperty(
+                            APIMgtGatewayConstants.MCP_PROTOCOL_VERSION,
+                            result.get("protocolVersion").getAsString());
+                }
+                JsonObject serverInfo = result.getAsJsonObject("serverInfo");
+                if (serverInfo != null) {
+                    if (serverInfo.has("name")) {
+                        messageContext.setProperty(
+                                APIMgtGatewayConstants.MCP_SERVER_NAME,
+                                serverInfo.get("name").getAsString());
+                    }
+                    if (serverInfo.has("version")) {
+                        messageContext.setProperty(
+                                APIMgtGatewayConstants.MCP_SERVER_VERSION,
+                                serverInfo.get("version").getAsString());
+                    }
+                }
+            }
+        } catch (JsonParseException | IllegalStateException e) {
+            log.warn("Failed to extract serverInfo from MCP initialize response for analytics. " +
+                    "Response may be malformed.", e);
+        }
     }
 }

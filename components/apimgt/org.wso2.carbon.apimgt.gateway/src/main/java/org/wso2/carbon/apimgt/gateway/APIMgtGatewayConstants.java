@@ -224,6 +224,9 @@ public class APIMgtGatewayConstants {
     public static final String MCP_SESSION_ID_KEY = "MCP_SESSION_ID";
     public static final String MCP_REQUESTED_PROTOCOL_VERSION_KEY = "MCP_REQUESTED_PROTOCOL_VERSION";
     public static final String MCP_CLIENT_INFO_KEY = "MCP_CLIENT_INFO";
+    public static final String MCP_PROTOCOL_VERSION = "MCP_PROTOCOL_VERSION";
+    public static final String MCP_SERVER_NAME = "MCP_SERVER_NAME";
+    public static final String MCP_SERVER_VERSION = "MCP_SERVER_VERSION";
     public static final String MCP_REQUEST_SIZE_KEY = "MCP_REQUEST_SIZE";
     public static final String MCP_API_ELECTED_RESOURCE_KEY = "MCP_API_ELECTED_RESOURCE";
     public static final String MCP_RESOURCE = "/mcp";
@@ -236,6 +239,8 @@ public class APIMgtGatewayConstants {
     public static final String MCP_SESSION_ID = "sessionId";
     public static final String MCP_REQUESTED_PROTOCOL_VERSION = "requestedProtocolVersion";
     public static final String MCP_CLIENT_INFO = "clientInfo";
+    public static final String MCP_SERVER_INFO = "serverInfo";
+
 
     /**
      * JWT Claim related Constants

@@ -582,6 +582,17 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         mcpAnalytics.put(MCP_CAPABILITY_NAME, messageContext.getProperty(MCP_CAPABILITY_NAME_KEY));
         mcpAnalytics.put(MCP_CLIENT_INFO, clientInfo);
 
+        String protocolVersion = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_PROTOCOL_VERSION);
+        String serverName = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_SERVER_NAME);
+        String serverVersion = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_SERVER_VERSION);
+        if (protocolVersion != null || serverName != null || serverVersion != null) {
+            Map<String, Object> serverInfo = new HashMap<>();
+            serverInfo.put("protocolVersion", protocolVersion);
+            serverInfo.put("name", serverName);
+            serverInfo.put("version", serverVersion);
+            mcpAnalytics.put(MCP_SERVER_INFO, serverInfo);
+        }
+
         if (log.isDebugEnabled()) {
             log.debug("MCP analytics data extracted: " + gson.toJson(mcpAnalytics));
         }
