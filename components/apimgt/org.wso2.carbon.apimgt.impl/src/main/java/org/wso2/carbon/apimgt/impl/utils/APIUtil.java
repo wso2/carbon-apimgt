@@ -12130,7 +12130,7 @@ public final class APIUtil {
         }
     }
 
-    public static void updateAPIAsyncAPISpecWithVersion(API api) throws APIManagementException {
+    public static void updateAPIAsyncAPISpecWithVersion(API api) {
         String asyncApiDefinition = api.getAsyncApiDefinition();
 
         if (asyncApiDefinition != null && !asyncApiDefinition.trim().isEmpty()) {
