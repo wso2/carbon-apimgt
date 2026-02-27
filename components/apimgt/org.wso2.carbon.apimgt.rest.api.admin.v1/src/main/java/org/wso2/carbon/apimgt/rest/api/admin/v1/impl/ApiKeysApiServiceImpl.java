@@ -48,6 +48,10 @@ public class ApiKeysApiServiceImpl implements ApiKeysApiService {
                                                                          String keyType, APIKeyRevokeRequestDTO body,
                                                                          MessageContext messageContext)
             throws APIManagementException {
+
+        if (body == null || body.getKeyName() == null || body.getKeyName().trim().isEmpty()) {
+            throw new APIManagementException("keyName is required for API key revocation.");
+        }
         APIAdmin apiAdmin = new APIAdminImpl();
         apiAdmin.revokeAPIKey(apiId, applicationId, keyType, body.getKeyName());
         return Response.ok().build();

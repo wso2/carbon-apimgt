@@ -688,8 +688,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response associateAPIKeyToApp(String applicationId, String keyType,
-                                                                         AppAPIKeyAssociateRequestDTO body,
+    public Response associateAPIKeyToApp(String applicationId, String keyType, AppAPIKeyAssociateRequestDTO body,
                                                                          String ifMatch, MessageContext messageContext)
             throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
@@ -703,11 +702,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 } else {
-                    if (APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)) {
-                        application.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
-                    } else if (APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType)) {
-                        application.setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
-                    } else {
+                    boolean isValidKeyType = APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)
+                            || APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType);
+                    if (!isValidKeyType) {
                         RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
                     }
                     if (body != null && body.getApiName() != null) {
@@ -716,7 +713,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     if (body != null && body.getKeyName() != null) {
                         keyName = body.getKeyName();
                     }
-                    apiConsumer.createAssociationToApp(body.getApiId(), applicationId, keyName);
+                    apiConsumer.createAssociationToAppViaApp(body.getApiId(), applicationId, keyName, keyType);
                     APIKeyAssociationDTO apiKeyAssociationDTO = ApplicationKeyMappingUtil.formApiAssociationToDTO(apiName,
                             application.getName(), keyName);
                     return Response.ok().entity(apiKeyAssociationDTO).build();
@@ -795,7 +792,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     String restrictedIP = null;
                     String restrictedReferer = null;
 
-                    if (body.getAdditionalProperties() != null) {
+                    if (body != null && body.getAdditionalProperties() != null) {
                         Map additionalProperties = (HashMap) body.getAdditionalProperties();
                         if (additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_IP) != null) {
                             restrictedIP = (String) additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_IP);
@@ -851,6 +848,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                                                           String ifMatch, MessageContext messageContext)
             throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
+        if (body == null || StringUtils.isEmpty(body.getKeyName())) {
+            RestApiUtil.handleBadRequest("Key name is required", log);
+        }
         String keyName = body.getKeyName();
         Application application;
         try {
@@ -879,10 +879,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response regenerateAppBoundAPIKey(String applicationId,
-                                                                          String keyType, String ifMatch,
-                                                                          APIKeyRenewRequestDTO body, MessageContext messageContext) {
+    public Response regenerateAppBoundAPIKey(String applicationId, String keyType, APIKeyRenewRequestDTO body, String ifMatch,
+                                             MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
+        if (body == null) {
+            RestApiUtil.handleBadRequest("Request body is required", log);
+            return null;
+        }
         String keyName = body.getKeyName();
         if (!StringUtils.isEmpty(keyName)) {
             try {
@@ -936,9 +939,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response revokeAppBoundAPIKey(String applicationId, String keyType,
-                                  String ifMatch, APIKeyRevokeRequestDTO body, MessageContext messageContext) {
+    public Response revokeAppBoundAPIKey(String applicationId, String keyType, APIKeyRevokeRequestDTO body, String ifMatch,
+                                         MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
+        if (body == null) {
+            RestApiUtil.handleBadRequest("Request body is required", log);
+            return null;
+        }
         String apiKey = body.getApikey();
         String keyName = body.getKeyName();
         try {
@@ -1023,9 +1030,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 }
             } else {
                 if(log.isDebugEnabled()) {
-                    log.debug("Application with given id " + applicationId + " doesn't not exist ");
+                    log.debug("Application with given id " + applicationId + " doesn't exist ");
                 }
-                RestApiUtil.handleBadRequest("Validation failed for the given token ", log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);;
             }
         } catch (APIManagementException e) {
             String msg = "Error while revoking API Key of application " + applicationId;

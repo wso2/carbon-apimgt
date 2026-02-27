@@ -17212,9 +17212,10 @@ public class ApiMgtDAO {
      * @param keyName Name of the API key
      * @param apiUUId API UUId
      * @param appUUId Application UUId
+     * @para keyType Type of the API key
      * @throws APIManagementException
      */
-    public void createAssociationToApiKey(String keyName, String apiUUId, String appUUId) throws APIManagementException {
+    public void createAssociationToApiKey(String keyName, String apiUUId, String appUUId, String keyType) throws APIManagementException {
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -17229,6 +17230,7 @@ public class ApiMgtDAO {
             ps.setString(1, appUUId);
             ps.setString(2, apiUUId);
             ps.setString(3, keyName);
+            ps.setString(4, keyType);
 
             ps.executeUpdate();
             conn.commit();

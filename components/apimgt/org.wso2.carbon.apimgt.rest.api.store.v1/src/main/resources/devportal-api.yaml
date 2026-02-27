@@ -1495,7 +1495,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/APIKeyRenewRequest'
-        required: false
+        required: true
       responses:
         200:
           description: |
@@ -3704,7 +3704,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/APIKeyRenewRequest'
-        required: false
+        required: true
       responses:
         200:
           description: |
@@ -3786,7 +3786,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/APIKeyRevokeRequest'
-        required: false
+        required: true
       responses:
         200:
           description: |
@@ -3797,7 +3797,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         412:
           $ref: '#/components/responses/PreconditionFailed'
-      deprecated: true
       security:
         - OAuth2Security:
             - apim:subscribe
@@ -6604,7 +6603,7 @@ components:
           example: 3600
         lastUsed:
           type: string
-          description: Last used time as epoch milliseconds, or NULL if never used.
+          description: Last used time as epoch milliseconds (string), or `NOT_USED` if never used.
           example: 2026-02-06 23:45:07
     APIKeyInfo:
       title: API Key details to invoke APIs
@@ -6624,7 +6623,7 @@ components:
           example: 3600
         lastUsed:
           type: string
-          description: Last used time as epoch milliseconds, or NULL if never used.
+          description: Last used time as epoch milliseconds (string), or `NOT_USED` if never used.
           example: 2026-02-06 23:45:07
     APIWithKeyInfo:
       title: API with API Key
@@ -6663,7 +6662,7 @@ components:
           example: 3600
         lastUsed:
           type: string
-          description: Last used time as epoch milliseconds, or NULL if never used.
+          description: Last used time as epoch milliseconds (string), or `NOT_USED` if never used.
           example: 2026-02-06 23:45:07
     APIAPIKeyList:
       title: API Keys List
@@ -6964,6 +6963,8 @@ components:
     APIKeyRenewRequest:
       title: API Key renewal request object
       type: object
+      required:
+        - keyName
       properties:
         keyName:
           type: string
@@ -6981,6 +6982,9 @@ components:
     APIAPIKeyAssociateRequest:
       title: API Key association request object
       type: object
+      required:
+        - keyName
+        - applicationName
       properties:
         keyName:
           type: string
@@ -6993,6 +6997,8 @@ components:
     APIKeyDissociateRequest:
       title: API Key dissociation request object
       type: object
+      required:
+        - keyName
       properties:
         keyName:
           type: string
@@ -7017,6 +7023,9 @@ components:
     APIKeyRevokeRequest:
       title: API Key revoke request object
       type: object
+      oneOf:
+        - required: [ apikey ]
+        - required: [ keyName ]
       properties:
         apikey:
           type: string
@@ -7029,6 +7038,8 @@ components:
     APIAPIKeyRevokeRequest:
       title: API Key revoke request object
       type: object
+      required:
+        - keyName
       properties:
         keyName:
           type: string

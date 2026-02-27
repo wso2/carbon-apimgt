@@ -701,8 +701,8 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response regenerateAppBoundAPIKey(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @ApiParam(value = "API Key renewal request object " ) APIKeyRenewRequestDTO apIKeyRenewRequestDTO) throws APIManagementException{
-        return delegate.regenerateAppBoundAPIKey(applicationId, keyType, ifMatch, apIKeyRenewRequestDTO, securityContext);
+    public Response regenerateAppBoundAPIKey(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "API Key renewal request object " ,required=true) APIKeyRenewRequestDTO apIKeyRenewRequestDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.regenerateAppBoundAPIKey(applicationId, keyType, apIKeyRenewRequestDTO, ifMatch, securityContext);
     }
 
     @POST
@@ -720,7 +720,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Api key revoked successfully. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response revokeAppBoundAPIKey(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @ApiParam(value = "API Key revoke request object " ) APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO) throws APIManagementException{
-        return delegate.revokeAppBoundAPIKey(applicationId, keyType, ifMatch, apIKeyRevokeRequestDTO, securityContext);
+    public Response revokeAppBoundAPIKey(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "API Key revoke request object " ,required=true) APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.revokeAppBoundAPIKey(applicationId, keyType, apIKeyRevokeRequestDTO, ifMatch, securityContext);
     }
 }

@@ -80,6 +80,6 @@ public interface ApplicationsApiService {
       public Response getAPIKeyAssociationsForApp(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAppBoundAPIKeys(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getSubscribedAPIsWithAPIKeys(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response regenerateAppBoundAPIKey(String applicationId, String keyType, String ifMatch, APIKeyRenewRequestDTO apIKeyRenewRequestDTO, MessageContext messageContext) throws APIManagementException;
-      public Response revokeAppBoundAPIKey(String applicationId, String keyType, String ifMatch, APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response regenerateAppBoundAPIKey(String applicationId, String keyType, APIKeyRenewRequestDTO apIKeyRenewRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response revokeAppBoundAPIKey(String applicationId, String keyType, APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
 }

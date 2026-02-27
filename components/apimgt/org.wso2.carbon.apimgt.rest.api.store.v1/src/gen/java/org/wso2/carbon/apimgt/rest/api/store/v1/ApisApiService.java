@@ -75,7 +75,6 @@ public interface ApisApiService {
       public Response getWSDLOfAPI(String apiId, String format, String environmentName, String ifNoneMatch, String xWSO2Tenant, Long exp, String sig, String xWSO2TenantQ, MessageContext messageContext) throws APIManagementException;
       public Response generateApiBoundApiKey(String apiId, APIAPIKeyGenerateRequestDTO apIAPIKeyGenerateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIBoundAPIKeys(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response regenerateAPIBoundAPIKey(String apiId, String ifMatch, APIKeyRenewRequestDTO apIKeyRenewRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response revokeAPIBoundAPIKey(String apiId, APIAPIKeyRevokeRequestDTO apIAPIKeyRevokeRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
-
+      public Response regenerateAPIBoundAPIKey(String apiId, APIKeyRenewRequestDTO apIKeyRenewRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
 }

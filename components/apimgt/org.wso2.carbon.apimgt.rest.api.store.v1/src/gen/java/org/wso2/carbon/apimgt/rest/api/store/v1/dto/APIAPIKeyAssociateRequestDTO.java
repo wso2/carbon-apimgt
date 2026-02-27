@@ -32,8 +32,9 @@ public class APIAPIKeyAssociateRequestDTO   {
   }
 
   
-  @ApiModelProperty(example = "Test_Key", value = "API Key name")
+  @ApiModelProperty(example = "Test_Key", required = true, value = "API Key name")
   @JsonProperty("keyName")
+  @NotNull
   public String getKeyName() {
     return keyName;
   }
@@ -50,8 +51,9 @@ public class APIAPIKeyAssociateRequestDTO   {
   }
 
   
-  @ApiModelProperty(example = "DefaultApplication", value = "Application name to be associated")
+  @ApiModelProperty(example = "DefaultApplication", required = true, value = "Application name to be associated")
   @JsonProperty("applicationName")
+  @NotNull
   public String getApplicationName() {
     return applicationName;
   }

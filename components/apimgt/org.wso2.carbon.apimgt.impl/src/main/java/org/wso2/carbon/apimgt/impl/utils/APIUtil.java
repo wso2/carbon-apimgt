@@ -9201,6 +9201,9 @@ public final class APIUtil {
      * @return the hashed api key.
      */
     public static String sha256Hash(String apiKey) {
+        if (StringUtils.isEmpty(apiKey)) {
+            throw new IllegalArgumentException("API Key must not be null or empty.");
+        }
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(apiKey.getBytes(StandardCharsets.UTF_8));

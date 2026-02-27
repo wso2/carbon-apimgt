@@ -274,12 +274,8 @@ public class ApplicationKeyMappingUtil {
                     APIKeyInfoDTO dto = new APIKeyInfoDTO();
                     dto.setKeyName(src.getKeyName());
                     dto.setIssuedOn(src.getCreatedTime());
-                    dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
-                    if (src.getLastUsedTime() == null) {
-                        dto.setLastUsed("NOT_USED");
-                    } else {
-                        dto.setLastUsed(src.getLastUsedTime());
-                    }
+                    dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
+                    dto.setLastUsed(getLastUsedTimeOrDefault(src.getLastUsedTime()));
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -299,12 +295,8 @@ public class ApplicationKeyMappingUtil {
                     dto.setKeyName(src.getKeyName());
                     dto.setApiName(src.getApiName());
                     dto.setIssuedOn(src.getCreatedTime());
-                    dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
-                    if (src.getLastUsedTime() == null) {
-                        dto.setLastUsed("NOT_USED");
-                    } else {
-                        dto.setLastUsed(src.getLastUsedTime());
-                    }
+                    dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
+                    dto.setLastUsed(getLastUsedTimeOrDefault(src.getLastUsedTime()));
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -323,12 +315,8 @@ public class ApplicationKeyMappingUtil {
                     APIAPIKeyInfoDTO dto = new APIAPIKeyInfoDTO();
                     dto.setKeyName(src.getKeyName());
                     dto.setIssuedOn(src.getCreatedTime());
-                    dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
-                    if (src.getLastUsedTime() == null) {
-                        dto.setLastUsed("NOT_USED");
-                    } else {
-                        dto.setLastUsed(src.getLastUsedTime());
-                    }
+                    dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
+                    dto.setLastUsed(getLastUsedTimeOrDefault(src.getLastUsedTime()));
                     dto.setAssociatedApp(src.getApplicationName());
                     return dto;
                 })
@@ -353,5 +341,13 @@ public class ApplicationKeyMappingUtil {
                 })
                 .collect(Collectors.toList());
         return apiApiKeyInfoDTOList;
+    }
+
+    private static String getLastUsedTimeOrDefault(String lastUsedTime) {
+        return lastUsedTime == null ? "NOT_USED" : lastUsedTime;
+    }
+
+    private static int toSafeValidityPeriod(long validityPeriod) {
+        return (int) Math.min(validityPeriod, Integer.MAX_VALUE);
     }
 }

@@ -7197,6 +7197,8 @@ components:
     APIKeyRevokeRequest:
       title: API Key revoke request object
       type: object
+      required:
+        - keyName
       properties:
         keyName:
           type: string
@@ -7554,14 +7556,6 @@ components:
         enum:
           - PRODUCTION
           - SANDBOX
-    keyName:
-      name: keyName
-      in: path
-      description: |
-        Name of the API key. URL-encode this value if it contains reserved path characters.
-      required: true
-      schema:
-        type: string
   securitySchemes:
     OAuth2Security:
       type: oauth2

@@ -441,14 +441,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                     if (!isValidKeyType) {
                         RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
                     }
-                    if (body != null && body.getValidityPeriod() != null && body.getValidityPeriod() > 0) {
+                    if (body.getValidityPeriod() != null && body.getValidityPeriod() > 0) {
                         validityPeriod = body.getValidityPeriod();
                     } else {
                         validityPeriod = -1;
                     }
-                    if (body != null && body.getKeyName() != null) {
-                        keyName = body.getKeyName();
-                    }
+                    keyName = body.getKeyName();
                     String restrictedIP = null;
                     String restrictedReferer = null;
 
@@ -475,9 +473,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response getAPIBoundAPIKeys(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
-        String userName = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             if (apiConsumer.getLightweightAPIByUUID(apiId, organization) == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, log);
@@ -501,8 +498,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                                 String ifMatch, MessageContext messageContext)
             throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
+        if (body == null || StringUtils.isEmpty(body.getKeyName())) {
+            String errorMessage = "Error while executing the prepare statement as request is badly formatted";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+            return null;
+        }
         String keyName = body.getKeyName();
-        if (!StringUtils.isEmpty(keyName) && body != null && StringUtils.isNotEmpty(body.getApplicationName())) {
+        if (!StringUtils.isEmpty(keyName) && StringUtils.isNotEmpty(body.getApplicationName())) {
             try {
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -524,7 +526,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if(log.isDebugEnabled()) {
                     log.debug("Error while creating an association to the API " + apiId + " and API key " + keyName);
                 }
-                log.error(msg, e);
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         } else {
@@ -539,11 +540,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response revokeAPIBoundAPIKey(String apiId, APIAPIKeyRevokeRequestDTO body, String ifMatch,
                                                MessageContext messageContext) throws APIManagementException {
-        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         String keyName = body.getKeyName();
         if (!StringUtils.isEmpty(keyName)) {
             try {
-                APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
                 if (apiConsumer.getLightweightAPIByUUID(apiId, organization) == null) {
                     RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, log);
@@ -561,7 +561,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if(log.isDebugEnabled()) {
                     log.debug("Error while revoking API Key of API " + apiId + " and api key " + keyName);
                 }
-                log.error(msg, e);
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         } else {
@@ -576,11 +575,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response dissociateAPIKey(String apiId, APIKeyDissociateRequestDTO body, String ifMatch,
                                                             MessageContext messageContext) throws APIManagementException {
-        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         String keyName = body.getKeyName();
         if (!StringUtils.isEmpty(keyName)) {
             try {
-                APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
                 if (apiConsumer.getLightweightAPIByUUID(apiId, organization) == null) {
                     RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, log);
@@ -597,7 +595,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if(log.isDebugEnabled()) {
                     log.debug("Error while removing association of API " + apiId + " and api key " + keyName);
                 }
-                log.error(msg, e);
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         } else {
@@ -610,8 +607,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response regenerateAPIBoundAPIKey(String apiId, String ifMatch, APIKeyRenewRequestDTO body,
-                                                   MessageContext messageContext) throws APIManagementException {
+    public Response regenerateAPIBoundAPIKey(String apiId, APIKeyRenewRequestDTO body, String ifMatch,
+                                             MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String keyName = body.getKeyName();
         if (!StringUtils.isEmpty(keyName)) {
@@ -633,14 +630,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                     if(log.isDebugEnabled()) {
                         log.debug("API with given id " + apiId + " doesn't exist ");
                     }
-                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, apiId, log);
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, log);
                 }
             } catch (APIManagementException e) {
                 String msg = "Error while regenerating API Key of API " + apiId;
                 if(log.isDebugEnabled()) {
                     log.debug("Error while regenerating API Key of API " + apiId + " and API Key " + keyName);
                 }
-                log.error(msg, e);
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         } else {
@@ -1366,8 +1362,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response getWSDLOfAPI(String apiId, String fileFormat, String environmentName,
-            String ifNoneMatch, String xWSO2Tenant, Long exp, String sig, String xWSO2TenantQ,
-            MessageContext messageContext) throws APIManagementException {
+                                 String ifNoneMatch, String xWSO2Tenant, Long exp, String sig, String xWSO2TenantQ,
+                                 MessageContext messageContext) throws APIManagementException {
         String organization;
         if (StringUtils.isNotEmpty(xWSO2TenantQ) && StringUtils.isEmpty(xWSO2Tenant)) {
             organization = RestApiUtil.getRequestedTenantDomain(xWSO2TenantQ);

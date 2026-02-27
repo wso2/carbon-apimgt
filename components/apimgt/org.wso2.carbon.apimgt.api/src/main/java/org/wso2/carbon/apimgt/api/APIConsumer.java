@@ -702,11 +702,12 @@ public interface APIConsumer extends APIManager {
      * Creates an association for a given API key.
      *
      * @param apiId      Id of the API
-     * @param appId        Id of the Application.
-     * @param keyName Name of API key.
+     * @param appId        Id of the Application
+     * @param keyName Name of API key
+     * @param keyType Type of API key
      * @throws APIManagementException This is the custom exception class for API management.
      */
-    void createAssociationToApp(String apiId, String appId, String keyName)
+    void createAssociationToAppViaApp(String apiId, String appId, String keyName, String keyType)
             throws APIManagementException;
 
     /**

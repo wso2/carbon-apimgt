@@ -617,6 +617,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                  String permittedIP, String permittedReferer, String keyName, String keyType)
             throws APIManagementException {
 
+        if (StringUtils.isBlank(keyName)) {
+            throw new APIManagementException("Key name is required for API-bound API keys");
+        }
         String apiKey;
         // Generate API key in opaque format
         apiKey = generateOpaqueKey();
@@ -4161,11 +4164,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             throws APIManagementException {
         String applicationUUID = APIUtil.getApplicationUUID(appName, userName);
         int appId = APIUtil.getApplicationId(appName, userName);
-        apiMgtDAO.createAssociationToApiKey(keyName, apiUUId, applicationUUID);
         APIKeyInfo apiKeyInfo = apiMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, keyName);
         if (apiKeyInfo == null) {
             throw new APIMgtResourceNotFoundException("API key not found for name: " + keyName);
         }
+        apiMgtDAO.createAssociationToApiKey(keyName, apiUUId, applicationUUID, apiKeyInfo.getKeyType());
         sendAPIKeyAssociationInfoEvent(keyName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
                 apiUUId, applicationUUID, appId, "CREATE_ASSOCIATION");
     }
@@ -4174,19 +4177,20 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * Creates an association for a given API key.
      *
      * @param apiUUId      UUId of the API
-     * @param appUUId        UUId of the Application.
-     * @param keyName Name of API key.
+     * @param appUUId        UUId of the Application
+     * @param keyName Name of API key
+     * @param keyType Type of API key
      * @throws APIManagementException This is the custom exception class for API management.
      */
     @Override
-    public void createAssociationToApp(String apiUUId, String appUUId, String keyName)
+    public void createAssociationToAppViaApp(String apiUUId, String appUUId, String keyName, String keyType)
             throws APIManagementException {
-        apiMgtDAO.createAssociationToApiKey(keyName, apiUUId, appUUId);
+        apiMgtDAO.createAssociationToApiKey(keyName, apiUUId, appUUId, keyType);
         APIKeyInfo apiKeyInfo = apiMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, appUUId, keyName);
         if (apiKeyInfo == null) {
             throw new APIMgtResourceNotFoundException("API key not found for name: " + keyName);
         }
-        sendAPIKeyAssociationInfoEvent(keyName, apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
+        sendAPIKeyAssociationInfoEvent(keyName, keyType, apiKeyInfo.getApiKeyHash(),
                 apiUUId, appUUId, apiKeyInfo.getAppId(), "CREATE_ASSOCIATION");
     }
 
