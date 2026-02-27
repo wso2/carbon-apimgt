@@ -46,6 +46,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -77,6 +78,8 @@ public class RestApiCommonUtil {
     private static Set<URITemplate> adminAPIResourceMappings;
     private static Set<URITemplate> serviceCatalogAPIResourceMappings;
     private static Set<URITemplate> governanceResourceMapping;
+    private static volatile byte[] inMemoryBase64Key = null;
+    private static final Object lock = new Object();
 
     public static void unsetThreadLocalRequestedTenant() {
 
@@ -977,18 +980,34 @@ public class RestApiCommonUtil {
     }
 
     protected static byte[] getHmacKeyBytes() throws APIManagementException {
-        String base64Key = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration().getFirstProperty(APIConstants.DEVPORTAL_URL_GENERATION_SECRET);
 
-        if (StringUtils.isEmpty(base64Key)) {
-            throw new APIManagementException("Could not resolve HMAC secret key from API Manager Configuration.");
+        // If a key is configured by user (NO default key added to default.json)
+        String configuredBase64Key = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getFirstProperty(APIConstants.DEVPORTAL_URL_GENERATION_SECRET);
+        if (configuredBase64Key != null && !configuredBase64Key.isEmpty()) {
+            try {
+                return Base64.getDecoder().decode(configuredBase64Key);
+            } catch (IllegalArgumentException e) {
+                log.debug("Configured URL signing key is not a valid Base64 encoded string.");
+                throw new APIManagementException(
+                        "Configured URL signing key is not a valid Base64 encoded string.", e);
+            }
         }
-        try {
-            return Base64.getDecoder().decode(base64Key);
-        } catch (IllegalArgumentException e) {
-            log.debug("HMAC secret key is not a valid Base64 encoded string.");
-            throw new APIManagementException("HMAC secret key is not a valid Base64 encoded string.", e);
+        // No key configured, generate in-memory key
+        // This will fail in multi-node deployments, user configuring their own key is recommended
+        if (inMemoryBase64Key == null) {
+            synchronized (lock) {
+                if (inMemoryBase64Key == null) {
+                    log.warn("URL signing key is not configured in deployment.toml. " +
+                                    "Please add the configuration under [apim.devportal] section in deployment.toml for production environments.");
+                    log.info("Generating a random key to sign the URL." );
+                    byte[] keyBytes = new byte[32];
+                    new SecureRandom().nextBytes(keyBytes);
+                    inMemoryBase64Key = keyBytes;
+                }
+            }
         }
+        return inMemoryBase64Key;
     }
 
     private static byte[] signWithHmacSHA256(String data, byte[] key) throws NoSuchAlgorithmException, InvalidKeyException {
