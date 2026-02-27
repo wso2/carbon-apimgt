@@ -14,6 +14,7 @@ safe-outputs:
     labels: ["agentic-backport", "v4-lineage"]
 tools:
   edit: {}
+  bash: true
   github:
     toolsets: [repos, pull_requests]
 ---
@@ -32,20 +33,25 @@ You are an expert engineer specializing in the WSO2 Carbon 4.x platform. Your go
 - Sort them in descending order to apply the fix from newest to oldest.
 
 ## 3. The Porting Loop
-For each target branch:
+For each target branch, strictly follow these steps in order:
 
-### Step A: Locate & Adapt
+### Step A: Workspace Preparation (CRITICAL)
+1. **Checkout Branch:** Use the `bash` tool to execute `git checkout -f <target_branch>` (e.g., `git checkout -f carbon-apimgt-v4.3.0`). Do not attempt to edit files until you have switched to the target branch.
+2. **Verify:** Use the `bash` tool to run `git status` to ensure you are cleanly on the older branch.
+
+### Step B: Locate & Adapt
 1. **Context Search:** Search the repository at the target branch for the files modified in the original PR. 
    - *Note:* Be aware that package structures often shifted in older Carbon versions (e.g., from `org.wso2.carbon.apimgt.impl` to `org.wso2.carbon.apimgt.hostobjects` or vice versa).
-2. **Manual Edit:** Use your internal editing capability to apply the fix logic to the target file.
+2. **Manual Edit:** Use the `edit` tool to apply the fix logic to the target file in the current workspace.
    - Adjust imports, method signatures, or variable names to match the target branch's existing code style and API.
    - Do NOT use `git cherry-pick`. You are manually rewriting the fix to ensure compatibility.
 
-### Step B: Validation & Submission
-1. **Self-Correction:** If the file does not exist in the target version, skip that branch and log the reason.
-2. **PR Creation:** Once the logic is applied, create a new branch named `backport/agent/${target_branch}`.
-3. **Submit:** Open a Pull Request targeting the respective maintenance branch. 
+### Step C: Validation & Submission
+1. **Self-Correction:** If the file does not exist in the target version, skip that branch, clear your workspace, and move to the next.
+2. **Submit PR:** Use the `create-pull-request` safe output to propose the changes. 
+   - **CRITICAL:** You MUST explicitly set the `base` parameter in the tool call to your `<target_branch>` (e.g., `base: "carbon-apimgt-v4.3.0"`). Do not let it default.
    - In the description, clearly state how you adapted the code for that specific version's architecture.
+3. **Cleanup:** After submission, use the `bash` tool to run `git reset --hard HEAD` and `git clean -fd` to clear the workspace before moving to the next branch in the loop.
 
 ## 4. Final Reporting
 - Post a summary table to the original PR on branch `v4.4.0` listing the status (Success/Skipped/Failed) for every branch processed.

@@ -22,7 +22,7 @@
 # For more information: https://github.github.com/gh-aw/introduction/overview/
 #
 #
-# gh-aw-metadata: {"schema_version":"v1","frontmatter_hash":"93c1127b936ec1e95268ed255810ff9b9ea99a64c1b6ecfd254d2e881d603bd5","compiler_version":"v0.50.4"}
+# gh-aw-metadata: {"schema_version":"v1","frontmatter_hash":"c0dbf40e554df20ca75c5ed77ea9552464da1573cb75f88535f21e8be0ebf32a","compiler_version":"v0.50.4"}
 
 name: "porting-agent-POC"
 "on":
