@@ -160,6 +160,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             return FaultCategory.THROTTLED;
         } else if (isTargetFaultRequest()) {
             return FaultCategory.TARGET_CONNECTIVITY;
+        } else if (isGuardrailFaultRequest()) {
+            return FaultCategory.GUARDRAIL_FAULT;
         } else {
             return FaultCategory.OTHER;
         }
@@ -439,6 +441,12 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         custom.put(Constants.RESPONSE_CONTENT_TYPE, getResponseContentType());
         custom.put(Constants.CERTIFICATE_COMMON_NAME, getCommonName());
 
+        boolean guardrailHit = isGuardrailHit();
+        custom.put(Constants.IS_GUARDRAIL_HIT, guardrailHit);
+        if (guardrailHit) {
+            custom.put(Constants.GUARDRAIL_NAME, getGuardrailName());
+        }
+
         // Headers (optional)
         if (shouldSendHeaders()) {
             log.debug("Including headers in analytics event");
@@ -599,6 +607,36 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         customProperties.put(APIMgtGatewayConstants.MCP_ANALYTICS, mcpAnalytics);
     }
 
+    private Object getGuardrailName() {
+        if (messageContext.getProperty(SynapseConstants.ERROR_MESSAGE) != null) {
+            String errorMessage = messageContext.getProperty(SynapseConstants.ERROR_MESSAGE).toString();
+            if (errorMessage.contains("\"interveningGuardrail\"")) {
+                try {
+                    // Extract the value after "interveningGuardrail":"
+                    int startIndex = errorMessage.indexOf("\"interveningGuardrail\":\"") +
+                            "\"interveningGuardrail\":\"".length();
+                    int endIndex = errorMessage.indexOf("\"", startIndex);
+                    if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
+                        return errorMessage.substring(startIndex, endIndex).trim();
+                    }
+                } catch (Exception e) {
+                    log.warn("Error extracting guardrail name from error message", e);
+                }
+            }
+        }
+        return null;
+    }
+
+    private boolean isGuardrailHit() {
+        if (!messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE)) {
+            return false;
+        }
+
+        int errorCode = getErrorCode();
+        return errorCode >= Constants.ERROR_CODE_RANGES.GUARDRAIL_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.GUARDRAIL_FAILURE__END;
+    }
+
     private String getApiContext() {
 
         if (messageContext.getPropertyKeySet().contains(JWTConstants.REST_API_CONTEXT)) {
@@ -644,6 +682,12 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         return (errorCode >= Constants.ERROR_CODE_RANGES.TARGET_FAILURE_START
                 && errorCode < Constants.ERROR_CODE_RANGES.TARGET_FAILURE__END)
                 || errorCode == Constants.ENDPOINT_SUSPENDED_ERROR_CODE;
+    }
+
+    private boolean isGuardrailFaultRequest() {
+        int errorCode = getErrorCode();
+        return errorCode >= Constants.ERROR_CODE_RANGES.GUARDRAIL_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.GUARDRAIL_FAILURE__END;
     }
 
     private int getErrorCode() {

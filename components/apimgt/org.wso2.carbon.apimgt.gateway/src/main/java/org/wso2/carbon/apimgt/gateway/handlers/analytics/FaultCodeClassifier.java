@@ -49,6 +49,8 @@ public class FaultCodeClassifier {
             return getTargetFaultSubCategory(errorCode);
         case THROTTLED:
             return getThrottledFaultSubCategory(errorCode);
+        case GUARDRAIL_FAULT:
+            return getGuardrailViolationFaultSubCategory(errorCode);
         case OTHER:
             return getOtherFaultSubCategory(errorCode);
         }
@@ -120,6 +122,23 @@ public class FaultCodeClassifier {
             return FaultSubCategories.Throttling.QUERY_TOO_COMPLEX;
         default:
             return FaultSubCategories.Throttling.OTHER;
+        }
+    }
+
+    protected FaultSubCategory getGuardrailViolationFaultSubCategory(int errorCode) {
+        switch (errorCode) {
+        case Constants.GUARDRAIL_ERROR_CODE:
+            if (messageContext.getProperty(SynapseConstants.ERROR_MESSAGE) != null) {
+                String errorMessage = (String) messageContext.getProperty(SynapseConstants.ERROR_MESSAGE);
+                if (errorMessage.contains("\"direction\":\"REQUEST\"")) {
+                    return FaultSubCategories.GuardrailViolation.REQUEST_GUARDRAIL_HIT;
+                } else if (errorMessage.contains("\"direction\":\"RESPONSE\"")) {
+                    return FaultSubCategories.GuardrailViolation.RESPONSE_GUARDRAIL_HIT;
+                }
+            }
+            return FaultSubCategories.GuardrailViolation.GUARDRAIL_HIT;
+        default:
+            return FaultSubCategories.GuardrailViolation.OTHER;
         }
     }
 

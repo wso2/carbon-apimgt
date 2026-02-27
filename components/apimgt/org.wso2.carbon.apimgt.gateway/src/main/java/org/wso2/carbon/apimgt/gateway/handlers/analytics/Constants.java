@@ -60,10 +60,14 @@ public class Constants {
 
         public static final int WS_TARGET_FAILURE_START = 1002;
         public static final int WS_TARGET_FAILURE__END = 1015;
+
+        public static final int GUARDRAIL_FAILURE_START = 900514;
+        public static final int GUARDRAIL_FAILURE__END = 900515;
     }
 
     public static final int RESOURCE_NOT_FOUND_ERROR_CODE = 404;
     public static final int METHOD_NOT_ALLOWED_ERROR_CODE = 405;
+    public static final int GUARDRAIL_ERROR_CODE = 900514;
     public static final int ENDPOINT_SUSPENDED_ERROR_CODE = 303001;
     public static final int RESOURCE_NOT_FOUND_APIM_ERROR_CODE = 900906;
 
@@ -99,5 +103,7 @@ public class Constants {
     public static final String SUBTYPE = "subtype";
 
     public static final String MCP_METHOD = "jsonRpcMethod";
+    public static final String GUARDRAIL_NAME = "guardrailName";
+    public static final String IS_GUARDRAIL_HIT = "isGuardrailHit";
 
 }
