@@ -78,7 +78,7 @@ public class RestApiCommonUtil {
     private static Set<URITemplate> adminAPIResourceMappings;
     private static Set<URITemplate> serviceCatalogAPIResourceMappings;
     private static Set<URITemplate> governanceResourceMapping;
-    private static volatile byte[] inMemoryBase64Key = null;
+    private static volatile byte[] generatedURLSigningKey = null;
     private static final Object lock = new Object();
 
     public static void unsetThreadLocalRequestedTenant() {
@@ -995,19 +995,19 @@ public class RestApiCommonUtil {
         }
         // No key configured, generate in-memory key
         // This will fail in multi-node deployments, user configuring their own key is recommended
-        if (inMemoryBase64Key == null) {
+        if (generatedURLSigningKey == null) {
             synchronized (lock) {
-                if (inMemoryBase64Key == null) {
+                if (generatedURLSigningKey == null) {
                     log.warn("URL signing key is not configured in deployment.toml. " +
                                     "Please add the configuration under [apim.devportal] section in deployment.toml for production environments.");
                     log.info("Generating a random key to sign the URL." );
                     byte[] keyBytes = new byte[32];
                     new SecureRandom().nextBytes(keyBytes);
-                    inMemoryBase64Key = keyBytes;
+                    generatedURLSigningKey = keyBytes;
                 }
             }
         }
-        return inMemoryBase64Key;
+        return generatedURLSigningKey;
     }
 
     private static byte[] signWithHmacSHA256(String data, byte[] key) throws NoSuchAlgorithmException, InvalidKeyException {
