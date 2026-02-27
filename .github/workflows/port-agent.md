@@ -28,9 +28,10 @@ You are an expert engineer specializing in the WSO2 Carbon 4.x platform. Your go
 - Identify the set of files modified in the merged PR and the logic of the changes.
 
 ## 2. Dynamic Target Discovery
-- Find all remote branches matching the pattern `origin/carbon-apimgt-v4.*`.
-- Filter this list to only include branches where the version number is **lower** than `v4.4.0` (e.g., `v4.3.0`, `v4.2.0`, `v4.1.0`, `v4.0.0`).
-- Sort them in descending order to apply the fix from newest to oldest.
+- **Fetch Remotes:** First, use the `bash` tool to run `git fetch --all` to ensure your local workspace sees all remote branches.
+- **Find Branches:** Find all remote branches matching the pattern `origin/carbon-apimgt-v4.*`.
+- **Filter:** Filter this list to only include branches where the version number is **lower** than `v4.4.0` (e.g., `v4.3.0`, `v4.2.0`, `v4.1.0`, `v4.0.0`).
+- **Sort:** Sort them in descending order to apply the fix from newest to oldest.
 
 ## 3. The Porting Loop
 For each target branch, strictly follow these steps in order:
