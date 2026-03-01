@@ -16894,7 +16894,6 @@ public class ApiMgtDAO {
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                         Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
-                        keyInfo.setApplicationId(rs.getString("APPLICATION_UUID"));
                         keyInfo.setApiUUId(apiUUId);
                         keyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         keyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
@@ -16977,9 +16976,9 @@ public class ApiMgtDAO {
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             String sqlQuery = SQLConstants.GET_KEY_DETAILS_FOR_ASSOCIATION_SQL;
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
-                ps.setString(1, apiUUId);
-                ps.setString(2, keyUUId);
-                ps.setString(3, appUUId);
+                ps.setString(1, appUUId);
+                ps.setString(2, apiUUId);
+                ps.setString(3, keyUUId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         apiKeyInfo.setApiName(rs.getString("API_NAME"));

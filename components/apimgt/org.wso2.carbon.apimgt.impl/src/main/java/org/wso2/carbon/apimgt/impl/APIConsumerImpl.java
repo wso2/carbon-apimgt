@@ -4129,12 +4129,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public APIKeyInfo createAssociationToApp(String apiUUId, String keyUUId, String appUUId)
             throws APIManagementException {
         APIKeyInfo apiKeyInfo = apiMgtDAO.getKeyDetailsForAssociation(apiUUId, appUUId, keyUUId);
-        if (apiKeyInfo == null) {
+        if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId);
         }
         apiMgtDAO.createAssociationToApiKey(keyUUId, appUUId);
         sendAPIKeyAssociationInfoEvent(apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
                 apiUUId, appUUId, apiKeyInfo.getAppId(), "CREATE_ASSOCIATION");
+        Application application = apiMgtDAO.getApplicationByUUID(appUUId);
+        apiKeyInfo.setApplicationName(application.getName());
         return apiKeyInfo;
     }
 
@@ -4146,7 +4148,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      */
     public void removeApiKeyAssociationViaApp(String appUUId, String keyUUId) throws APIManagementException {
         APIKeyInfo apiKeyInfo = apiMgtDAO.getAPIKeyDetailsByKeyUUIDAndAppUUID(appUUId, keyUUId);
-        if (apiKeyInfo == null) {
+        if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for name: " + keyUUId);
         }
         apiMgtDAO.removeAssociationOfAPIKeyViaApp(appUUId, keyUUId);
@@ -4162,7 +4164,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      */
     public void removeApiKeyAssociation(String apiUUId, String keyUUId) throws APIManagementException {
         APIKeyInfo apiKeyInfo = apiMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, keyUUId);
-        if (apiKeyInfo == null) {
+        if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId);
         }
         apiMgtDAO.removeAssociationOfAPIKey(keyUUId);

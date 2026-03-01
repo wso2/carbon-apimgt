@@ -71,15 +71,15 @@ public interface ApplicationsApiService {
       public Response applicationsGet(String groupId, String query, String sortBy, String sortOrder, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsImportPost(InputStream fileInputStream, Attachment fileDetail, Boolean preserveOwner, Boolean skipSubscriptions, String appOwner, Boolean skipApplicationKeys, Boolean update, Boolean ignoreTier, MessageContext messageContext) throws APIManagementException;
       public Response applicationsPost(ApplicationDTO applicationDTO, MessageContext messageContext) throws APIManagementException;
-      public Response generateConsumerSecret(String applicationId, String keyMappingId, ConsumerSecretCreationRequestDTO consumerSecretCreationRequestDTO, MessageContext messageContext) throws APIManagementException;
-      public Response getConsumerSecrets(String applicationId, String keyMappingId, MessageContext messageContext) throws APIManagementException;
-      public Response revokeConsumerSecret(String applicationId, String keyMappingId, ConsumerSecretDeletionRequestDTO consumerSecretDeletionRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response associateAPIKeyToApp(String applicationId, String keyType, AppAPIKeyAssociateRequestDTO appAPIKeyAssociateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response dissociateAPIKeyFromApp(String applicationId, String keyType, APIKeyDissociateRequestDTO apIKeyDissociateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response generateAppBoundAPIKey(String applicationId, String keyType, String ifMatch, APIKeyGenerateRequestDTO apIKeyGenerateRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response generateConsumerSecret(String applicationId, String keyMappingId, ConsumerSecretCreationRequestDTO consumerSecretCreationRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response getAPIKeyAssociationsForApp(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAppBoundAPIKeys(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getConsumerSecrets(String applicationId, String keyMappingId, MessageContext messageContext) throws APIManagementException;
       public Response getSubscribedAPIsWithAPIKeys(String applicationId, String keyType, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response regenerateAppBoundAPIKey(String applicationId, String keyType, APIKeyRenewRequestDTO apIKeyRenewRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response revokeAppBoundAPIKey(String applicationId, String keyType, APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response revokeConsumerSecret(String applicationId, String keyMappingId, ConsumerSecretDeletionRequestDTO consumerSecretDeletionRequestDTO, MessageContext messageContext) throws APIManagementException;
 }
