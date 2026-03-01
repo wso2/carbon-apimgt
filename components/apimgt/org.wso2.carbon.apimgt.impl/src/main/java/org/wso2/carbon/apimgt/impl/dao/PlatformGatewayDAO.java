@@ -218,6 +218,28 @@ public class PlatformGatewayDAO {
     }
 
     /**
+     * List platform gateways that have a row in AM_GW_INSTANCES (same source as deployment acks and stats).
+     * Use this for GET /environments so the list is consistent with deployment feedback.
+     */
+    public List<PlatformGateway> listGatewaysByOrganizationWithInstance(String organizationId)
+            throws APIManagementException {
+        List<PlatformGateway> list = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(
+                     SQLConstants.PlatformGatewaySQLConstants.SELECT_GATEWAYS_BY_ORG_WITH_INSTANCE_SQL)) {
+            ps.setString(1, organizationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapRowToGateway(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error listing platform gateways with instance", e);
+        }
+        return list;
+    }
+
+    /**
      * Update gateway active status (e.g. connected/disconnected for control plane WebSocket).
      */
     public void updateGatewayActiveStatus(String gatewayId, boolean active) throws APIManagementException {

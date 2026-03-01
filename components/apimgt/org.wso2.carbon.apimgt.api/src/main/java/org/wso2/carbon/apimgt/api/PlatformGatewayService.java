@@ -67,6 +67,14 @@ public interface PlatformGatewayService {
     List<PlatformGateway> listGatewaysByOrganization(String organizationId) throws APIManagementException;
 
     /**
+     * List platform gateways that have a row in AM_GW_INSTANCES (for GET /environments; same source as deployment acks).
+     *
+     * @param organizationId organization id
+     * @return list of gateways (never null)
+     */
+    List<PlatformGateway> listGatewaysByOrganizationWithInstance(String organizationId) throws APIManagementException;
+
+    /**
      * Get a platform gateway by id.
      *
      * @param id gateway id

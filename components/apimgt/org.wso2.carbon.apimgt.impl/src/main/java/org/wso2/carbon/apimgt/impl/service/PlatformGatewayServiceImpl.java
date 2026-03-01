@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.model.CreatePlatformGatewayResult;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
+import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
@@ -31,6 +32,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -93,6 +95,9 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
             connection.setAutoCommit(false);
             dao.createGateway(connection, gateway);
             dao.createToken(connection, tokenId, gatewayId, tokenHash, now);
+            // Register in AM_GW_INSTANCES so deployment acks and GET /environments use the same source
+            GatewayManagementDAO.getInstance().insertGatewayInstance(connection, gatewayId, organizationId,
+                    Collections.singletonList(name), now, new byte[0]);
             connection.commit();
         } catch (APIManagementException e) {
             rollbackQuietly(connection);
@@ -120,6 +125,14 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
     public List<PlatformGateway> listGatewaysByOrganization(String organizationId) throws APIManagementException {
         List<PlatformGatewayDAO.PlatformGateway> list = PlatformGatewayDAO.getInstance()
                 .listGatewaysByOrganization(organizationId);
+        return list.stream().map(PlatformGatewayServiceImpl::toApiModel).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PlatformGateway> listGatewaysByOrganizationWithInstance(String organizationId)
+            throws APIManagementException {
+        List<PlatformGatewayDAO.PlatformGateway> list = PlatformGatewayDAO.getInstance()
+                .listGatewaysByOrganizationWithInstance(organizationId);
         return list.stream().map(PlatformGatewayServiceImpl::toApiModel).collect(Collectors.toList());
     }
 

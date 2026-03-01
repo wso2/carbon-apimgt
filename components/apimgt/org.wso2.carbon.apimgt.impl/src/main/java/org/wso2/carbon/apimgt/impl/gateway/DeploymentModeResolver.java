@@ -25,15 +25,19 @@ import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Resolves deployment target environment names into Synapse gateway labels and platform gateway IDs.
  * Used by the Publisher REST flow so that a single "deploy to these environments" request can
  * target both Synapse and platform gateways via {@link org.wso2.carbon.apimgt.impl.APIGatewayManager#deployToGateway}.
  * <p>
- * For each environment name: if it matches a registered platform gateway name for the organization,
- * it is added to platform gateway IDs; otherwise it is treated as a Synapse gateway label.
+ * Uses a single batch lookup: {@code listGatewaysByOrganization(organization)} once, then in-memory
+ * name→gateway map so we avoid N per-name lookups. For each request name: if it is in the platform
+ * map, add the gateway ID; otherwise treat as a Synapse label.
  */
 public final class DeploymentModeResolver {
 
@@ -59,20 +63,31 @@ public final class DeploymentModeResolver {
         PlatformGatewayService platformGatewayService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
 
+        // Single batch lookup: one list call per org instead of N getGatewayByNameAndOrganization calls.
+        Map<String, PlatformGateway> nameToPlatformGateway = null;
+        if (platformGatewayService != null) {
+            try {
+                List<PlatformGateway> gateways = platformGatewayService.listGatewaysByOrganization(organization);
+                if (gateways != null && !gateways.isEmpty()) {
+                    nameToPlatformGateway = gateways.stream()
+                            .filter(gw -> gw != null && StringUtils.isNotBlank(gw.getName()))
+                            .collect(Collectors.toMap(gw -> gw.getName().trim(), gw -> gw, (a, b) -> a));
+                }
+            } catch (APIManagementException e) {
+                // Proceed with empty platform set; all names will be treated as Synapse
+            }
+        }
+
         for (String name : environmentNames) {
             if (StringUtils.isBlank(name)) {
                 continue;
             }
             String trimmed = name.trim();
-            if (platformGatewayService != null) {
-                try {
-                    PlatformGateway gw = platformGatewayService.getGatewayByNameAndOrganization(trimmed, organization);
-                    if (gw != null && gw.getId() != null) {
-                        platformGatewayIds.add(gw.getId());
-                        continue;
-                    }
-                } catch (APIManagementException e) {
-                    // Treat as Synapse label if lookup fails
+            if (nameToPlatformGateway != null) {
+                PlatformGateway gw = nameToPlatformGateway.get(trimmed);
+                if (gw != null && gw.getId() != null) {
+                    platformGatewayIds.add(gw.getId());
+                    continue;
                 }
             }
             synapseLabels.add(trimmed);

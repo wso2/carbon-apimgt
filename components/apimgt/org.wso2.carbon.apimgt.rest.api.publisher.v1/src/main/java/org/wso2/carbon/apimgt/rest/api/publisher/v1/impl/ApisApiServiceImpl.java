@@ -4405,9 +4405,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     * Merge platform gateways into the environments map so deploy/undeploy revision
-     * accepts them by name (same as in GET /environments). Each platform gateway is
-     * added as an Environment with one VHost so vhost validation passes.
+     * Merge platform gateways into the environments map used for deploy/undeploy-revision validation only.
+     * Same pattern as Synapse environments: request body has name, vhost, displayOnDevportal; we validate
+     * against this map. GET /environments stays Synapse-only; UI uses GET /gateways for platform targets
+     * and calls the same deploy-revision/undeploy-revision with those names (no cross: one request = one gateway type).
      */
     private void addPlatformGatewaysToEnvironmentsMap(Map<String, Environment> environments, String organization) {
         org.wso2.carbon.apimgt.api.PlatformGatewayService platformGatewayService =

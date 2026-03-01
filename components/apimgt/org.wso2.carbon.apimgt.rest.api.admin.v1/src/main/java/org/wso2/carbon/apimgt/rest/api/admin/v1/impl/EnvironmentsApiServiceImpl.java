@@ -8,6 +8,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
@@ -156,13 +157,15 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         List<Environment> envList = apiAdmin.getAllEnvironments(organization);
         EnvironmentListDTO envListDTO = EnvironmentMappingUtil.fromEnvListToEnvListDTO(envList);
 
-        // Include platform gateways in the same list so UI gets one unified deploy-target list
-        // (no separate GET /gateways call needed for deploy dropdown)
-        org.wso2.carbon.apimgt.api.PlatformGatewayService platformGatewayService =
+        // Same approach as Synapse/APK: include platform gateways in the same environment list so UI gets
+        // one deploy-target list; each has gatewayType so UI can filter (e.g. show only platform gateways when chosen).
+        PlatformGatewayService platformGatewayService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
         if (platformGatewayService != null) {
             try {
-                List<PlatformGateway> platformGateways = platformGatewayService.listGatewaysByOrganization(organization);
+                // Use gateways that have AM_GW_INSTANCES row (same source as deployment acks and stats)
+                List<PlatformGateway> platformGateways =
+                        platformGatewayService.listGatewaysByOrganizationWithInstance(organization);
                 if (platformGateways != null && !platformGateways.isEmpty()) {
                     List<EnvironmentDTO> list = new ArrayList<>(envListDTO.getList());
                     list.addAll(platformGateways.stream()

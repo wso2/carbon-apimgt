@@ -5012,7 +5012,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
         }
         environmentsToRemove.removeAll(gatewaysToAdd);
-        gatewayManager.unDeployFromGateway(apiProduct, tenantDomain, associatedAPIs, environmentsToRemove);
+        String organization = apiProduct.getOrganization() != null ? apiProduct.getOrganization() : tenantDomain;
+        DeploymentTargets targets = DeploymentModeResolver.resolve(organization, environmentsToRemove);
+        gatewayManager.unDeployFromGateway(apiProduct, tenantDomain, associatedAPIs, environmentsToRemove,
+                targets.getSynapseLabels(),
+                targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds());
     }
 
     protected int getTenantId(String tenantDomain) throws UserStoreException {
@@ -7494,7 +7498,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 try {
                     DeploymentTargets targets = DeploymentModeResolver.resolve(organization, targetEnvironments);
                     gatewayManager.deployToGateway(api, organization, targets.getSynapseLabels(),
-                            targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds());
+                            targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds(),
+                            revisionUUID);
                 } catch (RuntimeException e) {
                     if (e instanceof FaultyGatewayDeploymentException) {
                         Set<String> environments = ((FaultyGatewayDeploymentException) e).getEnvironments();
