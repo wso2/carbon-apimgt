@@ -2249,6 +2249,71 @@ paths:
           "https://127.0.0.1:9443/api/am/admin/v4/environments/8d263942-a6df-4cc2-a804-7a2525501450/gateways"'
 
   ######################################################
+  # The "Platform Gateways" resource API (platform / self-hosted gateway registration)
+  ######################################################
+  /gateways:
+    get:
+      tags:
+        - Platform Gateways
+      summary: Get all platform gateways
+      description: |
+        Get all registered platform gateways for the organization.
+      responses:
+        200:
+          description: |
+            OK.
+            List of platform gateways returned (without registration tokens).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformGatewayList'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/gateways"'
+    post:
+      tags:
+        - Platform Gateways
+      summary: Register a platform gateway
+      description: |
+        Register a new platform gateway. A registration token is generated and returned
+        once in the response; store it (e.g. as GATEWAY_CONTROL_PLANE_TOKEN in Docker Compose) for the
+        gateway to connect to the control plane WebSocket. The token is stored hashed and cannot be retrieved later.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlatformGatewayRequest'
+      responses:
+        201:
+          description: |
+            Created.
+            Gateway and registration token (returned once) in the response body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformGatewayWithToken'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/gateways"'
+
+  ######################################################
   # The "Organizations" resource API
   ######################################################
   /organizations:
@@ -5588,6 +5653,127 @@ components:
           enum:
             - ACTIVE
             - EXPIRED
+    CreatePlatformGatewayRequest:
+      title: Create Platform Gateway Request
+      description: Request body for creating a platform gateway (name pattern, functionalityType enum, optional properties).
+      required:
+        - name
+        - displayName
+        - vhost
+        - functionalityType
+      type: object
+      properties:
+        name:
+          type: string
+          pattern: '^[a-z0-9-]+$'
+          minLength: 3
+          maxLength: 64
+          description: URL-friendly gateway identifier (lowercase alphanumeric with hyphens, unique per organization)
+          example: prod-gateway-01
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Human-readable gateway name
+          example: Production Gateway 01
+        description:
+          type: string
+          maxLength: 1023
+          description: Optional description
+        vhost:
+          type: string
+          maxLength: 255
+          minLength: 1
+          description: Virtual host (domain name) for the gateway
+          example: mg.wso2.com
+        isCritical:
+          type: boolean
+          default: false
+          description: Whether the gateway is marked as critical
+        functionalityType:
+          type: string
+          enum: [regular, ai, event]
+          default: regular
+          description: Type of gateway functionality
+          example: regular
+        properties:
+          type: object
+          additionalProperties: true
+          description: Custom key-value properties for the gateway
+          example: {"region": "us-west", "tier": "premium"}
+    PlatformGateway:
+      title: Platform Gateway
+      description: Platform gateway response (without registration token). Used for list and get.
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Gateway UUID
+        organizationId:
+          type: string
+          readOnly: true
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        properties:
+          type: object
+          additionalProperties: true
+          description: Custom key-value properties
+        vhost:
+          type: string
+        isCritical:
+          type: boolean
+        functionalityType:
+          type: string
+          enum: [regular, ai, event]
+        isActive:
+          type: boolean
+          description: Indicates if the gateway is currently connected to the control plane via WebSocket
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+      readOnly:
+        - id
+        - organizationId
+        - createdAt
+        - updatedAt
+    PlatformGatewayWithToken:
+      title: Platform Gateway (Create Response)
+      description: Platform gateway response including the one-time registration token (POST create only).
+      allOf:
+        - $ref: '#/components/schemas/PlatformGateway'
+        - type: object
+          properties:
+            registrationToken:
+              type: string
+              description: |
+                Registration token (returned only once on create). Use as api-key when connecting
+                the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN.
+      readOnly:
+        - id
+        - organizationId
+        - createdAt
+        - updatedAt
+    PlatformGatewayList:
+      title: Platform Gateway List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Number of platform gateways returned
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlatformGateway'
     Organization:
       title: Organization
       required:
