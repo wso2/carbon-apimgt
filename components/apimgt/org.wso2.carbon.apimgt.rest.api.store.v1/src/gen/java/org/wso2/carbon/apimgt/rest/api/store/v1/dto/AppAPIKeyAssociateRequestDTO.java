@@ -20,62 +20,45 @@ import javax.validation.Valid;
 
 public class AppAPIKeyAssociateRequestDTO   {
   
-    private String apiName = null;
-    private String apiId = null;
-    private String keyName = null;
-
-  /**
-   * API name
-   **/
-  public AppAPIKeyAssociateRequestDTO apiName(String apiName) {
-    this.apiName = apiName;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "SampleAPI", value = "API name")
-  @JsonProperty("apiName")
-  public String getApiName() {
-    return apiName;
-  }
-  public void setApiName(String apiName) {
-    this.apiName = apiName;
-  }
+    private String apiUUID = null;
+    private String keyUUID = null;
 
   /**
    * The unique identifier of the API.
    **/
-  public AppAPIKeyAssociateRequestDTO apiId(String apiId) {
-    this.apiId = apiId;
+  public AppAPIKeyAssociateRequestDTO apiUUID(String apiUUID) {
+    this.apiUUID = apiUUID;
     return this;
   }
 
   
-  @ApiModelProperty(example = "2962f3bb-8330-438e-baee-0ee1d6434ba4", value = "The unique identifier of the API.")
-  @JsonProperty("apiId")
-  public String getApiId() {
-    return apiId;
+  @ApiModelProperty(example = "2962f3bb-8330-438e-baee-0ee1d6434ba4", required = true, value = "The unique identifier of the API.")
+  @JsonProperty("apiUUID")
+  @NotNull
+  public String getApiUUID() {
+    return apiUUID;
   }
-  public void setApiId(String apiId) {
-    this.apiId = apiId;
+  public void setApiUUID(String apiUUID) {
+    this.apiUUID = apiUUID;
   }
 
   /**
-   * API key name
+   * The UUID of the API key
    **/
-  public AppAPIKeyAssociateRequestDTO keyName(String keyName) {
-    this.keyName = keyName;
+  public AppAPIKeyAssociateRequestDTO keyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
     return this;
   }
 
   
-  @ApiModelProperty(example = "Test_Key", value = "API key name")
-  @JsonProperty("keyName")
-  public String getKeyName() {
-    return keyName;
+  @ApiModelProperty(required = true, value = "The UUID of the API key")
+  @JsonProperty("keyUUID")
+  @NotNull
+  public String getKeyUUID() {
+    return keyUUID;
   }
-  public void setKeyName(String keyName) {
-    this.keyName = keyName;
+  public void setKeyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
   }
 
 
@@ -88,14 +71,13 @@ public class AppAPIKeyAssociateRequestDTO   {
       return false;
     }
     AppAPIKeyAssociateRequestDTO appAPIKeyAssociateRequest = (AppAPIKeyAssociateRequestDTO) o;
-    return Objects.equals(apiName, appAPIKeyAssociateRequest.apiName) &&
-        Objects.equals(apiId, appAPIKeyAssociateRequest.apiId) &&
-        Objects.equals(keyName, appAPIKeyAssociateRequest.keyName);
+    return Objects.equals(apiUUID, appAPIKeyAssociateRequest.apiUUID) &&
+        Objects.equals(keyUUID, appAPIKeyAssociateRequest.keyUUID);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiName, apiId, keyName);
+    return Objects.hash(apiUUID, keyUUID);
   }
 
   @Override
@@ -103,9 +85,8 @@ public class AppAPIKeyAssociateRequestDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class AppAPIKeyAssociateRequestDTO {\n");
     
-    sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
-    sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
-    sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
+    sb.append("    apiUUID: ").append(toIndentedString(apiUUID)).append("\n");
+    sb.append("    keyUUID: ").append(toIndentedString(keyUUID)).append("\n");
     sb.append("}");
     return sb.toString();
   }

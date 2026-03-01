@@ -57,7 +57,7 @@ public class OpaqueAPIKeyAssociationInfoListener implements MessageListener {
                                 .path("payloadData");
 
                     APIKeyInfo apiKeyInfo;
-                    String lookupKey = "Api|" + payload.path(APIConstants.NotificationEvent.API_KEY_HASH).asText();
+                    String lookupKey = payload.path(APIConstants.NotificationEvent.API_KEY_HASH).asText();
                     if (payload.path(APIConstants.NotificationEvent.ASSOCIATION_TYPE).asText().
                             equalsIgnoreCase("CREATE_ASSOCIATION")) {
                         apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKey);

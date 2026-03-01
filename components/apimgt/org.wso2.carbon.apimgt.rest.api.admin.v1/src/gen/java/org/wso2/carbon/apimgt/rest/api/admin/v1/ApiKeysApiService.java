@@ -22,6 +22,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApiKeysApiService {
-      public Response apiKeysApiIdApplicationIdKeyTypeRevokePost(String apiId, String applicationId, String keyType, APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response apiKeysGet(MessageContext messageContext) throws APIManagementException;
+      public Response apiKeysRevokePost(APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO, MessageContext messageContext) throws APIManagementException;
 }

@@ -67,10 +67,10 @@ public class OpaqueAPIKeyInfoListener implements MessageListener {
                     apiKeyInfo.setOrigin(payload.path(APIConstants.NotificationEvent.ORIGIN).asText());
                     if ("APP".equalsIgnoreCase(apiKeyInfo.getOrigin())) {
                         apiKeyInfo.setApplicationId(payload.path(APIConstants.NotificationEvent.ORIGIN_UUID).asText());
-                        lookupKey = "App|" + payload.path(APIConstants.NotificationEvent.API_KEY_HASH).asText();
+                        lookupKey = payload.path(APIConstants.NotificationEvent.API_KEY_HASH).asText();
                     } else if ("API".equalsIgnoreCase(apiKeyInfo.getOrigin())) {
                         apiKeyInfo.setApiUUId(payload.path(APIConstants.NotificationEvent.ORIGIN_UUID).asText());
-                        lookupKey = "Api|" + payload.path(APIConstants.NotificationEvent.API_KEY_HASH).asText();
+                        lookupKey = payload.path(APIConstants.NotificationEvent.API_KEY_HASH).asText();
                     } else {
                         log.warn("Dropping opaque API key info event with unsupported origin: " + apiKeyInfo.getOrigin());
                         return;

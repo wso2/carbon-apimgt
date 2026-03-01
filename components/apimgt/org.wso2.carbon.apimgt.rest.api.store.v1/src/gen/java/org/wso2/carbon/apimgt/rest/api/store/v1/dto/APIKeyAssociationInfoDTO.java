@@ -20,11 +20,30 @@ import javax.validation.Valid;
 
 public class APIKeyAssociationInfoDTO   {
   
+    private String keyUUID = null;
     private String keyName = null;
     private String apiName = null;
     private String issuedOn = null;
     private Integer validityPeriod = null;
     private String lastUsed = null;
+
+  /**
+   * The UUID of the API key
+   **/
+  public APIKeyAssociationInfoDTO keyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "The UUID of the API key")
+  @JsonProperty("keyUUID")
+  public String getKeyUUID() {
+    return keyUUID;
+  }
+  public void setKeyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
+  }
 
   /**
    * API Key name
@@ -125,7 +144,8 @@ public class APIKeyAssociationInfoDTO   {
       return false;
     }
     APIKeyAssociationInfoDTO apIKeyAssociationInfo = (APIKeyAssociationInfoDTO) o;
-    return Objects.equals(keyName, apIKeyAssociationInfo.keyName) &&
+    return Objects.equals(keyUUID, apIKeyAssociationInfo.keyUUID) &&
+        Objects.equals(keyName, apIKeyAssociationInfo.keyName) &&
         Objects.equals(apiName, apIKeyAssociationInfo.apiName) &&
         Objects.equals(issuedOn, apIKeyAssociationInfo.issuedOn) &&
         Objects.equals(validityPeriod, apIKeyAssociationInfo.validityPeriod) &&
@@ -134,7 +154,7 @@ public class APIKeyAssociationInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyName, apiName, issuedOn, validityPeriod, lastUsed);
+    return Objects.hash(keyUUID, keyName, apiName, issuedOn, validityPeriod, lastUsed);
   }
 
   @Override
@@ -142,6 +162,7 @@ public class APIKeyAssociationInfoDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIKeyAssociationInfoDTO {\n");
     
+    sb.append("    keyUUID: ").append(toIndentedString(keyUUID)).append("\n");
     sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
     sb.append("    issuedOn: ").append(toIndentedString(issuedOn)).append("\n");

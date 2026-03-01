@@ -6585,6 +6585,9 @@ components:
       title: API Key association
       type: object
       properties:
+        keyUUID:
+          type: string
+          description: The UUID of the API key
         keyName:
           type: string
           description: API Key name
@@ -6609,6 +6612,9 @@ components:
       title: API Key details to invoke APIs
       type: object
       properties:
+        keyUUID:
+          type: string
+          description: The UUID of the API key
         keyName:
           type: string
           description: API Key name
@@ -6633,6 +6639,9 @@ components:
           type: string
           description: API Key name
           example: Test_Key
+        keyUUID:
+          type: string
+          description: The UUID of the API key
         apiName:
           type: string
           description: API name
@@ -6644,6 +6653,9 @@ components:
       title: API Key details to invoke APIs
       type: object
       properties:
+        keyUUID:
+          type: string
+          description: The UUID of the API key
         keyName:
           type: string
           description: API Key name
@@ -6964,12 +6976,11 @@ components:
       title: API Key renewal request object
       type: object
       required:
-        - keyName
+        - keyUUID
       properties:
-        keyName:
+        keyUUID:
           type: string
-          description: API Key name
-          example: Test_Key
+          description: The UUID of the API key
         validityPeriod:
           type: integer
           description: API key validity period
@@ -6983,68 +6994,61 @@ components:
       title: API Key association request object
       type: object
       required:
-        - keyName
-        - applicationName
+        - keyUUID
+        - applicationUUID
       properties:
-        keyName:
+        keyUUID:
           type: string
-          description: API Key name
-          example: Test_Key
-        applicationName:
+          description: The UUID of the API key
+        applicationUUID:
           type: string
-          description: Application name to be associated
-          example: DefaultApplication
+          description: The UUID of the Application to be associated
     APIKeyDissociateRequest:
       title: API Key dissociation request object
       type: object
       required:
-        - keyName
+        - keyUUID
       properties:
-        keyName:
+        keyUUID:
           type: string
-          description: API Key name
-          example: Test_Key
+          description: The UUID of the API key
     AppAPIKeyAssociateRequest:
       title: API Key association request object
       type: object
+      required:
+        - keyUUID
+        - apiUUID
       properties:
-        apiName:
-          type: string
-          description: API name
-          example: SampleAPI
-        apiId:
+        apiUUID:
           type: string
           description: The unique identifier of the API.
           example: 2962f3bb-8330-438e-baee-0ee1d6434ba4
-        keyName:
+        keyUUID:
           type: string
-          description: API key name
-          example: Test_Key
+          description: The UUID of the API key
     APIKeyRevokeRequest:
       title: API Key revoke request object
       type: object
       oneOf:
         - required: [ apikey ]
-        - required: [ keyName ]
+        - required: [ keyUUID ]
       properties:
         apikey:
           type: string
           description: API Key to revoke
           example: eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=
-        keyName:
+        keyUUID:
           type: string
-          description: API Key name
-          example: Test_Key
+          description: The UUID of the API key
     APIAPIKeyRevokeRequest:
       title: API Key revoke request object
       type: object
       required:
-        - keyName
+        - keyUUID
       properties:
-        keyName:
+        keyUUID:
           type: string
-          description: API Key name
-          example: Test_Key
+          description: The UUID of the API key
     ScopeInfo:
       title: API Scope info object with scope details
       type: object

@@ -37,7 +37,6 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
 
     private static final Log log = LogFactory.getLog(OpaqueAPIKeyNotifierImpl.class);
     protected static final String DEFAULT_TTL = "3600";
-    protected Properties realTimeNotifierProperties;
 
     /**
      * Method to publish the api key last used time on to the realtime message broker
@@ -53,7 +52,7 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
         if (properties.getProperty(APIConstants.NotificationEvent.EXPIRY_TIME) != null) {
             expiryTimeForJWT = Long.parseLong(properties.getProperty(APIConstants.NotificationEvent.EXPIRY_TIME));
         }
-        String realtimeNotifierTTL = realTimeNotifierProperties.getProperty("ttl", DEFAULT_TTL);
+        String realtimeNotifierTTL = DEFAULT_TTL;
         String eventId = properties.getProperty(APIConstants.NotificationEvent.EVENT_ID);
         if (APIConstants.NotificationEvent.API_KEY_USAGE_EVENT.equals(
                 properties.getProperty(APIConstants.NotificationEvent.EVENT_TYPE))) {
@@ -138,12 +137,5 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
         apiKeyAssociationInfoEvent.setOrgId(orgId);
         APIUtil.publishEvent(EventPublisherType.API_KEY_ASSOCIATION_INFO, apiKeyAssociationInfoEvent,
                 apiKeyAssociationInfoEvent.toString());
-    }
-
-    @Override
-    public void init(Properties realTimeNotifierProperties) {
-        this.realTimeNotifierProperties = realTimeNotifierProperties != null
-                ? (Properties) realTimeNotifierProperties.clone()
-                : new Properties();
     }
 }

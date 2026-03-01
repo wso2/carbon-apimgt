@@ -72,6 +72,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /api-keys:
+    get:
+      summary: An Array of API keys generated
+      description: |
+        This will provide API keys generated
+      parameters:
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be retrieved from.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: An array of API keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/APIKeyList'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /revokedjwt:
     get:
       summary: >-
@@ -1365,6 +1394,40 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/API'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    APIKey:
+      type: object
+      properties:
+        apiKeyHash:
+          type: string
+        keyName:
+          type: string
+        keyType:
+          type: string
+        status:
+          type: string
+        validityPeriod:
+          type: integer
+          format: int32
+        appId:
+          type: integer
+        additionalProperties:
+          type: object
+          properties: { }
+    APIKeyList:
+      title: API Key List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of API Keys returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIKey'
         pagination:
           $ref: '#/components/schemas/Pagination'
     DeployedAPIRevision:

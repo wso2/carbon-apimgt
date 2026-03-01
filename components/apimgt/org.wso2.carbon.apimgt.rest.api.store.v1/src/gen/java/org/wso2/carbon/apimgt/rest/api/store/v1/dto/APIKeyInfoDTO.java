@@ -20,10 +20,29 @@ import javax.validation.Valid;
 
 public class APIKeyInfoDTO   {
   
+    private String keyUUID = null;
     private String keyName = null;
     private String issuedOn = null;
     private Integer validityPeriod = null;
     private String lastUsed = null;
+
+  /**
+   * The UUID of the API key
+   **/
+  public APIKeyInfoDTO keyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "The UUID of the API key")
+  @JsonProperty("keyUUID")
+  public String getKeyUUID() {
+    return keyUUID;
+  }
+  public void setKeyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
+  }
 
   /**
    * API Key name
@@ -106,7 +125,8 @@ public class APIKeyInfoDTO   {
       return false;
     }
     APIKeyInfoDTO apIKeyInfo = (APIKeyInfoDTO) o;
-    return Objects.equals(keyName, apIKeyInfo.keyName) &&
+    return Objects.equals(keyUUID, apIKeyInfo.keyUUID) &&
+        Objects.equals(keyName, apIKeyInfo.keyName) &&
         Objects.equals(issuedOn, apIKeyInfo.issuedOn) &&
         Objects.equals(validityPeriod, apIKeyInfo.validityPeriod) &&
         Objects.equals(lastUsed, apIKeyInfo.lastUsed);
@@ -114,7 +134,7 @@ public class APIKeyInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyName, issuedOn, validityPeriod, lastUsed);
+    return Objects.hash(keyUUID, keyName, issuedOn, validityPeriod, lastUsed);
   }
 
   @Override
@@ -122,6 +142,7 @@ public class APIKeyInfoDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIKeyInfoDTO {\n");
     
+    sb.append("    keyUUID: ").append(toIndentedString(keyUUID)).append("\n");
     sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    issuedOn: ").append(toIndentedString(issuedOn)).append("\n");
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");

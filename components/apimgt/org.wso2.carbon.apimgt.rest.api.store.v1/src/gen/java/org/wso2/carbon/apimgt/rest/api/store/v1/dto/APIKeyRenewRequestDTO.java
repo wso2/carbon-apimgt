@@ -20,27 +20,27 @@ import javax.validation.Valid;
 
 public class APIKeyRenewRequestDTO   {
   
-    private String keyName = null;
+    private String keyUUID = null;
     private Integer validityPeriod = null;
     private Object additionalProperties = null;
 
   /**
-   * API Key name
+   * The UUID of the API key
    **/
-  public APIKeyRenewRequestDTO keyName(String keyName) {
-    this.keyName = keyName;
+  public APIKeyRenewRequestDTO keyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
     return this;
   }
 
   
-  @ApiModelProperty(example = "Test_Key", required = true, value = "API Key name")
-  @JsonProperty("keyName")
+  @ApiModelProperty(required = true, value = "The UUID of the API key")
+  @JsonProperty("keyUUID")
   @NotNull
-  public String getKeyName() {
-    return keyName;
+  public String getKeyUUID() {
+    return keyUUID;
   }
-  public void setKeyName(String keyName) {
-    this.keyName = keyName;
+  public void setKeyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
   }
 
   /**
@@ -90,14 +90,14 @@ public class APIKeyRenewRequestDTO   {
       return false;
     }
     APIKeyRenewRequestDTO apIKeyRenewRequest = (APIKeyRenewRequestDTO) o;
-    return Objects.equals(keyName, apIKeyRenewRequest.keyName) &&
+    return Objects.equals(keyUUID, apIKeyRenewRequest.keyUUID) &&
         Objects.equals(validityPeriod, apIKeyRenewRequest.validityPeriod) &&
         Objects.equals(additionalProperties, apIKeyRenewRequest.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyName, validityPeriod, additionalProperties);
+    return Objects.hash(keyUUID, validityPeriod, additionalProperties);
   }
 
   @Override
@@ -105,7 +105,7 @@ public class APIKeyRenewRequestDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIKeyRenewRequestDTO {\n");
     
-    sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
+    sb.append("    keyUUID: ").append(toIndentedString(keyUUID)).append("\n");
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");

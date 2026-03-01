@@ -374,15 +374,12 @@ public class APIAdminImpl implements APIAdmin {
     /**
      * Revokes a given api key
      *
-     * @param apiId Id of the API
-     * @param applicationId Id of the Application
-     * @param keyType Key type
-     * @param keyName API key name
+     * @param keyUUId API key UUId
      */
     @Override
-    public void revokeAPIKey(String apiId, String applicationId, String keyType, String keyName) throws APIManagementException {
+    public void revokeAPIKey(String keyUUId) throws APIManagementException {
 
-        apiMgtDAO.revokeAPIKeyFromAdmin(apiId, applicationId, keyType, keyName);
+        apiMgtDAO.revokeAPIKey(keyUUId);
     }
 
     /**

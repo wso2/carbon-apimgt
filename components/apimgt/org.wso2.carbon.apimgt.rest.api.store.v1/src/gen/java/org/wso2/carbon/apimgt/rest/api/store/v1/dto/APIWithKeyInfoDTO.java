@@ -21,6 +21,7 @@ import javax.validation.Valid;
 public class APIWithKeyInfoDTO   {
   
     private String keyName = null;
+    private String keyUUID = null;
     private String apiName = null;
     private String apiUUID = null;
 
@@ -40,6 +41,24 @@ public class APIWithKeyInfoDTO   {
   }
   public void setKeyName(String keyName) {
     this.keyName = keyName;
+  }
+
+  /**
+   * The UUID of the API key
+   **/
+  public APIWithKeyInfoDTO keyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "The UUID of the API key")
+  @JsonProperty("keyUUID")
+  public String getKeyUUID() {
+    return keyUUID;
+  }
+  public void setKeyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
   }
 
   /**
@@ -89,13 +108,14 @@ public class APIWithKeyInfoDTO   {
     }
     APIWithKeyInfoDTO apIWithKeyInfo = (APIWithKeyInfoDTO) o;
     return Objects.equals(keyName, apIWithKeyInfo.keyName) &&
+        Objects.equals(keyUUID, apIWithKeyInfo.keyUUID) &&
         Objects.equals(apiName, apIWithKeyInfo.apiName) &&
         Objects.equals(apiUUID, apIWithKeyInfo.apiUUID);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyName, apiName, apiUUID);
+    return Objects.hash(keyName, keyUUID, apiName, apiUUID);
   }
 
   @Override
@@ -104,6 +124,7 @@ public class APIWithKeyInfoDTO   {
     sb.append("class APIWithKeyInfoDTO {\n");
     
     sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
+    sb.append("    keyUUID: ").append(toIndentedString(keyUUID)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
     sb.append("    apiUUID: ").append(toIndentedString(apiUUID)).append("\n");
     sb.append("}");

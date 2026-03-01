@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.api.model;
 import java.util.Map;
 
 public class APIKeyInfo {
+
+    private String keyUUID;
     private String keyName;
     private int appId;
     private String applicationId;
@@ -40,6 +42,14 @@ public class APIKeyInfo {
     private String apiKey;
     private String authUser;
     private String status;
+
+    public String getKeyUUID() {
+        return keyUUID;
+    }
+
+    public void setKeyUUID(String keyUUID) {
+        this.keyUUID = keyUUID;
+    }
 
     public String getKeyName() {
         return keyName;

@@ -21,7 +21,7 @@ import javax.validation.Valid;
 public class APIKeyRevokeRequestDTO   {
   
     private String apikey = null;
-    private String keyName = null;
+    private String keyUUID = null;
 
   /**
    * API Key to revoke
@@ -42,21 +42,21 @@ public class APIKeyRevokeRequestDTO   {
   }
 
   /**
-   * API Key name
+   * The UUID of the API key
    **/
-  public APIKeyRevokeRequestDTO keyName(String keyName) {
-    this.keyName = keyName;
+  public APIKeyRevokeRequestDTO keyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
     return this;
   }
 
   
-  @ApiModelProperty(example = "Test_Key", value = "API Key name")
-  @JsonProperty("keyName")
-  public String getKeyName() {
-    return keyName;
+  @ApiModelProperty(value = "The UUID of the API key")
+  @JsonProperty("keyUUID")
+  public String getKeyUUID() {
+    return keyUUID;
   }
-  public void setKeyName(String keyName) {
-    this.keyName = keyName;
+  public void setKeyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
   }
 
 
@@ -70,12 +70,12 @@ public class APIKeyRevokeRequestDTO   {
     }
     APIKeyRevokeRequestDTO apIKeyRevokeRequest = (APIKeyRevokeRequestDTO) o;
     return Objects.equals(apikey, apIKeyRevokeRequest.apikey) &&
-        Objects.equals(keyName, apIKeyRevokeRequest.keyName);
+        Objects.equals(keyUUID, apIKeyRevokeRequest.keyUUID);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apikey, keyName);
+    return Objects.hash(apikey, keyUUID);
   }
 
   @Override
@@ -84,7 +84,7 @@ public class APIKeyRevokeRequestDTO   {
     sb.append("class APIKeyRevokeRequestDTO {\n");
     
     sb.append("    apikey: ").append(toIndentedString(apikey)).append("\n");
-    sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
+    sb.append("    keyUUID: ").append(toIndentedString(keyUUID)).append("\n");
     sb.append("}");
     return sb.toString();
   }

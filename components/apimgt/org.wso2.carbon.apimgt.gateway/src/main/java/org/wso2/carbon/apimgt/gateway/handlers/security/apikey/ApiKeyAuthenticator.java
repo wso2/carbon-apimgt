@@ -182,8 +182,9 @@ public class ApiKeyAuthenticator implements Authenticator {
                                 apiContext, apiVersion, referer);
                         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext,
                                 apiVersion, payload, splitToken[0]);
-                        String endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO, jwtConfigurationDto, apiKey,
-                                signedJWT, payload, tokenIdentifier, apiContext, apiVersion, isGatewayTokenCacheEnabled);
+                        String endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO,
+                                jwtConfigurationDto, apiKey, signedJWT, payload, tokenIdentifier, apiContext, apiVersion,
+                                isGatewayTokenCacheEnabled);
                         AuthenticationContext authenticationContext = GatewayUtils.generateAuthenticationContext(tokenIdentifier,
                                 payload, apiKeyValidationInfoDTO, endUserToken);
                         APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext,
@@ -202,7 +203,8 @@ public class ApiKeyAuthenticator implements Authenticator {
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
             }
-            AuthenticationContext opaqueApiKeyAuthenticationContext = validateOpaqueApiKey(apiKey, apiContext, apiVersion, referer, GatewayUtils.getIp(axis2MessageContext));
+            AuthenticationContext opaqueApiKeyAuthenticationContext = validateOpaqueApiKey(apiKey, apiContext,
+                    apiVersion, referer, GatewayUtils.getIp(axis2MessageContext));
             if (opaqueApiKeyAuthenticationContext.isAuthenticated()) {
                 APISecurityUtils.setAuthenticationContext(synCtx, opaqueApiKeyAuthenticationContext, null);
                 synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, opaqueApiKeyAuthenticationContext.getUsername());
@@ -239,21 +241,19 @@ public class ApiKeyAuthenticator implements Authenticator {
      * @return AuthenticationContext Authentication context with the API key validation info
      * @throws APIManagementException if an error occurs
      */
-    public AuthenticationContext validateOpaqueApiKey(String apiKey, String apiContext, String apiVersion, String referrer, String ip)
-            throws APISecurityException, APIManagementException {
+    public AuthenticationContext validateOpaqueApiKey(String apiKey, String apiContext, String apiVersion, String referrer,
+                                                      String ip) throws APISecurityException, APIManagementException {
 
         // Hash the provided API key
         String apiKeyHash = APIUtil.sha256Hash(apiKey);
-        String lookupKeyApi = "Api|" + apiKeyHash;
+        String lookupKey = apiKeyHash;
         APIKeyInfo apiKeyInfo;
-        apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKeyApi);
-        if (apiKeyInfo == null) {
-            String lookupKeyApp = "App|" + apiKeyHash;
-            apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKeyApp);
-        }
+        apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKey);
 
-        if (apiKeyInfo == null || !"ACTIVE".equals(apiKeyInfo.getStatus())) {
-            log.error("Invalid Api Key. Active API key information not available.");
+        if (apiKeyInfo == null || !APIConstants.NotificationEvent.ACTIVE.equals(apiKeyInfo.getStatus())) {
+            if (log.isDebugEnabled()) {
+                log.debug("Invalid Api Key. Active API key information not available.");
+            }
             throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                     APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
         }
@@ -262,31 +262,28 @@ public class ApiKeyAuthenticator implements Authenticator {
         if (!MessageDigest.isEqual(
                 apiKeyHash.getBytes(StandardCharsets.UTF_8),
                 apiKeyInfo.getApiKeyHash().getBytes(StandardCharsets.UTF_8))) {
-            log.error("Invalid Api Key. API key hash is not matched.");
+            if (log.isDebugEnabled()) {
+                log.debug("Invalid Api Key. API key hash is not matched.");
+            }
             throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                     APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
         }
 
         // Validate subscriptions
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
-        try {
-            apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext, apiVersion, apiKeyInfo.getKeyType(),
-                    apiKeyInfo.getAppId(), apiKey);
-            if (apiKeyValidationInfoDTO != null && apiKeyValidationInfoDTO.isAuthorized()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("User is subscribed to the API: " + apiContext + ", " +
-                            "version: " + apiVersion + ". Token: " + apiKeyInfo.getKeyName());
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("User is not subscribed to access the API: " + apiContext +
-                            ", version: " + apiVersion + ". Token: " + apiKeyInfo.getKeyName());
-                }
-                log.error("User is not subscribed to access the API.");
-                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
-                        APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+        apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext, apiVersion, apiKeyInfo.getKeyType(),
+                apiKeyInfo.getAppId(), apiKey);
+        if (apiKeyValidationInfoDTO != null && apiKeyValidationInfoDTO.isAuthorized()) {
+            if (log.isDebugEnabled()) {
+                log.debug("User is subscribed to the API: " + apiContext + ", " +
+                        "version: " + apiVersion + ". Token: " + apiKeyInfo.getKeyName());
             }
-        } catch (APISecurityException e) {
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("User is not subscribed to access the API: " + apiContext +
+                        ", version: " + apiVersion + ". Token: " + apiKeyInfo.getKeyName());
+            }
+            log.error("User is not subscribed to access the API.");
             throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                     APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
         }
@@ -303,6 +300,11 @@ public class ApiKeyAuthenticator implements Authenticator {
         return GatewayUtils.generateAuthenticationContext(apiKey, null, apiKeyValidationInfoDTO, null);
     }
 
+    /**
+     * Publish API key usage events to CP
+     * @param apiKeyHash API key hash value
+     * @param tenantDomain Tenant domain
+     */
     private void updateApiKeyLastUsedTime(String apiKeyHash, String tenantDomain) {
         OpaqueApiKeyPublisher apiKeyUsagePublisher = OpaqueApiKeyPublisher.getInstance();
         Properties properties = new Properties();

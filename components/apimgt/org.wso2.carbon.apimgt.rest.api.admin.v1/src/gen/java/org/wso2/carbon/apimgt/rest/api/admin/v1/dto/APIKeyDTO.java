@@ -20,6 +20,7 @@ import javax.validation.Valid;
 
 public class APIKeyDTO   {
   
+    private String keyUUID = null;
     private String keyName = null;
     private String apiName = null;
     private String applicationName = null;
@@ -59,6 +60,24 @@ return null;
     private String issuedOn = null;
     private Integer validityPeriod = null;
     private String lastUsed = null;
+
+  /**
+   * The UUID of the API key
+   **/
+  public APIKeyDTO keyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "The UUID of the API key")
+  @JsonProperty("keyUUID")
+  public String getKeyUUID() {
+    return keyUUID;
+  }
+  public void setKeyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
+  }
 
   /**
    * API Key name
@@ -213,7 +232,8 @@ return null;
       return false;
     }
     APIKeyDTO apIKey = (APIKeyDTO) o;
-    return Objects.equals(keyName, apIKey.keyName) &&
+    return Objects.equals(keyUUID, apIKey.keyUUID) &&
+        Objects.equals(keyName, apIKey.keyName) &&
         Objects.equals(apiName, apIKey.apiName) &&
         Objects.equals(applicationName, apIKey.applicationName) &&
         Objects.equals(keyType, apIKey.keyType) &&
@@ -225,7 +245,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyName, apiName, applicationName, keyType, user, issuedOn, validityPeriod, lastUsed);
+    return Objects.hash(keyUUID, keyName, apiName, applicationName, keyType, user, issuedOn, validityPeriod, lastUsed);
   }
 
   @Override
@@ -233,6 +253,7 @@ return null;
     StringBuilder sb = new StringBuilder();
     sb.append("class APIKeyDTO {\n");
     
+    sb.append("    keyUUID: ").append(toIndentedString(keyUUID)).append("\n");
     sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
     sb.append("    applicationName: ").append(toIndentedString(applicationName)).append("\n");

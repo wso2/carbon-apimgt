@@ -676,7 +676,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             application = ExportUtils.getApplicationDetails(appName, appOwner, apiConsumer);
         }
         if (application == null) {
-            throw new APIManagementException("No application found with name " + appName + " owned by " + appOwner, ExceptionCodes.APPLICATION_NOT_FOUND);
+            throw new APIManagementException("No application found with name " + appName + " owned by " + appOwner,
+                    ExceptionCodes.APPLICATION_NOT_FOUND);
         } else if (!MultitenantUtils.getTenantDomain(application.getSubscriber().getName())
                 .equals(MultitenantUtils.getTenantDomain(username))) {
             throw new APIManagementException("Cross Tenant Exports are not allowed", ExceptionCodes.TENANT_MISMATCH);
@@ -688,47 +689,47 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response associateAPIKeyToApp(String applicationId, String keyType, AppAPIKeyAssociateRequestDTO body,
+    public Response associateAPIKeyToApp(String applicationUUId, String keyType, AppAPIKeyAssociateRequestDTO body,
                                                                          String ifMatch, MessageContext messageContext)
             throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         Application application;
-        String apiName = null, keyName = null;
+        String apiUUId = null, keyUUId = null;
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
-            if ((application = apiConsumer.getApplicationByUUID(applicationId)) == null) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            if ((application = apiConsumer.getApplicationByUUID(applicationUUId)) == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationUUId, log);
             } else {
                 if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationUUId, log);
                 } else {
                     boolean isValidKeyType = APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)
                             || APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType);
                     if (!isValidKeyType) {
                         RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
                     }
-                    if (body != null && body.getApiName() != null) {
-                        apiName = body.getApiName();
+                    if (body != null && body.getApiUUID() != null) {
+                        apiUUId = body.getApiUUID();
                     }
-                    if (body != null && body.getKeyName() != null) {
-                        keyName = body.getKeyName();
+                    if (body != null && body.getKeyUUID() != null) {
+                        keyUUId = body.getKeyUUID();
                     }
-                    apiConsumer.createAssociationToAppViaApp(body.getApiId(), applicationId, keyName, keyType);
-                    APIKeyAssociationDTO apiKeyAssociationDTO = ApplicationKeyMappingUtil.formApiAssociationToDTO(apiName,
-                            application.getName(), keyName);
+                    APIKeyInfo apikeyInfo = apiConsumer.createAssociationToApp(apiUUId, keyUUId, applicationUUId);
+                    APIKeyAssociationDTO apiKeyAssociationDTO = ApplicationKeyMappingUtil.formApiAssociationToDTO(
+                            apikeyInfo.getApiName(),
+                            application.getName(), apikeyInfo.getKeyName());
                     return Response.ok().entity(apiKeyAssociationDTO).build();
                 }
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while creating an association to the API Key " + keyName, e, log);
+            RestApiUtil.handleInternalServerError("Error while creating an association to the API Key " + keyUUId, e, log);
         }
         return null;
     }
 
     @Override
-    public Response getAPIKeyAssociationsForApp(String applicationId,
-                                                                           String keyType, String ifNoneMatch,
-                                                                           MessageContext messageContext)
+    public Response getAPIKeyAssociationsForApp(String applicationId, String keyType, String ifNoneMatch,
+                                                MessageContext messageContext)
             throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         Application application;
@@ -753,7 +754,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 }
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving API Key associations for application " + applicationId, e, log);
+            RestApiUtil.handleInternalServerError("Error while retrieving API Key associations for application " +
+                    applicationId, e, log);
         }
         return null;
     }
@@ -848,10 +850,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                                                           String ifMatch, MessageContext messageContext)
             throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        if (body == null || StringUtils.isEmpty(body.getKeyName())) {
+        if (body == null || StringUtils.isEmpty(body.getKeyUUID())) {
             RestApiUtil.handleBadRequest("Key name is required", log);
         }
-        String keyName = body.getKeyName();
+        String keyUUID = body.getKeyUUID();
         Application application;
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
@@ -868,12 +870,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     } else {
                         RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
                     }
-                    apiConsumer.removeApiKeyAssociationViaApp(applicationId, keyName);
+                    apiConsumer.removeApiKeyAssociationViaApp(applicationId, keyUUID);
                     return Response.ok().build();
                 }
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while removing an association to the API Key " + keyName, e, log);
+            RestApiUtil.handleInternalServerError("Error while removing an association to the API Key " + keyUUID, e, log);
         }
         return null;
     }
@@ -886,8 +888,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             RestApiUtil.handleBadRequest("Request body is required", log);
             return null;
         }
-        String keyName = body.getKeyName();
-        if (!StringUtils.isEmpty(keyName)) {
+        String keyUUID = body.getKeyUUID();
+        if (!StringUtils.isEmpty(keyUUID)) {
             try {
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
                 Application application = apiConsumer.getApplicationByUUID(applicationId);
@@ -901,7 +903,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                     "or SANDBOX", log);
                         } else {
                             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                            APIKeyInfo apiKeyInfo = apiConsumer.regenerateApiKey(applicationId, keyType, keyName, tenantDomain, username);
+                            APIKeyInfo apiKeyInfo = apiConsumer.regenerateApiKey(applicationId, keyType, keyUUID,
+                                    tenantDomain, username);
                             APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKeyInfo.getApiKey(),
                                     (int) apiKeyInfo.getValidityPeriod(), apiKeyInfo.getKeyName());
                             return Response.ok().entity(apiKeyDto).build();
@@ -924,14 +927,14 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 String msg = "Error while regenerating API Key of application " + applicationId;
                 if(log.isDebugEnabled()) {
                     log.debug("Error while regenerating API Key of application " +
-                            applicationId+ " and API Key " + keyName);
+                            applicationId+ " and API Key " + keyUUID);
                 }
                 log.error(msg, e);
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Provided API Key name " + keyName + " is not valid");
+                log.debug("Provided API Key UUID " + keyUUID + " is not valid");
             }
             RestApiUtil.handleBadRequest("Provided API Key isn't valid ", log);
         }
@@ -947,7 +950,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             return null;
         }
         String apiKey = body.getApikey();
-        String keyName = body.getKeyName();
+        String keyUUID = body.getKeyUUID();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
@@ -999,7 +1002,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             }
                             RestApiUtil.handleInternalServerError("Validation failed for the given token", log);
                         }
-                    } else if (!StringUtils.isEmpty(keyName)) {
+                    } else if (!StringUtils.isEmpty(keyUUID)) {
                         boolean isValidKeyType = APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)
                                 || APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType);
                         if (!isValidKeyType) {
@@ -1007,7 +1010,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                     "or SANDBOX", log);
                         } else {
                             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                            apiConsumer.revokeApiKey(applicationId, keyType, keyName, tenantDomain);
+                            apiConsumer.revokeApiKey(keyUUID, tenantDomain);
                             return Response.ok().build();
                         }
                     } else {
@@ -1015,7 +1018,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             if (!StringUtils.isEmpty(apiKey)) {
                                 log.debug("Provided API Key " + APIUtil.getMaskedToken(apiKey) + " is not valid");
                             } else {
-                                log.debug("Provided API Key name " + keyName + " is not valid");
+                                log.debug("Provided API Key UUID " + keyUUID + " is not valid");
                             }
                         }
                         RestApiUtil.handleBadRequest("Provided API Key isn't valid ", log);
@@ -1037,9 +1040,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         } catch (APIManagementException e) {
             String msg = "Error while revoking API Key of application " + applicationId;
             if (log.isDebugEnabled()) {
-                if (!StringUtils.isEmpty(keyName)) {
+                if (!StringUtils.isEmpty(keyUUID)) {
                     log.debug("Error while revoking API Key of application " +
-                            applicationId + " and token " + keyName);
+                            applicationId + " and token " + keyUUID);
                 } else {
                     log.debug("Error while revoking API Key of application " +
                             applicationId + " and token " + APIUtil.getMaskedToken(apiKey));
@@ -1071,13 +1074,15 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
                     } else {
                         List<APIKeyInfo> apiKeyList = apiConsumer.getApisWithApiKeys(applicationId, keyType);
-                        List<APIWithKeyInfoDTO> apiApiKeyInfoDTOList = ApplicationKeyMappingUtil.formApiWithApiKeyListToDTOList(apiKeyList);
+                        List<APIWithKeyInfoDTO> apiApiKeyInfoDTOList = ApplicationKeyMappingUtil.
+                                formApiWithApiKeyListToDTOList(apiKeyList);
                         return Response.ok().entity(apiApiKeyInfoDTOList).build();
                     }
                 }
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving APIs with API Keys for application " + applicationId, e, log);
+            RestApiUtil.handleInternalServerError("Error while retrieving APIs with API Keys for application " +
+                    applicationId, e, log);
         }
         return null;
     }

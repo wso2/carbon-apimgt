@@ -3415,6 +3415,7 @@ public final class APIConstants {
         public static final String APPLICATION_ID = "applicationId";
         public static final String APPLICATION_UUID = "applicationUUId";
         public static final String API_UUID = "apiUUId";
+        public static final String ACTIVE = "ACTIVE";
         public static final String ORIGIN = "origin";
         public static final String ORIGIN_UUID = "originUUId";
         public static final String VALIDITY_PERIOD = "validityPeriod";

@@ -20,45 +20,45 @@ import javax.validation.Valid;
 
 public class APIAPIKeyAssociateRequestDTO   {
   
-    private String keyName = null;
-    private String applicationName = null;
+    private String keyUUID = null;
+    private String applicationUUID = null;
 
   /**
-   * API Key name
+   * The UUID of the API key
    **/
-  public APIAPIKeyAssociateRequestDTO keyName(String keyName) {
-    this.keyName = keyName;
+  public APIAPIKeyAssociateRequestDTO keyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
     return this;
   }
 
   
-  @ApiModelProperty(example = "Test_Key", required = true, value = "API Key name")
-  @JsonProperty("keyName")
+  @ApiModelProperty(required = true, value = "The UUID of the API key")
+  @JsonProperty("keyUUID")
   @NotNull
-  public String getKeyName() {
-    return keyName;
+  public String getKeyUUID() {
+    return keyUUID;
   }
-  public void setKeyName(String keyName) {
-    this.keyName = keyName;
+  public void setKeyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
   }
 
   /**
-   * Application name to be associated
+   * The UUID of the Application to be associated
    **/
-  public APIAPIKeyAssociateRequestDTO applicationName(String applicationName) {
-    this.applicationName = applicationName;
+  public APIAPIKeyAssociateRequestDTO applicationUUID(String applicationUUID) {
+    this.applicationUUID = applicationUUID;
     return this;
   }
 
   
-  @ApiModelProperty(example = "DefaultApplication", required = true, value = "Application name to be associated")
-  @JsonProperty("applicationName")
+  @ApiModelProperty(required = true, value = "The UUID of the Application to be associated")
+  @JsonProperty("applicationUUID")
   @NotNull
-  public String getApplicationName() {
-    return applicationName;
+  public String getApplicationUUID() {
+    return applicationUUID;
   }
-  public void setApplicationName(String applicationName) {
-    this.applicationName = applicationName;
+  public void setApplicationUUID(String applicationUUID) {
+    this.applicationUUID = applicationUUID;
   }
 
 
@@ -71,13 +71,13 @@ public class APIAPIKeyAssociateRequestDTO   {
       return false;
     }
     APIAPIKeyAssociateRequestDTO apIAPIKeyAssociateRequest = (APIAPIKeyAssociateRequestDTO) o;
-    return Objects.equals(keyName, apIAPIKeyAssociateRequest.keyName) &&
-        Objects.equals(applicationName, apIAPIKeyAssociateRequest.applicationName);
+    return Objects.equals(keyUUID, apIAPIKeyAssociateRequest.keyUUID) &&
+        Objects.equals(applicationUUID, apIAPIKeyAssociateRequest.applicationUUID);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyName, applicationName);
+    return Objects.hash(keyUUID, applicationUUID);
   }
 
   @Override
@@ -85,8 +85,8 @@ public class APIAPIKeyAssociateRequestDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIAPIKeyAssociateRequestDTO {\n");
     
-    sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
-    sb.append("    applicationName: ").append(toIndentedString(applicationName)).append("\n");
+    sb.append("    keyUUID: ").append(toIndentedString(keyUUID)).append("\n");
+    sb.append("    applicationUUID: ").append(toIndentedString(applicationUUID)).append("\n");
     sb.append("}");
     return sb.toString();
   }

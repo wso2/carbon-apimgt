@@ -1436,10 +1436,11 @@ paths:
   /apis/{apiId}/api-keys/generate:
     post:
       tags:
-        - API Keys
+        - APIKeys
       summary: Generate API Key
       description: |
         Generate a self contained API Key for the API
+      operationId: generateApiBoundApiKey
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-Match'
@@ -1479,10 +1480,11 @@ paths:
   /apis/{apiId}/api-keys/regenerate:
     post:
       tags:
-        - API Keys
+        - APIKeys
       summary: Regenerate API Key
       description: |
         Regenerate a self contained API Key for the API specified by the key name
+      operationId: regenerateAPIBoundAPIKey
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-Match'
@@ -1493,7 +1495,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/APIKeyRenewRequest'
-        required: false
+        required: true
       responses:
         200:
           description: |
@@ -1522,10 +1524,11 @@ paths:
   /apis/{apiId}/api-keys:
     get:
       tags:
-        - API Keys
+        - APIKeys
       summary: Get API Key(s) of a Given API
       description: |
         Retrieve self contained API Key(s) for the API.
+      operationId: getAPIBoundAPIKeys
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-None-Match'
@@ -1557,10 +1560,11 @@ paths:
   /apis/{apiId}/api-keys/revoke:
     post:
       tags:
-        - API Keys
+        - APIKeys
       summary: Revoke API Key
       description: |
         Revoke a self contained API Key for the API specified by the key name
+      operationId: revokeAPIBoundAPIKey
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-Match'
@@ -1597,10 +1601,11 @@ paths:
   /apis/{apiId}/api-keys/associate:
     post:
       tags:
-        - API Keys
+        - APIKeys
       summary: Create an association for the API Key
       description: |
         Create an association for a self contained API Key for the API
+      operationId: associateAPIKey
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-Match'
@@ -1640,10 +1645,11 @@ paths:
   /apis/{apiId}/api-keys/dissociate:
     post:
       tags:
-        - API Keys
+        - APIKeys
       summary: Remove an Association for the API Key
       description: |
         Remove an association a self contained API Key for the API specified by the key name
+      operationId: dissociateAPIKey
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-Match'
@@ -3637,10 +3643,11 @@ paths:
   /applications/{applicationId}/api-keys/{keyType}/generate:
     post:
       tags:
-        - API Keys
+        - APIKeys
       summary: Generate API Key
       description: |
         Generate a self contained API Key for the application
+      operationId: generateAppBoundAPIKey
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'
@@ -3681,10 +3688,11 @@ paths:
   /applications/{applicationId}/api-keys/{keyType}/regenerate:
     post:
       tags:
-        - API Keys
+        - APIKeys
       summary: Regenerate API Key
       description: |
         Regenerate a self contained API Key for the application specified by the key name
+      operationId: regenerateAppBoundAPIKey
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'
@@ -3696,7 +3704,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/APIKeyRenewRequest'
-        required: false
+        required: true
       responses:
         200:
           description: |
@@ -3725,10 +3733,11 @@ paths:
   /applications/{applicationId}/api-keys/{keyType}:
     get:
       tags:
-        - API Keys
+        - APIKeys
       summary: Get API Key(s) of a Given Type
       description: |
         Retrieve self contained API Key(s) for the application specifying the key type in the URI.
+      operationId: getAppBoundAPIKeys
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'
@@ -3761,10 +3770,11 @@ paths:
   /applications/{applicationId}/api-keys/{keyType}/revoke:
     post:
       tags:
-        - API Keys
+        - APIKeys
       summary: Revoke API Key
       description: |
         Revoke a self contained API Key for the application
+      operationId: revokeAppBoundAPIKey
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'
@@ -3776,7 +3786,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/APIKeyRevokeRequest'
-        required: false
+        required: true
       responses:
         200:
           description: |
@@ -3787,7 +3797,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         412:
           $ref: '#/components/responses/PreconditionFailed'
-      deprecated: true
       security:
         - OAuth2Security:
             - apim:subscribe
@@ -3801,10 +3810,11 @@ paths:
   /applications/{applicationId}/api-keys/{keyType}/subscriptions:
     get:
       tags:
-        - API Keys
+        - APIKeys
       summary: Get Subscribed APIs with API Key(s) of a Given Type
       description: |
         Retrieve subscribed APIs with non-associated API Key(s) for the application specifying the key type in the URI.
+      operationId: getSubscribedAPIsWithAPIKeys
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'
@@ -3837,10 +3847,11 @@ paths:
   /applications/{applicationId}/api-keys/{keyType}/associate:
     post:
       tags:
-        - API Keys
+        - APIKeys
       summary: Associate an API Key to the Application
       description: |
         Create an association to a self contained API Key for the application
+      operationId: associateAPIKeyToApp
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'
@@ -3881,10 +3892,11 @@ paths:
   /applications/{applicationId}/api-keys/{keyType}/dissociate:
     post:
       tags:
-        - API Keys
+        - APIKeys
       summary: Remove the association of the API Key to the Application
       description: |
         Remove the association to a self contained API Key for the application
+      operationId: dissociateAPIKeyFromApp
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'
@@ -3922,10 +3934,11 @@ paths:
   /applications/{applicationId}/api-keys/{keyType}/associations:
     get:
       tags:
-        - API Keys
+        - APIKeys
       summary: Get API Key associations of a Given Type
       description: |
         Retrieve API key associations for the application specifying the key type in the URI.
+      operationId: getAPIKeyAssociationsForApp
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'
@@ -6572,6 +6585,9 @@ components:
       title: API Key association
       type: object
       properties:
+        keyUUID:
+          type: string
+          description: The UUID of the API key
         keyName:
           type: string
           description: API Key name
@@ -6590,12 +6606,15 @@ components:
           example: 3600
         lastUsed:
           type: string
-          description: Last used time as epoch milliseconds, or NULL if never used.
-          example: NOT_USED
+          description: Last used time as epoch milliseconds (string), or `NOT_USED` if never used.
+          example: 2026-02-06 23:45:07
     APIKeyInfo:
       title: API Key details to invoke APIs
       type: object
       properties:
+        keyUUID:
+          type: string
+          description: The UUID of the API key
         keyName:
           type: string
           description: API Key name
@@ -6610,8 +6629,8 @@ components:
           example: 3600
         lastUsed:
           type: string
-          description: Last used time as epoch milliseconds, or NULL if never used.
-          example: NOT_USED
+          description: Last used time as epoch milliseconds (string), or `NOT_USED` if never used.
+          example: 2026-02-06 23:45:07
     APIWithKeyInfo:
       title: API with API Key
       type: object
@@ -6620,6 +6639,9 @@ components:
           type: string
           description: API Key name
           example: Test_Key
+        keyUUID:
+          type: string
+          description: The UUID of the API key
         apiName:
           type: string
           description: API name
@@ -6631,6 +6653,9 @@ components:
       title: API Key details to invoke APIs
       type: object
       properties:
+        keyUUID:
+          type: string
+          description: The UUID of the API key
         keyName:
           type: string
           description: API Key name
@@ -6649,8 +6674,8 @@ components:
           example: 3600
         lastUsed:
           type: string
-          description: Last used time as epoch milliseconds, or NULL if never used.
-          example: NOT_USED
+          description: Last used time as epoch milliseconds (string), or `NOT_USED` if never used.
+          example: 2026-02-06 23:45:07
     APIAPIKeyList:
       title: API Keys List
       type: object
@@ -6950,11 +6975,12 @@ components:
     APIKeyRenewRequest:
       title: API Key renewal request object
       type: object
+      required:
+        - keyUUID
       properties:
-        keyName:
+        keyUUID:
           type: string
-          description: API Key name
-          example: Test_Key
+          description: The UUID of the API key
         validityPeriod:
           type: integer
           description: API key validity period
@@ -6967,59 +6993,62 @@ components:
     APIAPIKeyAssociateRequest:
       title: API Key association request object
       type: object
+      required:
+        - keyUUID
+        - applicationUUID
       properties:
-        keyName:
+        keyUUID:
           type: string
-          description: API Key name
-          example: Test_Key
-        applicationName:
+          description: The UUID of the API key
+        applicationUUID:
           type: string
-          description: Application name to be associated
-          example: DefaultApplication
+          description: The UUID of the Application to be associated
     APIKeyDissociateRequest:
       title: API Key dissociation request object
       type: object
+      required:
+        - keyUUID
       properties:
-        keyName:
+        keyUUID:
           type: string
-          description: API Key name
-          example: Test_Key
+          description: The UUID of the API key
     AppAPIKeyAssociateRequest:
       title: API Key association request object
       type: object
+      required:
+        - keyUUID
+        - apiUUID
       properties:
-        apiName:
-          type: string
-          description: API name
-          example: SampleAPI
-        apiId:
+        apiUUID:
           type: string
           description: The unique identifier of the API.
           example: 2962f3bb-8330-438e-baee-0ee1d6434ba4
-        keyName:
+        keyUUID:
           type: string
-          description: API key name
-          example: Test_Key
+          description: The UUID of the API key
     APIKeyRevokeRequest:
       title: API Key revoke request object
       type: object
+      oneOf:
+        - required: [ apikey ]
+        - required: [ keyUUID ]
       properties:
         apikey:
           type: string
           description: API Key to revoke
           example: eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=
-        keyName:
+        keyUUID:
           type: string
-          description: API Key name
-          example: Test_Key
+          description: The UUID of the API key
     APIAPIKeyRevokeRequest:
       title: API Key revoke request object
       type: object
+      required:
+        - keyUUID
       properties:
-        keyName:
+        keyUUID:
           type: string
-          description: API Key name
-          example: Test_Key
+          description: The UUID of the API key
     ScopeInfo:
       title: API Scope info object with scope details
       type: object

@@ -43,10 +43,4 @@ public interface OpaqueAPIKeyNotifier {
      */
     void sendApiKeyAssociationInfoOnRealtime(Properties properties);
 
-    /**
-     * Initialization properties from configuration
-     * @param realTimeNotifierProperties
-     */
-    void init(Properties realTimeNotifierProperties);
-
 }

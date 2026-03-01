@@ -4610,17 +4610,13 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X GET "https://127.0.0.1:9443/api/am/admin/v4/api-keys"'
 
-  /api-keys/{apiId}/{applicationId}/{keyType}/revoke:
+  /api-keys/revoke:
     post:
       tags:
         - API Keys
       summary: Revoke an API Key
       description: |
         Revoke an API Key for the API
-      parameters:
-        - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/applicationId'
-        - $ref: '#/components/parameters/keyType'
       requestBody:
         description: |
           API key revoke object
@@ -7146,6 +7142,9 @@ components:
       title: API Key details to invoke APIs
       type: object
       properties:
+        keyUUID:
+          type: string
+          description: The UUID of the API key
         keyName:
           type: string
           description: API Key name
@@ -7198,12 +7197,11 @@ components:
       title: API Key revoke request object
       type: object
       required:
-        - keyName
+        - keyUUID
       properties:
-        keyName:
+        keyUUID:
           type: string
-          description: API Key name
-          example: Test_Key
+          description: The UUID of the API key
 
   responses:
     BadRequest:

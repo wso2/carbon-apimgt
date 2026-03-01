@@ -38,22 +38,18 @@ public class ApiKeysApiServiceImpl implements ApiKeysApiService {
 
     /**
      * Delete an api key provided by the display name
-     * @param apiId API ID
-     * @param applicationId Application ID
-     * @param keyType Application key type
+     *
      * @param messageContext Message context
      * @return API key deletion response
      */
-    public Response apiKeysApiIdApplicationIdKeyTypeRevokePost(String apiId, String applicationId,
-                                                                         String keyType, APIKeyRevokeRequestDTO body,
-                                                                         MessageContext messageContext)
+    public Response apiKeysRevokePost(APIKeyRevokeRequestDTO body, MessageContext messageContext)
             throws APIManagementException {
 
-        if (body == null || body.getKeyName() == null || body.getKeyName().trim().isEmpty()) {
-            throw new APIManagementException("keyName is required for API key revocation.");
+        if (body == null || body.getKeyUUID() == null) {
+            throw new APIManagementException("keyUUID is required for API key revocation.");
         }
         APIAdmin apiAdmin = new APIAdminImpl();
-        apiAdmin.revokeAPIKey(apiId, applicationId, keyType, body.getKeyName());
+        apiAdmin.revokeAPIKey(body.getKeyUUID());
         return Response.ok().build();
     }
 

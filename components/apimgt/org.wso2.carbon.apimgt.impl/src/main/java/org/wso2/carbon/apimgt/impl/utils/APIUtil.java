@@ -9200,12 +9200,12 @@ public final class APIUtil {
      * @param apiKey api key.
      * @return the hashed api key.
      */
-    public static String sha256Hash(String apiKey) {
+    public static String sha256Hash(String apiKey) throws APIManagementException {
         if (StringUtils.isEmpty(apiKey)) {
-            throw new IllegalArgumentException("API Key must not be null or empty.");
+            throw new APIManagementException("API Key must not be null or empty.");
         }
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            MessageDigest digest = MessageDigest.getInstance(SHA_256);
             byte[] hash = digest.digest(apiKey.getBytes(StandardCharsets.UTF_8));
 
             // Convert hash to hex
@@ -9215,8 +9215,9 @@ public final class APIUtil {
             return String.format("$sha256$%s", hashHex);
 
         } catch (NoSuchAlgorithmException e) {
-            // SHA-256 is always available in Java
-            throw new IllegalStateException("SHA-256 algorithm not found", e);
+            String msg = "Error in generating SHA-256 value";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         }
     }
 

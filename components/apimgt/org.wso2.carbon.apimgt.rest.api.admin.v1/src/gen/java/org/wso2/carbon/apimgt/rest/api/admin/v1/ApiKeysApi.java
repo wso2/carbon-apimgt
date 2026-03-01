@@ -37,23 +37,6 @@ public class ApiKeysApi  {
 ApiKeysApiService delegate = new ApiKeysApiServiceImpl();
 
 
-    @POST
-    @Path("/{apiId}/{applicationId}/{keyType}/revoke")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Revoke an API Key", notes = "Revoke an API Key for the API ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
-        })
-    }, tags={ "API Keys",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Api key revoked successfully. ", response = Void.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response apiKeysApiIdApplicationIdKeyTypeRevokePost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Application UUID ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "API key revoke object " ,required=true) APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO) throws APIManagementException{
-        return delegate.apiKeysApiIdApplicationIdKeyTypeRevokePost(apiId, applicationId, keyType, apIKeyRevokeRequestDTO, securityContext);
-    }
-
     @GET
     
     
@@ -62,7 +45,7 @@ ApiKeysApiService delegate = new ApiKeysApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
-    }, tags={ "API Keys (Collection)" })
+    }, tags={ "API Keys (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API keys returned. ", response = APIKeyListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
@@ -70,5 +53,22 @@ ApiKeysApiService delegate = new ApiKeysApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
     public Response apiKeysGet() throws APIManagementException{
         return delegate.apiKeysGet(securityContext);
+    }
+
+    @POST
+    @Path("/revoke")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Revoke an API Key", notes = "Revoke an API Key for the API ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+        })
+    }, tags={ "API Keys" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Api key revoked successfully. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response apiKeysRevokePost(@ApiParam(value = "API key revoke object " ,required=true) APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO) throws APIManagementException{
+        return delegate.apiKeysRevokePost(apIKeyRevokeRequestDTO, securityContext);
     }
 }

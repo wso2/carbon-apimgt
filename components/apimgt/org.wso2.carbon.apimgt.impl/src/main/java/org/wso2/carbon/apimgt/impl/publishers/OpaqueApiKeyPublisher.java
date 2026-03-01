@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl.publishers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.OpaqueAPIKeyNotifier;
 
@@ -34,20 +33,15 @@ public class OpaqueApiKeyPublisher {
     private static final Log log = LogFactory.getLog(OpaqueApiKeyPublisher.class);
 
     private static OpaqueApiKeyPublisher opaqueApiKeyPublisher = null;
-    private boolean realtimeNotifierEnabled;
     private OpaqueAPIKeyNotifier opaqueApiKeyNotifier;
 
     private OpaqueApiKeyPublisher() {
 
-        Properties realtimeNotifierProperties = APIManagerConfiguration.getRealtimeOpaqueApiKeyNotifierProperties();
-        realtimeNotifierEnabled = realtimeNotifierProperties != null;
         opaqueApiKeyNotifier = ServiceReferenceHolder.getInstance().getOpaqueApiKeyNotifier();
-        if (realtimeNotifierEnabled && opaqueApiKeyNotifier != null) {
-            opaqueApiKeyNotifier.init(realtimeNotifierProperties);
+        if (opaqueApiKeyNotifier != null) {
             log.debug("Opaque API key notifier initialized");
         } else {
             log.warn("Opaque API key notifier is not initialized. Realtime notifications will be disabled.");
-            realtimeNotifierEnabled = false;
         }
     }
 
@@ -65,12 +59,7 @@ public class OpaqueApiKeyPublisher {
      */
     public void publishApiKeyUsageEvents(Properties properties) {
 
-        if (realtimeNotifierEnabled) {
-            log.debug("Realtime message sending is enabled");
-            opaqueApiKeyNotifier.sendLastUsedTimeOnRealtime(properties);
-        } else {
-            log.debug("Realtime message sending isn't enabled or configured properly");
-        }
+        opaqueApiKeyNotifier.sendLastUsedTimeOnRealtime(properties);
     }
 
     /**
@@ -79,12 +68,7 @@ public class OpaqueApiKeyPublisher {
      */
     public void publishApiKeyInfoEvents(Properties properties) {
 
-        if (realtimeNotifierEnabled) {
-            log.debug("Realtime message sending is enabled");
-            opaqueApiKeyNotifier.sendApiKeyInfoOnRealtime(properties);
-        } else {
-            log.debug("Realtime message sending isn't enabled or configured properly");
-        }
+        opaqueApiKeyNotifier.sendApiKeyInfoOnRealtime(properties);
     }
 
     /**
@@ -93,11 +77,6 @@ public class OpaqueApiKeyPublisher {
      */
     public void publishApiKeyAssociationInfoEvents(Properties properties) {
 
-        if (realtimeNotifierEnabled) {
-            log.debug("Realtime message sending is enabled");
-            opaqueApiKeyNotifier.sendApiKeyAssociationInfoOnRealtime(properties);
-        } else {
-            log.debug("Realtime message sending isn't enabled or configured properly");
-        }
+        opaqueApiKeyNotifier.sendApiKeyAssociationInfoOnRealtime(properties);
     }
 }

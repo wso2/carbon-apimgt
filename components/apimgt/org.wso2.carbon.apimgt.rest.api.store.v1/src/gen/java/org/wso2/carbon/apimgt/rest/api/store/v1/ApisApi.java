@@ -492,24 +492,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @POST
-    @Path("/{apiId}/generate-definition-url")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Generate a URL to download a resource for an API", notes = "Generate a URL to access an API resource like the WSDL definition.", response = String.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            
-        })
-    }, tags={ "APIs",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Returns generated download URL as a string.", response = String.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response generateDefinitionURL( @NotNull @ApiParam(value = "Type of the resource to be retrieved using the generated url (Ex - wsdl)",required=true, allowableValues="wsdl")  @QueryParam("type") String type, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Name of the API gateway environment. ")  @QueryParam("environmentName") String environmentName,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException {
-        return delegate.generateDefinitionURL(type, apiId, environmentName, xWSO2Tenant, securityContext);
-    }
-
     @Path("/{apiId}/api-keys/generate")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -527,6 +509,25 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
     public Response generateApiBoundApiKey(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "API Key generation request object " ,required=true) APIAPIKeyGenerateRequestDTO apIAPIKeyGenerateRequestDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.generateApiBoundApiKey(apiId, apIAPIKeyGenerateRequestDTO, ifMatch, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/generate-definition-url")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Generate a URL to download a resource for an API", notes = "Generate a URL to access an API resource like the WSDL definition.", response = String.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Returns generated download URL as a string.", response = String.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response generateDefinitionURL( @NotNull @ApiParam(value = "Type of the resource to be retrieved using the generated url (Ex - wsdl)",required=true, allowableValues="wsdl")  @QueryParam("type") String type, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Name of the API gateway environment. ")  @QueryParam("environmentName") String environmentName,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.generateDefinitionURL(type, apiId, environmentName, xWSO2Tenant, securityContext);
     }
 
     @GET

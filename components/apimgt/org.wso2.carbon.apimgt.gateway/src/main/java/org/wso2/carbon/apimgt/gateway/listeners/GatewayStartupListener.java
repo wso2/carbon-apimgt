@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.LLMProviderManager;
 import org.wso2.carbon.apimgt.gateway.TenancyLoader;
+import org.wso2.carbon.apimgt.gateway.apikey.APIKeysRetriever;
 import org.wso2.carbon.apimgt.gateway.notifiers.DeploymentStatusNotifier;
 import org.wso2.carbon.apimgt.gateway.notifiers.GatewayNotifier;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
@@ -240,6 +241,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             ServiceReferenceHolder.getInstance().addLoadedTenant(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             retrieveAndDeployArtifacts(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             retrieveBlockConditionsAndKeyTemplates();
+            retrieveApiKeys();
             WebhooksDataHolder.getInstance()
                     .registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             jmsTransportHandlerForTrafficManager
@@ -524,6 +526,13 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             RevokedJWTTokensRetriever webServiceRevokedJWTTokensRetriever = new RevokedJWTTokensRetriever();
             webServiceRevokedJWTTokensRetriever.startRevokedJWTTokensRetriever();
         }
+    }
+
+    private void retrieveApiKeys() {
+
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        APIKeysRetriever webServiceAPIKeysRetriever = new APIKeysRetriever();
+        webServiceAPIKeysRetriever.startWebServiceApiKeyRetriever(tenantDomain);
     }
 
     @Override

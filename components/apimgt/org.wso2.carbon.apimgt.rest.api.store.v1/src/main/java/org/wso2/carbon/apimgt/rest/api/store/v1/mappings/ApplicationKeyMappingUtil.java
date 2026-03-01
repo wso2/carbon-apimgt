@@ -272,6 +272,7 @@ public class ApplicationKeyMappingUtil {
         List<APIKeyInfoDTO> apiKeyInfoDTOList = apiKeyInfoList.stream()
                 .map(src -> {
                     APIKeyInfoDTO dto = new APIKeyInfoDTO();
+                    dto.setKeyUUID(src.getKeyUUID());
                     dto.setKeyName(src.getKeyName());
                     dto.setIssuedOn(src.getCreatedTime());
                     dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
@@ -292,6 +293,7 @@ public class ApplicationKeyMappingUtil {
         List<APIKeyAssociationInfoDTO> apiKeyAssociationInfoDTOList = apiKeyInfoList.stream()
                 .map(src -> {
                     APIKeyAssociationInfoDTO dto = new APIKeyAssociationInfoDTO();
+                    dto.setKeyUUID(src.getKeyUUID());
                     dto.setKeyName(src.getKeyName());
                     dto.setApiName(src.getApiName());
                     dto.setIssuedOn(src.getCreatedTime());
@@ -313,6 +315,7 @@ public class ApplicationKeyMappingUtil {
         List<APIAPIKeyInfoDTO> apiKeyInfoDTOList = apiKeyInfoList.stream()
                 .map(src -> {
                     APIAPIKeyInfoDTO dto = new APIAPIKeyInfoDTO();
+                    dto.setKeyUUID(src.getKeyUUID());
                     dto.setKeyName(src.getKeyName());
                     dto.setIssuedOn(src.getCreatedTime());
                     dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
@@ -334,6 +337,7 @@ public class ApplicationKeyMappingUtil {
         List<APIWithKeyInfoDTO> apiApiKeyInfoDTOList = apiKeyInfoList.stream()
                 .map(src -> {
                     APIWithKeyInfoDTO dto = new APIWithKeyInfoDTO();
+                    dto.setKeyUUID(src.getKeyUUID());
                     dto.setKeyName(src.getKeyName());
                     dto.setApiUUID(src.getApiUUId());
                     dto.setApiName(src.getApiName());
