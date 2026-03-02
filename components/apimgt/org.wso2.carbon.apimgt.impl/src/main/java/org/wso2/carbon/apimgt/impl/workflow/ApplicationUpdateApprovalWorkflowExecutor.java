@@ -95,7 +95,7 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         workflowDTO.setProperties(APPLICATION_TIER_PROPERTY, existingApplication.getTier());
         workflowDTO.setProperties(APPLICATION_OWNER_PROPERTY, existingApplication.getOwner());
 
-        if (!StringUtils.isNotBlank(existingApplication.getDescription())) {
+        if (StringUtils.isNotBlank(existingApplication.getDescription())) {
             workflowDTO.setProperties(APPLICATION_DESCRIPTION_PROPERTY, existingApplication.getDescription());
         }
 

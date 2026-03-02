@@ -74,7 +74,7 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
         workflowDTO.setProperties(APPLICATION_TIER_PROPERTY, application.getTier());
         workflowDTO.setProperties(APPLICATION_OWNER_PROPERTY, appWorkFlowDTO.getUserName());
 
-        if (!StringUtils.isNotBlank(application.getDescription())) {
+        if (StringUtils.isNotBlank(application.getDescription())) {
             workflowDTO.setProperties(APPLICATION_DESCRIPTION_PROPERTY, application.getDescription());
         }
 

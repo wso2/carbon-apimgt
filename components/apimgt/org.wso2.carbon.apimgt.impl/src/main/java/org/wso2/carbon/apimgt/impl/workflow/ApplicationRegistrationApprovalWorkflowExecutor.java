@@ -70,7 +70,7 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
         workflowDTO.setProperties(APPLICATION_OWNER_PROPERTY, appRegDTO.getUserName());
         workflowDTO.setProperties(KEY_TYPE_PROPERTY, appRegDTO.getKeyType());
 
-        if (!StringUtils.isNotBlank(application.getDescription())) {
+        if (StringUtils.isNotBlank(application.getDescription())) {
             workflowDTO.setProperties(APPLICATION_DESCRIPTION_PROPERTY, application.getDescription());
         }
 
