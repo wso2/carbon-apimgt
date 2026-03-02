@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -97,10 +98,12 @@ public final class PlatformGatewayAPIYamlConverter {
         return "/" + orgSegment + "/" + envSegment + "/" + apiNamePath + "/" + version;
     }
 
-    /** URL path segment from display name (e.g. "Reading List API 1" -> "reading-list-api-1"). */
+    /** URL path segment from display name (e.g. "Reading List API 1" -> "reading-list-api-1"). Returns "api" if null, empty, or normalized to empty (e.g. only separators). */
     private static String toApiNamePath(String displayName) {
         if (displayName == null || displayName.isEmpty()) return "api";
-        return displayName.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+        String normalized = displayName.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+        if (normalized == null || normalized.isEmpty()) return "api";
+        return normalized;
     }
 
     private static String buildYaml(API api, String displayName, String version, String context, String metadataName)
@@ -190,7 +193,7 @@ public final class PlatformGatewayAPIYamlConverter {
 
     /**
      * Extract production endpoint URL from endpointConfig JSON.
-     * Handles production_endpoints.url or production_endpoints.list[0].url.
+     * Handles production_endpoints.url, production_endpoints.list[0].url, or list[0] as string URL.
      */
     public static String extractProductionEndpointUrl(String endpointConfig) throws APIManagementException {
         if (StringUtils.isBlank(endpointConfig)) {
@@ -207,6 +210,20 @@ public final class PlatformGatewayAPIYamlConverter {
                 Object url = ((JSONObject) prod).get(APIConstants.API_DATA_URL);
                 if (url != null && StringUtils.isNotBlank(url.toString())) {
                     return url.toString().trim();
+                }
+            }
+            if (prod instanceof JSONArray) {
+                JSONArray list = (JSONArray) prod;
+                if (!list.isEmpty()) {
+                    Object first = list.get(0);
+                    if (first instanceof JSONObject) {
+                        Object url = ((JSONObject) first).get(APIConstants.API_DATA_URL);
+                        if (url != null && StringUtils.isNotBlank(url.toString())) {
+                            return url.toString().trim();
+                        }
+                    } else if (first != null && StringUtils.isNotBlank(first.toString())) {
+                        return first.toString().trim();
+                    }
                 }
             }
             throw new APIManagementException("production_endpoints has no url");

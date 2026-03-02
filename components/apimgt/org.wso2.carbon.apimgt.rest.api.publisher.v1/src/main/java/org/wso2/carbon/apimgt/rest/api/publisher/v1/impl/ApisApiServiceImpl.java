@@ -4410,7 +4410,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * against this map. GET /environments stays Synapse-only; UI uses GET /gateways for platform targets
      * and calls the same deploy-revision/undeploy-revision with those names (no cross: one request = one gateway type).
      */
-    private void addPlatformGatewaysToEnvironmentsMap(Map<String, Environment> environments, String organization) {
+    private void addPlatformGatewaysToEnvironmentsMap(Map<String, Environment> environments, String organization)
+            throws APIManagementException {
         org.wso2.carbon.apimgt.api.PlatformGatewayService platformGatewayService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
         if (platformGatewayService == null) {
@@ -4437,9 +4438,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 environments.put(gw.getName(), env);
             }
         } catch (Exception e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Could not add platform gateways to environments map", e);
-            }
+            log.error("Could not add platform gateways to environments map", e);
+            throw new APIManagementException("Failed to resolve platform gateways for environments", e);
         }
     }
 

@@ -52,7 +52,7 @@ public class OrganizationInterceptor extends AbstractPhaseInterceptor {
             if (RestApiConstants.PLATFORM_GATEWAY_API_KEY.equals(message.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME))) {
                 Object existing = message.get(RestApiConstants.ORGANIZATION);
                 if (existing != null && org.apache.commons.lang3.StringUtils.isNotBlank(existing.toString())) {
-                    logger.debug("Organization already set by platform gateway api-key: " + existing);
+                    logger.debug("Organization already set by platform gateway api-key");
                     return;
                 }
             }

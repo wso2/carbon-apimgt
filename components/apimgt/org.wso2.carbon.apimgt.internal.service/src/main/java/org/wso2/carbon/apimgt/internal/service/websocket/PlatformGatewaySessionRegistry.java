@@ -47,32 +47,35 @@ public class PlatformGatewaySessionRegistry {
 
     /**
      * Register a gateway's WebSocket session. Replaces any existing session for the same gateway ID.
+     * Atomically swaps in the new session and closes the previous one to avoid races with sendToGateways.
      */
     public void register(String gatewayId, Session session) {
         if (gatewayId == null || session == null) {
             return;
         }
-        Session previous = gatewaySessions.put(gatewayId, session);
-        if (previous != null && previous.isOpen()) {
-            try {
-                previous.close();
-            } catch (IOException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Error closing previous session for gateway " + gatewayId + ": " + e.getMessage());
+        gatewaySessions.compute(gatewayId, (id, previous) -> {
+            if (previous != null && previous != session && previous.isOpen()) {
+                try {
+                    previous.close();
+                } catch (IOException e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Error closing previous session for gateway " + gatewayId + ": " + e.getMessage());
+                    }
                 }
             }
-        }
+            return session;
+        });
         if (log.isDebugEnabled()) {
             log.debug("Registered WebSocket session for gateway: " + gatewayId);
         }
     }
 
     /**
-     * Unregister a gateway's session (e.g. on WebSocket close).
+     * Unregister a gateway's session (e.g. on WebSocket close). Only removes if the current mapping
+     * is still this exact session, so a newly registered session is not removed during reconnects.
      */
-    public void unregister(String gatewayId) {
-        if (gatewayId != null) {
-            gatewaySessions.remove(gatewayId);
+    public void unregister(String gatewayId, Session session) {
+        if (gatewayId != null && session != null && gatewaySessions.remove(gatewayId, session)) {
             if (log.isDebugEnabled()) {
                 log.debug("Unregistered WebSocket session for gateway: " + gatewayId);
             }
@@ -98,7 +101,7 @@ public class PlatformGatewaySessionRegistry {
                 continue;
             }
             if (!session.isOpen()) {
-                gatewaySessions.remove(gatewayId);
+                gatewaySessions.remove(gatewayId, session);
                 if (log.isDebugEnabled()) {
                     log.debug("Removed closed session for gateway " + gatewayId);
                 }
@@ -112,7 +115,9 @@ public class PlatformGatewaySessionRegistry {
                 }
             } catch (IOException e) {
                 log.warn("Failed to send deploy message to gateway " + gatewayId + ": " + e.getMessage());
-                gatewaySessions.remove(gatewayId);
+                if (gatewaySessions.get(gatewayId) == session) {
+                    gatewaySessions.remove(gatewayId, session);
+                }
             }
         }
     }

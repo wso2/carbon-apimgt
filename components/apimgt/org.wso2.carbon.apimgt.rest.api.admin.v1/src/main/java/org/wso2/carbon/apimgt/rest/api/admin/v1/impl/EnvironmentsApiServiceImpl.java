@@ -175,10 +175,10 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
                     envListDTO.setList(list);
                     envListDTO.setCount(list.size());
                 }
+            } catch (APIManagementException e) {
+                log.warn("Could not append platform gateways to environments list", e);
             } catch (Exception e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Could not append platform gateways to environments list", e);
-                }
+                log.error("Unexpected error appending platform gateways to environments list", e);
             }
         }
 

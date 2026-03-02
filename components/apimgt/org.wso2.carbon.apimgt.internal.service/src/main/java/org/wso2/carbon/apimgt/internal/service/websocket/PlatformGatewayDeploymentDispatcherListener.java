@@ -55,7 +55,7 @@ public class PlatformGatewayDeploymentDispatcherListener implements ServletConte
             }
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
-                log.debug("Error unregistering dispatcher: " + e.getMessage());
+                log.debug("Error unregistering dispatcher", e);
             }
         }
     }

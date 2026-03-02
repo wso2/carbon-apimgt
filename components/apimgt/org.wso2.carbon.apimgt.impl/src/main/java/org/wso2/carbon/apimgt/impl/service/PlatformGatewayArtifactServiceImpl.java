@@ -55,10 +55,10 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
         if (StringUtils.isBlank(apiId) || StringUtils.isBlank(organization)) {
             throw new APIManagementException("API ID and organization are required");
         }
-        if (yamlContent == null) {
+        if (yamlContent == null || yamlContent.trim().isEmpty()) {
             throw new APIManagementException("YAML content is required");
         }
-        PlatformGatewayArtifactDAO.getInstance().saveArtifact(apiId.trim(), organization.trim(), yamlContent);
+        PlatformGatewayArtifactDAO.getInstance().saveArtifact(apiId.trim(), organization.trim(), yamlContent.trim());
     }
 
     @Override

@@ -2605,7 +2605,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.info("Undeploying API: " + api.getId().getApiName() + " from " + environmentsToRemove.size()
                     + " environments");
         }
-        gatewayManager.unDeployFromGateway(api, tenantDomain, targets.getSynapseLabels(), onDeleteOrRetire,
+        gatewayManager.unDeployFromGateway(api, api.getOrganization(), targets.getSynapseLabels(), onDeleteOrRetire,
                 targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds());
         if (log.isDebugEnabled()) {
             log.debug("Removing API: " + api.getId().getApiName() + " from gateways. onDeleteOrRetire: " +
@@ -7283,13 +7283,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.getId().setUuid(apiId);
         api.setOrganization(organization);
 
-        if (!isInitiatedFromGateway) {
-            handlePendingDeployments(apiId, apiRevisionUUID, apiRevisionDeployments);
+        // Deduplicate by deployment name to avoid unique constraint violations when input contains duplicates
+        List<APIRevisionDeployment> dedupedDeployments = new ArrayList<>();
+        Set<String> seenDeployments = new HashSet<>();
+        for (APIRevisionDeployment d : apiRevisionDeployments) {
+            String depName = d != null ? d.getDeployment() : null;
+            if (depName != null && seenDeployments.add(depName)) {
+                dedupedDeployments.add(d);
+            }
         }
 
-        apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, apiRevisionDeployments);
+        if (!isInitiatedFromGateway) {
+            handlePendingDeployments(apiId, apiRevisionUUID, dedupedDeployments);
+        }
 
-        for (APIRevisionDeployment deployment : apiRevisionDeployments) {
+        apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, dedupedDeployments);
+
+        for (APIRevisionDeployment deployment : dedupedDeployments) {
             if (!isInitiatedFromGateway) {
                 apiMgtDAO.updateAPIRevisionDeploymentStatus(apiRevisionUUID,
                         APIConstants.APIRevisionStatus.API_REVISION_CREATED, deployment.getDeployment());

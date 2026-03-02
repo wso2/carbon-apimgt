@@ -133,13 +133,14 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             gateway = PlatformGatewayTokenUtil.verifyToken(apiKey);
         } catch (Exception e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Platform gateway token verification failed", e);
-            }
-            return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid api-key").build();
+            log.error("Platform gateway token verification failed with unexpected error", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Server error").build();
         }
         if (gateway == null) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid or expired api-key").build();
+            if (log.isDebugEnabled()) {
+                log.debug("Platform gateway token verification failed: invalid or expired api-key");
+            }
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid api-key").build();
         }
         if (log.isDebugEnabled()) {
             log.debug("Platform gateway deployment notification received: apiId=" + apiId + ", gatewayId=" + gateway.id
@@ -172,7 +173,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             yaml = artifactService.getStoredPlatformArtifact(apiId, organization);
         }
         if (yaml == null) {
-            yaml = PlatformGatewayAPIYamlConverter.toPlatformGatewayYaml(api, organization, "default");
+            String environment = "default";
+            if (api.getEnvironments() != null && !api.getEnvironments().isEmpty()) {
+                environment = api.getEnvironments().iterator().next();
+            }
+            if (StringUtils.isBlank(environment)) {
+                environment = "default";
+            }
+            yaml = PlatformGatewayAPIYamlConverter.toPlatformGatewayYaml(api, organization, environment);
         }
         byte[] zipBytes = buildZipWithYaml(yaml);
         return Response.ok(zipBytes)

@@ -58,7 +58,27 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
 
     private static String escapeJson(String s) {
         if (s == null) return "";
-        return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
+        StringBuilder sb = new StringBuilder(s.length() * 2);
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            switch (c) {
+                case '\\': sb.append("\\\\"); break;
+                case '"': sb.append("\\\""); break;
+                case '\n': sb.append("\\n"); break;
+                case '\r': sb.append("\\r"); break;
+                case '\t': sb.append("\\t"); break;
+                case '\b': sb.append("\\b"); break;
+                case '\f': sb.append("\\f"); break;
+                default:
+                    if (c <= 0x1F) {
+                        sb.append(String.format("\\u%04x", (int) c));
+                    } else {
+                        sb.append(c);
+                    }
+                    break;
+            }
+        }
+        return sb.toString();
     }
 
     /**
@@ -76,16 +96,16 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
     }
 
     /**
-     * Build message in API Platform format: type "api.undeployed", payload { apiId, environment, vhost },
-     * timestamp, correlationId.
+     * Build message in API Platform format: type "api.undeployed", payload { apiId, deploymentId, vhost },
+     * timestamp, correlationId. Uses deploymentId to mirror deploy message format.
      */
     private static String buildUndeployMessage(DeployAPIInGatewayEvent event) {
         String timestamp = Instant.now().toString();
         String apiId = escapeJson(event.getUuid());
-        String environment = escapeJson(event.getContext());
+        String deploymentId = escapeJson(event.getEventId());
         String vhost = "";
-        return "{\"type\":\"api.undeployed\",\"payload\":{\"apiId\":\"" + apiId + "\",\"environment\":\""
-                + environment + "\",\"vhost\":\"" + vhost + "\"},\"timestamp\":\"" + escapeJson(timestamp)
+        return "{\"type\":\"api.undeployed\",\"payload\":{\"apiId\":\"" + apiId + "\",\"deploymentId\":\""
+                + deploymentId + "\",\"vhost\":\"" + vhost + "\"},\"timestamp\":\"" + escapeJson(timestamp)
                 + "\",\"correlationId\":\"" + escapeJson(event.getEventId()) + "\"}";
     }
 }

@@ -526,6 +526,8 @@ public class GatewayManagementDAO {
         } catch (SQLException e) {
             log.error("Error while calculating gateway deployment statistics for revision: " + revisionUuid
                     + " and environment: " + environmentName, e);
+            throw new APIManagementException("Error while calculating gateway deployment statistics for revision: "
+                    + revisionUuid + " and environment: " + environmentName, e);
         }
     }
 

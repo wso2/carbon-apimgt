@@ -83,22 +83,26 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
 
         // Set CarbonContext so getLoggedInUserProvider() and Registry/tenant lookups use this org (avoids "organizationnull").
         PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(org);
         try {
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(org);
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
-        } catch (Exception e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Could not resolve tenant id for org " + org + ", using super tenant", e);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(org);
+            try {
+                int tenantId = APIUtil.getTenantIdFromTenantDomain(org);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Could not resolve tenant id for org " + org + ", using super tenant", e);
+                }
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
             }
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-        }
-        // Username format expected by getAPIProvider: e.g. admin@carbon.super so tenant is derived correctly.
-        String systemUser = "admin@" + org;
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(systemUser);
+            // Username format expected by getAPIProvider: e.g. admin@carbon.super so tenant is derived correctly.
+            String systemUser = "admin@" + org;
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(systemUser);
 
-        if (log.isDebugEnabled()) {
-            log.debug("Request authenticated via platform gateway api-key for gateway: " + gateway.id);
+            if (log.isDebugEnabled()) {
+                log.debug("Request authenticated via platform gateway api-key for gateway: " + gateway.id);
+            }
+        } finally {
+            // endTenantFlow() not called here so tenant remains set for resource invocation; thread-local is cleared when thread is reused for a non-platform-gateway request that sets a different tenant
         }
     }
 

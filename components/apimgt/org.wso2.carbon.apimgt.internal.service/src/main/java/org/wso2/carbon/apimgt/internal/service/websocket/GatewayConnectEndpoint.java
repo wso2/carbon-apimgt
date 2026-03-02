@@ -223,7 +223,7 @@ public class GatewayConnectEndpoint {
         PlatformGatewayDAO.PlatformGateway gateway =
                 (PlatformGatewayDAO.PlatformGateway) session.getUserProperties().get(GATEWAY_PROPERTY);
         if (gateway != null) {
-            PlatformGatewaySessionRegistry.getInstance().unregister(gateway.id);
+            PlatformGatewaySessionRegistry.getInstance().unregister(gateway.id, session);
             try {
                 PlatformGatewayDAO.getInstance().updateGatewayActiveStatus(gateway.id, false);
             } catch (APIManagementException e) {

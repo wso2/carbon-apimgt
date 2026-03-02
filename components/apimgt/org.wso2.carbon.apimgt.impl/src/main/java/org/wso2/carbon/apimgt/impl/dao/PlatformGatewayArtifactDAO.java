@@ -73,6 +73,7 @@ public class PlatformGatewayArtifactDAO {
 
     /**
      * Save or replace platform artifact for an API and organization.
+     * Performs UPDATE first; if no row updated, INSERTs. Uses a single connection to avoid race conditions.
      *
      * @param apiId         API UUID
      * @param organizationId organization id
@@ -83,26 +84,24 @@ public class PlatformGatewayArtifactDAO {
             throw new APIManagementException("API UUID and organization are required");
         }
         Timestamp now = new Timestamp(System.currentTimeMillis());
-        String existing = getArtifact(apiId, organizationId);
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            if (existing == null) {
-                try (PreparedStatement ps = connection.prepareStatement(
-                        SQLConstants.PlatformGatewayArtifactSQLConstants.INSERT_ARTIFACT_SQL)) {
-                    ps.setString(1, apiId);
-                    ps.setString(2, organizationId);
-                    ps.setString(3, yamlContent);
-                    ps.setTimestamp(4, now);
-                    ps.setTimestamp(5, now);
-                    ps.executeUpdate();
-                }
-            } else {
-                try (PreparedStatement ps = connection.prepareStatement(
-                        SQLConstants.PlatformGatewayArtifactSQLConstants.UPDATE_ARTIFACT_SQL)) {
-                    ps.setString(1, yamlContent);
-                    ps.setTimestamp(2, now);
-                    ps.setString(3, apiId);
-                    ps.setString(4, organizationId);
-                    ps.executeUpdate();
+            try (PreparedStatement ps = connection.prepareStatement(
+                    SQLConstants.PlatformGatewayArtifactSQLConstants.UPDATE_ARTIFACT_SQL)) {
+                ps.setString(1, yamlContent);
+                ps.setTimestamp(2, now);
+                ps.setString(3, apiId);
+                ps.setString(4, organizationId);
+                int updated = ps.executeUpdate();
+                if (updated == 0) {
+                    try (PreparedStatement insertPs = connection.prepareStatement(
+                            SQLConstants.PlatformGatewayArtifactSQLConstants.INSERT_ARTIFACT_SQL)) {
+                        insertPs.setString(1, apiId);
+                        insertPs.setString(2, organizationId);
+                        insertPs.setString(3, yamlContent);
+                        insertPs.setTimestamp(4, now);
+                        insertPs.setTimestamp(5, now);
+                        insertPs.executeUpdate();
+                    }
                 }
             }
         } catch (SQLException e) {

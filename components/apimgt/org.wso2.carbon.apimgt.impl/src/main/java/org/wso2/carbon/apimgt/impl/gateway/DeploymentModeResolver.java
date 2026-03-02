@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.gateway;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.PlatformGatewayService;
@@ -40,6 +42,8 @@ import java.util.stream.Collectors;
  * map, add the gateway ID; otherwise treat as a Synapse label.
  */
 public final class DeploymentModeResolver {
+
+    private static final Log log = LogFactory.getLog(DeploymentModeResolver.class);
 
     private DeploymentModeResolver() {
     }
@@ -74,7 +78,7 @@ public final class DeploymentModeResolver {
                             .collect(Collectors.toMap(gw -> gw.getName().trim(), gw -> gw, (a, b) -> a));
                 }
             } catch (APIManagementException e) {
-                // Proceed with empty platform set; all names will be treated as Synapse
+                log.warn("Failed to resolve platform gateway names, defaulting to Synapse labels", e);
             }
         }
 

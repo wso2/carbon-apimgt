@@ -5149,9 +5149,9 @@ public class SQLConstants {
                 "INSERT INTO AM_GW_INSTANCES (GATEWAY_UUID, ORGANIZATION, LAST_UPDATED, GW_PROPERTIES) VALUES (?, ?, ?, ?) ";
         public static final String SELECT_GATEWAY_SQL =
                 "SELECT 1 FROM AM_GW_INSTANCES WHERE GATEWAY_UUID=? AND (ORGANIZATION=? OR ORGANIZATION='WSO2-ALL-TENANTS')";
-        /** Resolve organization from gateway UUID (e.g. when gateway does not send tenantDomain). */
+        /** Resolve organization from gateway UUID (e.g. when gateway does not send tenantDomain). Prefer specific org over WSO2-ALL-TENANTS. */
         public static final String SELECT_ORGANIZATION_BY_GATEWAY_UUID_SQL =
-                "SELECT ORGANIZATION FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ?";
+                "SELECT ORGANIZATION FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ? ORDER BY CASE WHEN ORGANIZATION = 'WSO2-ALL-TENANTS' THEN 1 ELSE 0 END, ORGANIZATION LIMIT 1";
         public static final String SELECT_DEPLOYMENT_SQL =
                 "SELECT 1 FROM AM_GW_REVISION_DEPLOYMENT grd INNER JOIN AM_GW_INSTANCES gwi ON grd.GATEWAY_ID = gwi"
                         + ".GATEWAY_ID WHERE gwi.GATEWAY_UUID = ? AND grd.API_ID = ?";
@@ -5194,9 +5194,9 @@ public class SQLConstants {
         public static final String SELECT_GATEWAYS_BY_ORG_SQL =
                 "SELECT ID, ORGANIZATION_ID, NAME, DISPLAY_NAME, DESCRIPTION, VHOST, IS_CRITICAL, " +
                         "FUNCTIONALITY_TYPE, PROPERTIES, IS_ACTIVE, CREATED_AT, UPDATED_AT FROM AM_PLATFORM_GATEWAY WHERE ORGANIZATION_ID = ? ORDER BY CREATED_AT";
-        /** Platform gateways that have a row in AM_GW_INSTANCES (for GET /environments and deployment acks). */
+        /** Platform gateways that have a row in AM_GW_INSTANCES (for GET /environments and deployment acks). DISTINCT so each gateway appears once despite multiple env mappings. */
         public static final String SELECT_GATEWAYS_BY_ORG_WITH_INSTANCE_SQL =
-                "SELECT pg.ID, pg.ORGANIZATION_ID, pg.NAME, pg.DISPLAY_NAME, pg.DESCRIPTION, pg.VHOST, pg.IS_CRITICAL, " +
+                "SELECT DISTINCT pg.ID, pg.ORGANIZATION_ID, pg.NAME, pg.DISPLAY_NAME, pg.DESCRIPTION, pg.VHOST, pg.IS_CRITICAL, " +
                         "pg.FUNCTIONALITY_TYPE, pg.PROPERTIES, pg.IS_ACTIVE, pg.CREATED_AT, pg.UPDATED_AT " +
                         "FROM AM_PLATFORM_GATEWAY pg " +
                         "INNER JOIN AM_GW_INSTANCES gwi ON gwi.GATEWAY_UUID = pg.ID AND gwi.ORGANIZATION = pg.ORGANIZATION_ID " +

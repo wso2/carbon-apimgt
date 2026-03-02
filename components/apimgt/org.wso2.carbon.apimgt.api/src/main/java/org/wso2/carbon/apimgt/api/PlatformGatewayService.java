@@ -68,11 +68,17 @@ public interface PlatformGatewayService {
 
     /**
      * List platform gateways that have a row in AM_GW_INSTANCES (for GET /environments; same source as deployment acks).
+     * Default implementation delegates to {@link #listGatewaysByOrganization(String)} for backward compatibility
+     * so external implementers are not forced to override; concrete implementations may override to return
+     * only gateways that have an instance row.
      *
      * @param organizationId organization id
      * @return list of gateways (never null)
      */
-    List<PlatformGateway> listGatewaysByOrganizationWithInstance(String organizationId) throws APIManagementException;
+    default List<PlatformGateway> listGatewaysByOrganizationWithInstance(String organizationId)
+            throws APIManagementException {
+        return listGatewaysByOrganization(organizationId);
+    }
 
     /**
      * Get a platform gateway by id.
