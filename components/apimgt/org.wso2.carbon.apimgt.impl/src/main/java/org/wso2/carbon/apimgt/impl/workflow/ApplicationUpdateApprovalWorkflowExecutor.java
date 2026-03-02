@@ -57,6 +57,12 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
     private static final String REQUESTED_CUSTOM_ATTRIBUTES_PROPERTY = "requestedCustomAttributes";
     private static final String EXISTING_APPLICATION_ATTRIBUTES_PROPERTY = "existingApplicationAttributes";
     private static final String APPLICATION_DESCRIPTION_PROPERTY = "applicationDescription";
+    private static final String APPLICATION_NAME_LABEL = "Application Name";
+    private static final String TIER_LABEL = "Tier";
+    private static final String DESCRIPTION_LABEL = "Description";
+    private static final String GROUPS_LABEL = "Groups";
+    private static final String SHARING_WITH_ORGANIZATION_LABEL = "Sharing with the organization";
+
 
     @Override
     public String getWorkflowType() {
@@ -79,7 +85,7 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing Application Update Approval Workflow.. ");
+            log.debug("Executing Application Update Approval Workflow. " + "Workflow Reference: " + workflowDTO.getWorkflowReference());
         }
         ApplicationWorkflowDTO applicationWorkflowDTO = (ApplicationWorkflowDTO) workflowDTO;
         Application pendingApplication = applicationWorkflowDTO.getApplication();
@@ -89,27 +95,27 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         workflowDTO.setProperties(APPLICATION_TIER_PROPERTY, existingApplication.getTier());
         workflowDTO.setProperties(APPLICATION_OWNER_PROPERTY, existingApplication.getOwner());
 
-        if (!StringUtils.isEmpty(String.valueOf(existingApplication.getDescription()))) {
-            workflowDTO.setProperties(APPLICATION_DESCRIPTION_PROPERTY, String.valueOf(existingApplication.getDescription()));
+        if (!StringUtils.isNotBlank(existingApplication.getDescription())) {
+            workflowDTO.setProperties(APPLICATION_DESCRIPTION_PROPERTY, existingApplication.getDescription());
         }
 
         List<Map<String, String>> applicationUpdateDiffs = new ArrayList<>();
 
-        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, "Application Name",
+        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, APPLICATION_NAME_LABEL,
                 existingApplication.getName(), pendingApplication.getName());
 
-        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, "Tier",
+        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, TIER_LABEL,
                 existingApplication.getTier(), pendingApplication.getTier());
 
-        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, "Description",
+        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, DESCRIPTION_LABEL,
                 existingApplication.getDescription(), pendingApplication.getDescription());
 
-        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, "Groups",
+        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, GROUPS_LABEL,
                 existingApplication.getGroupId(), pendingApplication.getGroupId());
 
         // Special case: since the shared organization (getSharedOrganization) is an uuid when
         // "Sharing with the organization" is enabled
-        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, "Sharing with the organization",
+        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, SHARING_WITH_ORGANIZATION_LABEL,
                 getShareWithOrganizationStatus(existingApplication.getSharedOrganization()),
                 getShareWithOrganizationStatus(pendingApplication.getSharedOrganization()));
 
@@ -154,7 +160,7 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         String message = "Approve update request for application '" + pendingApplication.getName() +
                 "' submitted by user: " + applicationWorkflowDTO.getUserName();
 
-        if (applicationAttributesVisibility && !existingApplication.getApplicationAttributes().isEmpty()) {
+        if (applicationAttributesVisibility && existingApplication.getApplicationAttributes() != null && !existingApplication.getApplicationAttributes().isEmpty()) {
             try {
                 workflowDTO.setProperties(EXISTING_APPLICATION_ATTRIBUTES_PROPERTY, objectMapper.writeValueAsString(existingApplication.getApplicationAttributes()));
             } catch (JsonProcessingException e) {
@@ -167,6 +173,9 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         workflowDTO.setWorkflowDescription(message);
 
         super.execute(workflowDTO);
+        if (log.isDebugEnabled()) {
+            log.debug("Application Update Approval Workflow executed successfully for application: " + existingApplication.getName() + " by owner: " + existingApplication.getOwner());
+        }
 
         return new GeneralWorkflowResponse();
     }

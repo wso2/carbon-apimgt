@@ -52,10 +52,13 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
      */
     @Override
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
+
         if (log.isDebugEnabled()) {
-            log.debug("Executing Application registration Workflow..");
+            log.debug("Executing Application Registration Approval Workflow. " + "Workflow Reference: " + workflowDTO.getWorkflowReference());
         }
+
         ApplicationRegistrationWorkflowDTO appRegDTO = (ApplicationRegistrationWorkflowDTO) workflowDTO;
+
         Application application = appRegDTO.getApplication();
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -67,11 +70,11 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
         workflowDTO.setProperties(APPLICATION_OWNER_PROPERTY, appRegDTO.getUserName());
         workflowDTO.setProperties(KEY_TYPE_PROPERTY, appRegDTO.getKeyType());
 
-        if (!StringUtils.isEmpty(String.valueOf(application.getDescription()))) {
-            workflowDTO.setProperties(APPLICATION_DESCRIPTION_PROPERTY, String.valueOf(application.getDescription()));
+        if (!StringUtils.isNotBlank(application.getDescription())) {
+            workflowDTO.setProperties(APPLICATION_DESCRIPTION_PROPERTY, application.getDescription());
         }
 
-        if (applicationAttributesVisibility && !application.getApplicationAttributes().isEmpty()) {
+        if (applicationAttributesVisibility && application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
             try {
                 workflowDTO.setProperties(APPLICATION_ATTRIBUTES_PROPERTY, objectMapper.writeValueAsString(application.getApplicationAttributes()));
             } catch (JsonProcessingException e) {
@@ -82,6 +85,9 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
         }
 
         super.execute(workflowDTO);
+        if (log.isDebugEnabled()) {
+            log.debug("Application Registration Approval Workflow executed successfully for application: " + application.getName() + ", keyType: " + appRegDTO.getKeyType());
+        }
 
         return new GeneralWorkflowResponse();
     }

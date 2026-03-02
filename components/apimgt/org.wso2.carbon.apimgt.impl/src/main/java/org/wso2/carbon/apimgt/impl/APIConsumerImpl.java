@@ -1294,7 +1294,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setSubscriber(userId);
 
                 // Retrieve email claim value for the subscriber
-                String subscriberEmail = getEmailClaimValue(username, tenantId);
+                String subscriberEmail = getEmailClaimValue(workflowDTO.getSubscriber(), workflowDTO.getTenantId());
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Retrieved email for subscriber : " + username);
+                }
+
                 if (StringUtils.isNotBlank(subscriberEmail)) {
                     workflowDTO.setProperties(SUBSCRIBER_EMAIL, subscriberEmail);
                 }
@@ -1498,7 +1503,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setSubscriber(userId);
 
                 // Retrieve email claim value for the subscriber
-                String subscriberEmail = getEmailClaimValue(username, tenantId);
+                String subscriberEmail = getEmailClaimValue(workflowDTO.getSubscriber(), workflowDTO.getTenantId());
                 if (StringUtils.isNotBlank(subscriberEmail)) {
                     workflowDTO.setProperties(SUBSCRIBER_EMAIL, subscriberEmail);
                 }
@@ -1777,7 +1782,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setExternalWorkflowReference(removeSubscriptionWFExecutor.generateUUID());
 
             // Retrieve email claim value for the subscriber
-            String subscriberEmail = getEmailClaimValue(username, tenantId);
+            String subscriberEmail = getEmailClaimValue(workflowDTO.getSubscriber(), workflowDTO.getTenantId());
             if (StringUtils.isNotBlank(subscriberEmail)) {
                 workflowDTO.setProperties(SUBSCRIBER_EMAIL, subscriberEmail);
             }
@@ -2134,7 +2139,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appWFDto.setCreatedTime(System.currentTimeMillis());
 
             // Retrieve email claim value for the application owner
-            String applicationOwnerEmail = getEmailClaimValue(username, tenantId);
+            String applicationOwnerEmail = getEmailClaimValue(appWFDto.getUserName(), appWFDto.getTenantId());
             if (StringUtils.isNotBlank(applicationOwnerEmail)) {
                 appWFDto.setProperties(APPLICATION_OWNER_EMAIL, applicationOwnerEmail);
             }
@@ -2370,7 +2375,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appWFDto.setCreatedTime(System.currentTimeMillis());
 
             // Retrieve email claim value for the application owner
-            String applicationOwnerEmail = getEmailClaimValue(username, tenantId);
+            String applicationOwnerEmail = getEmailClaimValue(appWFDto.getUserName(), appWFDto.getTenantId());
             if (StringUtils.isNotBlank(applicationOwnerEmail)) {
                 appWFDto.setProperties(APPLICATION_OWNER_EMAIL, applicationOwnerEmail);
             }
@@ -2557,7 +2562,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
 
             // Retrieve email claim value for the application owner
-            String applicationOwnerEmail = getEmailClaimValue(username, tenantId);
+            String applicationOwnerEmail = getEmailClaimValue(workflowDTO.getUserName(), workflowDTO.getTenantId());
             if (StringUtils.isNotBlank(applicationOwnerEmail)) {
                 workflowDTO.setProperties(APPLICATION_OWNER_EMAIL, applicationOwnerEmail);
             }
@@ -2995,7 +3000,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             appRegWFDto.setDomainList(allowedDomains);
 
             // Retrieve email claim value for the application owner
-            String applicationOwnerEmail = getEmailClaimValue(username, tenantId);
+            String applicationOwnerEmail = getEmailClaimValue(appRegWFDto.getUserName(), appRegWFDto.getTenantId());
             if (StringUtils.isNotBlank(applicationOwnerEmail)) {
                 appRegWFDto.setProperties(APPLICATION_OWNER_EMAIL, applicationOwnerEmail);
             }
@@ -5878,10 +5883,19 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     private String getEmailClaimValue(String username, int tenantId) {
 
         try {
+
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieving email claim for user : " + username + " in tenantId : " + tenantId);
+            }
+
             UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance()
                     .getRealmService()
                     .getTenantUserRealm(tenantId)
                     .getUserStoreManager();
+
+            if (userStoreManager == null) {
+                return null;
+            }
 
             return userStoreManager.getUserClaimValue(
                     MultitenantUtils.getTenantAwareUsername(username),

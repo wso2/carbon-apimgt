@@ -62,12 +62,13 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
      */
     @Override
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
-        APIRevisionWorkflowDTO revisionWorkFlowDTO = (APIRevisionWorkflowDTO) workflowDTO;
-        APIRevision revision = revisionWorkFlowDTO.getAPIRevision();
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing API Revision Deployment Workflow: " + revisionWorkFlowDTO.getWorkflowReference());
+            log.debug("Executing API Revision Deployment Approval Workflow. " + "Workflow Reference: " + workflowDTO.getWorkflowReference());
         }
+
+        APIRevisionWorkflowDTO revisionWorkFlowDTO = (APIRevisionWorkflowDTO) workflowDTO;
+        APIRevision revision = revisionWorkFlowDTO.getAPIRevision();
 
         String message = "Approve revision " + revision.getId() + " deployment request from the user "
                 + revisionWorkFlowDTO.getUserName() + " for the environment " + revisionWorkFlowDTO.getEnvironment()
@@ -82,8 +83,8 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
         workflowDTO.setProperties(ENVIRONMENT_PROPERTY, revisionWorkFlowDTO.getEnvironment());
         workflowDTO.setProperties(REVISION_ID_PROPERTY, String.valueOf(revision.getId()));
 
-        if (!StringUtils.isEmpty(String.valueOf(revision.getDescription()))) {
-            workflowDTO.setProperties(REVISION_DESCRIPTION_PROPERTY, String.valueOf(revision.getDescription()));
+        if (StringUtils.isNotBlank(revision.getDescription())) {
+            workflowDTO.setProperties(REVISION_DESCRIPTION_PROPERTY, revision.getDescription());
         }
         // set properties for Admin backend logic
         workflowDTO.setMetadata(REVISION_ID_PROPERTY, revisionWorkFlowDTO.getRevisionId());
@@ -93,6 +94,9 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
         workflowDTO.setMetadata(API_ID_PROPERTY, revision.getApiUUID());
 
         super.execute(workflowDTO);
+        if (log.isDebugEnabled()) {
+            log.debug("API Revision Deployment Approval Workflow executed successfully for API: " + revisionWorkFlowDTO.getApiName());
+        }
 
         return new GeneralWorkflowResponse();
     }

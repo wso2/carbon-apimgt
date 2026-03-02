@@ -4046,11 +4046,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         stateWorkflowDTO.setWorkflowDescription(workflowDescription);
 
         // Retrieve email claim values for the provider and the invoker
-        String providerEmail = getEmailClaimValue(providerName, tenantId);
-        String invokerEmail = null;
+        String providerEmail = getEmailClaimValue(stateWorkflowDTO.getApiProvider(), stateWorkflowDTO.getTenantId());
 
-        // If the invoker and provider are the same user, avoid retrieving the email again.
-        if (!this.username.equals(providerName)) {
+        String invokerEmail;
+        if (Objects.equals(this.username, stateWorkflowDTO.getApiProvider())) {
+            invokerEmail = providerEmail;
+        } else {
             invokerEmail = getEmailClaimValue(this.username, tenantId);
         }
 
@@ -7404,11 +7405,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             workflowDTO.setWorkflowDescription(workflowDescription);
 
             // Retrieve email claim values for the provider and the invoker
-            String providerEmail = getEmailClaimValue(apiIdentifier.getProviderName(), tenantId);
-            String invokerEmail = null;
+            String providerEmail = getEmailClaimValue(workflowDTO.getApiProvider(), workflowDTO.getTenantId());
 
-            // If the invoker and provider are the same user, avoid retrieving the email again.
-            if (!this.username.equals(apiIdentifier.getProviderName())) {
+            String invokerEmail;
+            if (Objects.equals(this.username, workflowDTO.getApiProvider())) {
+                invokerEmail = providerEmail;
+            } else {
                 invokerEmail = getEmailClaimValue(this.username, tenantId);
             }
 
@@ -9552,17 +9554,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private String getEmailClaimValue(String username, int tenantId) {
 
         try {
+
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieving email claim for user : " + username + " in tenantId : " + tenantId);
+            }
+
             UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance()
                     .getRealmService()
                     .getTenantUserRealm(tenantId)
                     .getUserStoreManager();
+
+            if (userStoreManager == null) {
+                return null;
+            }
 
             return userStoreManager.getUserClaimValue(
                     MultitenantUtils.getTenantAwareUsername(username),
                     EMAIL_CLAIM_URI,
                     UserCoreConstants.DEFAULT_PROFILE
             );
-        } catch (UserStoreException e) {
+        } catch (UserStoreException | RuntimeException e) {
             log.warn("Error while retrieving email claim for user in tenantId : " + tenantId, e);
             return null;
         }

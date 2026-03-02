@@ -50,6 +50,10 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
     @Override
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Executing Application Deletion Approval Workflow. " + "Workflow Reference: " + workflowDTO.getWorkflowReference());
+        }
+
         ApplicationWorkflowDTO appWorkFlowDTO = (ApplicationWorkflowDTO) workflowDTO;
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -62,11 +66,11 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
         workflowDTO.setProperties(APPLICATION_OWNER_PROPERTY, appWorkFlowDTO.getUserName());
         workflowDTO.setMetadata(APPLICATION_STATUS_PROPERTY,application.getStatus());
 
-        if (!StringUtils.isEmpty(String.valueOf(application.getDescription()))) {
-            workflowDTO.setProperties(APPLICATION_DESCRIPTION_PROPERTY, String.valueOf(application.getDescription()));
+        if (StringUtils.isNotBlank(application.getDescription())) {
+            workflowDTO.setProperties(APPLICATION_DESCRIPTION_PROPERTY, application.getDescription());
         }
 
-        if (applicationAttributesVisibility && !application.getApplicationAttributes().isEmpty()) {
+        if (applicationAttributesVisibility && application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
             try {
                 workflowDTO.setProperties(APPLICATION_ATTRIBUTES_PROPERTY, objectMapper.writeValueAsString(application.getApplicationAttributes()));
             } catch (JsonProcessingException e) {
@@ -77,6 +81,9 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
         }
 
         super.execute(workflowDTO);
+        if (log.isDebugEnabled()) {
+            log.debug("Application Deletion Approval Workflow executed successfully for application: " + application.getName());
+        }
 
         return new GeneralWorkflowResponse();
     }

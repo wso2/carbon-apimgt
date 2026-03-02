@@ -42,7 +42,8 @@ public class SubscriptionUpdateApprovalWorkflowExecutor extends WorkflowExecutor
     private static final String API_VERSION_PROPERTY = "apiVersion";
     private static final String SUBSCRIBER_PROPERTY = "subscriber";
     private static final String APPLICATION_NAME_PROPERTY = "applicationName";
-    private static final String SUBSCRIPTION_TIER_PROPERTY = "Subscription Tier";
+    private static final String SUBSCRIPTION_TIER_PROPERTY = "subscriptionTier";
+    private static final String SUBSCRIPTION_TIER_LABEL = "Subscription Tier";
     private static final String UPDATES_PROPERTY = "updates";
 
     @Override
@@ -64,7 +65,7 @@ public class SubscriptionUpdateApprovalWorkflowExecutor extends WorkflowExecutor
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing Subscription Update Webservice Workflow.. ");
+            log.debug("Executing Subscription Update Approval Workflow. " + "Workflow Reference: " + workflowDTO.getWorkflowReference());
         }
         SubscriptionWorkflowDTO subsWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
         String message = "Approve API " + subsWorkflowDTO.getApiName() + " - " + subsWorkflowDTO.getApiVersion() +
@@ -79,7 +80,7 @@ public class SubscriptionUpdateApprovalWorkflowExecutor extends WorkflowExecutor
 
         List<Map<String, String>> subscriptionUpdateDiffs = new ArrayList<>();
 
-        compareAndAddToSubscriptionUpdateDiffs(subscriptionUpdateDiffs, SUBSCRIPTION_TIER_PROPERTY,
+        compareAndAddToSubscriptionUpdateDiffs(subscriptionUpdateDiffs, SUBSCRIPTION_TIER_LABEL,
                 subsWorkflowDTO.getTierName(), subsWorkflowDTO.getRequestedTierName());
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -93,6 +94,9 @@ public class SubscriptionUpdateApprovalWorkflowExecutor extends WorkflowExecutor
         }
 
         super.execute(workflowDTO);
+        if (log.isDebugEnabled()) {
+            log.debug("Subscription Update Approval Workflow executed successfully for API: " + subsWorkflowDTO.getApiName());
+        }
 
         return new GeneralWorkflowResponse();
     }
