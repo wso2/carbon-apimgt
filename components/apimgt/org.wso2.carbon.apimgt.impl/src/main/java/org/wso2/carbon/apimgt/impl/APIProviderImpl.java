@@ -2601,6 +2601,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         environmentsToRemove.removeAll(environmentsToAdd);
         DeploymentTargets targets = DeploymentModeResolver.resolve(api.getOrganization(), environmentsToRemove);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        if (log.isInfoEnabled()) {
+            log.info("Undeploying API: " + api.getId().getApiName() + " from " + environmentsToRemove.size()
+                    + " environments");
+        }
         gatewayManager.unDeployFromGateway(api, tenantDomain, targets.getSynapseLabels(), onDeleteOrRetire,
                 targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds());
         if (log.isDebugEnabled()) {
@@ -7283,19 +7287,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handlePendingDeployments(apiId, apiRevisionUUID, apiRevisionDeployments);
         }
 
-        // Only insert deployments that are not already recorded (idempotent deploy; unique key NAME, REVISION_UUID)
-        List<APIRevisionDeployment> existingForRevision = apiMgtDAO.getAPIRevisionDeploymentByRevisionUUID(apiRevisionUUID);
-        Set<String> existingNames = existingForRevision.stream()
-                .map(APIRevisionDeployment::getDeployment)
-                .collect(Collectors.toSet());
-        List<APIRevisionDeployment> newDeploymentsOnly = apiRevisionDeployments.stream()
-                .filter(d -> !existingNames.contains(d.getDeployment()))
-                .collect(Collectors.toList());
-        if (!newDeploymentsOnly.isEmpty()) {
-            apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, newDeploymentsOnly);
-        }
+        apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, apiRevisionDeployments);
 
-        for (APIRevisionDeployment deployment : newDeploymentsOnly) {
+        for (APIRevisionDeployment deployment : apiRevisionDeployments) {
             if (!isInitiatedFromGateway) {
                 apiMgtDAO.updateAPIRevisionDeploymentStatus(apiRevisionUUID,
                         APIConstants.APIRevisionStatus.API_REVISION_CREATED, deployment.getDeployment());
@@ -7497,6 +7491,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 targetEnvironments, gatewayVhosts, deploymentsToRemove);
                 try {
                     DeploymentTargets targets = DeploymentModeResolver.resolve(organization, targetEnvironments);
+                    if (log.isInfoEnabled()) {
+                        log.info("Deploying API revision: " + revisionUUID + " to " + targetEnvironments.size()
+                                + " environments");
+                    }
                     gatewayManager.deployToGateway(api, organization, targets.getSynapseLabels(),
                             targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds(),
                             revisionUUID);

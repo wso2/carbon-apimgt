@@ -122,6 +122,9 @@ public class GatewayManagementDAO {
      */
     public String getOrganizationByGatewayId(String gatewayId) throws APIManagementException {
         if (gatewayId == null || gatewayId.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway ID is null or empty, returning null for organization");
+            }
             return null;
         }
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -195,6 +198,10 @@ public class GatewayManagementDAO {
             try {
                 insertGatewayInstance(connection, gatewayId, organization, envLabels, lastUpdated, gwProperties);
                 connection.commit();
+                if (log.isInfoEnabled()) {
+                    log.info("Successfully inserted gateway instance with ID: " + gatewayId + " for organization: "
+                            + organization);
+                }
             } catch (APIManagementException e) {
                 connection.rollback();
                 throw e;
@@ -498,25 +505,27 @@ public class GatewayManagementDAO {
      * @throws APIManagementException if database operation fails
      */
     public void setGatewayDeploymentStats(APIRevisionDeployment apiRevisionDeployment, String revisionUuid,
-                                          String environmentName, String apiUuid) throws APIManagementException {
+            String environmentName, String apiUuid) throws APIManagementException {
         GatewayNotificationConfiguration config = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getGatewayNotificationConfiguration();
         long currentTime = System.currentTimeMillis();
-        long expireTimeThreshold = currentTime - (config.getGatewayCleanupConfiguration().getExpireTimeSeconds() * 1000L);
+        long expireTimeThreshold =
+                currentTime - (config.getGatewayCleanupConfiguration().getExpireTimeSeconds() * 1000L);
         Timestamp expireTimestamp = new Timestamp(expireTimeThreshold);
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             boolean isPlatformGatewayEnv = isPlatformGatewayEnvironment(connection, environmentName, apiUuid);
 
             if (isPlatformGatewayEnv) {
-                setGatewayDeploymentStatsPlatform(connection, apiRevisionDeployment, revisionUuid, environmentName, apiUuid);
+                setGatewayDeploymentStatsPlatform(connection, apiRevisionDeployment, revisionUuid, environmentName,
+                        apiUuid);
             } else {
                 setGatewayDeploymentStatsWithHeartbeat(connection, apiRevisionDeployment, revisionUuid, environmentName,
                         apiUuid, expireTimestamp);
             }
         } catch (SQLException e) {
             log.error("Error while calculating gateway deployment statistics for revision: " + revisionUuid
-                              + " and environment: " + environmentName, e);
+                    + " and environment: " + environmentName, e);
         }
     }
 
@@ -552,10 +561,10 @@ public class GatewayManagementDAO {
     }
 
     private void setGatewayDeploymentStatsWithHeartbeat(Connection connection,
-                                                        APIRevisionDeployment apiRevisionDeployment,
-                                                        String revisionUuid, String environmentName, String apiUuid,
-                                                        Timestamp expireTimestamp) throws SQLException {
-        try (PreparedStatement ps = connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GATEWAY_DEPLOYMENT_STATS_QUERY)) {
+            APIRevisionDeployment apiRevisionDeployment, String revisionUuid, String environmentName, String apiUuid,
+            Timestamp expireTimestamp) throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement(
+                SQLConstants.APIRevisionSqlConstants.GATEWAY_DEPLOYMENT_STATS_QUERY)) {
             ps.setString(1, revisionUuid);
             ps.setString(2, environmentName);
             ps.setTimestamp(3, expireTimestamp);
@@ -577,7 +586,8 @@ public class GatewayManagementDAO {
             }
         }
 
-        try (PreparedStatement ps = connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GATEWAY_LIVE_COUNT_WITH_API_ORGANIZATION_QUERY)) {
+        try (PreparedStatement ps = connection.prepareStatement(
+                SQLConstants.APIRevisionSqlConstants.GATEWAY_LIVE_COUNT_WITH_API_ORGANIZATION_QUERY)) {
             ps.setTimestamp(1, expireTimestamp);
             ps.setString(2, environmentName);
             ps.setString(3, apiUuid);
@@ -598,11 +608,10 @@ public class GatewayManagementDAO {
      * after the gateway calls notify with SUCCESS, deployedGatewayCount and liveGatewayCount become 1.
      * UI can poll GET /apis/{apiId}/deployments to see when actual values are returned.
      */
-    private void setGatewayDeploymentStatsPlatform(Connection connection,
-                                                    APIRevisionDeployment apiRevisionDeployment,
-                                                    String revisionUuid, String environmentName, String apiUuid)
-            throws SQLException {
-        try (PreparedStatement ps = connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GATEWAY_DEPLOYMENT_STATS_PLATFORM_QUERY)) {
+    private void setGatewayDeploymentStatsPlatform(Connection connection, APIRevisionDeployment apiRevisionDeployment,
+            String revisionUuid, String environmentName, String apiUuid) throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement(
+                SQLConstants.APIRevisionSqlConstants.GATEWAY_DEPLOYMENT_STATS_PLATFORM_QUERY)) {
             ps.setString(1, revisionUuid);
             ps.setString(2, environmentName);
 

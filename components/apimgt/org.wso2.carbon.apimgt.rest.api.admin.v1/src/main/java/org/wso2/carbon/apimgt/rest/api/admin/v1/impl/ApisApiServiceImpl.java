@@ -18,30 +18,22 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.APIGatewayManager;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApiResultDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PaginationDTO;

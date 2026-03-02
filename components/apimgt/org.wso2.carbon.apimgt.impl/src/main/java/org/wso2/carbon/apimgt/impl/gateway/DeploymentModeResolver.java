@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * target both Synapse and platform gateways via {@link org.wso2.carbon.apimgt.impl.APIGatewayManager#deployToGateway}.
  * <p>
  * Uses a single batch lookup: {@code listGatewaysByOrganization(organization)} once, then in-memory
- * name→gateway map so we avoid N per-name lookups. For each request name: if it is in the platform
+ * name -> gateway map so we avoid N per-name lookups. For each request name: if it is in the platform
  * map, add the gateway ID; otherwise treat as a Synapse label.
  */
 public final class DeploymentModeResolver {

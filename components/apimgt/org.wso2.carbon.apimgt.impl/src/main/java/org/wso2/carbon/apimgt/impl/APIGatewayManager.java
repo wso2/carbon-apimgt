@@ -80,7 +80,10 @@ public class APIGatewayManager {
      */
     private void sendDeploymentEvent(API api, String tenantDomain, Set<String> publishedGateways,
                                      Set<String> platformGatewayIds, String revisionUuidForPlatform) {
-
+        if (log.isInfoEnabled()) {
+            log.info("Sending deployment event for API: " + api.getId().getName() + " version: "
+                    + api.getId().getVersion() + " to gateways");
+        }
         APIIdentifier apiIdentifier = api.getId();
         Set<String> gateways = publishedGateways != null ? publishedGateways : new HashSet<>();
         boolean useRevisionAsEventId = revisionUuidForPlatform != null && !revisionUuidForPlatform.isEmpty()
@@ -210,7 +213,7 @@ public class APIGatewayManager {
     }
 
     /**
-     * Deploy API to Synapse and/or platform gateways. When platformGatewayIds is non-empty,
+     * Deploy API to Synapse or platform gateways. When platformGatewayIds is non-empty,
      * PlatformGatewayDeployNotifier will dispatch to the platform path.
      *
      * @param api                  API to deploy
@@ -224,7 +227,7 @@ public class APIGatewayManager {
     }
 
     /**
-     * Deploy API to Synapse and/or platform gateways. When revisionUuid is non-null and platformGatewayIds
+     * Deploy API to Synapse or platform gateways. When revisionUuid is non-null and platformGatewayIds
      * is non-empty, the deploy event uses revisionUuid as deploymentId so the platform gateway echoes it
      * in notify-api-deployment-status and deployment stats (deployedGatewayCount, failedGatewayCount) match.
      *
@@ -236,6 +239,14 @@ public class APIGatewayManager {
      */
     public void deployToGateway(API api, String tenantDomain, Set<String> gatewaysToPublish,
                                Set<String> platformGatewayIds, String revisionUuid) {
+        if (log.isInfoEnabled()) {
+            log.info("Deploying API: " + api.getId().getName() + " version: " + api.getId().getVersion()
+                    + " to tenant: " + tenantDomain);
+        }
+        if (platformGatewayIds != null && !platformGatewayIds.isEmpty() && log.isDebugEnabled()) {
+            log.debug("Deploying to " + platformGatewayIds.size() + " platform gateways with revision: "
+                    + revisionUuid);
+        }
         if (debugEnabled) {
             log.debug("Status of " + api.getId() + " has been updated to DB");
         }
@@ -247,7 +258,7 @@ public class APIGatewayManager {
     }
 
     /**
-     * Deploy API product to Synapse and/or platform gateways.
+     * Deploy API product to Synapse or platform gateways.
      *
      * @param api                  API product to deploy
      * @param tenantDomain         tenant domain
@@ -268,7 +279,7 @@ public class APIGatewayManager {
     }
 
     /**
-     * Undeploy API from Synapse and/or platform gateways.
+     * Undeploy API from Synapse or platform gateways.
      *
      * @param api                  API to undeploy
      * @param tenantDomain         tenant domain
@@ -291,7 +302,7 @@ public class APIGatewayManager {
     }
 
     /**
-     * Undeploy API Product from Synapse and/or platform gateways. Use this when the caller has already
+     * Undeploy API Product from Synapse or platform gateways. Use this when the caller has already
      * resolved gateway names into Synapse labels and platform gateway IDs (e.g. via DeploymentModeResolver).
      *
      * @param apiProduct           API product to undeploy

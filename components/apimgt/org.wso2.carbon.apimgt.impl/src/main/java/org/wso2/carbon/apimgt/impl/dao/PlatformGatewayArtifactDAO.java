@@ -32,7 +32,7 @@ import java.sql.Timestamp;
 
 /**
  * DAO for platform gateway API artifact storage (AM_PLATFORM_GATEWAY_API_ARTIFACT).
- * Stores platform-format api.yaml per API and organization (Scenario 1).
+ * Stores platform-format api.yaml per API and organization.
  */
 public class PlatformGatewayArtifactDAO {
 

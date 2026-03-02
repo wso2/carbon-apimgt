@@ -161,6 +161,33 @@ public class PlatformGatewayDAO {
     }
 
     /**
+     * Creates a platform gateway, its token, and registers it in AM_GW_INSTANCES in a single transaction.
+     * Keeps connection and transaction boundary inside the DAO layer (service -> impl -> dao).
+     */
+    public void createGatewayWithTokenAndGatewayInstance(PlatformGateway gateway, String tokenId, String tokenHash,
+                                                         List<String> envLabels)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                createGateway(connection, gateway);
+                createToken(connection, tokenId, gateway.id, tokenHash, gateway.createdAt);
+                GatewayManagementDAO.getInstance().insertGatewayInstance(connection, gateway.id, gateway.organizationId,
+                        envLabels, gateway.createdAt, new byte[0]);
+                connection.commit();
+            } catch (APIManagementException e) {
+                connection.rollback();
+                throw e;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIManagementException("Error creating platform gateway", e);
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error getting database connection", e);
+        }
+    }
+
+    /**
      * Get platform gateway by ID.
      */
     public PlatformGateway getGatewayById(String id) throws APIManagementException {

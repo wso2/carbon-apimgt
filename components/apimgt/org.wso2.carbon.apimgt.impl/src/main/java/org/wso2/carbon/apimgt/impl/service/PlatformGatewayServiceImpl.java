@@ -22,14 +22,10 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.model.CreatePlatformGatewayResult;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
-import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collections;
@@ -89,26 +85,8 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
                 now
         );
 
-        Connection connection = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            dao.createGateway(connection, gateway);
-            dao.createToken(connection, tokenId, gatewayId, tokenHash, now);
-            // Register in AM_GW_INSTANCES so deployment acks and GET /environments use the same source
-            GatewayManagementDAO.getInstance().insertGatewayInstance(connection, gatewayId, organizationId,
-                    Collections.singletonList(name), now, new byte[0]);
-            connection.commit();
-        } catch (APIManagementException e) {
-            rollbackQuietly(connection);
-            throw e;
-        } catch (SQLException e) {
-            rollbackQuietly(connection);
-            throw new APIManagementException("Error creating platform gateway", e);
-        } finally {
-            closeQuietly(connection);
-        }
-
+        dao.createGatewayWithTokenAndGatewayInstance(gateway, tokenId, tokenHash,
+                Collections.singletonList(name));
         String registrationToken = tokenId + PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR + plainToken;
         return new CreatePlatformGatewayResult(toApiModel(gateway), registrationToken);
     }
@@ -157,23 +135,5 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         api.setCreatedAt(g.createdAt != null ? new java.util.Date(g.createdAt.getTime()) : null);
         api.setUpdatedAt(g.updatedAt != null ? new java.util.Date(g.updatedAt.getTime()) : null);
         return api;
-    }
-
-    private static void rollbackQuietly(Connection connection) {
-        if (connection != null) {
-            try {
-                connection.rollback();
-            } catch (SQLException ignored) {
-            }
-        }
-    }
-
-    private static void closeQuietly(Connection connection) {
-        if (connection != null) {
-            try {
-                connection.close();
-            } catch (SQLException ignored) {
-            }
-        }
     }
 }
