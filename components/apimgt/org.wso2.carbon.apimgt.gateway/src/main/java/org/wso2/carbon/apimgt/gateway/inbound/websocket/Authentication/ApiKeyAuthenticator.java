@@ -73,16 +73,16 @@ public class ApiKeyAuthenticator implements Authenticator {
                 if (StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT)) {
                     splitToken = apiKey.split("\\.");
                     if (splitToken.length == 3) {
-                        isJwtApiKey = true;
                         ApiKeyAuthenticatorUtils.validateAPIKeyFormat(splitToken);
                         signedJWT = (SignedJWT) JWTParser.parse(apiKey);
                         decodedHeader = signedJWT.getHeader();
                         payload = signedJWT.getJWTClaimsSet();
-                        return ApiKeyAuthenticatorUtils.isAPIKey(splitToken, decodedHeader, payload);
+                        isJwtApiKey = ApiKeyAuthenticatorUtils.isAPIKey(splitToken, decodedHeader, payload);
+                        return true; // Proceed to authenticate(); it decides JWT vs opaque path
                     }
-                } else {
-                    isJwtApiKey = false;
                 }
+                isJwtApiKey = false;
+                return StringUtils.isNotBlank(apiKey); // Opaque candidate
             } catch (ParseException e) {
                 log.error("Error while parsing API Key", e);
                 return false;
@@ -154,7 +154,8 @@ public class ApiKeyAuthenticator implements Authenticator {
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 } else {
                     AuthenticationContext opaqueApiKeyAuthenticationContext = validateOpaqueApiKey(apiKey, apiContext,
-                            apiVersion, tenantDomain);
+                            apiVersion, tenantDomain, inboundMessageContext.getUserIP(),
+                            inboundMessageContext.getRequestHeaders().get(APIMgtGatewayConstants.REFERER));
                     if (!InboundWebsocketProcessorUtil.validateAuthenticationContext(opaqueApiKeyAuthenticationContext,
                             inboundMessageContext)) {
                         return InboundWebsocketProcessorUtil.getFrameErrorDTO(
@@ -186,10 +187,13 @@ public class ApiKeyAuthenticator implements Authenticator {
      * @param apiContext The API context
      * @param apiVersion The API version
      * @param tenantDomain Tenant domain
+     * @param ip Ip
+     * @param referrer Referer
      * @return AuthenticationContext Authentication context with the API key validation info
      * @throws APIManagementException if an error occurs
      */
-    private AuthenticationContext validateOpaqueApiKey(String apiKey, String apiContext, String apiVersion, String tenantDomain)
+    private AuthenticationContext validateOpaqueApiKey(String apiKey, String apiContext, String apiVersion, String tenantDomain,
+                                                       String ip, String referrer)
             throws APISecurityException, APIManagementException {
 
         // Hash the provided API key
@@ -208,18 +212,18 @@ public class ApiKeyAuthenticator implements Authenticator {
         boolean isVerified = ApiKeyAuthenticatorUtils.verifyAPIKeyHashFromTokenCache(isGatewayTokenCacheEnabled,
                 apiKeyHash, apiKey);
         apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKey);
-        if (!isVerified) {
-            // Not found in cache or caching disabled
-            if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null ||
-                    !APIConstants.NotificationEvent.ACTIVE.equals(apiKeyInfo.getStatus())) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Invalid Api Key. Active API key information not available.");
-                }
-                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
-                        APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+        // Not found in cache or caching disabled
+        if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null ||
+                !APIConstants.NotificationEvent.ACTIVE.equals(apiKeyInfo.getStatus())) {
+            if (log.isDebugEnabled()) {
+                log.debug("Invalid Api Key. Active API key information not available.");
             }
+            throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                    APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+        }
+        if (!isVerified) {
             // Check whether the provided API key is already there in the stored list and return false otherwise
-            else if (!MessageDigest.isEqual(
+            if (!MessageDigest.isEqual(
                     apiKeyHash.getBytes(StandardCharsets.UTF_8),
                     apiKeyInfo.getApiKeyHash().getBytes(StandardCharsets.UTF_8))) {
                 if (log.isDebugEnabled()) {
@@ -228,9 +232,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                         APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
             }
-            else {
-                isVerified = true;
-            }
+            isVerified = true;
         }
         // If Api Key is verified
         if (isVerified) {
@@ -239,6 +241,8 @@ public class ApiKeyAuthenticator implements Authenticator {
             // Validate subscriptions
             apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext, apiVersion, apiKeyInfo.getKeyType(),
                     apiKeyInfo.getAppId(), apiKey);
+            ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(ip, apiContext, apiVersion, referrer,
+                    apiKeyInfo.getAdditionalProperties());
             if (apiKeyValidationInfoDTO != null && apiKeyValidationInfoDTO.isAuthorized()) {
                 if (log.isDebugEnabled()) {
                     log.debug("User is subscribed to the API: " + apiContext + ", " +

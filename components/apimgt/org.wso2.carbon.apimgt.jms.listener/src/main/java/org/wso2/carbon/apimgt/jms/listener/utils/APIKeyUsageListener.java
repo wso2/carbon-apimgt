@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiKeyMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
 import javax.jms.JMSException;
@@ -65,7 +66,7 @@ public class APIKeyUsageListener implements MessageListener {
                     Timestamp lastUsedTimestamp = epoch != null ? new Timestamp(epoch) : null;
 
                     if (apiKeyHash != null && !apiKeyHash.isEmpty()) {
-                        ApiMgtDAO.getInstance().updateAPIKeyUsage(apiKeyHash, lastUsedTimestamp);
+                        ApiKeyMgtDAO.getInstance().updateAPIKeyUsage(apiKeyHash, lastUsedTimestamp);
                     } else {
                         log.warn("Received API key usage event with empty apiKeyHash.");
                     }

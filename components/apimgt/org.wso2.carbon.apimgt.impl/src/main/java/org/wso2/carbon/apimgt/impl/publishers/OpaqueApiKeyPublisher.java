@@ -59,7 +59,9 @@ public class OpaqueApiKeyPublisher {
      */
     public void publishApiKeyUsageEvents(Properties properties) {
 
-        opaqueApiKeyNotifier.sendLastUsedTimeOnRealtime(properties);
+        if (opaqueApiKeyNotifier != null) {
+            opaqueApiKeyNotifier.sendLastUsedTimeOnRealtime(properties);
+        }
     }
 
     /**
@@ -68,7 +70,9 @@ public class OpaqueApiKeyPublisher {
      */
     public void publishApiKeyInfoEvents(Properties properties) {
 
-        opaqueApiKeyNotifier.sendApiKeyInfoOnRealtime(properties);
+        if (opaqueApiKeyNotifier != null) {
+            opaqueApiKeyNotifier.sendApiKeyInfoOnRealtime(properties);
+        }
     }
 
     /**
@@ -77,6 +81,8 @@ public class OpaqueApiKeyPublisher {
      */
     public void publishApiKeyAssociationInfoEvents(Properties properties) {
 
-        opaqueApiKeyNotifier.sendApiKeyAssociationInfoOnRealtime(properties);
+        if (opaqueApiKeyNotifier != null) {
+            opaqueApiKeyNotifier.sendApiKeyAssociationInfoOnRealtime(properties);
+        }
     }
 }

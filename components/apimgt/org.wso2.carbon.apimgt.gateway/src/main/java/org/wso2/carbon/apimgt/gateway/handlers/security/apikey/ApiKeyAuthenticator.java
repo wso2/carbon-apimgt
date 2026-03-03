@@ -262,18 +262,18 @@ public class ApiKeyAuthenticator implements Authenticator {
         boolean isVerified = ApiKeyAuthenticatorUtils.verifyAPIKeyHashFromTokenCache(isGatewayTokenCacheEnabled,
                 apiKeyHash, apiKey);
         apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKey);
-        if (!isVerified) {
-            // Not found in cache or caching disabled
-            if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null ||
-                    !APIConstants.NotificationEvent.ACTIVE.equals(apiKeyInfo.getStatus())) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Invalid Api Key. Active API key information not available.");
-                }
-                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
-                        APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+        // Not found in cache or caching disabled
+        if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null ||
+                !APIConstants.NotificationEvent.ACTIVE.equals(apiKeyInfo.getStatus())) {
+            if (log.isDebugEnabled()) {
+                log.debug("Invalid Api Key. Active API key information not available.");
             }
+            throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                    APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+        }
+        if (!isVerified) {
             // Check whether the provided API key is already there in the stored list and return false otherwise
-            else if (!MessageDigest.isEqual(
+            if (!MessageDigest.isEqual(
                     apiKeyHash.getBytes(StandardCharsets.UTF_8),
                     apiKeyInfo.getApiKeyHash().getBytes(StandardCharsets.UTF_8))) {
                 if (log.isDebugEnabled()) {
@@ -282,9 +282,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                         APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
             }
-            else {
-                isVerified = true;
-            }
+            isVerified = true;
         }
         // If Api Key is verified
         if (isVerified) {

@@ -50,7 +50,7 @@ public class ApiKeysApiServiceImpl implements ApiKeysApiService {
                     dto.setKeyName(src.getKeyName());
                     dto.setKeyType(src.getKeyType());
                     dto.setStatus(src.getStatus());
-                    dto.setValidityPeriod((int) Math.min(src.getValidityPeriod(), Integer.MAX_VALUE));
+                    dto.setExpiresAt((int) Math.min(src.getExpiresAt(), Integer.MAX_VALUE));
                     dto.setAppId(src.getAppId());
                     dto.setAdditionalProperties(src.getProperties());
                     return dto;

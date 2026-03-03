@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.dao;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -77,39 +76,44 @@ public class ApiKeyMgtDAO {
             String addApiKeySql = SQLConstants.ADD_API_KEY_SQL;
             String addApiKeyToApiMappingSql = SQLConstants.ADD_API_KEY_TO_API_MAPPING_SQL;
             String addApiKeyToAppMappingSql = SQLConstants.ADD_API_KEY_TO_APP_MAPPING_SQL;
-            try (PreparedStatement ps = conn.prepareStatement(addApiKeySql)) {
-                ps.setString(1, keyUUID);
-                ps.setString(2, keyInfoDTO.getKeyName());
-                ps.setString(3, apiKeyHash);
-                ps.setString(4, keyInfoDTO.getKeyType());
-                ps.setBytes(5, keyInfoDTO.getApiKeyProperties());
-                ps.setString(6, keyInfoDTO.getAuthUser());
-                ps.setTimestamp(7, new Timestamp(System.currentTimeMillis()),
-                        Calendar.getInstance(TimeZone.getTimeZone("UTC")));
-                ps.setLong(8, keyInfoDTO.getValidityPeriod());
-                if (keyInfoDTO.getLastUsedTime() == null) {
-                    ps.setNull(9, Types.TIMESTAMP);
-                } else {
-                    ps.setString(9, keyInfoDTO.getLastUsedTime());
-                }
-                ps.setString(10, "ACTIVE");
-                ps.executeUpdate();
-                conn.commit();
-            }
-            if (keyInfoDTO.getApiId() != null) {
-                try (PreparedStatement ps = conn.prepareStatement(addApiKeyToApiMappingSql)) {
+            try {
+                try (PreparedStatement ps = conn.prepareStatement(addApiKeySql)) {
                     ps.setString(1, keyUUID);
-                    ps.setString(2, keyInfoDTO.getApiId());
+                    ps.setString(2, keyInfoDTO.getKeyName());
+                    ps.setString(3, apiKeyHash);
+                    ps.setString(4, keyInfoDTO.getKeyType());
+                    ps.setBytes(5, keyInfoDTO.getApiKeyProperties());
+                    ps.setString(6, keyInfoDTO.getAuthUser());
+                    ps.setTimestamp(7, new Timestamp(System.currentTimeMillis()),
+                            Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+                    ps.setLong(8, keyInfoDTO.getValidityPeriod());
+                    if (keyInfoDTO.getLastUsedTime() == null) {
+                        ps.setNull(9, Types.TIMESTAMP);
+                    } else {
+                        ps.setString(9, keyInfoDTO.getLastUsedTime());
+                    }
+                    ps.setString(10, "ACTIVE");
                     ps.executeUpdate();
                     conn.commit();
                 }
-            } else if (keyInfoDTO.getApplicationId() != null) {
-                try (PreparedStatement ps = conn.prepareStatement(addApiKeyToAppMappingSql)) {
-                    ps.setString(1, keyUUID);
-                    ps.setString(2, keyInfoDTO.getApplicationId());
-                    ps.executeUpdate();
-                    conn.commit();
+                if (keyInfoDTO.getApiId() != null) {
+                    try (PreparedStatement ps = conn.prepareStatement(addApiKeyToApiMappingSql)) {
+                        ps.setString(1, keyUUID);
+                        ps.setString(2, keyInfoDTO.getApiId());
+                        ps.executeUpdate();
+                        conn.commit();
+                    }
+                } else if (keyInfoDTO.getApplicationId() != null) {
+                    try (PreparedStatement ps = conn.prepareStatement(addApiKeyToAppMappingSql)) {
+                        ps.setString(1, keyUUID);
+                        ps.setString(2, keyInfoDTO.getApplicationId());
+                        ps.executeUpdate();
+                        conn.commit();
+                    }
                 }
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Failed to add generated API key", e);
             }
         } catch (SQLException e) {
             handleException("Failed to add generated API key", e);
@@ -305,6 +309,17 @@ public class ApiKeyMgtDAO {
                         keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
                         keyInfo.setStatus(rs.getString("STATUS"));
                         keyInfo.setAppId(rs.getInt("APPLICATION_ID"));
+                        Long validityPeriod = rs.getObject("VALIDITY_PERIOD", Long.class);
+                        long expiresAt = 0L;
+                        if (createdTime != null && validityPeriod != null && validityPeriod > 0) {
+                            long issuedTime = createdTime.getTime();
+                            if (Long.MAX_VALUE - issuedTime < validityPeriod) {
+                                expiresAt = Long.MAX_VALUE;
+                            } else {
+                                expiresAt = issuedTime + validityPeriod;
+                            }
+                        }
+                        keyInfo.setExpiresAt(expiresAt);
                         apiKeyInfoList.add(keyInfo);
                     }
                 }

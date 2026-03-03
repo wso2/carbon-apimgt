@@ -551,7 +551,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         jwtTokenInfoDTO.setPermittedIP(permittedIP);
         jwtTokenInfoDTO.setPermittedReferer(permittedReferer);
 
-        if (keyName == null || keyName.isEmpty()) {
+        if (StringUtils.isBlank(keyName)) {
             ApiKeyGenerator apiKeyGenerator = loadApiKeyGenerator();
             if (apiKeyGenerator != null) {
                 apiKey = apiKeyGenerator.generateToken(jwtTokenInfoDTO);
@@ -560,6 +560,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 throw new APIManagementException("Failed to generate the API key in JWT format");
             }
         } else {
+            keyName = keyName.trim();
             // Generate API key in opaque format
             apiKey = generateOpaqueKey();
         }

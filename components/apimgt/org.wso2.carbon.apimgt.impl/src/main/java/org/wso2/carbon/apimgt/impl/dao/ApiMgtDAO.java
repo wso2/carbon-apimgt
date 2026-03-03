@@ -16584,15 +16584,7 @@ public class ApiMgtDAO {
             prepStmt.execute();
             connection.commit();
         } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException rollbackEx) {
-                    log.error("Failed to rollback updating last used time of API key", rollbackEx);
-                }
-            }
-            handleException(
-                    "Error occurred while converting NULL throttling tiers to Unlimited in AM_API_URL_MAPPING table",
+            handleException("Error occurred while converting NULL throttling tiers to Unlimited in AM_API_URL_MAPPING table",
                     e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);

@@ -1407,7 +1407,7 @@ components:
           type: string
         status:
           type: string
-        validityPeriod:
+        expiresAt:
           type: integer
           format: int32
         appId:

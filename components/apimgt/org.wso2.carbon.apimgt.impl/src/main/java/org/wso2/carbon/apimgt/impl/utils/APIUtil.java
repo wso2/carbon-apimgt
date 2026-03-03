@@ -9224,7 +9224,7 @@ public final class APIUtil {
     public static String convertBytesToHex(byte[] bytes) {
         StringBuilder hex = new StringBuilder(bytes.length * 2);
         for (byte b : bytes) {
-            hex.append(String.format("%02x", b));
+            hex.append(String.format("%02x", b & 0xff));
         }
         return hex.toString();
     }

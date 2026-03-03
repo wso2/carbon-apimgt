@@ -338,7 +338,7 @@ public class ApiKeyAuthenticatorUtils {
 
         log.debug("Api Key is verified and started checking whether the Api key is expired or not.");
         boolean isApiKeyExpired = false;
-        Long expiresAt = apiKeyInfo.getExpiresAt();
+        long expiresAt = apiKeyInfo.getExpiresAt();
         if (expiresAt > 0 && expiresAt < System.currentTimeMillis()) {
             isApiKeyExpired = true;
         }
@@ -401,8 +401,10 @@ public class ApiKeyAuthenticatorUtils {
             // Validate http referer against the permitted referrers
             if (StringUtils.isNotEmpty(referer)) {
                 for (String restrictedReferer : permittedRefererList.split(",")) {
-                    String restrictedRefererRegExp = restrictedReferer.trim()
-                            .replace("*", "[^ ]*");
+                    String restrictedRefererRegExp = "^" + java.util.Arrays.stream(restrictedReferer.trim().split("\\*", -1))
+                            .map(java.util.regex.Pattern::quote)
+                            .collect(java.util.stream.Collectors.joining(".*")) +
+                            "$";
                     if (referer.matches(restrictedRefererRegExp)) {
                         // Referer is allowed
                         return;
@@ -464,8 +466,10 @@ public class ApiKeyAuthenticatorUtils {
             // Validate http referer against the permitted referrers
             if (StringUtils.isNotEmpty(referer)) {
                 for (String restrictedReferer : permittedRefererList.split(",")) {
-                    String restrictedRefererRegExp = restrictedReferer.trim()
-                            .replace("*", "[^ ]*");
+                    String restrictedRefererRegExp = "^" + java.util.Arrays.stream(restrictedReferer.trim().split("\\*", -1))
+                            .map(java.util.regex.Pattern::quote)
+                            .collect(java.util.stream.Collectors.joining(".*")) +
+                            "$";
                     if (referer.matches(restrictedRefererRegExp)) {
                         // Referer is allowed
                         return;

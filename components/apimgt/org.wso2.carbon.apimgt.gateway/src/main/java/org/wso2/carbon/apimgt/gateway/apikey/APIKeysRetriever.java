@@ -90,9 +90,9 @@ public class APIKeysRetriever extends TimerTask {
                     List<APIKeyDTO> dtoList =
                             mapper.readValue(responseString,
                                     new TypeReference<List<APIKeyDTO>>() {});
-                    Map<String, String> props = new HashMap<>();
-                    Map<String, String> oldProps = new HashMap<>();
                     for (APIKeyDTO dto : dtoList) {
+                        Map<String, String> props = new HashMap<>();
+                        Map<String, String> oldProps = new HashMap<>();
                         // Convert DTO -> APIKeyInfo
                         APIKeyInfo info = new APIKeyInfo();
                         info.setLookupKey(dto.getApiKeyHash());
@@ -100,11 +100,11 @@ public class APIKeysRetriever extends TimerTask {
                         info.setKeyName(dto.getKeyName());
                         info.setKeyType(dto.getKeyType());
                         info.setStatus(dto.getStatus());
-                        info.setValidityPeriod(dto.getValidityPeriod());
+                        info.setExpiresAt(dto.getExpiresAt());
                         info.setAppId(dto.getAppId());
                         byte[] apikeyProperties = dto.getAdditionalProperties();
                         if (apikeyProperties != null && apikeyProperties.length != 0) {
-                        oldProps = mapper.readValue(apikeyProperties, new TypeReference<Map<String, String>>() {});
+                            oldProps = mapper.readValue(apikeyProperties, new TypeReference<Map<String, String>>() {});
                         }
                         props.put(APIConstants.JwtTokenConstants.PERMITTED_IP,
                                 oldProps.get(APIConstants.JwtTokenConstants.PERMITTED_IP));
