@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
