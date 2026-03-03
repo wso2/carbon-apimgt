@@ -1,22 +1,18 @@
-name: port-agent
+name: Matrix Agentic Backport
 on:
   pull_request:
     types: [closed]
     branches:
       - 'carbon-apimgt-v4.4.0'
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
-  backport:
+  backport-matrix:
     if: github.event.pull_request.merged == true
     strategy:
       fail-fast: false
       matrix:
         target_branch: ['carbon-apimgt-v4.3.0', 'carbon-apimgt-v4.2.0', 'carbon-apimgt-v4.1.0']
-
+    
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Orchestrator (v4.4.0)
@@ -29,15 +25,16 @@ jobs:
         with:
           ref: ${{ matrix.target_branch }}
           path: 'workspace'
-          fetch-depth: 0
 
-      - name: Run Copilot Agent
-        uses: github/copilot-agent-action@v1
-        with:
-          instructions-path: orchestrator/.github/workflows/agent-instructions.md
+      - name: Install gh-aw CLI
         env:
-          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN}}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TARGET_BRANCH: ${{ matrix.target_branch }}
+        run: gh extension install github/gh-aw
+
+      - name: Execute Agentic Workflow
+        env:
+          GH_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
           ORIGINAL_PR_NUMBER: ${{ github.event.pull_request.number }}
-          GITHUB_WORKSPACE: ${{ github.workspace }}/workspace
+        run: |
+          cd ${{ github.workspace }}/workspace
+          gh aw run ../orchestrator/.github/workflows/backport-agent.lock.yml
