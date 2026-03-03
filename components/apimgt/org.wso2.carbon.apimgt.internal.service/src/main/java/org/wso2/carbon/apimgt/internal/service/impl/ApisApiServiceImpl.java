@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -145,9 +146,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Validate that the acknowledged API exists and belongs to the same organization as the gateway.
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPIInfoByUUID(apiId);
-            if (api == null || gateway.organizationId == null
-                    || !gateway.organizationId.equals(api.getOrganization())) {
+            APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+            if (apiInfo == null || gateway.organizationId == null
+                    || !gateway.organizationId.equals(apiInfo.getOrganization())) {
                 if (log.isDebugEnabled()) {
                     log.debug("Platform gateway deployment notification rejected: API not found or organization "
                             + "mismatch for apiId=" + apiId + ", gatewayId=" + gateway.id);

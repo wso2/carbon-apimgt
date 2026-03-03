@@ -65,8 +65,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "API definition (zip with api.yaml when Accept application/zip, else JSON).", response = File.class),
         @ApiResponse(code = 404, message = "API not found", response = Void.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = Void.class) })
-    public Response apisApiIdGet( @NotNull  @ApiParam(value = "Tenant/organization domain." ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant, @ApiParam(value = "API UUID.",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "application/zip for API Platform gateway format; application/json for APIList." , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
-        return delegate.apisApiIdGet(xWSO2Tenant, apiId, accept, securityContext);
+    public Response apisApiIdGet(@ApiParam(value = "API UUID.",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Tenant/organization domain (optional; derived from api-key or context when omitted)." )@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "application/zip for API Platform gateway format; application/json for APIList." , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
+        return delegate.apisApiIdGet(apiId, xWSO2Tenant, accept, securityContext);
     }
 
     @GET

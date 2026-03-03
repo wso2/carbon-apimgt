@@ -18,12 +18,18 @@
 
 package org.wso2.carbon.apimgt.internal.service.websocket;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.PlatformGatewayService;
+import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayDeploymentDispatcher;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -38,22 +44,54 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
 
     @Override
     public void dispatchDeploy(DeployAPIInGatewayEvent event, Set<String> platformGatewayIds) {
-        String message = buildDeployMessage(event);
         if (log.isDebugEnabled()) {
             log.debug("Dispatching deploy to " + platformGatewayIds.size() + " platform gateway(s): apiId="
                     + event.getUuid());
         }
-        PlatformGatewaySessionRegistry.getInstance().sendToGateways(platformGatewayIds, message);
+        PlatformGatewaySessionRegistry registry = PlatformGatewaySessionRegistry.getInstance();
+        PlatformGatewayService platformGatewayService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        for (String gatewayId : platformGatewayIds) {
+            String vhost = resolveVhost(platformGatewayService, gatewayId);
+            String message = buildDeployMessage(event, vhost);
+            registry.sendToGateways(Collections.singleton(gatewayId), message);
+        }
     }
 
     @Override
     public void dispatchUndeploy(DeployAPIInGatewayEvent event, Set<String> platformGatewayIds) {
-        String message = buildUndeployMessage(event);
         if (log.isDebugEnabled()) {
             log.debug("Dispatching undeploy to " + platformGatewayIds.size() + " platform gateway(s): apiId="
                     + event.getUuid());
         }
-        PlatformGatewaySessionRegistry.getInstance().sendToGateways(platformGatewayIds, message);
+        PlatformGatewaySessionRegistry registry = PlatformGatewaySessionRegistry.getInstance();
+        PlatformGatewayService platformGatewayService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        for (String gatewayId : platformGatewayIds) {
+            String vhost = resolveVhost(platformGatewayService, gatewayId);
+            String message = buildUndeployMessage(event, vhost);
+            registry.sendToGateways(Collections.singleton(gatewayId), message);
+        }
+    }
+
+    /**
+     * Resolve vhost for the given gateway from platform gateway config; empty string if not available.
+     */
+    private static String resolveVhost(PlatformGatewayService platformGatewayService, String gatewayId) {
+        if (platformGatewayService == null || StringUtils.isBlank(gatewayId)) {
+            return "";
+        }
+        try {
+            PlatformGateway gateway = platformGatewayService.getGatewayById(gatewayId);
+            if (gateway != null && StringUtils.isNotBlank(gateway.getVhost())) {
+                return gateway.getVhost().trim();
+            }
+        } catch (APIManagementException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Could not resolve vhost for gateway " + gatewayId + ", using empty: " + e.getMessage());
+            }
+        }
+        return "";
     }
 
     private static String escapeJson(String s) {
@@ -84,28 +122,30 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
     /**
      * Build message in API Platform format: type "api.deployed", payload { apiId, deploymentId, vhost },
      * timestamp, correlationId. Gateway uses apiId to fetch API definition and deploy.
+     * vhost is from the target platform gateway config so the gateway-controller can route correctly.
      */
-    private static String buildDeployMessage(DeployAPIInGatewayEvent event) {
+    private static String buildDeployMessage(DeployAPIInGatewayEvent event, String vhost) {
         String timestamp = Instant.now().toString();
         String apiId = escapeJson(event.getUuid());
         String deploymentId = escapeJson(event.getEventId());
-        String vhost = "";
+        String vhostEscaped = escapeJson(vhost != null ? vhost : "");
         return "{\"type\":\"api.deployed\",\"payload\":{\"apiId\":\"" + apiId + "\",\"deploymentId\":\""
-                + deploymentId + "\",\"vhost\":\"" + vhost + "\"},\"timestamp\":\"" + escapeJson(timestamp)
+                + deploymentId + "\",\"vhost\":\"" + vhostEscaped + "\"},\"timestamp\":\"" + escapeJson(timestamp)
                 + "\",\"correlationId\":\"" + escapeJson(event.getEventId()) + "\"}";
     }
 
     /**
      * Build message in API Platform format: type "api.undeployed", payload { apiId, deploymentId, vhost },
      * timestamp, correlationId. Uses deploymentId to mirror deploy message format.
+     * vhost is from the target platform gateway config so the gateway-controller can route correctly.
      */
-    private static String buildUndeployMessage(DeployAPIInGatewayEvent event) {
+    private static String buildUndeployMessage(DeployAPIInGatewayEvent event, String vhost) {
         String timestamp = Instant.now().toString();
         String apiId = escapeJson(event.getUuid());
         String deploymentId = escapeJson(event.getEventId());
-        String vhost = "";
+        String vhostEscaped = escapeJson(vhost != null ? vhost : "");
         return "{\"type\":\"api.undeployed\",\"payload\":{\"apiId\":\"" + apiId + "\",\"deploymentId\":\""
-                + deploymentId + "\",\"vhost\":\"" + vhost + "\"},\"timestamp\":\"" + escapeJson(timestamp)
+                + deploymentId + "\",\"vhost\":\"" + vhostEscaped + "\"},\"timestamp\":\"" + escapeJson(timestamp)
                 + "\",\"correlationId\":\"" + escapeJson(event.getEventId()) + "\"}";
     }
 }
