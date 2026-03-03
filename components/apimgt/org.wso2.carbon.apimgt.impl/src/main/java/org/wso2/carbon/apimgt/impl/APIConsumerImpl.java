@@ -3973,8 +3973,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
         APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUID);
-        if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
-            throw new APIMgtResourceNotFoundException("Active API key not found for UUID: " + keyUUID);
+        if (apiKeyInfo == null) {
+            throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUID);
         }
         apiKeyMgtDAO.revokeAPIKey(keyUUID);
         revocationRequestPublisher.publishRevocationEvents(apiKeyInfo.getApiKeyHash(), properties);
@@ -4041,9 +4041,12 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         return regeneratedApiKeyInfo;
     }
 
-    private long calculateExpiresAt(long validityPeriod) {
+    private long calculateExpiresAt(long validityPeriodSeconds) {
+        if (validityPeriodSeconds <= 0) {
+            return 0L; // No expiry
+        }
         long now = System.currentTimeMillis();
-        long expiresAt = validityPeriod > 0 ? now + validityPeriod : 0L;
+        long expiresAt = now + (validityPeriodSeconds * 1000L); // Convert to ms
         return expiresAt;
     }
 

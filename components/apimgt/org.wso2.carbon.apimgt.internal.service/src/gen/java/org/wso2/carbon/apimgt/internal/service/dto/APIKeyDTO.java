@@ -24,7 +24,7 @@ public class APIKeyDTO   {
     private String keyName = null;
     private String keyType = null;
     private String status = null;
-    private Integer validityPeriod = null;
+    private Integer expiresAt = null;
     private Integer appId = null;
     private Object additionalProperties = null;
 
@@ -98,19 +98,19 @@ public class APIKeyDTO   {
 
   /**
    **/
-  public APIKeyDTO validityPeriod(Integer validityPeriod) {
-    this.validityPeriod = validityPeriod;
+  public APIKeyDTO expiresAt(Integer expiresAt) {
+    this.expiresAt = expiresAt;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("validityPeriod")
-  public Integer getValidityPeriod() {
-    return validityPeriod;
+  @JsonProperty("expiresAt")
+  public Integer getExpiresAt() {
+    return expiresAt;
   }
-  public void setValidityPeriod(Integer validityPeriod) {
-    this.validityPeriod = validityPeriod;
+  public void setExpiresAt(Integer expiresAt) {
+    this.expiresAt = expiresAt;
   }
 
   /**
@@ -162,14 +162,14 @@ public class APIKeyDTO   {
         Objects.equals(keyName, apIKey.keyName) &&
         Objects.equals(keyType, apIKey.keyType) &&
         Objects.equals(status, apIKey.status) &&
-        Objects.equals(validityPeriod, apIKey.validityPeriod) &&
+        Objects.equals(expiresAt, apIKey.expiresAt) &&
         Objects.equals(appId, apIKey.appId) &&
         Objects.equals(additionalProperties, apIKey.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiKeyHash, keyName, keyType, status, validityPeriod, appId, additionalProperties);
+    return Objects.hash(apiKeyHash, keyName, keyType, status, expiresAt, appId, additionalProperties);
   }
 
   @Override
@@ -181,7 +181,7 @@ public class APIKeyDTO   {
     sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
+    sb.append("    expiresAt: ").append(toIndentedString(expiresAt)).append("\n");
     sb.append("    appId: ").append(toIndentedString(appId)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");

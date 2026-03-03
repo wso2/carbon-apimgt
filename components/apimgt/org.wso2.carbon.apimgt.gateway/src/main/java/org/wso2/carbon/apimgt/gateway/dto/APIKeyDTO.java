@@ -105,14 +105,14 @@ public class APIKeyDTO {
 
   /**
    **/
-  public APIKeyDTO validityPeriod(Integer validityPeriod) {
-    this.expiresAt = validityPeriod;
+  public APIKeyDTO expiresAt(Integer expiresAt) {
+    this.expiresAt = expiresAt;
     return this;
   }
 
 
   @ApiModelProperty(value = "")
-  @JsonProperty("validityPeriod")
+  @JsonProperty("expiresAt")
   public Integer getExpiresAt() {
     return expiresAt;
   }
@@ -190,7 +190,7 @@ public class APIKeyDTO {
     sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    validityPeriod: ").append(toIndentedString(expiresAt)).append("\n");
+    sb.append("    expiresAt: ").append(toIndentedString(expiresAt)).append("\n");
     sb.append("    appId: ").append(toIndentedString(appId)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");

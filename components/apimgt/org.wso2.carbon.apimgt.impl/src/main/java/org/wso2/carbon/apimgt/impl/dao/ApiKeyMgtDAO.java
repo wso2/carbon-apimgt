@@ -313,10 +313,11 @@ public class ApiKeyMgtDAO {
                         long expiresAt = 0L;
                         if (createdTime != null && validityPeriod != null && validityPeriod > 0) {
                             long issuedTime = createdTime.getTime();
-                            if (Long.MAX_VALUE - issuedTime < validityPeriod) {
+                            long validityMillis = validityPeriod * 1000L;
+                            if (Long.MAX_VALUE - issuedTime < validityMillis) {
                                 expiresAt = Long.MAX_VALUE;
                             } else {
-                                expiresAt = issuedTime + validityPeriod;
+                                expiresAt = issuedTime + validityMillis;
                             }
                         }
                         keyInfo.setExpiresAt(expiresAt);
