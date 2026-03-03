@@ -9553,15 +9553,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private String getEmailClaimValue(String username, int tenantId) {
 
+        int resolvedTenantId = tenantId;
+
         try {
 
             if (log.isDebugEnabled()) {
-                log.debug("Retrieving email claim for user : " + username + " in tenantId : " + tenantId);
+                log.debug("Retrieving email claim for user in tenantId : " + tenantId);
+            }
+
+            String userTenantDomain = MultitenantUtils.getTenantDomain(username);
+            if (StringUtils.isNotBlank(userTenantDomain)) {
+                resolvedTenantId = APIUtil.getTenantIdFromTenantDomain(userTenantDomain);
             }
 
             UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance()
                     .getRealmService()
-                    .getTenantUserRealm(tenantId)
+                    .getTenantUserRealm(resolvedTenantId)
                     .getUserStoreManager();
 
             if (userStoreManager == null) {
@@ -9573,8 +9580,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     EMAIL_CLAIM_URI,
                     UserCoreConstants.DEFAULT_PROFILE
             );
-        } catch (UserStoreException | RuntimeException e) {
-            log.warn("Error while retrieving email claim for user in tenantId : " + tenantId, e);
+        } catch (UserStoreException e) {
+            log.warn("Error while retrieving email claim for user in tenantId : " + resolvedTenantId, e);
             return null;
         }
     }

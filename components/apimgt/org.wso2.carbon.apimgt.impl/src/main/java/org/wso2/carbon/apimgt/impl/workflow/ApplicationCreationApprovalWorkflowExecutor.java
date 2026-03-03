@@ -39,12 +39,13 @@ import java.util.Map;
 public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(ApplicationCreationApprovalWorkflowExecutor.class);
-    private boolean applicationAttributesVisibility = true;
+    private boolean applicationAttributesVisibility = false;
     private static final String APPLICATION_NAME_PROPERTY = "applicationName";
     private static final String APPLICATION_OWNER_PROPERTY = "applicationOwner";
     private static final String APPLICATION_TIER_PROPERTY = "applicationTier";
     private static final String APPLICATION_ATTRIBUTES_PROPERTY = "applicationAttributes";
     private static final String APPLICATION_DESCRIPTION_PROPERTY = "applicationDescription";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public String getWorkflowType() {
@@ -60,10 +61,9 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing Application Creation Approval Workflow. " + "Workflow Reference: " + workflowDTO.getWorkflowReference());
+            log.debug("Executing Application Creation Approval Workflow. Workflow Reference: " + workflowDTO.getWorkflowReference());
         }
 
-        ObjectMapper objectMapper = new ObjectMapper();
         ApplicationWorkflowDTO appWorkFlowDTO = (ApplicationWorkflowDTO) workflowDTO;
 
         Application application = appWorkFlowDTO.getApplication();
@@ -80,7 +80,7 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
 
         if (applicationAttributesVisibility && application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
                 try {
-                    workflowDTO.setProperties(APPLICATION_ATTRIBUTES_PROPERTY, objectMapper.writeValueAsString(application.getApplicationAttributes()));
+                    workflowDTO.setProperties(APPLICATION_ATTRIBUTES_PROPERTY, OBJECT_MAPPER.writeValueAsString(application.getApplicationAttributes()));
                 } catch (JsonProcessingException e) {
                     String msg = "Failed to serialize custom attributes of application ";
                     log.error(msg, e);
@@ -91,7 +91,8 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
 
         super.execute(workflowDTO);
         if (log.isDebugEnabled()) {
-            log.debug("Application Creation Approval Workflow executed successfully for application: " + application.getName());
+            log.debug("Application Creation Approval Workflow executed successfully. Workflow Reference: "
+                    + workflowDTO.getWorkflowReference());
         }
 
         return new GeneralWorkflowResponse();

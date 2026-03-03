@@ -44,7 +44,7 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
 
     private static final Log log = LogFactory.getLog(ApplicationUpdateApprovalWorkflowExecutor.class);
     private static final ApiMgtDAO dao = ApiMgtDAO.getInstance();
-    private boolean applicationAttributesVisibility = true;
+    private boolean applicationAttributesVisibility = false;
     private static final String APPLICATION_NAME_PROPERTY = "applicationName";
     private static final String APPLICATION_OWNER_PROPERTY = "applicationOwner";
     private static final String APPLICATION_TIER_PROPERTY = "applicationTier";
@@ -62,6 +62,7 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
     private static final String DESCRIPTION_LABEL = "Description";
     private static final String GROUPS_LABEL = "Groups";
     private static final String SHARING_WITH_ORGANIZATION_LABEL = "Sharing with the organization";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 
     @Override
@@ -85,7 +86,7 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing Application Update Approval Workflow. " + "Workflow Reference: " + workflowDTO.getWorkflowReference());
+            log.debug("Executing Application Update Approval Workflow. Workflow Reference: " + workflowDTO.getWorkflowReference());
         }
         ApplicationWorkflowDTO applicationWorkflowDTO = (ApplicationWorkflowDTO) workflowDTO;
         Application pendingApplication = applicationWorkflowDTO.getApplication();
@@ -101,33 +102,41 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
 
         List<Map<String, String>> applicationUpdateDiffs = new ArrayList<>();
 
-        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, APPLICATION_NAME_LABEL,
+        compareAndAddToUpdateDiffs(applicationUpdateDiffs, APPLICATION_NAME_LABEL,
                 existingApplication.getName(), pendingApplication.getName());
 
-        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, TIER_LABEL,
+        compareAndAddToUpdateDiffs(applicationUpdateDiffs, TIER_LABEL,
                 existingApplication.getTier(), pendingApplication.getTier());
 
-        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, DESCRIPTION_LABEL,
+        compareAndAddToUpdateDiffs(applicationUpdateDiffs, DESCRIPTION_LABEL,
                 existingApplication.getDescription(), pendingApplication.getDescription());
 
-        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, GROUPS_LABEL,
+        compareAndAddToUpdateDiffs(applicationUpdateDiffs, GROUPS_LABEL,
                 existingApplication.getGroupId(), pendingApplication.getGroupId());
 
         // Special case: since the shared organization (getSharedOrganization) is an uuid when
         // "Sharing with the organization" is enabled
-        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, SHARING_WITH_ORGANIZATION_LABEL,
+        compareAndAddToUpdateDiffs(applicationUpdateDiffs, SHARING_WITH_ORGANIZATION_LABEL,
                 getShareWithOrganizationStatus(existingApplication.getSharedOrganization()),
                 getShareWithOrganizationStatus(pendingApplication.getSharedOrganization()));
 
-        applicationUpdateDiffs.addAll(extractCustomAttributeDiffs
-                (existingApplication.getApplicationAttributes(), pendingApplication.getApplicationAttributes()));
+        if (applicationAttributesVisibility) {
+            Map<String, String> existingApplicationAttributes= existingApplication.getApplicationAttributes();
+            Map<String, String> pendingApplicationAttributes = pendingApplication.getApplicationAttributes();
+
+            // Only compute diffs when at least one side has attributes
+            if ((existingApplicationAttributes != null && !existingApplicationAttributes.isEmpty())
+                    || (pendingApplicationAttributes != null && !pendingApplicationAttributes.isEmpty())) {
+                applicationUpdateDiffs.addAll(
+                        extractCustomAttributeDiffs(existingApplicationAttributes, pendingApplicationAttributes)
+                );
+            }
+        }
 
         String applicationUpdateDiffJson;
-        ObjectMapper objectMapper = new ObjectMapper();
-
         if (!applicationUpdateDiffs.isEmpty()) {
             try {
-                applicationUpdateDiffJson = objectMapper.writeValueAsString(applicationUpdateDiffs);
+                applicationUpdateDiffJson = OBJECT_MAPPER.writeValueAsString(applicationUpdateDiffs);
             } catch (JsonProcessingException e) {
                 String msg = "Failed to serialize application update differences to JSON";
                 log.error(msg, e);
@@ -146,9 +155,10 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         }
 
         String requestedCustomAttributes;
-        if (!pendingApplication.getApplicationAttributes().isEmpty()) {
+        Map<String, String> pendingAttributes = pendingApplication.getApplicationAttributes();
+        if (pendingAttributes != null && !pendingAttributes.isEmpty()) {
             try {
-                requestedCustomAttributes = objectMapper.writeValueAsString(pendingApplication.getApplicationAttributes());
+                requestedCustomAttributes = OBJECT_MAPPER.writeValueAsString(pendingAttributes);
             } catch (JsonProcessingException e) {
                 String msg = "Failed to serialize requested custom attributes of application";
                 log.error(msg, e);
@@ -162,7 +172,7 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
 
         if (applicationAttributesVisibility && existingApplication.getApplicationAttributes() != null && !existingApplication.getApplicationAttributes().isEmpty()) {
             try {
-                workflowDTO.setProperties(EXISTING_APPLICATION_ATTRIBUTES_PROPERTY, objectMapper.writeValueAsString(existingApplication.getApplicationAttributes()));
+                workflowDTO.setProperties(EXISTING_APPLICATION_ATTRIBUTES_PROPERTY, OBJECT_MAPPER.writeValueAsString(existingApplication.getApplicationAttributes()));
             } catch (JsonProcessingException e) {
                 String msg = "Failed to serialize custom attributes of application";
                 log.error(msg, e);
@@ -174,7 +184,8 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
 
         super.execute(workflowDTO);
         if (log.isDebugEnabled()) {
-            log.debug("Application Update Approval Workflow executed successfully for application: " + existingApplication.getName() + " by owner: " + existingApplication.getOwner());
+            log.debug("Application Update Approval Workflow executed successfully. Workflow Reference: "
+                    + workflowDTO.getWorkflowReference());
         }
 
         return new GeneralWorkflowResponse();

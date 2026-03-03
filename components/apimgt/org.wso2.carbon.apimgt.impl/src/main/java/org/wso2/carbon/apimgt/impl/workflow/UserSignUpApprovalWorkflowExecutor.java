@@ -51,7 +51,7 @@ public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecut
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing User SignUp Approval Workflow. " + "Workflow Reference: " + workflowDTO.getWorkflowReference());
+            log.debug("Executing User SignUp Approval Workflow. Workflow Reference: " + workflowDTO.getWorkflowReference());
         }
         String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(workflowDTO.getWorkflowReference());
         String message = "Approve APIStore signup request done by " + tenantAwareUserName + " from the tenant domain " +
@@ -61,7 +61,8 @@ public class UserSignUpApprovalWorkflowExecutor extends UserSignUpWorkflowExecut
         workflowDTO.setProperties(TENANT_DOMAIN_PROPERTY, workflowDTO.getTenantDomain());
         super.execute(workflowDTO);
         if (log.isDebugEnabled()) {
-            log.debug("User SignUp Approval Workflow executed successfully for user: " + tenantAwareUserName);
+            log.debug("User SignUp Approval Workflow executed successfully. Workflow Reference: "
+                    + workflowDTO.getWorkflowReference());
         }
         return new GeneralWorkflowResponse();
     }

@@ -45,6 +45,7 @@ public class SubscriptionUpdateApprovalWorkflowExecutor extends WorkflowExecutor
     private static final String SUBSCRIPTION_TIER_PROPERTY = "subscriptionTier";
     private static final String SUBSCRIPTION_TIER_LABEL = "Subscription Tier";
     private static final String UPDATES_PROPERTY = "updates";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public String getWorkflowType() {
@@ -65,7 +66,7 @@ public class SubscriptionUpdateApprovalWorkflowExecutor extends WorkflowExecutor
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing Subscription Update Approval Workflow. " + "Workflow Reference: " + workflowDTO.getWorkflowReference());
+            log.debug("Executing Subscription Update Approval Workflow. Workflow Reference: " + workflowDTO.getWorkflowReference());
         }
         SubscriptionWorkflowDTO subsWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
         String message = "Approve API " + subsWorkflowDTO.getApiName() + " - " + subsWorkflowDTO.getApiVersion() +
@@ -80,13 +81,12 @@ public class SubscriptionUpdateApprovalWorkflowExecutor extends WorkflowExecutor
 
         List<Map<String, String>> subscriptionUpdateDiffs = new ArrayList<>();
 
-        compareAndAddToSubscriptionUpdateDiffs(subscriptionUpdateDiffs, SUBSCRIPTION_TIER_LABEL,
+        compareAndAddToUpdateDiffs(subscriptionUpdateDiffs, SUBSCRIPTION_TIER_LABEL,
                 subsWorkflowDTO.getTierName(), subsWorkflowDTO.getRequestedTierName());
 
-        ObjectMapper objectMapper = new ObjectMapper();
         if (!subscriptionUpdateDiffs.isEmpty()) {
             try {
-                workflowDTO.setProperties(UPDATES_PROPERTY, objectMapper.writeValueAsString(subscriptionUpdateDiffs));
+                workflowDTO.setProperties(UPDATES_PROPERTY, OBJECT_MAPPER.writeValueAsString(subscriptionUpdateDiffs));
             } catch (JsonProcessingException e) {
                 throw new WorkflowException(
                         "Failed to serialize subscription update differences to JSON", e);
@@ -95,7 +95,8 @@ public class SubscriptionUpdateApprovalWorkflowExecutor extends WorkflowExecutor
 
         super.execute(workflowDTO);
         if (log.isDebugEnabled()) {
-            log.debug("Subscription Update Approval Workflow executed successfully for API: " + subsWorkflowDTO.getApiName());
+            log.debug("Subscription Update Approval Workflow executed successfully. Workflow Reference: "
+                    + workflowDTO.getWorkflowReference());
         }
 
         return new GeneralWorkflowResponse();

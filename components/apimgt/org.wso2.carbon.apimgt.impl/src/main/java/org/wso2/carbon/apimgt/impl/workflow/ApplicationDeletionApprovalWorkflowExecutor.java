@@ -33,13 +33,14 @@ import java.util.*;
 public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(ApplicationDeletionApprovalWorkflowExecutor.class);
-    private boolean applicationAttributesVisibility = true;
+    private boolean applicationAttributesVisibility = false;
     private static final String APPLICATION_NAME_PROPERTY = "applicationName";
     private static final String APPLICATION_OWNER_PROPERTY = "applicationOwner";
     private static final String APPLICATION_TIER_PROPERTY = "applicationTier";
     private static final String APPLICATION_STATUS_PROPERTY = "applicationStatus";
     private static final String APPLICATION_ATTRIBUTES_PROPERTY = "applicationAttributes";
     private static final String APPLICATION_DESCRIPTION_PROPERTY = "applicationDescription";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public String getWorkflowType() {
@@ -51,11 +52,10 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing Application Deletion Approval Workflow. " + "Workflow Reference: " + workflowDTO.getWorkflowReference());
+            log.debug("Executing Application Deletion Approval Workflow. Workflow Reference: " + workflowDTO.getWorkflowReference());
         }
 
         ApplicationWorkflowDTO appWorkFlowDTO = (ApplicationWorkflowDTO) workflowDTO;
-        ObjectMapper objectMapper = new ObjectMapper();
 
         Application application = appWorkFlowDTO.getApplication();
         String message = "Approve application " + application.getName() + " delete request from application creator - "
@@ -72,7 +72,7 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
 
         if (applicationAttributesVisibility && application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
             try {
-                workflowDTO.setProperties(APPLICATION_ATTRIBUTES_PROPERTY, objectMapper.writeValueAsString(application.getApplicationAttributes()));
+                workflowDTO.setProperties(APPLICATION_ATTRIBUTES_PROPERTY, OBJECT_MAPPER.writeValueAsString(application.getApplicationAttributes()));
             } catch (JsonProcessingException e) {
                 String msg = "Failed to serialize custom attributes of application";
                 log.error(msg, e);
@@ -82,7 +82,8 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
 
         super.execute(workflowDTO);
         if (log.isDebugEnabled()) {
-            log.debug("Application Deletion Approval Workflow executed successfully for application: " + application.getName());
+            log.debug("Application Deletion Approval Workflow executed successfully. Workflow Reference: "
+                    + workflowDTO.getWorkflowReference());
         }
 
         return new GeneralWorkflowResponse();

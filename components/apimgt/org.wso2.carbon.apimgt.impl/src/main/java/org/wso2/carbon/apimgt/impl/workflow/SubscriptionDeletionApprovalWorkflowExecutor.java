@@ -47,7 +47,7 @@ public class SubscriptionDeletionApprovalWorkflowExecutor extends WorkflowExecut
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing Subscription Deletion Approval Workflow. " + "Workflow Reference: " + workflowDTO.getWorkflowReference());
+            log.debug("Executing Subscription Deletion Approval Workflow. Workflow Reference: " + workflowDTO.getWorkflowReference());
         }
         SubscriptionWorkflowDTO subsWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
         String message = "Approve API " + subsWorkflowDTO.getApiName() + " - " + subsWorkflowDTO.getApiVersion() +
@@ -61,7 +61,8 @@ public class SubscriptionDeletionApprovalWorkflowExecutor extends WorkflowExecut
         workflowDTO.setProperties(SUBSCRIBER_PROPERTY, subsWorkflowDTO.getSubscriber());
         super.execute(workflowDTO);
         if (log.isDebugEnabled()) {
-            log.debug("Subscription Deletion Approval Workflow executed successfully for API: " + subsWorkflowDTO.getApiName());
+            log.debug("Subscription Deletion Approval Workflow executed successfully. Workflow Reference: "
+                    + workflowDTO.getWorkflowReference());
         }
 
         return new GeneralWorkflowResponse();

@@ -37,13 +37,14 @@ import java.util.List;
 public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApplicationRegistrationWorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(ApplicationRegistrationApprovalWorkflowExecutor.class);
-    private boolean applicationAttributesVisibility = true;
+    private boolean applicationAttributesVisibility = false;
     private static final String KEY_TYPE_PROPERTY = "keyType";
     private static final String APPLICATION_NAME_PROPERTY = "applicationName";
     private static final String APPLICATION_OWNER_PROPERTY = "applicationOwner";
     private static final String APPLICATION_TIER_PROPERTY = "applicationTier";
     private static final String APPLICATION_ATTRIBUTES_PROPERTY = "applicationAttributes";
     private static final String APPLICATION_DESCRIPTION_PROPERTY = "applicationDescription";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     /**
      * Execute the Application Creation workflow approval process.
@@ -54,13 +55,12 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing Application Registration Approval Workflow. " + "Workflow Reference: " + workflowDTO.getWorkflowReference());
+            log.debug("Executing Application Registration Approval Workflow. Workflow Reference: " + workflowDTO.getWorkflowReference());
         }
 
         ApplicationRegistrationWorkflowDTO appRegDTO = (ApplicationRegistrationWorkflowDTO) workflowDTO;
 
         Application application = appRegDTO.getApplication();
-        ObjectMapper objectMapper = new ObjectMapper();
 
         String message = "Approve request to create " + appRegDTO.getKeyType() + " keys for " + application.getName() +
                 " from application creator - " + appRegDTO.getUserName() + " with throttling tier - " + application.getTier();
@@ -76,7 +76,7 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
 
         if (applicationAttributesVisibility && application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
             try {
-                workflowDTO.setProperties(APPLICATION_ATTRIBUTES_PROPERTY, objectMapper.writeValueAsString(application.getApplicationAttributes()));
+                workflowDTO.setProperties(APPLICATION_ATTRIBUTES_PROPERTY, OBJECT_MAPPER.writeValueAsString(application.getApplicationAttributes()));
             } catch (JsonProcessingException e) {
                 String msg = "Failed to serialize custom attributes of application";
                 log.error(msg, e);
@@ -86,7 +86,8 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
 
         super.execute(workflowDTO);
         if (log.isDebugEnabled()) {
-            log.debug("Application Registration Approval Workflow executed successfully for application: " + application.getName() + ", keyType: " + appRegDTO.getKeyType());
+            log.debug("Application Registration Approval Workflow executed successfully. Workflow Reference: "
+                    + workflowDTO.getWorkflowReference());
         }
 
         return new GeneralWorkflowResponse();

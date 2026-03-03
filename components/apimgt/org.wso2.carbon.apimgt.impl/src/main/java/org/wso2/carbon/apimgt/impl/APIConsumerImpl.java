@@ -1684,7 +1684,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO = (SubscriptionWorkflowDTO) apiMgtDAO.retrieveWorkflow(workflowExtRef);
 
                 // clear inherited properties from the subscription creation workflow to avoid using outdated values if the subscription or application was updated.
-                workflowDTO.getProperties().clear();
+                if (workflowDTO.getProperties() != null) {
+                    workflowDTO.getProperties().clear();
+                }
 
                 // set tiername to the workflowDTO only when workflows are enabled
                 SubscribedAPI subscription = apiMgtDAO
@@ -2551,7 +2553,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setWorkflowReference(String.valueOf(applicationId));
             workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
             workflowDTO.setCallbackUrl(removeApplicationWFExecutor.getCallbackURL());
-            workflowDTO.setUserName(this.username);
+            workflowDTO.setUserName(application.getSubscriber().getName());
             workflowDTO.setTenantDomain(tenantDomain);
             workflowDTO.setTenantId(tenantId);
 
@@ -5882,15 +5884,22 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      */
     private String getEmailClaimValue(String username, int tenantId) {
 
+        int resolvedTenantId = tenantId;
+
         try {
 
             if (log.isDebugEnabled()) {
                 log.debug("Retrieving email claim for user : " + username + " in tenantId : " + tenantId);
             }
 
+            String userTenantDomain = MultitenantUtils.getTenantDomain(username);
+            if (StringUtils.isNotBlank(userTenantDomain)) {
+                resolvedTenantId = APIUtil.getTenantIdFromTenantDomain(userTenantDomain);
+            }
+
             UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance()
                     .getRealmService()
-                    .getTenantUserRealm(tenantId)
+                    .getTenantUserRealm(resolvedTenantId)
                     .getUserStoreManager();
 
             if (userStoreManager == null) {
@@ -5903,7 +5912,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     UserCoreConstants.DEFAULT_PROFILE
             );
         } catch (UserStoreException e) {
-            log.warn("Error while retrieving email claim for user in tenantId : " + tenantId, e);
+            log.warn("Error while retrieving email claim for user in tenantId : " + resolvedTenantId, e);
             return null;
         }
     }

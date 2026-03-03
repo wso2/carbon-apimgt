@@ -59,7 +59,7 @@ public class SubscriptionCreationApprovalWorkflowExecutor extends WorkflowExecut
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing Subscription Creation Approval Workflow. " + "Workflow Reference: " + workflowDTO.getWorkflowReference());
+            log.debug("Executing Subscription Creation Approval Workflow. Workflow Reference: " + workflowDTO.getWorkflowReference());
         }
         SubscriptionWorkflowDTO subsWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
         String message = "Approve API " + subsWorkflowDTO.getApiName() + " - " + subsWorkflowDTO.getApiVersion() +
@@ -73,7 +73,8 @@ public class SubscriptionCreationApprovalWorkflowExecutor extends WorkflowExecut
         workflowDTO.setProperties(SUBSCRIBER_PROPERTY, subsWorkflowDTO.getSubscriber());
         super.execute(workflowDTO);
         if (log.isDebugEnabled()) {
-            log.debug("Subscription Creation Approval Workflow executed successfully for API: " + subsWorkflowDTO.getApiName());
+            log.debug("Subscription Creation Approval Workflow executed successfully. Workflow Reference: "
+                    + workflowDTO.getWorkflowReference());
         }
         return new GeneralWorkflowResponse();
     }

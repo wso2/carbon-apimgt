@@ -371,20 +371,6 @@ public class WorkflowUtils {
     }
 
     /**
-     * Construct a record with the current and the expected value for a given application attribute.
-     * @param attributeName
-     * @param current
-     * @param expected
-     */
-    protected static Map<String, String> constructApplicationUpdateRecord(String attributeName, String current, String expected) {
-        return Map.of(
-                "attributeName", attributeName,
-                "current", current == null ? "" : current,
-                "expected", expected == null ? "" : expected
-        );
-    }
-
-    /**
      * Identify newly added, removed and changed custom properties of an application.
      * @param oldMap
      * @param newMap
@@ -399,12 +385,12 @@ public class WorkflowUtils {
                     log.debug("Added key: " + key + ", value: " + newMap.get(key));
                 }
 
-                attribChanges.add(constructApplicationUpdateRecord(key, "N/A", newMap.get(key)));
+                attribChanges.add(constructUpdateRecord(key, "N/A", newMap.get(key)));
             } else if (!Objects.equals(oldMap.get(key), newMap.get(key))) {
                 if (log.isDebugEnabled()) {
                     log.debug("Changed key: " + key + ", from: " + oldMap.get(key) + " to: " + newMap.get(key));
                 }
-                attribChanges.add(constructApplicationUpdateRecord(key, oldMap.get(key), newMap.get(key)));
+                attribChanges.add(constructUpdateRecord(key, oldMap.get(key), newMap.get(key)));
             }
         }
 
@@ -414,30 +400,11 @@ public class WorkflowUtils {
                     log.debug("Removed key: " + key + ", value was: " + oldMap.get(key));
                 }
 
-                attribChanges.add(constructApplicationUpdateRecord(key, oldMap.get(key), "Removed"));
+                attribChanges.add(constructUpdateRecord(key, oldMap.get(key), "Removed"));
             }
         }
 
         return attribChanges;
-    }
-
-    /**
-     * Compare the current and the new value for a given attribute (ie: Application Name) and add it to the list
-     * if there is a difference.
-     * @param diffs
-     * @param label
-     * @param oldValue
-     * @param newValue
-     */
-    protected static void compareAndAddToApplicationUpdateDiffs (
-            List<Map<String, String>> diffs,
-            String label,
-            String oldValue,
-            String newValue
-    ) {
-        if (!Objects.equals(oldValue, newValue)) {
-            diffs.add(constructApplicationUpdateRecord(label, oldValue, newValue));
-        }
     }
 
     /**
@@ -451,38 +418,38 @@ public class WorkflowUtils {
     }
 
     /**
-     * Compare the current and the new value for a given attribute (ie: Subscription Tier) and add it to the list
+     * Constructs a diff record representing a change in a specific attribute.
+     *
+     * @param attributeName The name of the attribute being updated
+     * @param current       The existing value of the attribute
+     * @param expected      The updated value of the attribute
+     * @return A map representing the attribute update record
+     */
+    protected static Map<String, String> constructUpdateRecord(String attributeName, String current, String expected) {
+        return Map.of(
+                "attributeName", attributeName,
+                "current", current == null ? "" : current,
+                "expected", expected == null ? "" : expected
+        );
+    }
+
+    /**
+     * Compare the current and the new value for a given attribute (ie: Application Name, Subscription Tier) and add it to the list
      * if there is a difference.
      *
-     * @param diffs    The list that collects detected subscription update differences
+     * @param diffs    The list collecting detected attribute differences
      * @param label    The display label or attribute name being compared
      * @param oldValue The current value of the attribute
      * @param newValue The proposed updated value of the attribute
      */
-    protected static void compareAndAddToSubscriptionUpdateDiffs (
+    protected static void compareAndAddToUpdateDiffs(
             List<Map<String, String>> diffs,
             String label,
             String oldValue,
             String newValue
     ) {
         if (!Objects.equals(oldValue, newValue)) {
-            diffs.add(constructSubscriptionUpdateRecord(label, oldValue, newValue));
+            diffs.add(constructUpdateRecord(label, oldValue, newValue));
         }
-    }
-
-    /**
-     * Constructs a subscription update record representing a change in a specific attribute.
-     *
-     * @param attributeName The name of the attribute being updated
-     * @param current       The existing value of the attribute
-     * @param expected      The updated value of the attribute
-     * @return A map representing the subscription update record
-     */
-    protected static Map<String, String> constructSubscriptionUpdateRecord(String attributeName, String current, String expected) {
-        return Map.of(
-                "attributeName", attributeName,
-                "current", current == null ? "" : current,
-                "expected", expected == null ? "" : expected
-        );
     }
 }
