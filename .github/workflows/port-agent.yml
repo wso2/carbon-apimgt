@@ -1,0 +1,43 @@
+name: port-agent
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - 'carbon-apimgt-v4.4.0'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  backport:
+    if: github.event.pull_request.merged == true
+    strategy:
+      fail-fast: false
+      matrix:
+        target_branch: ['carbon-apimgt-v4.3.0', 'carbon-apimgt-v4.2.0', 'carbon-apimgt-v4.1.0']
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Orchestrator (v4.4.0)
+        uses: actions/checkout@v6
+        with:
+          path: 'orchestrator'
+
+      - name: Checkout Target Workspace (${{ matrix.target_branch }})
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ matrix.target_branch }}
+          path: 'workspace'
+          fetch-depth: 0
+
+      - name: Run Copilot Agent
+        uses: github/copilot-agent-action@v1
+        with:
+          instructions-path: orchestrator/.github/workflows/agent-instructions.md
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN}}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_BRANCH: ${{ matrix.target_branch }}
+          ORIGINAL_PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_WORKSPACE: ${{ github.workspace }}/workspace
