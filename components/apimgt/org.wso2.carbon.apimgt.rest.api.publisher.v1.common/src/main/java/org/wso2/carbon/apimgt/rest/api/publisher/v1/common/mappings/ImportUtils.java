@@ -349,6 +349,16 @@ public class ImportUtils {
                     extractedFolderPath, targetApi, organization, importedApiDTO.getType().toString(),
                     apiProvider);
 
+            // Ignoring mediation policies if there are API or Operation level policies defined in the API.
+            // This scenario applies to migrated APIs that had mediation policies attached and were exported
+            // before completing the on-the-fly migration (i.e., before saving the API post-migration).
+            if ((importedApiDTO.getMediationPolicies() != null &&
+                    !importedApiDTO.getMediationPolicies().isEmpty()) &&
+                    ((extractedAPIPolicies != null && !extractedAPIPolicies.isEmpty()) ||
+                            (extractedPoliciesMap != null && !extractedPoliciesMap.isEmpty()))) {
+                importedApiDTO.setMediationPolicies(Collections.emptyList());
+            }
+
             // If the overwrite is set to true (which means an update), retrieve the existing API
             if (Boolean.TRUE.equals(overwrite) && targetApi != null) {
                 log.info("Existing API found, attempting to update it...");
