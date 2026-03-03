@@ -84,8 +84,8 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
     public void sendApiKeyInfoOnRealtime(Properties properties) {
 
         String eventId = properties.getProperty(APIConstants.NotificationEvent.EVENT_ID);
-        String validityPeriodStr = properties.getProperty(APIConstants.NotificationEvent.VALIDITY_PERIOD);
-        long validityPeriod = validityPeriodStr != null ? Long.parseLong(validityPeriodStr) : 0L;
+        String expiresAtStr = properties.getProperty(APIConstants.NotificationEvent.EXPIRES_AT);
+        long expiresAt = expiresAtStr != null ? Long.parseLong(expiresAtStr) : 0L;
         String orgId = properties.getProperty(APIConstants.NotificationEvent.ORG_ID);
         Object tenantIdObj = properties.get(APIConstants.NotificationEvent.TENANT_ID);
         int tenantId = tenantIdObj instanceof Integer ? (Integer) tenantIdObj : 0;
@@ -104,7 +104,7 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
                         properties.getProperty(APIConstants.NotificationEvent.KEY_TYPE),
                         properties.getProperty(APIConstants.NotificationEvent.KEY_NAME),
                         origin, originUUId, appId,
-                        properties.getProperty(APIConstants.NotificationEvent.STATUS), validityPeriod,
+                        properties.getProperty(APIConstants.NotificationEvent.STATUS), expiresAt,
                         properties.getProperty(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES), tenantId};
         EventPublisherEvent apiKeyInfoEvent = new EventPublisherEvent(APIConstants.API_KEY_INFO_STREAM_ID,
                 System.currentTimeMillis(), objects);

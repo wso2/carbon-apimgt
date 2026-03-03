@@ -77,7 +77,7 @@ public class OpaqueAPIKeyInfoListener implements MessageListener {
                     }
                     apiKeyInfo.setAppId(payload.path(APIConstants.NotificationEvent.APPLICATION_ID).asInt());
                     apiKeyInfo.setStatus(payload.path(APIConstants.NotificationEvent.STATUS).asText());
-                    apiKeyInfo.setValidityPeriod(payload.path(APIConstants.NotificationEvent.VALIDITY_PERIOD).asLong());
+                    apiKeyInfo.setExpiresAt(payload.path(APIConstants.NotificationEvent.EXPIRES_AT).asLong());
                     apiKeyInfo.setLookupKey(lookupKey);
                     String additionalPropsEscaped = payload.path(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES).
                             asText(null);

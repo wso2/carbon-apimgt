@@ -68,6 +68,7 @@ import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiKeyMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
@@ -144,10 +145,12 @@ public class APIAdminImpl implements APIAdmin {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
     protected ApiMgtDAO apiMgtDAO;
+    protected ApiKeyMgtDAO apiKeyMgtDAO;
     protected LabelsDAO labelsDAO;
 
     public APIAdminImpl() {
         apiMgtDAO = ApiMgtDAO.getInstance();
+        apiKeyMgtDAO = ApiKeyMgtDAO.getInstance();
         labelsDAO = LabelsDAO.getInstance();
     }
 
@@ -368,7 +371,7 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public List<APIKeyInfo> getAllApiKeys(String tenantDomain) throws APIManagementException {
 
-        return apiMgtDAO.getAllAPIKeys(tenantDomain);
+        return apiKeyMgtDAO.getAllAPIKeys(tenantDomain);
     }
 
     /**
@@ -379,7 +382,7 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public void revokeAPIKey(String keyUUId) throws APIManagementException {
 
-        apiMgtDAO.revokeAPIKey(keyUUId);
+        apiKeyMgtDAO.revokeAPIKey(keyUUId);
     }
 
     /**

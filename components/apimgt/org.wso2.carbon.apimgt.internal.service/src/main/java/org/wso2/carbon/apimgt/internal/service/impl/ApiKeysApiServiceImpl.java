@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
+import org.wso2.carbon.apimgt.impl.dao.ApiKeyMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -36,7 +37,7 @@ public class ApiKeysApiServiceImpl implements ApiKeysApiService {
 
     public Response apiKeysGet(String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
 
-        List<APIKeyInfo> apiKeyInfoList = ApiMgtDAO.getInstance().getAllAPIKeys(xWSO2Tenant);
+        List<APIKeyInfo> apiKeyInfoList = ApiKeyMgtDAO.getInstance().getAllAPIKeys(xWSO2Tenant);
         return Response.ok().entity(getAPIKeyInfoDTOList(apiKeyInfoList)).build();
     }
 

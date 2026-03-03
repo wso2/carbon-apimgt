@@ -3418,7 +3418,7 @@ public final class APIConstants {
         public static final String ACTIVE = "ACTIVE";
         public static final String ORIGIN = "origin";
         public static final String ORIGIN_UUID = "originUUId";
-        public static final String VALIDITY_PERIOD = "validityPeriod";
+        public static final String EXPIRES_AT = "expiresAt";
         public static final String STATUS = "status";
         public static final String EVENT_ID = "eventId";
         public static final String TENANT_ID = "tenantId";

@@ -36,6 +36,7 @@ public class APIKeyInfo {
     private String createdTime;
     private String lookupKey;
     private long validityPeriod;
+    private long expiresAt;
     private byte[] properties;
     private Map<String, String> additionalProperties;
     private String apiKeyHash;
@@ -153,6 +154,14 @@ public class APIKeyInfo {
 
     public void setValidityPeriod(long validityPeriod) {
         this.validityPeriod = validityPeriod;
+    }
+
+    public long getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(long expiresAt) {
+        this.expiresAt = expiresAt;
     }
 
     public byte[] getProperties() {
