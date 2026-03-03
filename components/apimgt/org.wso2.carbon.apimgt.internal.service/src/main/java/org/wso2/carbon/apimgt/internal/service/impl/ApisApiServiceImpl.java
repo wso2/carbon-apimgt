@@ -142,6 +142,23 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid api-key").build();
         }
+        // Validate that the acknowledged API exists and belongs to the same organization as the gateway.
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPIInfoByUUID(apiId);
+            if (api == null || gateway.organizationId == null
+                    || !gateway.organizationId.equals(api.getOrganization())) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Platform gateway deployment notification rejected: API not found or organization "
+                            + "mismatch for apiId=" + apiId + ", gatewayId=" + gateway.id);
+                }
+                return Response.status(Response.Status.NOT_FOUND).entity("API not found for gateway organization").build();
+            }
+        } catch (APIManagementException e) {
+            log.error("Error validating API for platform gateway deployment notification: apiId=" + apiId
+                    + ", gatewayId=" + gateway.id, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Server error").build();
+        }
         if (log.isDebugEnabled()) {
             log.debug("Platform gateway deployment notification received: apiId=" + apiId + ", gatewayId=" + gateway.id
                     + ", deploymentId=" + deploymentId);

@@ -207,9 +207,22 @@ public final class PlatformGatewayAPIYamlConverter {
                 throw new APIManagementException("API has no production_endpoints");
             }
             if (prod instanceof JSONObject) {
-                Object url = ((JSONObject) prod).get(APIConstants.API_DATA_URL);
+                JSONObject prodObj = (JSONObject) prod;
+                Object url = prodObj.get(APIConstants.API_DATA_URL);
                 if (url != null && StringUtils.isNotBlank(url.toString())) {
                     return url.toString().trim();
+                }
+                Object list = prodObj.get("list");
+                if (list instanceof JSONArray && !((JSONArray) list).isEmpty()) {
+                    Object first = ((JSONArray) list).get(0);
+                    if (first instanceof JSONObject) {
+                        Object listUrl = ((JSONObject) first).get(APIConstants.API_DATA_URL);
+                        if (listUrl != null && StringUtils.isNotBlank(listUrl.toString())) {
+                            return listUrl.toString().trim();
+                        }
+                    } else if (first != null && StringUtils.isNotBlank(first.toString())) {
+                        return first.toString().trim();
+                    }
                 }
             }
             if (prod instanceof JSONArray) {

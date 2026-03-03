@@ -36,6 +36,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
@@ -168,10 +170,26 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
                         platformGatewayService.listGatewaysByOrganizationWithInstance(organization);
                 if (platformGateways != null && !platformGateways.isEmpty()) {
                     List<EnvironmentDTO> list = new ArrayList<>(envListDTO.getList());
-                    list.addAll(platformGateways.stream()
-                            .map(gw -> EnvironmentMappingUtil.fromPlatformGatewayToEnvDTO(gw,
-                                    APIConstants.WSO2_API_PLATFORM_GATEWAY))
-                            .collect(Collectors.toList()));
+                    // Avoid duplicates when a platform gateway name matches an existing environment name.
+                    HashSet<String> existingNames = list.stream()
+                            .map(EnvironmentDTO::getName)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toCollection(HashSet::new));
+                    for (PlatformGateway gw : platformGateways) {
+                        if (gw == null || gw.getName() == null) {
+                            continue;
+                        }
+                        String name = gw.getName().trim();
+                        if (name.isEmpty() || existingNames.contains(name)) {
+                            continue;
+                        }
+                        EnvironmentDTO dto = EnvironmentMappingUtil.fromPlatformGatewayToEnvDTO(
+                                gw, APIConstants.WSO2_API_PLATFORM_GATEWAY);
+                        list.add(dto);
+                        if (dto.getName() != null) {
+                            existingNames.add(dto.getName());
+                        }
+                    }
                     envListDTO.setList(list);
                     envListDTO.setCount(list.size());
                 }

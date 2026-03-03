@@ -5194,14 +5194,15 @@ public class SQLConstants {
         public static final String SELECT_GATEWAYS_BY_ORG_SQL =
                 "SELECT ID, ORGANIZATION_ID, NAME, DISPLAY_NAME, DESCRIPTION, VHOST, IS_CRITICAL, " +
                         "FUNCTIONALITY_TYPE, PROPERTIES, IS_ACTIVE, CREATED_AT, UPDATED_AT FROM AM_PLATFORM_GATEWAY WHERE ORGANIZATION_ID = ? ORDER BY CREATED_AT";
-        /** Platform gateways that have a row in AM_GW_INSTANCES (for GET /environments and deployment acks). DISTINCT so each gateway appears once despite multiple env mappings. */
+        /** Platform gateways that have a row in AM_GW_INSTANCES (for GET /environments and deployment acks). EXISTS avoids duplicate rows when a gateway has multiple env mappings. */
         public static final String SELECT_GATEWAYS_BY_ORG_WITH_INSTANCE_SQL =
-                "SELECT DISTINCT pg.ID, pg.ORGANIZATION_ID, pg.NAME, pg.DISPLAY_NAME, pg.DESCRIPTION, pg.VHOST, pg.IS_CRITICAL, " +
+                "SELECT pg.ID, pg.ORGANIZATION_ID, pg.NAME, pg.DISPLAY_NAME, pg.DESCRIPTION, pg.VHOST, pg.IS_CRITICAL, " +
                         "pg.FUNCTIONALITY_TYPE, pg.PROPERTIES, pg.IS_ACTIVE, pg.CREATED_AT, pg.UPDATED_AT " +
                         "FROM AM_PLATFORM_GATEWAY pg " +
                         "INNER JOIN AM_GW_INSTANCES gwi ON gwi.GATEWAY_UUID = pg.ID AND gwi.ORGANIZATION = pg.ORGANIZATION_ID " +
-                        "INNER JOIN AM_GW_INSTANCE_ENV_MAPPING env ON env.GATEWAY_ID = gwi.GATEWAY_ID " +
-                        "WHERE pg.ORGANIZATION_ID = ? ORDER BY pg.CREATED_AT";
+                        "WHERE pg.ORGANIZATION_ID = ? " +
+                        "AND EXISTS (SELECT 1 FROM AM_GW_INSTANCE_ENV_MAPPING env WHERE env.GATEWAY_ID = gwi.GATEWAY_ID) " +
+                        "ORDER BY pg.CREATED_AT";
         public static final String INSERT_TOKEN_SQL =
                 "INSERT INTO AM_PLATFORM_GATEWAY_TOKEN (ID, GATEWAY_ID, TOKEN_HASH, STATUS, CREATED_AT, REVOKED_AT) " +
                         "VALUES (?, ?, ?, 'active', ?, NULL)";

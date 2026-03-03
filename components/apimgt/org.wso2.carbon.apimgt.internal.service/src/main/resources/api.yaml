@@ -182,8 +182,8 @@ paths:
       parameters:
         - name: xWSO2Tenant
           in: header
-          required: true
-          description: Tenant/organization domain.
+          required: false
+          description: Tenant/organization domain (optional; derived from api-key or context when omitted).
           schema:
             type: string
         - name: apiId

@@ -74,7 +74,9 @@ public class OrganizationInterceptor extends AbstractPhaseInterceptor {
                 RestApiUtil.handleInternalServerError("Error while resolving the organization resolver", e, logger);
             }
         }
-        logger.debug("Organization :" + message.get(RestApiConstants.ORGANIZATION));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Organization resolved by OrganizationInterceptor");
+        }
     }
 
     public void setAllowTenantHeader(boolean allowTenantHeader) {

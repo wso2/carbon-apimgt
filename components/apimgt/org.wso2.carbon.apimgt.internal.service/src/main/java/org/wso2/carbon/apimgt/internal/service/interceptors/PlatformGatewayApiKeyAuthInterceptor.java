@@ -47,6 +47,9 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
     private static final Log log = LogFactory.getLog(PlatformGatewayApiKeyAuthInterceptor.class);
     private static final String API_KEY_HEADER = "api-key";
 
+    /** Message property set when this interceptor started the tenant flow; cleanup interceptor uses it to call endTenantFlow(). */
+    public static final String MESSAGE_PROPERTY_TENANT_FLOW_STARTED = "PlatformGatewayTenantFlowStarted";
+
     public PlatformGatewayApiKeyAuthInterceptor() {
         super(Phase.PRE_INVOKE);
     }
@@ -98,11 +101,13 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
             String systemUser = "admin@" + org;
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(systemUser);
 
+            message.put(MESSAGE_PROPERTY_TENANT_FLOW_STARTED, Boolean.TRUE);
+
             if (log.isDebugEnabled()) {
                 log.debug("Request authenticated via platform gateway api-key for gateway: " + gateway.id);
             }
         } finally {
-            // endTenantFlow() not called here so tenant remains set for resource invocation; thread-local is cleared when thread is reused for a non-platform-gateway request that sets a different tenant
+            // endTenantFlow() is called in PlatformGatewayTenantFlowCleanupInterceptor (POST_INVOKE) so tenant remains set for resource invocation
         }
     }
 
