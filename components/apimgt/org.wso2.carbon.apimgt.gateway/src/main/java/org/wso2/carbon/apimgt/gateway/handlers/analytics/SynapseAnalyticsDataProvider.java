@@ -246,6 +246,11 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
         if (authContext == null) {
+            Object resourcePath = messageContext.getProperty(Constants.RESOURCE_PATH);
+            if (resourcePath != null && MCP_RESOURCE.equals(resourcePath.toString())) {
+                // Return a default application for MCP requests
+                return getAnonymousApp();
+            }
             throw new DataNotFoundException("Error occurred when getting Application information");
         }
         Application application = new Application();
@@ -253,6 +258,15 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         application.setApplicationName(authContext.getApplicationName());
         application.setApplicationOwner(authContext.getSubscriber());
         application.setKeyType(authContext.getKeyType());
+        return application;
+    }
+
+    public static Application getAnonymousApp() {
+        Application application = new Application();
+        application.setApplicationId(Constants.ANONYMOUS_VALUE);
+        application.setApplicationName(Constants.ANONYMOUS_VALUE);
+        application.setKeyType(Constants.ANONYMOUS_VALUE);
+        application.setApplicationOwner(Constants.ANONYMOUS_VALUE);
         return application;
     }
 
