@@ -219,6 +219,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.databridge.commons.Event;
+import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
@@ -9558,7 +9559,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
 
             if (log.isDebugEnabled()) {
-                log.debug("Retrieving email claim for user in tenantId : " + tenantId);
+                log.debug("Retrieving email claim for user : " + username + " in tenantId : " + tenantId);
             }
 
             String userTenantDomain = MultitenantUtils.getTenantDomain(username);
@@ -9566,10 +9567,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 resolvedTenantId = APIUtil.getTenantIdFromTenantDomain(userTenantDomain);
             }
 
-            UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance()
-                    .getRealmService()
-                    .getTenantUserRealm(resolvedTenantId)
-                    .getUserStoreManager();
+            UserRealm userRealm = ServiceReferenceHolder.getInstance().getRealmService()
+                    .getTenantUserRealm(resolvedTenantId);
+            if (userRealm == null) {
+                return null;
+            }
+            UserStoreManager userStoreManager = userRealm.getUserStoreManager();
 
             if (userStoreManager == null) {
                 return null;

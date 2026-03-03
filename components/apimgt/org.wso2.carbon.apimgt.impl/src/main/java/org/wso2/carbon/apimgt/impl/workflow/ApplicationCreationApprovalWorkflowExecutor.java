@@ -84,7 +84,6 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
                 } catch (JsonProcessingException e) {
                     String msg = "Failed to serialize custom attributes of application ";
                     log.error(msg, e);
-                    log.error(msg + application.getName() + ", error : " + e.getMessage());
                     throw new WorkflowException(msg, e);
                 }
         }

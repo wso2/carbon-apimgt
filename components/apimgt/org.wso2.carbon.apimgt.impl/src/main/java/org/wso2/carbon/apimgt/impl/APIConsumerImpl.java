@@ -153,6 +153,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
@@ -1297,7 +1298,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 String subscriberEmail = getEmailClaimValue(workflowDTO.getSubscriber(), workflowDTO.getTenantId());
 
                 if (log.isDebugEnabled()) {
-                    log.debug("Retrieved email for subscriber : " + username);
+                    log.debug("Retrieved email for subscriber : " + workflowDTO.getSubscriber());
                 }
 
                 if (StringUtils.isNotBlank(subscriberEmail)) {
@@ -5897,10 +5898,12 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 resolvedTenantId = APIUtil.getTenantIdFromTenantDomain(userTenantDomain);
             }
 
-            UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance()
-                    .getRealmService()
-                    .getTenantUserRealm(resolvedTenantId)
-                    .getUserStoreManager();
+            UserRealm userRealm = ServiceReferenceHolder.getInstance().getRealmService()
+                    .getTenantUserRealm(resolvedTenantId);
+            if (userRealm == null) {
+                return null;
+            }
+            UserStoreManager userStoreManager = userRealm.getUserStoreManager();
 
             if (userStoreManager == null) {
                 return null;
