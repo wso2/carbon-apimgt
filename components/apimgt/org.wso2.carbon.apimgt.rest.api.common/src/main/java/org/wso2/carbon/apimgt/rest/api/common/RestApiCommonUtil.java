@@ -30,8 +30,8 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -980,34 +980,11 @@ public class RestApiCommonUtil {
     }
 
     protected static byte[] getHmacKeyBytes() throws APIManagementException {
-
-        // If a key is configured by user (NO default key added to default.json)
-        String configuredBase64Key = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration().getFirstProperty(APIConstants.DEVPORTAL_URL_GENERATION_SECRET);
-        if (configuredBase64Key != null && !configuredBase64Key.isEmpty()) {
-            try {
-                return Base64.getDecoder().decode(configuredBase64Key);
-            } catch (IllegalArgumentException e) {
-                log.debug("Configured URL signing key is not a valid Base64 encoded string.");
-                throw new APIManagementException(
-                        "Configured URL signing key is not a valid Base64 encoded string.", e);
-            }
+        byte[] key = ServiceReferenceHolder.getInstance().getUrlSigningKey();
+        if (key == null) {
+            throw new APIManagementException("URL signing key is not initialized.");
         }
-        // No key configured, generate in-memory key
-        // This will fail in multi-node deployments, user configuring their own key is recommended
-        if (generatedURLSigningKey == null) {
-            synchronized (lock) {
-                if (generatedURLSigningKey == null) {
-                    log.warn("URL signing key is not configured in deployment.toml. " +
-                                    "Please add the configuration under [apim.devportal] section in deployment.toml for production environments.");
-                    log.info("Generating a random key to sign the URL." );
-                    byte[] keyBytes = new byte[32];
-                    new SecureRandom().nextBytes(keyBytes);
-                    generatedURLSigningKey = keyBytes;
-                }
-            }
-        }
-        return generatedURLSigningKey;
+        return key;
     }
 
     private static byte[] signWithHmacSHA256(String data, byte[] key) throws NoSuchAlgorithmException, InvalidKeyException {

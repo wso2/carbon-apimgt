@@ -17,17 +17,22 @@
 
 package org.wso2.carbon.apimgt.rest.api.common.internal;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
 import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestAPIAuthenticator;
+
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,6 +58,7 @@ public class APIMRestAPICommonComponent {
             jwtValidatorMap.put(issuer, jwtValidator);
         });
         ServiceReferenceHolder.getInstance().setJwtValidatorMap(jwtValidatorMap);
+        initializeUrlSigningKey();
     }
 
     @Deactivate
@@ -93,5 +99,19 @@ public class APIMRestAPICommonComponent {
 
     protected void removeRestAPIAuthenticationService(RestAPIAuthenticator authenticator) {
         ServiceReferenceHolder.getInstance().removeAuthenticator(authenticator);
+    }
+
+    void initializeUrlSigningKey() {
+        String base64Key = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                .getFirstProperty(APIConstants.DEVPORTAL_URL_GENERATION_SECRET);
+        if (StringUtils.isNotEmpty(base64Key)) {
+            byte[] finalKey = base64Key.getBytes(StandardCharsets.UTF_8);
+            ServiceReferenceHolder.getInstance().setUrlSigningKey(finalKey);
+        } else {
+            byte[] keyBytes = new byte[32];
+            new SecureRandom().nextBytes(keyBytes);
+            ServiceReferenceHolder.getInstance().setUrlSigningKey(keyBytes);
+            log.info("Generated a random key to sign the WSDL URL.");
+        }
     }
 }
