@@ -6596,6 +6596,9 @@ components:
           type: string
           description: API name
           example: NotificationAPI
+        apiUUID:
+          type: string
+          description: The UUID of the API
         issuedOn:
           type: string
           description: Created Time
@@ -6981,15 +6984,6 @@ components:
         keyUUID:
           type: string
           description: The UUID of the API key
-        validityPeriod:
-          type: integer
-          description: API key validity period
-          format: int32
-          example: 3600
-        additionalProperties:
-          type: object
-          properties: { }
-          description: Additional parameters if Authorization server needs any
     APIAPIKeyAssociateRequest:
       title: API Key association request object
       type: object

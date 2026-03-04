@@ -161,6 +161,8 @@ public class ApplicationKeyMappingUtil {
         apiKeyDto.setValidityPeriod(validityTime);
         if (keyName != null) {
             apiKeyDto.setKeyName(keyName);
+        } else {
+            apiKeyDto.setKeyName("N/A");
         }
         return apiKeyDto;
     }
@@ -292,6 +294,7 @@ public class ApplicationKeyMappingUtil {
                     dto.setKeyUUID(src.getKeyUUID());
                     dto.setKeyName(src.getKeyName());
                     dto.setApiName(src.getApiName());
+                    dto.setApiUUID(src.getApiUUId());
                     dto.setIssuedOn(src.getCreatedTime());
                     dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
                     dto.setLastUsed(getLastUsedTimeOrDefault(src.getLastUsedTime()));

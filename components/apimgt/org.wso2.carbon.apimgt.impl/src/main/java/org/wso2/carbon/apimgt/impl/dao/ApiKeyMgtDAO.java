@@ -103,7 +103,7 @@ public class ApiKeyMgtDAO {
                         ps.executeUpdate();
                         conn.commit();
                     }
-                } else if (keyInfoDTO.getApplicationId() != null) {
+                } if (keyInfoDTO.getApplicationId() != null) {
                     try (PreparedStatement ps = conn.prepareStatement(addApiKeyToAppMappingSql)) {
                         ps.setString(1, keyUUID);
                         ps.setString(2, keyInfoDTO.getApplicationId());
@@ -189,6 +189,7 @@ public class ApiKeyMgtDAO {
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
                         keyInfo.setApplicationId(applicationUUID);
                         keyInfo.setKeyType(keyType);
+                        keyInfo.setApiUUId(rs.getString("API_UUID"));
                         apiKeyInfoList.add(keyInfo);
                     }
                 }
@@ -411,6 +412,7 @@ public class ApiKeyMgtDAO {
                         keyInfo.setApiUUId(apiUUId);
                         keyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         keyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
+                        keyInfo.setApplicationId(rs.getString("APPLICATION_UUID"));
                     }
                 }
             }

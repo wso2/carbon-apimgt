@@ -45,14 +45,14 @@ ApiKeysApiService delegate = new ApiKeysApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
-    }, tags={ "API Keys (Collection)",  })
+    }, tags={ "APIKeys",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API keys returned. ", response = APIKeyListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response apiKeysGet() throws APIManagementException{
-        return delegate.apiKeysGet(securityContext);
+    public Response getAllAPIKeys() throws APIManagementException{
+        return delegate.getAllAPIKeys(securityContext);
     }
 
     @POST
@@ -63,12 +63,12 @@ ApiKeysApiService delegate = new ApiKeysApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
-    }, tags={ "API Keys" })
+    }, tags={ "APIKeys" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Api key revoked successfully. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response apiKeysRevokePost(@ApiParam(value = "API key revoke object " ,required=true) APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO) throws APIManagementException{
-        return delegate.apiKeysRevokePost(apIKeyRevokeRequestDTO, securityContext);
+    public Response revokeAPIKeyFromAdmin(@ApiParam(value = "API key revoke object " ,required=true) APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO) throws APIManagementException{
+        return delegate.revokeAPIKeyFromAdmin(apIKeyRevokeRequestDTO, securityContext);
     }
 }

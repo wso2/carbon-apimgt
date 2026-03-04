@@ -21,8 +21,6 @@ import javax.validation.Valid;
 public class APIKeyRenewRequestDTO   {
   
     private String keyUUID = null;
-    private Integer validityPeriod = null;
-    private Object additionalProperties = null;
 
   /**
    * The UUID of the API key
@@ -43,43 +41,6 @@ public class APIKeyRenewRequestDTO   {
     this.keyUUID = keyUUID;
   }
 
-  /**
-   * API key validity period
-   **/
-  public APIKeyRenewRequestDTO validityPeriod(Integer validityPeriod) {
-    this.validityPeriod = validityPeriod;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "3600", value = "API key validity period")
-  @JsonProperty("validityPeriod")
-  public Integer getValidityPeriod() {
-    return validityPeriod;
-  }
-  public void setValidityPeriod(Integer validityPeriod) {
-    this.validityPeriod = validityPeriod;
-  }
-
-  /**
-   * Additional parameters if Authorization server needs any
-   **/
-  public APIKeyRenewRequestDTO additionalProperties(Object additionalProperties) {
-    this.additionalProperties = additionalProperties;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "Additional parameters if Authorization server needs any")
-      @Valid
-  @JsonProperty("additionalProperties")
-  public Object getAdditionalProperties() {
-    return additionalProperties;
-  }
-  public void setAdditionalProperties(Object additionalProperties) {
-    this.additionalProperties = additionalProperties;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -90,14 +51,12 @@ public class APIKeyRenewRequestDTO   {
       return false;
     }
     APIKeyRenewRequestDTO apIKeyRenewRequest = (APIKeyRenewRequestDTO) o;
-    return Objects.equals(keyUUID, apIKeyRenewRequest.keyUUID) &&
-        Objects.equals(validityPeriod, apIKeyRenewRequest.validityPeriod) &&
-        Objects.equals(additionalProperties, apIKeyRenewRequest.additionalProperties);
+    return Objects.equals(keyUUID, apIKeyRenewRequest.keyUUID);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyUUID, validityPeriod, additionalProperties);
+    return Objects.hash(keyUUID);
   }
 
   @Override
@@ -106,8 +65,6 @@ public class APIKeyRenewRequestDTO   {
     sb.append("class APIKeyRenewRequestDTO {\n");
     
     sb.append("    keyUUID: ").append(toIndentedString(keyUUID)).append("\n");
-    sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
-    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }

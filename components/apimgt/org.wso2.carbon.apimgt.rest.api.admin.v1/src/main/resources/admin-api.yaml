@@ -4583,10 +4583,11 @@ paths:
   /api-keys:
     get:
       tags:
-        - API Keys (Collection)
+        - APIKeys
       summary: Get all API Keys
       description: |
         Retrieve all API Keys.
+      operationId: getAllAPIKeys
       responses:
         200:
           description: |
@@ -4613,10 +4614,11 @@ paths:
   /api-keys/revoke:
     post:
       tags:
-        - API Keys
+        - APIKeys
       summary: Revoke an API Key
       description: |
         Revoke an API Key for the API
+      operationId: revokeAPIKeyFromAdmin
       requestBody:
         description: |
           API key revoke object

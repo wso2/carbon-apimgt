@@ -23,6 +23,7 @@ public class APIKeyAssociationInfoDTO   {
     private String keyUUID = null;
     private String keyName = null;
     private String apiName = null;
+    private String apiUUID = null;
     private String issuedOn = null;
     private Integer validityPeriod = null;
     private String lastUsed = null;
@@ -79,6 +80,24 @@ public class APIKeyAssociationInfoDTO   {
   }
   public void setApiName(String apiName) {
     this.apiName = apiName;
+  }
+
+  /**
+   * The UUID of the API
+   **/
+  public APIKeyAssociationInfoDTO apiUUID(String apiUUID) {
+    this.apiUUID = apiUUID;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "The UUID of the API")
+  @JsonProperty("apiUUID")
+  public String getApiUUID() {
+    return apiUUID;
+  }
+  public void setApiUUID(String apiUUID) {
+    this.apiUUID = apiUUID;
   }
 
   /**
@@ -147,6 +166,7 @@ public class APIKeyAssociationInfoDTO   {
     return Objects.equals(keyUUID, apIKeyAssociationInfo.keyUUID) &&
         Objects.equals(keyName, apIKeyAssociationInfo.keyName) &&
         Objects.equals(apiName, apIKeyAssociationInfo.apiName) &&
+        Objects.equals(apiUUID, apIKeyAssociationInfo.apiUUID) &&
         Objects.equals(issuedOn, apIKeyAssociationInfo.issuedOn) &&
         Objects.equals(validityPeriod, apIKeyAssociationInfo.validityPeriod) &&
         Objects.equals(lastUsed, apIKeyAssociationInfo.lastUsed);
@@ -154,7 +174,7 @@ public class APIKeyAssociationInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyUUID, keyName, apiName, issuedOn, validityPeriod, lastUsed);
+    return Objects.hash(keyUUID, keyName, apiName, apiUUID, issuedOn, validityPeriod, lastUsed);
   }
 
   @Override
@@ -165,6 +185,7 @@ public class APIKeyAssociationInfoDTO   {
     sb.append("    keyUUID: ").append(toIndentedString(keyUUID)).append("\n");
     sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
+    sb.append("    apiUUID: ").append(toIndentedString(apiUUID)).append("\n");
     sb.append("    issuedOn: ").append(toIndentedString(issuedOn)).append("\n");
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
     sb.append("    lastUsed: ").append(toIndentedString(lastUsed)).append("\n");

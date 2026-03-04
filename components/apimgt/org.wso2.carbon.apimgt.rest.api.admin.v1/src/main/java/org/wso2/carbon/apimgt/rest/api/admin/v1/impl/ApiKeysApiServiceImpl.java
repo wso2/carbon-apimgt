@@ -42,7 +42,7 @@ public class ApiKeysApiServiceImpl implements ApiKeysApiService {
      * @param messageContext Message context
      * @return API key deletion response
      */
-    public Response apiKeysRevokePost(APIKeyRevokeRequestDTO body, MessageContext messageContext)
+    public Response revokeAPIKeyFromAdmin(APIKeyRevokeRequestDTO body, MessageContext messageContext)
             throws APIManagementException {
 
         if (body == null || body.getKeyUUID() == null) {
@@ -58,7 +58,7 @@ public class ApiKeysApiServiceImpl implements ApiKeysApiService {
      * @param messageContext Message context
      * @return A list of all api keys response
      */
-    public Response apiKeysGet(MessageContext messageContext) throws APIManagementException {
+    public Response getAllAPIKeys(MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         List<APIKeyInfo> apiKeyInfoList = apiAdmin.getAllApiKeys(organization);
