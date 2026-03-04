@@ -229,6 +229,9 @@ public class APIMgtGatewayConstants {
     public static final String MCP_SERVER_VERSION = "MCP_SERVER_VERSION";
     public static final String MCP_REQUEST_SIZE_KEY = "MCP_REQUEST_SIZE";
     public static final String MCP_API_ELECTED_RESOURCE_KEY = "MCP_API_ELECTED_RESOURCE";
+    public static final String MCP_ERROR_CODE_KEY = "MCP_ERROR_CODE";
+    public static final String MCP_IS_ERROR_KEY = "MCP_IS_ERROR";
+    public static final int MCP_DEFAULT_ERROR_CODE = 0;
     public static final String MCP_RESOURCE = "/mcp";
     public static final String MCP_WELL_KNOWN_RESOURCE = "/.well-known/oauth-protected-resource";
     public static final String MCP_AUTH_CLAIM = "MCP_AUTHENTICATED";
@@ -240,6 +243,8 @@ public class APIMgtGatewayConstants {
     public static final String MCP_REQUESTED_PROTOCOL_VERSION = "requestedProtocolVersion";
     public static final String MCP_CLIENT_INFO = "clientInfo";
     public static final String MCP_SERVER_INFO = "serverInfo";
+    public static final String MCP_ERROR_CODE = "mcpErrorCode";
+    public static final String MCP_IS_ERROR = "isError";
 
 
     /**

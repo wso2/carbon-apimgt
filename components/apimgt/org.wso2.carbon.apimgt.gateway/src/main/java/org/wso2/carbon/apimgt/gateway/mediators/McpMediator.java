@@ -173,6 +173,9 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                         setServerInfoProperties(messageContext, mcpResponse.getResponse());
                     }
 
+                    // Extract and set MCP error details for analytics if the response indicates an error
+                    setMCPErrorDetails(messageContext, mcpResponse.getResponse());
+
                     log.info("MCP request processed successfully. Method: " + mcpMethod +
                             ", Status: " + mcpResponse.getStatusCode());
                 } catch (AxisFault e) {
@@ -392,6 +395,40 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         } catch (JsonParseException | IllegalStateException e) {
             log.warn("Failed to extract serverInfo from MCP initialize response for analytics. " +
                     "Response may be malformed.", e);
+        }
+    }
+
+    /**
+     * Extracts error details from MCP response and sets them as properties
+     * on the messageContext for analytics.
+     */
+    private void setMCPErrorDetails(MessageContext messageContext, String responseJson) {
+        try {
+            JsonObject responseObject = JsonParser.parseString(responseJson).getAsJsonObject();
+
+            // Check for Protocol Errors (JSON-RPC protocol error)
+            if (responseObject.has("error") && !responseObject.get("error").isJsonNull()) {
+                JsonObject error = responseObject.getAsJsonObject("error");
+                if (error.has("code") && !error.get("code").isJsonNull()) {
+                    int errorCode = error.get("code").getAsInt();
+                    messageContext.setProperty(APIMgtGatewayConstants.MCP_IS_ERROR_KEY, true);
+                    messageContext.setProperty(APIMgtGatewayConstants.MCP_ERROR_CODE_KEY, errorCode);
+                }
+            }
+            // Check for Tool Execution Errors (tool call failure)
+            else if (responseObject.has("result") && !responseObject.get("result").isJsonNull()) {
+                JsonObject result = responseObject.getAsJsonObject("result");
+                if (result.has("isError") && !result.get("isError").isJsonNull()
+                        && result.get("isError").getAsBoolean()) {
+                    messageContext.setProperty(APIMgtGatewayConstants.MCP_IS_ERROR_KEY, true);
+                    messageContext.setProperty(APIMgtGatewayConstants.MCP_ERROR_CODE_KEY,
+                            APIMgtGatewayConstants.MCP_DEFAULT_ERROR_CODE);
+                }
+            }
+        } catch (JsonParseException e) {
+            log.debug("Failed to parse MCP response JSON while extracting error details.", e);
+        } catch (IllegalStateException e) {
+            log.debug("Invalid JSON structure in MCP response while extracting error details.", e);
         }
     }
 }

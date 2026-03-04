@@ -586,14 +586,6 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         Map<String, Object> mcpAnalytics = new HashMap<>();
         Map<String, Object> clientInfo = new HashMap<>();
 
-        Params.ClientInfo clientInfoObj = (Params.ClientInfo) messageContext.getProperty(MCP_CLIENT_INFO_KEY);
-        if (clientInfoObj != null) {
-            clientInfo.put("name", clientInfoObj.getName());
-            clientInfo.put("version", clientInfoObj.getVersion());
-            clientInfo.put(MCP_REQUESTED_PROTOCOL_VERSION,
-                    messageContext.getProperty(MCP_REQUESTED_PROTOCOL_VERSION_KEY));
-        }
-
         String sessionId = (String) messageContext.getProperty(MCP_SESSION_ID_KEY);
         if (sessionId != null) {
             mcpAnalytics.put(MCP_SESSION_ID, sessionId);
@@ -602,7 +594,15 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         mcpAnalytics.put(MCP_METHOD, messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
         mcpAnalytics.put(MCP_CAPABILITY, messageContext.getProperty(MCP_CAPABILITY_KEY));
         mcpAnalytics.put(MCP_CAPABILITY_NAME, messageContext.getProperty(MCP_CAPABILITY_NAME_KEY));
-        mcpAnalytics.put(MCP_CLIENT_INFO, clientInfo);
+
+        Params.ClientInfo clientInfoObj = (Params.ClientInfo) messageContext.getProperty(MCP_CLIENT_INFO_KEY);
+        if (clientInfoObj != null) {
+            clientInfo.put("name", clientInfoObj.getName());
+            clientInfo.put("version", clientInfoObj.getVersion());
+            clientInfo.put(MCP_REQUESTED_PROTOCOL_VERSION,
+                    messageContext.getProperty(MCP_REQUESTED_PROTOCOL_VERSION_KEY));
+            mcpAnalytics.put(MCP_CLIENT_INFO, clientInfo);
+        }
 
         String protocolVersion = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_PROTOCOL_VERSION);
         String serverName = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_SERVER_NAME);
@@ -613,6 +613,13 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             serverInfo.put("name", serverName);
             serverInfo.put("version", serverVersion);
             mcpAnalytics.put(MCP_SERVER_INFO, serverInfo);
+        }
+
+        boolean isError = messageContext.getPropertyKeySet().contains(MCP_IS_ERROR_KEY)
+                && (Boolean) messageContext.getProperty(MCP_IS_ERROR_KEY);
+        mcpAnalytics.put(MCP_IS_ERROR, isError);
+        if (isError) {
+            mcpAnalytics.put(MCP_ERROR_CODE, messageContext.getProperty(MCP_ERROR_CODE_KEY));
         }
 
         if (log.isDebugEnabled()) {
