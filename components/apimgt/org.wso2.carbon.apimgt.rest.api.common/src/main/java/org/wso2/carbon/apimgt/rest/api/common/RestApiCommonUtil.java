@@ -78,8 +78,6 @@ public class RestApiCommonUtil {
     private static Set<URITemplate> adminAPIResourceMappings;
     private static Set<URITemplate> serviceCatalogAPIResourceMappings;
     private static Set<URITemplate> governanceResourceMapping;
-    private static volatile byte[] generatedURLSigningKey = null;
-    private static final Object lock = new Object();
 
     public static void unsetThreadLocalRequestedTenant() {
 

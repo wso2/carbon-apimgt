@@ -101,7 +101,7 @@ public class APIMRestAPICommonComponent {
         ServiceReferenceHolder.getInstance().removeAuthenticator(authenticator);
     }
 
-    void initializeUrlSigningKey() {
+    private void initializeUrlSigningKey() {
         String base64Key = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                 .getFirstProperty(APIConstants.DEVPORTAL_URL_GENERATION_SECRET);
         if (StringUtils.isNotEmpty(base64Key)) {
@@ -111,7 +111,6 @@ public class APIMRestAPICommonComponent {
             byte[] keyBytes = new byte[32];
             new SecureRandom().nextBytes(keyBytes);
             ServiceReferenceHolder.getInstance().setUrlSigningKey(keyBytes);
-            log.info("Generated a random key to sign the WSDL URL.");
         }
     }
 }
