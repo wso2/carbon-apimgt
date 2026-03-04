@@ -83,7 +83,6 @@ import java.util.stream.Collectors;
 import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
 import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.*;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.MASK_VALUE;
-import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.MCP_METHOD;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_HEADERS;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_HEADER_MASK;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.RESPONSE_HEADERS;
@@ -246,8 +245,11 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
         if (authContext == null) {
-            Object resourcePath = messageContext.getProperty(Constants.RESOURCE_PATH);
-            if (resourcePath != null && MCP_RESOURCE.equals(resourcePath.toString())) {
+            String resourcePath = (String) messageContext.getProperty(Constants.RESOURCE_PATH);
+            if (resourcePath == null) {
+                resourcePath = (String) messageContext.getProperty(API_ELECTED_RESOURCE);
+            }
+            if (resourcePath != null && resourcePath.startsWith(MCP_RESOURCE)) {
                 // Return a default application for MCP requests
                 return getAnonymousApp();
             }
@@ -515,7 +517,6 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             getAiAnalyticsData((Map) aiMeta, startHourUtc, custom);
         }
         if (MCP.equals(messageContext.getProperty(API_TYPE))) {
-            custom.put(Constants.REQUEST_SIZE, messageContext.getProperty(MCP_REQUEST_SIZE_KEY));
             getMCPAnalyticsData(custom);
         }
 
@@ -591,7 +592,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             mcpAnalytics.put(MCP_SESSION_ID, sessionId);
         }
 
-        mcpAnalytics.put(MCP_METHOD, messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
+        mcpAnalytics.put(Constants.MCP_METHOD, messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
         mcpAnalytics.put(MCP_CAPABILITY, messageContext.getProperty(MCP_CAPABILITY_KEY));
         mcpAnalytics.put(MCP_CAPABILITY_NAME, messageContext.getProperty(MCP_CAPABILITY_NAME_KEY));
 
@@ -631,7 +632,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     private Object getGuardrailName() {
         if (messageContext.getProperty(SynapseConstants.ERROR_MESSAGE) != null) {
             String errorMessage = messageContext.getProperty(SynapseConstants.ERROR_MESSAGE).toString();
-            if (errorMessage.contains("\"interveningGuardrail\"")) {
+            if (errorMessage.contains("\"interveningGuardrail\":\"")) {
                 try {
                     // Extract the value after "interveningGuardrail":"
                     int startIndex = errorMessage.indexOf("\"interveningGuardrail\":\"") +
@@ -668,8 +669,11 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     private boolean isSuccessRequest() {
 
-        Object resourcePath = messageContext.getProperty(Constants.RESOURCE_PATH);
-        if (resourcePath != null && MCP_RESOURCE.equals(resourcePath.toString())) {
+        String resourcePath = (String) messageContext.getProperty(Constants.RESOURCE_PATH);
+        if (resourcePath == null) {
+            resourcePath = (String) messageContext.getProperty(API_ELECTED_RESOURCE);
+        }
+        if (resourcePath != null && resourcePath.startsWith(MCP_RESOURCE)) {
             return !messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE);
         }
 

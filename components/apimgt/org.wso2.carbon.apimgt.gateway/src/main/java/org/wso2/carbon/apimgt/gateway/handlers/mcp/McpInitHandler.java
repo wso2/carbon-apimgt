@@ -165,7 +165,7 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_SESSION_ID_KEY,
                         headers.get(APIConstants.MCP.HEADER_MCP_SESSION_ID)); //TODO: not this. get from notification/initialize response
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUESTED_PROTOCOL_VERSION_KEY,
-                        headers.get(APIConstants.MCP.HEADER_MCP_PROTOCOL_VERSION));
+                        headers.get(APIConstants.MCP.MCP_PROTOCOL_VERSION_HEADER));
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUEST_SIZE_KEY,
                         headers.get(APIConstants.HEADER_CONTENT_LENGTH));
 

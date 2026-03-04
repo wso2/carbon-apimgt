@@ -176,8 +176,10 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                     // Extract and set MCP error details for analytics if the response indicates an error
                     setMCPErrorDetails(messageContext, mcpResponse.getResponse());
 
-                    log.info("MCP request processed successfully. Method: " + mcpMethod +
-                            ", Status: " + mcpResponse.getStatusCode());
+                    if (log.isDebugEnabled()) {
+                        log.debug("MCP request processed successfully. Method: " + mcpMethod +
+                                ", Status: " + mcpResponse.getStatusCode());
+                    }
                 } catch (AxisFault e) {
                     log.error("Error while generating mcp payload " + axis2MessageContext.getLogIDString(), e);
                 }
@@ -368,6 +370,12 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
      */
     private void setServerInfoProperties(MessageContext messageContext,
             String responseJson) {
+        if (responseJson == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("MCP initialize response JSON is null, skipping serverInfo extraction.");
+            }
+            return;
+        }
         try {
             JsonObject responseObject = JsonParser.parseString(responseJson).getAsJsonObject();
             JsonObject result = responseObject.getAsJsonObject("result");
@@ -403,6 +411,12 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
      * on the messageContext for analytics.
      */
     private void setMCPErrorDetails(MessageContext messageContext, String responseJson) {
+        if (responseJson == null || responseJson.trim().isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("MCP response JSON is null or empty, skipping error details extraction.");
+            }
+            return;
+        }
         try {
             JsonObject responseObject = JsonParser.parseString(responseJson).getAsJsonObject();
 
@@ -425,10 +439,9 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                             APIMgtGatewayConstants.MCP_DEFAULT_ERROR_CODE);
                 }
             }
-        } catch (JsonParseException e) {
-            log.debug("Failed to parse MCP response JSON while extracting error details.", e);
-        } catch (IllegalStateException e) {
-            log.debug("Invalid JSON structure in MCP response while extracting error details.", e);
+        } catch (JsonParseException | IllegalStateException e) {
+            log.warn("Failed to extract error details from MCP response for analytics. " +
+                    "Response may be malformed.", e);
         }
     }
 }
