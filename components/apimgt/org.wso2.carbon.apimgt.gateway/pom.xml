@@ -525,7 +525,8 @@
                         <Provide-Capability>
                             osgi.service;objectClass=org.wso2.carbon.apimgt.api.GuardrailProviderService,
                             osgi.service;objectClass=org.wso2.carbon.apimgt.api.EmbeddingProviderService,
-                            osgi.service;objectClass=org.wso2.carbon.apimgt.api.VectorDBProviderService
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.api.VectorDBProviderService,
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.api.AILLMProviderService
                         </Provide-Capability>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>

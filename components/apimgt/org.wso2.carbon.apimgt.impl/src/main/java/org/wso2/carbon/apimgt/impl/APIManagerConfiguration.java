@@ -69,6 +69,7 @@ import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.EmbeddingProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.GuardrailProviderConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.LLMProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
@@ -149,6 +150,8 @@ public class APIManagerConfiguration {
     private final Map<String, TenantSharingConfigurationDTO> tenantSharingConfigurations = new HashMap<>();
     private final EmbeddingProviderConfigurationDTO embeddingProviderConfigurationDTO =
             new EmbeddingProviderConfigurationDTO();
+    private final LLMProviderConfigurationDTO llmProviderConfigurationDTO =
+            new LLMProviderConfigurationDTO();
     private final VectorDBProviderConfigurationDTO vectorDBProviderConfigurationDTO =
             new VectorDBProviderConfigurationDTO();
     private static Properties realtimeNotifierProperties;
@@ -903,21 +906,15 @@ public class APIManagerConfiguration {
                     OMElement aiChildElement = (OMElement) aiChildren.next();
 
                     if (APIConstants.AI.GUARDRAIL_PROVIDERS.equals(aiChildElement.getLocalName())) {
-                        // Iterate through each <EmbeddingProvider>
                         for (Iterator<?> providers = aiChildElement.getChildElements(); providers.hasNext(); ) {
                             OMElement providerElement = (OMElement) providers.next();
-
                             if (APIConstants.AI.GUARDRAIL_PROVIDER.equals(providerElement.getLocalName())) {
-                                // Get the provider type
                                 String type = providerElement.getAttributeValue(
                                         new QName(APIConstants.AI.GUARDRAIL_PROVIDER_TYPE));
                                 if (type == null || type.isEmpty()) {
-                                    continue; // skip if no type defined
+                                    continue;
                                 }
-
                                 Map<String, String> propertiesMap = new HashMap<>();
-
-                                // Iterate through each <Property>
                                 for (Iterator<?> props = providerElement.getChildElements(); props.hasNext(); ) {
                                     OMElement prop = (OMElement) props.next();
 
@@ -932,7 +929,6 @@ public class APIManagerConfiguration {
                                     }
                                 }
 
-                                // Add to the main map
                                 GuardrailProviderConfigurationDTO guardrailProviderConfigurationDTO =
                                         new GuardrailProviderConfigurationDTO();
                                 guardrailProviderConfigurationDTO.setType(type);
@@ -941,18 +937,13 @@ public class APIManagerConfiguration {
                             }
                         }
                     }
-
                     if (APIConstants.AI.EMBEDDING_PROVIDER.equals(aiChildElement.getLocalName())) {
-                        // Get the provider type
                         String type = aiChildElement.getAttributeValue(
                                 new QName(APIConstants.AI.EMBEDDING_PROVIDER_TYPE));
                         if (type == null || type.isEmpty()) {
-                            continue; // skip if no type defined
+                            continue;
                         }
-
                         Map<String, String> propertiesMap = new HashMap<>();
-
-                        // Iterate through each <Property>
                         for (Iterator<?> props = aiChildElement.getChildElements(); props.hasNext(); ) {
                             OMElement prop = (OMElement) props.next();
 
@@ -970,18 +961,37 @@ public class APIManagerConfiguration {
                         this.embeddingProviderConfigurationDTO.setType(type);
                         this.embeddingProviderConfigurationDTO.setProperties(propertiesMap);
                     }
+                    if (APIConstants.AI.LLM_PROVIDER.equals(aiChildElement.getLocalName())) {
+                        String type = aiChildElement.getAttributeValue(
+                                new QName(APIConstants.AI.LLM_PROVIDER_TYPE));
+                        if (type == null || type.isEmpty()) {
+                            continue;
+                        }
+                        Map<String, String> propertiesMap = new HashMap<>();
+                        for (Iterator<?> props = aiChildElement.getChildElements(); props.hasNext(); ) {
+                            OMElement prop = (OMElement) props.next();
 
+                            if (APIConstants.AI.LLM_PROVIDER_PROPERTY.equals(prop.getLocalName())) {
+                                String key = prop.getAttributeValue(
+                                        new QName(APIConstants.AI.LLM_PROVIDER_PROPERTY_KEY));
+                                String value = MiscellaneousUtil.resolve(prop, secretResolver);
+
+                                if (key != null && !key.isEmpty()) {
+                                    propertiesMap.put(key, value);
+                                }
+                            }
+                        }
+
+                        this.llmProviderConfigurationDTO.setType(type);
+                        this.llmProviderConfigurationDTO.setProperties(propertiesMap);
+                    }
                     if (APIConstants.AI.VECTOR_DB_PROVIDER.equals(aiChildElement.getLocalName())) {
-                        // Get the vector DB type
                         String type = aiChildElement.getAttributeValue(
                                 new QName(APIConstants.AI.VECTOR_DB_PROVIDER_TYPE));
                         if (type == null || type.isEmpty()) {
-                            continue; // skip if no type defined
+                            continue;
                         }
-
                         Map<String, String> propertiesMap = new HashMap<>();
-
-                        // Iterate through each <Property>
                         for (Iterator<?> props = aiChildElement.getChildElements(); props.hasNext(); ) {
                             OMElement prop = (OMElement) props.next();
 
@@ -1450,6 +1460,11 @@ public class APIManagerConfiguration {
     public EmbeddingProviderConfigurationDTO getEmbeddingProvider() {
 
         return embeddingProviderConfigurationDTO;
+    }
+
+    public LLMProviderConfigurationDTO getLLMProvider() {
+
+        return llmProviderConfigurationDTO;
     }
 
     public VectorDBProviderConfigurationDTO getVectorDBProvider() {
