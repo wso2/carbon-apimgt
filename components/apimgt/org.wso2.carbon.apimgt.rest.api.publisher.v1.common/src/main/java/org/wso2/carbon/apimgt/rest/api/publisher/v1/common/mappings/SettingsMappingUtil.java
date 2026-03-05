@@ -17,19 +17,14 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayFeatureCatalog;
-import org.wso2.carbon.apimgt.api.model.GatewayMode;
-import org.wso2.carbon.apimgt.api.model.PlatformGateway;
-import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -44,7 +39,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberContactAttribu
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
