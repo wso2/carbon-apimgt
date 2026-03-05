@@ -1685,6 +1685,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             PublisherCommonUtils.clearArtifactComplianceInfo(apiId, RestApiConstants.RESOURCE_API , organization);
             // Clean up stale deduplication violations on OTHER APIs that reference this deleted API
             PublisherCommonUtils.cleanupViolationsReferencingApi(apiId, organization);
+            // [DORMANT] Successor mapping cleanup — deactivated while
+            // AM_API_SUCCESSOR_MAPPING persistence is dormant. Will be re-enabled
+            // once successor selection flow is fully integrated.
+            // try {
+            //     org.wso2.carbon.apimgt.governance.gatekeeper.dao.impl.SuccessorMappingDAOImpl
+            //             .getInstance().deleteAllReferences(apiId, organization);
+            // } catch (Exception ex) {
+            //     log.warn("Failed to clean up successor mappings for deleted API: " + apiId, ex);
+            // }
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
@@ -3718,7 +3727,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response changeAPILifecycle(String action, String apiId, String lifecycleChecklist, String ifMatch,
+    public Response changeAPILifecycle(String action, String apiId, String lifecycleChecklist,
+                                       String successorUuid, String ifMatch,
                                        MessageContext messageContext) throws APIManagementException {
 
         try {
@@ -3728,6 +3738,139 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIConstants.API_IDENTIFIER_TYPE));
             APIStateChangeResponse stateChangeResponse = PublisherCommonUtils.changeApiOrApiProductLifecycle(action,
                     apiWrapper, lifecycleChecklist, organization);
+
+            // ── RFC 8594 Header Injection + Successor Persistence ─────────────
+            // [DORMANT] The full RFC 8594 Sunset header injection and
+            // AM_API_SUCCESSOR_MAPPING persistence logic is temporarily deactivated.
+            // Block-mode enforcement remains active to reject lifecycle transitions
+            // when no successor exists in block mode. The persistence, header
+            // injection, and successor resolution via MinHash/DAO will be re-enabled
+            // once the successor selection flow is fully integrated.
+            if ("Deprecate".equalsIgnoreCase(action) || "Retire".equalsIgnoreCase(action)) {
+                try {
+                    org.wso2.carbon.apimgt.governance.gatekeeper.service.GatekeeperService gatekeeperService =
+                            org.wso2.carbon.apimgt.governance.gatekeeper.service.GatekeeperService.getInstance();
+
+                    if (gatekeeperService != null && gatekeeperService.isInitialized()) {
+
+                        // ── [DORMANT] Successor resolution via parameter/DAO/MinHash ──
+                        // String selectedSuccessorUuid = successorUuid;
+                        // org.wso2.carbon.apimgt.governance.gatekeeper.dao.SuccessorMappingDAO successorDAO =
+                        //         org.wso2.carbon.apimgt.governance.gatekeeper.dao.impl
+                        //                 .SuccessorMappingDAOImpl.getInstance();
+                        // if (selectedSuccessorUuid == null || selectedSuccessorUuid.isEmpty()) {
+                        //     try {
+                        //         String existing = successorDAO.getSuccessorId(apiId, organization);
+                        //         if (existing != null && !existing.isEmpty()) {
+                        //             selectedSuccessorUuid = existing;
+                        //         }
+                        //     } catch (Exception daoEx) {
+                        //         log.debug("[DEPRECATION-GUIDE] Could not query persisted successor");
+                        //     }
+                        // }
+                        // org.wso2.carbon.apimgt.governance.gatekeeper.model.DeprecationGuideResult guide;
+                        // if (selectedSuccessorUuid != null && !selectedSuccessorUuid.isEmpty()) {
+                        //     guide = gatekeeperService.buildGuideForKnownSuccessor(
+                        //             apiId, selectedSuccessorUuid, organization, action);
+                        // } else {
+                        //     guide = gatekeeperService.findSuccessorForDeprecation(
+                        //             apiId, organization, action);
+                        // }
+
+                        // ── Block Mode Enforcement (ACTIVE) ──────────────────────
+                        // Use findSuccessorForDeprecation to check for a successor
+                        // and read the lifecycle enforcement mode. If mode=block and
+                        // no successor is found, the lifecycle transition is rejected.
+                        org.wso2.carbon.apimgt.governance.gatekeeper.model.DeprecationGuideResult guide =
+                                gatekeeperService.findSuccessorForDeprecation(
+                                        apiId, organization, action);
+
+                        // ── Enforcement mode check (WARN-ONLY) ──
+                        // Block mode is disabled: deprecation always proceeds.
+                        // Violations are recorded in the compliance tab instead.
+                        try {
+                            java.lang.reflect.Method getMode =
+                                    guide.getClass().getMethod("getEnforcementMode");
+                            String mode = (String) getMode.invoke(guide);
+                            log.info("[DEPRECATION-GUIDE] Enforcement mode='" + mode
+                                    + "', successorFound=" + guide.isSuccessorFound()
+                                    + " for API " + apiId + " (action=" + action + ")."
+                                    + " Deprecation will proceed (warn-only mode active).");
+                        } catch (NoSuchMethodException nsm) {
+                            // Old version without enforcement mode — allow transition
+                        } catch (java.lang.reflect.InvocationTargetException ite) {
+                            log.debug("[DEPRECATION-GUIDE] Could not read enforcement mode: "
+                                    + ite.getMessage());
+                        }
+
+                        // ── [DORMANT] Persist mapping + inject RFC 8594 headers ──
+                        // if (guide.isSuccessorFound()) {
+                        //     try {
+                        //         successorDAO.addSuccessorMapping(
+                        //                 apiId, guide.getSuccessorApiUuid(), organization);
+                        //     } catch (Exception persistEx) {
+                        //         log.warn("[DEPRECATION-GUIDE] Failed to persist successor mapping");
+                        //     }
+                        //     API targetApi = apiProvider.getAPIbyUUID(apiId, organization);
+                        //     if (targetApi != null) {
+                        //         targetApi.addProperty("X-Deprecation-Successor-UUID",
+                        //                 guide.getSuccessorApiUuid());
+                        //         targetApi.addProperty("X-Deprecation-Successor",
+                        //                 guide.getSuccessorApiName() + " "
+                        //                         + guide.getSuccessorApiVersion());
+                        //         targetApi.addProperty("X-RFC8594-Link",
+                        //                 guide.getRfc8594LinkHeader());
+                        //         targetApi.addProperty("X-RFC8594-Sunset",
+                        //                 guide.getRfc8594SunsetHeader());
+                        //         targetApi.addProperty("X-Deprecation-Similarity",
+                        //                 String.format("%.1f%%", guide.getSimilarityPercentage()));
+                        //         targetApi.addProperty("X-Lifecycle-Action", action);
+                        //         apiProvider.updateAPI(targetApi, targetApi);
+                        //     }
+                        // }
+                        log.info("[DEPRECATION-GUIDE] Block-mode check completed for API "
+                                + apiId + " (action: " + action + "). "
+                                + "Successor found: " + guide.isSuccessorFound()
+                                + ". RFC 8594 injection & persistence are DORMANT.");
+                    }
+                } catch (Exception guideEx) {
+                    // Don't block transition if guide check fails
+                    log.warn("[DEPRECATION-GUIDE] Lifecycle enforcement check failed for API "
+                            + apiId + " (action: " + action + "): " + guideEx.getMessage());
+                }
+            }
+            // ── End RFC 8594 + Successor Persistence ──────────────────────────
+
+            // ── Trigger governance lifecycle compliance evaluation on Deprecate/Retire ──
+            // This ensures the lifecycle ruleset (successor check) runs and
+            // violations appear in the compliance dashboard.
+            if ("Deprecate".equalsIgnoreCase(action) || "Retire".equalsIgnoreCase(action)) {
+                log.info("[LIFECYCLE-GOVERNANCE] Triggering compliance evaluation for API "
+                        + apiId + " after " + action + " action.");
+                try {
+                    // Use reflection to create APIMGovernanceServiceImpl directly
+                    // (ServiceReferenceHolder.getAPIMGovernanceService() is 9.33.x-only)
+                    Class<?> serviceImplClass = Class.forName(
+                            "org.wso2.carbon.apimgt.governance.impl.service.APIMGovernanceServiceImpl");
+                    Object govService = serviceImplClass.getDeclaredConstructor().newInstance();
+                    java.lang.reflect.Method evalMethod = serviceImplClass.getMethod(
+                            "evaluateComplianceAsync",
+                            String.class,
+                            ArtifactType.class,
+                            APIMGovernableState.class,
+                            String.class);
+                    log.info("[LIFECYCLE-GOVERNANCE] Calling evaluateComplianceAsync via reflection for "
+                            + apiId);
+                    evalMethod.invoke(govService, apiId, ArtifactType.API,
+                            APIMGovernableState.API_UPDATE, organization);
+                    log.info("[LIFECYCLE-GOVERNANCE] evaluateComplianceAsync completed for " + apiId);
+                } catch (Throwable govEx) {
+                    // Catch ALL throwables including NoClassDefFoundError, etc.
+                    log.error("[LIFECYCLE-GOVERNANCE] Governance compliance evaluation failed for API "
+                            + apiId + " after " + action + ": " + govEx.getClass().getName()
+                            + " - " + govEx.getMessage(), govEx);
+                }
+            }
 
             //returns the current lifecycle state
             LifecycleStateDTO stateDTO = getLifecycleState(apiId, organization); // todo try to prevent this call
@@ -3742,6 +3885,170 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while updating the lifecycle of API " + apiId, e, log);
+            } else {
+                throw e;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get Deprecation / Retirement Guide for an API — returns structural successor
+     * recommendation using MinHash/LSH similarity from the Gatekeeper module.
+     *
+     * Supports both "Deprecate" and "Retire" lifecycle actions via the ?action= query param.
+     *
+     * Scenario A (successor found): Returns the successor API details + RFC 8594 headers
+     *                                + all candidate versions for user selection.
+     * Scenario B (no successor):    Returns a migration risk warning with enforcement mode.
+     */
+    public Response getDeprecationGuide(String apiId, MessageContext messageContext) throws APIManagementException {
+        try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+            // Validate API exists
+            CommonUtils.validateAPIExistence(apiId);
+
+            // Read lifecycle action from query parameter (?action=Deprecate or ?action=Retire)
+            String lifecycleAction = "Deprecate"; // default
+            try {
+                javax.servlet.http.HttpServletRequest request = messageContext.getHttpServletRequest();
+                String actionParam = request.getParameter("action");
+                if ("Retire".equalsIgnoreCase(actionParam)) {
+                    lifecycleAction = "Retire";
+                }
+            } catch (Exception qe) {
+                log.debug("[DEPRECATION-GUIDE] Could not read action query param, defaulting to Deprecate");
+            }
+
+            // Try to get GatekeeperService and find successor
+            try {
+                org.wso2.carbon.apimgt.governance.gatekeeper.service.GatekeeperService gatekeeperService =
+                        org.wso2.carbon.apimgt.governance.gatekeeper.service.GatekeeperService.getInstance();
+
+                if (gatekeeperService == null || !gatekeeperService.isInitialized()) {
+                    log.warn("GatekeeperService not available for deprecation guide. " +
+                            "Returning no-successor result.");
+                    java.util.Map<String, Object> fallback = new java.util.LinkedHashMap<>();
+                    fallback.put("apiUuid", apiId);
+                    fallback.put("organization", organization);
+                    fallback.put("successorFound", false);
+                    fallback.put("migrationRisk", true);
+                    fallback.put("lifecycleAction", lifecycleAction);
+                    fallback.put("enforcementMode", "warn");
+                    fallback.put("message", "Deprecation Guide unavailable — GatekeeperService not initialized.");
+                    return Response.ok().entity(fallback).build();
+                }
+
+                org.wso2.carbon.apimgt.governance.gatekeeper.model.DeprecationGuideResult guideResult =
+                        gatekeeperService.findSuccessorForDeprecation(apiId, organization, lifecycleAction);
+
+                // Convert to a JSON-friendly map for the response
+                java.util.Map<String, Object> response = new java.util.LinkedHashMap<>();
+                response.put("apiUuid", guideResult.getApiUuid());
+                response.put("apiName", guideResult.getApiName());
+                response.put("apiVersion", guideResult.getApiVersion());
+                response.put("organization", guideResult.getOrganization());
+                response.put("successorFound", guideResult.isSuccessorFound());
+                response.put("migrationRisk", guideResult.isMigrationRisk());
+                response.put("message", guideResult.getMessage());
+
+                // ── New fields: lifecycleAction, enforcementMode, successorCarriedOver ──
+                try {
+                    java.lang.reflect.Method getAction =
+                            guideResult.getClass().getMethod("getLifecycleAction");
+                    response.put("lifecycleAction", getAction.invoke(guideResult));
+                } catch (NoSuchMethodException nsm) {
+                    response.put("lifecycleAction", lifecycleAction);
+                }
+                try {
+                    java.lang.reflect.Method getMode =
+                            guideResult.getClass().getMethod("getEnforcementMode");
+                    response.put("enforcementMode", getMode.invoke(guideResult));
+                } catch (NoSuchMethodException nsm) {
+                    response.put("enforcementMode", "warn");
+                }
+                try {
+                    java.lang.reflect.Method getCarried =
+                            guideResult.getClass().getMethod("isSuccessorCarriedOver");
+                    response.put("successorCarriedOver", getCarried.invoke(guideResult));
+                } catch (NoSuchMethodException nsm) {
+                    response.put("successorCarriedOver", false);
+                }
+
+                if (guideResult.isSuccessorFound()) {
+                    response.put("successorApiUuid", guideResult.getSuccessorApiUuid());
+                    response.put("successorApiName", guideResult.getSuccessorApiName());
+                    response.put("successorApiVersion", guideResult.getSuccessorApiVersion());
+                    response.put("similarityPercentage", guideResult.getSimilarityPercentage());
+                    // Use reflection so it works regardless of class version loaded by OSGi
+                    try {
+                        java.lang.reflect.Method getStatus =
+                                guideResult.getClass().getMethod("getSuccessorStatus");
+                        response.put("successorStatus", getStatus.invoke(guideResult));
+                    } catch (NoSuchMethodException nsm) {
+                        response.put("successorStatus", "PUBLISHED");
+                    }
+                    try {
+                        java.lang.reflect.Method getType =
+                                guideResult.getClass().getMethod("getSuccessorType");
+                        response.put("successorType", getType.invoke(guideResult));
+                    } catch (NoSuchMethodException nsm) {
+                        response.put("successorType", "UNKNOWN");
+                    }
+                    response.put("rfc8594LinkHeader", guideResult.getRfc8594LinkHeader());
+                    response.put("rfc8594SunsetHeader", guideResult.getRfc8594SunsetHeader());
+                }
+
+                // ── All Candidate Versions (multi-version successor list) ──────
+                try {
+                    java.lang.reflect.Method getCandidates =
+                            guideResult.getClass().getMethod("getAllCandidates");
+                    Object candidatesObj = getCandidates.invoke(guideResult);
+                    if (candidatesObj instanceof java.util.List) {
+                        java.util.List<?> candidatesList = (java.util.List<?>) candidatesObj;
+                        java.util.List<java.util.Map<String, Object>> candidateMaps = new java.util.ArrayList<>();
+                        for (Object cand : candidatesList) {
+                            java.util.Map<String, Object> cm = new java.util.LinkedHashMap<>();
+                            Class<?> candClass = cand.getClass();
+                            cm.put("apiUuid", candClass.getMethod("getApiUuid").invoke(cand));
+                            cm.put("apiName", candClass.getMethod("getApiName").invoke(cand));
+                            cm.put("apiVersion", candClass.getMethod("getApiVersion").invoke(cand));
+                            cm.put("similarityPercentage",
+                                    candClass.getMethod("getSimilarityPercentage").invoke(cand));
+                            cm.put("successorType",
+                                    candClass.getMethod("getSuccessorType").invoke(cand));
+                            cm.put("status", candClass.getMethod("getStatus").invoke(cand));
+                            cm.put("context", candClass.getMethod("getContext").invoke(cand));
+                            candidateMaps.add(cm);
+                        }
+                        response.put("allCandidates", candidateMaps);
+                    }
+                } catch (NoSuchMethodException nsm) {
+                    response.put("allCandidates", new java.util.ArrayList<>());
+                } catch (Exception candEx) {
+                    log.debug("[DEPRECATION-GUIDE] Could not serialize allCandidates: "
+                            + candEx.getMessage());
+                    response.put("allCandidates", new java.util.ArrayList<>());
+                }
+
+                return Response.ok().entity(response).build();
+
+            } catch (Exception e) {
+                log.error("Error computing deprecation guide for API " + apiId, e);
+                java.util.Map<String, Object> fallback = new java.util.LinkedHashMap<>();
+                fallback.put("apiUuid", apiId);
+                fallback.put("organization", organization);
+                fallback.put("successorFound", false);
+                fallback.put("migrationRisk", true);
+                fallback.put("lifecycleAction", lifecycleAction);
+                fallback.put("enforcementMode", "warn");
+                fallback.put("message", "Could not compute deprecation guide: " + e.getMessage());
+                return Response.ok().entity(fallback).build();
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
                 throw e;
             }

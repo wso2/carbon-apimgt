@@ -3333,6 +3333,82 @@ public class APIManagerConfiguration {
             }
         }
 
+        // Parse deduplication configuration
+        OMElement dedupConfig = omElement
+                .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEDUPLICATION_CONFIG));
+        if (dedupConfig != null) {
+            OMElement dedupEnabled = dedupConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEDUP_ENABLED));
+            if (dedupEnabled != null) {
+                apimGovConfigurationDto.setDeduplicationEnabled(Boolean.parseBoolean(dedupEnabled.getText()));
+            }
+
+            OMElement simThreshold = dedupConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEDUP_SIMILARITY_THRESHOLD));
+            if (simThreshold != null) {
+                apimGovConfigurationDto.setDeduplicationSimilarityThreshold(
+                        Double.parseDouble(simThreshold.getText()));
+            }
+
+            OMElement highConfThreshold = dedupConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEDUP_HIGH_CONFIDENCE_THRESHOLD));
+            if (highConfThreshold != null) {
+                apimGovConfigurationDto.setDeduplicationHighConfidenceThreshold(
+                        Double.parseDouble(highConfThreshold.getText()));
+            }
+
+            OMElement dedupMode = dedupConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEDUP_MODE));
+            if (dedupMode != null) {
+                apimGovConfigurationDto.setDeduplicationMode(dedupMode.getText());
+            }
+
+            OMElement numHashFunctions = dedupConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEDUP_NUM_HASH_FUNCTIONS));
+            if (numHashFunctions != null) {
+                apimGovConfigurationDto.setDeduplicationNumHashFunctions(
+                        Integer.parseInt(numHashFunctions.getText()));
+            }
+
+            OMElement numBands = dedupConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEDUP_NUM_BANDS));
+            if (numBands != null) {
+                apimGovConfigurationDto.setDeduplicationNumBands(Integer.parseInt(numBands.getText()));
+            }
+
+            OMElement shingleSize = dedupConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEDUP_SHINGLE_SIZE));
+            if (shingleSize != null) {
+                apimGovConfigurationDto.setDeduplicationShingleSize(Integer.parseInt(shingleSize.getText()));
+            }
+        }
+
+        // Parse deprecation guide configuration
+        OMElement deprecationConfig = omElement
+                .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEPRECATION_GUIDE_CONFIG));
+        if (deprecationConfig != null) {
+            OMElement depEnabled = deprecationConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEPRECATION_GUIDE_ENABLED));
+            if (depEnabled != null) {
+                apimGovConfigurationDto.setDeprecationGuideEnabled(Boolean.parseBoolean(depEnabled.getText()));
+            }
+
+            OMElement scanInterval = deprecationConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DEPRECATION_GUIDE_SCAN_INTERVAL));
+            if (scanInterval != null) {
+                apimGovConfigurationDto.setDeprecationGuideScanIntervalMinutes(
+                        Integer.parseInt(scanInterval.getText()));
+            }
+
+            OMElement successorThreshold = deprecationConfig
+                    .getFirstChildWithName(new QName(
+                            APIConstants.APIMGovernance.DEPRECATION_GUIDE_SUCCESSOR_THRESHOLD));
+            if (successorThreshold != null) {
+                apimGovConfigurationDto.setDeprecationGuideSuccessorSimilarityThreshold(
+                        Double.parseDouble(successorThreshold.getText()));
+            }
+        }
+
     }
 
     /**

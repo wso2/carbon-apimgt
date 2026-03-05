@@ -65,6 +65,16 @@ public class GatekeeperValidationEngine implements ValidationEngine {
     private static final String DEDUPLICATION_RULE_DESCRIPTION =
             "Checks for duplicate APIs using MinHash and LSH similarity detection";
 
+    // Lifecycle-specific rule name and descriptions (separate from dedup strings)
+    private static final String LIFECYCLE_RULE_NAME = "api-deprecation-successor-check";
+    private static final String LIFECYCLE_RULE_DESCRIPTION =
+            "Checks for a valid successor when deprecating or retiring an API";
+    private static final String LIFECYCLE_VIOLATION_REASON =
+            "API deprecated without an identified successor.";
+    private static final String LIFECYCLE_VIOLATION_MESSAGE =
+            "This API was transitioned to a Deprecated/Retired state without a linked successor. "
+            + "This creates a migration risk for consumers.";
+
     // Metadata prefix used by ComplianceEvaluationScheduler to pass context
     private static final String METADATA_PREFIX = "###GATEKEEPER_CONTEXT:";
     private static final String METADATA_SUFFIX = "###";
@@ -78,6 +88,14 @@ public class GatekeeperValidationEngine implements ValidationEngine {
      */
     @Override
     public void validateRulesetContent(Ruleset ruleset) throws APIMGovernanceException {
+        // Lifecycle rulesets have their own YAML format — skip dedup-specific validation
+        if (isLifecycleRuleset(ruleset)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Validated lifecycle ruleset content: " + ruleset.getName());
+            }
+            return;
+        }
+
         // Only process DEDUPLICATION category rulesets
         if (!isDeduplicationRuleset(ruleset)) {
             if (log.isDebugEnabled()) {
@@ -125,13 +143,17 @@ public class GatekeeperValidationEngine implements ValidationEngine {
                 }
             }
 
-            log.info("Validated deduplication ruleset content: " + ruleset.getName());
+            if (log.isDebugEnabled()) {
+                log.debug("Validated deduplication ruleset content: " + ruleset.getName());
+            }
 
             // Invalidate config cache so new threshold/settings take effect immediately
             // This is called during create/update flows, so the new config will be
             // picked up on the next dedup check without waiting for cache expiry
             DeduplicationConfigService.getInstance().invalidateAllCaches();
-            log.info("Invalidated deduplication config cache after ruleset validation");
+            if (log.isDebugEnabled()) {
+                log.debug("Invalidated deduplication config cache after ruleset validation");
+            }
 
         } catch (APIMGovernanceException e) {
             throw e;
@@ -169,6 +191,26 @@ public class GatekeeperValidationEngine implements ValidationEngine {
      */
     @Override
     public List<Rule> extractRulesFromRuleset(Ruleset ruleset) throws APIMGovernanceException {
+        // Handle lifecycle rulesets — produce a single lifecycle rule
+        if (isLifecycleRuleset(ruleset)) {
+            List<Rule> rules = new ArrayList<>();
+            Rule lifecycleRule = new Rule();
+            lifecycleRule.setId(java.util.UUID.randomUUID().toString());
+            lifecycleRule.setName(LIFECYCLE_RULE_NAME);
+            lifecycleRule.setDescription(LIFECYCLE_RULE_DESCRIPTION);
+            lifecycleRule.setSeverity(RuleSeverity.ERROR);
+            // Content is required by GOV_RULESET_RULE.RULE_CONTENT (NOT NULL blob).
+            // Use the ruleset's YAML content so the rule row is properly persisted.
+            RulesetContent rc = ruleset.getRulesetContent();
+            if (rc != null && rc.getContent() != null) {
+                lifecycleRule.setContent(new String(rc.getContent(), StandardCharsets.UTF_8));
+            } else {
+                lifecycleRule.setContent(LIFECYCLE_RULE_NAME);
+            }
+            rules.add(lifecycleRule);
+            return rules;
+        }
+
         // Only process GENERIC/deduplication category rulesets
         if (!isDeduplicationRuleset(ruleset)) {
             return Collections.emptyList();
@@ -267,7 +309,25 @@ public class GatekeeperValidationEngine implements ValidationEngine {
     public List<RuleViolation> validate(String target, Ruleset ruleset) throws APIMGovernanceException {
         List<RuleViolation> violations = new ArrayList<>();
 
-        // Only process DEDUPLICATION category rulesets
+        if (log.isDebugEnabled()) {
+            log.debug("validate() called for ruleset: '" + ruleset.getName()
+                    + "' (category=" + ruleset.getRuleCategory()
+                    + ", id=" + ruleset.getId() + ")");
+        }
+
+        // ── Lifecycle ruleset handling (deprecation/retirement successor check) ──
+        boolean lifecycle = isLifecycleRuleset(ruleset);
+        if (log.isDebugEnabled()) {
+            log.debug("isLifecycleRuleset('" + ruleset.getName() + "') = " + lifecycle);
+        }
+        if (lifecycle) {
+            if (log.isDebugEnabled()) {
+                log.debug("Routing to validateLifecycleRuleset for: " + ruleset.getName());
+            }
+            return validateLifecycleRuleset(target, ruleset);
+        }
+
+        // ── Deduplication ruleset handling ──
         if (!isDeduplicationRuleset(ruleset)) {
             if (log.isDebugEnabled()) {
                 log.debug("Skipping validation for non-deduplication ruleset: " + ruleset.getName());
@@ -290,7 +350,9 @@ public class GatekeeperValidationEngine implements ValidationEngine {
         //   warn  → WARN severity, non-blocking (alerts user)
         //   block → ERROR severity, blocks deployment at API_DEPLOY state
         String mode = getMode(ruleset);
-        log.info("Deduplication mode for ruleset '" + ruleset.getName() + "': " + mode);
+        if (log.isDebugEnabled()) {
+            log.debug("Deduplication mode for ruleset '" + ruleset.getName() + "': " + mode);
+        }
 
         // Read custom message from YAML rules section
         String customMessage = getCustomRuleMessage(ruleset);
@@ -390,33 +452,265 @@ public class GatekeeperValidationEngine implements ValidationEngine {
     }
 
     /**
-     * Checks if the ruleset is a deduplication ruleset.
+     * Validates an API against a lifecycle/retirement ruleset.
+     * <p>
+     * Checks whether the API has been deprecated/retired without a valid successor.
+     * If no successor is found, produces a violation that persists in the GOV_RULE_VIOLATION table
+     * and appears in the Compliance/Adherence Summary.
+     * <p>
+     * Enforcement modes:
+     *   BLOCK → ERROR severity (transition blocked by ApisApiServiceImpl at lifecycle time)
+     *   WARN  → WARN severity, non-blocking (violation recorded for compliance visibility)
+     *   AUDIT → WARN severity, non-blocking (violation recorded for compliance visibility)
+     *
+     * @param target  API definition or metadata string
+     * @param ruleset The lifecycle ruleset
+     * @return List of violations (empty if API has a successor or is not deprecated/retired)
+     */
+    private List<RuleViolation> validateLifecycleRuleset(String target, Ruleset ruleset) {
+        List<RuleViolation> violations = new ArrayList<>();
+
+        GatekeeperService gatekeeperService = GatekeeperService.getInstance();
+        if (!gatekeeperService.isInitialized()) {
+            log.warn("GatekeeperService not initialized. Skipping lifecycle ruleset check.");
+            return violations;
+        }
+
+        // ── Policy Attachment Guard ──────────────────────────────────────
+        // Skip lifecycle evaluation if the ruleset is not attached to any
+        // active governance policy.  This prevents stale compliance results
+        // when the admin toggles the lifecycle ruleset off in the policy UI.
+        try {
+            if (!gatekeeperService.isLifecycleRulesetInActivePolicy(null)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Lifecycle ruleset '" + ruleset.getName()
+                            + "' is not attached to any active policy. "
+                            + "Skipping compliance evaluation.");
+                }
+                return violations;
+            }
+        } catch (Exception ex) {
+            log.warn("Could not verify lifecycle policy attachment for '"
+                    + ruleset.getName() + "': " + ex.getMessage()
+                    + ". Proceeding with evaluation (fail-open).");
+        }
+
+        String mode = getLifecycleMode(ruleset);
+        if (log.isDebugEnabled()) {
+            log.debug("Lifecycle enforcement mode for ruleset '" + ruleset.getName() + "': " + mode);
+        }
+
+        try {
+            // Parse metadata context if present
+            String apiUuid = null;
+            String organization = null;
+
+            if (target != null && target.startsWith(METADATA_PREFIX)) {
+                int suffixStart = target.indexOf(METADATA_SUFFIX, METADATA_PREFIX.length());
+                if (suffixStart > 0) {
+                    String metadataJson = target.substring(METADATA_PREFIX.length(), suffixStart);
+                    try {
+                        Map<String, String> metadata = jsonMapper.readValue(metadataJson, Map.class);
+                        apiUuid = metadata.get("apiUuid");
+                        organization = metadata.get("organization");
+                    } catch (Exception e) {
+                        log.debug("Could not parse metadata from target for lifecycle check", e);
+                    }
+                }
+            }
+
+            if (apiUuid == null) {
+                apiUuid = extractApiUuid(target);
+            }
+            if (organization == null) {
+                organization = extractOrganization(target);
+            }
+
+            // Get API status via DAO (works from scheduler threads, unlike APIProvider)
+            if (log.isDebugEnabled()) {
+                log.debug("Lifecycle check: looking up API status for " + apiUuid
+                        + " in org=" + organization);
+            }
+            String status = null;
+            try {
+                status = org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO.getInstance()
+                        .getAPIStatusFromAPIUUID(apiUuid);
+            } catch (Throwable ex) {
+                log.warn("Could not get API status via ApiMgtDAO for " + apiUuid
+                        + ": " + ex.getClass().getName() + " - " + ex.getMessage());
+            }
+
+            if (status == null) {
+                // Fallback: try via APIProvider
+                try {
+                    String adminUsername = gatekeeperService.getAdminUsername(organization);
+                    org.wso2.carbon.apimgt.api.APIProvider apiProvider =
+                            org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance()
+                                    .getAPIProvider(adminUsername);
+                    if (apiProvider != null) {
+                        org.wso2.carbon.apimgt.api.model.API api =
+                                apiProvider.getAPIbyUUID(apiUuid, organization);
+                        if (api != null) {
+                            status = api.getStatus();
+                        }
+                    }
+                } catch (Throwable ex) {
+                    log.warn("Fallback APIProvider also failed for " + apiUuid
+                            + ": " + ex.getClass().getName() + " - " + ex.getMessage());
+                }
+            }
+
+            if (status == null) {
+                log.debug("Could not determine API status for " + apiUuid
+                        + ". Skipping lifecycle check.");
+                return violations;
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("Lifecycle check: API " + apiUuid + " status=" + status);
+            }
+            boolean isDeprecatedOrRetired = "DEPRECATED".equalsIgnoreCase(status)
+                    || "RETIRED".equalsIgnoreCase(status);
+
+            if (!isDeprecatedOrRetired) {
+                // API is not deprecated/retired — no lifecycle violation
+                if (log.isDebugEnabled()) {
+                    log.debug("API " + apiUuid + " is " + status
+                            + " — not deprecated/retired, no lifecycle violation.");
+                }
+                return violations;
+            }
+
+            // Check if a successor exists (via API properties or successor mapping table)
+            boolean hasSuccessor = false;
+            String successorUuid = null;
+            try {
+                String adminUsername = gatekeeperService.getAdminUsername(organization);
+                org.wso2.carbon.apimgt.api.APIProvider apiProvider =
+                        org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance()
+                                .getAPIProvider(adminUsername);
+                if (apiProvider != null) {
+                    org.wso2.carbon.apimgt.api.model.API api =
+                            apiProvider.getAPIbyUUID(apiUuid, organization);
+                    if (api != null) {
+                        successorUuid = api.getProperty("X-Deprecation-Successor-UUID");
+                        if (successorUuid != null && !successorUuid.isEmpty()) {
+                            hasSuccessor = true;
+                        }
+                    }
+                }
+            } catch (Throwable ex) {
+                log.debug("Could not check successor property for " + apiUuid
+                        + ": " + ex.getMessage());
+                // If we can't check, assume no successor — safer to flag the violation
+            }
+
+            // [DORMANT] Also check the AM_API_SUCCESSOR_MAPPING table — currently dormant
+            // but kept for future integration when successor persistence is re-enabled.
+            // if (!hasSuccessor) {
+            //     try {
+            //         String mappedSuccessor = org.wso2.carbon.apimgt.governance.gatekeeper.dao.impl
+            //                 .SuccessorMappingDAOImpl.getInstance().getSuccessorId(apiUuid, organization);
+            //         hasSuccessor = (mappedSuccessor != null && !mappedSuccessor.isEmpty());
+            //     } catch (Exception daoEx) {
+            //         log.debug("Could not check successor mapping table: " + daoEx.getMessage());
+            //     }
+            // }
+
+            if (!hasSuccessor) {
+                // No successor found — produce a violation
+                RuleViolation violation = new RuleViolation();
+                violation.setRulesetId(ruleset.getId());
+                violation.setRuleName(LIFECYCLE_RULE_NAME);
+                violation.setViolatedPath(LIFECYCLE_VIOLATION_REASON);
+
+                // Determine severity based on mode
+                if ("block".equalsIgnoreCase(mode)) {
+                    violation.setSeverity(RuleSeverity.ERROR);
+                } else {
+                    violation.setSeverity(RuleSeverity.WARN);
+                }
+
+                violation.setRuleMessage(LIFECYCLE_VIOLATION_MESSAGE);
+                violations.add(violation);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Lifecycle violation: API " + apiUuid + " (" + status
+                            + ") has no successor. Mode: " + mode);
+                }
+            } else {
+                log.debug("API " + apiUuid + " has successor " + successorUuid
+                        + ". No lifecycle violation.");
+            }
+
+        } catch (Exception e) {
+            log.error("Error during lifecycle ruleset validation for "
+                    + ruleset.getName() + ": " + e.getMessage(), e);
+        }
+
+        return violations;
+    }
+
+    /**
+     * Checks if the ruleset is a deduplication ruleset (GENERIC but NOT lifecycle).
      *
      * @param ruleset The ruleset to check
-     * @return True if it's a deduplication ruleset
+     * @return True if it's a deduplication ruleset (not a lifecycle ruleset)
      */
     private boolean isDeduplicationRuleset(Ruleset ruleset) {
+        // First check if it's GENERIC category
+        boolean isGeneric = false;
         if (ruleset.getRuleCategory() != null) {
-            return GatekeeperConstants.GENERIC_RULE_CATEGORY.equalsIgnoreCase(
+            isGeneric = GatekeeperConstants.GENERIC_RULE_CATEGORY.equalsIgnoreCase(
                     ruleset.getRuleCategory().name());
         }
 
-        // Also check the content for deduplication configuration
+        if (!isGeneric) {
+            // Also check the content for deduplication configuration
+            try {
+                RulesetContent content = ruleset.getRulesetContent();
+                if (content != null && content.getContent() != null) {
+                    String contentString = new String(content.getContent(), StandardCharsets.UTF_8);
+                    Map<String, Object> config = yamlMapper.readValue(contentString, Map.class);
+                    if (config.containsKey("type")
+                            && GatekeeperConstants.GENERIC_RULE_CATEGORY.equalsIgnoreCase(
+                                    (String) config.get("type"))) {
+                        isGeneric = true;
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("Could not parse ruleset content for type detection", e);
+            }
+        }
+
+        // Exclude lifecycle rulesets from dedup processing
+        return isGeneric && !isLifecycleRuleset(ruleset);
+    }
+
+    /**
+     * Checks if the ruleset is a lifecycle/retirement ruleset.
+     * These handle deprecation/retirement successor enforcement, not deduplication.
+     *
+     * @param ruleset The ruleset to check
+     * @return True if it's a lifecycle ruleset
+     */
+    private boolean isLifecycleRuleset(Ruleset ruleset) {
+        String name = ruleset.getName() != null ? ruleset.getName().toLowerCase() : "";
+        if (name.contains("lifecycle") || name.contains("retirement") || name.contains("deprecation")) {
+            return true;
+        }
+        // Also check content for lifecycle_retirement section or compliance_exclusion flag
         try {
             RulesetContent content = ruleset.getRulesetContent();
             if (content != null && content.getContent() != null) {
                 String contentString = new String(content.getContent(), StandardCharsets.UTF_8);
-                Map<String, Object> config = yamlMapper.readValue(contentString, Map.class);
-                if (config.containsKey("type") &&
-                        GatekeeperConstants.GENERIC_RULE_CATEGORY.equalsIgnoreCase(
-                                (String) config.get("type"))) {
+                if (contentString.contains("lifecycle_retirement:")) {
                     return true;
                 }
             }
         } catch (Exception e) {
-            log.debug("Could not parse ruleset content for type detection", e);
+            log.debug("Could not parse ruleset content for lifecycle detection", e);
         }
-
         return false;
     }
 
@@ -533,6 +827,10 @@ public class GatekeeperValidationEngine implements ValidationEngine {
             sb.append(" | API_UUID:").append(conflict.getMatchedApiUuid());
         }
 
+        if (conflict.getMatchedApiProvider() != null) {
+            sb.append(" | API_CREATOR:").append(conflict.getMatchedApiProvider());
+        }
+
         return sb.toString();
     }
 
@@ -563,6 +861,46 @@ public class GatekeeperValidationEngine implements ValidationEngine {
             log.debug("Could not parse mode from ruleset", e);
         }
         return "audit"; // Default to audit mode
+    }
+
+    /**
+     * Gets the mode (audit/warn/block) from a lifecycle ruleset YAML configuration.
+     * Looks inside 'lifecycle_retirement:' section or at root level.
+     */
+    @SuppressWarnings("unchecked")
+    private String getLifecycleMode(Ruleset ruleset) {
+        try {
+            RulesetContent content = ruleset.getRulesetContent();
+            if (content != null && content.getContent() != null) {
+                String contentString = new String(content.getContent(), StandardCharsets.UTF_8);
+                Map<String, Object> config = yamlMapper.readValue(contentString, Map.class);
+
+                // Check nested lifecycle_retirement section first
+                if (config.containsKey("lifecycle_retirement")
+                        && config.get("lifecycle_retirement") instanceof Map) {
+                    Map<String, Object> lcConfig = (Map<String, Object>) config.get("lifecycle_retirement");
+                    if (lcConfig.containsKey(GatekeeperConstants.RulesetConfig.MODE)) {
+                        return String.valueOf(lcConfig.get(GatekeeperConstants.RulesetConfig.MODE));
+                    }
+                }
+
+                // Also support corrupted format where it's under 'deduplication:' section
+                if (config.containsKey("deduplication") && config.get("deduplication") instanceof Map) {
+                    Map<String, Object> dedupConfig = (Map<String, Object>) config.get("deduplication");
+                    if (dedupConfig.containsKey(GatekeeperConstants.RulesetConfig.MODE)) {
+                        return String.valueOf(dedupConfig.get(GatekeeperConstants.RulesetConfig.MODE));
+                    }
+                }
+
+                // Check root level
+                if (config.containsKey(GatekeeperConstants.RulesetConfig.MODE)) {
+                    return String.valueOf(config.get(GatekeeperConstants.RulesetConfig.MODE));
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Could not parse mode from lifecycle ruleset", e);
+        }
+        return "warn"; // Default to warn for lifecycle rulesets
     }
 
     /**
