@@ -32,6 +32,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.gatekeeper.GatekeeperValidationEngine;
 import org.wso2.carbon.apimgt.governance.gatekeeper.observer.GatekeeperStartupObserver;
+import org.wso2.carbon.apimgt.governance.gatekeeper.service.DeprecationGuideScheduler;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.core.ServerStartupObserver;
@@ -84,6 +85,9 @@ public class GatekeeperComponent {
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         log.info("Deactivating API Gatekeeper component");
+
+        // Shutdown the Deprecation Guide scheduler
+        DeprecationGuideScheduler.shutdown();
 
         if (startupObserverRegistration != null) {
             startupObserverRegistration.unregister();

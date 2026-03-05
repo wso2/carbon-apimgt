@@ -32,6 +32,8 @@ import org.wso2.carbon.apimgt.governance.gatekeeper.minhash.MinHashGenerator;
 import org.wso2.carbon.apimgt.governance.gatekeeper.model.APISignature;
 import org.wso2.carbon.apimgt.governance.gatekeeper.model.ConflictReport;
 import org.wso2.carbon.apimgt.governance.gatekeeper.model.DeduplicationResult;
+import org.wso2.carbon.apimgt.governance.gatekeeper.model.DeprecationGuideResult;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
@@ -92,17 +94,16 @@ public class GatekeeperService {
      */
     public synchronized void initialize() throws APIMGovernanceException {
         if (initialized) {
-            log.info("GatekeeperService already initialized");
+            log.debug("GatekeeperService already initialized");
             return;
         }
 
-        log.info("Initializing GatekeeperService - ensuring database tables exist");
+        log.info("Initializing GatekeeperService");
         ensureTablesExist();
 
-        log.info("Initializing GatekeeperService - hydrating LSH index from database");
         hydrateIndex();
         initialized = true;
-        log.info("GatekeeperService initialization complete. LSH index contains " + lshIndex.size() + " APIs");
+        log.info("GatekeeperService initialized. LSH index contains " + lshIndex.size() + " APIs");
     }
 
     /**
@@ -137,8 +138,17 @@ public class GatekeeperService {
                 }
             }
 
+            // Create AM_API_SUCCESSOR_MAPPING table — stores the user-confirmed successor
+            // selection made during Deprecate / Retire lifecycle transitions.
+            stmt.execute("CREATE TABLE IF NOT EXISTS AM_API_SUCCESSOR_MAPPING (" +
+                    "API_UUID VARCHAR(255) NOT NULL, " +
+                    "SUCCESSOR_UUID VARCHAR(255) NOT NULL, " +
+                    "ORGANIZATION VARCHAR(128) NOT NULL, " +
+                    "MAPPING_TIMESTAMP TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
+                    "PRIMARY KEY (API_UUID, ORGANIZATION))");
+
             connection.commit();
-            log.info("Gatekeeper database tables verified/created successfully");
+            log.debug("Gatekeeper database tables verified/created successfully");
 
         } catch (Exception e) {
             if (connection != null) {
@@ -177,7 +187,7 @@ public class GatekeeperService {
             }
         }
 
-        log.info("Hydrated LSH index with " + signatures.size() + " signatures");
+        log.debug("Hydrated LSH index with " + signatures.size() + " signatures");
     }
 
     /**
@@ -193,17 +203,38 @@ public class GatekeeperService {
     public DeduplicationResult checkForDuplicates(String apiDefinition, String apiUuid,
                                                    String organization, double threshold)
             throws APIMGovernanceException {
+        return checkForDuplicates(apiDefinition, apiUuid, organization, threshold, false);
+    }
+
+    /**
+     * Checks if an API is a potential duplicate of existing APIs.
+     *
+     * @param apiDefinition   The API definition to check
+     * @param apiUuid         The UUID of the API being checked
+     * @param organization    The organization
+     * @param threshold       Similarity threshold (0.0 to 1.0)
+     * @param skipFirstInRule If true, skips the First-In rule (used by the deprecation guide
+     *                        to find newer successors for an older API being deprecated)
+     * @return DeduplicationResult with conflict reports if duplicates found
+     * @throws APIMGovernanceException If check fails
+     */
+    public DeduplicationResult checkForDuplicates(String apiDefinition, String apiUuid,
+                                                   String organization, double threshold,
+                                                   boolean skipFirstInRule)
+            throws APIMGovernanceException {
 
         // Validate threshold
         if (threshold < GatekeeperConstants.MIN_SIMILARITY_THRESHOLD
                 || threshold > GatekeeperConstants.MAX_SIMILARITY_THRESHOLD) {
-            log.info("Invalid threshold " + threshold + ", using default: "
+            log.debug("Invalid threshold " + threshold + ", using default: "
                     + GatekeeperConstants.DEFAULT_SIMILARITY_THRESHOLD);
             threshold = GatekeeperConstants.DEFAULT_SIMILARITY_THRESHOLD;
         }
 
-        log.info("Checking for duplicates for API " + apiUuid + " with threshold: "
-                + String.format("%.2f", threshold) + " (%.0f%%) in organization: " + organization);
+        if (log.isDebugEnabled()) {
+            log.debug("Checking for duplicates for API " + apiUuid + " with threshold: "
+                    + String.format("%.2f", threshold) + " in organization: " + organization);
+        }
 
         // Generate signature for the query API
         SignatureService.APISignatureDTO signatureDTO =
@@ -224,9 +255,9 @@ public class GatekeeperService {
         similarApis.removeIf(r -> r.getApiUuid().equals(apiUuid));
 
         // Log individual similarity scores for debugging
-        if (!similarApis.isEmpty()) {
+        if (!similarApis.isEmpty() && log.isDebugEnabled()) {
             for (LSHIndex.SimilarityResult sr : similarApis) {
-                log.info(String.format("Similarity match: API %s -> %s = %.4f (%.2f%%)",
+                log.debug(String.format("Similarity match: API %s -> %s = %.4f (%.2f%%)",
                         apiUuid, sr.getApiUuid(), sr.getSimilarity(), sr.getSimilarity() * 100));
             }
         }
@@ -253,8 +284,10 @@ public class GatekeeperService {
             log.debug("Could not read high confidence threshold from config, using default: 0.95");
         }
 
-        // Resolve the creation time of the query API for First-In comparison
+        // Resolve the creation time and name of the query API for First-In comparison
+        // and version-family exclusion
         String queryApiCreatedTime = null;
+        String queryApiName = null;
         try {
             String adminUsername = getAdminUsername(organization);
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(adminUsername);
@@ -262,10 +295,13 @@ public class GatekeeperService {
                 API queryApi = apiProvider.getAPIbyUUID(apiUuid, organization);
                 if (queryApi != null) {
                     queryApiCreatedTime = queryApi.getCreatedTime();
+                    if (queryApi.getId() != null) {
+                        queryApiName = queryApi.getId().getApiName();
+                    }
                 }
             }
         } catch (Exception e) {
-            log.debug("Could not resolve creation time for query API " + apiUuid + ": " + e.getMessage());
+            log.debug("Could not resolve creation time/name for query API " + apiUuid + ": " + e.getMessage());
         }
 
         for (LSHIndex.SimilarityResult similar : similarApis) {
@@ -275,6 +311,7 @@ public class GatekeeperService {
             String matchedApiName = null;
             String matchedApiVersion = null;
             String matchedApiCreatedTime = null;
+            String matchedApiProvider = null;
             try {
                 String adminUsername = getAdminUsername(organization);
                 APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(adminUsername);
@@ -284,6 +321,7 @@ public class GatekeeperService {
                         matchedApiName = matchedApi.getId().getApiName();
                         matchedApiVersion = matchedApi.getId().getVersion();
                         matchedApiCreatedTime = matchedApi.getCreatedTime();
+                        matchedApiProvider = matchedApi.getId().getProviderName();
                     }
                 }
             } catch (Exception e) {
@@ -291,25 +329,45 @@ public class GatekeeperService {
                         + ": " + e.getMessage());
             }
 
+            // Version-family exclusion: APIs with the SAME name but different versions are
+            // intentional API versioning (via "Create New Version"), NOT duplicates.
+            // Skip these matches unless we are explicitly looking for successors (deprecation guide).
+            if (!skipFirstInRule && queryApiName != null && matchedApiName != null
+                    && queryApiName.equals(matchedApiName)) {
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("Version-family exclusion: Skipping match %s -> %s "
+                                    + "(same API name '%s', different versions)",
+                            apiUuid, similar.getApiUuid(), queryApiName));
+                }
+                continue;
+            }
+
             // First-In rule: Only report this conflict if the matched API is OLDER than the query API.
             // If the query API is older (or same age), skip — the query API is the "original" and
             // should not receive violations. The newer API (matched) will get its own violations
             // when it is evaluated separately.
-            if (queryApiCreatedTime != null && matchedApiCreatedTime != null) {
+            //
+            // NOTE: This rule is SKIPPED when skipFirstInRule=true (used by the deprecation guide
+            // to find newer successors for the older, about-to-be-deprecated API).
+            if (!skipFirstInRule && queryApiCreatedTime != null && matchedApiCreatedTime != null) {
                 int timeComparison = queryApiCreatedTime.compareTo(matchedApiCreatedTime);
                 if (timeComparison < 0) {
                     // Query API was created BEFORE the matched API → query is the original, skip
-                    log.info(String.format("First-In rule: Skipping match %s -> %s (query created at %s is older " +
-                                    "than match created at %s)",
-                            apiUuid, similar.getApiUuid(), queryApiCreatedTime, matchedApiCreatedTime));
+                    if (log.isDebugEnabled()) {
+                        log.debug(String.format("First-In rule: Skipping match %s -> %s (query created at %s is older " +
+                                        "than match created at %s)",
+                                apiUuid, similar.getApiUuid(), queryApiCreatedTime, matchedApiCreatedTime));
+                    }
                     continue;
                 } else if (timeComparison == 0) {
                     // Same creation time — use UUID lexicographic order as tiebreaker.
                     // The "smaller" UUID is considered the original.
                     if (apiUuid.compareTo(similar.getApiUuid()) < 0) {
-                        log.info(String.format("First-In rule: Skipping match %s -> %s (same creation time, " +
-                                        "query UUID is lexicographically smaller)",
-                                apiUuid, similar.getApiUuid()));
+                        if (log.isDebugEnabled()) {
+                            log.debug(String.format("First-In rule: Skipping match %s -> %s (same creation time, " +
+                                            "query UUID is lexicographically smaller)",
+                                    apiUuid, similar.getApiUuid()));
+                        }
                         continue;
                     }
                 }
@@ -325,6 +383,7 @@ public class GatekeeperService {
                     .matchedApiUuid(similar.getApiUuid())
                     .matchedApiName(matchedApiName)
                     .matchedApiVersion(matchedApiVersion)
+                    .matchedApiProvider(matchedApiProvider)
                     .similarityScore(similarity)
                     .message(String.format("API '%s' has %.1f%% similarity",
                             displayName, similarity * 100))
@@ -338,10 +397,16 @@ public class GatekeeperService {
             conflictReports.add(report);
         }
 
-        // If all conflicts were skipped by the First-In rule, the query API is the original
+        // If all conflicts were skipped by the First-In rule (or other filters),
+        // the query API has no relevant matches
         if (conflictReports.isEmpty()) {
-            log.info("First-In rule: All matches skipped for API " + apiUuid
-                    + " (this API is the original/oldest). Marking as unique.");
+            if (!skipFirstInRule) {
+                log.debug("First-In rule: All matches skipped for API " + apiUuid
+                        + " (this API is the original/oldest). Marking as unique.");
+            } else {
+                log.debug("[DEPRECATION-GUIDE] All similarity matches filtered out for API "
+                        + apiUuid + ". Marking as unique.");
+            }
             DeduplicationResult result = DeduplicationResult.unique(apiUuid, organization);
             result.setThreshold(threshold);
             return result;
@@ -529,8 +594,10 @@ public class GatekeeperService {
         
         // Check if deduplication is enabled in config
         if (!config.isEnabled()) {
-            log.info("Deduplication is disabled via config for organization: " + organization 
-                    + ". Skipping check for API " + apiId);
+            if (log.isDebugEnabled()) {
+                log.debug("Deduplication is disabled via config for organization: " + organization 
+                        + ". Skipping check for API " + apiId);
+            }
             org.wso2.carbon.apimgt.governance.gatekeeper.model.DuplicateCheckResult skipResult = 
                     new org.wso2.carbon.apimgt.governance.gatekeeper.model.DuplicateCheckResult();
             skipResult.setApiId(apiId);
@@ -541,10 +608,11 @@ public class GatekeeperService {
 
         double threshold = config.getSimilarityThreshold();
         
-        // Always log the threshold being used (INFO level for visibility)
-        log.info("Deduplication check for API " + apiId + " using threshold: " 
-                + String.format("%.2f", threshold * 100) + "% (org: " + organization 
-                + ", mode: " + config.getMode() + ")");
+        if (log.isDebugEnabled()) {
+            log.debug("Deduplication check for API " + apiId + " using threshold: " 
+                    + String.format("%.2f", threshold * 100) + "% (org: " + organization 
+                    + ", mode: " + config.getMode() + ")");
+        }
         
         if (log.isDebugEnabled()) {
             log.debug("Full config - enabled: " + config.isEnabled() + ", mode: " + config.getMode()
@@ -589,7 +657,7 @@ public class GatekeeperService {
      * @return Number of APIs indexed
      */
     public int indexExistingAPIs() {
-        log.info("Starting to index existing APIs for deduplication...");
+        log.debug("Starting to index existing APIs for deduplication...");
         
         int indexedCount = 0;
         int skippedCount = 0;
@@ -602,7 +670,7 @@ public class GatekeeperService {
             for (APISignature sig : existingSignatures) {
                 existingSignatureApiIds.add(sig.getApiUuid());
             }
-            log.info("Found " + existingSignatureApiIds.size() + " APIs already indexed in AM_API_MINHASH");
+            log.debug("Found " + existingSignatureApiIds.size() + " APIs already indexed in AM_API_MINHASH");
 
             // Get all organizations
             List<String> organizations = getOrganizations();
@@ -611,7 +679,7 @@ public class GatekeeperService {
                 try {
                     // Get all APIs for this organization
                     List<ApiResult> apis = ApiMgtDAO.getInstance().getAllAPIs(organization);
-                    log.info("Found " + apis.size() + " APIs in organization: " + organization);
+                    log.debug("Found " + apis.size() + " APIs in organization: " + organization);
                     
                     for (ApiResult apiResult : apis) {
                         String apiId = apiResult.getId();
@@ -652,7 +720,7 @@ public class GatekeeperService {
             log.error("Error indexing existing APIs: " + e.getMessage(), e);
         }
         
-        log.info("Finished indexing existing APIs. Indexed: " + indexedCount + 
+        log.debug("Finished indexing existing APIs. Indexed: " + indexedCount + 
                 ", Skipped: " + skippedCount + ", Errors: " + errorCount);
         
         return indexedCount;
@@ -679,7 +747,7 @@ public class GatekeeperService {
      * @param organization The organization
      * @return The API definition (OpenAPI spec) or null if not found
      */
-    private String getAPIDefinition(String apiId, String organization) {
+    String getAPIDefinition(String apiId, String organization) {
         try {
             String adminUsername = getAdminUsername(organization);
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(adminUsername);
@@ -701,14 +769,646 @@ public class GatekeeperService {
 
     /**
      * Gets the admin username for the given organization.
-     * 
+     *
      * @param organization The organization/tenant domain
      * @return The admin username
      */
-    private String getAdminUsername(String organization) {
+    public String getAdminUsername(String organization) {
         if (organization == null || "carbon.super".equals(organization)) {
             return "admin";
         }
         return "admin@" + organization;
+    }
+
+    /**
+     * Finds a structural successor for an API that is about to be deprecated or retired.
+     * Uses MinHash/LSH similarity to find the best non-deprecated, non-retired API
+     * that can serve as a replacement.
+     *
+     * <p><b>Scenario A (successor found):</b> Returns a result with the best successor
+     * details, all candidate versions, and pre-computed RFC 8594 Link/Sunset headers.</p>
+     * <p><b>Scenario B (no successor):</b> Returns a migration-risk result requiring
+     * explicit user acknowledgement before the transition.</p>
+     *
+     * @param apiUuid         UUID of the API about to be deprecated/retired
+     * @param organization    The organization
+     * @param lifecycleAction The lifecycle action: "Deprecate" or "Retire"
+     * @return DeprecationGuideResult with successor info or migration risk warning
+     */
+    public DeprecationGuideResult findSuccessorForDeprecation(String apiUuid, String organization,
+                                                               String lifecycleAction) {
+        log.debug("[DEPRECATION-GUIDE] Finding structural successor for API " + apiUuid
+                + " in org: " + organization + " (action: " + lifecycleAction + ")");
+
+        // ── Policy Membership Guardrail ──────────────────────────────────
+        // Only execute transition checks if the lifecycle ruleset is explicitly
+        // enabled (associated) in at least one governance policy for this organization.
+        if (!isLifecycleRulesetInActivePolicy(organization)) {
+            log.debug("[DEPRECATION-GUIDE] Lifecycle ruleset not enabled in any governance policy "
+                    + "for org: " + organization + ". Skipping transition check for API " + apiUuid);
+            return DeprecationGuideResult.noSuccessor(
+                    apiUuid, "Unknown", "Unknown", organization,
+                    lifecycleAction != null ? lifecycleAction : "Deprecate",
+                    DeprecationGuideResult.MODE_WARN);
+        }
+
+        String apiName = "Unknown";
+        String apiVersion = "Unknown";
+
+        // Read enforcement mode and successor threshold.
+        // Priority: 1) DB (GOV_RULESET_CONTENT — updated by Admin UI)
+        //           2) YAML file on disk (initial defaults)
+        String enforcementMode = DeprecationGuideResult.MODE_WARN;
+        double successorThreshold = 0.5; // default
+        int sunsetPeriodDays = 90; // default
+        boolean configLoadedFromDb = false;
+
+        // ── 1. Try reading from GOV_RULESET_CONTENT (Admin UI persists here) ──
+        try {
+            String dbContent = getLifecycleRulesetContentFromDb(organization);
+            if (dbContent != null && !dbContent.isEmpty()) {
+                for (String line : dbContent.split("\n")) {
+                    String trimmed = line.trim();
+                    if (trimmed.startsWith("mode:")) {
+                        String modeValue = trimmed.substring(5).trim()
+                                .replace("\"", "").replace("'", "");
+                        if ("block".equalsIgnoreCase(modeValue)) {
+                            enforcementMode = DeprecationGuideResult.MODE_BLOCK;
+                        }
+                        configLoadedFromDb = true;
+                    } else if (trimmed.startsWith("similarity_threshold:")) {
+                        String thresholdStr = trimmed.substring(
+                                "similarity_threshold:".length()).trim();
+                        try {
+                            double t = Double.parseDouble(thresholdStr);
+                            // DB stores as 0.0-1.0 fraction
+                            successorThreshold = t;
+                        } catch (NumberFormatException nfe) {
+                            log.debug("[DEPRECATION-GUIDE] Invalid threshold in DB: " + thresholdStr);
+                        }
+                    } else if (trimmed.startsWith("successor_similarity_threshold:")) {
+                        String thresholdStr = trimmed.substring(
+                                "successor_similarity_threshold:".length()).trim();
+                        try {
+                            successorThreshold = Double.parseDouble(thresholdStr);
+                        } catch (NumberFormatException nfe) {
+                            log.debug("[DEPRECATION-GUIDE] Invalid successor threshold: " + thresholdStr);
+                        }
+                    } else if (trimmed.startsWith("sunset_period_days:")) {
+                        String daysStr = trimmed.substring("sunset_period_days:".length()).trim();
+                        try {
+                            sunsetPeriodDays = Integer.parseInt(daysStr);
+                        } catch (NumberFormatException nfe) {
+                            log.debug("[DEPRECATION-GUIDE] Invalid sunset_period_days: " + daysStr);
+                        }
+                    }
+                }
+                if (configLoadedFromDb) {
+                    log.debug("[DEPRECATION-GUIDE] Config loaded from DB — mode: "
+                            + enforcementMode + ", threshold: " + successorThreshold
+                            + ", sunsetDays: " + sunsetPeriodDays);
+                }
+            }
+        } catch (Exception e) {
+            log.debug("[DEPRECATION-GUIDE] Could not read config from DB: " + e.getMessage());
+        }
+
+        // ── 2. Fallback: YAML file on disk ──
+        if (!configLoadedFromDb) {
+            try {
+                String carbonHome = System.getProperty("carbon.home", "");
+                java.io.File rulesetFile = new java.io.File(carbonHome
+                        + "/repository/resources/governance/default-rulesets/"
+                        + "lifecycle-retirement-ruleset.yaml");
+                if (rulesetFile.exists()) {
+                    String content = new String(java.nio.file.Files.readAllBytes(rulesetFile.toPath()));
+                    for (String line : content.split("\n")) {
+                        String trimmed = line.trim();
+                        if (trimmed.startsWith("mode:")) {
+                            String modeValue = trimmed.substring(5).trim()
+                                    .replace("\"", "").replace("'", "");
+                            if ("block".equalsIgnoreCase(modeValue)) {
+                                enforcementMode = DeprecationGuideResult.MODE_BLOCK;
+                            }
+                        } else if (trimmed.startsWith("successor_similarity_threshold:")) {
+                            String thresholdStr = trimmed.substring(
+                                    "successor_similarity_threshold:".length()).trim();
+                            try {
+                                successorThreshold = Double.parseDouble(thresholdStr);
+                            } catch (NumberFormatException nfe) {
+                                log.debug("[DEPRECATION-GUIDE] Invalid threshold in YAML: " + thresholdStr);
+                            }
+                        } else if (trimmed.startsWith("sunset_period_days:")) {
+                            String daysStr = trimmed.substring("sunset_period_days:".length()).trim();
+                            try {
+                                sunsetPeriodDays = Integer.parseInt(daysStr);
+                            } catch (NumberFormatException nfe) {
+                                log.debug("[DEPRECATION-GUIDE] Invalid sunset_period_days: " + daysStr);
+                            }
+                        }
+                    }
+                    log.debug("[DEPRECATION-GUIDE] Config loaded from YAML — mode: "
+                            + enforcementMode + ", threshold: " + successorThreshold
+                            + ", sunsetDays: " + sunsetPeriodDays);
+                } else {
+                    log.debug("[DEPRECATION-GUIDE] lifecycle-retirement-ruleset.yaml not found. "
+                            + "Using defaults.");
+                }
+            } catch (Exception e) {
+                log.debug("[DEPRECATION-GUIDE] Could not read YAML config: " + e.getMessage());
+            }
+        }
+
+        // Store sunsetPeriodDays for use in sunset header computation
+        final int finalSunsetDays = sunsetPeriodDays;
+
+        try {
+            // Resolve the API being deprecated/retired
+            String adminUsername = getAdminUsername(organization);
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(adminUsername);
+            API deprecatingApi = apiProvider.getAPIbyUUID(apiUuid, organization);
+
+            if (deprecatingApi != null && deprecatingApi.getId() != null) {
+                apiName = deprecatingApi.getId().getApiName();
+                apiVersion = deprecatingApi.getId().getVersion();
+            }
+
+            // ── Successor Carryover: DEPRECATED → RETIRED ──────────────────
+            // If we are retiring and a successor was already assigned during deprecation,
+            // carry it over automatically instead of re-scanning.
+            if ("Retire".equalsIgnoreCase(lifecycleAction) && deprecatingApi != null) {
+                String carriedSuccessorUuid = deprecatingApi.getProperty("X-Deprecation-Successor-UUID");
+                if (carriedSuccessorUuid != null && !carriedSuccessorUuid.isEmpty()) {
+                    log.debug("[DEPRECATION-GUIDE] Successor carryover: API " + apiUuid
+                            + " already has successor " + carriedSuccessorUuid
+                            + " from DEPRECATED state. Carrying over to RETIRED.");
+                    try {
+                        API carriedApi = apiProvider.getAPIbyUUID(carriedSuccessorUuid, organization);
+                        if (carriedApi != null
+                                && APIStatus.PUBLISHED.getStatus().equalsIgnoreCase(carriedApi.getStatus())) {
+                            String cName = carriedApi.getId() != null
+                                    ? carriedApi.getId().getApiName() : "Unknown";
+                            String cVersion = carriedApi.getId() != null
+                                    ? carriedApi.getId().getVersion() : "Unknown";
+                            String cContext = carriedApi.getContext() != null
+                                    ? carriedApi.getContext() : "/" + cName;
+                            String linkHeader = "<" + cContext + ">; rel=\"successor-version\"";
+                            java.time.ZonedDateTime sunsetDate = java.time.ZonedDateTime.now().plusDays(finalSunsetDays);
+                            String sunsetHeader = java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME
+                                    .format(sunsetDate);
+
+                            boolean isOfficial = apiName.equals(cName);
+                            String sType = isOfficial
+                                    ? DeprecationGuideResult.TYPE_OFFICIAL_VERSION
+                                    : DeprecationGuideResult.TYPE_SEMANTIC_NEIGHBOR;
+
+                            // Build single-candidate list for the carried-over successor
+                            List<DeprecationGuideResult.SuccessorCandidate> carried = new ArrayList<>();
+                            carried.add(new DeprecationGuideResult.SuccessorCandidate(
+                                    carriedSuccessorUuid, cName, cVersion,
+                                    100.0, sType, "PUBLISHED", cContext));
+
+                            DeprecationGuideResult result = DeprecationGuideResult.successorFound(
+                                    apiUuid, apiName, apiVersion, organization,
+                                    carriedSuccessorUuid, cName, cVersion,
+                                    100.0, linkHeader, sunsetHeader,
+                                    "PUBLISHED", sType,
+                                    carried, lifecycleAction, enforcementMode);
+                            result.setSuccessorCarriedOver(true);
+                            return result;
+                        }
+                        log.debug("[DEPRECATION-GUIDE] Carried-over successor " + carriedSuccessorUuid
+                                + " is no longer PUBLISHED. Re-scanning...");
+                    } catch (Exception e) {
+                        log.debug("[DEPRECATION-GUIDE] Could not resolve carried-over successor: "
+                                + e.getMessage() + ". Re-scanning...");
+                    }
+                }
+            }
+
+            // Get the OpenAPI definition for the API being deprecated/retired
+            String apiDefinition = getAPIDefinition(apiUuid, organization);
+            if (apiDefinition == null || apiDefinition.isEmpty()) {
+                log.warn("[DEPRECATION-GUIDE] No API definition found for " + apiUuid
+                        + ". Cannot search for successor.");
+                return DeprecationGuideResult.noSuccessor(
+                        apiUuid, apiName, apiVersion, organization,
+                        lifecycleAction, enforcementMode);
+            }
+
+            // Use the successor similarity threshold from the lifecycle ruleset config.
+            // This is ISOLATED from the deduplication ruleset — changes in Admin Portal
+            // for one ruleset do not affect the other.
+            // skipFirstInRule=true: we WANT to find newer APIs as successors for the older API
+            DeduplicationResult result = checkForDuplicates(
+                    apiDefinition, apiUuid, organization, successorThreshold, true);
+
+            if (!result.isDuplicate() || result.getConflictReports() == null
+                    || result.getConflictReports().isEmpty()) {
+                log.debug("[DEPRECATION-GUIDE] No structurally similar APIs found for " + apiUuid);
+                return DeprecationGuideResult.noSuccessor(
+                        apiUuid, apiName, apiVersion, organization,
+                        lifecycleAction, enforcementMode);
+            }
+
+            // ── Multi-Version Candidate Discovery ──────────────────────────
+            // Collect ALL eligible PUBLISHED candidates (official versions + semantic neighbors).
+            // Sort by priority: official versions first, then by similarity descending.
+            List<DeprecationGuideResult.SuccessorCandidate> allCandidates = new ArrayList<>();
+            ConflictReport bestOfficialVersion = null;
+            API bestOfficialVersionApi = null;
+            ConflictReport bestSemanticNeighbor = null;
+            API bestSemanticNeighborApi = null;
+
+            for (ConflictReport conflict : result.getConflictReports()) {
+                String matchedUuid = conflict.getMatchedApiUuid();
+                if (matchedUuid == null || matchedUuid.equals(apiUuid)) {
+                    continue;
+                }
+
+                try {
+                    API matchedApi = apiProvider.getAPIbyUUID(matchedUuid, organization);
+                    if (matchedApi == null) {
+                        continue;
+                    }
+
+                    String status = matchedApi.getStatus();
+
+                    // Strict lifecycle filter: ONLY PUBLISHED APIs are valid successors
+                    if (!APIStatus.PUBLISHED.getStatus().equalsIgnoreCase(status)) {
+                        log.debug(String.format("[DEPRECATION-GUIDE] Skipping %s (status: %s) "
+                                        + "— only PUBLISHED APIs qualify as successors",
+                                matchedUuid, status));
+                        continue;
+                    }
+
+                    String matchedName = matchedApi.getId() != null
+                            ? matchedApi.getId().getApiName() : null;
+                    String matchedVersion = matchedApi.getId() != null
+                            ? matchedApi.getId().getVersion() : "Unknown";
+                    String matchedContext = matchedApi.getContext() != null
+                            ? matchedApi.getContext() : "/" + matchedName;
+                    double similarityPct = conflict.getSimilarityScore() * 100.0;
+                    boolean isOfficialVersion = apiName != null && matchedName != null
+                            && apiName.equals(matchedName);
+                    String candidateType = isOfficialVersion
+                            ? DeprecationGuideResult.TYPE_OFFICIAL_VERSION
+                            : DeprecationGuideResult.TYPE_SEMANTIC_NEIGHBOR;
+
+                    // Add to all-candidates list for multi-version selection
+                    allCandidates.add(new DeprecationGuideResult.SuccessorCandidate(
+                            matchedUuid, matchedName, matchedVersion,
+                            similarityPct, candidateType, status, matchedContext));
+
+                    // Track best in each category
+                    if (isOfficialVersion) {
+                        if (bestOfficialVersion == null
+                                || conflict.getSimilarityScore()
+                                > bestOfficialVersion.getSimilarityScore()) {
+                            bestOfficialVersion = conflict;
+                            bestOfficialVersionApi = matchedApi;
+                        }
+                    } else {
+                        if (bestSemanticNeighbor == null
+                                || conflict.getSimilarityScore()
+                                > bestSemanticNeighbor.getSimilarityScore()) {
+                            bestSemanticNeighbor = conflict;
+                            bestSemanticNeighborApi = matchedApi;
+                        }
+                    }
+                } catch (Exception e) {
+                    log.debug("[DEPRECATION-GUIDE] Could not resolve API " + matchedUuid
+                            + ": " + e.getMessage());
+                }
+            }
+
+            // Sort candidates: official versions first, then by similarity descending
+            allCandidates.sort((a, b) -> {
+                boolean aOfficial = DeprecationGuideResult.TYPE_OFFICIAL_VERSION
+                        .equals(a.getSuccessorType());
+                boolean bOfficial = DeprecationGuideResult.TYPE_OFFICIAL_VERSION
+                        .equals(b.getSuccessorType());
+                if (aOfficial != bOfficial) {
+                    return aOfficial ? -1 : 1;
+                }
+                return Double.compare(b.getSimilarityPercentage(), a.getSimilarityPercentage());
+            });
+
+            // Select the best successor using priority order
+            ConflictReport bestSuccessor;
+            API bestApi;
+            String successorType;
+
+            if (bestOfficialVersion != null) {
+                bestSuccessor = bestOfficialVersion;
+                bestApi = bestOfficialVersionApi;
+                successorType = DeprecationGuideResult.TYPE_OFFICIAL_VERSION;
+            } else if (bestSemanticNeighbor != null) {
+                bestSuccessor = bestSemanticNeighbor;
+                bestApi = bestSemanticNeighborApi;
+                successorType = DeprecationGuideResult.TYPE_SEMANTIC_NEIGHBOR;
+            } else {
+                bestSuccessor = null;
+                bestApi = null;
+                successorType = null;
+            }
+
+            if (bestSuccessor == null) {
+                log.debug("[DEPRECATION-GUIDE] No eligible PUBLISHED successor found for "
+                        + apiUuid + " (all similar APIs are non-published)");
+                return DeprecationGuideResult.noSuccessor(
+                        apiUuid, apiName, apiVersion, organization,
+                        lifecycleAction, enforcementMode);
+            }
+
+            // Build Scenario A result
+            String successorName = bestApi.getId() != null
+                    ? bestApi.getId().getApiName() : "Unknown";
+            String successorVersion = bestApi.getId() != null
+                    ? bestApi.getId().getVersion() : "Unknown";
+            String successorStatus = bestApi.getStatus();
+            double similarityPct = bestSuccessor.getSimilarityScore() * 100.0;
+
+            String successorContext = bestApi.getContext() != null
+                    ? bestApi.getContext() : "/" + successorName;
+            String linkHeader = "<" + successorContext + ">; rel=\"successor-version\"";
+
+            java.time.ZonedDateTime sunsetDate = java.time.ZonedDateTime.now().plusDays(finalSunsetDays);
+            String sunsetHeader = java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME
+                    .format(sunsetDate);
+
+            log.debug(String.format("[DEPRECATION-GUIDE] Successor found for %s v%s → %s v%s "
+                            + "(%.1f%% similarity, type: %s, candidates: %d, action: %s)",
+                    apiName, apiVersion, successorName, successorVersion,
+                    similarityPct, successorType,
+                    allCandidates.size(), lifecycleAction));
+
+            return DeprecationGuideResult.successorFound(
+                    apiUuid, apiName, apiVersion, organization,
+                    bestSuccessor.getMatchedApiUuid(), successorName, successorVersion,
+                    similarityPct, linkHeader, sunsetHeader,
+                    successorStatus, successorType,
+                    allCandidates, lifecycleAction, enforcementMode);
+
+        } catch (Exception e) {
+            log.error("[DEPRECATION-GUIDE] Error finding successor for API " + apiUuid, e);
+            return DeprecationGuideResult.noSuccessor(
+                    apiUuid, apiName, apiVersion, organization,
+                    lifecycleAction, enforcementMode);
+        }
+    }
+
+    /**
+     * Reads the lifecycle ruleset content from GOV_RULESET_CONTENT in the database.
+     * The Admin UI persists mode/threshold changes here when the user clicks "Update".
+     *
+     * @param organization The organization (tenant domain)
+     * @return The YAML content string, or null if not found
+     */
+    private String getLifecycleRulesetContentFromDb(String organization) {
+        String sql = "SELECT rc.CONTENT FROM GOV_RULESET_CONTENT rc "
+                + "JOIN GOV_RULESET r ON rc.RULESET_ID = r.RULESET_ID "
+                + "WHERE (LOWER(r.NAME) LIKE '%lifecycle%' OR LOWER(r.NAME) LIKE '%retirement%') "
+                + "AND r.RULE_CATEGORY = 'GENERIC' LIMIT 1";
+        java.sql.Connection conn = null;
+        java.sql.PreparedStatement ps = null;
+        java.sql.ResultSet rs = null;
+        try {
+            conn = org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil.getConnection();
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                // CONTENT may be stored as BLOB or TEXT
+                try {
+                    java.sql.Blob blob = rs.getBlob("CONTENT");
+                    if (blob != null) {
+                        byte[] bytes = blob.getBytes(1, (int) blob.length());
+                        return new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
+                    }
+                } catch (Exception blobEx) {
+                    // Not a BLOB — try as string
+                }
+                return rs.getString("CONTENT");
+            }
+        } catch (Exception e) {
+            log.debug("[DEPRECATION-GUIDE] Could not read lifecycle ruleset content from DB: "
+                    + e.getMessage());
+        } finally {
+            if (rs != null) { try { rs.close(); } catch (Exception ignored) { } }
+            if (ps != null) { try { ps.close(); } catch (Exception ignored) { } }
+            if (conn != null) { try { conn.close(); } catch (Exception ignored) { } }
+        }
+        return null;
+    }
+
+    /**
+     * Checks if the lifecycle/retirement ruleset is associated with at least one
+     * governance policy for the given organization. If not, the transition checks
+     * should be skipped — the ruleset is not actively enforced.
+     *
+     * @param organization The organization (tenant domain)
+     * @return true if the lifecycle ruleset is in an active policy, false otherwise
+     */
+    private boolean isLifecycleRulesetInActivePolicy(String organization) {
+        String tenantDomain = organization != null ? organization : "carbon.super";
+        String sql = "SELECT COUNT(*) AS CNT FROM GOV_POLICY_RULESET pr "
+                + "JOIN GOV_RULESET r ON pr.RULESET_ID = r.RULESET_ID "
+                + "WHERE (LOWER(r.NAME) LIKE '%lifecycle%' OR LOWER(r.NAME) LIKE '%retirement%') "
+                + "AND r.RULE_CATEGORY = 'GENERIC' "
+                + "AND (r.ORGANIZATION = ? OR r.ORGANIZATION = 'carbon.super')";
+        java.sql.Connection conn = null;
+        java.sql.PreparedStatement ps = null;
+        java.sql.ResultSet rs = null;
+        try {
+            conn = org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil.getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, tenantDomain);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt("CNT");
+                if (log.isDebugEnabled()) {
+                    log.debug("[DEPRECATION-GUIDE] Lifecycle policy association count for org "
+                            + tenantDomain + ": " + count);
+                }
+                return count > 0;
+            }
+        } catch (Exception e) {
+            log.warn("[DEPRECATION-GUIDE] Error checking lifecycle policy membership: "
+                    + e.getMessage());
+        } finally {
+            if (rs != null) { try { rs.close(); } catch (Exception ignored) { } }
+            if (ps != null) { try { ps.close(); } catch (Exception ignored) { } }
+            if (conn != null) { try { conn.close(); } catch (Exception ignored) { } }
+        }
+        // Fail-closed: if we cannot verify, do NOT enforce
+        return false;
+    }
+
+    /**
+     * Builds a DeprecationGuideResult for a user-confirmed successor UUID.
+     * This bypasses MinHash/LSH discovery — the user has already chosen the successor
+     * (either in the current request or from a persisted mapping).
+     *
+     * @param apiUuid          UUID of the API being deprecated/retired
+     * @param successorUuid    UUID of the user-selected successor API
+     * @param organization     The organization (tenant domain)
+     * @param lifecycleAction  "Deprecate" or "Retire"
+     * @return DeprecationGuideResult with the selected successor details
+     */
+    public DeprecationGuideResult buildGuideForKnownSuccessor(String apiUuid, String successorUuid,
+                                                               String organization,
+                                                               String lifecycleAction) {
+        log.debug("[DEPRECATION-GUIDE] Building guide for known successor: "
+                + apiUuid + " → " + successorUuid + " (action: " + lifecycleAction + ")");
+
+        String apiName = "Unknown";
+        String apiVersion = "Unknown";
+
+        // Read enforcement mode & sunset period from config (DB-first, YAML-fallback)
+        String enforcementMode = DeprecationGuideResult.MODE_WARN;
+        int sunsetPeriodDays = 90;
+        boolean configLoadedFromDb = false;
+
+        try {
+            String dbContent = getLifecycleRulesetContentFromDb(organization);
+            if (dbContent != null && !dbContent.isEmpty()) {
+                for (String line : dbContent.split("\n")) {
+                    String trimmed = line.trim();
+                    if (trimmed.startsWith("mode:")) {
+                        String modeValue = trimmed.substring(5).trim()
+                                .replace("\"", "").replace("'", "");
+                        if ("block".equalsIgnoreCase(modeValue)) {
+                            enforcementMode = DeprecationGuideResult.MODE_BLOCK;
+                        }
+                        configLoadedFromDb = true;
+                    } else if (trimmed.startsWith("sunset_period_days:")) {
+                        String daysStr = trimmed.substring("sunset_period_days:".length()).trim();
+                        try {
+                            sunsetPeriodDays = Integer.parseInt(daysStr);
+                        } catch (NumberFormatException nfe) {
+                            // ignore
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.debug("[DEPRECATION-GUIDE] Could not read config from DB for known successor: "
+                    + e.getMessage());
+        }
+
+        if (!configLoadedFromDb) {
+            try {
+                String carbonHome = System.getProperty("carbon.home", "");
+                java.io.File rulesetFile = new java.io.File(carbonHome
+                        + "/repository/resources/governance/default-rulesets/"
+                        + "lifecycle-retirement-ruleset.yaml");
+                if (rulesetFile.exists()) {
+                    String content = new String(java.nio.file.Files.readAllBytes(rulesetFile.toPath()));
+                    for (String line : content.split("\n")) {
+                        String trimmed = line.trim();
+                        if (trimmed.startsWith("mode:")) {
+                            String modeValue = trimmed.substring(5).trim()
+                                    .replace("\"", "").replace("'", "");
+                            if ("block".equalsIgnoreCase(modeValue)) {
+                                enforcementMode = DeprecationGuideResult.MODE_BLOCK;
+                            }
+                        } else if (trimmed.startsWith("sunset_period_days:")) {
+                            String daysStr = trimmed.substring("sunset_period_days:".length()).trim();
+                            try {
+                                sunsetPeriodDays = Integer.parseInt(daysStr);
+                            } catch (NumberFormatException nfe) {
+                                // ignore
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("[DEPRECATION-GUIDE] Could not read YAML config for known successor: "
+                        + e.getMessage());
+            }
+        }
+
+        final int finalSunsetDays = sunsetPeriodDays;
+
+        try {
+            String adminUsername = getAdminUsername(organization);
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(adminUsername);
+
+            // Resolve the deprecating API
+            API deprecatingApi = apiProvider.getAPIbyUUID(apiUuid, organization);
+            if (deprecatingApi != null && deprecatingApi.getId() != null) {
+                apiName = deprecatingApi.getId().getApiName();
+                apiVersion = deprecatingApi.getId().getVersion();
+            }
+
+            // Resolve the successor API
+            API successorApi = apiProvider.getAPIbyUUID(successorUuid, organization);
+            if (successorApi == null) {
+                log.warn("[DEPRECATION-GUIDE] User-selected successor " + successorUuid
+                        + " not found. Returning no-successor result.");
+                return DeprecationGuideResult.noSuccessor(
+                        apiUuid, apiName, apiVersion, organization,
+                        lifecycleAction, enforcementMode);
+            }
+
+            String successorStatus = successorApi.getStatus();
+            if (!APIStatus.PUBLISHED.getStatus().equalsIgnoreCase(successorStatus)) {
+                log.warn("[DEPRECATION-GUIDE] User-selected successor " + successorUuid
+                        + " is not PUBLISHED (status: " + successorStatus + ").");
+                return DeprecationGuideResult.noSuccessor(
+                        apiUuid, apiName, apiVersion, organization,
+                        lifecycleAction, enforcementMode);
+            }
+
+            String successorName = successorApi.getId() != null
+                    ? successorApi.getId().getApiName() : "Unknown";
+            String successorVersion = successorApi.getId() != null
+                    ? successorApi.getId().getVersion() : "Unknown";
+            String successorContext = successorApi.getContext() != null
+                    ? successorApi.getContext() : "/" + successorName;
+            double similarityPct = 100.0; // User explicitly confirmed
+
+            boolean isOfficialVersion = apiName.equals(successorName);
+            String successorType = isOfficialVersion
+                    ? DeprecationGuideResult.TYPE_OFFICIAL_VERSION
+                    : DeprecationGuideResult.TYPE_SEMANTIC_NEIGHBOR;
+
+            String linkHeader = "<" + successorContext + ">; rel=\"successor-version\"";
+            java.time.ZonedDateTime sunsetDate = java.time.ZonedDateTime.now().plusDays(finalSunsetDays);
+            String sunsetHeader = java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME
+                    .format(sunsetDate);
+
+            // Build single-candidate list
+            List<DeprecationGuideResult.SuccessorCandidate> candidates = new ArrayList<>();
+            candidates.add(new DeprecationGuideResult.SuccessorCandidate(
+                    successorUuid, successorName, successorVersion,
+                    similarityPct, successorType, successorStatus, successorContext));
+
+            log.debug(String.format("[DEPRECATION-GUIDE] Known successor resolved: %s v%s → %s v%s "
+                            + "(user-confirmed, type: %s, action: %s)",
+                    apiName, apiVersion, successorName, successorVersion,
+                    successorType, lifecycleAction));
+
+            return DeprecationGuideResult.successorFound(
+                    apiUuid, apiName, apiVersion, organization,
+                    successorUuid, successorName, successorVersion,
+                    similarityPct, linkHeader, sunsetHeader,
+                    successorStatus, successorType,
+                    candidates, lifecycleAction, enforcementMode);
+
+        } catch (Exception e) {
+            log.error("[DEPRECATION-GUIDE] Error building guide for known successor "
+                    + successorUuid + " of API " + apiUuid, e);
+            return DeprecationGuideResult.noSuccessor(
+                    apiUuid, apiName, apiVersion, organization,
+                    lifecycleAction, enforcementMode);
+        }
+    }
+
+    /**
+     * Backward-compatible overload — defaults to "Deprecate" action.
+     */
+    public DeprecationGuideResult findSuccessorForDeprecation(String apiUuid, String organization) {
+        return findSuccessorForDeprecation(apiUuid, organization, "Deprecate");
     }
 }
