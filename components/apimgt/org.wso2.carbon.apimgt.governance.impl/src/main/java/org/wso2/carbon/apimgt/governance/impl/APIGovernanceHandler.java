@@ -137,6 +137,12 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
 
         } catch (APIManagementException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_APIS_FOR_LABEL, e, label);
+        } catch (NoClassDefFoundError e) {
+            if (log.isDebugEnabled()) {
+                log.debug("LabelsDAO not available in runtime, returning empty artifacts for label "
+                        + label + ": " + e.getMessage());
+            }
+            return apiIds;
         }
     }
 
@@ -153,6 +159,15 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
             return LabelsDAO.getInstance().getMappedLabelIDsForApi(apiId);
         } catch (APIManagementException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_LABELS_FOR_API, e, apiId);
+        } catch (NoClassDefFoundError e) {
+            // LabelsDAO not available in this runtime (e.g. AM 4.6.0 / apimgt 9.32.x)
+            // Labels are a 9.33.x feature — return empty list so policies fall back to
+            // organization-wide matching
+            if (log.isDebugEnabled()) {
+                log.debug("LabelsDAO not available in runtime, returning empty labels for API "
+                        + apiId + ": " + e.getMessage());
+            }
+            return new ArrayList<>();
         }
     }
 

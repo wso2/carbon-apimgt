@@ -68,20 +68,44 @@ public class ComplianceEvaluationScheduler {
     private static ScheduledExecutorService scheduler;
     private static ThreadPoolExecutor processorPool;
     private static final ComplianceMgtDAO complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
+    private static volatile boolean initialized = false;
 
     /**
      * Initialize the evaluation request scheduler.
      */
-    public static void initialize() {
+    public static synchronized void initialize() {
+        if (initialized) {
+            if (log.isDebugEnabled()) {
+                log.debug("Evaluation Request Scheduler already initialized, skipping.");
+            }
+            return;
+        }
         log.info("Initializing Evaluation Request Scheduler...");
 
-        APIMGovernanceConfigDTO apimGovernanceConfigDTO = ServiceReferenceHolder.getInstance()
-                .getAPIMConfigurationService().getAPIManagerConfiguration().getAPIMGovernanceConfigurationDto();
-
-        threadPoolSize = apimGovernanceConfigDTO.getSchedulerThreadPoolSize();
-        queueSize = apimGovernanceConfigDTO.getSchedulerQueueSize();
-        checkIntervalMinutes = apimGovernanceConfigDTO.getSchedulerTaskCheckInterval();
-        cleanupIntervalMinutes = apimGovernanceConfigDTO.getSchedulerTaskCleanupInterval();
+        // Load configuration with fallback defaults for runtimes where
+        // APIMGovernanceConfigDTO is not available (e.g. AM 4.6.0 / apimgt 9.32.x)
+        try {
+            Object configDto = ServiceReferenceHolder.getInstance()
+                    .getAPIMConfigurationService().getAPIManagerConfiguration()
+                    .getClass().getMethod("getAPIMGovernanceConfigurationDto").invoke(
+                            ServiceReferenceHolder.getInstance()
+                                    .getAPIMConfigurationService().getAPIManagerConfiguration());
+            threadPoolSize = (int) configDto.getClass().getMethod("getSchedulerThreadPoolSize").invoke(configDto);
+            queueSize = (int) configDto.getClass().getMethod("getSchedulerQueueSize").invoke(configDto);
+            checkIntervalMinutes = (int) configDto.getClass().getMethod("getSchedulerTaskCheckInterval").invoke(configDto);
+            cleanupIntervalMinutes = (int) configDto.getClass().getMethod("getSchedulerTaskCleanupInterval").invoke(configDto);
+            log.info("Loaded scheduler config from APIMGovernanceConfigDTO: threadPool=" + threadPoolSize
+                    + ", queue=" + queueSize + ", checkInterval=" + checkIntervalMinutes + "min");
+        } catch (Throwable e) {
+            // APIMGovernanceConfigDTO not available in this runtime — use defaults
+            threadPoolSize = 2;
+            queueSize = 100;
+            checkIntervalMinutes = 1;
+            cleanupIntervalMinutes = 60;
+            log.warn("APIMGovernanceConfigDTO not available (" + e.getClass().getSimpleName()
+                    + "), using default scheduler config: threadPool=" + threadPoolSize
+                    + ", queue=" + queueSize + ", checkInterval=" + checkIntervalMinutes + "min");
+        }
 
         scheduler = Executors.newSingleThreadScheduledExecutor();
         processorPool = createProcessorPool();
@@ -89,6 +113,10 @@ public class ComplianceEvaluationScheduler {
         scheduler.scheduleAtFixedRate(
                 ComplianceEvaluationScheduler::processPendingRequests,
                 0, checkIntervalMinutes, TimeUnit.MINUTES);
+
+        initialized = true;
+        log.info("Evaluation Request Scheduler initialized with check interval: "
+                + checkIntervalMinutes + " minutes");
     }
 
     /**
@@ -295,17 +323,29 @@ public class ComplianceEvaluationScheduler {
         for (Ruleset ruleset : rulesets) {
             List<RuleViolation> ruleViolations = new ArrayList<>();
 
-            // Handle GENERIC rulesets by performing real-time deduplication check
-            // via GatekeeperValidationEngine (writes violations to GOV_RULE_VIOLATION)
+            // Handle GENERIC rulesets (deduplication + lifecycle) by performing real-time check
+            // via GatekeeperValidationEngine (writes violations to GOV_RULE_VIOLATION).
+            // GatekeeperValidationEngine internally differentiates between dedup and lifecycle
+            // rulesets, so both types are processed here — lifecycle violations appear in
+            // the Compliance/Adherence Summary as "Failed" when an API is deprecated
+            // without a successor.
             if (RuleCategory.GENERIC.equals(ruleset.getRuleCategory())) {
-                log.debug("Processing GENERIC ruleset " + ruleset.getId() + 
-                        " for artifact " + artifactRefId + ". Performing real-time dedup check.");
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Processing GENERIC ruleset '" + ruleset.getName() + "' (id=" 
+                            + ruleset.getId() + ") for artifact " + artifactRefId 
+                            + ". Performing real-time check.");
+                }
                 List<RuleViolation> realTimeViolations = performRealTimeDedupCheck(
                         artifactRefId, ruleset, artifactProjectContentMap, organization);
+                if (log.isDebugEnabled()) {
+                    log.debug("GENERIC ruleset '" + ruleset.getName() + "' returned " 
+                            + realTimeViolations.size() + " violations for artifact " + artifactRefId);
+                }
                 rulesetViolationsMap.put(ruleset.getId(), realTimeViolations);
                 if (!realTimeViolations.isEmpty()) {
                     AuditLogger.log("Async Eval Request",
-                            "Dedup check found %d violations for artifact %s " +
+                            "GENERIC check found %d violations for artifact %s " +
                                     "in organization %s against ruleset %s",
                             realTimeViolations.size(), artifactRefId, organization, ruleset.getId());
                 }
@@ -329,6 +369,11 @@ public class ComplianceEvaluationScheduler {
 
                 // Use Factory to get appropriate validation engine for this ruleset
                 ValidationEngine validationEngine = ValidationEngineFactory.getValidationEngine(ruleset);
+                if (validationEngine == null) {
+                    log.warn("No validation engine available for ruleset " + ruleset.getId()
+                            + ". Skipping async evaluation for artifact " + artifactRefId);
+                    continue;
+                }
 
                 // Send target content and ruleset for validation
                 List<RuleViolation> violations = validationEngine.validate(contentToValidate, ruleset);
@@ -354,6 +399,20 @@ public class ComplianceEvaluationScheduler {
             AuditLogger.log("Async Eval Request", logMessage);
             return;
         }
+
+        // Diagnostic: Log rulesetViolationsMap before storing
+        StringBuilder mapSummary = new StringBuilder();
+        mapSummary.append("rulesetViolationsMap for artifact ").append(artifactRefId)
+                .append(" (policy=").append(policyId).append("): {");
+        for (java.util.Map.Entry<String, java.util.List<RuleViolation>> entry : rulesetViolationsMap.entrySet()) {
+            mapSummary.append(" ").append(entry.getKey())
+                    .append("=").append(entry.getValue().size()).append(" violations,");
+        }
+        mapSummary.append(" }");
+        if (log.isDebugEnabled()) {
+            log.debug("[COMPLIANCE-SAVE] " + mapSummary.toString());
+        }
+
         savePolicyEvaluationResults(artifactRefId, artifactType, policyId, rulesetViolationsMap,
                 organization);
     }
@@ -371,10 +430,18 @@ public class ComplianceEvaluationScheduler {
                                                     Map<String, List<RuleViolation>> rulesetViolationsMap,
                                                     String organization) {
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("[COMPLIANCE-SAVE] Calling addComplianceEvalResults for artifact " + artifactRefId
+                        + ", policy=" + policyId + ", rulesetCount=" + rulesetViolationsMap.size());
+            }
             complianceMgtDAO.addComplianceEvalResults(artifactRefId, artifactType, policyId, rulesetViolationsMap,
                     organization);
+            if (log.isDebugEnabled()) {
+                log.debug("[COMPLIANCE-SAVE] Successfully stored results for artifact " + artifactRefId);
+            }
         } catch (APIMGovernanceException e) {
-            log.error("Error saving governance results for artifact " + artifactRefId, e);
+            log.error("[COMPLIANCE-SAVE] Error saving governance results for artifact " + artifactRefId
+                    + ": " + e.getMessage(), e);
         }
     }
 
@@ -462,6 +529,11 @@ public class ComplianceEvaluationScheduler {
     private static List<RuleViolation> performRealTimeDedupCheck(String artifactRefId, Ruleset ruleset,
                                                                   Map<RuleType, String> artifactProjectContentMap,
                                                                   String organization) {
+        if (log.isDebugEnabled()) {
+            log.debug("performRealTimeDedupCheck called for artifact " + artifactRefId
+                    + ", ruleset '" + ruleset.getName() + "' (id=" + ruleset.getId()
+                    + ", ruleType=" + ruleset.getRuleType() + ")");
+        }
         try {
             // Get the API definition content
             RuleType ruleType = ruleset.getRuleType();
@@ -471,9 +543,24 @@ public class ComplianceEvaluationScheduler {
             }
 
             if (contentToValidate == null || contentToValidate.isEmpty()) {
-                log.debug("No API definition content available for real-time dedup check of artifact "
-                        + artifactRefId);
-                return new ArrayList<>();
+                if (log.isDebugEnabled()) {
+                    log.debug("No API definition content for artifact " + artifactRefId
+                            + " (ruleset='" + ruleset.getName() + "'). "
+                            + "Map keys: " + artifactProjectContentMap.keySet()
+                            + ". This is expected for lifecycle rulesets that don't need content.");
+                }
+                // For lifecycle rulesets, still proceed with empty content + metadata
+                boolean isLifecycle = ruleset.getName() != null
+                        && (ruleset.getName().toLowerCase().contains("lifecycle")
+                        || ruleset.getName().toLowerCase().contains("retirement"));
+                if (isLifecycle) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Lifecycle ruleset detected — proceeding with metadata-only content.");
+                    }
+                    contentToValidate = "";
+                } else {
+                    return new ArrayList<>();
+                }
             }
 
             // Get the validation engine for GENERIC category
@@ -482,20 +569,31 @@ public class ComplianceEvaluationScheduler {
                 log.warn("No validation engine found for GENERIC ruleset " + ruleset.getId());
                 return new ArrayList<>();
             }
+            if (log.isDebugEnabled()) {
+                log.debug("ValidationEngine resolved for ruleset '" + ruleset.getName()
+                        + "': " + validationEngine.getClass().getName());
+            }
 
             // Enrich the content with metadata so GatekeeperValidationEngine knows
             // which API UUID and organization to use for the dedup check
             String enrichedContent = buildEnrichedContent(contentToValidate, artifactRefId, organization);
 
             // Perform the real-time dedup check through the validation engine
+            if (log.isDebugEnabled()) {
+                log.debug("Calling validationEngine.validate() for ruleset '" + ruleset.getName()
+                        + "' on artifact " + artifactRefId);
+            }
             List<RuleViolation> violations = validationEngine.validate(enrichedContent, ruleset);
+            if (log.isDebugEnabled()) {
+                log.debug("validationEngine.validate() returned " 
+                        + (violations != null ? violations.size() : "null")
+                        + " violations for ruleset '" + ruleset.getName() + "' on artifact " + artifactRefId);
+            }
             return violations != null ? violations : new ArrayList<>();
 
         } catch (Exception e) {
-            log.warn("Real-time dedup check failed for artifact " + artifactRefId + ": " + e.getMessage());
-            if (log.isDebugEnabled()) {
-                log.debug("Stack trace:", e);
-            }
+            log.error("Real-time check failed for artifact " + artifactRefId 
+                    + " (ruleset='" + ruleset.getName() + "'): " + e.getMessage(), e);
             return new ArrayList<>();
         }
     }

@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.springframework.http.HttpHeaders;
@@ -57,6 +59,8 @@ import javax.ws.rs.core.Response;
  * This is the implementation class for the Rulesets API.
  */
 public class RulesetsApiServiceImpl implements RulesetsApiService {
+
+    private static final Log log = LogFactory.getLog(RulesetsApiServiceImpl.class);
 
     /**
      * Create a new Governance Ruleset
@@ -194,8 +198,30 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             RulesetManager rulesetManager = new RulesetManager();
             RulesetInfo updatedRuleset = rulesetManager.updateRuleset(rulesetId, ruleset, organization);
 
-            // Re-access policy compliance in the background
-            new ComplianceManager().handleRulesetChangeEvent(rulesetId, organization);
+            // Trigger compliance re-evaluation for rulesets that are NOT lifecycle/transition-based.
+            // Lifecycle rulesets have compliance_exclusion=true in their YAML and are evaluated
+            // when APIs are deprecated/retired (via changeAPILifecycle), not on ruleset update.
+            // Triggering full re-evaluation for lifecycle mode changes would unnecessarily
+            // re-run compliance tests for ALL APIs against ALL rulesets.
+            boolean isComplianceExcluded = false;
+            RulesetContent rc = ruleset.getRulesetContent();
+            if (rc != null && rc.getContent() != null) {
+                String contentStr = new String(rc.getContent(), java.nio.charset.StandardCharsets.UTF_8);
+                if (contentStr.contains("compliance_exclusion: true")
+                        || contentStr.contains("compliance_exclusion:true")) {
+                    isComplianceExcluded = true;
+                }
+            }
+            if (name != null && (name.toLowerCase().contains("lifecycle")
+                    || name.toLowerCase().contains("retirement"))) {
+                isComplianceExcluded = true;
+            }
+            if (!isComplianceExcluded) {
+                new ComplianceManager().handleRulesetChangeEvent(rulesetId, organization);
+            } else {
+                log.info("Skipping compliance re-evaluation for transition-based ruleset: " + name
+                        + " (compliance_exclusion=true)");
+            }
 
             return Response.status(Response.Status.OK).entity(RulesetMappingUtil.
                     fromRulesetInfoToRulesetInfoDTO(updatedRuleset)).build();

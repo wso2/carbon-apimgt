@@ -544,9 +544,12 @@ public class ComplianceManager {
             // Validate the artifact against each ruleset
             for (Ruleset ruleset : rulesets) {
 
-                // Handle GENERIC rulesets (e.g., deduplication) - these need special handling
-                // as they don't match artifact types but use GatekeeperValidationEngine
+                // Handle GENERIC rulesets (deduplication + lifecycle) - these need special
+                // handling as they don't match artifact types but use GatekeeperValidationEngine.
+                // GatekeeperValidationEngine internally routes lifecycle vs dedup rulesets
+                // to the appropriate validation path, so both types flow through here.
                 if (RuleCategory.GENERIC.equals(ruleset.getRuleCategory())) {
+
                     log.debug("Processing GENERIC ruleset " + ruleset.getId() +
                             " for artifact " + artifactRefId + " during sync evaluation.");
                     try {
@@ -630,6 +633,11 @@ public class ComplianceManager {
 
                     // Use Factory to get appropriate validation engine for this ruleset
                     ValidationEngine validationEngine = ValidationEngineFactory.getValidationEngine(ruleset);
+                    if (validationEngine == null) {
+                        log.warn("No validation engine available for ruleset " + ruleset.getId()
+                                + ". Skipping evaluation for artifact " + artifactRefId);
+                        continue;
+                    }
 
                     // Send target content and ruleset for validation
                     List<RuleViolation> ruleViolations = validationEngine.validate(
@@ -870,6 +878,22 @@ public class ComplianceManager {
             List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId, organization);
             for (Ruleset ruleset : rulesets) {
                 if (RuleCategory.GENERIC.equals(ruleset.getRuleCategory())) {
+                    // Skip lifecycle rulesets — their mode=block is for lifecycle
+                    // transitions, not deploy-time enforcement.
+                    String rsetNameLc = ruleset.getName() != null
+                            ? ruleset.getName().toLowerCase() : "";
+                    String rsetContent = ruleset.getRulesetContent() != null
+                            && ruleset.getRulesetContent().getContent() != null
+                            ? new String(ruleset.getRulesetContent().getContent()) : "";
+                    boolean isLifecycleRuleset = rsetNameLc.contains("lifecycle")
+                            || rsetNameLc.contains("retirement")
+                            || rsetNameLc.contains("deprecation")
+                            || rsetContent.contains("compliance_exclusion: true")
+                            || rsetContent.contains("compliance_exclusion:true")
+                            || rsetContent.contains("lifecycle_retirement:");
+                    if (isLifecycleRuleset) {
+                        continue;
+                    }
                     String mode = extractDedupModeFromRuleset(ruleset);
                     if ("block".equalsIgnoreCase(mode)) {
                         log.info("Found GENERIC ruleset " + ruleset.getId()
