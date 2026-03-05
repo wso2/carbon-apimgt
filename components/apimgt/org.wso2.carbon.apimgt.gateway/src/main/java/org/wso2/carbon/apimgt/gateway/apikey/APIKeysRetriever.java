@@ -54,9 +54,7 @@ public class APIKeysRetriever extends TimerTask {
 
     @Override
     public void run() {
-        if (log.isDebugEnabled()) {
-            log.debug("Starting web service based API key data retrieving process.");
-        }
+        log.debug("Starting web service based API key data retrieving process.");
         retrieveAPIKeysDataFromWebService(tenantDomain);
     }
 

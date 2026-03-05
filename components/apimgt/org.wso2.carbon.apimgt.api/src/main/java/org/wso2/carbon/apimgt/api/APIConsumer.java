@@ -618,6 +618,21 @@ public interface APIConsumer extends APIManager {
      * @param validityPeriod       Requested validity period for the api key.
      * @param permittedIP          Permitted IP addresses for the api key.
      * @param permittedReferer     Permitted referrers for the api key.
+     * @return Generated api key.
+     * @throws APIManagementException
+     */
+    String generateApiKey(Application application, String userName, long validityPeriod, String permittedIP,
+                          String permittedReferer)
+            throws APIManagementException;
+
+    /**
+     * Generates a new api key
+     *
+     * @param application          The Application Object that represents the Application.
+     * @param userName             Username of the user requesting the api key.
+     * @param validityPeriod       Requested validity period for the api key.
+     * @param permittedIP          Permitted IP addresses for the api key.
+     * @param permittedReferer     Permitted referrers for the api key.
      * @param keyName       Name of the api key.
      * @return Generated api key.
      * @throws APIManagementException

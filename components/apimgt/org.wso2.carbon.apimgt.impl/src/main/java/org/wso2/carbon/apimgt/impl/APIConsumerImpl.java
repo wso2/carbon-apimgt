@@ -517,13 +517,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param validityPeriod       Requested validity period for the api key.
      * @param permittedIP          Permitted IP addresses for the api key.
      * @param permittedReferer     Permitted referrers for the api key.
-     * @param keyName       Name of the api key.
      * @return
      * @throws APIManagementException
      */
     @Override
+    @Deprecated
     public String generateApiKey(Application application, String userName, long validityPeriod,
-                                 String permittedIP, String permittedReferer, String keyName)
+                                 String permittedIP, String permittedReferer)
             throws APIManagementException {
 
         JwtTokenInfoDTO jwtTokenInfoDTO;
@@ -550,20 +550,36 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         jwtTokenInfoDTO.setKeyType(application.getKeyType());
         jwtTokenInfoDTO.setPermittedIP(permittedIP);
         jwtTokenInfoDTO.setPermittedReferer(permittedReferer);
-
-        if (StringUtils.isBlank(keyName) && APIKeyUtils.isJWTAPIKeyGenerationEnabled()) {
-            ApiKeyGenerator apiKeyGenerator = loadApiKeyGenerator();
-            if (apiKeyGenerator != null) {
-                apiKey = apiKeyGenerator.generateToken(jwtTokenInfoDTO);
-                return apiKey;
-            } else {
-                throw new APIManagementException("Failed to generate the API key in JWT format");
-            }
+        ApiKeyGenerator apiKeyGenerator = loadApiKeyGenerator();
+        if (apiKeyGenerator != null) {
+            apiKey = apiKeyGenerator.generateToken(jwtTokenInfoDTO);
+            return apiKey;
         } else {
-            keyName = keyName.trim();
-            // Generate API key in opaque format
-            apiKey = generateOpaqueKey();
+            throw new APIManagementException("Failed to generate the API key in JWT format");
         }
+    }
+
+    /**
+     * Generates an API key
+     *
+     * @param application          The Application Object that represents the Application.
+     * @param userName             Username of the user requesting the api key.
+     * @param validityPeriod       Requested validity period for the api key.
+     * @param permittedIP          Permitted IP addresses for the api key.
+     * @param permittedReferer     Permitted referrers for the api key.
+     * @param keyName       Name of the api key.
+     * @return
+     * @throws APIManagementException
+     */
+    @Override
+    public String generateApiKey(Application application, String userName, long validityPeriod,
+                                 String permittedIP, String permittedReferer, String keyName)
+            throws APIManagementException {
+
+        String apiKey;
+        keyName = keyName.trim();
+        // Generate API key in opaque format
+        apiKey = generateOpaqueKey();
         Map<String, String> props = new HashMap<>();
         props.put(APIConstants.JwtTokenConstants.PERMITTED_IP,
                 permittedIP != null ? permittedIP : "");
@@ -574,7 +590,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiKeyInfoDTO.setApplicationId(application.getUUID());
         String apiKeyHash = APIUtil.sha256Hash(apiKey);
         apiKeyMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
-        sendAPIKeyInfoEvent(apiKeyHash, application, null, calculateExpiresAt(validityPeriod),
+        sendAPIKeyInfoEvent(apiKeyHash, application, null, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(), validityPeriod),
                 application.getKeyType(), keyName, props);
         return apiKey;
     }
@@ -613,7 +629,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 permittedReferer, props);
         apiKeyInfoDTO.setApiId(api.getUUID());
         apiKeyMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
-        sendAPIKeyInfoEvent(apiKeyHash,null, api, calculateExpiresAt(validityPeriod), keyType, keyName, props);
+        sendAPIKeyInfoEvent(apiKeyHash,null, api, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(),
+                validityPeriod), keyType, keyName, props);
         return apiKey;
     }
 
@@ -645,6 +662,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiKeyInfoDTO.setApiKeyProperties(serializedProps);
         apiKeyInfoDTO.setAuthUser(userName);
         apiKeyInfoDTO.setValidityPeriod(validityPeriod);
+        apiKeyInfoDTO.setCreatedTime(System.currentTimeMillis());
         apiKeyInfoDTO.setLastUsedTime(null);
         apiKeyInfoDTO.setPermittedIP(permittedIP);
         apiKeyInfoDTO.setPermittedReferer(permittedReferer);
@@ -4030,6 +4048,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         apiKeyInfoDTO.setLastUsedTime(apiKeyInfo.getLastUsedTime());
         String apiKey = generateOpaqueKey();
         apiKeyInfoDTO.setApiKey(apiKey);
+        apiKeyInfoDTO.setCreatedTime(System.currentTimeMillis());
         String apiKeyHash = APIUtil.sha256Hash(apiKey);
         apiKeyMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         APIKeyInfo regeneratedApiKeyInfo = new APIKeyInfo();
@@ -4037,16 +4056,16 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         regeneratedApiKeyInfo.setApiKey(apiKey);
         regeneratedApiKeyInfo.setValidityPeriod(apiKeyInfo.getValidityPeriod());
         sendAPIKeyInfoEvent(apiKeyHash, apiMgtDAO.getApplicationByUUID(applicationId),
-                null, calculateExpiresAt(apiKeyInfo.getValidityPeriod()), keyType, apiKeyInfo.getKeyName(), props);
+                null, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(), apiKeyInfo.getValidityPeriod()), keyType,
+                apiKeyInfo.getKeyName(), props);
         return regeneratedApiKeyInfo;
     }
 
-    private long calculateExpiresAt(long validityPeriodSeconds) {
+    private long calculateExpiresAt(long createdTime, long validityPeriodSeconds) {
         if (validityPeriodSeconds <= 0) {
             return 0L; // No expiry
         }
-        long now = System.currentTimeMillis();
-        long expiresAt = now + (validityPeriodSeconds * 1000L); // Convert to ms
+        long expiresAt = createdTime + (validityPeriodSeconds * 1000L); // Convert to ms
         return expiresAt;
     }
 
@@ -4100,6 +4119,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         apiKeyInfoDTO.setLastUsedTime(apiKeyInfo.getLastUsedTime());
         String apiKey = generateOpaqueKey();
         apiKeyInfoDTO.setApiKey(apiKey);
+        apiKeyInfoDTO.setCreatedTime(System.currentTimeMillis());
         String apiKeyHash = APIUtil.sha256Hash(apiKey);
         apiKeyMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         APIKeyInfo regeneratedApiKeyInfo = new APIKeyInfo();
@@ -4107,8 +4127,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         regeneratedApiKeyInfo.setApiKey(apiKey);
         regeneratedApiKeyInfo.setValidityPeriod(apiKeyInfo.getValidityPeriod());
         sendAPIKeyInfoEvent(apiKeyHash,null,
-                getLightweightAPIByUUID(apiUUId, organization), calculateExpiresAt(apiKeyInfo.getValidityPeriod()),
-                apiKeyInfo.getKeyType(), apiKeyInfo.getKeyName(), props);
+                getLightweightAPIByUUID(apiUUId, organization), calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(),
+                        apiKeyInfo.getValidityPeriod()), apiKeyInfo.getKeyType(), apiKeyInfo.getKeyName(), props);
         return regeneratedApiKeyInfo;
     }
 

@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJ
 import org.wso2.carbon.apimgt.gateway.dto.JWTTokenPayloadInfo;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -341,6 +342,7 @@ public class ApiKeyAuthenticatorUtils {
         long expiresAt = apiKeyInfo.getExpiresAt();
         if (expiresAt > 0 && expiresAt < System.currentTimeMillis()) {
             isApiKeyExpired = true;
+            DataHolder.getInstance().removeOpaqueAPIKeyInfo(apiKeyHash);
         }
         if (isApiKeyExpired) {
             if (isGatewayTokenCacheEnabled) {

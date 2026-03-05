@@ -84,7 +84,7 @@ public class ApiKeyMgtDAO {
                     ps.setString(4, keyInfoDTO.getKeyType());
                     ps.setBytes(5, keyInfoDTO.getApiKeyProperties());
                     ps.setString(6, keyInfoDTO.getAuthUser());
-                    ps.setTimestamp(7, new Timestamp(System.currentTimeMillis()),
+                    ps.setTimestamp(7, new Timestamp(keyInfoDTO.getCreatedTime()),
                             Calendar.getInstance(TimeZone.getTimeZone("UTC")));
                     ps.setLong(8, keyInfoDTO.getValidityPeriod());
                     if (keyInfoDTO.getLastUsedTime() == null) {
