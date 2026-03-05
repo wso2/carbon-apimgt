@@ -40,6 +40,8 @@ public class ServiceReferenceHolder {
 
     private List<RestAPIAuthenticator> authenticators = new ArrayList<>();
 
+    private byte[] urlSigningKey;
+
     public static ServiceReferenceHolder getInstance() {
         return instance;
     }
@@ -77,5 +79,13 @@ public class ServiceReferenceHolder {
 
     public List<RestAPIAuthenticator> getAuthenticators() {
         return authenticators;
+    }
+
+    public byte[] getUrlSigningKey() {
+        return urlSigningKey;
+    }
+
+    public void setUrlSigningKey(byte[] urlSigningKey) {
+        this.urlSigningKey = urlSigningKey;
     }
 }

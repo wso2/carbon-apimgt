@@ -30,8 +30,8 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -46,6 +46,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -977,18 +978,11 @@ public class RestApiCommonUtil {
     }
 
     protected static byte[] getHmacKeyBytes() throws APIManagementException {
-        String base64Key = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration().getFirstProperty(APIConstants.DEVPORTAL_URL_GENERATION_SECRET);
-
-        if (StringUtils.isEmpty(base64Key)) {
-            throw new APIManagementException("Could not resolve HMAC secret key from API Manager Configuration.");
+        byte[] key = ServiceReferenceHolder.getInstance().getUrlSigningKey();
+        if (key == null) {
+            throw new APIManagementException("URL signing key is not initialized.");
         }
-        try {
-            return Base64.getDecoder().decode(base64Key);
-        } catch (IllegalArgumentException e) {
-            log.debug("HMAC secret key is not a valid Base64 encoded string.");
-            throw new APIManagementException("HMAC secret key is not a valid Base64 encoded string.", e);
-        }
+        return key;
     }
 
     private static byte[] signWithHmacSHA256(String data, byte[] key) throws NoSuchAlgorithmException, InvalidKeyException {
