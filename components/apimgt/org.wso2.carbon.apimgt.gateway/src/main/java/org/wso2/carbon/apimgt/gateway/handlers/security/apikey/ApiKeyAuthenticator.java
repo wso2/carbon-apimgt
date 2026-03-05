@@ -276,9 +276,7 @@ public class ApiKeyAuthenticator implements Authenticator {
             if (!MessageDigest.isEqual(
                     apiKeyHash.getBytes(StandardCharsets.UTF_8),
                     apiKeyInfo.getApiKeyHash().getBytes(StandardCharsets.UTF_8))) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Invalid Api Key. API key hash is not matched.");
-                }
+                log.debug("Invalid Api Key. API key hash is not matched.");
                 throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                         APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
             }

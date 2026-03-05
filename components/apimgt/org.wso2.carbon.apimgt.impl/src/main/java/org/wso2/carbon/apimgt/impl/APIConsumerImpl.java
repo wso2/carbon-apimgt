@@ -3950,7 +3950,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         return getOpenAPIDefinitionForDeployment(api, environmentName, kmId);
     }
 
-    public void revokeApiKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
+    public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
 
         RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
         Properties properties = new Properties();

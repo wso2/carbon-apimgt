@@ -867,7 +867,7 @@ public interface APIConsumer extends APIManager {
 
     Set<APIKey> getApplicationKeysOfApplication(int applicationId, String xWso2Tenant) throws APIManagementException;
 
-    void revokeApiKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException;
+    void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException;
 
     /**
      * Revoke opaque api key and delete from the DB

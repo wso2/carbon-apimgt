@@ -978,7 +978,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                             }
                                             String tokenIdentifier = payload.getString(APIConstants.JwtTokenConstants.JWT_ID);
                                             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                                            apiConsumer.revokeApiKey(tokenIdentifier, expiryTime, tenantDomain);
+                                            apiConsumer.revokeAPIKey(tokenIdentifier, expiryTime, tenantDomain);
                                             return Response.ok().build();
                                         } else {
                                             if (log.isDebugEnabled()) {

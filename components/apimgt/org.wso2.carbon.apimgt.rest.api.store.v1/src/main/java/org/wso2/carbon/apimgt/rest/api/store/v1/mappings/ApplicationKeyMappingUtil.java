@@ -155,6 +155,14 @@ public class ApplicationKeyMappingUtil {
         return applicationKeyDTO;
     }
 
+    @Deprecated
+    public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime){
+        APIKeyDTO apiKeyDto = new APIKeyDTO();
+        apiKeyDto.setApikey(apiKey);
+        apiKeyDto.setValidityPeriod(validityTime);
+        return apiKeyDto;
+    }
+
     public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime, String keyName){
         APIKeyDTO apiKeyDto = new APIKeyDTO();
         apiKeyDto.setApikey(apiKey);
