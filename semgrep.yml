@@ -195,7 +195,7 @@ rules:
       - pattern: |
           $TENANT = (ArrayList) ((TreeMap) ($PROPS.get(...))).get($HEADER);
       - pattern-not-inside: |
-          $ALLOW = $PROPS2.get(APIConstants.PROPERTY_ALLOW_TENANT_HEADER_KEY);
+          $ALLOW = $PROPS.get(APIConstants.PROPERTY_ALLOW_TENANT_HEADER_KEY);
           ...
           $TENANT = (ArrayList) ((TreeMap) ($PROPS.get(...))).get($HEADER);
     message: >
