@@ -92,9 +92,10 @@ public class AsyncAPIDefinitionProcessor implements APIDefinitionProcessor {
 
     @Override
     public List<URITemplate> extractOperations(String definition) throws APIManagementException {
-        // AsyncAPI operations/channels are typically handled differently
-        // Extract both publish and subscribe operations
-        List<URITemplate> uriTemplates = new ArrayList<>();
+        if (definition == null || definition.trim().isEmpty()) {
+            throw new APIManagementException("AsyncAPI definition is null or empty");
+        }
+        // Extract both publish and subscribe operations.
         try {
             AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
                 AsyncApiParserUtil.getAsyncApiVersion(definition), 
@@ -106,12 +107,12 @@ public class AsyncAPIDefinitionProcessor implements APIDefinitionProcessor {
                 .getURITemplates(definition, true);
 
             if (asyncTemplates != null) {
-                uriTemplates.addAll(asyncTemplates);
+                return new ArrayList<>(asyncTemplates);
             }
         } catch (Exception e) {
-            log.error("Error extracting operations from AsyncAPI definition", e);
+            throw new APIManagementException("Error extracting operations from AsyncAPI definition", e);
         }
-        return uriTemplates;
+        return new ArrayList<>();
     }
 
     @Override
