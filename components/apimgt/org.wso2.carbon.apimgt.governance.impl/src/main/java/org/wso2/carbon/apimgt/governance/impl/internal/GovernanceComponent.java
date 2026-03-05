@@ -54,40 +54,71 @@ import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 public class GovernanceComponent {
 
     private static final Log log = LogFactory.getLog(GovernanceComponent.class);
+    private static volatile boolean activated = false;
     private ServiceRegistration registration;
 
     @Activate
     protected void activate(ComponentContext componentContext) throws Exception {
 
-        if (log.isDebugEnabled()) {
-            log.debug("Governance component activated");
+        if (activated) {
+            if (log.isDebugEnabled()) {
+                log.debug("GovernanceComponent already activated, skipping re-activation");
+            }
+            return;
+        }
+        // Set flag immediately to prevent re-entrant activations from service registrations below
+        activated = true;
+
+        log.info("Activating Governance component...");
+
+        // Initialize DB connection first (before service registrations that may trigger side-effects)
+        try {
+            APIMGovernanceDBUtil.initialize();
+        } catch (Throwable e) {
+            log.error("APIMGovernanceDBUtil.initialize() FAILED", e);
         }
 
-        BundleContext bundleContext = componentContext.getBundleContext();
-        APIMGovServerStartupShutdownListener startupShutdownListener
-                = new APIMGovServerStartupShutdownListener();
-        registration = bundleContext
-                .registerService(ServerStartupObserver.class, startupShutdownListener, null);
-        registration = bundleContext
-                .registerService(ServerShutdownHandler.class, startupShutdownListener, null);
-        registration = bundleContext
-                .registerService(JMSListenerShutDownService.class, startupShutdownListener, null);
+        try {
+            BundleContext bundleContext = componentContext.getBundleContext();
 
-        APIMGovernanceDBUtil.initialize();
+            // Initialize the scheduler FIRST (before listener registration that may fail
+            // due to EventHubConfigurationDto not being available in certain runtimes)
+            String migrationEnabled = System.getProperty(APIMGovernanceConstants.MIGRATE);
+            if (migrationEnabled == null) {
+                ComplianceEvaluationScheduler.initialize();
+                APIMGovernanceConfigDeployer configDeployer = new APIMGovernanceConfigDeployer();
+                bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(),
+                        configDeployer, null);
+                log.info("ComplianceEvaluationScheduler initialized successfully");
+            }
 
-        String migrationEnabled = System.getProperty(APIMGovernanceConstants.MIGRATE);
-        if (migrationEnabled == null) {
-            ComplianceEvaluationScheduler.initialize();
-            APIMGovernanceConfigDeployer configDeployer = new APIMGovernanceConfigDeployer();
-            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
+            // Register startup/shutdown listeners (may fail if EventHubConfigurationDto
+            // is not available in the runtime, but this should not block governance)
+            try {
+                APIMGovServerStartupShutdownListener startupShutdownListener
+                        = new APIMGovServerStartupShutdownListener();
+                registration = bundleContext
+                        .registerService(ServerStartupObserver.class, startupShutdownListener, null);
+                registration = bundleContext
+                        .registerService(ServerShutdownHandler.class, startupShutdownListener, null);
+                registration = bundleContext
+                        .registerService(JMSListenerShutDownService.class, startupShutdownListener, null);
+            } catch (Throwable listenerEx) {
+                log.warn("APIMGovServerStartupShutdownListener registration failed (non-fatal): "
+                        + listenerEx.getMessage());
+            }
+
+            log.info("Governance component activated successfully");
+        } catch (Throwable t) {
+            log.error("Error during GovernanceComponent activation", t);
         }
     }
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
-        ComplianceEvaluationScheduler.shutdown();
-        if (registration != null) {
-            registration.unregister();
+        // Only perform real shutdown when the bundle is actually stopping
+        if (log.isDebugEnabled()) {
+            log.debug("GovernanceComponent deactivate() called");
         }
     }
 
@@ -109,7 +140,7 @@ public class GovernanceComponent {
     @Reference(
             name = "org.wso2.carbon.apimgt.governance.engine.SpectralValidationEngine",
             service = ValidationEngine.class,
-            cardinality = ReferenceCardinality.MANDATORY,
+            cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetValidationEngineService"
     )
@@ -121,14 +152,20 @@ public class GovernanceComponent {
         // Register Spectral engine as the default and for SPECTRAL category
         ValidationEngineFactory.setDefaultEngine(validationEngine);
         ValidationEngineFactory.registerValidationEngine(RuleCategory.SPECTRAL, validationEngine);
-        log.info("Registered SpectralValidationEngine as default and for SPECTRAL category");
+        if (log.isDebugEnabled()) {
+            log.debug("Registered SpectralValidationEngine as default and for SPECTRAL category");
+        }
     }
 
     protected void unsetValidationEngineService(ValidationEngine validationEngine) {
 
         ServiceReferenceHolder.getInstance().setValidationEngineService(null);
-        ValidationEngineFactory.setDefaultEngine(null);
-        ValidationEngineFactory.unregisterValidationEngine(RuleCategory.SPECTRAL);
+        // Do NOT null out the default engine or unregister SPECTRAL here.
+        // During OSGi reference oscillation, the engine is immediately re-set,
+        // and nulling it creates a race window where requests get NPE.
+        if (log.isDebugEnabled()) {
+            log.debug("ValidationEngine reference unset (engine remains cached in factory)");
+        }
     }
 
 }

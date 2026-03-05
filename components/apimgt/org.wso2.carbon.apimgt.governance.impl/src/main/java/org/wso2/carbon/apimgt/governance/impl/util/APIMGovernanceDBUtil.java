@@ -51,6 +51,8 @@ public class APIMGovernanceDBUtil {
      *
      * @throws APIMGovernanceException if an error occurs while loading DB configuration
      */
+    private static final String DEFAULT_DATASOURCE_JNDI = "jdbc/WSO2AM_DB";
+
     public static void initialize() throws APIMGovernanceException {
         if (dataSource != null) {
             return;
@@ -58,36 +60,60 @@ public class APIMGovernanceDBUtil {
 
         synchronized (APIMGovernanceDBUtil.class) {
             if (dataSource == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Initializing data source");
-                }
-                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                        getAPIMConfigurationService().getAPIManagerConfiguration();
-                String dataSourceName = config.getAPIMGovernanceConfigurationDto()
-                        .getDataSourceName();
+                log.info("[GovernanceDB] Initializing governance data source...");
 
-                if (dataSourceName != null) {
-                    try {
-                        Context ctx = new InitialContext();
-                        dataSource = (DataSource) ctx.lookup(dataSourceName);
-                    } catch (NamingException e) {
-                        throw new APIMGovernanceException(APIMGovExceptionCodes.DATASOURCE_INACCESSIBLE
-                                , e, dataSourceName);
-                    }
-                } else {
-                    log.error(DATA_SOURCE_NAME + " not defined in api-manager.xml.");
+                // Step 1: resolve the JNDI datasource name from config (or fall back to default)
+                String dataSourceName = null;
+                try {
+                    APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                            .getAPIMConfigurationService().getAPIManagerConfiguration();
+                    dataSourceName = config.getAPIMGovernanceConfigurationDto().getDataSourceName();
+                    log.info("[GovernanceDB] DataSource name from config: " + dataSourceName);
+                } catch (Throwable t) {
+                    // Catches NPE (config service not set), NoClassDefFoundError, etc.
+                    log.warn("[GovernanceDB] Config service unavailable, falling back to default "
+                            + "datasource name (" + DEFAULT_DATASOURCE_JNDI + "): " + t.getMessage());
+                }
+
+                if (dataSourceName == null) {
+                    dataSourceName = DEFAULT_DATASOURCE_JNDI;
+                    log.info("[GovernanceDB] Using default DataSource JNDI name: " + dataSourceName);
+                }
+
+                // Step 2: JNDI lookup
+                try {
+                    Context ctx = new InitialContext();
+                    dataSource = (DataSource) ctx.lookup(dataSourceName);
+                    log.info("[GovernanceDB] DataSource initialized successfully via JNDI: "
+                            + dataSourceName);
+                } catch (NamingException e) {
+                    log.error("[GovernanceDB] JNDI lookup failed for: " + dataSourceName, e);
+                    throw new APIMGovernanceException(APIMGovExceptionCodes.DATASOURCE_INACCESSIBLE,
+                            e, dataSourceName);
                 }
             }
         }
     }
 
     /**
-     * Utility method to get a new database connection
+     * Utility method to get a new database connection.
+     * Performs lazy initialization if the datasource was not ready during startup.
      *
      * @return Connection
      * @throws SQLException if failed to get Connection
      */
     public static Connection getConnection() throws SQLException {
+        if (dataSource != null) {
+            return dataSource.getConnection();
+        }
+
+        // Lazy re-initialization: datasource may not have been ready during component activation
+        try {
+            initialize();
+        } catch (APIMGovernanceException e) {
+            log.debug("[GovernanceDB] Lazy initialization attempt failed", e);
+        }
+
         if (dataSource != null) {
             return dataSource.getConnection();
         }

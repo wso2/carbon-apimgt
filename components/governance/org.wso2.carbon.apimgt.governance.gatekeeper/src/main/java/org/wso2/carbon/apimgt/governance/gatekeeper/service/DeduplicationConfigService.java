@@ -23,7 +23,10 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.gatekeeper.GatekeeperConstants;
+import org.wso2.carbon.apimgt.governance.gatekeeper.internal.GatekeeperServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -77,7 +80,10 @@ public class DeduplicationConfigService {
 
     /**
      * Gets the deduplication configuration for an organization.
-     * Uses cached value if available and not expired.
+     * Resolution order:
+     * 1. Read base config from default.json (via APIMGovernanceConfigDTO)
+     * 2. Override with DB ruleset config if available (per-organization)
+     * 3. Fall back to safe hardcoded defaults if neither is available
      *
      * @param organization The organization
      * @return DeduplicationConfig with threshold and other settings
@@ -94,24 +100,107 @@ public class DeduplicationConfigService {
             }
         }
 
-        // Fetch from database
-        DeduplicationConfig config = fetchConfigFromDatabase(organization);
-        if (config != null) {
-            configCache.put(cacheKey, config);
-            cacheTimestamps.put(cacheKey, System.currentTimeMillis());
+        // Step 1: Load base config from default.json (via APIMGovernanceConfigDTO)
+        DeduplicationConfig config = loadConfigFromDefaultJson();
+
+        // Step 2: Try to override with DB ruleset config (per-organization)
+        DeduplicationConfig dbConfig = fetchConfigFromDatabase(organization);
+        if (dbConfig != null) {
+            // DB config overrides default.json values
+            config = mergeConfigs(config, dbConfig);
+            log.info("Deduplication config for org '" + cacheKey +
+                    "' merged: default.json base + DB ruleset overrides");
         } else {
-            // Use defaults
-            config = new DeduplicationConfig();
-            configCache.put(cacheKey, config);
-            cacheTimestamps.put(cacheKey, System.currentTimeMillis());
+            log.info("Deduplication config for org '" + cacheKey +
+                    "' loaded from default.json (no DB ruleset override found)");
         }
+
+        configCache.put(cacheKey, config);
+        cacheTimestamps.put(cacheKey, System.currentTimeMillis());
 
         return config;
     }
 
     /**
+     * Loads deduplication configuration from default.json via the APIMGovernanceConfigDTO.
+     * Falls back to safe hardcoded defaults if the config service is unavailable.
+     *
+     * @return DeduplicationConfig populated from default.json
+     */
+    private DeduplicationConfig loadConfigFromDefaultJson() {
+        DeduplicationConfig config = new DeduplicationConfig();
+
+        try {
+            APIManagerConfiguration apiManagerConfig = GatekeeperServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+            if (apiManagerConfig != null) {
+                APIMGovernanceConfigDTO govConfig = apiManagerConfig.getAPIMGovernanceConfigurationDto();
+                if (govConfig != null) {
+                    config.setEnabled(govConfig.isDeduplicationEnabled());
+                    config.setSimilarityThreshold(govConfig.getDeduplicationSimilarityThreshold());
+                    config.setHighConfidenceThreshold(govConfig.getDeduplicationHighConfidenceThreshold());
+                    config.setMode(govConfig.getDeduplicationMode());
+                    config.setNumHashFunctions(govConfig.getDeduplicationNumHashFunctions());
+                    config.setNumBands(govConfig.getDeduplicationNumBands());
+                    config.setShingleSize(govConfig.getDeduplicationShingleSize());
+
+                    log.info("Loaded deduplication config from default.json: threshold="
+                            + config.getSimilarityThreshold()
+                            + ", mode=" + config.getMode()
+                            + ", enabled=" + config.isEnabled());
+                    return config;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Could not load dedup config from default.json, using hardcoded defaults: "
+                    + e.getMessage());
+            if (log.isDebugEnabled()) {
+                log.debug("Stack trace:", e);
+            }
+        }
+
+        // Safe hardcoded defaults (matched to GatekeeperConstants)
+        log.info("Using hardcoded default deduplication config");
+        return config;
+    }
+
+    /**
+     * Merges a database-sourced config on top of a base config (from default.json).
+     * Only non-default DB values override the base.
+     *
+     * @param base     Base config from default.json
+     * @param override Override config from DB
+     * @return Merged config
+     */
+    private DeduplicationConfig mergeConfigs(DeduplicationConfig base, DeduplicationConfig override) {
+        DeduplicationConfig merged = new DeduplicationConfig();
+
+        // Start with base values
+        merged.setEnabled(base.isEnabled());
+        merged.setSimilarityThreshold(base.getSimilarityThreshold());
+        merged.setHighConfidenceThreshold(base.getHighConfidenceThreshold());
+        merged.setMode(base.getMode());
+        merged.setNumHashFunctions(base.getNumHashFunctions());
+        merged.setNumBands(base.getNumBands());
+        merged.setShingleSize(base.getShingleSize());
+
+        // Override with DB values (DB config is authoritative when present)
+        merged.setEnabled(override.isEnabled());
+        merged.setSimilarityThreshold(override.getSimilarityThreshold());
+        merged.setHighConfidenceThreshold(override.getHighConfidenceThreshold());
+        merged.setMode(override.getMode());
+        merged.setNumHashFunctions(override.getNumHashFunctions());
+        merged.setNumBands(override.getNumBands());
+        merged.setShingleSize(override.getShingleSize());
+
+        return merged;
+    }
+
+    /**
      * Invalidates the cache for an organization.
      * Call this when the deduplication ruleset is updated.
+     * Note: This should NOT be called when a lifecycle/retirement ruleset is updated.
      *
      * @param organization The organization
      */
@@ -162,6 +251,7 @@ public class DeduplicationConfigService {
 
     /**
      * Checks if any governance policy has the deduplication ruleset associated.
+     * Excludes lifecycle/retirement rulesets from the count.
      */
     private boolean checkPolicyAssociationInDB(String organization) {
         String org = organization != null ? organization : "carbon.super";
@@ -169,6 +259,9 @@ public class DeduplicationConfigService {
         String sql = "SELECT COUNT(*) AS CNT FROM GOV_POLICY_RULESET pr " +
                 "JOIN GOV_RULESET r ON pr.RULESET_ID = r.RULESET_ID " +
                 "WHERE r.RULE_CATEGORY = 'GENERIC' " +
+                "AND LOWER(r.NAME) NOT LIKE '%lifecycle%' " +
+                "AND LOWER(r.NAME) NOT LIKE '%retirement%' " +
+                "AND LOWER(r.NAME) NOT LIKE '%deprecation%' " +
                 "AND (r.ORGANIZATION = ? OR r.ORGANIZATION = 'carbon.super')";
         
         try (Connection conn = APIMGovernanceDBUtil.getConnection();
@@ -226,12 +319,16 @@ public class DeduplicationConfigService {
     }
     
     /**
-     * Fetches config by RULE_CATEGORY = 'GENERIC'.
+     * Fetches config by RULE_CATEGORY = 'GENERIC', excluding lifecycle rulesets.
+     * Only returns configuration for the deduplication engine, not lifecycle/retirement rulesets.
      */
     private DeduplicationConfig fetchByCategory(String organization) {
         String sql = "SELECT rc.CONTENT FROM GOV_RULESET r " +
                 "JOIN GOV_RULESET_CONTENT rc ON r.RULESET_ID = rc.RULESET_ID " +
                 "WHERE r.RULE_CATEGORY = 'GENERIC' " +
+                "AND LOWER(r.NAME) NOT LIKE '%lifecycle%' " +
+                "AND LOWER(r.NAME) NOT LIKE '%retirement%' " +
+                "AND LOWER(r.NAME) NOT LIKE '%deprecation%' " +
                 "AND (r.ORGANIZATION = ? OR r.ORGANIZATION = 'carbon.super') " +
                 "ORDER BY CASE WHEN r.ORGANIZATION = ? THEN 0 ELSE 1 END " +
                 "LIMIT 1";
