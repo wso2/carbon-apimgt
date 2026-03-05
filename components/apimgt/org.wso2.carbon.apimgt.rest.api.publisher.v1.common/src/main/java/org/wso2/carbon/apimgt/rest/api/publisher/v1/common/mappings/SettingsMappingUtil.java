@@ -17,14 +17,19 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayFeatureCatalog;
+import org.wso2.carbon.apimgt.api.model.GatewayMode;
+import org.wso2.carbon.apimgt.api.model.PlatformGateway;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -39,6 +44,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberContactAttribu
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +72,7 @@ public class SettingsMappingUtil {
         if (isUserAvailable) {
             Map<String, Environment> environments = APIUtil.getEnvironments(organization);
             if (environments != null) {
+                addPlatformGatewaysToEnvironmentsMap(environments, organization);
                 environmentListDTO = EnvironmentMappingUtil.fromEnvironmentCollectionToDTO(environments.values());
             }
             settingsDTO.setEnvironment(environmentListDTO.getList());
@@ -115,6 +122,55 @@ public class SettingsMappingUtil {
             settingsDTO.setIsGatewayNotificationEnabled(APIUtil.isGatewayNotificationEnabled());
         }
         return settingsDTO;
+    }
+
+    /**
+     * Merge platform gateways (registered via admin portal) into the environments map
+     * so GET /settings returns them in the environment list.
+     */
+    private void addPlatformGatewaysToEnvironmentsMap(Map<String, Environment> environments, String organization) {
+        PlatformGatewayService platformGatewayService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        if (platformGatewayService == null) {
+            return;
+        }
+        try {
+            List<PlatformGateway> gateways = platformGatewayService.listGatewaysByOrganization(organization);
+            if (gateways == null) {
+                return;
+            }
+            for (PlatformGateway gw : gateways) {
+                if (gw == null || StringUtils.isBlank(gw.getName()) || environments.containsKey(gw.getName())) {
+                    continue;
+                }
+                Environment env = new Environment();
+                env.setUuid(gw.getId());
+                env.setName(gw.getName());
+                env.setDisplayName(gw.getDisplayName() != null ? gw.getDisplayName() : gw.getName());
+                env.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+                env.setProvider("wso2");
+                env.setMode(GatewayMode.WRITE_ONLY.getMode());
+                String vhostStr = StringUtils.isNotBlank(gw.getVhost()) ? gw.getVhost() : "default";
+                String vhostHost = vhostStr;
+                int httpsPort = 8443; // api-platform gateway default HTTPS port
+                if (vhostStr.contains(":")) {
+                    String[] parts = vhostStr.split(":", 2);
+                    vhostHost = parts[0];
+                    if (parts.length > 1 && StringUtils.isNumeric(parts[1])) {
+                        httpsPort = Integer.parseInt(parts[1]);
+                    }
+                }
+                VHost vhost = new VHost();
+                vhost.setHost(vhostHost);
+                vhost.setWsHost(vhostHost);
+                vhost.setHttpPort(VHost.DEFAULT_HTTP_PORT);
+                vhost.setHttpsPort(httpsPort);
+                env.setVhosts(Collections.singletonList(vhost));
+                environments.put(gw.getName(), env);
+            }
+        } catch (Exception e) {
+            log.warn("Could not add platform gateways to settings environment list", e);
+        }
     }
 
     /**

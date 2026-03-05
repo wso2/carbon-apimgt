@@ -264,13 +264,24 @@ public class APIAdminImpl implements APIAdmin {
         Environment env = APIUtil.getReadOnlyEnvironments().get(uuid);
         if (env == null) {
             env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
-            if (env == null) {
-                String errorMessage = String.format("Failed to retrieve Environment with UUID %s. " +
-                                "Environment not found", uuid);
-                throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
-                        ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid))
-                );
+        }
+        if (env == null) {
+            // Platform gateways are added by addPlatformGatewaysToEnvironmentsMap and may not be in DB;
+            // resolve by UUID from organization-scoped environment map.
+            Map<String, Environment> orgEnvs = APIUtil.getEnvironments(tenantDomain);
+            for (Environment e : orgEnvs.values()) {
+                if (uuid.equals(e.getUuid())) {
+                    env = e;
+                    break;
+                }
             }
+        }
+        if (env == null) {
+            String errorMessage = String.format("Failed to retrieve Environment with UUID %s. " +
+                            "Environment not found", uuid);
+            throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
+                    ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid))
+            );
         }
         return env;
     }

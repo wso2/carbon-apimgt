@@ -49,12 +49,13 @@ public final class PlatformGatewayAPIYamlConverter {
 
     /**
      * Build API Platform format YAML string from on-prem API for platform-gateway deployment.
-     * Uses platform-style context so invocation URL matches: /{orgId}/{environment}/{apiName}/{version}/{resource}.
+     * Uses the API's own context (with {version} replaced by actual version), so invocation URL
+     * matches Synapse and other gateway types: no tenant or environment in the path.
      * No policies are included (policy hub).
      *
      * @param api on-prem API (must have endpoint config)
-     * @param organization organization (tenant domain, e.g. carbon.super); if blank, uses API context
-     * @param environment environment segment (e.g. "default"); if blank, uses API context
+     * @param organization organization (tenant domain); used for validation/lookup only, not in URL path
+     * @param environment environment (unused in path; kept for API compatibility)
      * @return YAML string (apiVersion, kind, metadata, spec with displayName, version, context, upstream, operations)
      * @throws APIManagementException if API is invalid or endpoint URL cannot be resolved
      */
@@ -63,7 +64,9 @@ public final class PlatformGatewayAPIYamlConverter {
         String displayName = sanitizeDisplayName(
                 api.getDisplayName() != null ? api.getDisplayName() : (api.getId() != null ? api.getId().getApiName() : null));
         String version = normalizeVersion(api.getId() != null ? api.getId().getVersion() : null);
-        String context = buildPlatformStyleContext(organization, environment, displayName, version, api);
+        String versionInPath = api.getId() != null && StringUtils.isNotBlank(api.getId().getVersion())
+                ? api.getId().getVersion() : "1.0";
+        String context = buildContextFromApi(api, versionInPath);
         String metadataName = toMetadataName(displayName, version);
         return buildYaml(api, displayName, version, context, metadataName);
     }
@@ -85,17 +88,26 @@ public final class PlatformGatewayAPIYamlConverter {
         return buildYaml(api, displayName, version, context, metadataName);
     }
 
-    private static String buildPlatformStyleContext(String organization, String environment, String displayName,
-            String version, API api) {
-        if (StringUtils.isBlank(organization) || StringUtils.isBlank(environment)) {
-            return normalizeContext(api.getContextTemplate() != null ? api.getContextTemplate() : api.getContext());
+    /**
+     * Builds context from the API's context template and version. Uses version as-is in path (e.g. 1.0.0).
+     * Replaces {version} in the template with the actual version. Invocation path: e.g. /demo/1.0.0/
+     */
+    private static String buildContextFromApi(API api, String versionInPath) {
+        String template = api.getContextTemplate() != null ? api.getContextTemplate() : api.getContext();
+        if (StringUtils.isBlank(template)) {
+            String displayName = api.getDisplayName() != null ? api.getDisplayName()
+                    : (api.getId() != null ? api.getId().getApiName() : "api");
+            String apiNamePath = toApiNamePath(displayName);
+            return "/" + apiNamePath + "/" + versionInPath;
         }
-        String orgSegment = organization.trim().toLowerCase().replaceAll("[^a-z0-9\\-_.]", "-").replaceAll("-+", "-").replaceAll("^-|-$", "");
-        if (orgSegment.isEmpty()) orgSegment = "default";
-        String envSegment = environment.trim().toLowerCase().replaceAll("[^a-z0-9\\-]", "-").replaceAll("-+", "-").replaceAll("^-|-$", "");
-        if (envSegment.isEmpty()) envSegment = "default";
-        String apiNamePath = toApiNamePath(displayName);
-        return "/" + orgSegment + "/" + envSegment + "/" + apiNamePath + "/" + version;
+        String ctx = template.trim();
+        if (!ctx.startsWith("/")) ctx = "/" + ctx;
+        if (ctx.contains(APIConstants.VERSION_PLACEHOLDER)) {
+            ctx = ctx.replace(APIConstants.VERSION_PLACEHOLDER, versionInPath);
+        } else if (!ctx.endsWith("/" + versionInPath)) {
+            ctx = ctx.endsWith("/") ? ctx + versionInPath : ctx + "/" + versionInPath;
+        }
+        return normalizeContext(ctx);
     }
 
     /** URL path segment from display name (e.g. "Reading List API 1" -> "reading-list-api-1"). Returns "api" if null, empty, or normalized to empty (e.g. only separators). */
