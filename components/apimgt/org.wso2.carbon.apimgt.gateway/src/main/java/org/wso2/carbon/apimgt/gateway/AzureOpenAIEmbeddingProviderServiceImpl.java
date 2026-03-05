@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.gateway;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -59,9 +60,19 @@ public class AzureOpenAIEmbeddingProviderServiceImpl implements EmbeddingProvide
         azureApiKey = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_API_KEY);
         endpointUrl = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT);
 
-        if (this.azureApiKey == null || this.endpointUrl == null) {
-            throw new APIManagementException(
-                    "Missing required Azure OpenAI configuration properties: 'apikey' and/or 'embedding_endpoint'");
+        boolean isApiKeyMissing = StringUtils.isEmpty(this.azureApiKey);
+        boolean isEndpointMissing = StringUtils.isEmpty(this.endpointUrl);
+
+        if (isApiKeyMissing || isEndpointMissing) {
+            StringBuilder missingPropertiesBuilder = new StringBuilder();
+            if (isApiKeyMissing) {
+                missingPropertiesBuilder.append(APIConstants.AI.EMBEDDING_PROVIDER_API_KEY).append(", ");
+            }
+            if (isEndpointMissing) {
+                missingPropertiesBuilder.append(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT).append(", ");
+            }
+            String missing = missingPropertiesBuilder.substring(0, missingPropertiesBuilder.length() - 2);
+            throw new APIManagementException("Missing required properties: " + missing);
         }
 
         // Retry parameters
@@ -74,8 +85,7 @@ public class AzureOpenAIEmbeddingProviderServiceImpl implements EmbeddingProvide
                     .getOrDefault(APIConstants.AI.RETRY_PROGRESSION_FACTOR,
                             APIConstants.AI.DEFAULT_RETRY_PROGRESSION_FACTOR));
         } catch (NumberFormatException e) {
-            throw new APIManagementException("Invalid retry configuration provided: " +
-                    "'retrieval_timeout', 'retry_count', 'retry_progression_factor'");
+            throw new APIManagementException("Failed to parse retry configuration: " + e.getMessage(), e);
         }
 
         this.httpClient = APIUtil.getHttpClient(endpointUrl);
@@ -93,19 +103,18 @@ public class AzureOpenAIEmbeddingProviderServiceImpl implements EmbeddingProvide
 
     @Override
     public double[] getEmbedding(String input) throws APIManagementException {
-        HttpPost post = new HttpPost(endpointUrl);
-        post.setHeader(APIConstants.API_KEY_AUTH, azureApiKey);
-        post.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+        HttpPost httpPostRequest = new HttpPost(endpointUrl);
+        httpPostRequest.setHeader(APIConstants.API_KEY_AUTH, azureApiKey);
+        httpPostRequest.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
 
         try {
-            // Build request JSON
             ObjectNode requestBody = objectMapper.createObjectNode();
             requestBody.put(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_REQUEST_INPUT, input);
             String json = objectMapper.writeValueAsString(requestBody);
-            post.setEntity(new StringEntity(json, StandardCharsets.UTF_8));
+            httpPostRequest.setEntity(new StringEntity(json, StandardCharsets.UTF_8));
 
             try (CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(
-                    post, httpClient, retrievalTimeout, maxRetryCount, retryProgressionFactor)) {
+                    httpPostRequest, httpClient, retrievalTimeout, maxRetryCount, retryProgressionFactor)) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
 
