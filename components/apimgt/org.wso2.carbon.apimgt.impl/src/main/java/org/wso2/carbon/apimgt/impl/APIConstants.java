@@ -208,6 +208,10 @@ public final class APIConstants {
     public static final String FILE_URI_PREFIX = "file://";
     public static final String API_DOC_RESOURCE_NAME = "api-doc.json";
 
+    public static final String WSDL_RESOURCE_TYPE = "wsdl";
+    public static final String URL_EXPIRATION_TIME_PARAM = "exp=";
+    public static final String URL_SIGNATURE_PARAM = "&sig=";
+
     public static final String WSDL_VERSION_11 = "1.1";
     public static final String WSDL_VERSION_20 = "2.0";
 
@@ -1138,6 +1142,7 @@ public final class APIConstants {
     public static final String API_DEVPORTAL_DEFAULT_RESERVED_USERNAME = API_STORE +
             "DefaultReservedUsername";
     public static final String API_STORE_CREATE_DEFAULT_APPLICATION = API_STORE + "CreateDefaultApplication";
+    public static final String DEVPORTAL_URL_GENERATION_SECRET = API_STORE + "URLGenSecret";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = API_PUBLISHER + "DisplayURL";
@@ -2877,6 +2882,7 @@ public final class APIConstants {
         public static final String PUB_API_RESPONSE_PARAMS_ID = "id";
         public static final String DYNAMIC_CLIENT_REGISTRATION_URL_SUFFIX =
                 "/client-registration/" + REST_API_OLD_VERSION + "/register";
+        public static final String ENVIRONMENT_NAME = "environmentName";
     }
 
     public static final int MAX_LENGTH_API_NAME = 60;
@@ -2890,7 +2896,7 @@ public final class APIConstants {
      */
     public static final String TRUST_STORE_PASSWORD = "Security.TrustStore.Password";
     public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
-    
+
     /**
      * Constants related to HTTP client creation
      */
@@ -3060,6 +3066,13 @@ public final class APIConstants {
         public static final String EVENT_HUB_CONFIGURATIONS = "EventHubConfigurations";
         public static final String KEY_MANAGER = "KeyManager";
         public static final String APPLICATION_CONFIGURATIONS = "ApplicationConfigurations";
+        public static final String CONSTRAINTS = "constraints";
+        public static final String CONSTRAINT_TYPE = "type";
+        public static final String CONSTRAINT_VALUE = "value";
+        public static final String CONSTRAINT_FIELD_MAX = "max";
+        public static final String CONSTRAINT_FIELD_MIN = "min";
+        public static final String CONSTRAINT_FIELD_PATTERN = "pattern";
+        public static final String CONSTRAINT_FIELD_ALLOWED = "allowed";
         public static final String EVENT_RECEIVER_CONFIGURATION = "EventReceiverConfiguration";
 
         public static final String ENABLE = "Enable";
@@ -3121,6 +3134,15 @@ public final class APIConstants {
         public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
         public static final String APPLICATION_GRANT_TYPE = "application";
         public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";
+        public static final String ENABLE_MULTIPLE_CLIENT_SECRETS = "enable_multiple_client_secrets";
+        public static final String CLIENT_SECRET_COUNT = "client_secret_count";
+        public static final String CLIENT_SECRET_DESCRIPTION = "client_secret_description";
+        public static final String CLIENT_SECRET_EXPIRES_IN = "client_secret_expires_in";
+        public static final String CLIENT_SECRET_EXPIRES_AT = "client_secret_expires_at";
+
+        public static final String CUSTOM_KM_TYPE = "CustomKeyManager";
+        public static final String CUSTOM_KM_DISPLAY_NAME = "Custom Key Manager (Out-of-Band Provisioning)";
+        public static final String DEFAULT_KEY_MANAGER_HOST = "https://localhost:9443";
 
         public static class KeyManagerEvent {
 
@@ -3633,7 +3655,7 @@ public final class APIConstants {
 
     // Constants related to the Certificate Management
     public static final String ENABLE_CERTIFICATE_MANAGEMENT_EVENT_LISTENING = "EnableCertificateManagementEventListening";
-    
+
     // For Organization access control Configuration
     public static final String ORG_BASED_ACCESS_CONTROL = "OrganizationBasedAccessControl";
     public static final String ORG_BASED_ACCESS_CONTROL_ENABLE = "Enable";

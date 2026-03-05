@@ -28,7 +28,9 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.context.CarbonContext;
@@ -36,10 +38,17 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -935,6 +944,66 @@ public class RestApiCommonUtil {
         openAPI.addExtension(X_WSO2_BASEPATH, context + "/" + version);
         openAPI.addExtension(X_WSO2_DISABLE_SECURITY, true);
         return Json.mapper().writeValueAsString(openAPI);
+    }
+
+    public static String generateSignedUrl(String basePath, String separator, String apiUUID)
+            throws APIManagementException {
+        try {
+            long timeOfExpiration = (System.currentTimeMillis() + (15 * 60 * 1000)) / 1000;
+            byte[] signedString = signWithHmacSHA256((apiUUID + ":" + timeOfExpiration), getHmacKeyBytes());
+            String signature = toHexString(signedString);
+            return basePath + separator + APIConstants.URL_EXPIRATION_TIME_PARAM + timeOfExpiration + APIConstants.URL_SIGNATURE_PARAM + signature;
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new APIManagementException("Error generating HMAC signature for API resource URL: " + apiUUID, e);
+        }
+    }
+
+    public static void validateSignedUrl(long exp, String sig, String apiUUID) throws APIManagementException {
+        long now = System.currentTimeMillis() / 1000L;
+        if (exp <= now) {
+            throw new APIManagementException("Provided URL is invalid for API UUID: " + apiUUID, ExceptionCodes.WSDL_URL_INVALID);
+        }
+        try {
+            byte[] signedString = signWithHmacSHA256((apiUUID + ":" + exp), getHmacKeyBytes());
+            String expectedSignature = toHexString(signedString);
+            if (sig == null || !MessageDigest.isEqual(expectedSignature.getBytes(StandardCharsets.UTF_8),
+                    sig.getBytes(StandardCharsets.UTF_8))) {
+                throw new APIManagementException("Provided URL is unauthorized for API UUID: " + apiUUID,
+                        ExceptionCodes.WSDL_URL_INVALID);
+            }
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new APIManagementException("Error validating HMAC signature for API URL: " + apiUUID, e);
+        }
+    }
+
+    protected static byte[] getHmacKeyBytes() throws APIManagementException {
+        String base64Key = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getFirstProperty(APIConstants.DEVPORTAL_URL_GENERATION_SECRET);
+
+        if (StringUtils.isEmpty(base64Key)) {
+            throw new APIManagementException("Could not resolve HMAC secret key from API Manager Configuration.");
+        }
+        try {
+            return Base64.getDecoder().decode(base64Key);
+        } catch (IllegalArgumentException e) {
+            log.debug("HMAC secret key is not a valid Base64 encoded string.");
+            throw new APIManagementException("HMAC secret key is not a valid Base64 encoded string.", e);
+        }
+    }
+
+    private static byte[] signWithHmacSHA256(String data, byte[] key) throws NoSuchAlgorithmException, InvalidKeyException {
+        Mac mac = Mac.getInstance(APIConstants.AWSConstants.HMAC_SHA_256);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, APIConstants.AWSConstants.HMAC_SHA_256);
+        mac.init(secretKeySpec);
+        return mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static String toHexString(byte[] bytes) {
+        StringBuilder result = new StringBuilder();
+        for (byte b : bytes) {
+            result.append(String.format("%02x", b));
+        }
+        return result.toString();
     }
 
 }

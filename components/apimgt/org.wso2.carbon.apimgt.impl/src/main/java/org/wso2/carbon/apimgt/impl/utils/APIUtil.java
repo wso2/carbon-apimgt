@@ -392,6 +392,7 @@ public final class APIUtil {
 
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
+    private static final int CONSUMER_SECRET_MASK_LENGTH = 16;
 
     private APIUtil() {
 
@@ -4887,6 +4888,33 @@ public final class APIUtil {
         object.put(APIConstants.HASH, bytesToHex(hash));
 
         return object.toString();
+    }
+
+    public static String maskSecret(String secret) {
+
+        boolean isHashingEnabled = OAuthServerConfiguration.getInstance().isClientSecretHashEnabled();
+        if (log.isDebugEnabled()) {
+            log.debug("Masking secret. Client Secret Hashing enabled: " + isHashingEnabled);
+        }
+        if (secret == null || secret.isEmpty() || isHashingEnabled) {
+            // Always return a fixed length mask value if secret is null or empty or if hashing is enabled
+            return generateMask(CONSUMER_SECRET_MASK_LENGTH);
+        }
+
+        // Show first 3 characters, mask the rest so total = 16
+        int visibleChars = Math.min(3, secret.length());
+        int maskedPartLength = Math.max(CONSUMER_SECRET_MASK_LENGTH - visibleChars, 0);
+        String visiblePart = secret.substring(0, visibleChars);
+        return visiblePart + generateMask(maskedPartLength);
+    }
+
+    private static String generateMask(int length) {
+        // Generate mask dynamically for given length
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            sb.append('*');
+        }
+        return sb.toString();
     }
 
     private static String bytesToHex(byte[] bytes) {
@@ -12020,6 +12048,26 @@ public final class APIUtil {
     }
 
     /**
+     * Check whether multiple client secret support is enabled or not.
+     *
+     * @return Whether multiple client secret support is enabled or not.
+     */
+    public static boolean isMultipleClientSecretsEnabled() {
+
+        return ServiceReferenceHolder.getInstance().getOauthServerConfiguration().isMultipleClientSecretsEnabled();
+    }
+
+    /**
+     * Get the number of client secrets allowed for an OAuth client.
+     *
+     * @return Number of client secrets allowed for an OAuth client.
+     */
+    public static int getClientSecretCount() {
+
+        return ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getClientSecretCount();
+    }
+
+    /**
      * Validates the environment and schedules the federated gateway API discovery if applicable.
      *
      * @param environment   The environment to validate and schedule discovery for.
@@ -12039,6 +12087,30 @@ public final class APIUtil {
         } catch (APIManagementException e) {
             log.error("Error while validating and scheduling federated gateway API discovery for environment: "
                     + environment.getName() + " in organization: " + organization, e);
+        }
+    }
+
+    /**
+     * Stops the federated gateway API discovery for the given environment and organization.
+     *
+     * @param environment   The environment for which to stop the discovery.
+     * @param organization  The organization to which the environment belongs.
+     */
+    public static void stopFederatedGatewayAPIDiscovery(Environment environment, String organization) {
+        FederatedAPIDiscoveryService federatedAPIDiscoveryService = ServiceReferenceHolder
+                .getInstance().getFederatedAPIDiscoveryService();
+        if (APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(environment.getProvider()) &&
+                federatedAPIDiscoveryService != null) {
+            try {
+                federatedAPIDiscoveryService.stopDiscovery(environment, organization);
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully stopped federated API discovery for environment: " +
+                            environment.getName());
+                }
+            } catch (Exception e) {
+                log.error("Error while stopping federated API discovery for environment: "
+                        + environment.getName(), e);
+            }
         }
     }
 
