@@ -102,15 +102,15 @@ public class APIMRestAPICommonComponent {
     }
 
     private void initializeUrlSigningKey() {
-        String base64Key = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+        String urlGenerationKey = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                 .getFirstProperty(APIConstants.DEVPORTAL_URL_GENERATION_SECRET);
-        if (StringUtils.isNotEmpty(base64Key)) {
-            byte[] finalKey = base64Key.getBytes(StandardCharsets.UTF_8);
+        if (StringUtils.isNotEmpty(urlGenerationKey)) {
+            byte[] finalKey = urlGenerationKey.getBytes(StandardCharsets.UTF_8);
             ServiceReferenceHolder.getInstance().setUrlSigningKey(finalKey);
         } else {
-            byte[] keyBytes = new byte[32];
-            new SecureRandom().nextBytes(keyBytes);
-            ServiceReferenceHolder.getInstance().setUrlSigningKey(keyBytes);
+            byte[] urlGenerationKeyBytes = new byte[32];
+            new SecureRandom().nextBytes(urlGenerationKeyBytes);
+            ServiceReferenceHolder.getInstance().setUrlSigningKey(urlGenerationKeyBytes);
         }
     }
 }
