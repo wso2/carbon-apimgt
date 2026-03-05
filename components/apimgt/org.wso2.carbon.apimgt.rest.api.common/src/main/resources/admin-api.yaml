@@ -6119,6 +6119,10 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/KeyManagerConfiguration'
+              configurationConstraints:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConfigurationConstraint'
         gatewayConfiguration:
           type: array
           items:
@@ -6476,6 +6480,36 @@ components:
           description: Indicates that this configuration field cannot be modified once the Key Manager is created.
           default: false
           example: true
+    ConfigurationConstraint:
+      title: Configurable Configuration Constraints
+      type: object
+      properties:
+        name:
+          type: string
+          example: application_access_token_expiry_time
+        label:
+          type: string
+          example: Access Token Expiry
+        type:
+          type: string
+          example: input
+        multiple:
+          type: boolean
+          example: true
+        tooltip:
+          type: string
+          example: Define the valid range for token expiration in seconds.
+        constraintType:
+          type: string
+          example: RANGE
+        values:
+          type: array
+          items:
+            type: object
+            properties: { }
+        default:
+          type: object
+          properties: { }
     GatewayConfiguration:
       title: Gateway Configuration
       type: object

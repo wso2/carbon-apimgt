@@ -105,10 +105,11 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
 
             AsyncApi30Channel channel = channels.get(channelName);
             if (channel == null) continue;
+            String channelAddress = StringUtils.isNotBlank(channel.getAddress()) ? channel.getAddress() : channelName;
 
             if (includePublish && APISpecParserConstants.ASYNCAPI_ACTION_SEND.equalsIgnoreCase(action)) {
                 uriTemplates.add(buildURITemplate(
-                        channelName,
+                        channelAddress,
                         APISpecParserConstants.HTTP_VERB_PUBLISH,
                         operation,
                         scopes,
@@ -116,7 +117,7 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
                 ));
             } else if (APISpecParserConstants.ASYNCAPI_ACTION_RECEIVE.equalsIgnoreCase(action)) {
                 uriTemplates.add(buildURITemplate(
-                        channelName,
+                        channelAddress,
                         APISpecParserConstants.HTTP_VERB_SUBSCRIBE,
                         operation,
                         scopes,

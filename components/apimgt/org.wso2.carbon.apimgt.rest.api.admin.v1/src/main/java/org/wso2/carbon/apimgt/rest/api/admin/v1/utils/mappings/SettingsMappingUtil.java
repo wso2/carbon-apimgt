@@ -76,7 +76,8 @@ public class SettingsMappingUtil {
                         keyManagerConfiguration.getDefaultConsumerKeyClaim(),
                         keyManagerConfiguration.getConnectionConfigurations(),
                         keyManagerConfiguration.getAuthConfigurations(),
-                        keyManagerConfiguration.getEndpointConfigurations()));
+                        keyManagerConfiguration.getEndpointConfigurations(),
+                        keyManagerConfiguration.getAvailableAppConfigConstraints()));
             }
         });
         return list;
@@ -102,7 +103,7 @@ public class SettingsMappingUtil {
     private static SettingsKeyManagerConfigurationDTO fromKeyManagerConfigurationToSettingsKeyManagerConfigurationDTO(
             String name, String displayName, String scopesClaim, String consumerKeyClaim,
             List<ConfigurationDto> connectionConfigurationDtoList, List<ConfigurationDto> authConfigurationDtoList,
-            List<ConfigurationDto> endpointConfigurations) {
+            List<ConfigurationDto> endpointConfigurations, List<ConstraintConfigDto> availableAppConfigConstraints) {
 
         SettingsKeyManagerConfigurationDTO settingsKeyManagerConfigurationDTO =
                 new SettingsKeyManagerConfigurationDTO();
@@ -154,6 +155,20 @@ public class SettingsMappingUtil {
                 keyManagerConfigurationDTO.setDefault(configurationDto.getDefaultValue());
                 keyManagerConfigurationDTO.setValues(configurationDto.getValues());
                 settingsKeyManagerConfigurationDTO.getEndpointConfigurations().add(keyManagerConfigurationDTO);
+            }
+        }
+        if (availableAppConfigConstraints != null) {
+            for (ConstraintConfigDto constraintConfig : availableAppConfigConstraints) {
+                ConfigurationConstraintDTO constraintDTO = new ConfigurationConstraintDTO();
+                constraintDTO.setName(constraintConfig.getName());
+                constraintDTO.setLabel(constraintConfig.getLabel());
+                constraintDTO.setType(constraintConfig.getType());
+                constraintDTO.setTooltip(constraintConfig.getTooltip());
+                constraintDTO.setMultiple(constraintConfig.isMultiple());
+                constraintDTO.setValues(constraintConfig.getValues());
+                constraintDTO.setDefault(constraintConfig.getDefaultConstraints());
+                constraintDTO.setConstraintType(constraintConfig.getConstraintType().toString());
+                settingsKeyManagerConfigurationDTO.getConfigurationConstraints().add(constraintDTO);
             }
         }
         return settingsKeyManagerConfigurationDTO;

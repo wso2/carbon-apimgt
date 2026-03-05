@@ -202,18 +202,42 @@ public class RestApiUtil {
      * @return JAXRS Response object
      */
     public static Response getResponseFromResourceFile(String fileNameWithoutExtension, ResourceFile resourceFile) {
+        return buildResourceResponse(fileNameWithoutExtension, resourceFile, APIConstants.APPLICATION_WSDL_MEDIA_TYPE,
+                true);
+    }
+
+    /**
+     * Create a JAXRS Response object based on the provided ResourceFile for Devportal to support both wsdl download and wsdl access via URL.
+     *
+     * @param fileNameWithoutExtension Filename without the extension. The extension is determined from the method
+     * @param resourceFile ResourceFile object
+     * @return JAXRS Response object
+     */
+    public static Response getResponseFromResourceFileForDevportal(String fileNameWithoutExtension,
+            ResourceFile resourceFile) {
+        return buildResourceResponse(fileNameWithoutExtension, resourceFile, APIConstants.APPLICATION_XML_MEDIA_TYPE,
+                false);
+    }
+
+    private static Response buildResourceResponse(String fileNameWithoutExtension, ResourceFile resourceFile,
+            String wsdlContentType, boolean asAttachment) {
         String contentType;
         String extension;
         if (resourceFile.getContentType().contains(APIConstants.APPLICATION_ZIP)) {
             contentType = APIConstants.APPLICATION_ZIP;
             extension = APIConstants.ZIP_FILE_EXTENSION;
         } else {
-            contentType = APIConstants.APPLICATION_WSDL_MEDIA_TYPE;
+            contentType = wsdlContentType;
             extension = APIConstants.WSDL_FILE_EXTENSION;
         }
         String filename = fileNameWithoutExtension + extension;
-        return Response.ok(resourceFile.getContent(), contentType).header("Content-Disposition",
-                "attachment; filename=\"" + filename + "\"" ).build();
+        if (asAttachment) {
+            return Response.ok(resourceFile.getContent(), contentType)
+                    .header("Content-Disposition", "attachment; filename=\"" + filename + "\"").build();
+        } else {
+            return Response.ok(resourceFile.getContent(), contentType)
+                    .header("Content-Disposition", "inline; filename=\"" + filename + "\"").build();
+        }
     }
 
     /**

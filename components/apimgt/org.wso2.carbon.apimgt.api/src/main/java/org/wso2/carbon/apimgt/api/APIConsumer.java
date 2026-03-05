@@ -30,6 +30,8 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretInfo;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -49,6 +51,7 @@ import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.api.model.ApplicationResponse;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -463,7 +466,7 @@ public interface APIConsumer extends APIManager {
      * @param offset
      * @param groupingId   the groupId to which the applications must belong.
      * @param organization Identifier of an organization
-     * @param sharedOrganization 
+     * @param sharedOrganization
      * @return Applications
      * @throws APIManagementException if failed to applications for given subscriber
      */
@@ -632,6 +635,65 @@ public interface APIConsumer extends APIManager {
     String renewConsumerSecret(String clientId, String keyManagerName) throws APIManagementException;
 
     /**
+     * Generates a new consumer secret for an OAuth application.
+     * <p>
+     * Implementations may override this method to support creating additional
+     * consumer secrets for a given client. The default implementation does not
+     * support this operation and will throw an {@link UnsupportedOperationException}.
+     *
+     * @param keyManagerName         name of the Key Manager associated with the OAuth application
+     * @param consumerSecretRequest  request containing information required to generate the consumer secret
+     * @return {@link ConsumerSecretInfo} containing details of the generated consumer secret
+     * @throws APIManagementException if an error occurs while generating the consumer secret
+     * @throws UnsupportedOperationException if the Key Manager does not support generating consumer secrets
+     */
+    default ConsumerSecretInfo generateConsumerSecret(String keyManagerName,
+                                                      ConsumerSecretRequest consumerSecretRequest)
+            throws APIManagementException {
+
+        throw new UnsupportedOperationException("Generating new consumer secret is not supported");
+    }
+
+    /**
+     * Retrieves all consumer secrets associated with a given OAuth client.
+     * <p>
+     * Implementations may override this method to support listing multiple
+     * consumer secrets for a client. The default implementation does not
+     * support this operation and will throw an {@link UnsupportedOperationException}.
+     *
+     * @param clientId       client ID of the application
+     * @param keyManagerName name of the Key Manager associated with the OAuth application
+     * @return list of {@link ConsumerSecretInfo} objects associated with the client
+     * @throws APIManagementException if an error occurs while retrieving consumer secrets
+     * @throws UnsupportedOperationException if the Key Manager does not support retrieving consumer secrets
+     */
+    default List<ConsumerSecretInfo> retrieveConsumerSecrets(String clientId, String keyManagerName)
+            throws APIManagementException {
+
+        throw new UnsupportedOperationException("Retrieving consumer secrets is not supported");
+    }
+
+    /**
+     * Deletes a specific consumer secret associated with an OAuth application.
+     * <p>
+     * Implementations may override this method to support deletion of
+     * individual consumer secrets. The default implementation does not
+     * support this operation and will throw an {@link UnsupportedOperationException}.
+     *
+     * @param secretId               identifier of the consumer secret to be deleted
+     * @param keyManagerName         name of the Key Manager associated with the OAuth application
+     * @param consumerSecretRequest  request containing additional information required for deletion
+     * @throws APIManagementException if an error occurs while deleting the consumer secret
+     * @throws UnsupportedOperationException if the Key Manager does not support deleting consumer secrets
+     */
+    default void deleteConsumerSecret(String secretId, String keyManagerName,
+                                      ConsumerSecretRequest consumerSecretRequest)
+            throws APIManagementException {
+
+        throw new UnsupportedOperationException("Deleting consumer secret is not supported");
+    }
+
+    /**
      * Returns a set of scopes associated with a list of API uuids.
      *
      * @param uuids list of API uuids
@@ -687,6 +749,21 @@ public interface APIConsumer extends APIManager {
      */
     ResourceFile getWSDL(API api, String environmentName, String environmentType, String organization)
             throws APIManagementException;
+
+    /**
+     * Returns the WSDL ResourceFile (Single WSDL) for the provided API and environment details with an option
+     * to include main WSDL content in the response in ZIP scenario
+     *
+     * @param api                          API
+     * @param fileFormat       whether to include main WSDL content in the response
+     * @param environmentName              environment name
+     * @param environmentType              environment type
+     * @param organization                 Identifier of an organization
+     * @return WSDL of the API
+     * @throws APIManagementException when error occurred while getting the WSDL
+     */
+    ResourceFile getWSDL(API api, String fileFormat, String environmentName, String environmentType,
+            String organization) throws APIManagementException;
     /**
      * Returns application attributes defined in configuration
      *
@@ -904,7 +981,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     boolean removalKeys(Application application, String keyMappingId, String xWSO2Tenant) throws APIManagementException;
-    
+
     /**
      * @param searchQuery search query. ex : provider:admin
      * @param organizationInfo Identifier of an organization
@@ -925,5 +1002,16 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     Map<String, Object> searchPaginatedContent(String searchQuery, OrganizationInfo organizationInfo, int start, int end)
+            throws APIManagementException;
+
+    /**
+     * This method is used to validate the signed URL and retrieve the API information related to the URL.
+     *
+     * @param apiId        API UUID
+     * @param organization Identifier of an organization
+     * @return API information related to the signed URL
+     * @throws APIManagementException if an error occurs while validating the signed URL or retrieving API information
+     */
+    API getAPIWithoutPermissionCheck(String apiId, String organization)
             throws APIManagementException;
 }
