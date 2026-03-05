@@ -44,6 +44,9 @@ public class ConflictReport implements Serializable {
     @JsonProperty("matchedApiContext")
     private String matchedApiContext;
 
+    @JsonProperty("matchedApiProvider")
+    private String matchedApiProvider;
+
     @JsonProperty("similarityScore")
     private double similarityScore;
 
@@ -96,6 +99,11 @@ public class ConflictReport implements Serializable {
 
         public Builder matchedApiContext(String matchedApiContext) {
             report.matchedApiContext = matchedApiContext;
+            return this;
+        }
+
+        public Builder matchedApiProvider(String matchedApiProvider) {
+            report.matchedApiProvider = matchedApiProvider;
             return this;
         }
 
@@ -169,6 +177,14 @@ public class ConflictReport implements Serializable {
 
     public void setMatchedApiContext(String matchedApiContext) {
         this.matchedApiContext = matchedApiContext;
+    }
+
+    public String getMatchedApiProvider() {
+        return matchedApiProvider;
+    }
+
+    public void setMatchedApiProvider(String matchedApiProvider) {
+        this.matchedApiProvider = matchedApiProvider;
     }
 
     public double getSimilarityScore() {

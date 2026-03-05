@@ -1513,6 +1513,16 @@ paths:
             **Sample CURL :**  curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -X POST "https://localhost:9443/api/am/publisher/v4/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish&lifecycleChecklist=Deprecate%20old%20versions%20after%20publishing%20the%20API%3Atrue,Requires%20re-subscription%20when%20publishing%20the%20API%3Afalse"
           schema:
             type: string
+        - name: successorUuid
+          in: query
+          description: |
+            UUID of the user-selected successor API. Used during Deprecate/Retire transitions
+            to persist the successor mapping and inject RFC 8594 headers. If not provided,
+            the system will attempt to use a previously persisted mapping or fall back to
+            MinHash/LSH-based structural similarity discovery.
+          required: false
+          schema:
+            type: string
         - $ref: '#/components/parameters/apiId-Q'
         - $ref: '#/components/parameters/If-Match'
       responses:
@@ -1562,6 +1572,67 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish"'
       operationId: changeAPILifecycle
+
+  /apis/{apiId}/deprecation-guide:
+    get:
+      tags:
+        - API Lifecycle
+      summary: Get Deprecation Guide for an API
+      description: |
+        This operation returns a structural successor recommendation for an API that is about to be deprecated.
+        It uses MinHash/LSH similarity analysis to find the best matching active API that could serve as a successor.
+        The response includes RFC 8594 compliant Sunset and Link headers for the deprecation notice.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            Deprecation guide returned successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  successorFound:
+                    type: boolean
+                    description: Whether a structural successor was found
+                  successorApiId:
+                    type: string
+                    description: UUID of the recommended successor API
+                  successorApiName:
+                    type: string
+                    description: Name of the recommended successor API
+                  successorApiVersion:
+                    type: string
+                    description: Version of the recommended successor API
+                  similarityScore:
+                    type: number
+                    format: double
+                    description: Structural similarity score (0.0 to 1.0)
+                  sunsetHeaderValue:
+                    type: string
+                    description: RFC 8594 Sunset header value
+                  linkHeaderValue:
+                    type: string
+                    description: RFC 8594 Link header value with successor-version relation
+                  migrationRisk:
+                    type: boolean
+                    description: Whether deprecation poses a migration risk (no successor found)
+                  message:
+                    type: string
+                    description: Human-readable message about the deprecation guide result
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deprecation-guide"'
+      operationId: getDeprecationGuide
 
   /apis/{apiId}/lifecycle-history:
     get:
