@@ -18,10 +18,16 @@
 
 package org.wso2.carbon.apimgt.impl.service;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.model.CreatePlatformGatewayResult;
+import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayMode;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
+import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 
@@ -87,8 +93,48 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
 
         dao.createGatewayWithTokenAndGatewayInstance(gateway, tokenId, tokenHash,
                 Collections.singletonList(name));
+
+        // Same approach as other gateways: store in AM_GATEWAY_ENVIRONMENT so lookup by UUID and deployment use one source.
+        Environment env = toEnvironment(gatewayId, name, displayName, description, vhost);
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        apiAdmin.addEnvironment(organizationId, env);
+
         String registrationToken = tokenId + PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR + plainToken;
         return new CreatePlatformGatewayResult(toApiModel(gateway), registrationToken);
+    }
+
+    /**
+     * Build an Environment for AM_GATEWAY_ENVIRONMENT (same shape as addPlatformGatewaysToEnvironmentsMap).
+     * Caller must set UUID on the result when using for addEnvironment so the gateway id is stored as env UUID.
+     */
+    private static Environment toEnvironment(String gatewayId, String name, String displayName,
+                                              String description, String vhost) {
+        Environment env = new Environment();
+        env.setUuid(gatewayId);
+        env.setName(name);
+        env.setDisplayName(StringUtils.isNotBlank(displayName) ? displayName : name);
+        env.setDescription(description);
+        env.setType(APIConstants.GATEWAY_ENV_TYPE_HYBRID);
+        env.setProvider("wso2");
+        env.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+        env.setMode(GatewayMode.WRITE_ONLY.getMode());
+        String vhostStr = StringUtils.isNotBlank(vhost) ? vhost : "default";
+        String vhostHost = vhostStr;
+        int httpsPort = 8443;
+        if (vhostStr.contains(":")) {
+            String[] parts = vhostStr.split(":", 2);
+            vhostHost = parts[0];
+            if (parts.length > 1 && StringUtils.isNumeric(parts[1])) {
+                httpsPort = Integer.parseInt(parts[1]);
+            }
+        }
+        VHost vhostObj = new VHost();
+        vhostObj.setHost(vhostHost);
+        vhostObj.setWsHost(vhostHost);
+        vhostObj.setHttpPort(VHost.DEFAULT_HTTP_PORT);
+        vhostObj.setHttpsPort(httpsPort);
+        env.setVhosts(Collections.singletonList(vhostObj));
+        return env;
     }
 
     @Override

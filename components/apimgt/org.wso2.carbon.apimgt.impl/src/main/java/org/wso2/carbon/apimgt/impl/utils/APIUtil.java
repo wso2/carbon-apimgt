@@ -8730,69 +8730,14 @@ public final class APIUtil {
         return ApiMgtDAO.getInstance().getAllEnvironments();
     }
 
-    // Take organization as a parameter
+    // Take organization as a parameter. Returns read-only + dynamic environments from AM_GATEWAY_ENVIRONMENT.
     public static Map<String, Environment> getEnvironments(String organization) throws APIManagementException {
-        // get dynamic gateway environments read from database
         Map<String, Environment> envFromDB = ApiMgtDAO.getInstance().getAllEnvironments(organization).stream()
                 .collect(Collectors.toMap(Environment::getName, env -> env));
 
-        // clone and overwrite api-manager.xml environments with environments from DB if exists with same name
         Map<String, Environment> allEnvironments = new LinkedHashMap<>(getReadOnlyEnvironments());
         allEnvironments.putAll(envFromDB);
-        addPlatformGatewaysToEnvironmentsMap(allEnvironments, organization);
         return allEnvironments;
-    }
-
-    /**
-     * Merge platform gateways (registered via admin portal) into the environments map
-     * so Store API and other callers can resolve deployment envs and build gateway access URLs for devportal.
-     */
-    private static void addPlatformGatewaysToEnvironmentsMap(Map<String, Environment> environments,
-            String organization) {
-        PlatformGatewayService platformGatewayService =
-                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
-        if (platformGatewayService == null) {
-            return;
-        }
-        try {
-            List<PlatformGateway> gateways = platformGatewayService.listGatewaysByOrganization(organization);
-            if (gateways == null) {
-                return;
-            }
-            for (PlatformGateway gw : gateways) {
-                if (gw == null || StringUtils.isBlank(gw.getName()) || environments.containsKey(gw.getName())) {
-                    continue;
-                }
-                Environment env = new Environment();
-                env.setUuid(gw.getId());
-                env.setName(gw.getName());
-                env.setDisplayName(gw.getDisplayName() != null ? gw.getDisplayName() : gw.getName());
-                env.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
-                env.setProvider("wso2");
-                env.setMode(GatewayMode.WRITE_ONLY.getMode());
-                String vhostStr = StringUtils.isNotBlank(gw.getVhost()) ? gw.getVhost() : "default";
-                String vhostHost = vhostStr;
-                int httpsPort = 8443; // api-platform gateway default HTTPS port
-                if (vhostStr.contains(":")) {
-                    String[] parts = vhostStr.split(":", 2);
-                    vhostHost = parts[0];
-                    if (parts.length > 1 && StringUtils.isNumeric(parts[1])) {
-                        httpsPort = Integer.parseInt(parts[1]);
-                    }
-                }
-                VHost vhost = new VHost();
-                vhost.setHost(vhostHost);
-                vhost.setWsHost(vhostHost);
-                vhost.setHttpPort(VHost.DEFAULT_HTTP_PORT);
-                vhost.setHttpsPort(httpsPort);
-                env.setVhosts(Collections.singletonList(vhost));
-                environments.put(gw.getName(), env);
-            }
-        } catch (Exception e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Could not add platform gateways to environments map", e);
-            }
-        }
     }
 
     // Federated Gateway related API Reference mapping methods

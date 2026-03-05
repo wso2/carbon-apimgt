@@ -4375,7 +4375,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
-        addPlatformGatewaysToEnvironmentsMap(environments, organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
             String environment = apiRevisionDeploymentDTO.getName();
@@ -4485,7 +4484,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
-        addPlatformGatewaysToEnvironmentsMap(environments, organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (allEnvironments) {
             apiRevisionDeployments = apiProvider.getAPIRevisionDeploymentList(revisionId);
