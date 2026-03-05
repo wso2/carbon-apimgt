@@ -43,7 +43,7 @@ public class ValidationEngineFactory {
     private static final Map<RuleCategory, ValidationEngine> registeredEngines = new ConcurrentHashMap<>();
 
     // Default engine (Spectral) used when no specific engine is registered for a category
-    private static ValidationEngine defaultEngine;
+    private static volatile ValidationEngine defaultEngine;
 
     /**
      * Private constructor to prevent instantiation.
@@ -117,8 +117,10 @@ public class ValidationEngineFactory {
             return;
         }
         registeredEngines.put(category, engine);
-        log.info("Registered validation engine " + engine.getClass().getSimpleName() + 
-                " for category: " + category);
+        if (log.isDebugEnabled()) {
+            log.debug("Registered validation engine " + engine.getClass().getSimpleName() +
+                    " for category: " + category);
+        }
     }
 
     /**
@@ -129,8 +131,8 @@ public class ValidationEngineFactory {
     public static void unregisterValidationEngine(RuleCategory category) {
         if (category != null) {
             ValidationEngine removed = registeredEngines.remove(category);
-            if (removed != null) {
-                log.info("Unregistered validation engine for category: " + category);
+            if (removed != null && log.isDebugEnabled()) {
+                log.debug("Unregistered validation engine for category: " + category);
             }
         }
     }
@@ -142,8 +144,10 @@ public class ValidationEngineFactory {
      */
     public static void setDefaultEngine(ValidationEngine engine) {
         defaultEngine = engine;
-        log.info("Set default validation engine: " + 
-                (engine != null ? engine.getClass().getSimpleName() : "null"));
+        if (log.isDebugEnabled()) {
+            log.debug("Set default validation engine: " +
+                    (engine != null ? engine.getClass().getSimpleName() : "null"));
+        }
     }
 
     /**
