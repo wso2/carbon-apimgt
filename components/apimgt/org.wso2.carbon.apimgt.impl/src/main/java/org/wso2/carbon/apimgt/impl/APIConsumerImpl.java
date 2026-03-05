@@ -551,7 +551,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         jwtTokenInfoDTO.setPermittedIP(permittedIP);
         jwtTokenInfoDTO.setPermittedReferer(permittedReferer);
 
-        if (StringUtils.isBlank(keyName)) {
+        if (StringUtils.isBlank(keyName) && APIKeyUtils.isJWTAPIKeyGenerationEnabled()) {
             ApiKeyGenerator apiKeyGenerator = loadApiKeyGenerator();
             if (apiKeyGenerator != null) {
                 apiKey = apiKeyGenerator.generateToken(jwtTokenInfoDTO);
