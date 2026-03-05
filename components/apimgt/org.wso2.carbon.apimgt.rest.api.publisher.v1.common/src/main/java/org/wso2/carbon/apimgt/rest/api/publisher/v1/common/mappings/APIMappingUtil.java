@@ -586,7 +586,6 @@ public class APIMappingUtil {
         String providerEmailDomainReplaced = APIUtil.replaceEmailDomain(provider);
         APIIdentifier apiId = new APIIdentifier(providerEmailDomainReplaced, dto.getName(), dto.getVersion());
         API model = new API(apiId);
-        model.setUuid(dto.getId());
 
         String context = dto.getContext();
         final String originalContext = context;
