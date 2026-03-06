@@ -374,7 +374,7 @@ public final class EncryptionKeyGenerator {
         if (!normalizedLine.startsWith("[") || normalizedLine.startsWith("[[")) {
             return null;
         }
-        int delimiterIndex = normalizedLine.indexOf(']');
+        int delimiterIndex = normalizedLine.lastIndexOf(']');
         if (delimiterIndex <= 0 || delimiterIndex != normalizedLine.length() - 1) {
             return null;
         }
