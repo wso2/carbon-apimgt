@@ -73,7 +73,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
             @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
             @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
         })
-    }, tags={ "API Keys",  })
+    }, tags={ "APIKeys",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Api key generated. ", response = APIKeyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
@@ -93,7 +93,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
             @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
             @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
         })
-    }, tags={ "API Keys",  })
+    }, tags={ "APIKeys",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Api key revoked successfully. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),

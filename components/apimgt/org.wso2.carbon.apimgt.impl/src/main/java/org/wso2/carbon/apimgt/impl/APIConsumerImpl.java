@@ -588,6 +588,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIKeyDTO apiKeyInfoDTO = generateAPIKeyInfoDTO(userName, validityPeriod, keyName, application.getKeyType(),
                 permittedIP, permittedReferer, props);
         apiKeyInfoDTO.setApplicationId(application.getUUID());
+        apiKeyInfoDTO.setKeyId(UUID.randomUUID().toString());
         String apiKeyHash = APIUtil.sha256Hash(apiKey);
         apiKeyMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         sendAPIKeyInfoEvent(apiKeyHash, application, null, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(), validityPeriod),
@@ -628,6 +629,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIKeyDTO apiKeyInfoDTO = generateAPIKeyInfoDTO(userName, validityPeriod, keyName, keyType, permittedIP,
                 permittedReferer, props);
         apiKeyInfoDTO.setApiId(api.getUUID());
+        apiKeyInfoDTO.setKeyId(UUID.randomUUID().toString());
         apiKeyMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         sendAPIKeyInfoEvent(apiKeyHash,null, api, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(),
                 validityPeriod), keyType, keyName, props);
@@ -4050,6 +4052,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         apiKeyInfoDTO.setApiKey(apiKey);
         apiKeyInfoDTO.setCreatedTime(System.currentTimeMillis());
         String apiKeyHash = APIUtil.sha256Hash(apiKey);
+        apiKeyInfoDTO.setKeyId(UUID.randomUUID().toString());
         apiKeyMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         APIKeyInfo regeneratedApiKeyInfo = new APIKeyInfo();
         regeneratedApiKeyInfo.setKeyName(apiKeyInfo.getKeyName());
@@ -4121,6 +4124,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         apiKeyInfoDTO.setApiKey(apiKey);
         apiKeyInfoDTO.setCreatedTime(System.currentTimeMillis());
         String apiKeyHash = APIUtil.sha256Hash(apiKey);
+        apiKeyInfoDTO.setKeyId(UUID.randomUUID().toString());
         apiKeyMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         APIKeyInfo regeneratedApiKeyInfo = new APIKeyInfo();
         regeneratedApiKeyInfo.setKeyName(apiKeyInfo.getKeyName());

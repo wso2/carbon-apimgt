@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.impl.dao.ApiKeyMgtDAO;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.internal.service.ApiKeysApiService;

@@ -70,7 +70,6 @@ public class ApiKeyMgtDAO {
      */
     public void addAPIKey(String apiKeyHash, APIKeyDTO keyInfoDTO) throws APIManagementException {
 
-        String keyUUID = UUID.randomUUID().toString();
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
             String addApiKeySql = SQLConstants.ADD_API_KEY_SQL;
@@ -78,7 +77,7 @@ public class ApiKeyMgtDAO {
             String addApiKeyToAppMappingSql = SQLConstants.ADD_API_KEY_TO_APP_MAPPING_SQL;
             try {
                 try (PreparedStatement ps = conn.prepareStatement(addApiKeySql)) {
-                    ps.setString(1, keyUUID);
+                    ps.setString(1, keyInfoDTO.getKeyId());
                     ps.setString(2, keyInfoDTO.getKeyName());
                     ps.setString(3, apiKeyHash);
                     ps.setString(4, keyInfoDTO.getKeyType());
@@ -98,14 +97,14 @@ public class ApiKeyMgtDAO {
                 }
                 if (keyInfoDTO.getApiId() != null) {
                     try (PreparedStatement ps = conn.prepareStatement(addApiKeyToApiMappingSql)) {
-                        ps.setString(1, keyUUID);
+                        ps.setString(1, keyInfoDTO.getKeyId());
                         ps.setString(2, keyInfoDTO.getApiId());
                         ps.executeUpdate();
                         conn.commit();
                     }
                 } if (keyInfoDTO.getApplicationId() != null) {
                     try (PreparedStatement ps = conn.prepareStatement(addApiKeyToAppMappingSql)) {
-                        ps.setString(1, keyUUID);
+                        ps.setString(1, keyInfoDTO.getKeyId());
                         ps.setString(2, keyInfoDTO.getApplicationId());
                         ps.executeUpdate();
                         conn.commit();

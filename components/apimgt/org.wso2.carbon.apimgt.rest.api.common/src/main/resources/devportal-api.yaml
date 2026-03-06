@@ -3647,7 +3647,7 @@ paths:
       summary: Generate API Key
       description: |
         Generate a self contained API Key for the application
-      operationId: generateAppBoundAPIKey
+      operationId: applicationsApplicationIdApiKeysKeyTypeGeneratePost
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'
@@ -3774,7 +3774,7 @@ paths:
       summary: Revoke API Key
       description: |
         Revoke a self contained API Key for the application
-      operationId: revokeAppBoundAPIKey
+      operationId: applicationsApplicationIdApiKeysKeyTypeRevokePost
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/keyType'

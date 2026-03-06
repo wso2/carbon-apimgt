@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.IOException;
 import java.net.URL;
@@ -50,7 +49,7 @@ import java.util.TimerTask;
 
 public class APIKeysRetriever extends TimerTask {
     private static final Log log = LogFactory.getLog(APIKeysRetriever.class);
-    private static String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+    private static String tenantDomain;
 
     @Override
     public void run() {

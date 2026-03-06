@@ -26,6 +26,7 @@ import java.io.Serializable;
 public class APIKeyDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    private String keyId;
     private String apiKey;
     private String keyName;
     private String applicationId;
@@ -38,6 +39,14 @@ public class APIKeyDTO implements Serializable {
     private String lastUsedTime;
     private String permittedIP;
     private String permittedReferer;
+
+    public String getKeyId() {
+        return keyId;
+    }
+
+    public void setKeyId(String keyId) {
+        this.keyId = keyId;
+    }
 
     public String getApiKey() {
         return apiKey;
