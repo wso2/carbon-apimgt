@@ -12237,7 +12237,7 @@ public final class APIUtil {
      */
     public static void updateAPISwaggerWithVersion(API api) {
         String swaggerDefinition = api.getSwaggerDefinition();
-
+        
         if (swaggerDefinition != null) {
             JsonObject apiSpec = JsonParser.parseString(swaggerDefinition).getAsJsonObject();
             JsonObject infoObject = apiSpec.has(SWAGGER_INFO) && apiSpec.get(SWAGGER_INFO).isJsonObject() ?
@@ -12254,6 +12254,31 @@ public final class APIUtil {
             api.setSwaggerDefinition(apiSpec.toString());
         } else {
             log.error("Swagger definition is null for API: " + api.getId().getApiName());
+        }
+    }
+
+    public static void updateAPIAsyncAPISpecWithVersion(API api) {
+        String asyncApiDefinition = api.getAsyncApiDefinition();
+
+        if (asyncApiDefinition != null && !asyncApiDefinition.trim().isEmpty()) {
+            JsonObject apiSpec = JsonParser.parseString(asyncApiDefinition).getAsJsonObject();
+            JsonObject infoObject = apiSpec.has(SWAGGER_INFO) && apiSpec.get(SWAGGER_INFO).isJsonObject() ?
+                    apiSpec.getAsJsonObject(SWAGGER_INFO) : null;
+            if (infoObject != null) {
+                infoObject.addProperty(SWAGGER_VER, api.getId().getVersion());
+            } else {
+                JsonObject newInfoObject = new JsonObject();
+                newInfoObject.addProperty(SWAGGER_TITLE, api.getId().getApiName());
+                newInfoObject.addProperty(SWAGGER_VER, api.getId().getVersion());
+                newInfoObject.addProperty(SWAGGER_DESCRIPTION, api.getDescription());
+                apiSpec.add(SWAGGER_INFO, newInfoObject);
+            }
+            api.setAsyncApiDefinition(apiSpec.toString());
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("AsyncAPI definition is null or empty for API: " + api.getId().getApiName() 
+                        + ". Skipping version update.");
+            }
         }
     }
 }
