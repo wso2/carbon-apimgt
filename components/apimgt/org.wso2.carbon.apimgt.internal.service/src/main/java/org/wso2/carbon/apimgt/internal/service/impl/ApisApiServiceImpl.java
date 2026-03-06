@@ -109,7 +109,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdGet(String xWSO2Tenant, String apiId, String accept,
+    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String accept,
             MessageContext messageContext) throws APIManagementException {
         String organization = RestApiUtil.getOrganization(messageContext);
         if (StringUtils.isEmpty(organization)) {

@@ -3630,6 +3630,9 @@ public final class APIUtil {
                         apiData.get(apiType).add(APIConstants.SOLACE);
                     }
                 }
+            } else if (APIConstants.WSO2_API_PLATFORM_GATEWAY.equalsIgnoreCase(gatewayType)) {
+                // api-platform uses registration token and internal API; no external gateway connector config.
+                // It is added to rest gateways below.
             } else {
                 GatewayAgentConfiguration externalGatewayConfiguration = externalGatewayConnectorConfigurationMap.get(gatewayType);
 
