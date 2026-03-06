@@ -378,11 +378,12 @@ public class APIAdminImpl implements APIAdmin {
      * Revokes a given api key
      *
      * @param keyUUId API key UUId
+     * @param tenantDomain Tenant domain
      */
     @Override
-    public void revokeAPIKey(String keyUUId) throws APIManagementException {
+    public void revokeAPIKey(String keyUUId, String tenantDomain) throws APIManagementException {
 
-        apiKeyMgtDAO.revokeAPIKey(keyUUId);
+        apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
     }
 
     /**

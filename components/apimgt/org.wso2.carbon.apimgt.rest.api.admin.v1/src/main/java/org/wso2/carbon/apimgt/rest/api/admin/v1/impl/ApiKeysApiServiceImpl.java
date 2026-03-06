@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.ApiKeysApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APIKeyRevokeRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APIKeyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
@@ -48,8 +49,9 @@ public class ApiKeysApiServiceImpl implements ApiKeysApiService {
         if (body == null || body.getKeyUUID() == null) {
             throw new APIManagementException("keyUUID is required for API key revocation.");
         }
+        String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIAdmin apiAdmin = new APIAdminImpl();
-        apiAdmin.revokeAPIKey(body.getKeyUUID());
+        apiAdmin.revokeAPIKey(body.getKeyUUID(), organization);
         return Response.ok().build();
     }
 

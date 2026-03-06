@@ -90,8 +90,9 @@ public interface APIAdmin  {
      * Revokes a given api key
      *
      * @param keyUUId API key UUID
+     * @param organization Tenant domain
      */
-    void revokeAPIKey(String keyUUId) throws APIManagementException;
+    void revokeAPIKey(String keyUUId, String organization) throws APIManagementException;
 
     /**
      * Checks whether the given environment has active gateway policy deployments.

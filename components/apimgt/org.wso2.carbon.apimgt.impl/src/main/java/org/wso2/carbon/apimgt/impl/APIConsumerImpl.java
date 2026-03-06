@@ -3996,7 +3996,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         if (apiKeyInfo == null) {
             throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUID);
         }
-        apiKeyMgtDAO.revokeAPIKey(keyUUID);
+        apiKeyMgtDAO.revokeAPIKey(keyUUID, tenantDomain);
         revocationRequestPublisher.publishRevocationEvents(apiKeyInfo.getApiKeyHash(), properties);
     }
 

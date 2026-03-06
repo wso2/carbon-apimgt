@@ -3978,7 +3978,18 @@ public class SQLConstants {
                     "LEFT JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
                     "WHERE KM.API_UUID = ? AND K.API_KEY_UUID = ? AND K.STATUS = 'ACTIVE'";
     public static final String REVOKE_API_KEY_SQL =
-            "UPDATE AM_API_KEY SET STATUS = 'REVOKED' WHERE API_KEY_UUID = ?";
+            "UPDATE AM_API_KEY K SET K.STATUS = 'REVOKED' " +
+                    "WHERE K.API_KEY_UUID = ? " +
+                    "AND EXISTS ( " +
+                    "    SELECT 1 FROM AM_API_KEY_APPLICATION_MAPPING M " +
+                    "    JOIN AM_APPLICATION A ON M.APPLICATION_UUID = A.UUID " +
+                    "    WHERE M.API_KEY_UUID = K.API_KEY_UUID AND A.ORGANIZATION = ? " +
+                    "    UNION " +
+                    "    SELECT 1 FROM AM_API_KEY_API_MAPPING M " +
+                    "    JOIN AM_API A ON M.API_UUID = A.API_UUID " +
+                    "    WHERE M.API_KEY_UUID = K.API_KEY_UUID AND A.ORGANIZATION = ? " +
+                    ") " +
+                    "AND K.STATUS != 'REVOKED'";
     public static final String UPDATE_API_KEY_LAST_USED_SQL =
             "UPDATE AM_API_KEY SET LAST_USED = ? WHERE API_KEY_HASH = ? AND STATUS = 'ACTIVE'";
     public static final String REMOVE_API_KEY_ASSOCIATION_SQL =

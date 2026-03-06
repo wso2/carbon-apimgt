@@ -335,15 +335,18 @@ public class ApiKeyMgtDAO {
      * Revoke an api key provided by the key UUID
      *
      * @param keyUUId API key UUID
+     * @param tenantDomain Tenant domain
      * @throws APIManagementException
      */
-    public void revokeAPIKey(String keyUUId) throws APIManagementException {
+    public void revokeAPIKey(String keyUUId, String tenantDomain) throws APIManagementException {
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
             String sqlQuery = SQLConstants.REVOKE_API_KEY_SQL;
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
                 ps.setString(1, keyUUId);
+                ps.setString(2, tenantDomain);
+                ps.setString(3, tenantDomain);
                 ps.executeUpdate();
                 conn.commit();
             }
