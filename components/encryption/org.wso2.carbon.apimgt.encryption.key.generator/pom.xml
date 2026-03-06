@@ -51,9 +51,6 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Main-Class>org.wso2.carbon.apimgt.encryption.key.generator.EncryptionKeyGenerator</Main-Class>
-                        <Export-Package>
-                            org.wso2.carbon.apimgt.encryption.key.generator;version="${carbon.apimgt.version}"
-                        </Export-Package>
                         <Import-Package>*;resolution:=optional</Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
@@ -66,15 +63,6 @@
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>*</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
         </plugins>
     </build>

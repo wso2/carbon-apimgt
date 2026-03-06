@@ -36,14 +36,12 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Ensures deployment.toml has an active [encryption] key value.
  */
 public final class EncryptionKeyGenerator {
 
-    private static final Logger LOGGER = Logger.getLogger(EncryptionKeyGenerator.class.getName());
     private static final String DEPLOYMENT_TOML_RELATIVE_PATH = "repository" + File.separator + "conf" +
             File.separator + "deployment.toml";
     private static final String ENCRYPTION_SECTION = "[encryption]";
@@ -233,7 +231,11 @@ public final class EncryptionKeyGenerator {
         } catch (AtomicMoveNotSupportedException e) {
             Files.move(tempFile, targetInRealParent, StandardCopyOption.REPLACE_EXISTING);
         } finally {
-            Files.deleteIfExists(tempFile);
+            try {
+                Files.deleteIfExists(tempFile);
+            } catch (IOException ignored) {
+                // Ignore cleanup failure to avoid masking a prior move exception.
+            }
         }
     }
 
@@ -387,7 +389,7 @@ public final class EncryptionKeyGenerator {
      */
     private static boolean isActiveKeyLine(String normalizedLine) {
 
-        String keyName = extractKeyName(normalizedLine);
+        String keyName = normalizePropertyName(extractKeyName(normalizedLine));
         if (!KEY_PROPERTY_NAME.equals(keyName)) {
             return false;
         }
@@ -530,7 +532,7 @@ public final class EncryptionKeyGenerator {
                 sectionEnd = i;
                 break;
             }
-            if (KEY_PROPERTY_NAME.equals(extractKeyName(normalized))) {
+            if (KEY_PROPERTY_NAME.equals(normalizePropertyName(extractKeyName(normalized)))) {
                 existingKeyIndexes.add(i);
             }
         }

@@ -178,6 +178,48 @@ public class EncryptionKeyGeneratorTest {
     }
 
     /**
+     * Verifies quoted key name is treated as active encryption key.
+     *
+     * @throws IOException if temporary file operations fail
+     */
+    @Test
+    public void testNoChangeWhenEncryptionKeyNameIsQuoted() throws IOException {
+
+        String key = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+        String content = "[encryption]\n\"key\" = \"" + key + "\"\n";
+        Path[] paths = createCarbonHomeWithDeployment(content);
+        Path carbonHome = paths[0];
+        Path deploymentToml = paths[1];
+
+        int exitCode = EncryptionKeyGenerator.execute(new String[] {carbonHome.toString()});
+        String updated = readFile(deploymentToml);
+
+        assertEquals(0, exitCode);
+        assertEquals(content, updated);
+    }
+
+    /**
+     * Verifies quoted empty key name is replaced without creating duplicate key entries.
+     *
+     * @throws IOException if temporary file operations fail
+     */
+    @Test
+    public void testReplaceQuotedEmptyEncryptionKeyWithoutDuplicate() throws IOException {
+
+        String content = "[encryption]\n\"key\" = \"\"\n";
+        Path[] paths = createCarbonHomeWithDeployment(content);
+        Path carbonHome = paths[0];
+        Path deploymentToml = paths[1];
+
+        int exitCode = EncryptionKeyGenerator.execute(new String[] {carbonHome.toString()});
+        String updated = readFile(deploymentToml);
+
+        assertEquals(10, exitCode);
+        assertFalse(updated.contains("\"key\" = \"\""));
+        assertSingleGeneratedKey(updated);
+    }
+
+    /**
      * Verifies symlinked deployment.toml is rejected.
      *
      * @throws IOException if temporary file operations fail
