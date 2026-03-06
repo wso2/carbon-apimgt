@@ -63,6 +63,45 @@ public class ApplicationsApi  {
 ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
 
 
+    @POST
+    @Path("/{applicationId}/api-keys/{keyType}/generate")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Generate API Key", notes = "Generate a self contained API Key for the application ", response = APIKeyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "API Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Api key generated. ", response = APIKeyDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @ApiParam(value = "API Key generation request object " ) APIKeyGenerateRequestDTO apIKeyGenerateRequestDTO) throws APIManagementException{
+        return delegate.applicationsApplicationIdApiKeysKeyTypeGeneratePost(applicationId, keyType, ifMatch, apIKeyGenerateRequestDTO, securityContext);
+    }
+
+    @POST
+    @Path("/{applicationId}/api-keys/{keyType}/revoke")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Revoke API Key", notes = "Revoke a self contained API Key for the application ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "API Keys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Api key revoked successfully. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "API Key revoke request object " ,required=true) APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.applicationsApplicationIdApiKeysKeyTypeRevokePost(applicationId, keyType, apIKeyRevokeRequestDTO, ifMatch, securityContext);
+    }
+
     @DELETE
     @Path("/{applicationId}")
     
@@ -545,26 +584,6 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     }
 
     @POST
-    @Path("/{applicationId}/api-keys/{keyType}/generate")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Generate API Key", notes = "Generate a self contained API Key for the application ", response = APIKeyDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
-            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
-        })
-    }, tags={ "APIKeys",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Api key generated. ", response = APIKeyDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response generateAppBoundAPIKey(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @ApiParam(value = "API Key generation request object " ) APIKeyGenerateRequestDTO apIKeyGenerateRequestDTO) throws APIManagementException{
-        return delegate.generateAppBoundAPIKey(applicationId, keyType, ifMatch, apIKeyGenerateRequestDTO, securityContext);
-    }
-
-    @POST
     @Path("/{applicationId}/oauth-keys/{keyMappingId}/generate-secret")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -683,25 +702,6 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
     public Response regenerateAppBoundAPIKey(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "API Key renewal request object " ,required=true) APIKeyRenewRequestDTO apIKeyRenewRequestDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.regenerateAppBoundAPIKey(applicationId, keyType, apIKeyRenewRequestDTO, ifMatch, securityContext);
-    }
-
-    @POST
-    @Path("/{applicationId}/api-keys/{keyType}/revoke")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Revoke API Key", notes = "Revoke a self contained API Key for the application ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
-            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
-            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
-        })
-    }, tags={ "APIKeys",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Api key revoked successfully. ", response = Void.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response revokeAppBoundAPIKey(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "API Key revoke request object " ,required=true) APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.revokeAppBoundAPIKey(applicationId, keyType, apIKeyRevokeRequestDTO, ifMatch, securityContext);
     }
 
     @POST

@@ -761,7 +761,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response generateAppBoundAPIKey(String applicationId, String keyType,
+    public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(String applicationId, String keyType,
                                     String ifMatch, APIKeyGenerateRequestDTO body, MessageContext messageContext) {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
@@ -942,7 +942,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response revokeAppBoundAPIKey(String applicationId, String keyType, APIKeyRevokeRequestDTO body, String ifMatch,
+    public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType, APIKeyRevokeRequestDTO body, String ifMatch,
                                          MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         if (body == null) {
