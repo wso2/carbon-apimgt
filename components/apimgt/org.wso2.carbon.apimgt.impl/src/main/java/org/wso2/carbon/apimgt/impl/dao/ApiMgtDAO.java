@@ -4220,7 +4220,7 @@ public class ApiMgtDAO {
             }
             // sortColumn, sortOrder variable values has sanitized in jaggery level (applications-list.jag)for security.
             sqlQuery = sqlQuery.replace("$1", sortColumn);
-            if ("acs".equalsIgnoreCase(sortOrder) || "desc".equalsIgnoreCase(sortOrder)) {
+            if ("asc".equalsIgnoreCase(sortOrder) || "desc".equalsIgnoreCase(sortOrder)) {
                 sqlQuery = sqlQuery.replace("$2", sortOrder);
             } else {
                 sqlQuery = sqlQuery.replace("$2", "asc");
@@ -4482,6 +4482,9 @@ public class ApiMgtDAO {
             String driverName = connection.getMetaData().getDriverName();
             if (driverName.contains("Oracle")) {
                 limit = offset + limit;
+            }
+            if (!"desc".equalsIgnoreCase(sortOrder)) {
+                    sortOrder = "asc";
             }
             sqlQuery = sqlQuery.replace("$1", sortBy);
             sqlQuery = sqlQuery.replace("$2", sortOrder);
