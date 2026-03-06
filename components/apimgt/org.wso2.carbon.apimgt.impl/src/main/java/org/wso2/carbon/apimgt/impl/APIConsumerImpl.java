@@ -3742,7 +3742,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         hostsWithSchemes = getHostWithSchemeMappingForEnvironment(api, apiTenantDomain, environmentName);
 
-        Environment environment = APIUtil.getEnvironments().get(environmentName);
+        String organization = StringUtils.isNotBlank(api.getOrganization()) ? api.getOrganization() : apiTenantDomain;
+        Environment environment = APIUtil.getEnvironments(organization).get(environmentName);
+        if (environment == null) {
+            throw new APIMgtResourceNotFoundException("Gateway environment '" + environmentName + "' not found");
+        }
         GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
                 .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
         KeyManagerConfigurationDTO keyManagerConfigurationDTO = null;

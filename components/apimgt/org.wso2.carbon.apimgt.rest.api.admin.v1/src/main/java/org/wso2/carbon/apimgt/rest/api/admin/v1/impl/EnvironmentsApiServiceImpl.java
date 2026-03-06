@@ -8,7 +8,11 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.PlatformGatewayService;
+import org.wso2.carbon.apimgt.api.model.PlatformGateway;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApiService;
 
@@ -32,6 +36,9 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
@@ -151,6 +158,48 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         List<Environment> envList = apiAdmin.getAllEnvironments(organization);
         EnvironmentListDTO envListDTO = EnvironmentMappingUtil.fromEnvListToEnvListDTO(envList);
+
+        // Same approach as Synapse/APK: include platform gateways in the same environment list so UI gets
+        // one deploy-target list; each has gatewayType so UI can filter (e.g. show only platform gateways when chosen).
+        PlatformGatewayService platformGatewayService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        if (platformGatewayService != null) {
+            try {
+                // Use gateways that have AM_GW_INSTANCES row (same source as deployment acks and stats)
+                List<PlatformGateway> platformGateways =
+                        platformGatewayService.listGatewaysByOrganizationWithInstance(organization);
+                if (platformGateways != null && !platformGateways.isEmpty()) {
+                    List<EnvironmentDTO> list = new ArrayList<>(envListDTO.getList());
+                    // Avoid duplicates when a platform gateway name matches an existing environment name.
+                    HashSet<String> existingNames = list.stream()
+                            .map(EnvironmentDTO::getName)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toCollection(HashSet::new));
+                    for (PlatformGateway gw : platformGateways) {
+                        if (gw == null || gw.getName() == null) {
+                            continue;
+                        }
+                        String name = gw.getName().trim();
+                        if (name.isEmpty() || existingNames.contains(name)) {
+                            continue;
+                        }
+                        EnvironmentDTO dto = EnvironmentMappingUtil.fromPlatformGatewayToEnvDTO(
+                                gw, APIConstants.WSO2_API_PLATFORM_GATEWAY);
+                        list.add(dto);
+                        if (dto.getName() != null) {
+                            existingNames.add(dto.getName());
+                        }
+                    }
+                    envListDTO.setList(list);
+                    envListDTO.setCount(list.size());
+                }
+            } catch (APIManagementException e) {
+                log.warn("Could not append platform gateways to environments list", e);
+            } catch (Exception e) {
+                log.error("Unexpected error appending platform gateways to environments list", e);
+            }
+        }
+
         return Response.ok().entity(envListDTO).build();
     }
 

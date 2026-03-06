@@ -72,7 +72,7 @@ public class GatewayManagementDAO {
             connection.setAutoCommit(false);
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    SQLConstants.GatewayManagementSQLConstants.DELETE_OLD_GATEWAYS_SQL)) {
+                    SQLConstants.GatewayManagementSQLConstants.DELETE_OLD_GATEWAYS_EXCLUDE_PLATFORM_SQL)) {
                 preparedStatement.setTimestamp(1, retentionThreshold);
                 deletedCount = preparedStatement.executeUpdate();
                 connection.commit();
@@ -113,6 +113,75 @@ public class GatewayManagementDAO {
     }
 
     /**
+     * Resolves the organization for a gateway by its UUID. Used when the gateway (e.g. platform gateway)
+     * does not send tenantDomain; APIM looks it up from AM_GW_INSTANCES so the gateway stays org-agnostic.
+     *
+     * @param gatewayId the gateway UUID
+     * @return the organization, or null if not found
+     * @throws APIManagementException if database operation fails
+     */
+    public String getOrganizationByGatewayId(String gatewayId) throws APIManagementException {
+        if (gatewayId == null || gatewayId.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway ID is null or empty, returning null for organization");
+            }
+            return null;
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(
+                     SQLConstants.GatewayManagementSQLConstants.SELECT_ORGANIZATION_BY_GATEWAY_UUID_SQL)) {
+            ps.setString(1, gatewayId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getString("ORGANIZATION") : null;
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error resolving organization for gateway " + gatewayId, e);
+        }
+    }
+
+    /**
+     * Inserts a new gateway instance record into the database using the provided connection.
+     * Does not commit; caller is responsible for transaction. Used when registering platform
+     * gateways in the same transaction as AM_PLATFORM_GATEWAY create.
+     *
+     * @param connection   the database connection to use
+     * @param gatewayId    the unique gateway identifier
+     * @param organization the organization identifier
+     * @param envLabels    the environment label(s) to associate with this gateway
+     * @param lastUpdated  timestamp of the last update
+     * @param gwProperties serialized gateway properties as byte array
+     * @throws APIManagementException if database operation fails
+     */
+    public void insertGatewayInstance(Connection connection, String gatewayId, String organization,
+                                      List<String> envLabels, Timestamp lastUpdated, byte[] gwProperties)
+            throws APIManagementException {
+        try {
+            try (PreparedStatement ps1 = connection.prepareStatement(
+                    SQLConstants.GatewayManagementSQLConstants.INSERT_GATEWAY_INSTANCE_SQL);
+                    PreparedStatement ps2 = connection.prepareStatement(
+                            SQLConstants.GatewayManagementSQLConstants.INSERT_GATEWAY_ENV_MAPPING_SQL)) {
+
+                ps1.setString(1, gatewayId);
+                ps1.setString(2, organization);
+                ps1.setTimestamp(3, lastUpdated);
+                ps1.setBinaryStream(4, new ByteArrayInputStream(gwProperties != null ? gwProperties : new byte[0]));
+                ps1.executeUpdate();
+
+                if (envLabels != null && !envLabels.isEmpty()) {
+                    for (String envLabel : envLabels) {
+                        ps2.setString(1, envLabel);
+                        ps2.setString(2, gatewayId);
+                        ps2.setString(3, organization);
+                        ps2.executeUpdate();
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error inserting gateway instance", e);
+        }
+    }
+
+    /**
      * Inserts a new gateway instance record into the database.
      *
      * @param gatewayId    the unique gateway identifier
@@ -126,30 +195,16 @@ public class GatewayManagementDAO {
                                       Timestamp lastUpdated, byte[] gwProperties) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            try (PreparedStatement ps1 = connection.prepareStatement(
-                    SQLConstants.GatewayManagementSQLConstants.INSERT_GATEWAY_INSTANCE_SQL);
-                    PreparedStatement ps2 = connection.prepareStatement(
-                            SQLConstants.GatewayManagementSQLConstants.INSERT_GATEWAY_ENV_MAPPING_SQL)) {
-
-                ps1.setString(1, gatewayId);
-                ps1.setString(2, organization);
-                ps1.setTimestamp(3, lastUpdated);
-                ps1.setBinaryStream(4, new ByteArrayInputStream(gwProperties));
-                ps1.executeUpdate();
-
-                if (envLabels != null && !envLabels.isEmpty()) {
-                    for (String envLabel : envLabels) {
-                        ps2.setString(1, envLabel);
-                        ps2.setString(2, gatewayId);
-                        ps2.setString(3, organization);
-                        ps2.executeUpdate();
-                    }
-                }
-
+            try {
+                insertGatewayInstance(connection, gatewayId, organization, envLabels, lastUpdated, gwProperties);
                 connection.commit();
-            } catch (SQLException e) {
+                if (log.isInfoEnabled()) {
+                    log.info("Successfully inserted gateway instance with ID: " + gatewayId + " for organization: "
+                            + organization);
+                }
+            } catch (APIManagementException e) {
                 connection.rollback();
-                throw new APIManagementException("Error inserting gateway instance", e);
+                throw e;
             }
         } catch (SQLException e) {
             throw new APIManagementException("Error getting database connection", e);
@@ -440,6 +495,8 @@ public class GatewayManagementDAO {
     /**
      * Calculates gateway deployment statistics for a specific API revision and environment.
      * This includes deployed count, failed count, latest success time, and live gateway count.
+     * For platform gateway environments, the heartbeat (LAST_UPDATED) filter is skipped so
+     * counts persist without periodic heartbeats.
      *
      * @param apiRevisionDeployment the APIRevisionDeployment object to populate with stats
      * @param revisionUuid          the UUID of the API revision
@@ -448,52 +505,135 @@ public class GatewayManagementDAO {
      * @throws APIManagementException if database operation fails
      */
     public void setGatewayDeploymentStats(APIRevisionDeployment apiRevisionDeployment, String revisionUuid,
-                                          String environmentName, String apiUuid) throws APIManagementException {
+            String environmentName, String apiUuid) throws APIManagementException {
         GatewayNotificationConfiguration config = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getGatewayNotificationConfiguration();
         long currentTime = System.currentTimeMillis();
-        long expireTimeThreshold = currentTime - (config.getGatewayCleanupConfiguration().getExpireTimeSeconds() * 1000L);
+        long expireTimeThreshold =
+                currentTime - (config.getGatewayCleanupConfiguration().getExpireTimeSeconds() * 1000L);
         Timestamp expireTimestamp = new Timestamp(expireTimeThreshold);
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            try (PreparedStatement ps = connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GATEWAY_DEPLOYMENT_STATS_QUERY)) {
-                ps.setString(1, revisionUuid);
-                ps.setString(2, environmentName);
-                ps.setTimestamp(3, expireTimestamp);
+            boolean isPlatformGatewayEnv = isPlatformGatewayEnvironment(connection, environmentName, apiUuid);
 
-                try (ResultSet resultSet = ps.executeQuery()) {
-                    if (resultSet.next()) {
-                        int deployedCount = resultSet.getInt(APIConstants.GatewayNotification.DEPLOYED_COUNT);
-                        int failedCount = resultSet.getInt(APIConstants.GatewayNotification.FAILED_COUNT);
-                        long latestSuccessTime = resultSet.getLong(APIConstants.GatewayNotification.LATEST_SUCCESS_TIME);
-
-                        apiRevisionDeployment.setDeployedGatewayCount(deployedCount);
-                        apiRevisionDeployment.setFailedGatewayCount(failedCount);
-
-                        if (latestSuccessTime > 0) {
-                            Timestamp successTimestamp = new Timestamp(latestSuccessTime);
-                            apiRevisionDeployment.setSuccessDeployedTime(successTimestamp.toString());
-                        }
-                    }
-                }
+            if (isPlatformGatewayEnv) {
+                setGatewayDeploymentStatsPlatform(connection, apiRevisionDeployment, revisionUuid, environmentName,
+                        apiUuid);
+            } else {
+                setGatewayDeploymentStatsWithHeartbeat(connection, apiRevisionDeployment, revisionUuid, environmentName,
+                        apiUuid, expireTimestamp);
             }
-
-            try (PreparedStatement ps = connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GATEWAY_LIVE_COUNT_WITH_API_ORGANIZATION_QUERY)) {
-                ps.setTimestamp(1, expireTimestamp);
-                ps.setString(2, environmentName);
-                ps.setString(3, apiUuid);
-
-                try (ResultSet resultSet = ps.executeQuery()) {
-                    if (resultSet.next()) {
-                        int liveCount = resultSet.getInt(APIConstants.GatewayNotification.LIVE_COUNT);
-                        apiRevisionDeployment.setLiveGatewayCount(liveCount);
-                    }
-                }
-            }
-
         } catch (SQLException e) {
             log.error("Error while calculating gateway deployment statistics for revision: " + revisionUuid
-                              + " and environment: " + environmentName, e);
+                    + " and environment: " + environmentName, e);
+            throw new APIManagementException("Error while calculating gateway deployment statistics for revision: "
+                    + revisionUuid + " and environment: " + environmentName, e);
+        }
+    }
+
+    /**
+     * Returns true if the given environment name is a platform gateway for the API's organization.
+     * Platform gateways do not use heartbeats; stats queries for them must not filter by LAST_UPDATED.
+     */
+    private boolean isPlatformGatewayEnvironment(Connection connection, String environmentName, String apiUuid)
+            throws SQLException {
+        if (environmentName == null || environmentName.isEmpty() || apiUuid == null || apiUuid.isEmpty()) {
+            return false;
+        }
+        String organization = null;
+        try (PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_ORGANIZATION_BY_API_ID)) {
+            ps.setString(1, apiUuid);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    organization = rs.getString("ORGANIZATION");
+                }
+            }
+        }
+        if (organization == null || organization.isEmpty()) {
+            return false;
+        }
+        try (PreparedStatement ps = connection.prepareStatement(
+                SQLConstants.PlatformGatewaySQLConstants.SELECT_GATEWAY_BY_NAME_AND_ORG_SQL)) {
+            ps.setString(1, environmentName);
+            ps.setString(2, organization);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    private void setGatewayDeploymentStatsWithHeartbeat(Connection connection,
+            APIRevisionDeployment apiRevisionDeployment, String revisionUuid, String environmentName, String apiUuid,
+            Timestamp expireTimestamp) throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement(
+                SQLConstants.APIRevisionSqlConstants.GATEWAY_DEPLOYMENT_STATS_QUERY)) {
+            ps.setString(1, revisionUuid);
+            ps.setString(2, environmentName);
+            ps.setTimestamp(3, expireTimestamp);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    int deployedCount = resultSet.getInt(APIConstants.GatewayNotification.DEPLOYED_COUNT);
+                    int failedCount = resultSet.getInt(APIConstants.GatewayNotification.FAILED_COUNT);
+                    long latestSuccessTime = resultSet.getLong(APIConstants.GatewayNotification.LATEST_SUCCESS_TIME);
+
+                    apiRevisionDeployment.setDeployedGatewayCount(deployedCount);
+                    apiRevisionDeployment.setFailedGatewayCount(failedCount);
+
+                    if (latestSuccessTime > 0) {
+                        Timestamp successTimestamp = new Timestamp(latestSuccessTime);
+                        apiRevisionDeployment.setSuccessDeployedTime(successTimestamp.toString());
+                    }
+                }
+            }
+        }
+
+        try (PreparedStatement ps = connection.prepareStatement(
+                SQLConstants.APIRevisionSqlConstants.GATEWAY_LIVE_COUNT_WITH_API_ORGANIZATION_QUERY)) {
+            ps.setTimestamp(1, expireTimestamp);
+            ps.setString(2, environmentName);
+            ps.setString(3, apiUuid);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    int liveCount = resultSet.getInt(APIConstants.GatewayNotification.LIVE_COUNT);
+                    apiRevisionDeployment.setLiveGatewayCount(liveCount);
+                }
+            }
+        }
+    }
+
+    /**
+     * Stats for platform gateway environments (no heartbeat filter).
+     * For platform gateways, liveGatewayCount is set from deployedGatewayCount (SUCCESS notify count)
+     * so that we do not show "1 live" before we know the deploy succeeded. Initially all counts are 0;
+     * after the gateway calls notify with SUCCESS, deployedGatewayCount and liveGatewayCount become 1.
+     * UI can poll GET /apis/{apiId}/deployments to see when actual values are returned.
+     */
+    private void setGatewayDeploymentStatsPlatform(Connection connection, APIRevisionDeployment apiRevisionDeployment,
+            String revisionUuid, String environmentName, String apiUuid) throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement(
+                SQLConstants.APIRevisionSqlConstants.GATEWAY_DEPLOYMENT_STATS_PLATFORM_QUERY)) {
+            ps.setString(1, revisionUuid);
+            ps.setString(2, environmentName);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    int deployedCount = resultSet.getInt(APIConstants.GatewayNotification.DEPLOYED_COUNT);
+                    int failedCount = resultSet.getInt(APIConstants.GatewayNotification.FAILED_COUNT);
+                    long latestSuccessTime = resultSet.getLong(APIConstants.GatewayNotification.LATEST_SUCCESS_TIME);
+
+                    apiRevisionDeployment.setDeployedGatewayCount(deployedCount);
+                    apiRevisionDeployment.setFailedGatewayCount(failedCount);
+                    // For platform gateways, live = successfully deployed only (from notify SUCCESS), not "gateway exists in env"
+                    apiRevisionDeployment.setLiveGatewayCount(deployedCount);
+
+                    if (latestSuccessTime > 0) {
+                        Timestamp successTimestamp = new Timestamp(latestSuccessTime);
+                        apiRevisionDeployment.setSuccessDeployedTime(successTimestamp.toString());
+                    }
+                }
+            }
         }
     }
 

@@ -4370,6 +4370,17 @@ public class SQLConstants {
                 "WHERE gwi.LAST_UPDATED >= ? AND envmap.ENV_LABEL = ? AND (gwi.ORGANIZATION = (" +
                 "SELECT ORGANIZATION FROM AM_API WHERE API_UUID = ?) OR gwi.ORGANIZATION = 'WSO2-ALL-TENANTS')";
 
+        /** Same as GATEWAY_DEPLOYMENT_STATS_QUERY but without heartbeat filter (for platform gateways). */
+        public static final String GATEWAY_DEPLOYMENT_STATS_PLATFORM_QUERY =
+                "SELECT " +
+                        "SUM(CASE WHEN grd.STATUS = 'SUCCESS' THEN 1 ELSE 0 END) AS DEPLOYED_COUNT, " +
+                        "SUM(CASE WHEN grd.STATUS = 'FAILURE' THEN 1 ELSE 0 END) AS FAILED_COUNT, " +
+                        "MAX(CASE WHEN grd.STATUS = 'SUCCESS' THEN grd.LAST_UPDATED END) AS LATEST_SUCCESS_TIME " +
+                        "FROM AM_GW_REVISION_DEPLOYMENT grd " +
+                        "INNER JOIN AM_GW_INSTANCES gwi ON grd.GATEWAY_ID = gwi.GATEWAY_ID " +
+                        "INNER JOIN AM_GW_INSTANCE_ENV_MAPPING envmap ON gwi.GATEWAY_ID = envmap.GATEWAY_ID " +
+                        "WHERE grd.REVISION_UUID = ? AND envmap.ENV_LABEL = ?";
+
     }
 
     /**
@@ -5131,10 +5142,16 @@ public class SQLConstants {
 
     public static class GatewayManagementSQLConstants {
         public static final String DELETE_OLD_GATEWAYS_SQL = "DELETE FROM AM_GW_INSTANCES WHERE LAST_UPDATED < ?";
+        // Exclude platform gateways (they are not heartbeat-based; they stay until deleted from AM_PLATFORM_GATEWAY)
+        public static final String DELETE_OLD_GATEWAYS_EXCLUDE_PLATFORM_SQL =
+                "DELETE FROM AM_GW_INSTANCES WHERE LAST_UPDATED < ? AND GATEWAY_UUID NOT IN (SELECT ID FROM AM_PLATFORM_GATEWAY)";
         public static final String INSERT_GATEWAY_INSTANCE_SQL =
                 "INSERT INTO AM_GW_INSTANCES (GATEWAY_UUID, ORGANIZATION, LAST_UPDATED, GW_PROPERTIES) VALUES (?, ?, ?, ?) ";
         public static final String SELECT_GATEWAY_SQL =
                 "SELECT 1 FROM AM_GW_INSTANCES WHERE GATEWAY_UUID=? AND (ORGANIZATION=? OR ORGANIZATION='WSO2-ALL-TENANTS')";
+        /** Resolve organization from gateway UUID (e.g. when gateway does not send tenantDomain). Prefer specific org over WSO2-ALL-TENANTS. */
+        public static final String SELECT_ORGANIZATION_BY_GATEWAY_UUID_SQL =
+                "SELECT ORGANIZATION FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ? ORDER BY CASE WHEN ORGANIZATION = 'WSO2-ALL-TENANTS' THEN 1 ELSE 0 END, ORGANIZATION LIMIT 1";
         public static final String SELECT_DEPLOYMENT_SQL =
                 "SELECT 1 FROM AM_GW_REVISION_DEPLOYMENT grd INNER JOIN AM_GW_INSTANCES gwi ON grd.GATEWAY_ID = gwi"
                         + ".GATEWAY_ID WHERE gwi.GATEWAY_UUID = ? AND grd.API_ID = ?";
@@ -5177,6 +5194,15 @@ public class SQLConstants {
         public static final String SELECT_GATEWAYS_BY_ORG_SQL =
                 "SELECT ID, ORGANIZATION_ID, NAME, DISPLAY_NAME, DESCRIPTION, VHOST, IS_CRITICAL, " +
                         "FUNCTIONALITY_TYPE, PROPERTIES, IS_ACTIVE, CREATED_AT, UPDATED_AT FROM AM_PLATFORM_GATEWAY WHERE ORGANIZATION_ID = ? ORDER BY CREATED_AT";
+        /** Platform gateways that have a row in AM_GW_INSTANCES (for GET /environments and deployment acks). EXISTS avoids duplicate rows when a gateway has multiple env mappings. */
+        public static final String SELECT_GATEWAYS_BY_ORG_WITH_INSTANCE_SQL =
+                "SELECT pg.ID, pg.ORGANIZATION_ID, pg.NAME, pg.DISPLAY_NAME, pg.DESCRIPTION, pg.VHOST, pg.IS_CRITICAL, " +
+                        "pg.FUNCTIONALITY_TYPE, pg.PROPERTIES, pg.IS_ACTIVE, pg.CREATED_AT, pg.UPDATED_AT " +
+                        "FROM AM_PLATFORM_GATEWAY pg " +
+                        "INNER JOIN AM_GW_INSTANCES gwi ON gwi.GATEWAY_UUID = pg.ID AND gwi.ORGANIZATION = pg.ORGANIZATION_ID " +
+                        "WHERE pg.ORGANIZATION_ID = ? " +
+                        "AND EXISTS (SELECT 1 FROM AM_GW_INSTANCE_ENV_MAPPING env WHERE env.GATEWAY_ID = gwi.GATEWAY_ID) " +
+                        "ORDER BY pg.CREATED_AT";
         public static final String INSERT_TOKEN_SQL =
                 "INSERT INTO AM_PLATFORM_GATEWAY_TOKEN (ID, GATEWAY_ID, TOKEN_HASH, STATUS, CREATED_AT, REVOKED_AT) " +
                         "VALUES (?, ?, ?, 'active', ?, NULL)";
@@ -5192,5 +5218,17 @@ public class SQLConstants {
                         "WHERE t.ID = ? AND t.STATUS = 'active'";
         public static final String UPDATE_GATEWAY_ACTIVE_SQL =
                 "UPDATE AM_PLATFORM_GATEWAY SET IS_ACTIVE = ?, UPDATED_AT = ? WHERE ID = ?";
+    }
+
+    /** SQL for platform gateway API artifact storage (Scenario 1: platform-only api.yaml). */
+    public static class PlatformGatewayArtifactSQLConstants {
+        public static final String INSERT_ARTIFACT_SQL =
+                "INSERT INTO AM_PLATFORM_GATEWAY_API_ARTIFACT (API_UUID, ORGANIZATION_ID, YAML_CONTENT, CREATED_AT, UPDATED_AT) VALUES (?, ?, ?, ?, ?)";
+        public static final String UPDATE_ARTIFACT_SQL =
+                "UPDATE AM_PLATFORM_GATEWAY_API_ARTIFACT SET YAML_CONTENT = ?, UPDATED_AT = ? WHERE API_UUID = ? AND ORGANIZATION_ID = ?";
+        public static final String SELECT_ARTIFACT_SQL =
+                "SELECT YAML_CONTENT FROM AM_PLATFORM_GATEWAY_API_ARTIFACT WHERE API_UUID = ? AND ORGANIZATION_ID = ?";
+        public static final String DELETE_ARTIFACT_SQL =
+                "DELETE FROM AM_PLATFORM_GATEWAY_API_ARTIFACT WHERE API_UUID = ? AND ORGANIZATION_ID = ?";
     }
 }

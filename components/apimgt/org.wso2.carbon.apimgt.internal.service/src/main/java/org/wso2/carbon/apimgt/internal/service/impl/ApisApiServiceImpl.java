@@ -18,10 +18,13 @@
 
 package org.wso2.carbon.apimgt.internal.service.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -29,6 +32,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
@@ -40,7 +45,13 @@ import org.wso2.carbon.apimgt.internal.service.ApisApiService;
 import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeployedEnvInfoDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.DeploymentAcknowledgmentResponseDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
+import org.wso2.carbon.apimgt.api.PlatformGatewayArtifactService;
+import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayAPIYamlConverter;
+import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -95,6 +106,119 @@ public class ApisApiServiceImpl implements ApisApiService {
             return Response.ok().entity(apiListDTO).build();
         }
         return null;
+    }
+
+    @Override
+    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String accept,
+            MessageContext messageContext) throws APIManagementException {
+        String organization = RestApiUtil.getOrganization(messageContext);
+        if (StringUtils.isEmpty(organization)) {
+            organization = xWSO2Tenant;
+        }
+        organization = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
+
+        if (accept != null && accept.toLowerCase().contains("application/zip")) {
+            return getApiAsPlatformGatewayZip(apiId, organization, messageContext);
+        }
+        return apisGet(xWSO2Tenant, apiId, null, null, null, true, accept != null ? accept : "application/json",
+                messageContext);
+    }
+
+    @Override
+    public Response apisApiIdGatewayDeploymentsPost(String apiId, String apiKey, Map<String, Object> requestBody,
+            String xWSO2Tenant, String deploymentId, MessageContext messageContext) throws APIManagementException {
+        if (StringUtils.isEmpty(apiKey)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Missing api-key header").build();
+        }
+        PlatformGatewayDAO.PlatformGateway gateway;
+        try {
+            gateway = PlatformGatewayTokenUtil.verifyToken(apiKey);
+        } catch (Exception e) {
+            log.error("Platform gateway token verification failed with unexpected error", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Server error").build();
+        }
+        if (gateway == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Platform gateway token verification failed: invalid or expired api-key");
+            }
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid api-key").build();
+        }
+        // Validate that the acknowledged API exists and belongs to the same organization as the gateway.
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+            if (apiInfo == null || gateway.organizationId == null
+                    || !gateway.organizationId.equals(apiInfo.getOrganization())) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Platform gateway deployment notification rejected: API not found or organization "
+                            + "mismatch for apiId=" + apiId + ", gatewayId=" + gateway.id);
+                }
+                return Response.status(Response.Status.NOT_FOUND).entity("API not found for gateway organization").build();
+            }
+        } catch (APIManagementException e) {
+            log.error("Error validating API for platform gateway deployment notification: apiId=" + apiId
+                    + ", gatewayId=" + gateway.id, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Server error").build();
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Platform gateway deployment notification received: apiId=" + apiId + ", gatewayId=" + gateway.id
+                    + ", deploymentId=" + deploymentId);
+        }
+        DeploymentAcknowledgmentResponseDTO response = new DeploymentAcknowledgmentResponseDTO();
+        response.setStatus(DeploymentAcknowledgmentResponseDTO.StatusEnum.RECEIVED);
+        return Response.ok().entity(response).build();
+    }
+
+    private Response getApiAsPlatformGatewayZip(String apiId, String organization, MessageContext messageContext)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        ApiTypeWrapper wrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
+        if (wrapper == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        if (wrapper.isAPIProduct()) {
+            if (log.isDebugEnabled()) {
+                log.debug("API Product not supported for platform gateway zip format: " + apiId);
+            }
+            return Response.status(Response.Status.BAD_REQUEST).entity("API Product not supported for zip format")
+                    .build();
+        }
+        org.wso2.carbon.apimgt.api.model.API api = wrapper.getApi();
+        String yaml = null;
+        PlatformGatewayArtifactService artifactService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
+        if (artifactService != null) {
+            yaml = artifactService.getStoredPlatformArtifact(apiId, organization);
+        }
+        if (yaml == null) {
+            String environment = "default";
+            if (api.getEnvironments() != null && !api.getEnvironments().isEmpty()) {
+                environment = api.getEnvironments().iterator().next();
+            }
+            if (StringUtils.isBlank(environment)) {
+                environment = "default";
+            }
+            yaml = PlatformGatewayAPIYamlConverter.toPlatformGatewayYaml(api, organization, environment);
+        }
+        byte[] zipBytes = buildZipWithYaml(yaml);
+        return Response.ok(zipBytes)
+                .type("application/zip")
+                .header("Content-Disposition", "attachment; filename=\"api.zip\"")
+                .build();
+    }
+
+    private static byte[] buildZipWithYaml(String yamlContent) throws APIManagementException {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             ZipOutputStream zos = new ZipOutputStream(baos)) {
+            ZipEntry entry = new ZipEntry("api.yaml");
+            zos.putNextEntry(entry);
+            zos.write(yamlContent.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zos.closeEntry();
+            zos.finish();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            throw new APIManagementException("Failed to build zip for API Platform gateway", e);
+        }
     }
 
     public Response deployedAPIRevision(List<DeployedAPIRevisionDTO> deployedAPIRevisionDTOList,

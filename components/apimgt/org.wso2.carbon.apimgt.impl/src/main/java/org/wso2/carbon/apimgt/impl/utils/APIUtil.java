@@ -91,6 +91,7 @@ import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.PasswordResolver;
+import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
@@ -121,6 +122,7 @@ import org.wso2.carbon.apimgt.api.model.GatewayConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.api.model.GatewayPortalConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayFeatureCatalog;
+import org.wso2.carbon.apimgt.api.model.GatewayMode;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
@@ -128,6 +130,7 @@ import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
+import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -3511,6 +3514,7 @@ public final class APIUtil {
         JsonObject synapseConfigJSON = null;
         JsonObject apkConfigJSON = null;
         JsonObject solaceConfigJSON = null;
+        JsonObject platformConfigJSON = null;
         try (InputStream synapseInputStream = APIUtil.class.getClassLoader()
                 .getResourceAsStream("gatewayFeatureCatalog/synapse-gateway-feature-catalog.json")) {
             if (synapseInputStream == null) {
@@ -3543,26 +3547,42 @@ public final class APIUtil {
         } catch (IOException e) {
             throw new APIManagementException("Error while reading Solace Feature Catalog JSON", e);
         }
+        try (InputStream platformInputStream = APIUtil.class.getClassLoader()
+                .getResourceAsStream("gatewayFeatureCatalog/platform-gateway-feature-catalog.json")) {
+            if (platformInputStream == null) {
+                throw new APIManagementException("Platform Gateway Feature Catalog JSON not found");
+            }
+            InputStreamReader reader = new InputStreamReader(platformInputStream, StandardCharsets.UTF_8);
+            platformConfigJSON = JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading Platform Gateway Feature Catalog JSON", e);
+        }
 
-        if (synapseConfigJSON == null || apkConfigJSON == null || solaceConfigJSON == null) {
+        if (synapseConfigJSON == null || apkConfigJSON == null || solaceConfigJSON == null
+                || platformConfigJSON == null) {
             throw new APIManagementException("Error while reading Gateway Feature Catalog JSON");
         }
 
         JsonObject synapseConfigsJSONValue = synapseConfigJSON.getAsJsonObject(APIConstants.WSO2_SYNAPSE_GATEWAY);
         JsonObject apkConfigsJSONValue = apkConfigJSON.getAsJsonObject(APIConstants.WSO2_APK_GATEWAY);
         JsonObject solaceConfigsJSONValue = solaceConfigJSON.getAsJsonObject(APIConstants.SOLACE);
+        JsonObject platformConfigsJSONValue =
+                platformConfigJSON.getAsJsonObject(APIConstants.WSO2_API_PLATFORM_GATEWAY);
 
         JsonObject synapseJSON = synapseConfigsJSONValue.getAsJsonObject("gatewayFeatures");
         JsonObject apkJSON = apkConfigsJSONValue.getAsJsonObject("gatewayFeatures");
         JsonObject solaceJSON = solaceConfigsJSONValue.getAsJsonObject("gatewayFeatures");
+        JsonObject platformJSON = platformConfigsJSONValue.getAsJsonObject("gatewayFeatures");
 
         Map<String, Object> synapseMap = gson.fromJson(synapseJSON, type);
         Map<String, Object> apkMap = gson.fromJson(apkJSON, type);
         Map<String, Object> solaceMap = gson.fromJson(solaceJSON, type);
+        Map<String, Object> platformMap = gson.fromJson(platformJSON, type);
 
         gatewayConfigsMap.put(APIConstants.WSO2_SYNAPSE_GATEWAY, synapseMap);
         gatewayConfigsMap.put(APIConstants.WSO2_APK_GATEWAY, apkMap);
         gatewayConfigsMap.put(APIConstants.SOLACE, solaceMap);
+        gatewayConfigsMap.put(APIConstants.WSO2_API_PLATFORM_GATEWAY, platformMap);
 
         JsonArray synapseApiTypes = synapseConfigsJSONValue.getAsJsonArray("apiTypes");
         JsonArray apkApiTypes = apkConfigsJSONValue.getAsJsonArray("apiTypes");
@@ -3610,6 +3630,9 @@ public final class APIUtil {
                         apiData.get(apiType).add(APIConstants.SOLACE);
                     }
                 }
+            } else if (APIConstants.WSO2_API_PLATFORM_GATEWAY.equalsIgnoreCase(gatewayType)) {
+                // api-platform uses registration token and internal API; no external gateway connector config.
+                // It is added to rest gateways below.
             } else {
                 GatewayAgentConfiguration externalGatewayConfiguration = externalGatewayConnectorConfigurationMap.get(gatewayType);
 
@@ -3620,6 +3643,12 @@ public final class APIUtil {
                             StringEscapeUtils.escapeJava(gatewayType));
                 }
             }
+        }
+
+        // Platform gateway: support REST APIs by default (no toggle in gatewayTypes).
+        List<String> restGateways = apiData.get("rest");
+        if (restGateways != null && !restGateways.contains(APIConstants.WSO2_API_PLATFORM_GATEWAY)) {
+            restGateways.add(APIConstants.WSO2_API_PLATFORM_GATEWAY);
         }
 
         GatewayFeatureCatalog gatewayFeatureCatalog = new GatewayFeatureCatalog();
@@ -8704,13 +8733,11 @@ public final class APIUtil {
         return ApiMgtDAO.getInstance().getAllEnvironments();
     }
 
-    // Take organization as a parameter
+    // Take organization as a parameter. Returns read-only + dynamic environments from AM_GATEWAY_ENVIRONMENT.
     public static Map<String, Environment> getEnvironments(String organization) throws APIManagementException {
-        // get dynamic gateway environments read from database
         Map<String, Environment> envFromDB = ApiMgtDAO.getInstance().getAllEnvironments(organization).stream()
                 .collect(Collectors.toMap(Environment::getName, env -> env));
 
-        // clone and overwrite api-manager.xml environments with environments from DB if exists with same name
         Map<String, Environment> allEnvironments = new LinkedHashMap<>(getReadOnlyEnvironments());
         allEnvironments.putAll(envFromDB);
         return allEnvironments;
@@ -11359,7 +11386,8 @@ public final class APIUtil {
             return null; // Return null to handle this scenario while populating API information
         }
         if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor) ||
-                APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(gatewayVendor)) {
+                APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(gatewayVendor) ||
+                APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(gatewayVendor)) {
             return APIConstants.WSO2_GATEWAY_ENVIRONMENT;
         } else {
             return APIConstants.EXTERNAL_GATEWAY_VENDOR;

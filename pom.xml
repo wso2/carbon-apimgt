@@ -1503,11 +1503,6 @@
                 <version>${fasterxml.jackson.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.uuid</groupId>
-                <artifactId>java-uuid-generator</artifactId>
-                <version>${fasterxml.uuid-generator.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>${version.snake.yaml}</version>
@@ -2243,7 +2238,6 @@
         <commons.scxml.version>0.9.0.wso2v2</commons.scxml.version>
         <velocity.version>2.4</velocity.version>
         <fasterxml.jackson.version>2.17.2</fasterxml.jackson.version>
-        <fasterxml.uuid-generator.version>5.2.0</fasterxml.uuid-generator.version>
         <jakarta.validation-api.version>2.0.2</jakarta.validation-api.version>
         <javax.inject.version>1</javax.inject.version>
         <carbon.broker.version>3.3.38</carbon.broker.version>
@@ -2289,7 +2283,7 @@
         <aspectj.version>1.9.5</aspectj.version>
         <everit.version>1.5.0.wso2.v2</everit.version>
         <json.orbit.version>3.0.0.wso2v7</json.orbit.version>
-        <aspectj.version>1.9.4</aspectj.version>
+        <aspectj.version>1.9.7</aspectj.version>
         <wso2.securevault.version>1.1.3</wso2.securevault.version>
         <com.jayway.jsonpath.version>2.9.0.wso2v1</com.jayway.jsonpath.version>
         <org.wso2.orbit.commons-text.version>1.10.0.wso2v2</org.wso2.orbit.commons-text.version>

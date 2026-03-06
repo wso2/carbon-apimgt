@@ -31,7 +31,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * DAO for platform gateway registration (AM_PLATFORM_GATEWAY, AM_PLATFORM_GATEWAY_TOKEN).
@@ -161,6 +163,33 @@ public class PlatformGatewayDAO {
     }
 
     /**
+     * Creates a platform gateway, its token, and registers it in AM_GW_INSTANCES in a single transaction.
+     * Keeps connection and transaction boundary inside the DAO layer (service -> impl -> dao).
+     */
+    public void createGatewayWithTokenAndGatewayInstance(PlatformGateway gateway, String tokenId, String tokenHash,
+                                                         List<String> envLabels)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                createGateway(connection, gateway);
+                createToken(connection, tokenId, gateway.id, tokenHash, gateway.createdAt);
+                GatewayManagementDAO.getInstance().insertGatewayInstance(connection, gateway.id, gateway.organizationId,
+                        envLabels, gateway.createdAt, new byte[0]);
+                connection.commit();
+            } catch (APIManagementException e) {
+                connection.rollback();
+                throw e;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIManagementException("Error creating platform gateway", e);
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error getting database connection", e);
+        }
+    }
+
+    /**
      * Get platform gateway by ID.
      */
     public PlatformGateway getGatewayById(String id) throws APIManagementException {
@@ -215,6 +244,32 @@ public class PlatformGatewayDAO {
             throw new APIManagementException("Error listing platform gateways", e);
         }
         return list;
+    }
+
+    /**
+     * List platform gateways that have a row in AM_GW_INSTANCES (same source as deployment acks and stats).
+     * Use this for GET /environments so the list is consistent with deployment feedback.
+     * Deduplicates by gateway id so each gateway appears once even if SQL returns multiple rows per env mapping.
+     */
+    public List<PlatformGateway> listGatewaysByOrganizationWithInstance(String organizationId)
+            throws APIManagementException {
+        Map<String, PlatformGateway> byId = new LinkedHashMap<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(
+                     SQLConstants.PlatformGatewaySQLConstants.SELECT_GATEWAYS_BY_ORG_WITH_INSTANCE_SQL)) {
+            ps.setString(1, organizationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    PlatformGateway gw = mapRowToGateway(rs);
+                    if (gw != null && gw.id != null && !byId.containsKey(gw.id)) {
+                        byId.put(gw.id, gw);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error listing platform gateways with instance", e);
+        }
+        return new ArrayList<>(byId.values());
     }
 
     /**
@@ -274,8 +329,11 @@ public class PlatformGatewayDAO {
     }
 
     /**
-     * Map a result set row to PlatformGateway. PROPERTIES is stored as string (VARCHAR/TEXT/MEDIUMTEXT/CLOB)
-     * across DB types; JDBC getString() returns the value for all of these (drivers map CLOB to string).
+     * Map a result set row to PlatformGateway.
+     * <p>PROPERTIES is stored as a string type (VARCHAR/TEXT/MEDIUMTEXT/CLOB depending on DB). For moderate
+     * sizes (typical for gateway custom JSON), {@link ResultSet#getString(String)} is standard and works for
+     * VARCHAR/TEXT/CLOB in modern drivers (Oracle 10g+, MySQL, PostgreSQL, H2). If a driver required CLOB-
+     * specific handling or very large values, use {@code getClob()} and stream via {@code getCharacterStream()}.</p>
      */
     private static PlatformGateway mapRowToGateway(ResultSet rs) throws SQLException {
         return new PlatformGateway(

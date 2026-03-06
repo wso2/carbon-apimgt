@@ -48,6 +48,8 @@ public final class RestApiConstants {
     public static final String OPAQUE_AUTHENTICATION = "oauth2";
     public static final String BASIC_AUTHENTICATION = "basic_auth";
     public static final String JWT_AUTHENTICATION = "jwt";
+    /** Set when request is authenticated via platform gateway api-key (Internal Data Service only). */
+    public static final String PLATFORM_GATEWAY_API_KEY = "platform_gateway_apikey";
     public static final String JWT_TOKEN = "JWT_TOKEN";
     public static final String DOT = ".";
     public static final long TIMESTAMP_SKEW_INSECONDS = 0;

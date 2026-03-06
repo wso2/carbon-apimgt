@@ -15966,7 +15966,8 @@ public class ApiMgtDAO {
      */
     public Environment addEnvironment(String tenantDomain, Environment environment) throws APIManagementException {
 
-        String uuid = UUID.randomUUID().toString();
+        // Use provided UUID when set (e.g. platform gateways use gateway id as environment UUID); otherwise generate.
+        String uuid = StringUtils.isNotBlank(environment.getUuid()) ? environment.getUuid() : UUID.randomUUID().toString();
         environment.setUuid(uuid);
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {

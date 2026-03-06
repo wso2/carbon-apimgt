@@ -22,6 +22,10 @@
     version="3.0" metadata-complete="true">
     <absolute-ordering />
 
+    <listener>
+        <listener-class>org.wso2.carbon.apimgt.internal.service.websocket.PlatformGatewayDeploymentDispatcherListener</listener-class>
+    </listener>
+
     <display-name>WSO2 APIM REST API</display-name>
     <description>WSO2 API Manager REST API</description>
     <servlet>
@@ -80,11 +84,13 @@
         <init-param>
             <param-name>jaxrs.inInterceptors</param-name>
             <param-value>
+                org.wso2.carbon.apimgt.internal.service.interceptors.PlatformGatewayApiKeyAuthInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor,
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.PermissionValidationInterceptor(permissions=/permission/admin/ permissions=/permission/protected/),
                 org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor,
-                org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor
+                org.wso2.carbon.apimgt.rest.api.util.interceptors.OrganizationInterceptor,
+                org.wso2.carbon.apimgt.internal.service.interceptors.PlatformGatewayTenantFlowCleanupInterceptor
             </param-value>
         </init-param>
         <init-param>
