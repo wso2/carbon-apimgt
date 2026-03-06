@@ -5,10 +5,29 @@ rules:
   # ============================================================================
   - id: wso2-authz-basic-auth-missing-admin-permission-check
     patterns:
-      - pattern: |
-          return validateRoles($MSG, $REALM, $TENANT, $USER);
+      - pattern: validateRoles($MSG, $REALM, $TENANT, $USER)
       - pattern-not-inside: |
           if (validateRoles(...) && validateAdminPermission(...)) { ... }
+      - pattern-not-inside: |
+          validateRoles(...);
+          ...
+          validateAdminPermission(...);
+      - pattern-not-inside: |
+          validateAdminPermission(...);
+          ...
+          validateRoles(...);
+      - pattern-not-inside: |
+          if (!validateRoles(...)) {
+              ...
+          }
+          ...
+          validateAdminPermission(...);
+      - pattern-not-inside: |
+          if (!validateAdminPermission(...)) {
+              ...
+          }
+          ...
+          validateRoles(...);
     message: >
       Basic authentication interceptor returns the result of role validation
       without also verifying admin permissions. A user with valid credentials and
