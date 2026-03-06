@@ -81,7 +81,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
-import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.*;
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.API_OBJECT;
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.API_ELECTED_RESOURCE;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.MASK_VALUE;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_HEADERS;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_HEADER_MASK;
@@ -249,7 +250,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             if (resourcePath == null) {
                 resourcePath = (String) messageContext.getProperty(API_ELECTED_RESOURCE);
             }
-            if (resourcePath != null && resourcePath.startsWith(MCP_RESOURCE)) {
+            if (resourcePath != null && resourcePath.startsWith(APIMgtGatewayConstants.MCP_RESOURCE)) {
                 // Return a default application for MCP requests
                 return getAnonymousApp();
             }
@@ -263,6 +264,12 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         return application;
     }
 
+    /**
+     * Returns an anonymous application object with default values. This is used for MCP requests or other scenarios
+     * where authentication context is not available.
+     *
+     * @return Application object with anonymous/default values
+     */
     public static Application getAnonymousApp() {
         Application application = new Application();
         application.setApplicationId(Constants.ANONYMOUS_VALUE);
@@ -457,6 +464,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         custom.put(Constants.RESPONSE_CONTENT_TYPE, getResponseContentType());
         custom.put(Constants.CERTIFICATE_COMMON_NAME, getCommonName());
 
+        // Guardrail hit information
         boolean guardrailHit = isGuardrailHit();
         custom.put(Constants.IS_GUARDRAIL_HIT, guardrailHit);
         if (guardrailHit) {
@@ -585,42 +593,53 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             log.debug("Extracting MCP analytics data from message context");
         }
         Map<String, Object> mcpAnalytics = new HashMap<>();
-        Map<String, Object> clientInfo = new HashMap<>();
 
-        String sessionId = (String) messageContext.getProperty(MCP_SESSION_ID_KEY);
+        // Extract Session ID, JsonRpcMethod, Capability, Client Info, Server Info, and Error Info from message context
+        String sessionId = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_SESSION_ID_KEY);
         if (sessionId != null) {
-            mcpAnalytics.put(MCP_SESSION_ID, sessionId);
+            mcpAnalytics.put(APIMgtGatewayConstants.MCP_SESSION_ID, sessionId);
         }
 
         mcpAnalytics.put(Constants.MCP_METHOD, messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
-        mcpAnalytics.put(MCP_CAPABILITY, messageContext.getProperty(MCP_CAPABILITY_KEY));
-        mcpAnalytics.put(MCP_CAPABILITY_NAME, messageContext.getProperty(MCP_CAPABILITY_NAME_KEY));
 
-        Params.ClientInfo clientInfoObj = (Params.ClientInfo) messageContext.getProperty(MCP_CLIENT_INFO_KEY);
-        if (clientInfoObj != null) {
-            clientInfo.put("name", clientInfoObj.getName());
-            clientInfo.put("version", clientInfoObj.getVersion());
-            clientInfo.put(MCP_REQUESTED_PROTOCOL_VERSION,
-                    messageContext.getProperty(MCP_REQUESTED_PROTOCOL_VERSION_KEY));
-            mcpAnalytics.put(MCP_CLIENT_INFO, clientInfo);
+        String capability = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_CAPABILITY_KEY);
+        if (capability != null) {
+            mcpAnalytics.put(APIMgtGatewayConstants.MCP_CAPABILITY, capability);
         }
 
-        String protocolVersion = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_PROTOCOL_VERSION);
-        String serverName = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_SERVER_NAME);
-        String serverVersion = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_SERVER_VERSION);
+        String capabilityName = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_CAPABILITY_NAME_KEY);
+        if (capabilityName != null) {
+            mcpAnalytics.put(APIMgtGatewayConstants.MCP_CAPABILITY_NAME, capabilityName);
+        }
+
+        Params.ClientInfo clientInfoObj = (Params.ClientInfo) messageContext.getProperty(
+                APIMgtGatewayConstants.MCP_CLIENT_INFO_KEY);
+        if (clientInfoObj != null) {
+            Map<String, Object> clientInfo = new HashMap<>();
+            clientInfo.put(APIMgtGatewayConstants.MCP_REQUESTED_PROTOCOL_VERSION,
+                    messageContext.getProperty(APIMgtGatewayConstants.MCP_REQUESTED_PROTOCOL_VERSION_KEY));
+            clientInfo.put(APIMgtGatewayConstants.MCP_CLIENT_NAME, clientInfoObj.getName());
+            clientInfo.put(APIMgtGatewayConstants.MCP_CLIENT_VERSION, clientInfoObj.getVersion());
+            mcpAnalytics.put(APIMgtGatewayConstants.MCP_CLIENT_INFO, clientInfo);
+        }
+
+        String protocolVersion = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_PROTOCOL_VERSION_KEY);
+        String serverName = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_SERVER_NAME_KEY);
+        String serverVersion = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_SERVER_VERSION_KEY);
         if (protocolVersion != null || serverName != null || serverVersion != null) {
             Map<String, Object> serverInfo = new HashMap<>();
-            serverInfo.put("protocolVersion", protocolVersion);
-            serverInfo.put("name", serverName);
-            serverInfo.put("version", serverVersion);
-            mcpAnalytics.put(MCP_SERVER_INFO, serverInfo);
+            serverInfo.put(APIMgtGatewayConstants.MCP_PROTOCOL_VERSION, protocolVersion);
+            serverInfo.put(APIMgtGatewayConstants.MCP_SERVER_NAME, serverName);
+            serverInfo.put(APIMgtGatewayConstants.MCP_SERVER_VERSION, serverVersion);
+            mcpAnalytics.put(APIMgtGatewayConstants.MCP_SERVER_INFO, serverInfo);
         }
 
-        boolean isError = messageContext.getPropertyKeySet().contains(MCP_IS_ERROR_KEY)
-                && (Boolean) messageContext.getProperty(MCP_IS_ERROR_KEY);
-        mcpAnalytics.put(MCP_IS_ERROR, isError);
+        boolean isError = messageContext.getPropertyKeySet().contains(APIMgtGatewayConstants.MCP_IS_ERROR_KEY)
+                && (Boolean) messageContext.getProperty(APIMgtGatewayConstants.MCP_IS_ERROR_KEY);
+        mcpAnalytics.put(APIMgtGatewayConstants.MCP_IS_ERROR, isError);
         if (isError) {
-            mcpAnalytics.put(MCP_ERROR_CODE, messageContext.getProperty(MCP_ERROR_CODE_KEY));
+            mcpAnalytics.put(APIMgtGatewayConstants.MCP_ERROR_CODE,
+                    messageContext.getProperty(APIMgtGatewayConstants.MCP_ERROR_CODE_KEY));
         }
 
         if (log.isDebugEnabled()) {
@@ -673,7 +692,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         if (resourcePath == null) {
             resourcePath = (String) messageContext.getProperty(API_ELECTED_RESOURCE);
         }
-        if (resourcePath != null && resourcePath.startsWith(MCP_RESOURCE)) {
+        if (resourcePath != null && resourcePath.startsWith(APIMgtGatewayConstants.MCP_RESOURCE)) {
             return !messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE);
         }
 

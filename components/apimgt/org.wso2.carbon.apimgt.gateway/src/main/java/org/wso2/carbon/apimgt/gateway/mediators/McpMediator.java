@@ -186,7 +186,10 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             } else {
                 // If no response is generated, set the HTTP status to 204 No Content
                 axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, HttpStatus.SC_NO_CONTENT);
-                log.info("MCP request processed with no content response. Method: " + mcpMethod);
+                if (log.isDebugEnabled()) {
+                    log.debug("MCP request processed with no content response. Method: " + mcpMethod +
+                            ". Setting 204 No Content.");
+                }
             }
         } else if (StringUtils.equals(mcpMethod, APIConstants.MCP.METHOD_NOTIFICATION_INITIALIZED)) {
             JsonUtil.removeJsonPayload(axis2MessageContext);
@@ -194,7 +197,10 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             axis2MessageContext.setProperty(APIConstants.NO_ENTITY_BODY, true);
             axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, HttpStatus.SC_ACCEPTED);
             axis2MessageContext.setProperty(APIMgtGatewayConstants.MCP_METHOD, mcpMethod);
-            log.info("Received MCP initialization notification from client. Method: " + mcpMethod);
+            if (log.isDebugEnabled()) {
+                log.debug("Received MCP initialization notification from client. Method: " + mcpMethod +
+                        ". Responding with 202 Accepted.");
+            }
         }
     }
 
@@ -378,29 +384,29 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         }
         try {
             JsonObject responseObject = JsonParser.parseString(responseJson).getAsJsonObject();
-            JsonObject result = responseObject.getAsJsonObject("result");
+            JsonObject result = responseObject.getAsJsonObject(APIMgtGatewayConstants.RESULT);
             if (result != null) {
                 // protocolVersion lives at result level
-                if (result.has("protocolVersion")) {
+                if (result.has(APIMgtGatewayConstants.PROTOCOL_VERSION)) {
                     messageContext.setProperty(
-                            APIMgtGatewayConstants.MCP_PROTOCOL_VERSION,
-                            result.get("protocolVersion").getAsString());
+                            APIMgtGatewayConstants.MCP_PROTOCOL_VERSION_KEY,
+                            result.get(APIMgtGatewayConstants.PROTOCOL_VERSION).getAsString());
                 }
-                JsonObject serverInfo = result.getAsJsonObject("serverInfo");
+                JsonObject serverInfo = result.getAsJsonObject(APIMgtGatewayConstants.SERVER_INFO);
                 if (serverInfo != null) {
-                    if (serverInfo.has("name")) {
+                    if (serverInfo.has(APIMgtGatewayConstants.SERVER_NAME)) {
                         messageContext.setProperty(
-                                APIMgtGatewayConstants.MCP_SERVER_NAME,
-                                serverInfo.get("name").getAsString());
+                                APIMgtGatewayConstants.MCP_SERVER_NAME_KEY,
+                                serverInfo.get(APIMgtGatewayConstants.SERVER_NAME).getAsString());
                     }
-                    if (serverInfo.has("version")) {
+                    if (serverInfo.has(APIMgtGatewayConstants.SERVER_VERSION)) {
                         messageContext.setProperty(
-                                APIMgtGatewayConstants.MCP_SERVER_VERSION,
-                                serverInfo.get("version").getAsString());
+                                APIMgtGatewayConstants.MCP_SERVER_VERSION_KEY,
+                                serverInfo.get(APIMgtGatewayConstants.SERVER_VERSION).getAsString());
                     }
                 }
             }
-        } catch (JsonParseException | IllegalStateException e) {
+        } catch (JsonParseException e) {
             log.warn("Failed to extract serverInfo from MCP initialize response for analytics. " +
                     "Response may be malformed.", e);
         }
@@ -421,25 +427,29 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             JsonObject responseObject = JsonParser.parseString(responseJson).getAsJsonObject();
 
             // Check for Protocol Errors (JSON-RPC protocol error)
-            if (responseObject.has("error") && !responseObject.get("error").isJsonNull()) {
-                JsonObject error = responseObject.getAsJsonObject("error");
-                if (error.has("code") && !error.get("code").isJsonNull()) {
-                    int errorCode = error.get("code").getAsInt();
+            if (responseObject.has(APIMgtGatewayConstants.ERROR)
+                    && !responseObject.get(APIMgtGatewayConstants.ERROR).isJsonNull()) {
+                JsonObject error = responseObject.getAsJsonObject(APIMgtGatewayConstants.ERROR);
+                if (error.has(APIMgtGatewayConstants.CODE)
+                        && !error.get(APIMgtGatewayConstants.CODE).isJsonNull()) {
+                    int errorCode = error.get(APIMgtGatewayConstants.CODE).getAsInt();
                     messageContext.setProperty(APIMgtGatewayConstants.MCP_IS_ERROR_KEY, true);
                     messageContext.setProperty(APIMgtGatewayConstants.MCP_ERROR_CODE_KEY, errorCode);
                 }
             }
             // Check for Tool Execution Errors (tool call failure)
-            else if (responseObject.has("result") && !responseObject.get("result").isJsonNull()) {
-                JsonObject result = responseObject.getAsJsonObject("result");
-                if (result.has("isError") && !result.get("isError").isJsonNull()
-                        && result.get("isError").getAsBoolean()) {
+            else if (responseObject.has(APIMgtGatewayConstants.RESULT)
+                    && !responseObject.get(APIMgtGatewayConstants.RESULT).isJsonNull()) {
+                JsonObject result = responseObject.getAsJsonObject(APIMgtGatewayConstants.RESULT);
+                if (result.has(APIMgtGatewayConstants.IS_ERROR)
+                        && !result.get(APIMgtGatewayConstants.IS_ERROR).isJsonNull()
+                        && result.get(APIMgtGatewayConstants.IS_ERROR).getAsBoolean()) {
                     messageContext.setProperty(APIMgtGatewayConstants.MCP_IS_ERROR_KEY, true);
                     messageContext.setProperty(APIMgtGatewayConstants.MCP_ERROR_CODE_KEY,
                             APIMgtGatewayConstants.MCP_DEFAULT_ERROR_CODE);
                 }
             }
-        } catch (JsonParseException | IllegalStateException e) {
+        } catch (JsonParseException e) {
             log.warn("Failed to extract error details from MCP response for analytics. " +
                     "Response may be malformed.", e);
         }

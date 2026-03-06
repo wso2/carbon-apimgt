@@ -224,9 +224,9 @@ public class APIMgtGatewayConstants {
     public static final String MCP_SESSION_ID_KEY = "MCP_SESSION_ID";
     public static final String MCP_REQUESTED_PROTOCOL_VERSION_KEY = "MCP_REQUESTED_PROTOCOL_VERSION";
     public static final String MCP_CLIENT_INFO_KEY = "MCP_CLIENT_INFO";
-    public static final String MCP_PROTOCOL_VERSION = "MCP_PROTOCOL_VERSION";
-    public static final String MCP_SERVER_NAME = "MCP_SERVER_NAME";
-    public static final String MCP_SERVER_VERSION = "MCP_SERVER_VERSION";
+    public static final String MCP_PROTOCOL_VERSION_KEY = "MCP_PROTOCOL_VERSION";
+    public static final String MCP_SERVER_NAME_KEY = "MCP_SERVER_NAME";
+    public static final String MCP_SERVER_VERSION_KEY = "MCP_SERVER_VERSION";
     public static final String MCP_REQUEST_SIZE_KEY = "MCP_REQUEST_SIZE";
     public static final String MCP_API_ELECTED_RESOURCE_KEY = "MCP_API_ELECTED_RESOURCE";
     public static final String MCP_ERROR_CODE_KEY = "MCP_ERROR_CODE";
@@ -237,14 +237,26 @@ public class APIMgtGatewayConstants {
     public static final String MCP_AUTH_CLAIM = "MCP_AUTHENTICATED";
     public static final Long MCP_AUTH_TOKEN_EXPIRATION_TIME = 6000L;
     public static final String MCP_ANALYTICS = "mcpAnalytics";
-    public static final String MCP_CAPABILITY_NAME = "capabilityName";
-    public static final String MCP_CAPABILITY = "capability";
     public static final String MCP_SESSION_ID = "sessionId";
-    public static final String MCP_REQUESTED_PROTOCOL_VERSION = "requestedProtocolVersion";
+    public static final String MCP_CAPABILITY = "capability";
+    public static final String MCP_CAPABILITY_NAME = "capabilityName";
     public static final String MCP_CLIENT_INFO = "clientInfo";
+    public static final String MCP_REQUESTED_PROTOCOL_VERSION = "requestedProtocolVersion";
+    public static final String MCP_CLIENT_NAME = "name";
+    public static final String MCP_CLIENT_VERSION = "version";
     public static final String MCP_SERVER_INFO = "serverInfo";
-    public static final String MCP_ERROR_CODE = "mcpErrorCode";
+    public static final String MCP_PROTOCOL_VERSION = "protocolVersion";
+    public static final String MCP_SERVER_NAME = "name";
+    public static final String MCP_SERVER_VERSION = "version";
     public static final String MCP_IS_ERROR = "isError";
+    public static final String MCP_ERROR_CODE = "mcpErrorCode";
+    public static final String SERVER_INFO = "serverInfo";
+    public static final String SERVER_NAME = "name";
+    public static final String SERVER_VERSION = "version";
+    public static final String PROTOCOL_VERSION = "protocolVersion";
+    public static final String RESULT = "result";
+    public static final String CODE = "code";
+    public static final String IS_ERROR = "isError";
 
 
     /**

@@ -143,7 +143,6 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
             RelayUtils.buildMessage(axis2MC);
             if (JsonUtil.hasAJsonPayload(axis2MC)) {
                 messageBody = JsonUtil.jsonPayloadToString(axis2MC);
-
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(McpRequest.class, new MCPRequestDeserializer())
                         .registerTypeAdapter(Params.class, new ParamsDeserializer())
@@ -163,7 +162,7 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_METHOD, method);
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY, request);
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_SESSION_ID_KEY,
-                        headers.get(APIConstants.MCP.HEADER_MCP_SESSION_ID)); //TODO: not this. get from notification/initialize response
+                        headers.get(APIConstants.MCP.HEADER_MCP_SESSION_ID));
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUESTED_PROTOCOL_VERSION_KEY,
                         headers.get(APIConstants.MCP.MCP_PROTOCOL_VERSION_HEADER));
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUEST_SIZE_KEY,
