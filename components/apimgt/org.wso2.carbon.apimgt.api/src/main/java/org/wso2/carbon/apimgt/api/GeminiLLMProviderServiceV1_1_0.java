@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2026 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -20,56 +20,54 @@ package org.wso2.carbon.apimgt.api;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.osgi.service.component.annotations.Component;
-import org.wso2.carbon.apimgt.api.model.LLMModel;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
 /**
- * Gemini LLM Provider Service.
+ * Gemini LLM Provider Service V1.1.0.
  */
 @Component(
-        name = "gemini.llm.provider.service",
+        name = "geminiV1_1_0.llm.provider.service",
         immediate = true,
         service = LLMProviderService.class
 )
-public class GeminiLLMProviderService extends BuiltInLLMProviderService {
-
-    @Override
-    public boolean isDeprecated() {
-        return true;
-    }
+public class GeminiLLMProviderServiceV1_1_0 extends BuiltInLLMProviderService {
 
     @Override
     public String getType() {
 
-        return APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_CONNECTOR;
+        return APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_CONNECTOR_V1_1_0;
     }
 
     @Override
     public LLMProvider getLLMProvider()
             throws APIManagementException {
 
-        log.debug("Initializing Gemini LLM Provider");
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing Gemini LLM Provider Version: " + this.getType());
+        }
         try {
             LLMProvider llmProvider = new LLMProvider();
             llmProvider.setName(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_NAME);
-            llmProvider.setApiVersion(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_VERSION);
-            llmProvider.setDescription(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_DESCRIPTION);
+            llmProvider.setApiVersion(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_VERSION_V1_1_0);
+            llmProvider.setDescription(
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_DESCRIPTION);
             llmProvider.setBuiltInSupport(true);
 
             llmProvider.setApiDefinition(readApiDefinition("repository" + File.separator + "resources"
                     + File.separator + "api_definitions" + File.separator
                     + APIConstants.AIAPIConstants
-                    .LLM_PROVIDER_SERVICE_GEMINI_API_DEFINITION_FILE_NAME));
+                    .LLM_PROVIDER_SERVICE_GEMINI_API_DEFINITION_FILE_NAME_V1_1_0));
 
             LLMProviderConfiguration llmProviderConfiguration = new LLMProviderConfiguration();
-            llmProviderConfiguration.setAuthenticationConfiguration(getLlmProviderAuthenticationConfiguration());
+            LLMProviderAuthenticationConfiguration llmProviderAuthenticationConfiguration =
+                    getLlmProviderAuthenticationConfiguration();
+            llmProviderConfiguration.setAuthenticationConfiguration(llmProviderAuthenticationConfiguration);
             llmProviderConfiguration.setConnectorType(this.getType());
-            llmProviderConfiguration.setDeprecated(isDeprecated());
 
             List<LLMProviderMetadata> llmProviderMetadata = new ArrayList<>();
             llmProviderMetadata.add(new LLMProviderMetadata(
@@ -94,14 +92,10 @@ public class GeminiLLMProviderService extends BuiltInLLMProviderService {
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_METADATA_IDENTIFIER_TOTAL_TOKEN_COUNT, false));
             llmProviderConfiguration.setMetadata(llmProviderMetadata);
 
-            // Set default model List
-            List<LLMModel> modelList = new ArrayList<>();
-            modelList.add(new LLMModel(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_GEMINI_NAME,
-                    Arrays.asList("gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-2.5-pro")));
-            llmProvider.setModelList(modelList);
-
             llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());
-            log.debug("Successfully configured Gemini LLM Provider");
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully configured Gemini LLM Provider Version: " + this.getType());
+            }
             return llmProvider;
         } catch (Exception e) {
             log.error("Error occurred when registering LLM Provider: " + this.getType());
@@ -109,6 +103,11 @@ public class GeminiLLMProviderService extends BuiltInLLMProviderService {
         }
     }
 
+    /**
+     * Get LLM Provider Authentication Configuration.
+     *
+     * @return LLMProviderAuthenticationConfiguration
+     */
     private static LLMProviderAuthenticationConfiguration getLlmProviderAuthenticationConfiguration() {
 
         LLMProviderAuthenticationConfiguration llmProviderAuthenticationConfiguration =

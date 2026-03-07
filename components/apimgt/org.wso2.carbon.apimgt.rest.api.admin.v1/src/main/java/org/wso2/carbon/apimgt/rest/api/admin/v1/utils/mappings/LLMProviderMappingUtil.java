@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Collections;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AIServiceProviderResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AIServiceProviderSummaryResponseDTO;
@@ -103,6 +104,12 @@ public class LLMProviderMappingUtil {
                                 .models(model.getValues()))
                         .collect(Collectors.toList());
         llmProviderResponseDTO.setModelProviders(llmModelDTOList);
+        String configurations = llmProvider.getConfigurations();
+        if (configurations != null) {
+            org.json.JSONObject configJson = new org.json.JSONObject(configurations);
+            llmProviderResponseDTO.setDeprecated(
+                    configJson.optBoolean(APIConstants.AIAPIConstants.LLM_PROVIDER_DEPRECATED, false));
+        }
         return llmProviderResponseDTO;
     }
     /**
@@ -173,6 +180,12 @@ public class LLMProviderMappingUtil {
         aiServiceProviderSummaryResponseDTO.setApiVersion(llmProvider.getApiVersion());
         aiServiceProviderSummaryResponseDTO.setBuiltInSupport(llmProvider.isBuiltInSupport());
         aiServiceProviderSummaryResponseDTO.setDescription(llmProvider.getDescription());
+        String configurations = llmProvider.getConfigurations();
+        if (configurations != null) {
+            org.json.JSONObject configJson = new org.json.JSONObject(configurations);
+            aiServiceProviderSummaryResponseDTO.setDeprecated(
+                    configJson.optBoolean(APIConstants.AIAPIConstants.LLM_PROVIDER_DEPRECATED, false));
+        }
         return aiServiceProviderSummaryResponseDTO;
     }
 
