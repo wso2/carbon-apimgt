@@ -91,19 +91,23 @@ public class OpaqueAPIKeyNotifierImpl implements OpaqueAPIKeyNotifier {
         int tenantId = tenantIdObj instanceof Integer ? (Integer) tenantIdObj : 0;
         Object appIdObj = properties.get(APIConstants.NotificationEvent.APPLICATION_ID);
         int appId = appIdObj instanceof Integer ? (Integer) appIdObj : 0;
-        String originUUId = null;
-        String origin = null;
-        if (properties.getProperty(APIConstants.NotificationEvent.APPLICATION_UUID) != null) {
-            originUUId  = properties.getProperty(APIConstants.NotificationEvent.APPLICATION_UUID);
-            origin = "APP";
+        String apiUUId = null;
+        String appUUId = null;
+        if (properties.getProperty(APIConstants.NotificationEvent.APPLICATION_UUID) != null &&
+                properties.getProperty(APIConstants.NotificationEvent.API_UUID) != null) {
+            apiUUId  = properties.getProperty(APIConstants.NotificationEvent.API_UUID);
+            appUUId = properties.getProperty(APIConstants.NotificationEvent.APPLICATION_UUID);
+        } else if (properties.getProperty(APIConstants.NotificationEvent.APPLICATION_UUID) != null) {
+            appUUId  = properties.getProperty(APIConstants.NotificationEvent.APPLICATION_UUID);
+            apiUUId = "APP";
         } else if (properties.getProperty(APIConstants.NotificationEvent.API_UUID) != null) {
-            originUUId = properties.getProperty(APIConstants.NotificationEvent.API_UUID);
-            origin = "API";
+            apiUUId = properties.getProperty(APIConstants.NotificationEvent.API_UUID);
+            appUUId = "API";
         }
         Object[] objects = new Object[]{eventId, properties.getProperty(APIConstants.NotificationEvent.API_KEY_HASH),
                         properties.getProperty(APIConstants.NotificationEvent.KEY_TYPE),
                         properties.getProperty(APIConstants.NotificationEvent.KEY_NAME),
-                        origin, originUUId, appId,
+                        apiUUId, appUUId, appId,
                         properties.getProperty(APIConstants.NotificationEvent.STATUS), expiresAt,
                         properties.getProperty(APIConstants.NotificationEvent.ADDITIONAL_PROPERTIES), tenantId};
         EventPublisherEvent apiKeyInfoEvent = new EventPublisherEvent(APIConstants.API_KEY_INFO_STREAM_ID,

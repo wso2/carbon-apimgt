@@ -693,7 +693,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.API_KEY_INFO_STREAM_ID);
         properties.put(APIConstants.NotificationEvent.API_KEY_HASH, apiKeyHash);
-        if (application != null) {
+        if (api != null && application != null) {
+            properties.put(APIConstants.NotificationEvent.API_UUID, api.getUUID());
+            properties.put(APIConstants.NotificationEvent.APPLICATION_UUID, application.getUUID());
+            properties.put(APIConstants.NotificationEvent.APPLICATION_ID, application.getId());
+        } else if (application != null) {
             properties.put(APIConstants.NotificationEvent.APPLICATION_UUID, application.getUUID());
             properties.put(APIConstants.NotificationEvent.APPLICATION_ID, application.getId());
         } else if (api != null) {
@@ -4130,7 +4134,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         regeneratedApiKeyInfo.setKeyName(apiKeyInfo.getKeyName());
         regeneratedApiKeyInfo.setApiKey(apiKey);
         regeneratedApiKeyInfo.setValidityPeriod(apiKeyInfo.getValidityPeriod());
-        sendAPIKeyInfoEvent(apiKeyHash,null,
+        sendAPIKeyInfoEvent(apiKeyHash, getApplicationByUUID(apiKeyInfo.getApplicationId()),
                 getLightweightAPIByUUID(apiUUId, organization), calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(),
                         apiKeyInfo.getValidityPeriod()), apiKeyInfo.getKeyType(), apiKeyInfo.getKeyName(), props);
         return regeneratedApiKeyInfo;
