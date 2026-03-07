@@ -4129,13 +4129,17 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         apiKeyInfoDTO.setCreatedTime(System.currentTimeMillis());
         String apiKeyHash = APIUtil.sha256Hash(apiKey);
         apiKeyInfoDTO.setKeyId(UUID.randomUUID().toString());
+        Application application = null;
+        if (StringUtils.isNotBlank(apiKeyInfo.getApplicationId())) {
+            application = getLightweightApplicationByUUID(apiKeyInfo.getApplicationId());
+        }
+        API api = getLightweightAPIByUUID(apiUUId, organization);
         apiKeyMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         APIKeyInfo regeneratedApiKeyInfo = new APIKeyInfo();
         regeneratedApiKeyInfo.setKeyName(apiKeyInfo.getKeyName());
         regeneratedApiKeyInfo.setApiKey(apiKey);
         regeneratedApiKeyInfo.setValidityPeriod(apiKeyInfo.getValidityPeriod());
-        sendAPIKeyInfoEvent(apiKeyHash, getApplicationByUUID(apiKeyInfo.getApplicationId()),
-                getLightweightAPIByUUID(apiUUId, organization), calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(),
+        sendAPIKeyInfoEvent(apiKeyHash, application, api, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(),
                         apiKeyInfo.getValidityPeriod()), apiKeyInfo.getKeyType(), apiKeyInfo.getKeyName(), props);
         return regeneratedApiKeyInfo;
     }

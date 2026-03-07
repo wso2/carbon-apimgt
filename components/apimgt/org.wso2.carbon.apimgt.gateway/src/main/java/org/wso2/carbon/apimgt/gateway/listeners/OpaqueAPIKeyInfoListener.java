@@ -70,10 +70,10 @@ public class OpaqueAPIKeyInfoListener implements MessageListener {
                         log.warn("Dropping opaque API key info event with unsupported origin for API key " + apiKeyInfo.getKeyName());
                         return;
                     }
-                    if (apiUUId != null) {
+                    if (apiUUId != null && !"APP".equals(apiUUId)) {
                         apiKeyInfo.setApiUUId(apiUUId);
                     }
-                    if (appUUId != null) {
+                    if (appUUId != null && !"API".equals(appUUId)) {
                         apiKeyInfo.setApplicationId(appUUId);
                     }
                     apiKeyInfo.setAppId(payload.path(APIConstants.NotificationEvent.APPLICATION_ID).asInt());

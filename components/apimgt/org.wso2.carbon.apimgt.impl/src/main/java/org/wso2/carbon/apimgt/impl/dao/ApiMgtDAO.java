@@ -4830,6 +4830,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(deleteSubscription, null, null);
             APIMgtDBUtil.closeAllConnections(deleteDomainApp, null, null);
             APIMgtDBUtil.closeAllConnections(deleteAppKey, null, null);
+            APIMgtDBUtil.closeAllConnections(deleteApiKeyAppMapping, null, null);
             APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
 
         }
