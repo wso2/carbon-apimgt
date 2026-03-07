@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.LLMProviderManager;
 import org.wso2.carbon.apimgt.gateway.TenancyLoader;
+import org.wso2.carbon.apimgt.gateway.apikey.APIKeysRetriever;
 import org.wso2.carbon.apimgt.gateway.notifiers.DeploymentStatusNotifier;
 import org.wso2.carbon.apimgt.gateway.notifiers.GatewayNotifier;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
@@ -240,12 +241,17 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             ServiceReferenceHolder.getInstance().addLoadedTenant(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             retrieveAndDeployArtifacts(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             retrieveBlockConditionsAndKeyTemplates();
+            retrieveApiKeys();
             WebhooksDataHolder.getInstance()
                     .registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             jmsTransportHandlerForTrafficManager
                     .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_THROTTLE_DATA, new JMSMessageListener());
             jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION,
                     new GatewayTokenRevocationMessageListener());
+            jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_OPAQUE_API_KEY_INFO,
+                    new OpaqueAPIKeyInfoListener());
+            jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_OPAQUE_API_KEY_ASSOCIATION_INFO,
+                    new OpaqueAPIKeyAssociationInfoListener());
             jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_CACHE_INVALIDATION,
                     new APIMgtGatewayCacheMessageListener());
             jmsTransportHandlerForEventHub
@@ -520,6 +526,13 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             RevokedJWTTokensRetriever webServiceRevokedJWTTokensRetriever = new RevokedJWTTokensRetriever();
             webServiceRevokedJWTTokensRetriever.startRevokedJWTTokensRetriever();
         }
+    }
+
+    private void retrieveApiKeys() {
+
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        APIKeysRetriever webServiceAPIKeysRetriever = new APIKeysRetriever();
+        webServiceAPIKeysRetriever.startWebServiceApiKeyRetriever(tenantDomain);
     }
 
     @Override

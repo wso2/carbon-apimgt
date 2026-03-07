@@ -62,6 +62,7 @@
             org.wso2.carbon.apimgt.rest.api.admin.v1.LabelsApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.MeApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.AiServiceProvidersApi,
+            org.wso2.carbon.apimgt.rest.api.admin.v1.ApiKeysApi,
         </param-value>
     </init-param>
     <init-param>

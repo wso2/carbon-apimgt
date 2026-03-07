@@ -3933,6 +3933,113 @@ public class SQLConstants {
 
     public static final String SCOPE_EXIST_SQL = "SELECT 1 FROM AM_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
 
+
+    /**
+     * Queries related to AM_API_KEY, AM_API_KEY_API_MAPPING and AM_API_KEY_APPLICATION_MAPPING tables
+     */
+    public static final String ADD_API_KEY_SQL =
+                    "INSERT INTO AM_API_KEY (API_KEY_UUID, NAME, API_KEY_HASH, KEY_TYPE, API_KEY_PROPERTIES, AUTHZ_USER, " +
+                            "TIME_CREATED, VALIDITY_PERIOD, LAST_USED, STATUS) " +
+                    "VALUES (?,?,?,?,?,?,?,?,?,?)";
+    public static final String ADD_API_KEY_TO_API_MAPPING_SQL =
+                    "INSERT INTO AM_API_KEY_API_MAPPING (API_KEY_UUID, API_UUID) VALUES (?,?)";
+    public static final String ADD_API_KEY_TO_APP_MAPPING_SQL =
+                    "INSERT INTO AM_API_KEY_APPLICATION_MAPPING (API_KEY_UUID, APPLICATION_UUID) VALUES (?,?)";
+    public static final String GET_ALL_API_KEYS_SQL =
+            "SELECT K.API_KEY_UUID, K.NAME, K.API_KEY_HASH, K.KEY_TYPE, K.API_KEY_PROPERTIES, K.AUTHZ_USER, " +
+                    "K.TIME_CREATED, K.VALIDITY_PERIOD, K.LAST_USED, K.STATUS, A.API_NAME, APP.NAME AS APPLICATION_NAME, " +
+                    "APP.APPLICATION_ID AS APPLICATION_ID FROM AM_API_KEY K " +
+                    "LEFT JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "LEFT JOIN AM_API A ON KM.API_UUID = A.API_UUID " +
+                    "LEFT JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "LEFT JOIN AM_APPLICATION APP ON AM.APPLICATION_UUID = APP.UUID " +
+                    "WHERE K.STATUS = 'ACTIVE' AND (A.ORGANIZATION = ? OR A.API_NAME IS NULL) AND " +
+                    "(APP.ORGANIZATION = ? OR AM.APPLICATION_UUID IS NULL)";
+    public static final String GET_API_KEY_SQL =
+            "SELECT K.API_KEY_UUID, K.NAME, K.TIME_CREATED, K.VALIDITY_PERIOD, K.LAST_USED " +
+                    "FROM AM_API_KEY K " +
+                    "JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "WHERE AM.APPLICATION_UUID = ? AND K.KEY_TYPE = ? AND K.STATUS = 'ACTIVE'";
+    public static final String GET_API_API_KEY_SQL =
+            "SELECT K.API_KEY_UUID, AM.APPLICATION_UUID, APP.NAME AS APPLICATION_NAME, K.NAME, K.KEY_TYPE, K.TIME_CREATED, " +
+                    "K.VALIDITY_PERIOD, K.LAST_USED " +
+                    "FROM AM_API_KEY K " +
+                    "LEFT JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "LEFT JOIN AM_APPLICATION APP ON AM.APPLICATION_UUID = APP.UUID " +
+                    "JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "WHERE KM.API_UUID = ? AND K.STATUS = 'ACTIVE'";
+    public static final String GET_API_KEY_DETAILS_FROM_KEY_UUID_SQL =
+            "SELECT NAME, API_KEY_HASH, KEY_TYPE, API_KEY_PROPERTIES, AUTHZ_USER, VALIDITY_PERIOD, LAST_USED FROM " +
+                    "AM_API_KEY WHERE API_KEY_UUID = ? AND STATUS = 'ACTIVE'";
+    public static final String GET_API_API_KEY_DETAILS_FROM_KEY_UUID_SQL =
+            "SELECT AM.APPLICATION_UUID, K.NAME, K.API_KEY_HASH, K.KEY_TYPE, K.API_KEY_PROPERTIES, K.AUTHZ_USER, K.VALIDITY_PERIOD, K.LAST_USED " +
+                    "FROM AM_API_KEY K " +
+                    "JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "LEFT JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "WHERE KM.API_UUID = ? AND K.API_KEY_UUID = ? AND K.STATUS = 'ACTIVE'";
+    public static final String REVOKE_API_KEY_SQL =
+            "UPDATE AM_API_KEY K SET K.STATUS = 'REVOKED' " +
+                    "WHERE K.API_KEY_UUID = ? " +
+                    "AND EXISTS ( " +
+                    "    SELECT 1 FROM AM_API_KEY_APPLICATION_MAPPING M " +
+                    "    JOIN AM_APPLICATION A ON M.APPLICATION_UUID = A.UUID " +
+                    "    WHERE M.API_KEY_UUID = K.API_KEY_UUID AND A.ORGANIZATION = ? " +
+                    "    UNION " +
+                    "    SELECT 1 FROM AM_API_KEY_API_MAPPING M " +
+                    "    JOIN AM_API A ON M.API_UUID = A.API_UUID " +
+                    "    WHERE M.API_KEY_UUID = K.API_KEY_UUID AND A.ORGANIZATION = ? " +
+                    ") " +
+                    "AND K.STATUS != 'REVOKED'";
+    public static final String UPDATE_API_KEY_LAST_USED_SQL =
+            "UPDATE AM_API_KEY SET LAST_USED = ? WHERE API_KEY_HASH = ? AND STATUS = 'ACTIVE'";
+    public static final String REMOVE_API_KEY_ASSOCIATION_SQL =
+            "DELETE FROM AM_API_KEY_APPLICATION_MAPPING WHERE API_KEY_UUID = ?";
+    public static final String REMOVE_API_KEY_ASSOCIATION_VIA_APP_SQL =
+            "DELETE FROM AM_API_KEY_APPLICATION_MAPPING WHERE APPLICATION_UUID = ? AND API_KEY_UUID = ?";
+    public static final String GET_API_KEY_ASSOCIATIONS_SQL =
+            "SELECT K.API_KEY_UUID, K.NAME, A.API_NAME, K.TIME_CREATED, K.VALIDITY_PERIOD, K.LAST_USED, KM.API_UUID " +
+                    "FROM AM_API_KEY K " +
+                    "JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "JOIN AM_API A ON KM.API_UUID = A.API_UUID " +
+                    "JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "WHERE AM.APPLICATION_UUID = ? AND K.KEY_TYPE = ? AND K.STATUS = 'ACTIVE'";
+    public static final String GET_API_UUID_AND_TYPE_FOR_ASSOCIATION_VIA_APP_SQL =
+            "SELECT KM.API_UUID, K.NAME, K.KEY_TYPE, K.API_KEY_HASH, APP.APPLICATION_ID AS APPLICATION_ID " +
+                    "FROM AM_API_KEY K " +
+                    "JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "JOIN AM_APPLICATION APP ON AM.APPLICATION_UUID = APP.UUID " +
+                    "WHERE AM.APPLICATION_UUID = ? AND K.API_KEY_UUID = ?";
+    public static final String GET_KEY_DETAILS_FOR_ASSOCIATION_SQL =
+            "SELECT K.NAME, K.KEY_TYPE, K.API_KEY_HASH, COALESCE(APP.APPLICATION_ID, APP_PROVIDED.APPLICATION_ID) AS APPLICATION_ID, " +
+                    "COALESCE(APP.NAME, APP_PROVIDED.NAME) AS APPLICATION_NAME, A.API_NAME FROM AM_API_KEY K " +
+                    "LEFT JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "LEFT JOIN AM_APPLICATION APP ON AM.APPLICATION_UUID = APP.UUID " +
+                    "JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "JOIN AM_API A ON KM.API_UUID = A.API_UUID " +
+                    "LEFT JOIN AM_APPLICATION APP_PROVIDED ON APP_PROVIDED.UUID = ? " +
+                    "WHERE KM.API_UUID = ? AND K.API_KEY_UUID = ?";
+    public static final String GET_KEY_TYPE_ONLY_FOR_ASSOCIATION_SQL =
+            "SELECT K.NAME, K.KEY_TYPE, K.API_KEY_HASH " +
+                    "FROM AM_API_KEY K " +
+                    "JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "WHERE KM.API_UUID = ? AND K.API_KEY_UUID = ?";
+    public static final String GET_SUBSCRIBED_API_WITH_API_KEY_SQL =
+            "SELECT DISTINCT K.API_KEY_UUID, K.NAME, KM.API_UUID, A.API_NAME " +
+                    "FROM AM_SUBSCRIPTION S " +
+                    "JOIN AM_APPLICATION APP ON S.APPLICATION_ID = APP.APPLICATION_ID " +
+                    "JOIN AM_API A ON S.API_ID = A.API_ID " +
+                    "JOIN AM_API_KEY_API_MAPPING KM ON KM.API_UUID = A.API_UUID " +
+                    "JOIN AM_API_KEY K ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "LEFT JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "WHERE APP.UUID = ? " +
+                    "AND S.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "' " +
+                    "AND S.SUB_STATUS = 'UNBLOCKED' " +
+                    "AND AM.APPLICATION_UUID IS NULL " +
+                    "AND K.STATUS = 'ACTIVE' " +
+                    "AND K.KEY_TYPE = ? " +
+                    "AND A.STATUS = 'PUBLISHED'";
+
     /**
      * Static class to hold database queries related to webhooks subscriptions
      */
