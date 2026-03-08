@@ -2313,6 +2313,43 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/gateways"'
 
+  /gateways/{gatewayId}/regenerate-token:
+    post:
+      tags:
+        - Platform Gateways
+      summary: Regenerate registration token for a platform gateway
+      description: |
+        Regenerate the registration token for an existing platform gateway. The old token is revoked
+        and a new one is generated. Store the new token (e.g. as GATEWAY_CONTROL_PLANE_TOKEN in Docker Compose)
+        for the gateway to reconnect to the control plane WebSocket. The token is returned only once.
+      parameters:
+        - name: gatewayId
+          in: path
+          description: Gateway UUID
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            Gateway and new registration token (returned once) in the response body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformGatewayWithToken'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/gateways/{gatewayId}/regenerate-token"'
+
   ######################################################
   # The "Organizations" resource API
   ######################################################
@@ -5701,6 +5738,25 @@ components:
           additionalProperties: true
           description: Custom key-value properties for the gateway
           example: {"region": "us-west", "tier": "premium"}
+        permissions:
+          type: object
+          description: Gateway visibility permissions configuration
+          properties:
+            permissionType:
+              type: string
+              enum: [PUBLIC, ALLOW, DENY]
+              default: PUBLIC
+              description: |
+                Permission type for gateway visibility:
+                - PUBLIC: Gateway is visible to all users
+                - ALLOW: Gateway is visible only to specified roles
+                - DENY: Gateway is hidden from specified roles
+            roles:
+              type: array
+              items:
+                type: string
+              description: List of roles for ALLOW/DENY permission types
+              example: ["admin", "publisher"]
     PlatformGateway:
       title: Platform Gateway
       description: Platform gateway response (without registration token). Used for list and get.
@@ -5733,6 +5789,24 @@ components:
         isActive:
           type: boolean
           description: Indicates if the gateway is currently connected to the control plane via WebSocket
+        permissions:
+          type: object
+          description: Gateway visibility permissions configuration
+          properties:
+            permissionType:
+              type: string
+              enum: [PUBLIC, ALLOW, DENY]
+              default: PUBLIC
+              description: |
+                Permission type for gateway visibility:
+                - PUBLIC: Gateway is visible to all users
+                - ALLOW: Gateway is visible only to specified roles
+                - DENY: Gateway is hidden from specified roles
+            roles:
+              type: array
+              items:
+                type: string
+              description: List of roles for ALLOW/DENY permission types
         createdAt:
           type: string
           format: date-time

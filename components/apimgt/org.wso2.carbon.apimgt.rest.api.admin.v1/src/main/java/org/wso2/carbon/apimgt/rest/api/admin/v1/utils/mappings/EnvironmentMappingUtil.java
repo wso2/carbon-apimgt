@@ -73,14 +73,7 @@ public class EnvironmentMappingUtil {
                 .collect(Collectors.toList()));
         envDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO
                 (env.getAdditionalProperties()));
-        GatewayVisibilityPermissionConfigurationDTO permissions = env.getPermissions();
-        if (permissions != null) {
-            EnvironmentPermissionsDTO environmentPermissionsDTO = new EnvironmentPermissionsDTO();
-            environmentPermissionsDTO.setPermissionType(EnvironmentPermissionsDTO.PermissionTypeEnum
-                    .fromValue(permissions.getPermissionType()));
-            environmentPermissionsDTO.setRoles(permissions.getRoles());
-            envDTO.setPermissions(environmentPermissionsDTO);
-        }
+        envDTO.setPermissions(mapPermissionsToDTO(env.getPermissions()));
         return envDTO;
     }
 
@@ -93,7 +86,8 @@ public class EnvironmentMappingUtil {
      * @param gatewayType   gateway type constant (e.g. api-platform)
      * @return EnvironmentDTO suitable for deploy-target list
      */
-    public static EnvironmentDTO fromPlatformGatewayToEnvDTO(PlatformGateway gateway, String gatewayType) {
+    public static EnvironmentDTO fromPlatformGatewayToEnvDTO(PlatformGateway gateway, String gatewayType,
+            GatewayVisibilityPermissionConfigurationDTO permissions) {
         EnvironmentDTO envDTO = new EnvironmentDTO();
         envDTO.setId(gateway.getId());
         envDTO.setName(gateway.getName());
@@ -103,8 +97,52 @@ public class EnvironmentMappingUtil {
         envDTO.setIsReadOnly(true);
         envDTO.setMode(EnvironmentDTO.ModeEnum.WRITE_ONLY);
         envDTO.setType("hybrid");
-        envDTO.setVhosts(new ArrayList<>());
+
+        // Populate vhosts from platform gateway's vhost
+        List<VHostDTO> vhosts = new ArrayList<>();
+        if (gateway.getVhost() != null && !gateway.getVhost().isEmpty()) {
+            VHostDTO vhostDTO = new VHostDTO();
+            vhostDTO.setHost(gateway.getVhost());
+            vhostDTO.setHttpPort(80);
+            vhostDTO.setHttpsPort(443);
+            vhostDTO.setWsPort(9099);
+            vhostDTO.setWssPort(8099);
+            vhosts.add(vhostDTO);
+        }
+        envDTO.setVhosts(vhosts);
+        envDTO.setEndpointURIs(new ArrayList<>());
+
+        // Include platform gateway metadata in additionalProperties for UI consumption
+        List<AdditionalPropertyDTO> additionalProps = new ArrayList<>();
+        AdditionalPropertyDTO isActiveProperty = new AdditionalPropertyDTO();
+        isActiveProperty.setKey("isActive");
+        isActiveProperty.setValue(String.valueOf(gateway.isActive()));
+        additionalProps.add(isActiveProperty);
+        AdditionalPropertyDTO platformGatewayIdProperty = new AdditionalPropertyDTO();
+        platformGatewayIdProperty.setKey("platformGatewayId");
+        platformGatewayIdProperty.setValue(gateway.getId());
+        additionalProps.add(platformGatewayIdProperty);
+        envDTO.setAdditionalProperties(additionalProps);
+
+        envDTO.setPermissions(mapPermissionsToDTO(permissions));
         return envDTO;
+    }
+
+    /**
+     * Map internal permissions model to REST API DTO.
+     * Always returns a non-null DTO, defaulting to PUBLIC if permissions are null.
+     */
+    private static EnvironmentPermissionsDTO mapPermissionsToDTO(
+            GatewayVisibilityPermissionConfigurationDTO permissions) {
+        EnvironmentPermissionsDTO dto = new EnvironmentPermissionsDTO();
+        if (permissions == null || permissions.getPermissionType() == null) {
+            dto.setPermissionType(EnvironmentPermissionsDTO.PermissionTypeEnum.PUBLIC);
+            return dto;
+        }
+        dto.setPermissionType(EnvironmentPermissionsDTO.PermissionTypeEnum
+                .fromValue(permissions.getPermissionType()));
+        dto.setRoles(permissions.getRoles());
+        return dto;
     }
 
     /**

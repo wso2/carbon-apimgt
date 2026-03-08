@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CreatePlatformGatewayRequestPermissionsDTO;
 import javax.validation.constraints.*;
 
 /**
@@ -65,6 +66,7 @@ return null;
     }
     private FunctionalityTypeEnum functionalityType = FunctionalityTypeEnum.REGULAR;
     private Map<String, Object> properties = new HashMap<String, Object>();
+    private CreatePlatformGatewayRequestPermissionsDTO permissions = null;
 
   /**
    * URL-friendly gateway identifier (lowercase alphanumeric with hyphens, unique per organization)
@@ -196,6 +198,24 @@ return null;
     this.properties = properties;
   }
 
+  /**
+   **/
+  public CreatePlatformGatewayRequestDTO permissions(CreatePlatformGatewayRequestPermissionsDTO permissions) {
+    this.permissions = permissions;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("permissions")
+  public CreatePlatformGatewayRequestPermissionsDTO getPermissions() {
+    return permissions;
+  }
+  public void setPermissions(CreatePlatformGatewayRequestPermissionsDTO permissions) {
+    this.permissions = permissions;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -212,12 +232,13 @@ return null;
         Objects.equals(vhost, createPlatformGatewayRequest.vhost) &&
         Objects.equals(isCritical, createPlatformGatewayRequest.isCritical) &&
         Objects.equals(functionalityType, createPlatformGatewayRequest.functionalityType) &&
-        Objects.equals(properties, createPlatformGatewayRequest.properties);
+        Objects.equals(properties, createPlatformGatewayRequest.properties) &&
+        Objects.equals(permissions, createPlatformGatewayRequest.permissions);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, displayName, description, vhost, isCritical, functionalityType, properties);
+    return Objects.hash(name, displayName, description, vhost, isCritical, functionalityType, properties, permissions);
   }
 
   @Override
@@ -232,6 +253,7 @@ return null;
     sb.append("    isCritical: ").append(toIndentedString(isCritical)).append("\n");
     sb.append("    functionalityType: ").append(toIndentedString(functionalityType)).append("\n");
     sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
+    sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
     sb.append("}");
     return sb.toString();
   }

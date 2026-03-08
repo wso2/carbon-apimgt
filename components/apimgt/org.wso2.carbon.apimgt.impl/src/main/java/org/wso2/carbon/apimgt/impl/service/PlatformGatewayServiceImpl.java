@@ -166,6 +166,36 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         return g != null ? toApiModel(g) : null;
     }
 
+    @Override
+    public CreatePlatformGatewayResult regenerateGatewayToken(String organizationId, String gatewayId)
+            throws APIManagementException {
+        PlatformGatewayDAO dao = PlatformGatewayDAO.getInstance();
+        PlatformGatewayDAO.PlatformGateway gateway = dao.getGatewayById(gatewayId);
+        if (gateway == null) {
+            throw new APIManagementException("Platform gateway not found: " + gatewayId,
+                    org.wso2.carbon.apimgt.api.ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
+        }
+        if (!organizationId.equals(gateway.organizationId)) {
+            throw new APIManagementException("Platform gateway not found in organization: " + gatewayId,
+                    org.wso2.carbon.apimgt.api.ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
+        }
+
+        String tokenId = PlatformGatewayTokenUtil.generateTokenId();
+        String plainToken = PlatformGatewayTokenUtil.generateToken();
+        String tokenHash;
+        try {
+            tokenHash = PlatformGatewayTokenUtil.hashToken(plainToken);
+        } catch (NoSuchAlgorithmException e) {
+            throw new APIManagementException("Error hashing gateway token", e);
+        }
+
+        Timestamp now = Timestamp.from(Instant.now());
+        dao.regenerateToken(gatewayId, tokenId, tokenHash, now);
+
+        String registrationToken = tokenId + PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR + plainToken;
+        return new CreatePlatformGatewayResult(toApiModel(gateway), registrationToken);
+    }
+
     private static PlatformGateway toApiModel(PlatformGatewayDAO.PlatformGateway g) {
         PlatformGateway api = new PlatformGateway();
         api.setId(g.id);

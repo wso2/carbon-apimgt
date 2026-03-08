@@ -35,8 +35,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -106,6 +108,29 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             EnvironmentDTO environmentDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(environment);
             return Response.ok().entity(environmentDTO).build();
         }
+
+        // Fallback: check if it's a platform gateway ID
+        PlatformGatewayService platformGatewayService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        if (platformGatewayService != null) {
+            try {
+                PlatformGateway gateway = platformGatewayService.getGatewayById(environmentId);
+                if (gateway != null && organization.equals(gateway.getOrganizationId())) {
+                    // Fetch permissions from corresponding environment if exists
+                    GatewayVisibilityPermissionConfigurationDTO permissions = null;
+                    Environment env = apiAdmin.getEnvironment(organization, gateway.getId());
+                    if (env != null) {
+                        permissions = env.getPermissions();
+                    }
+                    EnvironmentDTO dto = EnvironmentMappingUtil.fromPlatformGatewayToEnvDTO(
+                            gateway, APIConstants.WSO2_API_PLATFORM_GATEWAY, permissions);
+                    return Response.ok().entity(dto).build();
+                }
+            } catch (APIManagementException e) {
+                log.debug("Platform gateway not found for id: " + environmentId, e);
+            }
+        }
+
         throw new APIManagementException("Requested Gateway Environment not found",
                 ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND);
     }
@@ -159,6 +184,13 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         List<Environment> envList = apiAdmin.getAllEnvironments(organization);
         EnvironmentListDTO envListDTO = EnvironmentMappingUtil.fromEnvListToEnvListDTO(envList);
 
+        // Build a map from environment name to permissions for platform gateway lookup
+        Map<String, GatewayVisibilityPermissionConfigurationDTO> envPermissionsMap = envList.stream()
+                .filter(env -> env.getName() != null)
+                .filter(env -> env.getPermissions() != null)
+                .collect(Collectors.toMap(Environment::getName, Environment::getPermissions,
+                        (existing, replacement) -> existing, HashMap::new));
+
         // Same approach as Synapse/APK: include platform gateways in the same environment list so UI gets
         // one deploy-target list; each has gatewayType so UI can filter (e.g. show only platform gateways when chosen).
         PlatformGatewayService platformGatewayService =
@@ -183,8 +215,9 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
                         if (name.isEmpty() || existingNames.contains(name)) {
                             continue;
                         }
+                        GatewayVisibilityPermissionConfigurationDTO permissions = envPermissionsMap.get(name);
                         EnvironmentDTO dto = EnvironmentMappingUtil.fromPlatformGatewayToEnvDTO(
-                                gw, APIConstants.WSO2_API_PLATFORM_GATEWAY);
+                                gw, APIConstants.WSO2_API_PLATFORM_GATEWAY, permissions);
                         list.add(dto);
                         if (dto.getName() != null) {
                             existingNames.add(dto.getName());

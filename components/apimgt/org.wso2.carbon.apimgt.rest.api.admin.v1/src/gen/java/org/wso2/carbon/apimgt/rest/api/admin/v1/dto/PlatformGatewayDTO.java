@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayPermissionsDTO;
 import javax.validation.constraints.*;
 
 /**
@@ -68,6 +69,7 @@ return null;
     }
     private FunctionalityTypeEnum functionalityType = null;
     private Boolean isActive = null;
+    private PlatformGatewayPermissionsDTO permissions = null;
     private java.util.Date createdAt = null;
     private java.util.Date updatedAt = null;
 
@@ -246,6 +248,24 @@ return null;
 
   /**
    **/
+  public PlatformGatewayDTO permissions(PlatformGatewayPermissionsDTO permissions) {
+    this.permissions = permissions;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("permissions")
+  public PlatformGatewayPermissionsDTO getPermissions() {
+    return permissions;
+  }
+  public void setPermissions(PlatformGatewayPermissionsDTO permissions) {
+    this.permissions = permissions;
+  }
+
+  /**
+   **/
   public PlatformGatewayDTO createdAt(java.util.Date createdAt) {
     this.createdAt = createdAt;
     return this;
@@ -298,13 +318,14 @@ return null;
         Objects.equals(isCritical, platformGateway.isCritical) &&
         Objects.equals(functionalityType, platformGateway.functionalityType) &&
         Objects.equals(isActive, platformGateway.isActive) &&
+        Objects.equals(permissions, platformGateway.permissions) &&
         Objects.equals(createdAt, platformGateway.createdAt) &&
         Objects.equals(updatedAt, platformGateway.updatedAt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, organizationId, name, displayName, description, properties, vhost, isCritical, functionalityType, isActive, createdAt, updatedAt);
+    return Objects.hash(id, organizationId, name, displayName, description, properties, vhost, isCritical, functionalityType, isActive, permissions, createdAt, updatedAt);
   }
 
   @Override
@@ -322,6 +343,7 @@ return null;
     sb.append("    isCritical: ").append(toIndentedString(isCritical)).append("\n");
     sb.append("    functionalityType: ").append(toIndentedString(functionalityType)).append("\n");
     sb.append("    isActive: ").append(toIndentedString(isActive)).append("\n");
+    sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
     sb.append("    createdAt: ").append(toIndentedString(createdAt)).append("\n");
     sb.append("    updatedAt: ").append(toIndentedString(updatedAt)).append("\n");
     sb.append("}");

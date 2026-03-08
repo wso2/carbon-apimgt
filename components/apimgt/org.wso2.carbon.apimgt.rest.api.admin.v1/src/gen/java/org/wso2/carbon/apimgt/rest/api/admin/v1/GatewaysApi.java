@@ -38,6 +38,23 @@ public class GatewaysApi  {
 GatewaysApiService delegate = new GatewaysApiServiceImpl();
 
 
+    @POST
+    @Path("/{gatewayId}/regenerate-token")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Regenerate registration token for a platform gateway", notes = "Regenerate the registration token for an existing platform gateway. The old token is revoked and a new one is generated. Store the new token (e.g. as GATEWAY_CONTROL_PLANE_TOKEN in Docker Compose) for the gateway to reconnect to the control plane WebSocket. The token is returned only once. ", response = PlatformGatewayWithTokenDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+        })
+    }, tags={ "Platform Gateways",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Gateway and new registration token (returned once) in the response body. ", response = PlatformGatewayWithTokenDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response gatewaysGatewayIdRegenerateTokenPost(@ApiParam(value = "Gateway UUID",required=true) @PathParam("gatewayId") String gatewayId) throws APIManagementException{
+        return delegate.gatewaysGatewayIdRegenerateTokenPost(gatewayId, securityContext);
+    }
+
     @GET
     
     

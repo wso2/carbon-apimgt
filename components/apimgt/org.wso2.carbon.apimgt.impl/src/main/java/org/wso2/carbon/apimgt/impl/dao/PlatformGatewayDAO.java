@@ -351,4 +351,48 @@ public class PlatformGatewayDAO {
                 rs.getTimestamp("UPDATED_AT")
         );
     }
+
+    /**
+     * Revoke all active tokens for a gateway (mark them as revoked).
+     * Used as part of regenerate token flow.
+     */
+    public void revokeTokensByGatewayId(Connection connection, String gatewayId, Timestamp revokedAt)
+            throws APIManagementException {
+        try (PreparedStatement ps = connection.prepareStatement(
+                SQLConstants.PlatformGatewaySQLConstants.REVOKE_TOKENS_BY_GATEWAY_ID_SQL)) {
+            ps.setTimestamp(1, revokedAt);
+            ps.setString(2, gatewayId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new APIManagementException("Error revoking platform gateway tokens", e);
+        }
+    }
+
+    /**
+     * Regenerate a token for a gateway: revoke existing tokens and create a new one in a single transaction.
+     *
+     * @param gatewayId   the gateway ID
+     * @param tokenId     new token ID
+     * @param tokenHash   hash of the new plain token
+     * @param createdAt   timestamp for the operation
+     */
+    public void regenerateToken(String gatewayId, String tokenId, String tokenHash, Timestamp createdAt)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                revokeTokensByGatewayId(connection, gatewayId, createdAt);
+                createToken(connection, tokenId, gatewayId, tokenHash, createdAt);
+                connection.commit();
+            } catch (APIManagementException e) {
+                connection.rollback();
+                throw e;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIManagementException("Error regenerating platform gateway token", e);
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error getting database connection", e);
+        }
+    }
 }

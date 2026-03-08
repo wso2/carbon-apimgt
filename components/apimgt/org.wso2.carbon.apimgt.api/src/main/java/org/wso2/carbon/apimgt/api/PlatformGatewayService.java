@@ -87,4 +87,16 @@ public interface PlatformGatewayService {
      * @return the gateway, or null if not found
      */
     PlatformGateway getGatewayById(String id) throws APIManagementException;
+
+    /**
+     * Regenerate the registration token for a platform gateway.
+     * Revokes all existing active tokens and creates a new one.
+     *
+     * @param organizationId organization id
+     * @param gatewayId      gateway id
+     * @return the gateway with the new registration token (returned only once)
+     * @throws APIManagementException if gateway not found or on database error
+     */
+    CreatePlatformGatewayResult regenerateGatewayToken(String organizationId, String gatewayId)
+            throws APIManagementException;
 }
