@@ -464,6 +464,10 @@ public class RestApiPublisherUtils {
                     PNGTranscoder my_converter = new PNGTranscoder();
                     my_converter.transcode(input_svg_image, output_png_image);
                     inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+                } else {
+                    // Re-encode non-SVG images to normalize metadata and ensure consistent output.
+                    byte[] processedBytes = ImageProcessingUtils.removeExifMetadata(inputStreamBytes, fileMediaType);
+                    inputStream = new ByteArrayInputStream(processedBytes);
                 }
             }
         } catch (TranscoderException | IOException e) {
