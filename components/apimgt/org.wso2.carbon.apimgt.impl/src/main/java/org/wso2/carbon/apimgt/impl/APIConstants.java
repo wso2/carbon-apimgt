@@ -3441,8 +3441,7 @@ public final class APIConstants {
         public static final String APPLICATION_UUID = "applicationUUId";
         public static final String API_UUID = "apiUUId";
         public static final String ACTIVE = "ACTIVE";
-        public static final String ORIGIN = "origin";
-        public static final String ORIGIN_UUID = "originUUId";
+        public static final String APP_UUID = "appUUId";
         public static final String EXPIRES_AT = "expiresAt";
         public static final String STATUS = "status";
         public static final String EVENT_ID = "eventId";

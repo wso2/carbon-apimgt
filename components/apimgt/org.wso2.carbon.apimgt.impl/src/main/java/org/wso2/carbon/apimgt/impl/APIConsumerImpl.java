@@ -693,7 +693,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.API_KEY_INFO_STREAM_ID);
         properties.put(APIConstants.NotificationEvent.API_KEY_HASH, apiKeyHash);
-        if (application != null) {
+        if (api != null && application != null) {
+            properties.put(APIConstants.NotificationEvent.API_UUID, api.getUUID());
+            properties.put(APIConstants.NotificationEvent.APPLICATION_UUID, application.getUUID());
+            properties.put(APIConstants.NotificationEvent.APPLICATION_ID, application.getId());
+        } else if (application != null) {
             properties.put(APIConstants.NotificationEvent.APPLICATION_UUID, application.getUUID());
             properties.put(APIConstants.NotificationEvent.APPLICATION_ID, application.getId());
         } else if (api != null) {
@@ -4125,13 +4129,17 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         apiKeyInfoDTO.setCreatedTime(System.currentTimeMillis());
         String apiKeyHash = APIUtil.sha256Hash(apiKey);
         apiKeyInfoDTO.setKeyId(UUID.randomUUID().toString());
+        Application application = null;
+        if (StringUtils.isNotBlank(apiKeyInfo.getApplicationId())) {
+            application = getLightweightApplicationByUUID(apiKeyInfo.getApplicationId());
+        }
+        API api = getLightweightAPIByUUID(apiUUId, organization);
         apiKeyMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         APIKeyInfo regeneratedApiKeyInfo = new APIKeyInfo();
         regeneratedApiKeyInfo.setKeyName(apiKeyInfo.getKeyName());
         regeneratedApiKeyInfo.setApiKey(apiKey);
         regeneratedApiKeyInfo.setValidityPeriod(apiKeyInfo.getValidityPeriod());
-        sendAPIKeyInfoEvent(apiKeyHash,null,
-                getLightweightAPIByUUID(apiUUId, organization), calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(),
+        sendAPIKeyInfoEvent(apiKeyHash, application, api, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(),
                         apiKeyInfo.getValidityPeriod()), apiKeyInfo.getKeyType(), apiKeyInfo.getKeyName(), props);
         return regeneratedApiKeyInfo;
     }

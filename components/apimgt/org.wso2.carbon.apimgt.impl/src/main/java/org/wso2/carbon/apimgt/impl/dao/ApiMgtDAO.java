@@ -4689,6 +4689,7 @@ public class ApiMgtDAO {
         PreparedStatement deleteDomainApp = null;
         PreparedStatement deleteAppKey = null;
         PreparedStatement deleteApp = null;
+        PreparedStatement deleteApiKeyAppMapping = null;
         ResultSet rs = null;
 
         String getSubscriptionsQuery = SQLConstants.GET_SUBSCRIPTION_ID_OF_APPLICATION_SQL;
@@ -4700,6 +4701,7 @@ public class ApiMgtDAO {
         String deleteDomainAppQuery = SQLConstants.REMOVE_APPLICATION_FROM_DOMAIN_MAPPINGS_SQL;
         String deleteApplicationQuery = SQLConstants.REMOVE_APPLICATION_FROM_APPLICATIONS_SQL;
         String deleteRegistrationEntry = SQLConstants.REMOVE_APPLICATION_FROM_APPLICATION_REGISTRATIONS_SQL;
+        String deleteAPIKeyApplicationMappingQuery = SQLConstants.REMOVE_API_KEY_APPLICATION_MAPPING_SQL;
 
         boolean transactionCompleted = true;
         try {
@@ -4795,6 +4797,15 @@ public class ApiMgtDAO {
                         .getName());
             }
 
+            deleteApiKeyAppMapping = connection.prepareStatement(deleteAPIKeyApplicationMappingQuery);
+            deleteApiKeyAppMapping.setString(1, application.getUUID());
+            deleteApiKeyAppMapping.execute();
+
+            if (log.isDebugEnabled()) {
+                log.debug("API key application mapping details are deleted successfully for Application - " + application
+                        .getName());
+            }
+
             deleteApp = connection.prepareStatement(deleteApplicationQuery);
             deleteApp.setInt(1, application.getId());
             deleteApp.execute();
@@ -4819,6 +4830,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(deleteSubscription, null, null);
             APIMgtDBUtil.closeAllConnections(deleteDomainApp, null, null);
             APIMgtDBUtil.closeAllConnections(deleteAppKey, null, null);
+            APIMgtDBUtil.closeAllConnections(deleteApiKeyAppMapping, null, null);
             APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
 
         }
@@ -7571,6 +7583,7 @@ public class ApiMgtDAO {
         String deleteAPIBackendQuery = SQLConstants.REMOVE_AM_BACKEND_SQL;
         String deleteAPIMetadataQuery = SQLConstants.DELETE_ALL_API_METADATA;
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
+        String deleteAPIKeyMappingQuery = SQLConstants.REMOVE_FROM_API_KEY_API_MAPPINGS_SQL;
         String deleteGraphqlComplexityQuery = SQLConstants.REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -7630,6 +7643,11 @@ public class ApiMgtDAO {
             // Delete URL Templates (delete the resource scope mappings on delete cascade)
             prepStmt = connection.prepareStatement(deleteURLTemplateQuery);
             prepStmt.setInt(1, id);
+            prepStmt.execute();
+
+            // Delete AM_API_KEY_API_MAPPING (Delete the resource API key API mappings on delete cascade)
+            prepStmt = connection.prepareStatement(deleteAPIKeyMappingQuery);
+            prepStmt.setString(1, uuid);
             prepStmt.execute();
 
             deleteAllAPISpecificOperationPoliciesByAPIUUID(connection, uuid, null);

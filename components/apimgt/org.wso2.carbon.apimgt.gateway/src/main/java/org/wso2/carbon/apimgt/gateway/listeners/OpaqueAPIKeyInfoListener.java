@@ -60,20 +60,21 @@ public class OpaqueAPIKeyInfoListener implements MessageListener {
                                 .path("payloadData");
 
                     APIKeyInfo apiKeyInfo = new APIKeyInfo();
-                    String lookupKey = null;
                     apiKeyInfo.setApiKeyHash(payload.path(APIConstants.NotificationEvent.API_KEY_HASH).asText());
                     apiKeyInfo.setKeyType(payload.path(APIConstants.NotificationEvent.KEY_TYPE).asText());
                     apiKeyInfo.setKeyName(payload.path(APIConstants.NotificationEvent.KEY_NAME).asText());
-                    apiKeyInfo.setOrigin(payload.path(APIConstants.NotificationEvent.ORIGIN).asText());
-                    if ("APP".equalsIgnoreCase(apiKeyInfo.getOrigin())) {
-                        apiKeyInfo.setApplicationId(payload.path(APIConstants.NotificationEvent.ORIGIN_UUID).asText());
-                        lookupKey = payload.path(APIConstants.NotificationEvent.API_KEY_HASH).asText();
-                    } else if ("API".equalsIgnoreCase(apiKeyInfo.getOrigin())) {
-                        apiKeyInfo.setApiUUId(payload.path(APIConstants.NotificationEvent.ORIGIN_UUID).asText());
-                        lookupKey = payload.path(APIConstants.NotificationEvent.API_KEY_HASH).asText();
-                    } else {
-                        log.warn("Dropping opaque API key info event with unsupported origin: " + apiKeyInfo.getOrigin());
+                    String apiUUId = payload.path(APIConstants.NotificationEvent.API_UUID).asText(null);
+                    String appUUId = payload.path(APIConstants.NotificationEvent.APP_UUID).asText(null);
+                    String lookupKey = payload.path(APIConstants.NotificationEvent.API_KEY_HASH).asText();
+                    if (apiUUId == null && appUUId == null) {
+                        log.warn("Dropping opaque API key info event with unsupported origin for API key " + apiKeyInfo.getKeyName());
                         return;
+                    }
+                    if (apiUUId != null && !"APP".equals(apiUUId)) {
+                        apiKeyInfo.setApiUUId(apiUUId);
+                    }
+                    if (appUUId != null && !"API".equals(appUUId)) {
+                        apiKeyInfo.setApplicationId(appUUId);
                     }
                     apiKeyInfo.setAppId(payload.path(APIConstants.NotificationEvent.APPLICATION_ID).asInt());
                     apiKeyInfo.setStatus(payload.path(APIConstants.NotificationEvent.STATUS).asText());
@@ -89,7 +90,6 @@ public class OpaqueAPIKeyInfoListener implements MessageListener {
                                 new TypeReference<Map<String, String>>() {});
                     }
                     apiKeyInfo.setAdditionalProperties(additionalPropsMap);
-
                     // Add to GW cache
                     DataHolder.getInstance().addOpaqueAPIKeyInfo(apiKeyInfo);
                 }
