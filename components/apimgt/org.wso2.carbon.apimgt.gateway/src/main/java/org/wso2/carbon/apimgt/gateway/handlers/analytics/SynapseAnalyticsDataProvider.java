@@ -648,14 +648,16 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         customProperties.put(APIMgtGatewayConstants.MCP_ANALYTICS, mcpAnalytics);
     }
 
-    private Object getGuardrailName() {
-        if (messageContext.getProperty(SynapseConstants.ERROR_MESSAGE) != null) {
-            String errorMessage = messageContext.getProperty(SynapseConstants.ERROR_MESSAGE).toString();
-            if (errorMessage.contains("\"interveningGuardrail\":\"")) {
+    private String getGuardrailName() {
+        Object errorObj = messageContext.getProperty(SynapseConstants.ERROR_MESSAGE);
+        if (errorObj != null) {
+            String errorMessage = errorObj.toString();
+            String searchKey = "\"interveningGuardrail\":\"";
+            if (errorMessage.contains(searchKey)) {
                 try {
                     // Extract the value after "interveningGuardrail":"
-                    int startIndex = errorMessage.indexOf("\"interveningGuardrail\":\"") +
-                            "\"interveningGuardrail\":\"".length();
+                    int startIndex = errorMessage.indexOf(searchKey) +
+                            searchKey.length();
                     int endIndex = errorMessage.indexOf("\"", startIndex);
                     if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
                         return errorMessage.substring(startIndex, endIndex).trim();

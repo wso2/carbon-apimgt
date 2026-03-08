@@ -161,13 +161,14 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                 method = request.getMethod();
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_METHOD, method);
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY, request);
-                messageContext.setProperty(APIMgtGatewayConstants.MCP_SESSION_ID_KEY,
-                        headers.get(APIConstants.MCP.HEADER_MCP_SESSION_ID));
-                messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUESTED_PROTOCOL_VERSION_KEY,
-                        headers.get(APIConstants.MCP.MCP_PROTOCOL_VERSION_HEADER));
-                messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUEST_SIZE_KEY,
-                        headers.get(APIConstants.HEADER_CONTENT_LENGTH));
-
+                if (headers != null) {
+                    messageContext.setProperty(APIMgtGatewayConstants.MCP_SESSION_ID_KEY,
+                            headers.get(APIConstants.MCP.HEADER_MCP_SESSION_ID));
+                    messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUESTED_PROTOCOL_VERSION_KEY,
+                            headers.get(APIConstants.MCP.MCP_PROTOCOL_VERSION_HEADER));
+                    messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUEST_SIZE_KEY,
+                            headers.get(APIConstants.HEADER_CONTENT_LENGTH));
+                }
                 if (StringUtils.equals(method, APIConstants.MCP.METHOD_INITIALIZE)) {
                     Params params = request.getParams();
                     messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUESTED_PROTOCOL_VERSION_KEY, params.getProtocolVersion());
