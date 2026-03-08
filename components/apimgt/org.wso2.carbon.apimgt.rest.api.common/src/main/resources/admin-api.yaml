@@ -5645,6 +5645,15 @@ components:
               items:
                 type: string
                 example: Internal/everyone
+        status:
+          type: string
+          readOnly: true
+          description: For platform gateway environments (gatewayType api-platform), connection status to the control plane (Active or Inactive).
+          example: Active
+          default: Active
+          enum:
+            - Active
+            - Inactive
     EnvironmentList:
       title: Environment List
       type: object
@@ -5757,6 +5766,9 @@ components:
                 type: string
               description: List of roles for ALLOW/DENY permission types
               example: ["admin", "publisher"]
+          example:
+            permissionType: ALLOW
+            roles: ["admin", "publisher"]
     PlatformGateway:
       title: Platform Gateway
       description: Platform gateway response (without registration token). Used for list and get.
