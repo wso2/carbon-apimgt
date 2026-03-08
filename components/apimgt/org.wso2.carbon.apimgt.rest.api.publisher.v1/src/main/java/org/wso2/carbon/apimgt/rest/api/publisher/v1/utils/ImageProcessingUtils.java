@@ -19,13 +19,10 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.stream.ImageOutputStream;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -33,6 +30,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.ImageOutputStream;
 
 /**
  * Utility class for image processing operations
@@ -40,7 +44,9 @@ import java.util.Iterator;
 public class ImageProcessingUtils {
 
     private static final Log log = LogFactory.getLog(ImageProcessingUtils.class);
-    private static final int MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+    private static final int MAX_IMAGE_BYTES = 1024 * 1024;
+    private static final int MAX_IMAGE_WIDTH = 4096;
+    private static final int MAX_IMAGE_HEIGHT = 4096;
 
     /**
      * Removes EXIF metadata from image bytes.
@@ -52,11 +58,16 @@ public class ImageProcessingUtils {
      */
     public static byte[] removeExifMetadata(byte[] imageBytes, String mediaType) throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Removing EXIF metadata from thumbnail image. Detected media type: " + mediaType);
+        }
         if (imageBytes == null || imageBytes.length == 0) {
-            throw new APIManagementException("Thumbnail image is empty");
+            RestApiUtil.handleBadRequest("Thumbnail image is empty",
+                    ExceptionCodes.THUMBNAIL_IMAGE_EMPTY.getErrorCode(), log);
         }
         if (imageBytes.length > MAX_IMAGE_BYTES) {
-            throw new APIManagementException("Thumbnail image exceeds maximum allowed size: 5MB");
+            RestApiUtil.handleBadRequest("Thumbnail image exceeds maximum allowed size: 1MB",
+                    ExceptionCodes.THUMBNAIL_IMAGE_EXCEEDS_MAX_SIZE.getErrorCode(), log);
         }
         if (mediaType == null) {
             throw new APIManagementException("Thumbnail media type is not provided");
@@ -75,6 +86,8 @@ public class ImageProcessingUtils {
         }
 
         try {
+            // Validate image dimensions
+            validateImageDimensions(imageBytes);
             // Extract EXIF orientation before re-encoding (both JPEG and PNG can contain EXIF orientation)
             int orientation = extractExifOrientation(imageBytes, mediaType);
             if (log.isDebugEnabled()) {
@@ -108,6 +121,35 @@ public class ImageProcessingUtils {
             }
         } catch (IOException e) {
             throw new APIManagementException("Error processing thumbnail image", e);
+        }
+    }
+
+    /**
+     * Validates the dimensions of the provided image bytes based on the specified format.
+     *
+     * @param imageBytes the raw image file bytes
+     * @throws APIManagementException if the image dimensions exceed the allowed limits
+     * @throws IOException            if an error occurs while reading the image
+     */
+    private static void validateImageDimensions(byte[] imageBytes) throws APIManagementException, IOException {
+
+        try (ImageInputStream iis = ImageIO.createImageInputStream(new ByteArrayInputStream(imageBytes))) {
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+            if (!readers.hasNext()) {
+                throw new APIManagementException("Unable to determine image format");
+            }
+            ImageReader reader = readers.next();
+            try {
+                reader.setInput(iis, true, true);
+                int width = reader.getWidth(0);
+                int height = reader.getHeight(0);
+                if (width > MAX_IMAGE_WIDTH || height > MAX_IMAGE_HEIGHT) {
+                    RestApiUtil.handleBadRequest("Thumbnail dimensions exceed maximum allowed limits",
+                            ExceptionCodes.THUMBNAIL_IMAGE_EXCEEDS_MAX_DIMENSIONS.getErrorCode(), log);
+                }
+            } finally {
+                reader.dispose();
+            }
         }
     }
 
@@ -281,6 +323,9 @@ public class ImageProcessingUtils {
                 // Each chunk: 4 bytes data length (big-endian) + 4 bytes chunk type + data + 4 bytes CRC
                 int chunkLength = ((pngBytes[offset] & 0xFF) << 24) | ((pngBytes[offset + 1] & 0xFF) << 16) | (
                         (pngBytes[offset + 2] & 0xFF) << 8) | (pngBytes[offset + 3] & 0xFF);
+                if (chunkLength < 0 || chunkLength > pngBytes.length - 12) {
+                    break;
+                }
                 String chunkType = new String(pngBytes, offset + 4, 4, StandardCharsets.US_ASCII);
                 if ("eXIf".equals(chunkType)) {
                     int dataStart = offset + 8;
@@ -414,7 +459,7 @@ public class ImageProcessingUtils {
             }
         } else {
             // Fallback to default ImageIO write
-            ImageIO.write(image, "jpeg", outputStream);
+            ImageIO.write(jpegImage, "jpeg", outputStream);
         }
         return outputStream.toByteArray();
     }
