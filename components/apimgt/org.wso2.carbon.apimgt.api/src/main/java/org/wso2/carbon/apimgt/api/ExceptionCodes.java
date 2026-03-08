@@ -449,7 +449,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "gateway details not found for the API"),
 
     //Thumbnail image processing related codes
-    THUMBNAIL_IMAGE_EMPTY(901000, "Thumbnail image is empty", 400,
+    THUMBNAIL_IMAGE_EMPTY(901003, "Thumbnail image is empty", 400,
             "The provided thumbnail image is empty"),
     THUMBNAIL_IMAGE_EXCEEDS_MAX_SIZE(901001, "Thumbnail image exceeds maximum allowed size", 400,
             "Thumbnail image exceeds maximum allowed size of 1MB"),
