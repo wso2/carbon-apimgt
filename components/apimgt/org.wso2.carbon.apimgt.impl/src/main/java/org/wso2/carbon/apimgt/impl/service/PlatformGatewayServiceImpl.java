@@ -118,7 +118,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         env.setDisplayName(StringUtils.isNotBlank(displayName) ? displayName : name);
         env.setDescription(description);
         env.setType(APIConstants.GATEWAY_ENV_TYPE_HYBRID);
-        env.setProvider("wso2");
+        env.setProvider(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
         env.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
         env.setMode(GatewayMode.WRITE_ONLY.getMode());
         String vhostStr = StringUtils.isNotBlank(vhost) ? vhost : "default";
