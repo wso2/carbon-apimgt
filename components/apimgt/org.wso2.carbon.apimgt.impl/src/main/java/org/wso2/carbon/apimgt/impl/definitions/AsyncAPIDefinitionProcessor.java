@@ -43,6 +43,7 @@ import java.util.Set;
 public class AsyncAPIDefinitionProcessor implements APIDefinitionProcessor {
 
     private static final Log log = LogFactory.getLog(AsyncAPIDefinitionProcessor.class);
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public String getType(API api) {
@@ -70,7 +71,7 @@ public class AsyncAPIDefinitionProcessor implements APIDefinitionProcessor {
             if (definition == null || definition.trim().isEmpty()) {
                 return null;
             }
-            JsonNode rootNode = new ObjectMapper().readTree(definition);
+            JsonNode rootNode = OBJECT_MAPPER.readTree(definition);
             if (rootNode.has("servers")) {
                 JsonNode serversNode = rootNode.get("servers");
                 Iterator<JsonNode> elements = serversNode.elements();
@@ -94,7 +95,6 @@ public class AsyncAPIDefinitionProcessor implements APIDefinitionProcessor {
     public List<URITemplate> extractOperations(String definition) throws APIManagementException {
         // AsyncAPI operations/channels are typically handled differently
         // Extract both publish and subscribe operations
-        List<URITemplate> uriTemplates = new ArrayList<>();
         try {
             AbstractAsyncApiParser asyncApiParser = AsyncApiParserFactory.getAsyncApiParser(
                 AsyncApiParserUtil.getAsyncApiVersion(definition), 
@@ -106,12 +106,14 @@ public class AsyncAPIDefinitionProcessor implements APIDefinitionProcessor {
                 .getURITemplates(definition, true);
 
             if (asyncTemplates != null) {
-                uriTemplates.addAll(asyncTemplates);
+                return new ArrayList<>(asyncTemplates);
             }
+            return new ArrayList<>();
+        } catch (APIManagementException e) {
+            throw e;
         } catch (Exception e) {
-            log.error("Error extracting operations from AsyncAPI definition", e);
+            throw new APIManagementException("Error extracting operations from AsyncAPI definition", e);
         }
-        return uriTemplates;
     }
 
     @Override
