@@ -36,6 +36,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIComplianceException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIDefinitionProcessor;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
@@ -75,6 +76,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionProcessorFactory;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -348,6 +350,16 @@ public class ImportUtils {
             List<OperationPolicy> extractedAPIPolicies = extractValidateAndDropAPIPoliciesFromAPI(importedApiDTO,
                     extractedFolderPath, targetApi, organization, importedApiDTO.getType().toString(),
                     apiProvider);
+
+            // Ignoring mediation policies if there are API or Operation level policies defined in the API.
+            // This scenario applies to migrated APIs that had mediation policies attached and were exported
+            // before completing the on-the-fly migration (i.e., before saving the API post-migration).
+            if ((importedApiDTO.getMediationPolicies() != null &&
+                    !importedApiDTO.getMediationPolicies().isEmpty()) &&
+                    ((extractedAPIPolicies != null && !extractedAPIPolicies.isEmpty()) ||
+                            (extractedPoliciesMap != null && !extractedPoliciesMap.isEmpty()))) {
+                importedApiDTO.setMediationPolicies(Collections.emptyList());
+            }
 
             // If the overwrite is set to true (which means an update), retrieve the existing API
             if (Boolean.TRUE.equals(overwrite) && targetApi != null) {
@@ -1783,12 +1795,14 @@ public class ImportUtils {
      * @param response API Validation Response
      * @throws APIManagementException If an error occurs when retrieving the URI templates
      */
-    private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response)
-            throws APIManagementException {
+    private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response) 
+        throws APIManagementException {
 
-        List<URITemplate> uriTemplates = new ArrayList<>();
-        uriTemplates.addAll(response.getParser().getURITemplates(response.getJsonContent()));
-        List<APIOperationsDTO> apiOperationsDtos = APIMappingUtil.fromURITemplateListToOprationList(uriTemplates);
+        APIDefinitionProcessor definitionProcessor =
+                APIDefinitionProcessorFactory.getDefinitionProcessor(apiDto.getType().toString());
+        List<URITemplate> uriTemplates = definitionProcessor.extractOperations(response.getJsonContent());
+        List<APIOperationsDTO> apiOperationsDtos = APIMappingUtil
+            .fromURITemplateListToOprationList(uriTemplates);
         apiDto.setOperations(apiOperationsDtos);
     }
 

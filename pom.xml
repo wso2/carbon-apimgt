@@ -6,7 +6,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>9.33.24-SNAPSHOT</version>
+    <version>9.33.27-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>https://wso2.org</url>
 
@@ -2060,7 +2060,7 @@
 
         <!-- APIM Component Version -->
         <hamcrest.version>1.3</hamcrest.version>
-        <carbon.apimgt.version>9.33.24-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>9.33.27-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
 
@@ -2223,7 +2223,7 @@
         <cxf.version>3.6.8</cxf.version>
         <carbon.metrics.version>1.3.12</carbon.metrics.version>
         <!-- apache pdfbox version -->
-        <event.processor.version>2.3.22</event.processor.version>
+        <event.processor.version>2.4.0</event.processor.version>
         <pdfbox.version>3.0.1</pdfbox.version>
         <pdfbox.io.version>3.0.1.wso2v1</pdfbox.io.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
@@ -2241,7 +2241,7 @@
         <jakarta.validation-api.version>2.0.2</jakarta.validation-api.version>
         <javax.inject.version>1</javax.inject.version>
         <carbon.broker.version>3.3.38</carbon.broker.version>
-        <andes.version>3.3.37</andes.version>
+        <andes.version>3.4.0</andes.version>
         <waffle-jna.version>1.6.wso2v1</waffle-jna.version>
         <version.snake.yaml>2.2</version.snake.yaml>
         <wsdl4j.version>1.6.3.wso2v3</wsdl4j.version>

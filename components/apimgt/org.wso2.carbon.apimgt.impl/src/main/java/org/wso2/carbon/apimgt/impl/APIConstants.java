@@ -615,6 +615,27 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
 
+        // LLM Provider constants
+        public static final String OPENAI_LLM_PROVIDER_TYPE = "openai";
+        public static final String AZURE_OPENAI_LLM_PROVIDER_TYPE = "azure-openai";
+        public static final String MISTRAL_LLM_PROVIDER_TYPE = "mistral";
+        public static final String LLM_PROVIDER = "LLMProvider";
+        public static final String LLM_PROVIDER_TYPE = "type";
+        public static final String LLM_PROVIDER_PROPERTY = "Property";
+        public static final String LLM_PROVIDER_PROPERTY_KEY = "name";
+        public static final String LLM_PROVIDER_API_KEY = "apikey";
+        public static final String LLM_PROVIDER_LLM_ENDPOINT = "llm_endpoint";
+        public static final String LLM_PROVIDER_LLM_MODEL = "llm_model";
+        public static final String LLM_PROVIDER_MESSAGE_ROLE = "role";
+        public static final String LLM_PROVIDER_MESSAGE_ROLE_SYSTEM = "system";
+        public static final String LLM_PROVIDER_MESSAGE_ROLE_USER = "user";
+        public static final String LLM_PROVIDER_MESSAGE_CONTENT = "content";
+        public static final String LLM_PROVIDER_REQUEST_MESSAGES = "messages";
+        public static final String LLM_PROVIDER_REQUEST_MODEL = "model";
+        public static final String LLM_PROVIDER_RESPONSE_CHOICES = "choices";
+        public static final String LLM_PROVIDER_MESSAGE = "message";
+        public static final String LLM_PROVIDER_RESPONSE_CONTENT_PATH = "/choices/0/message/content";
+
         public static final String OPENAI_EMBEDDING_PROVIDER_TYPE = "openai";
         public static final String AZURE_OPENAI_EMBEDDING_PROVIDER_TYPE = "azure-openai";
         public static final String MISTRAL_EMBEDDING_PROVIDER_TYPE = "mistral";
@@ -721,6 +742,10 @@ public final class APIConstants {
         public static final String DEFAULT_RETRIEVAL_TIMEOUT = "500"; // 500 milliseconds
         public static final String DEFAULT_RETRY_COUNT = "0"; // 0 retry
         public static final String DEFAULT_RETRY_PROGRESSION_FACTOR = "1"; // No progression factor, fixed retry time
+
+        public static final String CLASSIFICATION_SYSTEM_PROMPT =
+                "You are an API routing assistant. Analyze the user request and determine the best category. " +
+                "Respond with ONLY the category name, nothing else.";
 
         private AI() {
 

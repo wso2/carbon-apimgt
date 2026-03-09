@@ -90,7 +90,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -303,11 +302,6 @@ public class ExportUtils {
             addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat,
                     organization);
         }
-
-        if (apiDtoToReturn.getMediationPolicies() != null && !apiDtoToReturn.getMediationPolicies().isEmpty()) {
-            apiDtoToReturn.setMediationPolicies(Collections.emptyList());
-        }
-
         addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier,
                 organization, currentApiUuid);
 
