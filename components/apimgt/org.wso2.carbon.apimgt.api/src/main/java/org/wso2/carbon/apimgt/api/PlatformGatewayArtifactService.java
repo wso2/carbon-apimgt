@@ -48,6 +48,15 @@ public interface PlatformGatewayArtifactService {
     void savePlatformArtifact(String apiId, String organization, String yamlContent) throws APIManagementException;
 
     /**
+     * Delete stored platform gateway artifact for an API and organization.
+     * Call when the API is updated so the next zip request re-converts (e.g. with updated policies).
+     *
+     * @param apiId         API UUID
+     * @param organization organization id
+     */
+    void deletePlatformArtifact(String apiId, String organization) throws APIManagementException;
+
+    /**
      * Convert internal API to platform api.yaml and run sanitization.
      * Returns converted YAML and list of missing/invalid fields for UI to fill.
      *

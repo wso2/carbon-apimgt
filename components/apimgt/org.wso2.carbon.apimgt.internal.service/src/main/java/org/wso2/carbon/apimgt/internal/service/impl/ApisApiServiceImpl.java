@@ -171,6 +171,36 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     private Response getApiAsPlatformGatewayZip(String apiId, String organization, MessageContext messageContext)
             throws APIManagementException {
+        PlatformGatewayArtifactService artifactService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
+
+        // 1. Try cache first (AM_PLATFORM_GATEWAY_API_ARTIFACT) to avoid conversion when possible
+        String yaml = null;
+        if (artifactService != null) {
+            yaml = artifactService.getStoredPlatformArtifact(apiId, organization);
+        }
+        if (yaml != null) {
+            // Cache hit: validate API still exists and is not an API Product, then serve from cache
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            ApiTypeWrapper wrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
+            if (wrapper == null) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+            if (wrapper.isAPIProduct()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("API Product not supported for platform gateway zip format: " + apiId);
+                }
+                return Response.status(Response.Status.BAD_REQUEST).entity("API Product not supported for zip format")
+                        .build();
+            }
+            byte[] zipBytes = buildZipWithYaml(yaml);
+            return Response.ok(zipBytes)
+                    .type("application/zip")
+                    .header("Content-Disposition", "attachment; filename=\"api.zip\"")
+                    .build();
+        }
+
+        // 2. Cache miss: load API, convert, persist for next time, then return
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         ApiTypeWrapper wrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
         if (wrapper == null) {
@@ -184,22 +214,28 @@ public class ApisApiServiceImpl implements ApisApiService {
                     .build();
         }
         org.wso2.carbon.apimgt.api.model.API api = wrapper.getApi();
-        String yaml = null;
-        PlatformGatewayArtifactService artifactService =
-                ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
+        String environment = "default";
+        if (api.getEnvironments() != null && !api.getEnvironments().isEmpty()) {
+            environment = api.getEnvironments().iterator().next();
+        }
+        if (StringUtils.isBlank(environment)) {
+            environment = "default";
+        }
+        yaml = PlatformGatewayAPIYamlConverter.toPlatformGatewayYaml(api, organization, environment);
+
+        // Lazy persist so subsequent zip requests hit the cache (same pattern as Synapse artifact storage)
         if (artifactService != null) {
-            yaml = artifactService.getStoredPlatformArtifact(apiId, organization);
-        }
-        if (yaml == null) {
-            String environment = "default";
-            if (api.getEnvironments() != null && !api.getEnvironments().isEmpty()) {
-                environment = api.getEnvironments().iterator().next();
+            try {
+                artifactService.savePlatformArtifact(apiId, organization, yaml);
+                if (log.isDebugEnabled()) {
+                    log.debug("Stored platform gateway artifact for API " + apiId + " (org: " + organization + ")");
+                }
+            } catch (APIManagementException e) {
+                log.warn("Failed to store platform gateway artifact for API " + apiId + "; will convert on next request: "
+                        + e.getMessage());
             }
-            if (StringUtils.isBlank(environment)) {
-                environment = "default";
-            }
-            yaml = PlatformGatewayAPIYamlConverter.toPlatformGatewayYaml(api, organization, environment);
         }
+
         byte[] zipBytes = buildZipWithYaml(yaml);
         return Response.ok(zipBytes)
                 .type("application/zip")

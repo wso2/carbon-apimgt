@@ -62,6 +62,14 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
     }
 
     @Override
+    public void deletePlatformArtifact(String apiId, String organization) throws APIManagementException {
+        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(organization)) {
+            return;
+        }
+        PlatformGatewayArtifactDAO.getInstance().deleteArtifact(apiId.trim(), organization.trim());
+    }
+
+    @Override
     public PlatformGatewayArtifactValidationResult convertAndValidate(API api, String organization, String environment)
             throws APIManagementException {
         PlatformGatewayArtifactValidationResult result = new PlatformGatewayArtifactValidationResult();

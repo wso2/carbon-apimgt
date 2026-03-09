@@ -22392,8 +22392,9 @@ public class ApiMgtDAO {
 
             // Handle API level policy mapping addition for new API version
             if (extractedAPILevelPolicies != null && extractedAPILevelPolicies.size() != 0) {
+                boolean isPlatformGatewayApi = APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(newAPI.getGatewayType());
                 addAPILevelPolicies(extractedAPILevelPolicies, newAPI.getUuid(), null,
-                        newAPI.getOrganization(), connection);
+                        newAPI.getOrganization(), connection, isPlatformGatewayApi);
             }
 
         } catch (SQLException e) {
@@ -24244,7 +24245,8 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Clone a common policy to the API
+     * Clone a common policy to the API.
+     * For non-Platform-Gateway APIs, throws if the common policy does not exist.
      *
      * @param commonPolicyId The policy ID that needs to be cloned
      * @param clonedPolicyId If needed, we can assign the policyId for the coloned policy. This will be an
@@ -24252,9 +24254,28 @@ public class ApiMgtDAO {
      * @param apiUUID        The API uuid which the cloned policy will be assigned to
      * @return cloned policyID
      * @throws APIManagementException
-     **/
+     */
     private String cloneCommonPolicyToAPI(Connection connection, String commonPolicyId, String clonedPolicyId,
                                           String apiUUID) throws APIManagementException, SQLException {
+        return cloneCommonPolicyToAPI(connection, commonPolicyId, clonedPolicyId, apiUUID, null, false);
+    }
+
+    /**
+     * Clone a common policy to the API. When the policy does not exist in the common store and the API is
+     * a Platform Gateway API, creates a placeholder API-specific policy so that external (e.g. Policy Hub)
+     * policy references can be stored.
+     *
+     * @param commonPolicyId       The policy ID that needs to be cloned (e.g. name::version)
+     * @param clonedPolicyId       API-specific policy UUID to use
+     * @param apiUUID              The API uuid which the cloned policy will be assigned to
+     * @param tenantDomain         Tenant/organization (required when isPlatformGatewayApi is true and policy is missing)
+     * @param isPlatformGatewayApi When true, create a placeholder if the common policy does not exist
+     * @return cloned policyID
+     * @throws APIManagementException
+     */
+    private String cloneCommonPolicyToAPI(Connection connection, String commonPolicyId, String clonedPolicyId,
+                                          String apiUUID, String tenantDomain, boolean isPlatformGatewayApi)
+            throws APIManagementException, SQLException {
         OperationPolicyData policyData = getOperationPolicyByPolicyID(connection, commonPolicyId, true);
         if (policyData != null) {
             if (log.isDebugEnabled()) {
@@ -24263,10 +24284,50 @@ public class ApiMgtDAO {
             }
             // If we are taking a clone from common policy, common policy's Id is used as the CLONED_POLICY_ID.
             return addAPISpecificOperationPolicy(connection, policyData, apiUUID, null, clonedPolicyId, commonPolicyId);
-        } else {
-            throw new APIManagementException("Cannot clone common policy with ID " + commonPolicyId
-                    + " as it does not exists.");
         }
+        if (isPlatformGatewayApi && tenantDomain != null) {
+            // External policy (e.g. from Policy Hub) not stored in AM; create placeholder so mapping is valid.
+            if (log.isDebugEnabled()) {
+                log.debug("Creating placeholder API-specific policy for external policy " + commonPolicyId
+                        + " (Platform Gateway API " + apiUUID + ")");
+            }
+            OperationPolicyData placeholder = createPlaceholderPolicyDataForExternalPolicy(commonPolicyId,
+                    clonedPolicyId, tenantDomain);
+            return addAPISpecificOperationPolicy(connection, placeholder, apiUUID, null, clonedPolicyId, commonPolicyId);
+        }
+        throw new APIManagementException("Cannot clone common policy with ID " + commonPolicyId
+                + " as it does not exists.");
+    }
+
+    /**
+     * Builds minimal OperationPolicyData for an external policy (e.g. Policy Hub) that is not in the common store.
+     * Policy ID format is expected to be "name::version".
+     */
+    private OperationPolicyData createPlaceholderPolicyDataForExternalPolicy(String commonPolicyId,
+                                                                              String clonedPolicyId,
+                                                                              String organization) {
+        String name = commonPolicyId;
+        String version = "1.0";
+        int colonIdx = commonPolicyId.indexOf("::");
+        if (colonIdx > 0) {
+            name = commonPolicyId.substring(0, colonIdx);
+            version = commonPolicyId.substring(colonIdx + 2);
+        }
+        OperationPolicySpecification spec = new OperationPolicySpecification();
+        spec.setName(name);
+        spec.setVersion(version);
+        spec.setDisplayName(name);
+        spec.setDescription("External policy reference (e.g. Policy Hub)");
+        spec.setApplicableFlows(new ArrayList<>());
+        spec.setSupportedGateways(new ArrayList<>(Collections.singletonList(APIConstants.WSO2_API_PLATFORM_GATEWAY)));
+        spec.setSupportedApiTypes(new ArrayList<>());
+        spec.setCategory(OperationPolicySpecification.PolicyCategory.Mediation);
+        OperationPolicyData data = new OperationPolicyData();
+        data.setPolicyId(clonedPolicyId);
+        data.setOrganization(organization);
+        data.setSpecification(spec);
+        data.setMd5Hash("");
+        return data;
     }
 
     /**
@@ -25266,11 +25327,16 @@ public class ApiMgtDAO {
      */
     public void addAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate, List<OperationPolicy> apiPolicies,
                                       String tenantDomain) throws APIManagementException {
+        addAPIPoliciesMapping(apiUUID, uriTemplate, apiPolicies, tenantDomain, false);
+    }
+
+    public void addAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate, List<OperationPolicy> apiPolicies,
+                                      String tenantDomain, boolean isPlatformGatewayApi) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                addAPIPoliciesMapping(apiUUID, uriTemplate, apiPolicies, tenantDomain, connection);
+                addAPIPoliciesMapping(apiUUID, uriTemplate, apiPolicies, tenantDomain, connection, isPlatformGatewayApi);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -25285,15 +25351,17 @@ public class ApiMgtDAO {
     /**
      * This method will add API level and Operation level policy mapping to the database.
      *
-     * @param apiUUID      API UUID
-     * @param uriTemplate  Set of URI Templates
-     * @param apiPolicies  List of API policies
-     * @param tenantDomain Tenant domain
-     * @param connection   DB connection
+     * @param apiUUID              API UUID
+     * @param uriTemplate          Set of URI Templates
+     * @param apiPolicies          List of API policies
+     * @param tenantDomain         Tenant domain
+     * @param connection           DB connection
+     * @param isPlatformGatewayApi When true, create placeholders for external policies that are not in the common store
      * @throws APIManagementException if failed to add policy mapping to the database
      */
     private void addAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate, List<OperationPolicy> apiPolicies,
-                                       String tenantDomain, Connection connection) throws APIManagementException {
+                                       String tenantDomain, Connection connection, boolean isPlatformGatewayApi)
+            throws APIManagementException {
 
         try (PreparedStatement apiLevelPolicyMappingStatement = connection
                     .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_POLICY_MAPPING);
@@ -25378,7 +25446,7 @@ public class ApiMgtDAO {
 
             for (ClonePolicyMetadataDTO toBeClonedPolicyData : toBeClonedPolicyDetails) {
                 cloneCommonPolicyToAPI(connection, toBeClonedPolicyData.getCurrentPolicyUUID(),
-                        toBeClonedPolicyData.getClonedPolicyUUID(), apiUUID);
+                        toBeClonedPolicyData.getClonedPolicyUUID(), apiUUID, tenantDomain, isPlatformGatewayApi);
             }
 
             operationPolicyMappingStatement.executeBatch();
@@ -25400,6 +25468,12 @@ public class ApiMgtDAO {
      */
     public void updateAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate,
                                          List<OperationPolicy> apiLevelPolicies, String tenantDomain) throws APIManagementException {
+        updateAPIPoliciesMapping(apiUUID, uriTemplate, apiLevelPolicies, tenantDomain, false);
+    }
+
+    public void updateAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate,
+                                         List<OperationPolicy> apiLevelPolicies, String tenantDomain,
+                                         boolean isPlatformGatewayApi) throws APIManagementException {
         // No need to delete the Operation policy mapping as they will be removed from the db when the url template
         // rows are deleted.
         String deleteOldAPILevelMappingsQuery = SQLConstants.OperationPolicyConstants.DELETE_API_POLICY_MAPPING;
@@ -25409,7 +25483,7 @@ public class ApiMgtDAO {
                 prepStmt.setString(1, apiUUID);
                 prepStmt.execute();
 
-                addAPIPoliciesMapping(apiUUID, uriTemplate, apiLevelPolicies, tenantDomain, connection);
+                addAPIPoliciesMapping(apiUUID, uriTemplate, apiLevelPolicies, tenantDomain, connection, isPlatformGatewayApi);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -25540,10 +25614,15 @@ public class ApiMgtDAO {
      */
     public void addAPILevelPolicies(List<OperationPolicy> policies, String apiUUID, String revisionUUID,
                                     String tenantDomain) throws APIManagementException {
+        addAPILevelPolicies(policies, apiUUID, revisionUUID, tenantDomain, false);
+    }
+
+    public void addAPILevelPolicies(List<OperationPolicy> policies, String apiUUID, String revisionUUID,
+                                    String tenantDomain, boolean isPlatformGatewayApi) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                addAPILevelPolicies(policies, apiUUID, revisionUUID, tenantDomain, connection);
+                addAPILevelPolicies(policies, apiUUID, revisionUUID, tenantDomain, connection, isPlatformGatewayApi);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -25557,16 +25636,18 @@ public class ApiMgtDAO {
     /**
      * This method will add API level policy mappings using the provided database connection.
      *
-     * @param policies     List of API policies
-     * @param apiUUID      API UUID
-     * @param revisionUUID API revision UUID
-     * @param tenantDomain Tenant domain
-     * @param connection   Database connection
+     * @param policies             List of API policies
+     * @param apiUUID               API UUID
+     * @param revisionUUID          API revision UUID
+     * @param tenantDomain          Tenant domain
+     * @param connection            Database connection
+     * @param isPlatformGatewayApi  When true, create placeholders for external policies that are not in the common store
      * @throws APIManagementException if failed to add policy mapping
      * @throws SQLException           if an SQL error occurs while adding policy mapping
      */
     private void addAPILevelPolicies(List<OperationPolicy> policies, String apiUUID, String revisionUUID,
-                                     String tenantDomain, Connection connection) throws APIManagementException, SQLException {
+                                     String tenantDomain, Connection connection, boolean isPlatformGatewayApi)
+            throws APIManagementException, SQLException {
         Map<String, String> updatedPoliciesMap = new HashMap<>();
         Set<String> usedClonedPolicies = new HashSet<String>();
         List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails = new ArrayList<>();
@@ -25601,7 +25682,7 @@ public class ApiMgtDAO {
             }
             for (ClonePolicyMetadataDTO toBeClonedPolicyData : toBeClonedPolicyDetails) {
                 cloneCommonPolicyToAPI(connection, toBeClonedPolicyData.getCurrentPolicyUUID(),
-                        toBeClonedPolicyData.getClonedPolicyUUID(), apiUUID);
+                        toBeClonedPolicyData.getClonedPolicyUUID(), apiUUID, tenantDomain, isPlatformGatewayApi);
             }
             statement.executeBatch();
             connection.commit();
