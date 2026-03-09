@@ -26,6 +26,7 @@ public class SettingsDTO   {
     private List<String> grantTypes = new ArrayList<String>();
     private List<String> scopes = new ArrayList<String>();
     private Boolean applicationSharingEnabled = false;
+    private Boolean isLegacyApiKeysEnabled = false;
     private Boolean mapExistingAuthApps = false;
     private String apiGatewayEndpoint = null;
     private Boolean monetizationEnabled = false;
@@ -127,6 +128,23 @@ return null;
   }
   public void setApplicationSharingEnabled(Boolean applicationSharingEnabled) {
     this.applicationSharingEnabled = applicationSharingEnabled;
+  }
+
+  /**
+   **/
+  public SettingsDTO isLegacyApiKeysEnabled(Boolean isLegacyApiKeysEnabled) {
+    this.isLegacyApiKeysEnabled = isLegacyApiKeysEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("IsLegacyApiKeysEnabled")
+  public Boolean isIsLegacyApiKeysEnabled() {
+    return isLegacyApiKeysEnabled;
+  }
+  public void setIsLegacyApiKeysEnabled(Boolean isLegacyApiKeysEnabled) {
+    this.isLegacyApiKeysEnabled = isLegacyApiKeysEnabled;
   }
 
   /**
@@ -475,6 +493,7 @@ return null;
     return Objects.equals(grantTypes, settings.grantTypes) &&
         Objects.equals(scopes, settings.scopes) &&
         Objects.equals(applicationSharingEnabled, settings.applicationSharingEnabled) &&
+        Objects.equals(isLegacyApiKeysEnabled, settings.isLegacyApiKeysEnabled) &&
         Objects.equals(mapExistingAuthApps, settings.mapExistingAuthApps) &&
         Objects.equals(apiGatewayEndpoint, settings.apiGatewayEndpoint) &&
         Objects.equals(monetizationEnabled, settings.monetizationEnabled) &&
@@ -498,7 +517,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, isJWTEnabledForLoginTokens, orgAccessControlEnabled, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength, apiChatEnabled, aiAuthTokenProvided, marketplaceAssistantEnabled, orgWideAppUpdateEnabled, devportalMode);
+    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, isLegacyApiKeysEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, isJWTEnabledForLoginTokens, orgAccessControlEnabled, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength, apiChatEnabled, aiAuthTokenProvided, marketplaceAssistantEnabled, orgWideAppUpdateEnabled, devportalMode);
   }
 
   @Override
@@ -509,6 +528,7 @@ return null;
     sb.append("    grantTypes: ").append(toIndentedString(grantTypes)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    applicationSharingEnabled: ").append(toIndentedString(applicationSharingEnabled)).append("\n");
+    sb.append("    isLegacyApiKeysEnabled: ").append(toIndentedString(isLegacyApiKeysEnabled)).append("\n");
     sb.append("    mapExistingAuthApps: ").append(toIndentedString(mapExistingAuthApps)).append("\n");
     sb.append("    apiGatewayEndpoint: ").append(toIndentedString(apiGatewayEndpoint)).append("\n");
     sb.append("    monetizationEnabled: ").append(toIndentedString(monetizationEnabled)).append("\n");
