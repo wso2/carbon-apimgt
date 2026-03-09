@@ -69,17 +69,7 @@ public final class EncryptionKeyGenerator {
      */
     public static void main(String[] args) {
 
-        exitProcess(execute(args));
-    }
-
-    /**
-     * Exits the current JVM process.
-     *
-     * @param statusCode process exit code
-     */
-    private static void exitProcess(int statusCode) {
-
-        System.exit(statusCode);
+        execute(args);
     }
 
     /**
