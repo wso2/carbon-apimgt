@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.definitions;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,6 +45,7 @@ public class AsyncAPIDefinitionProcessor implements APIDefinitionProcessor {
 
     private static final Log log = LogFactory.getLog(AsyncAPIDefinitionProcessor.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper YAML_OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
     @Override
     public String getType(API api) {
@@ -71,24 +73,63 @@ public class AsyncAPIDefinitionProcessor implements APIDefinitionProcessor {
             if (definition == null || definition.trim().isEmpty()) {
                 return null;
             }
-            JsonNode rootNode = OBJECT_MAPPER.readTree(definition);
+            JsonNode rootNode = readDefinition(definition);
             if (rootNode.has("servers")) {
                 JsonNode serversNode = rootNode.get("servers");
                 Iterator<JsonNode> elements = serversNode.elements();
                 if (elements.hasNext()) {
-                // Get the first server defined (e.g., 'production')
                     JsonNode server = elements.next();
-                
-                // 4. Directly extract the URL
-                    if (server.has("url")) {
-                        return server.get("url").asText();
-                    }
-                }    
+
+                    return resolveEndpointUrl(server);
+                }
             }
         } catch (IOException e) {
             log.error("Error while parsing definition to extract URL", e);
         }
         return null;
+    }
+
+    private JsonNode readDefinition(String definition) throws IOException {
+        try {
+            return OBJECT_MAPPER.readTree(definition);
+        } catch (IOException jsonException) {
+            try {
+                return YAML_OBJECT_MAPPER.readTree(definition);
+            } catch (IOException yamlException) {
+                yamlException.addSuppressed(jsonException);
+                throw yamlException;
+            }
+        }
+    }
+
+    private String resolveEndpointUrl(JsonNode server) {
+        if (server == null || !server.has("url")) {
+            return null;
+        }
+
+        String url = server.get("url").asText();
+        if (url == null || url.isEmpty()) {
+            return null;
+        }
+
+        if (!server.has("protocol")) {
+            return url;
+        }
+
+        String protocol = server.get("protocol").asText();
+        if (protocol == null || protocol.isEmpty() || hasScheme(url, protocol)) {
+            return url;
+        }
+
+        if (url.startsWith("//")) {
+            return protocol + ":" + url;
+        }
+
+        return protocol + "://" + url;
+    }
+
+    private boolean hasScheme(String url, String protocol) {
+        return url.contains("://") || url.startsWith(protocol + ":");
     }
 
     @Override

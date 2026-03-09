@@ -573,11 +573,7 @@ public class PublisherCommonUtils {
         }
         boolean isGraphql = originalAPI.getType() != null && APIConstants.APITransportType.GRAPHQL.toString()
                 .equals(originalAPI.getType());
-        boolean isAsyncAPI = originalAPI.getType() != null
-                && (APIConstants.APITransportType.WS.toString().equals(originalAPI.getType())
-                || APIConstants.APITransportType.WEBSUB.toString().equals(originalAPI.getType())
-                || APIConstants.APITransportType.SSE.toString().equals(originalAPI.getType())
-                || APIConstants.APITransportType.ASYNC.toString().equals(originalAPI.getType()));
+        boolean isAsyncAPI = isAsyncAPIType(originalAPI.getType());
         boolean isAIAPI = APIConstants.API_SUBTYPE_AI_API.equals(originalAPI.getSubtype());
 
         Scope[] apiDtoClassAnnotatedScopes = APIDTO.class.getAnnotationsByType(Scope.class);
@@ -2291,10 +2287,7 @@ public class PublisherCommonUtils {
         }
 
         boolean isWSAPI = dtoWrapper.isAPIDTO() && dtoWrapper.getType() == APIDTO.TypeEnum.WS;
-        boolean isAsyncAPI = isWSAPI || dtoWrapper.isAPIDTO() &&
-                (dtoWrapper.getType() == APIDTO.TypeEnum.WEBSUB ||
-                        dtoWrapper.getType() == APIDTO.TypeEnum.SSE ||
-                        dtoWrapper.getType() == APIDTO.TypeEnum.ASYNC);
+        boolean isAsyncAPI = dtoWrapper.isAPIDTO() && isAsyncAPIType(dtoWrapper.getType());
 
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -4071,14 +4064,26 @@ public class PublisherCommonUtils {
 
     public static boolean isStreamingAPI(APIDTO apidto) {
 
-        return APIDTO.TypeEnum.WS.equals(apidto.getType()) || APIDTO.TypeEnum.SSE.equals(apidto.getType()) ||
-                APIDTO.TypeEnum.WEBSUB.equals(apidto.getType()) || APIDTO.TypeEnum.ASYNC.equals(apidto.getType()) ||
-                APIDTO.TypeEnum.WEBHOOK.equals(apidto.getType());
+        return isAsyncAPIType(apidto.getType());
     }
 
     public static boolean isThirdPartyAsyncAPI(APIDTO apidto) {
         return APIDTO.TypeEnum.ASYNC.equals(apidto.getType()) && apidto.getAdvertiseInfo() != null &&
                 apidto.getAdvertiseInfo().isAdvertised();
+    }
+
+    static boolean isAsyncAPIType(APIDTO.TypeEnum apiType) {
+        return APIDTO.TypeEnum.WS.equals(apiType) || APIDTO.TypeEnum.SSE.equals(apiType)
+                || APIDTO.TypeEnum.WEBSUB.equals(apiType) || APIDTO.TypeEnum.ASYNC.equals(apiType)
+                || APIDTO.TypeEnum.WEBHOOK.equals(apiType);
+    }
+
+    static boolean isAsyncAPIType(String apiType) {
+        return APIConstants.APITransportType.WS.toString().equals(apiType)
+                || APIConstants.APITransportType.SSE.toString().equals(apiType)
+                || APIConstants.APITransportType.WEBSUB.toString().equals(apiType)
+                || APIConstants.APITransportType.ASYNC.toString().equals(apiType)
+                || APIConstants.APITransportType.WEBHOOK.toString().equals(apiType);
     }
 
     /**
