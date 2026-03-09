@@ -198,7 +198,7 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                             }
                         }
                         if (backendOperation != null) {
-                            messageContext.setProperty(APIMgtGatewayConstants.MCP_CAPABILITY_KEY, backendOperation.getVerb());
+                            messageContext.setProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY, backendOperation.getVerb());
                             messageContext.setProperty(APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE_KEY, backendOperation.getTarget());
                         }
                     }

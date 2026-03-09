@@ -220,7 +220,7 @@ public class APIMgtGatewayConstants {
     public static final String MCP_REQUEST_BODY = "MCP_REQUEST_BODY";
     public static final String MCP_NO_AUTH_REQUEST = "MCP_NO_AUTH_REQUEST";
     public static final String MCP_CAPABILITY_NAME_KEY = "MCP_CAPABILITY_NAME";
-    public static final String MCP_CAPABILITY_KEY = "MCP_CAPABILITY";
+    public static final String MCP_HTTP_METHOD_KEY = "MCP_HTTP_METHOD";
     public static final String MCP_SESSION_ID_KEY = "MCP_SESSION_ID";
     public static final String MCP_REQUESTED_PROTOCOL_VERSION_KEY = "MCP_REQUESTED_PROTOCOL_VERSION";
     public static final String MCP_CLIENT_INFO_KEY = "MCP_CLIENT_INFO";
