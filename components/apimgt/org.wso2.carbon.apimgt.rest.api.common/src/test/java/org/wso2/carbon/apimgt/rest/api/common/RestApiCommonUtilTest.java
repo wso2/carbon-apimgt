@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIConsumer;
@@ -35,11 +36,15 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.base.CarbonBaseConstants;
 import org.wso2.carbon.context.CarbonContext;
 
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+
 import static org.mockito.Mockito.when;
 import static org.wso2.carbon.h2.osgi.utils.CarbonConstants.CARBON_HOME;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({CarbonContext.class, APIManagerFactory.class, RestApiCommonUtil.class})
+@PowerMockIgnore({"javax.crypto.*"})
 public class RestApiCommonUtilTest {
 
     @Test
@@ -106,5 +111,40 @@ public class RestApiCommonUtilTest {
                         "\"type\":\"http\"},\"x-wso2-auth-header\":\"Authorization\",\"x-wso2-basePath\":\"hello/3.14\"," +
                         "\"x-wso2-disable-security\":true}";
         Assert.assertEquals("", expected, openAPIDefinition);
+    }
+
+    private static final byte[] TEST_HMAC_KEY = "test-hmac-key".getBytes(StandardCharsets.UTF_8);
+
+    @Test
+    public void testGenerateSignedUrl() throws Exception {
+        PowerMockito.spy(RestApiCommonUtil.class);
+        PowerMockito.doReturn(TEST_HMAC_KEY).when(RestApiCommonUtil.class, "getHmacKeyBytes");
+
+        String apiUUID = UUID.randomUUID().toString();
+        String basePath = "https://localhost:9443/api/am/devportal/v3/apis/" + apiUUID + "/wsdl?";
+        String url = RestApiCommonUtil.generateSignedUrl(basePath, "&", apiUUID);
+        System.out.println("generated url: " + url);
+        // test whether generated URL contains the required query params
+        Assert.assertTrue(url.contains("exp="));
+        Assert.assertTrue(url.contains("sig="));
+        long exp = Long.parseLong(extractParam(url, "exp"));
+        String sig = extractParam(url, "sig");
+        // test whether generated ULR is valid
+        RestApiCommonUtil.validateSignedUrl(exp, sig, apiUUID);
+        // Test Validation (Tampered signature)
+        try {
+            RestApiCommonUtil.validateSignedUrl(exp, "wrong-sig", apiUUID);
+            Assert.fail("Expected APIManagementException due to invalid signature");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(401, e.getErrorHandler().getHttpStatusCode());
+        }
+    }
+
+    /** Helper to extract query params from the generated URL string */
+    private String extractParam(String url, String param) {
+        String search = param + "=";
+        int start = url.indexOf(search) + search.length();
+        int end = url.indexOf("&", start);
+        return (end == -1) ? url.substring(start) : url.substring(start, end);
     }
 }

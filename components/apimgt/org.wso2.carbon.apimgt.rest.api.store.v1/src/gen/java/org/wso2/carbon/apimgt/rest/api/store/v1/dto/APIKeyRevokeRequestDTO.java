@@ -21,6 +21,7 @@ import javax.validation.Valid;
 public class APIKeyRevokeRequestDTO   {
   
     private String apikey = null;
+    private String keyUUID = null;
 
   /**
    * API Key to revoke
@@ -40,6 +41,24 @@ public class APIKeyRevokeRequestDTO   {
     this.apikey = apikey;
   }
 
+  /**
+   * The UUID of the API key
+   **/
+  public APIKeyRevokeRequestDTO keyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "The UUID of the API key")
+  @JsonProperty("keyUUID")
+  public String getKeyUUID() {
+    return keyUUID;
+  }
+  public void setKeyUUID(String keyUUID) {
+    this.keyUUID = keyUUID;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -50,12 +69,13 @@ public class APIKeyRevokeRequestDTO   {
       return false;
     }
     APIKeyRevokeRequestDTO apIKeyRevokeRequest = (APIKeyRevokeRequestDTO) o;
-    return Objects.equals(apikey, apIKeyRevokeRequest.apikey);
+    return Objects.equals(apikey, apIKeyRevokeRequest.apikey) &&
+        Objects.equals(keyUUID, apIKeyRevokeRequest.keyUUID);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apikey);
+    return Objects.hash(apikey, keyUUID);
   }
 
   @Override
@@ -64,6 +84,7 @@ public class APIKeyRevokeRequestDTO   {
     sb.append("class APIKeyRevokeRequestDTO {\n");
     
     sb.append("    apikey: ").append(toIndentedString(apikey)).append("\n");
+    sb.append("    keyUUID: ").append(toIndentedString(keyUUID)).append("\n");
     sb.append("}");
     return sb.toString();
   }

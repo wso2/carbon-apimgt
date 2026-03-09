@@ -1298,6 +1298,9 @@ public class SQLConstants {
     public static final String REMOVE_APPLICATION_FROM_APPLICATIONS_SQL =
             "DELETE FROM AM_APPLICATION WHERE APPLICATION_ID = ?";
 
+    public static final String REMOVE_API_KEY_APPLICATION_MAPPING_SQL =
+            "DELETE FROM AM_API_KEY_APPLICATION_MAPPING WHERE APPLICATION_UUID = ?";
+
     public static final String REMOVE_APPLICATION_FROM_APPLICATION_REGISTRATIONS_SQL =
             "DELETE FROM AM_APPLICATION_REGISTRATION WHERE APP_ID = ?";
 
@@ -1774,6 +1777,9 @@ public class SQLConstants {
     public static final String REMOVE_FROM_API_URL_MAPPINGS_SQL =
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
 
+    public static final String REMOVE_FROM_API_KEY_API_MAPPINGS_SQL =
+            "DELETE FROM AM_API_KEY_API_MAPPING WHERE API_UUID = ?";
+
     public static final String REMOVE_FROM_AM_BACKEND_OPERATION_MAPPING_SQL =
             "DELETE FROM AM_BACKEND_OPERATION_MAPPING WHERE URL_MAPPING_ID = ? AND BACKEND_ID = ?";
 
@@ -1880,20 +1886,25 @@ public class SQLConstants {
                     " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
     public static final String GET_API_PRODUCT_URI_TEMPLATE_ASSOCIATION_SQL =
-            " SELECT " +
-            "  API.API_PROVIDER," +
-            "  API.API_NAME," +
-            "  API.API_VERSION," +
-            "  APM.URL_MAPPING_ID  " +
-            "  FROM " +
-            "  AM_API API " +
-            "  INNER JOIN AM_API_PRODUCT_MAPPING APM ON API.API_ID = APM.API_ID " +
-            "  WHERE APM.URL_MAPPING_ID IN " +
-            "   (SELECT AUM.URL_MAPPING_ID " +
-            "   FROM AM_API_URL_MAPPING AUM " +
-            "   INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
-            "   WHERE API.API_UUID = ? AND " +
-            "   AUM.REVISION_UUID IS NULL AND APM.REVISION_UUID = 'Current API')";
+            "SELECT " +
+                    "    PROD.API_PROVIDER, " +
+                    "    PROD.API_NAME, " +
+                    "    PROD.API_VERSION, " +
+                    "    AUM_ORIG.URL_MAPPING_ID " +
+                    "FROM AM_API API_SRC " +
+                    "INNER JOIN AM_API_URL_MAPPING AUM " +
+                    "    ON AUM.API_ID = API_SRC.API_ID " +
+                    "INNER JOIN AM_API_PRODUCT_MAPPING APM " +
+                    "    ON APM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
+                    "INNER JOIN AM_API PROD " +
+                    "    ON PROD.API_ID = APM.API_ID " +
+                    "INNER JOIN AM_API_URL_MAPPING AUM_ORIG " +
+                    "    ON AUM_ORIG.API_ID = AUM.API_ID " +
+                    "   AND AUM_ORIG.HTTP_METHOD = AUM.HTTP_METHOD " +
+                    "   AND AUM_ORIG.URL_PATTERN = AUM.URL_PATTERN " +
+                    "WHERE API_SRC.API_UUID = ?" +
+                    "  AND APM.REVISION_UUID = 'Current API' " +
+                    "  AND AUM_ORIG.REVISION_UUID IS NULL";
 
     public static final String GET_ASSOCIATED_API_PRODUCT_URL_TEMPLATES_SQL =
             " SELECT " +
@@ -3408,6 +3419,19 @@ public class SQLConstants {
     public static final String GET_REFERENCE_ARTIFACTS_SQL = "SELECT GE.NAME,EMAPPING.REFERENCE_ARTIFACT FROM " +
             "AM_API_EXTERNAL_API_MAPPING EMAPPING JOIN AM_GATEWAY_ENVIRONMENT GE ON " +
             "EMAPPING.GATEWAY_ENV_ID=GE.UUID WHERE EMAPPING.API_ID = ?";
+    public static final String GET_API_RESOURCES_ASSIGNED_TO_MCP =
+            "SELECT AUM.URL_PATTERN, AUM.HTTP_METHOD, COUNT(AOM.MAPPING_ID) AS " +
+                    "OPERATION_MAPPING_COUNT FROM AM_API API " +
+                    "INNER JOIN AM_API_URL_MAPPING AUM ON API.API_ID = AUM.API_ID LEFT JOIN AM_API_OPERATION_MAPPING " +
+                    "AOM ON AUM.URL_MAPPING_ID = AOM.REF_URL_MAPPING_ID WHERE API.API_UUID = ? " +
+                    "AND API.API_TYPE = 'HTTP' AND API.ORGANIZATION = ? " +
+                    "GROUP BY AUM.URL_MAPPING_ID, AUM.HTTP_METHOD, AUM.URL_PATTERN " +
+                    "ORDER BY AUM.URL_MAPPING_ID";
+    public static final String GET_API_OPERATION_MAPPINGS_REFERENCED_BY_API =
+            "SELECT AOM.MAPPING_ID, AOM.URL_MAPPING_ID, AOM.REF_URL_MAPPING_ID, AUM.HTTP_METHOD, AUM.URL_PATTERN " +
+                    "FROM AM_API_OPERATION_MAPPING AOM " +
+                    "JOIN AM_API_URL_MAPPING AUM ON AOM.REF_URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
+                    "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID IS NULL";
 
     /**
      * Throttle related constants
@@ -3914,6 +3938,114 @@ public class SQLConstants {
             "DESCRIPTION,TENANT_ID AS TENANT_ID FROM AM_SCOPE WHERE TENANT_ID = ? AND SCOPE_TYPE = ?";
 
     public static final String SCOPE_EXIST_SQL = "SELECT 1 FROM AM_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
+
+
+    /**
+     * Queries related to AM_API_KEY, AM_API_KEY_API_MAPPING and AM_API_KEY_APPLICATION_MAPPING tables
+     */
+    public static final String ADD_API_KEY_SQL =
+                    "INSERT INTO AM_API_KEY (API_KEY_UUID, NAME, API_KEY_HASH, KEY_TYPE, API_KEY_PROPERTIES, AUTHZ_USER, " +
+                            "TIME_CREATED, VALIDITY_PERIOD, LAST_USED, STATUS) " +
+                    "VALUES (?,?,?,?,?,?,?,?,?,?)";
+    public static final String ADD_API_KEY_TO_API_MAPPING_SQL =
+                    "INSERT INTO AM_API_KEY_API_MAPPING (API_KEY_UUID, API_UUID) VALUES (?,?)";
+    public static final String ADD_API_KEY_TO_APP_MAPPING_SQL =
+                    "INSERT INTO AM_API_KEY_APPLICATION_MAPPING (API_KEY_UUID, APPLICATION_UUID) VALUES (?,?)";
+    public static final String GET_ALL_API_KEYS_SQL =
+            "SELECT K.API_KEY_UUID, K.NAME, K.API_KEY_HASH, K.KEY_TYPE, K.API_KEY_PROPERTIES, K.AUTHZ_USER, " +
+                    "K.TIME_CREATED, K.VALIDITY_PERIOD, K.LAST_USED, K.STATUS, A.API_NAME, APP.NAME AS APPLICATION_NAME, " +
+                    "APP.APPLICATION_ID AS APPLICATION_ID FROM AM_API_KEY K " +
+                    "LEFT JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "LEFT JOIN AM_API A ON KM.API_UUID = A.API_UUID " +
+                    "LEFT JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "LEFT JOIN AM_APPLICATION APP ON AM.APPLICATION_UUID = APP.UUID " +
+                    "WHERE K.STATUS = 'ACTIVE' AND (A.ORGANIZATION = ? OR A.API_NAME IS NULL) AND " +
+                    "(APP.ORGANIZATION = ? OR AM.APPLICATION_UUID IS NULL)";
+    public static final String GET_API_KEY_SQL =
+            "SELECT K.API_KEY_UUID, K.NAME, K.TIME_CREATED, K.VALIDITY_PERIOD, K.LAST_USED " +
+                    "FROM AM_API_KEY K " +
+                    "JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "WHERE AM.APPLICATION_UUID = ? AND K.KEY_TYPE = ? AND K.STATUS = 'ACTIVE' AND " +
+                    "NOT EXISTS (SELECT 1 FROM AM_API_KEY_API_MAPPING AAM WHERE AAM.API_KEY_UUID = K.API_KEY_UUID)";
+    public static final String GET_API_API_KEY_SQL =
+            "SELECT K.API_KEY_UUID, AM.APPLICATION_UUID, APP.NAME AS APPLICATION_NAME, K.NAME, K.KEY_TYPE, K.TIME_CREATED, " +
+                    "K.VALIDITY_PERIOD, K.LAST_USED " +
+                    "FROM AM_API_KEY K " +
+                    "LEFT JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "LEFT JOIN AM_APPLICATION APP ON AM.APPLICATION_UUID = APP.UUID " +
+                    "JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "WHERE KM.API_UUID = ? AND K.STATUS = 'ACTIVE'";
+    public static final String GET_API_KEY_DETAILS_FROM_KEY_UUID_SQL =
+            "SELECT NAME, API_KEY_HASH, KEY_TYPE, API_KEY_PROPERTIES, AUTHZ_USER, VALIDITY_PERIOD, LAST_USED FROM " +
+                    "AM_API_KEY WHERE API_KEY_UUID = ? AND STATUS = 'ACTIVE'";
+    public static final String GET_API_API_KEY_DETAILS_FROM_KEY_UUID_SQL =
+            "SELECT AM.APPLICATION_UUID, K.NAME, K.API_KEY_HASH, K.KEY_TYPE, K.API_KEY_PROPERTIES, K.AUTHZ_USER, K.VALIDITY_PERIOD, K.LAST_USED " +
+                    "FROM AM_API_KEY K " +
+                    "JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "LEFT JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "WHERE KM.API_UUID = ? AND K.API_KEY_UUID = ? AND K.STATUS = 'ACTIVE'";
+    public static final String REVOKE_API_KEY_SQL =
+            "UPDATE AM_API_KEY K SET K.STATUS = 'REVOKED' " +
+                    "WHERE K.API_KEY_UUID = ? " +
+                    "AND EXISTS ( " +
+                    "    SELECT 1 FROM AM_API_KEY_APPLICATION_MAPPING M " +
+                    "    JOIN AM_APPLICATION A ON M.APPLICATION_UUID = A.UUID " +
+                    "    WHERE M.API_KEY_UUID = K.API_KEY_UUID AND A.ORGANIZATION = ? " +
+                    "    UNION " +
+                    "    SELECT 1 FROM AM_API_KEY_API_MAPPING M " +
+                    "    JOIN AM_API A ON M.API_UUID = A.API_UUID " +
+                    "    WHERE M.API_KEY_UUID = K.API_KEY_UUID AND A.ORGANIZATION = ? " +
+                    ") " +
+                    "AND K.STATUS != 'REVOKED'";
+    public static final String UPDATE_API_KEY_LAST_USED_SQL =
+            "UPDATE AM_API_KEY SET LAST_USED = ? WHERE API_KEY_HASH = ? AND STATUS = 'ACTIVE'";
+    public static final String REMOVE_API_KEY_ASSOCIATION_SQL =
+            "DELETE FROM AM_API_KEY_APPLICATION_MAPPING WHERE API_KEY_UUID = ?";
+    public static final String REMOVE_API_KEY_ASSOCIATION_VIA_APP_SQL =
+            "DELETE FROM AM_API_KEY_APPLICATION_MAPPING WHERE APPLICATION_UUID = ? AND API_KEY_UUID = ?";
+    public static final String GET_API_KEY_ASSOCIATIONS_SQL =
+            "SELECT K.API_KEY_UUID, K.NAME, A.API_NAME, K.TIME_CREATED, K.VALIDITY_PERIOD, K.LAST_USED, KM.API_UUID " +
+                    "FROM AM_API_KEY K " +
+                    "JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "JOIN AM_API A ON KM.API_UUID = A.API_UUID " +
+                    "JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "WHERE AM.APPLICATION_UUID = ? AND K.KEY_TYPE = ? AND K.STATUS = 'ACTIVE'";
+    public static final String GET_API_UUID_AND_TYPE_FOR_ASSOCIATION_VIA_APP_SQL =
+            "SELECT KM.API_UUID, K.NAME, K.KEY_TYPE, K.API_KEY_HASH, APP.APPLICATION_ID AS APPLICATION_ID " +
+                    "FROM AM_API_KEY K " +
+                    "JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "JOIN AM_APPLICATION APP ON AM.APPLICATION_UUID = APP.UUID " +
+                    "WHERE AM.APPLICATION_UUID = ? AND K.API_KEY_UUID = ?";
+    public static final String GET_KEY_DETAILS_FOR_ASSOCIATION_SQL =
+            "SELECT K.NAME, K.KEY_TYPE, K.API_KEY_HASH, COALESCE(APP.APPLICATION_ID, APP_PROVIDED.APPLICATION_ID) AS APPLICATION_ID, " +
+                    "COALESCE(APP.NAME, APP_PROVIDED.NAME) AS APPLICATION_NAME, A.API_NAME FROM AM_API_KEY K " +
+                    "LEFT JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "LEFT JOIN AM_APPLICATION APP ON AM.APPLICATION_UUID = APP.UUID " +
+                    "JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "JOIN AM_API A ON KM.API_UUID = A.API_UUID " +
+                    "LEFT JOIN AM_APPLICATION APP_PROVIDED ON APP_PROVIDED.UUID = ? " +
+                    "WHERE KM.API_UUID = ? AND K.API_KEY_UUID = ?";
+    public static final String GET_KEY_TYPE_ONLY_FOR_ASSOCIATION_SQL =
+            "SELECT K.NAME, K.KEY_TYPE, K.API_KEY_HASH " +
+                    "FROM AM_API_KEY K " +
+                    "JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "WHERE KM.API_UUID = ? AND K.API_KEY_UUID = ?";
+    public static final String GET_SUBSCRIBED_API_WITH_API_KEY_SQL =
+            "SELECT DISTINCT K.API_KEY_UUID, K.NAME, KM.API_UUID, A.API_NAME " +
+                    "FROM AM_SUBSCRIPTION S " +
+                    "JOIN AM_APPLICATION APP ON S.APPLICATION_ID = APP.APPLICATION_ID " +
+                    "JOIN AM_API A ON S.API_ID = A.API_ID " +
+                    "JOIN AM_API_KEY_API_MAPPING KM ON KM.API_UUID = A.API_UUID " +
+                    "JOIN AM_API_KEY K ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "LEFT JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "WHERE APP.UUID = ? " +
+                    "AND S.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "' " +
+                    "AND S.SUB_STATUS = 'UNBLOCKED' " +
+                    "AND AM.APPLICATION_UUID IS NULL " +
+                    "AND K.STATUS = 'ACTIVE' " +
+                    "AND K.KEY_TYPE = ? " +
+                    "AND A.STATUS = 'PUBLISHED'";
 
     /**
      * Static class to hold database queries related to webhooks subscriptions

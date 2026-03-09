@@ -252,7 +252,9 @@ public enum ExceptionCodes implements ErrorHandler {
     NO_WSDL_AVAILABLE_FOR_API(900684, "WSDL Not Found", 404, "No WSDL Available for the API %s:%s"),
     CORRUPTED_STORED_WSDL(900685, "Corrupted Stored WSDL", 500, "The WSDL of the API %s is corrupted."),
     UNSUPPORTED_WSDL_FILE_EXTENSION(900686, "Unsupported WSDL File Extension", 400, "Unsupported extension. Only supported extensions are .wsdl and .zip"),
-
+    UNSUPPORTED_RESOURCE_TYPE(900687, "Unsupported resource type", 400, "Cannot generate URL for the unsupported resource type %s."),
+    API_TYPE_INCOMPATIBLE_WITH_RESOURCE(902057, "Resource type incompatible with API type", 400,
+            "Resource type '%s' is not supported for API type '%s'"),
 
     //OpenAPI/Swagger related codes [900750 900???)
     MALFORMED_OPENAPI_DEFINITON(900758, "Malformed OpenAPI Definition", 400, "The provided OpenAPI definition is not parsable as a valid JSON or YAML."),
@@ -317,6 +319,7 @@ public enum ExceptionCodes implements ErrorHandler {
     ACCESS_TOKEN_INACTIVE(900904, "Access Token Error", 401, " Access token is inactive."),
     USER_NOT_AUTHENTICATED(900905, "User is not Authenticated", 401, " User is not authenticated."),
     ACCESS_TOKEN_INVALID(900906, "Invalid Credentials", 401, " Access token is invalid."),
+    WSDL_URL_INVALID(900916, "Authorization Error", 401, " WSDL access URL is invalid."),
 
     INVALID_SCOPE(900910, "Invalid Scope", 403, " You are not authorized to access the resource."),
     INVALID_AUTHORIZATION_HEADER(900911, "Invalid Authorization header", 401,
@@ -363,6 +366,30 @@ public enum ExceptionCodes implements ErrorHandler {
             "Throttling Policy cannot be empty or null", 400, "Throttling Policy cannot be empty or null"),
     ALREADY_ASSIGNED_ADVANCED_POLICY_DELETE_ERROR(900971, "Cannot delete the advanced throttling policy", 403,
             "Cannot delete the advanced policy with the name %s because it is already assigned to an API/Resource"),
+
+    // Multiple client secret related codes
+    OPERATION_NOT_SUPPORTED_FOR_SINGLE_CLIENT_SECRET_MODE(900916,
+            "The requested operation is not supported", 400,
+            "This operation is not supported as the multiple client secret support is disabled" +
+                    " by server configuration."),
+    OPERATION_NOT_SUPPORTED_FOR_MULTIPLE_CLIENT_SECRET_MODE(900917,
+            "The requested operation is not supported", 400,
+            "This operation is not supported as the multiple client secret support is enabled" +
+                    " by server configuration. Use the client secret creation API" +
+                    " (POST /applications/{applicationId}/oauth-keys/{keyMappingId}/generate-secret) to generate" +
+                    " new client secrets."),
+    CLIENT_SECRET_GENERATION_FAILED(900918,
+            "Client secret generation failed", 500,
+            "Error occurred while generating a new client secret for the application with " +
+                    "consumer key %s."),
+    CLIENT_SECRET_DELETION_FAILED(900919,
+            "Client secret deletion failed", 500,
+            "Error occurred while deleting the client secret for the application with " +
+                    "consumer key %s."),
+    CLIENT_SECRET_RETRIEVAL_FAILED(900920,
+            "Client secret retrieval failed", 500,
+            "Error occurred while retrieving the client secret for the application with " +
+                    "consumer key %s."),
 
     //Throttle related codes
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
@@ -468,6 +495,10 @@ public enum ExceptionCodes implements ErrorHandler {
     TENANT_MISMATCH(901409,"Tenant mismatch", 400, "Tenant mismatch"),
     INVALID_APPLICATION_PROPERTIES(901410, "Invalid additional properties", 400,
             "Invalid additional properties given for application"),
+    OPERATION_NOT_IMPLEMENTED_FOR_CUSTOM_KM(901413, "Operation not implemented for custom Key Manager for Out-of-Band type",
+            501, "Operation not implemented for custom Key Manager for Out-of-Band type"),
+    INVALID_CLIENT_ID_FOR_OOB_MODE(901414, "Invalid client id for Out-of-Band mode", 400,
+            "Client id cannot be empty for Out-of-Band mode"),
 
     //Scope related
     SCOPE_NOT_FOUND_FOR_USER(901500, "Scope does not belong to this user", 404, "Scope not found"),

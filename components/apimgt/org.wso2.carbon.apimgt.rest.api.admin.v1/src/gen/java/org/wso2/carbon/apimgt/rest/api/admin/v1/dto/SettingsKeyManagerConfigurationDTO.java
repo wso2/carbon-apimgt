@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConfigurationConstraintDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerConfigurationDTO;
 import javax.validation.constraints.*;
 
@@ -30,6 +31,7 @@ public class SettingsKeyManagerConfigurationDTO   {
     private List<KeyManagerConfigurationDTO> authConfigurations = new ArrayList<KeyManagerConfigurationDTO>();
     private List<KeyManagerConfigurationDTO> configurations = new ArrayList<KeyManagerConfigurationDTO>();
     private List<KeyManagerConfigurationDTO> endpointConfigurations = new ArrayList<KeyManagerConfigurationDTO>();
+    private List<ConfigurationConstraintDTO> configurationConstraints = new ArrayList<ConfigurationConstraintDTO>();
 
   /**
    **/
@@ -153,6 +155,24 @@ public class SettingsKeyManagerConfigurationDTO   {
     this.endpointConfigurations = endpointConfigurations;
   }
 
+  /**
+   **/
+  public SettingsKeyManagerConfigurationDTO configurationConstraints(List<ConfigurationConstraintDTO> configurationConstraints) {
+    this.configurationConstraints = configurationConstraints;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("configurationConstraints")
+  public List<ConfigurationConstraintDTO> getConfigurationConstraints() {
+    return configurationConstraints;
+  }
+  public void setConfigurationConstraints(List<ConfigurationConstraintDTO> configurationConstraints) {
+    this.configurationConstraints = configurationConstraints;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -169,12 +189,13 @@ public class SettingsKeyManagerConfigurationDTO   {
         Objects.equals(defaultScopesClaim, settingsKeyManagerConfiguration.defaultScopesClaim) &&
         Objects.equals(authConfigurations, settingsKeyManagerConfiguration.authConfigurations) &&
         Objects.equals(configurations, settingsKeyManagerConfiguration.configurations) &&
-        Objects.equals(endpointConfigurations, settingsKeyManagerConfiguration.endpointConfigurations);
+        Objects.equals(endpointConfigurations, settingsKeyManagerConfiguration.endpointConfigurations) &&
+        Objects.equals(configurationConstraints, settingsKeyManagerConfiguration.configurationConstraints);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, displayName, defaultConsumerKeyClaim, defaultScopesClaim, authConfigurations, configurations, endpointConfigurations);
+    return Objects.hash(type, displayName, defaultConsumerKeyClaim, defaultScopesClaim, authConfigurations, configurations, endpointConfigurations, configurationConstraints);
   }
 
   @Override
@@ -189,6 +210,7 @@ public class SettingsKeyManagerConfigurationDTO   {
     sb.append("    authConfigurations: ").append(toIndentedString(authConfigurations)).append("\n");
     sb.append("    configurations: ").append(toIndentedString(configurations)).append("\n");
     sb.append("    endpointConfigurations: ").append(toIndentedString(endpointConfigurations)).append("\n");
+    sb.append("    configurationConstraints: ").append(toIndentedString(configurationConstraints)).append("\n");
     sb.append("}");
     return sb.toString();
   }

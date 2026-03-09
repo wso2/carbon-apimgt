@@ -1,6 +1,14 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1;
 
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyAssociateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyRevokeRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDissociateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRenewRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatResponseDTO;
@@ -401,6 +409,26 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.apisGet(limit, offset, xWSO2Tenant, query, ifNoneMatch, securityContext);
     }
 
+    @POST
+    @Path("/{apiId}/api-keys/associate")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Create an association for the API Key", notes = "Create an association for a self contained API Key for the API ", response = APIKeyAssociationDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "APIKeys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Api key associated successfully. ", response = APIKeyAssociationDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response associateAPIKey(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "API Key association request object " ,required=true) APIAPIKeyAssociateRequestDTO apIAPIKeyAssociateRequestDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.associateAPIKey(apiId, apIAPIKeyAssociateRequestDTO, ifMatch, securityContext);
+    }
+
     @DELETE
     @Path("/{apiId}/comments/{commentId}")
     
@@ -422,6 +450,26 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.deleteComment(commentId, apiId, ifMatch, securityContext);
     }
 
+    @POST
+    @Path("/{apiId}/api-keys/dissociate")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Remove an Association for the API Key", notes = "Remove an association a self contained API Key for the API specified by the key name ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "APIKeys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Removed association for the Api key successfully. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response dissociateAPIKey(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "API Key dissociation request object " ,required=true) APIKeyDissociateRequestDTO apIKeyDissociateRequestDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.dissociateAPIKey(apiId, apIKeyDissociateRequestDTO, ifMatch, securityContext);
+    }
+
     @PATCH
     @Path("/{apiId}/comments/{commentId}")
     @Consumes({ "application/json" })
@@ -441,6 +489,65 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response editCommentOfAPI(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") String commentId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Comment object that should to be updated " ,required=true) PatchRequestBodyDTO patchRequestBodyDTO) throws APIManagementException{
         return delegate.editCommentOfAPI(commentId, apiId, patchRequestBodyDTO, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/api-keys/generate")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Generate API Key", notes = "Generate a self contained API Key for the API ", response = APIKeyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "APIKeys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Api key generated. ", response = APIKeyDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response generateApiBoundApiKey(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "API Key generation request object " ,required=true) APIAPIKeyGenerateRequestDTO apIAPIKeyGenerateRequestDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.generateApiBoundApiKey(apiId, apIAPIKeyGenerateRequestDTO, ifMatch, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/generate-definition-url")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Generate a URL to download a resource for an API", notes = "Generate a URL to access an API resource like the WSDL definition.", response = String.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Returns generated download URL as a string.", response = String.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response generateDefinitionURL( @NotNull @ApiParam(value = "Type of the resource to be retrieved using the generated url (Ex - wsdl)",required=true, allowableValues="wsdl")  @QueryParam("type") String type, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Name of the API gateway environment. ")  @QueryParam("environmentName") String environmentName,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.generateDefinitionURL(type, apiId, environmentName, xWSO2Tenant, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/api-keys")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get API Key(s) of a Given API", notes = "Retrieve self contained API Key(s) for the API. ", response = APIAPIKeyListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "APIKeys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API key(s) of a given API are returned. ", response = APIAPIKeyListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response getAPIBoundAPIKeys(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.getAPIBoundAPIKeys(apiId, ifNoneMatch, securityContext);
     }
 
     @GET
@@ -502,17 +609,57 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/wsdl")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get API WSDL definition", notes = "This operation can be used to retrieve the swagger definition of an API. ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Get API WSDL definition", notes = "This operation can be used to retrieve the WSDL definition of an API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
-    }, tags={ "APIs" })
+    }, tags={ "APIs",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Requested WSDL document of the API is returned ", response = Void.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response getWSDLOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Name of the API gateway environment. ")  @QueryParam("environmentName") String environmentName,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
-        return delegate.getWSDLOfAPI(apiId, environmentName, ifNoneMatch, xWSO2Tenant, securityContext);
+    public Response getWSDLOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "If format is wsdl, send the content of the main WSDL file and not the archived WSDL. If not defined, send the zip. ")  @QueryParam("format") String format,  @ApiParam(value = "Name of the API gateway environment. ")  @QueryParam("environmentName") String environmentName,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Time of expiration of the generated URL. ")  @QueryParam("exp") Long exp,  @ApiParam(value = "Signature to validate the generated URL. ")  @QueryParam("sig") String sig,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. ")  @QueryParam("X-WSO2-Tenant-Q") String xWSO2TenantQ) throws APIManagementException{
+        return delegate.getWSDLOfAPI(apiId, format, environmentName, ifNoneMatch, xWSO2Tenant, exp, sig, xWSO2TenantQ, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/api-keys/regenerate")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Regenerate API Key", notes = "Regenerate a self contained API Key for the API specified by the key name ", response = APIKeyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "APIKeys",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Api key regenerated successfully. ", response = APIKeyDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response regenerateAPIBoundAPIKey(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "API Key renewal request object " ,required=true) APIKeyRenewRequestDTO apIKeyRenewRequestDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.regenerateAPIBoundAPIKey(apiId, apIKeyRenewRequestDTO, ifMatch, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/api-keys/revoke")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Revoke API Key", notes = "Revoke a self contained API Key for the API specified by the key name ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
+            @AuthorizationScope(scope = "apim:api_key", description = "Generate API Keys")
+        })
+    }, tags={ "APIKeys" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Api key revoked successfully. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response revokeAPIBoundAPIKey(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "API Key revocation request object " ,required=true) APIAPIKeyRevokeRequestDTO apIAPIKeyRevokeRequestDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.revokeAPIBoundAPIKey(apiId, apIAPIKeyRevokeRequestDTO, ifMatch, securityContext);
     }
 }

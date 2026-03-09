@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
@@ -67,6 +68,7 @@ import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiKeyMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
@@ -143,10 +145,12 @@ public class APIAdminImpl implements APIAdmin {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
     protected ApiMgtDAO apiMgtDAO;
+    protected ApiKeyMgtDAO apiKeyMgtDAO;
     protected LabelsDAO labelsDAO;
 
     public APIAdminImpl() {
         apiMgtDAO = ApiMgtDAO.getInstance();
+        apiKeyMgtDAO = ApiKeyMgtDAO.getInstance();
         labelsDAO = LabelsDAO.getInstance();
     }
 
@@ -253,6 +257,7 @@ public class APIAdminImpl implements APIAdmin {
                     + " as API revisions are deployed to it", ExceptionCodes.from(
                     ExceptionCodes.GATEWAY_ENVIRONMENT_API_REVISIONS_EXIST, String.format("UUID '%s'", uuid)));
         }
+        APIUtil.stopFederatedGatewayAPIDiscovery(existingEnv, tenantDomain);
         apiMgtDAO.deleteEnvironment(uuid);
     }
 
@@ -355,6 +360,30 @@ public class APIAdminImpl implements APIAdmin {
     public Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws APIManagementException {
 
         return apiMgtDAO.getAllApplicationsOfTenantForMigration(appTenantDomain);
+    }
+
+    /**
+     * Returns api keys of a given tenant
+     *
+     * @param tenantDomain Tenant Domain
+     * @return List of api keys related to the given tenant
+     */
+    @Override
+    public List<APIKeyInfo> getAllApiKeys(String tenantDomain) throws APIManagementException {
+
+        return apiKeyMgtDAO.getAllAPIKeys(tenantDomain);
+    }
+
+    /**
+     * Revokes a given api key
+     *
+     * @param keyUUId API key UUId
+     * @param tenantDomain Tenant domain
+     */
+    @Override
+    public void revokeAPIKey(String keyUUId, String tenantDomain) throws APIManagementException {
+
+        apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
     }
 
     /**

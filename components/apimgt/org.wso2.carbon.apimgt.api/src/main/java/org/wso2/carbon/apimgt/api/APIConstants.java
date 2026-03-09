@@ -141,9 +141,12 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_AZURE_AI_FOUNDRY_KEY = "api-key";
         public static final String LLM_PROVIDER_SERVICE_GEMINI_NAME = "Gemini";
         public static final String LLM_PROVIDER_SERVICE_GEMINI_VERSION = "1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_VERSION_V1_1_0 = "1.1.0";
         public static final String LLM_PROVIDER_SERVICE_GEMINI_CONNECTOR = "gemini_1.0.0";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_CONNECTOR_V1_1_0 = "gemini_1.1.0";
         public static final String LLM_PROVIDER_SERVICE_GEMINI_DESCRIPTION = "Gemini service";
         public static final String LLM_PROVIDER_SERVICE_GEMINI_API_DEFINITION_FILE_NAME = "gemini_api.yaml";
+        public static final String LLM_PROVIDER_SERVICE_GEMINI_API_DEFINITION_FILE_NAME_V1_1_0 = "gemini_api_v1.1.0.yaml";
         public static final String LLM_PROVIDER_SERVICE_GEMINI_KEY = "X-goog-api-key";
         public static final String LLM_PROVIDER_SERVICE_METADATA_REQUEST_MODEL = "requestModel";
         public static final String LLM_PROVIDER_SERVICE_METADATA_RESPONSE_MODEL = "responseModel";
@@ -175,6 +178,7 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_GEMINI_RESPONSE_METADATA_IDENTIFIER_MODEL =
                 "$.modelVersion";
         public static final String LLM_PROVIDER_SERVICE_DEFAULT = "default";
+        public static final String LLM_PROVIDER_DEPRECATED = "deprecated";
         public static final String NULL = "null";
         public static final String LLM_PROVIDER = "LLM_PROVIDER";
         public static final String LLM_PROVIDER_TENANT_ALL = "ALL";
@@ -182,7 +186,12 @@ public class APIConstants {
         public static final String TRAFFIC_FLOW_DIRECTION_IN = "IN";
         public static final String TRAFFIC_FLOW_DIRECTION_OUT = "OUT";
         public static final String API_LLM_ENDPOINT = "_API_LLMEndpoint_";
+        // New generic property name for passing target model configurations between mediators.
+        public static final String TARGET_MODEL_CONFIGS = "TARGET_MODEL_CONFIGS";
+        // Backward compatible constant name. New code should use TARGET_MODEL_CONFIGS.
         public static final String ROUND_ROBIN_CONFIGS = "ROUND_ROBIN_CONFIGS";
+        public static final String INTELLIGENT_MODEL_ROUTING_CONFIGS = "INTELLIGENT_MODEL_ROUTING_CONFIGS";
+        public static final String SEMANTIC_ROUTING_CONFIGS = "SEMANTIC_ROUTING_CONFIGS";
         public static final String FAILOVER_CONFIGS = "FAILOVER_CONFIGS";
         public static final String TARGET_MODEL_ENDPOINT = "TARGET_MODEL_ENDPOINT";
         public static final String TARGET_ENDPOINT = "TARGET_ENDPOINT";

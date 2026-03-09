@@ -88,4 +88,13 @@ public interface LLMProviderService {
      * @throws APIManagementException If registration fails.
      */
     LLMProvider getLLMProvider() throws APIManagementException;
+
+    /**
+     * Checks if this LLM Provider service is deprecated.
+     *
+     * @return true if deprecated, false otherwise.
+     */
+    default boolean isDeprecated() {
+        return false;
+    }
 }

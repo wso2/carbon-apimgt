@@ -18,7 +18,6 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -29,21 +28,23 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
+import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.utils.redis.RedisCacheUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import software.amazon.awssdk.auth.credentials.*;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.core.exception.SdkClientException;
-import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
@@ -52,14 +53,11 @@ import software.amazon.awssdk.services.lambda.model.InvocationType;
 import software.amazon.awssdk.services.lambda.model.InvokeRequest;
 import software.amazon.awssdk.services.lambda.model.InvokeResponse;
 import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
-import software.amazon.awssdk.services.sts.model.AssumeRoleResponse;
-import software.amazon.awssdk.services.sts.model.Credentials;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Iterator;
@@ -70,7 +68,7 @@ import java.util.TreeMap;
  * This @AWSLambdaMediator mediator invokes AWS Lambda functions when
  * calling resources in APIs with AWS Lambda endpoint type.
  */
-public class AWSLambdaMediator extends AbstractMediator {
+public class AWSLambdaMediator extends AbstractMediator implements ManagedLifecycle {
     private static final Log log = LogFactory.getLog(AWSLambdaMediator.class);
     private String accessKey = "";
     private String secretKey = "";
@@ -87,9 +85,106 @@ public class AWSLambdaMediator extends AbstractMediator {
     private static final String IS_BASE64_ENCODED_PARAMETER = "isBase64Encoded";
     private static final String PATH = "path";
     private static final String HTTP_METHOD = "httpMethod";
+    private LambdaClient awsLambdaClient;
+    private StsClient stsClient;
+    private StsAssumeRoleCredentialsProvider assumeRoleCredentialsProvider;
 
     public AWSLambdaMediator() {
 
+    }
+
+    /**
+     * Initializes the mediator.
+     *
+     * @param synapseEnvironment Synapse environment context
+     */
+    @Override
+    public void init(SynapseEnvironment synapseEnvironment) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("AWSLambdaMediator initialized.");
+        }
+
+        // Validate resource timeout and set client configuration
+        if (resourceTimeout.toMillis() < 1000 || resourceTimeout.toMillis() > 900000) {
+            setResourceTimeout(APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT);
+        }
+        ClientOverrideConfiguration clientConfig = ClientOverrideConfiguration.builder()
+                .apiCallTimeout(resourceTimeout)
+                .build();
+
+        if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Using temporary credentials supplied by the IAM role attached to AWS instance");
+            }
+
+            if (StringUtils.isEmpty(roleArn) && StringUtils.isEmpty(roleSessionName)
+                    && StringUtils.isEmpty(roleRegion)) {
+                awsLambdaClient = LambdaClient.builder()
+                        .credentialsProvider(DefaultCredentialsProvider.create())
+                        .httpClientBuilder(getHttpClientBuilder())
+                        .overrideConfiguration(clientConfig)
+                        .build();
+
+            } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
+                    && StringUtils.isNotEmpty(roleRegion)) {
+                Region region = new DefaultAwsRegionProviderChain().getRegion();
+                assumeRoleCredentialsProvider = getStsAssumeRoleCredentialsProvider(
+                        DefaultCredentialsProvider.create(), region, roleArn, roleSessionName);
+                awsLambdaClient = LambdaClient.builder()
+                        .credentialsProvider(assumeRoleCredentialsProvider)
+                        .httpClientBuilder(getHttpClientBuilder())
+                        .overrideConfiguration(clientConfig)
+                        .region(Region.of(roleRegion))
+                        .build();
+            } else {
+                log.error("Missing AWS STS configurations");
+            }
+
+        } else if (StringUtils.isNotEmpty(accessKey) && StringUtils.isNotEmpty(secretKey)
+                && StringUtils.isNotEmpty(region)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Using user given stored credentials");
+            }
+
+            StaticCredentialsProvider staticCredentialsProvider = StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(accessKey, secretKey));
+            if (StringUtils.isEmpty(roleArn) && StringUtils.isEmpty(roleSessionName)
+                    && StringUtils.isEmpty(roleRegion)) {
+                awsLambdaClient = LambdaClient.builder()
+                        .credentialsProvider(staticCredentialsProvider)
+                        .httpClientBuilder(getHttpClientBuilder())
+                        .overrideConfiguration(clientConfig)
+                        .region(Region.of(region))
+                        .build();
+
+            } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
+                    && StringUtils.isNotEmpty(roleRegion)) {
+                assumeRoleCredentialsProvider = getStsAssumeRoleCredentialsProvider(
+                        staticCredentialsProvider, Region.of(region), roleArn, roleSessionName);
+                awsLambdaClient = LambdaClient.builder()
+                        .credentialsProvider(assumeRoleCredentialsProvider)
+                        .httpClientBuilder(getHttpClientBuilder())
+                        .overrideConfiguration(clientConfig)
+                        .region(Region.of(roleRegion))
+                        .build();
+            } else {
+                log.error("Missing AWS STS configurations");
+            }
+        } else {
+            log.error("Missing AWS Credentials");
+        }
+    }
+
+    /**
+     * Destroys the mediator.
+     */
+    @Override
+    public void destroy() {
+
+        closeResource(awsLambdaClient);
+        closeResource(assumeRoleCredentialsProvider);
+        closeResource(stsClient);
     }
 
     /**
@@ -187,83 +282,17 @@ public class AWSLambdaMediator extends AbstractMediator {
     }
 
     /**
-     * invoke AWS Lambda function
+     * Invoke AWS Lambda function
      *
      * @param payload - input parameters to pass to AWS Lambda function as a JSONString
      * @return InvokeResult
      */
     private InvokeResponse invokeLambda(String payload) {
         try {
-            // Validate resource timeout and set client configuration
-            if (resourceTimeout.toMillis() < 1000 || resourceTimeout.toMillis() > 900000) {
-                setResourceTimeout(APIConstants.AWS_DEFAULT_CONNECTION_TIMEOUT);
-            }
-            ClientOverrideConfiguration clientConfig = ClientOverrideConfiguration.builder()
-                    .apiCallTimeout(resourceTimeout).build();
-
-            LambdaClient awsLambdaClient;
-            if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Using temporary credentials supplied by the IAM role attached to AWS instance");
-                }
-                if (StringUtils.isEmpty(roleArn) && StringUtils.isEmpty(roleSessionName)
-                        && StringUtils.isEmpty(roleRegion)) {
-                    awsLambdaClient = LambdaClient.builder()
-                            .credentialsProvider(DefaultCredentialsProvider.create())
-                            .httpClientBuilder(ApacheHttpClient.builder())
-                            .overrideConfiguration(clientConfig)
-                            .build();
-                } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
-                        && StringUtils.isNotEmpty(roleRegion)) {
-                    Region region = new DefaultAwsRegionProviderChain().getRegion();
-                    Credentials sessionCredentials = getSessionCredentials(
-                            DefaultCredentialsProvider.create(), roleArn, roleSessionName,
-                            String.valueOf(region));
-                    AwsSessionCredentials basicSessionCredentials = AwsSessionCredentials.create(sessionCredentials.accessKeyId(), sessionCredentials.secretAccessKey(), sessionCredentials.sessionToken());
-                    awsLambdaClient = LambdaClient.builder()
-                                    .credentialsProvider(StaticCredentialsProvider.create(basicSessionCredentials))
-                                    .httpClientBuilder(ApacheHttpClient.builder())
-                                    .overrideConfiguration(clientConfig)
-                            .region(Region.of(roleRegion))
-                            .build();
-                } else {
-                    log.error("Missing AWS STS configurations");
-                    return null;
-                }
-            } else if (StringUtils.isNotEmpty(accessKey) && StringUtils.isNotEmpty(secretKey)
-                    && StringUtils.isNotEmpty(region)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Using user given stored credentials");
-                }
-                AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKey, secretKey);
-                if (StringUtils.isEmpty(roleArn) && StringUtils.isEmpty(roleSessionName)
-                        && StringUtils.isEmpty(roleRegion)) {
-                    awsLambdaClient = LambdaClient.builder()
-                                    .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
-                                    .httpClientBuilder(ApacheHttpClient.builder())
-                                    .overrideConfiguration(clientConfig)
-                            .region(Region.of(region))
-                            .build();
-                } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
-                        && StringUtils.isNotEmpty(roleRegion)) {
-                    Credentials sessionCredentials = getSessionCredentials(
-                            StaticCredentialsProvider.create(awsCredentials), roleArn, roleSessionName, region);
-                    AwsSessionCredentials basicSessionCredentials = AwsSessionCredentials.create(sessionCredentials.accessKeyId(), sessionCredentials.secretAccessKey(), sessionCredentials.sessionToken());
-                    awsLambdaClient = LambdaClient.builder()
-                                    .credentialsProvider(StaticCredentialsProvider.create(basicSessionCredentials))
-                                    .httpClientBuilder(ApacheHttpClient.builder())
-                                    .overrideConfiguration(clientConfig)
-                            .region(Region.of(roleRegion))
-                            .build();
-                } else {
-                    log.error("Missing AWS STS configurations");
-                    return null;
-                }
-            } else {
-                log.error("Missing AWS Credentials");
+            if (awsLambdaClient == null) {
+                log.error("AWS Lambda client is null. Cannot invoke the lambda function.");
                 return null;
             }
-
             SdkBytes payloadBytes = SdkBytes.fromUtf8String(payload);
             InvokeRequest invokeRequest = InvokeRequest.builder()
                     .functionName(resourceName)
@@ -271,56 +300,86 @@ public class AWSLambdaMediator extends AbstractMediator {
                     .invocationType(InvocationType.REQUEST_RESPONSE)
                     .build();
             return awsLambdaClient.invoke(invokeRequest);
-        } catch (SdkClientException | URISyntaxException e) {
+        } catch (SdkClientException | AwsServiceException e) {
             log.error("Error while invoking the lambda function", e);
+            return null;
         }
-        return null;
     }
 
-    private Credentials getSessionCredentials(AwsCredentialsProvider credentialsProvider, String roleArn,
-                                              String roleSessionName, String region) throws URISyntaxException {
-        Credentials sessionCredentials = null;
-        if (ServiceReferenceHolder.getInstance().isRedisEnabled()) {
-            Object previousCredentialsObject = new RedisCacheUtils(ServiceReferenceHolder.getInstance().getRedisPool())
-                    .getObject(roleSessionName, Credentials.class);
-            if (previousCredentialsObject != null) {
-                sessionCredentials = (Credentials) previousCredentialsObject;
+    /**
+     * Creates the HTTP client builder based on the given configuration
+     *
+     * @return Configured ApacheHttpClient.Builder instance
+     */
+    private ApacheHttpClient.Builder getHttpClientBuilder() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                .getApiManagerConfigurationService().getAPIManagerConfiguration();
+
+        ApacheHttpClient.Builder builder = ApacheHttpClient.builder();
+
+        applyIntConfig(config, APIConstants.MAX_CONNECTIONS, builder::maxConnections);
+        applyIntConfig(config,  APIConstants.CONNECTION_TIMEOUT, v -> builder.connectionTimeout(
+                Duration.ofSeconds(v)));
+        applyIntConfig(config, APIConstants.SOCKET_TIMEOUT, v -> builder.socketTimeout(Duration.ofSeconds(v)));
+        applyIntConfig(config, APIConstants.ACQUISITION_TIMEOUT, v -> builder.connectionAcquisitionTimeout(
+                Duration.ofSeconds(v)));
+
+        return builder;
+    }
+
+    /**
+     * Applies the given APIM configuration value to the AWS SDK HTTP client builder
+     * Missing or invalid values are ignored, and AWS SDK defaults are used
+     *
+     * @param config APIM configuration source used to read the property
+     * @param key property suffix
+     * @param setter callback that applies the parsed integer value to the HTTP client builder
+     */
+    private void applyIntConfig(APIManagerConfiguration config, String key, java.util.function.IntConsumer setter) {
+
+        String value = config.getFirstProperty(APIConstants.AWS_LAMBDA_HTTP_CLIENT + key);
+        if (StringUtils.isNotEmpty(value)) {
+            try {
+                setter.accept(Integer.parseInt(value));
+            } catch (NumberFormatException nfe) {
+                log.warn("Invalid " + key + " for AWS Lambda HTTP Client: " + value + ". Falling back to default.");
             }
         } else {
-            sessionCredentials = CredentialsCache.getInstance().getCredentialsMap().get(roleSessionName);
+            log.warn(key + " for AWS Lambda HTTP Client is not set. Falling back to default.");
         }
-        if (sessionCredentials != null) {
-            long expirationTime = sessionCredentials.expiration().toEpochMilli();
-            long currentTime = System.currentTimeMillis();
-            long timeDifference = expirationTime - currentTime;
-            if (timeDifference > 1000) {
-                return sessionCredentials;
-            }
-        }
-        StsClient awsSTSClient;
-        if (StringUtils.isEmpty(region)) {
-            awsSTSClient = StsClient.builder()
-                    .credentialsProvider(credentialsProvider)
+    }
+
+    /**
+     * Creates an STS AssumeRole credentials provider for the given role
+     *
+     * @param baseCredentialsProvider Credentials used to call STS
+     * @param region AWS region for STS
+     * @param roleArn Role ARN to assume
+     * @param roleSessionName Session name used for AssumeRole
+     * @return StsAssumeRoleCredentialsProvider instance
+     */
+    private StsAssumeRoleCredentialsProvider getStsAssumeRoleCredentialsProvider(AwsCredentialsProvider
+                                  baseCredentialsProvider, Region region, String roleArn, String roleSessionName ) {
+
+        if (region != null) {
+            stsClient = StsClient.builder()
+                    .credentialsProvider(baseCredentialsProvider)
+                    .region(region)
                     .build();
         } else {
-            awsSTSClient = StsClient.builder()
-                    .credentialsProvider(credentialsProvider)
-                    .endpointOverride(new URI("https://sts." + region + ".amazonaws.com"))
+            stsClient = StsClient.builder()
+                    .credentialsProvider(baseCredentialsProvider)
                     .build();
         }
-        AssumeRoleRequest roleRequest = AssumeRoleRequest.builder()
-                .roleArn(roleArn)
-                .roleSessionName(roleSessionName)
+        // Build a provider that assumes the role and refreshes session credentials automatically
+        return StsAssumeRoleCredentialsProvider.builder()
+                .stsClient(stsClient)
+                .refreshRequest(AssumeRoleRequest.builder()
+                        .roleArn(roleArn)
+                        .roleSessionName(roleSessionName)
+                        .build())
                 .build();
-        AssumeRoleResponse assumeRoleResult = awsSTSClient.assumeRole(roleRequest);
-        sessionCredentials = assumeRoleResult.credentials();
-        if (ServiceReferenceHolder.getInstance().isRedisEnabled()) {
-            new RedisCacheUtils(ServiceReferenceHolder.getInstance().getRedisPool())
-                    .addObject(roleSessionName, sessionCredentials);
-        } else {
-            CredentialsCache.getInstance().getCredentialsMap().put(roleSessionName, sessionCredentials);
-        }
-        return sessionCredentials;
     }
 
     /**
@@ -365,6 +424,22 @@ public class AWSLambdaMediator extends AbstractMediator {
             log.error("Error while extracting form data content", e);
         }
         return content;
+    }
+
+    /**
+     * Helper method to safely close a resource
+     * Automatically derives the component name for logging from the class type
+     *
+     * @param resource The AutoCloseable resource to close
+     */
+    private void closeResource(AutoCloseable resource) {
+        if (resource != null) {
+            try {
+                resource.close();
+            } catch (Exception e) {
+                log.error("Error closing " + resource.getClass().getSimpleName(), e);
+            }
+        }
     }
 
     @Override

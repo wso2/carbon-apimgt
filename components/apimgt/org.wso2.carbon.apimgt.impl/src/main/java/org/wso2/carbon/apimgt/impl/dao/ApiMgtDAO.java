@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
@@ -129,6 +130,7 @@ import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -4220,7 +4222,7 @@ public class ApiMgtDAO {
             }
             // sortColumn, sortOrder variable values has sanitized in jaggery level (applications-list.jag)for security.
             sqlQuery = sqlQuery.replace("$1", sortColumn);
-            if ("acs".equalsIgnoreCase(sortOrder) || "desc".equalsIgnoreCase(sortOrder)) {
+            if ("asc".equalsIgnoreCase(sortOrder) || "desc".equalsIgnoreCase(sortOrder)) {
                 sqlQuery = sqlQuery.replace("$2", sortOrder);
             } else {
                 sqlQuery = sqlQuery.replace("$2", "asc");
@@ -4483,6 +4485,9 @@ public class ApiMgtDAO {
             if (driverName.contains("Oracle")) {
                 limit = offset + limit;
             }
+            if (!"desc".equalsIgnoreCase(sortOrder)) {
+                    sortOrder = "asc";
+            }
             sqlQuery = sqlQuery.replace("$1", sortBy);
             sqlQuery = sqlQuery.replace("$2", sortOrder);
             prepStmt = connection.prepareStatement(sqlQuery);
@@ -4684,6 +4689,7 @@ public class ApiMgtDAO {
         PreparedStatement deleteDomainApp = null;
         PreparedStatement deleteAppKey = null;
         PreparedStatement deleteApp = null;
+        PreparedStatement deleteApiKeyAppMapping = null;
         ResultSet rs = null;
 
         String getSubscriptionsQuery = SQLConstants.GET_SUBSCRIPTION_ID_OF_APPLICATION_SQL;
@@ -4695,6 +4701,7 @@ public class ApiMgtDAO {
         String deleteDomainAppQuery = SQLConstants.REMOVE_APPLICATION_FROM_DOMAIN_MAPPINGS_SQL;
         String deleteApplicationQuery = SQLConstants.REMOVE_APPLICATION_FROM_APPLICATIONS_SQL;
         String deleteRegistrationEntry = SQLConstants.REMOVE_APPLICATION_FROM_APPLICATION_REGISTRATIONS_SQL;
+        String deleteAPIKeyApplicationMappingQuery = SQLConstants.REMOVE_API_KEY_APPLICATION_MAPPING_SQL;
 
         boolean transactionCompleted = true;
         try {
@@ -4790,6 +4797,15 @@ public class ApiMgtDAO {
                         .getName());
             }
 
+            deleteApiKeyAppMapping = connection.prepareStatement(deleteAPIKeyApplicationMappingQuery);
+            deleteApiKeyAppMapping.setString(1, application.getUUID());
+            deleteApiKeyAppMapping.execute();
+
+            if (log.isDebugEnabled()) {
+                log.debug("API key application mapping details are deleted successfully for Application - " + application
+                        .getName());
+            }
+
             deleteApp = connection.prepareStatement(deleteApplicationQuery);
             deleteApp.setInt(1, application.getId());
             deleteApp.execute();
@@ -4814,6 +4830,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(deleteSubscription, null, null);
             APIMgtDBUtil.closeAllConnections(deleteDomainApp, null, null);
             APIMgtDBUtil.closeAllConnections(deleteAppKey, null, null);
+            APIMgtDBUtil.closeAllConnections(deleteApiKeyAppMapping, null, null);
             APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
 
         }
@@ -7566,6 +7583,7 @@ public class ApiMgtDAO {
         String deleteAPIBackendQuery = SQLConstants.REMOVE_AM_BACKEND_SQL;
         String deleteAPIMetadataQuery = SQLConstants.DELETE_ALL_API_METADATA;
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
+        String deleteAPIKeyMappingQuery = SQLConstants.REMOVE_FROM_API_KEY_API_MAPPINGS_SQL;
         String deleteGraphqlComplexityQuery = SQLConstants.REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -7625,6 +7643,11 @@ public class ApiMgtDAO {
             // Delete URL Templates (delete the resource scope mappings on delete cascade)
             prepStmt = connection.prepareStatement(deleteURLTemplateQuery);
             prepStmt.setInt(1, id);
+            prepStmt.execute();
+
+            // Delete AM_API_KEY_API_MAPPING (Delete the resource API key API mappings on delete cascade)
+            prepStmt = connection.prepareStatement(deleteAPIKeyMappingQuery);
+            prepStmt.setString(1, uuid);
             prepStmt.execute();
 
             deleteAllAPISpecificOperationPoliciesByAPIUUID(connection, uuid, null);
@@ -16582,8 +16605,7 @@ public class ApiMgtDAO {
             prepStmt.execute();
             connection.commit();
         } catch (SQLException e) {
-            handleException(
-                    "Error occurred while converting NULL throttling tiers to Unlimited in AM_API_URL_MAPPING table",
+            handleException("Error occurred while converting NULL throttling tiers to Unlimited in AM_API_URL_MAPPING table",
                     e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
@@ -20876,6 +20898,17 @@ public class ApiMgtDAO {
                 removeBackendOperationMapping(connection, uriTemplates);
                 removeApiOperationMapping(connection, uriTemplates);
 
+                // Before removing AM_API_URL_MAPPING, set AM_API_OPERATION_MAPPING references to NULL
+                Map<String, List<Integer>> apiOperationMappingsReferencedByAPIID =
+                        getAPIOperationMappingsReferencedByAPIID(apiId);
+                if (!apiOperationMappingsReferencedByAPIID.isEmpty()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Removing API Operation Mappings references for API ID: " + apiId +
+                                " before removing URL mappings.");
+                    }
+                    removeAPIOperationMappingsReferencedByAPIID(connection, apiOperationMappingsReferencedByAPIID);
+                }
+
                 // Removing related Current API entries from AM_API_URL_MAPPING table
                 PreparedStatement removeURLMappingsStatement = connection.prepareStatement(
                         REMOVE_CURRENT_API_ENTRIES_IN_AM_API_URL_MAPPING_BY_API_ID);
@@ -21131,6 +21164,26 @@ public class ApiMgtDAO {
                                     addApiOperationMappingPrepStmt.setInt(2,
                                             urlMapping.getAPIOperationMapping().getBackendOperation().getRefUriMappingId());
                                     addApiOperationMappingPrepStmt.addBatch();
+                                }
+
+                                /* Update the AM_API_OPERATION_MAPPING table by setting REF_URL_MAPPING_ID
+                                   to the restoredUrlMappingID
+                                 */
+                                String urlIdentifier = urlMapping.getHttpVerb() + urlMapping.getUriTemplate();
+                                if (apiOperationMappingsReferencedByAPIID.containsKey(urlIdentifier)) {
+                                    for (Integer urlMappingId : apiOperationMappingsReferencedByAPIID
+                                            .get(urlIdentifier)) {
+                                        /*
+                                          Here, we are doing the exact opposite of the previous
+                                          addApiOperationMappingPrepStmt.
+                                          This is because we are restoring the API, not the MCP.
+                                          Here, urlMappingId is coming from MCP and restoredUrlMappingID is
+                                          the current API URL mapping ID.
+                                         */
+                                        addApiOperationMappingPrepStmt.setInt(1, urlMappingId);
+                                        addApiOperationMappingPrepStmt.setInt(2, restoredUrlMappingID);
+                                        addApiOperationMappingPrepStmt.addBatch();
+                                    }
                                 }
                             }
                         }
@@ -23075,6 +23128,114 @@ public class ApiMgtDAO {
             getBackendPrepStmt.setString(5, organization);
             getBackendPrepStmt.executeUpdate();
         }
+    }
+
+    /**
+     * Get API resources attached to MCP.
+     * @param apiUUId uuid of API.
+     * @param organization organization of API.
+     * @return list of resources attached to mcp.
+     * @throws APIManagementException if fails to retrieve.
+     */
+    public Map<String, Boolean> getAPIResourcesAssignedToMCP(String apiUUId, String organization)
+            throws APIManagementException {
+        Map<String, Boolean> resourceMCPMap = new HashMap<>();
+        String query = SQLConstants.GET_API_RESOURCES_ASSIGNED_TO_MCP;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, apiUUId);
+            preparedStatement.setString(2, organization);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String operation = resultSet.getString("URL_PATTERN");
+                    String method = resultSet.getString("HTTP_METHOD");
+                    int count = resultSet.getInt("OPERATION_MAPPING_COUNT");
+                    String resourceKey = operation.concat(":").concat(method);
+                    if (resourceMCPMap.containsKey(resourceKey)) {
+                        if (!resourceMCPMap.get(resourceKey)) {
+                            resourceMCPMap.put(resourceKey, count > 0);
+                        }
+                    } else {
+                        resourceMCPMap.put(resourceKey, count > 0);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error occurred while returning mcp attachment to resource", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+        return resourceMCPMap;
+    }
+
+    /**
+     * Gets API operation mappings that reference the given API's URL mappings.
+     *
+     * @param apiId API identifier
+     * @return Map of URL identifiers to lists of URL mapping IDs
+     * @throws APIManagementException if database access fails
+     */
+    public Map<String, List<Integer>> getAPIOperationMappingsReferencedByAPIID(int apiId)
+            throws APIManagementException {
+        Map<String, List<Integer>> references = new HashMap<>();
+        String query = SQLConstants.GET_API_OPERATION_MAPPINGS_REFERENCED_BY_API;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    int urlMappingId = resultSet.getInt("URL_MAPPING_ID");
+                    String httpMethod = resultSet.getString("HTTP_METHOD");
+                    String urlPattern = resultSet.getString("URL_PATTERN");
+                    String urlIdentifier = httpMethod + urlPattern;
+                    List<Integer> mappingIds;
+                    if (references.containsKey(urlIdentifier)) {
+                        mappingIds = references.get(urlIdentifier);
+                        mappingIds.add(urlMappingId);
+                    } else {
+                        mappingIds = new ArrayList<>(List.of(urlMappingId));
+                        references.put(urlIdentifier, mappingIds);
+                    }
+                }
+            } catch (SQLException e) {
+                log.error(e);
+                throw new APIManagementException("An Error occurred while returning mcp attachment to resource", e,
+                        ExceptionCodes.INTERNAL_ERROR);
+            }
+        } catch (SQLException e) {
+            log.error(e);
+            throw new APIManagementException("Error occurred while returning mcp attachment to resource", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+        return references;
+    }
+
+    /**
+     * Removes API operation mappings that reference the current API's URL mappings.
+     * This method should be called before deleting entries from AM_API_URL_MAPPING to prevent
+     * foreign key constraint violations. Each mapping in the references map will be deleted
+     * from the AM_API_OPERATION_MAPPING table based on its URL_MAPPING_ID.
+     *
+     * @param conn       Database connection to use for the operation
+     * @param references Map of URL identifiers (httpMethod + urlPattern) to lists of URL mapping IDs
+     *                   that need to be removed from AM_API_OPERATION_MAPPING
+     * @throws APIManagementException if a database error occurs during the deletion
+     */
+    private void removeAPIOperationMappingsReferencedByAPIID(Connection conn,
+        Map<String, List<Integer>> references) throws APIManagementException {
+
+            String query = SQLConstants.REMOVE_FROM_AM_API_OPERATION_MAPPING_SQL;
+            try (PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+                for (Map.Entry<String, List<Integer>> entry : references.entrySet()) {
+                    for (Integer mappingId : entry.getValue()) {
+                        preparedStatement.setInt(1, mappingId);
+                        preparedStatement.addBatch();
+                    }
+                }
+                preparedStatement.executeBatch();
+            } catch (SQLException e) {
+                throw new APIManagementException("Error occurred while returning mcp attachment to resource", e,
+                        ExceptionCodes.INTERNAL_ERROR);
+            }
     }
 
     /**
