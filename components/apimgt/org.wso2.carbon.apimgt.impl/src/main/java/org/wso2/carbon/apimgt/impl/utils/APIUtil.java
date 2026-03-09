@@ -320,6 +320,8 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLContext;
 import java.security.cert.X509Certificate;
 import java.text.Normalizer;
@@ -393,6 +395,7 @@ public final class APIUtil {
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
     private static final int CONSUMER_SECRET_MASK_LENGTH = 16;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private APIUtil() {
 
@@ -467,6 +470,12 @@ public final class APIUtil {
                     eventPublisherFactory.getEventPublisher(EventPublisherType.NOTIFICATION));
             eventPublishers.putIfAbsent(EventPublisherType.TOKEN_REVOCATION,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.TOKEN_REVOCATION));
+            eventPublishers.putIfAbsent(EventPublisherType.API_KEY_INFO,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.API_KEY_INFO));
+            eventPublishers.putIfAbsent(EventPublisherType.API_KEY_ASSOCIATION_INFO,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.API_KEY_ASSOCIATION_INFO));
+            eventPublishers.putIfAbsent(EventPublisherType.API_KEY_USAGE,
+                    eventPublisherFactory.getEventPublisher(EventPublisherType.API_KEY_USAGE));
             eventPublishers.putIfAbsent(EventPublisherType.BLOCKING_EVENT,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.BLOCKING_EVENT));
             eventPublishers.putIfAbsent(EventPublisherType.KEY_TEMPLATE,
@@ -9183,6 +9192,41 @@ public final class APIUtil {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         int apiId = apiMgtDAO.getAPIID(uuid);
         return apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId), workflowType);
+    }
+
+    /**
+     * Generates the hash value using SHA-256 for a given API key.
+     *
+     * @param apiKey api key.
+     * @return the hashed api key.
+     */
+    public static String sha256Hash(String apiKey) throws APIManagementException {
+        if (StringUtils.isEmpty(apiKey)) {
+            throw new APIManagementException("API Key must not be null or empty.");
+        }
+        try {
+            MessageDigest digest = MessageDigest.getInstance(SHA_256);
+            byte[] hash = digest.digest(apiKey.getBytes(StandardCharsets.UTF_8));
+
+            // Convert hash to hex
+            String hashHex = convertBytesToHex(hash);
+
+            // Format: $sha256$<hash_hex>
+            return String.format("$sha256$%s", hashHex);
+
+        } catch (NoSuchAlgorithmException e) {
+            String msg = "Error in generating SHA-256 value";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    public static String convertBytesToHex(byte[] bytes) {
+        StringBuilder hex = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
+            hex.append(String.format("%02x", b & 0xff));
+        }
+        return hex.toString();
     }
 
     /**

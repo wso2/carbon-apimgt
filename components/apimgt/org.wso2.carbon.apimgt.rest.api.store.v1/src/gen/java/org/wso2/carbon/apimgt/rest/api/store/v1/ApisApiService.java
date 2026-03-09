@@ -9,7 +9,15 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyAssociateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyRevokeRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDissociateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRenewRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApiChatResponseDTO;
@@ -56,11 +64,17 @@ public interface ApisApiService {
       public Response apisApiIdUserRatingGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdUserRatingPut(String apiId, RatingDTO ratingDTO, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response associateAPIKey(String apiId, APIAPIKeyAssociateRequestDTO apIAPIKeyAssociateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response dissociateAPIKey(String apiId, APIKeyDissociateRequestDTO apIKeyDissociateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO, MessageContext messageContext) throws APIManagementException;
+      public Response generateApiBoundApiKey(String apiId, APIAPIKeyGenerateRequestDTO apIAPIKeyGenerateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response generateDefinitionURL(String type, String apiId, String environmentName, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIBoundAPIKeys(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException;
       public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset, MessageContext messageContext) throws APIManagementException;
       public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit, Integer offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException;
       public Response getWSDLOfAPI(String apiId, String format, String environmentName, String ifNoneMatch, String xWSO2Tenant, Long exp, String sig, String xWSO2TenantQ, MessageContext messageContext) throws APIManagementException;
+      public Response regenerateAPIBoundAPIKey(String apiId, APIKeyRenewRequestDTO apIKeyRenewRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response revokeAPIBoundAPIKey(String apiId, APIAPIKeyRevokeRequestDTO apIAPIKeyRevokeRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
 }

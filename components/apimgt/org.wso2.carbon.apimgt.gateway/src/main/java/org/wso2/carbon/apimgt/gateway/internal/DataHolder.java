@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
@@ -58,6 +59,7 @@ public class DataHolder {
     private Map<String,Map<String, API>> tenantAPIMap  = new HashMap<>();
     private Map<String, Boolean> tenantDeployStatus = new HashMap<>();
     private Map<String, LLMProviderInfo> llmProviderMap = new HashMap<>();
+    private ConcurrentHashMap<String, APIKeyInfo> apiKeyInfoHashMap = new ConcurrentHashMap<>();
     private final Map<String, Cache<String, Long>> apiSuspendedEndpoints = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, AbstractAPIMgtGatewayJWTGenerator> jwtGeneratorTenantMap =
             new ConcurrentHashMap<>();
@@ -145,6 +147,35 @@ public class DataHolder {
     public static DataHolder getInstance() {
 
         return Instance;
+    }
+
+    /**
+     * Adds a new opaque api key info.
+     *
+     * @param apiKeyInfo the api key info to add
+     */
+    public void addOpaqueAPIKeyInfo(APIKeyInfo apiKeyInfo) {
+
+        apiKeyInfoHashMap.put(apiKeyInfo.getLookupKey(), apiKeyInfo);
+    }
+
+    /**
+     * Returns opaque api key info for the given lookup key
+     *
+     */
+    public APIKeyInfo getOpaqueAPIKeyInfo(String lookupKey) {
+
+        return apiKeyInfoHashMap.get(lookupKey);
+    }
+
+    /**
+     * Removes an opaque api key info.
+     *
+     * @param lookupKey the reference for the api key hash to remove
+     */
+    public void removeOpaqueAPIKeyInfo(String lookupKey) {
+
+        apiKeyInfoHashMap.remove(lookupKey);
     }
 
     public void addApiToAliasList(String apiId, List<String> aliasList) {
