@@ -12,7 +12,9 @@ import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApiService;
 
@@ -25,7 +27,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.EnvironmentMappin
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
 import org.wso2.carbon.apimgt.impl.utils.GatewayManagementUtils;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayInstanceDTO;
@@ -35,11 +36,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
@@ -175,65 +178,116 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
      * Get list of gateway environments from config api-manager.xml and dynamic environments (from DB)
      *
      * @param messageContext message context
-     * @return created environment
+     * @return list of environments (platform gateways use live IS_ACTIVE from DB)
      * @throws APIManagementException if failed to get list
      */
     public Response environmentsGet(MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        List<Environment> envList = apiAdmin.getAllEnvironments(organization);
-        EnvironmentListDTO envListDTO = EnvironmentMappingUtil.fromEnvListToEnvListDTO(envList);
 
-        // Build a map from environment name to permissions for platform gateway lookup
+        List<PlatformGateway> platformGateways = getPlatformGatewaysWithInstance(organization);
+        Set<String> platformGatewayIds = (platformGateways != null && !platformGateways.isEmpty())
+                ? platformGateways.stream().map(PlatformGateway::getId).filter(Objects::nonNull).collect(Collectors.toSet())
+                : Collections.emptySet();
+
+        List<Environment> envList = apiAdmin.getAllEnvironments(organization);
+        // Exclude stored environments that represent platform gateways so we use live data from AM_PLATFORM_GATEWAY (IS_ACTIVE) instead.
+        List<Environment> envListFiltered = platformGatewayIds.isEmpty()
+                ? envList
+                : envList.stream().filter(env -> !isStoredPlatformGatewayEnv(env, platformGatewayIds)).collect(Collectors.toList());
+        EnvironmentListDTO envListDTO = EnvironmentMappingUtil.fromEnvListToEnvListDTO(envListFiltered);
+
+        // Build a map from environment name to permissions for platform gateway lookup (use full envList for permissions).
         Map<String, GatewayVisibilityPermissionConfigurationDTO> envPermissionsMap = envList.stream()
                 .filter(env -> env.getName() != null)
                 .filter(env -> env.getPermissions() != null)
                 .collect(Collectors.toMap(Environment::getName, Environment::getPermissions,
                         (existing, replacement) -> existing, HashMap::new));
 
-        // Same approach as Synapse/APK: include platform gateways in the same environment list so UI gets
-        // one deploy-target list; each has gatewayType so UI can filter (e.g. show only platform gateways when chosen).
-        PlatformGatewayService platformGatewayService =
-                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
-        if (platformGatewayService != null) {
-            try {
-                // Use gateways that have AM_GW_INSTANCES row (same source as deployment acks and stats)
-                List<PlatformGateway> platformGateways =
-                        platformGatewayService.listGatewaysByOrganizationWithInstance(organization);
-                if (platformGateways != null && !platformGateways.isEmpty()) {
-                    List<EnvironmentDTO> list = new ArrayList<>(envListDTO.getList());
-                    // Avoid duplicates when a platform gateway name matches an existing environment name.
-                    HashSet<String> existingNames = list.stream()
-                            .map(EnvironmentDTO::getName)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toCollection(HashSet::new));
-                    for (PlatformGateway gw : platformGateways) {
-                        if (gw == null || gw.getName() == null) {
-                            continue;
-                        }
-                        String name = gw.getName().trim();
-                        if (name.isEmpty() || existingNames.contains(name)) {
-                            continue;
-                        }
-                        GatewayVisibilityPermissionConfigurationDTO permissions = envPermissionsMap.get(name);
-                        EnvironmentDTO dto = EnvironmentMappingUtil.fromPlatformGatewayToEnvDTO(
-                                gw, APIConstants.WSO2_API_PLATFORM_GATEWAY, permissions);
-                        list.add(dto);
-                        if (dto.getName() != null) {
-                            existingNames.add(dto.getName());
-                        }
-                    }
-                    envListDTO.setList(list);
-                    envListDTO.setCount(list.size());
+        // Include platform gateways from DB in the list so UI gets one deploy-target list with live status (Active/Inactive).
+        if (platformGateways != null && !platformGateways.isEmpty()) {
+            List<EnvironmentDTO> list = new ArrayList<>(envListDTO.getList());
+            HashSet<String> existingNames = list.stream()
+                    .map(EnvironmentDTO::getName)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toCollection(HashSet::new));
+            for (PlatformGateway gw : platformGateways) {
+                if (gw == null || gw.getName() == null) {
+                    continue;
                 }
-            } catch (APIManagementException e) {
-                log.warn("Could not append platform gateways to environments list", e);
-            } catch (Exception e) {
-                log.error("Unexpected error appending platform gateways to environments list", e);
+                String name = gw.getName().trim();
+                if (name.isEmpty() || existingNames.contains(name)) {
+                    continue;
+                }
+                GatewayVisibilityPermissionConfigurationDTO permissions = envPermissionsMap.get(name);
+                EnvironmentDTO dto = EnvironmentMappingUtil.fromPlatformGatewayToEnvDTO(
+                        gw, APIConstants.WSO2_API_PLATFORM_GATEWAY, permissions);
+                list.add(dto);
+                if (dto.getName() != null) {
+                    existingNames.add(dto.getName());
+                }
             }
+            envListDTO.setList(list);
+            envListDTO.setCount(list.size());
         }
 
         return Response.ok().entity(envListDTO).build();
+    }
+
+    /**
+     * Returns platform gateways that have an AM_GW_INSTANCES row (live IS_ACTIVE from DB).
+     * Prefers PlatformGatewayService when registered; otherwise uses PlatformGatewayDAO and
+     * PlatformGatewayServiceImpl.fromDAO for conversion.
+     */
+    private List<PlatformGateway> getPlatformGatewaysWithInstance(String organization) {
+        PlatformGatewayService service = ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        if (service != null) {
+            try {
+                List<PlatformGateway> list = service.listGatewaysByOrganizationWithInstance(organization);
+                if (list != null && !list.isEmpty()) {
+                    return list;
+                }
+            } catch (APIManagementException e) {
+                log.warn("Could not list platform gateways via service, falling back to DAO", e);
+            }
+        }
+        try {
+            List<PlatformGatewayDAO.PlatformGateway> daoList =
+                    PlatformGatewayDAO.getInstance().listGatewaysByOrganizationWithInstance(organization);
+            if (daoList != null && !daoList.isEmpty()) {
+                List<PlatformGateway> result = new ArrayList<>(daoList.size());
+                for (PlatformGatewayDAO.PlatformGateway gw : daoList) {
+                    PlatformGateway api = PlatformGatewayServiceImpl.fromDAO(gw);
+                    if (api != null) {
+                        result.add(api);
+                    }
+                }
+                return result;
+            }
+        } catch (APIManagementException e) {
+            log.warn("Could not list platform gateways for environments", e);
+        }
+        return null;
+    }
+
+    /**
+     * Returns true if env is a stored platform gateway (exclude it so we use live data from DB instead).
+     */
+    private static boolean isStoredPlatformGatewayEnv(Environment env, Set<String> platformGatewayIds) {
+        if (env == null || platformGatewayIds == null || platformGatewayIds.isEmpty()) {
+            return false;
+        }
+        if (env.getUuid() != null && platformGatewayIds.contains(env.getUuid())) {
+            return true;
+        }
+        Map<String, String> props = env.getAdditionalProperties();
+        if (props != null) {
+            String id = props.get("platformGatewayId");
+            if (id != null && platformGatewayIds.contains(id)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

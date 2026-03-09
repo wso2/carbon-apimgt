@@ -25,17 +25,20 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
  * Converts on-prem APIM API model to API Platform Gateway readable YAML format.
  * Output conforms to gateway.api-platform.wso2.com/v1alpha1 RestApi spec.
- * Policies are omitted (policy hub is used separately).
+ * API-level and operation-level policies are included so the platform gateway can enforce them.
  */
 public final class PlatformGatewayAPIYamlConverter {
 
@@ -51,7 +54,7 @@ public final class PlatformGatewayAPIYamlConverter {
      * Build API Platform format YAML string from on-prem API for platform-gateway deployment.
      * Uses the API's own context (with {version} replaced by actual version), so invocation URL
      * matches Synapse and other gateway types: no tenant or environment in the path.
-     * No policies are included (policy hub).
+     * API-level and operation-level policies are included for gateway enforcement.
      *
      * @param api on-prem API (must have endpoint config)
      * @param organization organization (tenant domain); used for validation/lookup only, not in URL path
@@ -73,7 +76,7 @@ public final class PlatformGatewayAPIYamlConverter {
 
     /**
      * Build API Platform format YAML string from on-prem API (context from API definition).
-     * No policies are included (policy hub).
+     * API-level and operation-level policies are included for gateway enforcement.
      *
      * @param api on-prem API (must have endpoint config and context)
      * @return YAML string (apiVersion, kind, metadata, spec with displayName, version, context, upstream, operations)
@@ -139,9 +142,98 @@ public final class PlatformGatewayAPIYamlConverter {
             yaml.append("    sandbox:\n");
             yaml.append("      url: ").append(quote(sandboxUrl)).append("\n");
         }
+        appendApiLevelPolicies(api, yaml);
         yaml.append("  operations:\n");
         appendOperations(api, yaml);
         return yaml.toString();
+    }
+
+    /**
+     * Appends API-level policies to spec so the platform gateway can enforce them.
+     * Gateway expects Policy with name, version (major-only e.g. v0, v1), and optional params.
+     */
+    private static void appendApiLevelPolicies(API api, StringBuilder yaml) {
+        List<OperationPolicy> apiPolicies = api.getApiPolicies();
+        if (apiPolicies == null || apiPolicies.isEmpty()) {
+            return;
+        }
+        yaml.append("  policies:\n");
+        for (OperationPolicy policy : apiPolicies) {
+            appendPolicyYaml(policy, yaml, "  ");
+        }
+    }
+
+    /**
+     * Appends a single policy in platform gateway YAML form (name, version, optional params).
+     * Version is normalized to major-only (e.g. 0.2 -> v0) as required by the gateway.
+     * Includes flow (request/response/fault) from policy direction so the gateway can enforce
+     * policies in the correct phase.
+     */
+    private static void appendPolicyYaml(OperationPolicy policy, StringBuilder yaml, String indent) {
+        if (policy == null) return;
+        String name = policy.getPolicyName();
+        if (StringUtils.isBlank(name)) name = "policy";
+        String version = toPolicyVersionMajorOnly(policy.getPolicyVersion());
+        String flow = normalizeFlow(policy.getDirection());
+        yaml.append(indent).append("- name: ").append(quote(name)).append("\n");
+        yaml.append(indent).append("  version: ").append(quote(version)).append("\n");
+        Map<String, Object> params = policy.getParameters();
+        boolean hasParams = params != null && !params.isEmpty();
+        boolean needFlowParam = StringUtils.isNotBlank(flow);
+        if (needFlowParam && params != null && params.containsKey("flow")) {
+            needFlowParam = false;
+        }
+        if (hasParams || needFlowParam) {
+            yaml.append(indent).append("  params:\n");
+            if (needFlowParam) {
+                yaml.append(indent).append("    flow: ").append(quote(flow)).append("\n");
+            }
+            if (params != null) {
+                for (Map.Entry<String, Object> e : params.entrySet()) {
+                    Object v = e.getValue();
+                    String valueStr = v != null ? v.toString() : "";
+                    yaml.append(indent).append("    ").append(quoteYamlKey(e.getKey())).append(": ")
+                            .append(quote(valueStr)).append("\n");
+                }
+            }
+        }
+    }
+
+    /** Normalizes policy direction to flow: request, response, or fault (lowercase). Defaults to request. */
+    private static String normalizeFlow(String direction) {
+        if (StringUtils.isBlank(direction)) return "request";
+        String d = direction.trim().toLowerCase();
+        if ("response".equals(d) || "outbound".equals(d)) return "response";
+        if ("fault".equals(d) || "onfault".equals(d)) return "fault";
+        return "request";
+    }
+
+    /** Gateway expects major-only version (e.g. v0, v1). Converts 0.2 -> v0, 1.0 -> v1. */
+    private static String toPolicyVersionMajorOnly(String version) {
+        if (StringUtils.isBlank(version)) return "v1";
+        String v = version.trim();
+        if (v.startsWith("v") && v.length() > 1 && Character.isDigit(v.charAt(1))) {
+            int major = 1;
+            try {
+                int end = 1;
+                while (end < v.length() && Character.isDigit(v.charAt(end))) end++;
+                major = Integer.parseInt(v.substring(1, end));
+            } catch (NumberFormatException ignored) { }
+            return "v" + major;
+        }
+        try {
+            int dot = v.indexOf('.');
+            int major = dot > 0 ? Integer.parseInt(v.substring(0, dot).trim()) : Integer.parseInt(v.trim());
+            return "v" + major;
+        } catch (NumberFormatException e) {
+            return "v1";
+        }
+    }
+
+    private static String quoteYamlKey(String key) {
+        if (key == null) return "\"\"";
+        if (key.matches("^[a-zA-Z_][a-zA-Z0-9_]*$")) return key;
+        return quote(key);
     }
 
     private static String quote(String s) {
@@ -195,10 +287,17 @@ public final class PlatformGatewayAPIYamlConverter {
                 if (verb != null && !verb.isEmpty()) verbs.add(verb);
                 else verbs.add("GET");
             }
+            List<OperationPolicy> opPolicies = template.getOperationPolicies();
             for (String method : verbs) {
                 String m = (method == null || method.isEmpty()) ? "GET" : method.toUpperCase();
                 yaml.append("  - method: ").append(m).append("\n");
                 yaml.append("    path: ").append(quote(path)).append("\n");
+                if (opPolicies != null && !opPolicies.isEmpty()) {
+                    yaml.append("    policies:\n");
+                    for (OperationPolicy policy : opPolicies) {
+                        appendPolicyYaml(policy, yaml, "    ");
+                    }
+                }
             }
         }
     }

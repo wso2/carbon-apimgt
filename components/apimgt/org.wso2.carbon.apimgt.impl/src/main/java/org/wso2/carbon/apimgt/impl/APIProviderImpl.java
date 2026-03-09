@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.FaultyGatewayDeploymentException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
+import org.wso2.carbon.apimgt.api.PlatformGatewayArtifactService;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
@@ -705,7 +706,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Validate and process API level and operation level policies
         validateAndProcessAPIPolicyParameters(api, null, tenantDomain);
         // Add API level and operation level policies
-        apiMgtDAO.addAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain);
+        apiMgtDAO.addAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain,
+                isPlatformGatewayApi(api));
     }
 
     /**
@@ -1102,6 +1104,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                 APIConstants.AuditLogConstants.UPDATED, this.username);
 
+        // Invalidate platform gateway artifact cache so next zip request re-converts (e.g. with updated policies)
+        if (isPlatformGatewayApi(api)) {
+            try {
+                PlatformGatewayArtifactService artifactService =
+                        ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
+                if (artifactService != null) {
+                    artifactService.deletePlatformArtifact(api.getUuid(), organization);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to invalidate platform gateway artifact for API " + api.getUuid(), e);
+            }
+        }
+
         //notify key manager with API update
         registerOrUpdateResourceInKeyManager(api, tenantDomain);
 
@@ -1244,7 +1259,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Validate and process API level and operation level policies
         validateAndProcessAPIPolicyParameters(api, existingApi, tenantDomain);
         // Update API level and operation level policies
-        apiMgtDAO.updateAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain);
+        apiMgtDAO.updateAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain,
+                isPlatformGatewayApi(api));
     }
 
     @Override
@@ -1954,7 +1970,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         if (policyUpdated && updatePolicyMapping) {
-            apiMgtDAO.addAPILevelPolicies(api.getApiPolicies(), api.getUuid(), null, tenantDomain);
+            apiMgtDAO.addAPILevelPolicies(api.getApiPolicies(), api.getUuid(), null, tenantDomain,
+                    isPlatformGatewayApi(api));
         }
     }
 
@@ -2163,7 +2180,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
 
                     OperationPolicySpecification policySpecification = policyData.getSpecification();
-                    if (validateAppliedPolicyWithSpecification(policySpecification, policy, api.getType())) {
+                    if (validateAppliedPolicyWithSpecification(policySpecification, policy, api.getType(),
+                            isPlatformGatewayApi(api))) {
                         processSecretPolicyParameters(policySpecification, policy, existingPoliciesList);
                         validatedPolicies.add(policy);
                     }
@@ -2195,13 +2213,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                         OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
                         String apiType = (api != null) ? api.getType() : null;
-                        if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, apiType)) {
+                        if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, apiType,
+                                isPlatformGatewayApi(api))) {
                             processSecretPolicyParameters(commonPolicySpec, policy, existingPoliciesList);
                             validatedPolicies.add(policy);
                         }
                     } else {
-                        throw new APIManagementException("Selected policy " + policyId + " is not found.",
-                                ExceptionCodes.INVALID_OPERATION_POLICY);
+                        // Platform Gateway: policies may come from external source and are not in AM
+                        if (isPlatformGatewayApi(api)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Accepting policy " + policyId + " for Platform Gateway API (no local validation)");
+                            }
+                            validatedPolicies.add(policy);
+                        } else {
+                            throw new APIManagementException("Selected policy " + policyId + " is not found.",
+                                    ExceptionCodes.INVALID_OPERATION_POLICY);
+                        }
                     }
                 }
             } else {
@@ -2216,7 +2243,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 + policy.getPolicyName() + ". Validating the policy");
                     }
                     OperationPolicySpecification policySpecification = policyData.getSpecification();
-                    if (validateAppliedPolicyWithSpecification(policySpecification, policy, api.getType())) {
+                    if (validateAppliedPolicyWithSpecification(policySpecification, policy, api.getType(),
+                            isPlatformGatewayApi(api))) {
                         policy.setPolicyId(policyData.getPolicyId());
                         processSecretPolicyParameters(policySpecification, policy, existingPoliciesList);
                         validatedPolicies.add(policy);
@@ -2236,15 +2264,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                         OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
                         String apiType = (api != null) ? api.getType() : null;
-                        if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, apiType)) {
+                        if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, apiType,
+                                isPlatformGatewayApi(api))) {
                             policy.setPolicyId(commonPolicyData.getPolicyId());
                             processSecretPolicyParameters(commonPolicySpec, policy, existingPoliciesList);
                             validatedPolicies.add(policy);
                         }
                     } else {
-                        log.error("Selected policy " + policy.getPolicyName() + " is not found");
-                        throw new APIManagementException("Selected policy " + policy.getPolicyName() + " is not found.",
-                                ExceptionCodes.INVALID_OPERATION_POLICY);
+                        // Platform Gateway: policies may come from external source and are not in AM
+                        if (isPlatformGatewayApi(api)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Accepting policy " + policy.getPolicyName() + " for Platform Gateway API (no local validation)");
+                            }
+                            validatedPolicies.add(policy);
+                        } else {
+                            log.error("Selected policy " + policy.getPolicyName() + " is not found");
+                            throw new APIManagementException("Selected policy " + policy.getPolicyName() + " is not found.",
+                                    ExceptionCodes.INVALID_OPERATION_POLICY);
+                        }
                     }
                 }
             }
@@ -2252,26 +2289,49 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return validatedPolicies;
     }
 
+    /**
+     * Returns true if the API uses Platform Gateway (gateway type api-platform).
+     * For such APIs, policies may come from an external source and are not stored in AM; we skip local policy lookup when saving.
+     */
+    private static boolean isPlatformGatewayApi(API api) {
+        return api != null && api.getGatewayType() != null
+                && APIConstants.WSO2_API_PLATFORM_GATEWAY.equalsIgnoreCase(api.getGatewayType());
+    }
+
 
     @Override
     public boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification,
                                                           OperationPolicy appliedPolicy, String apiType)
             throws APIManagementException {
+        return validateAppliedPolicyWithSpecification(policySpecification, appliedPolicy, apiType, false);
+    }
 
-        //Validate the policy applied direction
-        if (!policySpecification.getApplicableFlows().contains(appliedPolicy.getDirection())) {
-            throw new APIManagementException(policySpecification.getName() + " cannot be used in the "
-                    + appliedPolicy.getDirection() + " flow.",
-                    ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
-        }
+    /**
+     * Validates applied policy against its specification. For Platform Gateway APIs, skips flow and API-type
+     * checks so that policies from Policy Hub (or external source) can be used in request/response flows;
+     * the platform gateway enforces flow semantics.
+     */
+    private boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification,
+                                                           OperationPolicy appliedPolicy, String apiType,
+                                                           boolean isPlatformGatewayApi) throws APIManagementException {
 
-        //Validate the API type. Skip the validation if the API type is null (global policy scenarios)
-        if (apiType != null) {
-            boolean isApiTypeValid = isApiTypeValid(policySpecification.getSupportedApiTypes(), apiType);
-            if (!isApiTypeValid) {
-                throw new APIManagementException(policySpecification.getName() + " cannot be used for the "
-                        + apiType + " API type.",
+        if (!isPlatformGatewayApi) {
+            //Validate the policy applied direction
+            if (policySpecification.getApplicableFlows() == null
+                    || !policySpecification.getApplicableFlows().contains(appliedPolicy.getDirection())) {
+                throw new APIManagementException(policySpecification.getName() + " cannot be used in the "
+                        + appliedPolicy.getDirection() + " flow.",
                         ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
+            }
+
+            //Validate the API type. Skip the validation if the API type is null (global policy scenarios)
+            if (apiType != null) {
+                boolean isApiTypeValid = isApiTypeValid(policySpecification.getSupportedApiTypes(), apiType);
+                if (!isApiTypeValid) {
+                    throw new APIManagementException(policySpecification.getName() + " cannot be used for the "
+                            + apiType + " API type.",
+                            ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
+                }
             }
         }
 

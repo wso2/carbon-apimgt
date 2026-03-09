@@ -283,6 +283,7 @@ public class PlatformGatewayDAO {
             ps.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
             ps.setString(3, gatewayId);
             ps.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
             throw new APIManagementException("Error updating platform gateway active status", e);
         }

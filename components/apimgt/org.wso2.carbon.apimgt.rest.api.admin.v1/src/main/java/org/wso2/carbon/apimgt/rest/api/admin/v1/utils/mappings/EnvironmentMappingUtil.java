@@ -125,6 +125,10 @@ public class EnvironmentMappingUtil {
         envDTO.setAdditionalProperties(additionalProps);
 
         envDTO.setPermissions(mapPermissionsToDTO(permissions));
+        // Gateway connection status for GET /environments (Active/Inactive for platform gateways)
+        envDTO.setStatus(Boolean.TRUE.equals(gateway.isActive())
+                ? EnvironmentDTO.StatusEnum.ACTIVE
+                : EnvironmentDTO.StatusEnum.INACTIVE);
         return envDTO;
     }
 

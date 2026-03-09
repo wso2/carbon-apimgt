@@ -197,6 +197,16 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
     }
 
     private static PlatformGateway toApiModel(PlatformGatewayDAO.PlatformGateway g) {
+        return fromDAO(g);
+    }
+
+    /**
+     * Convert DAO model to API model. Public so REST/admin layer can build env list from DAO when service is null.
+     */
+    public static PlatformGateway fromDAO(PlatformGatewayDAO.PlatformGateway g) {
+        if (g == null) {
+            return null;
+        }
         PlatformGateway api = new PlatformGateway();
         api.setId(g.id);
         api.setOrganizationId(g.organizationId);

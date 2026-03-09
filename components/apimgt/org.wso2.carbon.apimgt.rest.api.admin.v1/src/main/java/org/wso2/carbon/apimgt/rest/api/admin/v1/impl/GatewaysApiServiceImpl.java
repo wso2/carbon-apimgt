@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayPermissionsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayWithTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
@@ -123,8 +124,9 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         boolean gatewayExists = existingGateways.stream()
                 .anyMatch(gw -> StringUtils.equals(gw.getName(), gatewayName));
         if (gatewayExists) {
-            throw new APIManagementException("A platform gateway with name '" + gatewayName
-                    + "' already exists in organization '" + organization + "'.");
+            throw new APIManagementException(
+                    String.format(ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS.getErrorDescription(), gatewayName),
+                    ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS);
         }
 
         // Also check if a non-platform environment with this name exists
@@ -133,8 +135,9 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                 .filter(env -> !APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType()))
                 .anyMatch(env -> StringUtils.equals(env.getName(), gatewayName));
         if (envExists) {
-            throw new APIManagementException("A gateway environment with name '" + gatewayName
-                    + "' already exists in organization '" + organization + "'.");
+            throw new APIManagementException(
+                    String.format(ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS.getErrorDescription(), gatewayName),
+                    ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS);
         }
     }
 
@@ -163,6 +166,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         vHosts.add(buildVHost(body));
         existingEnvironment.setVhosts(vHosts);
 
+        // Persist permissions so GET /environments and GET /environments/{id} return them for this platform gateway
         existingEnvironment.setPermissions(buildGatewayVisibility(body));
 
         apiAdmin.updateEnvironment(organization, existingEnvironment);
