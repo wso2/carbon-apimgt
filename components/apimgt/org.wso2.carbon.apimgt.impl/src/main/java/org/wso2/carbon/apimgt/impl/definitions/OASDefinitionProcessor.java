@@ -41,6 +41,7 @@ import java.util.Set;
 public class OASDefinitionProcessor implements APIDefinitionProcessor {
 
     private static final Log log = LogFactory.getLog(OASDefinitionProcessor.class);
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public String getType(API api) {
@@ -68,8 +69,7 @@ public class OASDefinitionProcessor implements APIDefinitionProcessor {
             if (definition == null || definition.trim().isEmpty()) {
                 return null;
             }
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode rootNode = objectMapper.readTree(definition);
+            JsonNode rootNode = OBJECT_MAPPER.readTree(definition);
 
             if (rootNode.has("servers") && rootNode.get("servers").isArray()) {
                 JsonNode servers = rootNode.get("servers");
