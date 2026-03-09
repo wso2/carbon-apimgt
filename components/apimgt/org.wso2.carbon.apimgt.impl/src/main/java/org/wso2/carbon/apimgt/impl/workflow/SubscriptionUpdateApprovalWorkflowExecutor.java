@@ -40,6 +40,7 @@ public class SubscriptionUpdateApprovalWorkflowExecutor extends WorkflowExecutor
     private static final Log log = LogFactory.getLog(SubscriptionUpdateApprovalWorkflowExecutor.class);
     private static final String API_NAME_PROPERTY = "apiName";
     private static final String API_VERSION_PROPERTY = "apiVersion";
+    private static final String API_CONTEXT_PROPERTY = "apiContext";
     private static final String SUBSCRIBER_PROPERTY = "subscriber";
     private static final String APPLICATION_NAME_PROPERTY = "applicationName";
     private static final String SUBSCRIPTION_TIER_PROPERTY = "subscriptionTier";
@@ -75,6 +76,7 @@ public class SubscriptionUpdateApprovalWorkflowExecutor extends WorkflowExecutor
         workflowDTO.setWorkflowDescription(message);
         workflowDTO.setProperties(API_NAME_PROPERTY, subsWorkflowDTO.getApiName());
         workflowDTO.setProperties(API_VERSION_PROPERTY, subsWorkflowDTO.getApiVersion());
+        workflowDTO.setProperties(API_CONTEXT_PROPERTY, subsWorkflowDTO.getApiContext());
         workflowDTO.setProperties(APPLICATION_NAME_PROPERTY, subsWorkflowDTO.getApplicationName());
         workflowDTO.setProperties(SUBSCRIPTION_TIER_PROPERTY, subsWorkflowDTO.getTierName());
         workflowDTO.setProperties(SUBSCRIBER_PROPERTY, subsWorkflowDTO.getSubscriber());

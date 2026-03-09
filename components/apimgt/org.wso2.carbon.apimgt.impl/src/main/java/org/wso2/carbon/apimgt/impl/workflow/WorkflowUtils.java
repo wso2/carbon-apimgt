@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,6 +62,9 @@ import java.util.Collections;
 public class WorkflowUtils {
 
     private static final Log log = LogFactory.getLog(WorkflowUtils.class);
+    private static final String APPLICATION_ATTRIBUTES_PROPERTY = "applicationAttributes";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     public static void sendNotificationAfterWFComplete(WorkflowDTO workflowDTO, String wfType)
             throws APIManagementException {
 
@@ -278,10 +283,12 @@ public class WorkflowUtils {
 
         apiStateWorkFlowDTO.setProperties("apiName", apiStateWorkFlowDTO.getApiName());
         apiStateWorkFlowDTO.setProperties("apiVersion", apiStateWorkFlowDTO.getApiVersion());
+        apiStateWorkFlowDTO.setProperties("apiContext", apiStateWorkFlowDTO.getApiContext());
         apiStateWorkFlowDTO.setProperties("apiProvider", apiStateWorkFlowDTO.getApiProvider());
         apiStateWorkFlowDTO.setProperties("invoker", apiStateWorkFlowDTO.getInvoker());
         apiStateWorkFlowDTO.setProperties("currentState", apiStateWorkFlowDTO.getApiCurrentState());
-        apiStateWorkFlowDTO.setProperties("requestedState", apiStateWorkFlowDTO.getApiLCAction());
+        apiStateWorkFlowDTO.setProperties("requestedState", apiStateWorkFlowDTO.getApiLCAction().toUpperCase());
+        apiStateWorkFlowDTO.setProperties("tenantDomain", String.valueOf(apiStateWorkFlowDTO.getTenantDomain()));
 
     }
 
@@ -450,6 +457,47 @@ public class WorkflowUtils {
     ) {
         if (!Objects.equals(oldValue, newValue)) {
             diffs.add(constructUpdateRecord(label, oldValue, newValue));
+        }
+    }
+
+    /**
+     * Populates application attributes into the given {@link WorkflowDTO} if application attribute
+     * visibility is enabled and the application contains custom attributes.
+     * <p>
+     * The application attributes are serialized into a JSON string and stored as a workflow property
+     * using the {@code APPLICATION_ATTRIBUTES_PROPERTY} key. These properties can later be used
+     * during workflow execution or approval processes.
+     * </p>
+     * <p>
+     * Note: If the application does not contain any attributes or visibility is disabled,
+     * this method will not modify the provided workflow DTO.
+     * </p>
+     *
+     * @param workflowDTO The workflow DTO where the serialized application attributes will be stored
+     * @param application The application containing custom attributes
+     * @param applicationAttributesVisibility Indicates whether application attributes should be included in the workflow properties
+     * @throws WorkflowException If an error occurs while serializing the application attributes
+     */
+    public static void populateApplicationAttributes(
+            WorkflowDTO workflowDTO,
+            Application application,
+            boolean applicationAttributesVisibility) throws WorkflowException {
+        if (!applicationAttributesVisibility) {
+            return;
+        }
+        Map<String, String> applicationAttributes = application.getApplicationAttributes();
+        if (applicationAttributes == null || applicationAttributes.isEmpty()) {
+            return;
+        }
+        try {
+            workflowDTO.setProperties(
+                    APPLICATION_ATTRIBUTES_PROPERTY,
+                    OBJECT_MAPPER.writeValueAsString(applicationAttributes)
+            );
+        } catch (JsonProcessingException e) {
+            String msg = "Failed to serialize custom attributes of application " + application.getName();
+            log.error(msg, e);
+            throw new WorkflowException(msg, e);
         }
     }
 }

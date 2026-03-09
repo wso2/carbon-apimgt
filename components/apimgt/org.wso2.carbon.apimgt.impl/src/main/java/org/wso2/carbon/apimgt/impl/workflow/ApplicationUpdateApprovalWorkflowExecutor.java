@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import static org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils.*;
+import static org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils.extractCustomAttributeDiffs;
 
 /**
  * Approval workflow for Application Update
@@ -55,7 +56,6 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
     private static final String REQUESTED_SHARED_ORGANIZATION_PROPERTY = "requestedSharedOrganization";
     private static final String REQUESTED_GROUP_IDS_PROPERTY = "requestedGroupIDs";
     private static final String REQUESTED_CUSTOM_ATTRIBUTES_PROPERTY = "requestedCustomAttributes";
-    private static final String EXISTING_APPLICATION_ATTRIBUTES_PROPERTY = "existingApplicationAttributes";
     private static final String APPLICATION_DESCRIPTION_PROPERTY = "applicationDescription";
     private static final String APPLICATION_NAME_LABEL = "Application Name";
     private static final String TIER_LABEL = "Tier";
@@ -63,7 +63,9 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
     private static final String GROUPS_LABEL = "Groups";
     private static final String SHARING_WITH_ORGANIZATION_LABEL = "Sharing with the organization";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
+    private static final String TENANT_DOMAIN_PROPERTY = "tenantDomain";
+    private static final String GROUP_ID_PROPERTY = "groupId";
+    private static final String SHARED_ORGANIZATION_PROPERTY = "sharedOrganization";
 
     @Override
     public String getWorkflowType() {
@@ -95,6 +97,15 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         workflowDTO.setProperties(APPLICATION_NAME_PROPERTY, existingApplication.getName());
         workflowDTO.setProperties(APPLICATION_TIER_PROPERTY, existingApplication.getTier());
         workflowDTO.setProperties(APPLICATION_OWNER_PROPERTY, existingApplication.getOwner());
+        workflowDTO.setProperties(TENANT_DOMAIN_PROPERTY, applicationWorkflowDTO.getTenantDomain());
+
+        if (StringUtils.isNotBlank(existingApplication.getGroupId())) {
+            workflowDTO.setProperties(GROUP_ID_PROPERTY, existingApplication.getGroupId());
+        }
+
+        if (StringUtils.isNotBlank(existingApplication.getSharedOrganization())) {
+            workflowDTO.setProperties(SHARED_ORGANIZATION_PROPERTY, existingApplication.getSharedOrganization());
+        }
 
         if (StringUtils.isNotBlank(existingApplication.getDescription())) {
             workflowDTO.setProperties(APPLICATION_DESCRIPTION_PROPERTY, existingApplication.getDescription());
@@ -120,17 +131,31 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
                 getShareWithOrganizationStatus(existingApplication.getSharedOrganization()),
                 getShareWithOrganizationStatus(pendingApplication.getSharedOrganization()));
 
-        if (applicationAttributesVisibility) {
-            Map<String, String> existingApplicationAttributes= existingApplication.getApplicationAttributes();
-            Map<String, String> pendingApplicationAttributes = pendingApplication.getApplicationAttributes();
+        Map<String, String> existingApplicationAttributes = existingApplication.getApplicationAttributes();
+        Map<String, String> pendingApplicationAttributes = pendingApplication.getApplicationAttributes();
 
-            // Only compute diffs when at least one side has attributes
-            if ((existingApplicationAttributes != null && !existingApplicationAttributes.isEmpty())
-                    || (pendingApplicationAttributes != null && !pendingApplicationAttributes.isEmpty())) {
-                applicationUpdateDiffs.addAll(
-                        extractCustomAttributeDiffs(existingApplicationAttributes, pendingApplicationAttributes)
-                );
-            }
+        List<Map<String, String>> attributeDiffs =
+                extractCustomAttributeDiffs(existingApplicationAttributes, pendingApplicationAttributes);
+
+        if (applicationAttributesVisibility && !attributeDiffs.isEmpty()) {
+            applicationUpdateDiffs.addAll(attributeDiffs);
+        }
+
+        String message = String.format(
+                "Approve update request for application '%s' submitted by user: %s.",
+                existingApplication.getName(),
+                applicationWorkflowDTO.getUserName()
+        );
+
+        // When applicationAttributesVisibility is disabled (default), updates to custom
+        // application attributes are not included in the "updates" list displayed in
+        // the Admin Portal approval task. If attribute changes exist but are not added
+        // due to this configuration, append a note to the workflow description so that
+        // the approver is aware that attribute updates are present but not displayed.
+        if (!applicationAttributesVisibility && !attributeDiffs.isEmpty()) {
+            message += " Note that updates to application attributes are present, but they are not "
+                    + "displayed here because applicationAttributesVisibility is currently disabled "
+                    + "in the Admin Portal.";
         }
 
         String applicationUpdateDiffJson;
@@ -150,15 +175,14 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         workflowDTO.setMetadata(REQUESTED_DESCRIPTION_PROPERTY, pendingApplication.getDescription());
         workflowDTO.setMetadata(REQUESTED_SHARED_ORGANIZATION_PROPERTY, pendingApplication.getSharedOrganization());
 
-        if (pendingApplication.getGroupId() != null) {
+        if (StringUtils.isNotBlank(pendingApplication.getGroupId())) {
             workflowDTO.setMetadata(REQUESTED_GROUP_IDS_PROPERTY, pendingApplication.getGroupId());
         }
 
         String requestedCustomAttributes;
-        Map<String, String> pendingAttributes = pendingApplication.getApplicationAttributes();
-        if (pendingAttributes != null && !pendingAttributes.isEmpty()) {
+        if (pendingApplicationAttributes != null && !pendingApplicationAttributes.isEmpty()) {
             try {
-                requestedCustomAttributes = OBJECT_MAPPER.writeValueAsString(pendingAttributes);
+                requestedCustomAttributes = OBJECT_MAPPER.writeValueAsString(pendingApplicationAttributes);
             } catch (JsonProcessingException e) {
                 String msg = "Failed to serialize requested custom attributes of application";
                 log.error(msg, e);
@@ -167,18 +191,7 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
             workflowDTO.setMetadata(REQUESTED_CUSTOM_ATTRIBUTES_PROPERTY, requestedCustomAttributes);
         }
 
-        String message = "Approve update request for application '" + pendingApplication.getName() +
-                "' submitted by user: " + applicationWorkflowDTO.getUserName();
-
-        if (applicationAttributesVisibility && existingApplication.getApplicationAttributes() != null && !existingApplication.getApplicationAttributes().isEmpty()) {
-            try {
-                workflowDTO.setProperties(EXISTING_APPLICATION_ATTRIBUTES_PROPERTY, OBJECT_MAPPER.writeValueAsString(existingApplication.getApplicationAttributes()));
-            } catch (JsonProcessingException e) {
-                String msg = "Failed to serialize custom attributes of application";
-                log.error(msg, e);
-                throw new WorkflowException(msg, e);
-            }
-        }
+        WorkflowUtils.populateApplicationAttributes(workflowDTO, existingApplication, applicationAttributesVisibility);
 
         workflowDTO.setWorkflowDescription(message);
 

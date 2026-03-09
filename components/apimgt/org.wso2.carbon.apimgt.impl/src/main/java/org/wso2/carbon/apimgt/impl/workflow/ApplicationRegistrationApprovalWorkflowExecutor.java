@@ -17,8 +17,6 @@
  */
 package org.wso2.carbon.apimgt.impl.workflow;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,9 +40,10 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
     private static final String APPLICATION_NAME_PROPERTY = "applicationName";
     private static final String APPLICATION_OWNER_PROPERTY = "applicationOwner";
     private static final String APPLICATION_TIER_PROPERTY = "applicationTier";
-    private static final String APPLICATION_ATTRIBUTES_PROPERTY = "applicationAttributes";
     private static final String APPLICATION_DESCRIPTION_PROPERTY = "applicationDescription";
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final String TENANT_DOMAIN_PROPERTY = "tenantDomain";
+    private static final String GROUP_ID_PROPERTY = "groupId";
+    private static final String SHARED_ORGANIZATION_PROPERTY = "sharedOrganization";
 
     /**
      * Execute the Application Creation workflow approval process.
@@ -63,26 +62,27 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
         Application application = appRegDTO.getApplication();
 
         String message = "Approve request to create " + appRegDTO.getKeyType() + " keys for " + application.getName() +
-                " from application creator - " + appRegDTO.getUserName() + " with throttling tier - " + application.getTier();
+                " from requestor - " + appRegDTO.getUserName() + " with throttling tier - " + application.getTier();
         workflowDTO.setWorkflowDescription(message);
         workflowDTO.setProperties(APPLICATION_NAME_PROPERTY, application.getName());
         workflowDTO.setProperties(APPLICATION_TIER_PROPERTY, application.getTier());
         workflowDTO.setProperties(APPLICATION_OWNER_PROPERTY, appRegDTO.getUserName());
         workflowDTO.setProperties(KEY_TYPE_PROPERTY, appRegDTO.getKeyType());
+        workflowDTO.setProperties(TENANT_DOMAIN_PROPERTY, appRegDTO.getTenantDomain());
+
+        if (StringUtils.isNotBlank(appRegDTO.getApplication().getGroupId())) {
+            workflowDTO.setProperties(GROUP_ID_PROPERTY, appRegDTO.getApplication().getGroupId());
+        }
+
+        if (StringUtils.isNotBlank(appRegDTO.getApplication().getSharedOrganization())) {
+            workflowDTO.setProperties(SHARED_ORGANIZATION_PROPERTY, appRegDTO.getApplication().getSharedOrganization());
+        }
 
         if (StringUtils.isNotBlank(application.getDescription())) {
             workflowDTO.setProperties(APPLICATION_DESCRIPTION_PROPERTY, application.getDescription());
         }
 
-        if (applicationAttributesVisibility && application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
-            try {
-                workflowDTO.setProperties(APPLICATION_ATTRIBUTES_PROPERTY, OBJECT_MAPPER.writeValueAsString(application.getApplicationAttributes()));
-            } catch (JsonProcessingException e) {
-                String msg = "Failed to serialize custom attributes of application";
-                log.error(msg, e);
-                throw new WorkflowException(msg, e);
-            }
-        }
+        WorkflowUtils.populateApplicationAttributes(workflowDTO, application, applicationAttributesVisibility);
 
         super.execute(workflowDTO);
         if (log.isDebugEnabled()) {

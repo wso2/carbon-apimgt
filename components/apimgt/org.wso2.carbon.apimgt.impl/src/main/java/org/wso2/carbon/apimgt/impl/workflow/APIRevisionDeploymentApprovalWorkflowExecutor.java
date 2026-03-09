@@ -47,6 +47,7 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
     private static final String API_ID_PROPERTY = "apiId";
     private static final String INVOKER_PROPERTY = "invoker";
     private static final String REVISION_DESCRIPTION_PROPERTY = "revisionDescription";
+    private static final String TENANT_DOMAIN_PROPERTY = "tenantDomain";
 
     @Override
     public String getWorkflowType() {
@@ -81,7 +82,8 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
         workflowDTO.setProperties(API_PROVIDER_PROPERTY, revisionWorkFlowDTO.getApiProvider());
         workflowDTO.setProperties(INVOKER_PROPERTY, revisionWorkFlowDTO.getInvoker());
         workflowDTO.setProperties(ENVIRONMENT_PROPERTY, revisionWorkFlowDTO.getEnvironment());
-        workflowDTO.setProperties(REVISION_ID_PROPERTY, String.valueOf(revision.getId()));
+        workflowDTO.setProperties(REVISION_ID_PROPERTY, revisionWorkFlowDTO.getRevisionId());
+        workflowDTO.setProperties(TENANT_DOMAIN_PROPERTY, revisionWorkFlowDTO.getTenantDomain());
 
         if (StringUtils.isNotBlank(revision.getDescription())) {
             workflowDTO.setProperties(REVISION_DESCRIPTION_PROPERTY, revision.getDescription());
