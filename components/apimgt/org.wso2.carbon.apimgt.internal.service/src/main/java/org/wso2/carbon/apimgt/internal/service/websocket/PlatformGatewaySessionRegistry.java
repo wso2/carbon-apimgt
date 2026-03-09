@@ -83,6 +83,33 @@ public class PlatformGatewaySessionRegistry {
     }
 
     /**
+     * Close and unregister the WebSocket session for the given gateway (e.g. when gateway is deleted).
+     * The gateway client will receive a close frame. Safe to call if no session is registered.
+     */
+    public void closeAndUnregister(String gatewayId) {
+        if (gatewayId == null) {
+            return;
+        }
+        Session session = gatewaySessions.remove(gatewayId);
+        if (session == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("No WebSocket session to close for gateway: " + gatewayId);
+            }
+            return;
+        }
+        if (session.isOpen()) {
+            try {
+                session.close();
+            } catch (IOException e) {
+                log.warn("Error closing WebSocket session for gateway " + gatewayId + ": " + e.getMessage());
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Closed and unregistered WebSocket session for gateway: " + gatewayId);
+        }
+    }
+
+    /**
      * Send a text message to the given gateway IDs. Skips gateways with no registered session or closed session.
      *
      * @param gatewayIds target gateway IDs

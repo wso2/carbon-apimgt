@@ -38,6 +38,23 @@ public class GatewaysApi  {
 GatewaysApiService delegate = new GatewaysApiServiceImpl();
 
 
+    @DELETE
+    @Path("/{gatewayId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete a platform gateway", notes = "Delete a platform gateway and all its references (tokens, instance mappings, revision deployment records, gateway environment, permissions). Fails with 409 if any API revisions are currently deployed to this gateway; undeploy all APIs from the gateway first. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+        })
+    }, tags={ "Platform Gateways",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Gateway and all references removed.", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 409, message = "Conflict. Cannot delete gateway while API revisions are deployed to it.", response = ErrorDTO.class) })
+    public Response gatewaysGatewayIdDelete(@ApiParam(value = "Gateway UUID",required=true) @PathParam("gatewayId") String gatewayId) throws APIManagementException{
+        return delegate.gatewaysGatewayIdDelete(gatewayId, securityContext);
+    }
+
     @POST
     @Path("/{gatewayId}/regenerate-token")
     

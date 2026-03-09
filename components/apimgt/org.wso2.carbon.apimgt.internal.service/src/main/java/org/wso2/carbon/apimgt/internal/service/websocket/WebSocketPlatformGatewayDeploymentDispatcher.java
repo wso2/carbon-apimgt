@@ -35,8 +35,9 @@ import java.util.Set;
 /**
  * Pushes deploy/undeploy events to connected platform gateways via WebSocket.
  * Message format is aligned with API Platform (api-platform gateway-controller) so the same
- * gateway binary can work with on-prem APIM: type "api.deployed" / "api.undeployed" with
- * nested payload (apiId, deploymentId, vhost, etc.) and timestamp, correlationId.
+ * gateway binary can work with on-prem APIM: type "api.deployed" / "api.undeployed" / "api.deleted"
+ * with nested payload (apiId, deploymentId, vhost, etc.) and timestamp, correlationId.
+ * api.undeployed = revision undeployed (config preserved). api.deleted = API removed from publisher (config removed).
  */
 public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGatewayDeploymentDispatcher {
 
@@ -72,6 +73,34 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
             String message = buildUndeployMessage(event, vhost);
             registry.sendToGateways(Collections.singleton(gatewayId), message);
         }
+    }
+
+    @Override
+    public void dispatchDelete(DeployAPIInGatewayEvent event, Set<String> platformGatewayIds) {
+        if (log.isDebugEnabled()) {
+            log.debug("Dispatching delete to " + platformGatewayIds.size() + " platform gateway(s): apiId="
+                    + event.getUuid());
+        }
+        PlatformGatewaySessionRegistry registry = PlatformGatewaySessionRegistry.getInstance();
+        PlatformGatewayService platformGatewayService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        for (String gatewayId : platformGatewayIds) {
+            String vhost = resolveVhost(platformGatewayService, gatewayId);
+            String message = buildDeleteMessage(event, vhost);
+            registry.sendToGateways(Collections.singleton(gatewayId), message);
+        }
+    }
+
+    @Override
+    public void closeGatewayConnection(String gatewayId) {
+        if (StringUtils.isBlank(gatewayId)) {
+            return;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Closing WebSocket connection for deleted gateway: " + gatewayId);
+        }
+        // Force-close the session; gateway will see connection close and log "Connection lost" (no new message type)
+        PlatformGatewaySessionRegistry.getInstance().closeAndUnregister(gatewayId);
     }
 
     /**
@@ -147,5 +176,18 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
         return "{\"type\":\"api.undeployed\",\"payload\":{\"apiId\":\"" + apiId + "\",\"deploymentId\":\""
                 + deploymentId + "\",\"vhost\":\"" + vhostEscaped + "\"},\"timestamp\":\"" + escapeJson(timestamp)
                 + "\",\"correlationId\":\"" + escapeJson(event.getEventId()) + "\"}";
+    }
+
+    /**
+     * Build message in API Platform format: type "api.deleted", payload { apiId, vhost },
+     * timestamp, correlationId. Gateway performs full removal of config so same name+version can be reused.
+     */
+    private static String buildDeleteMessage(DeployAPIInGatewayEvent event, String vhost) {
+        String timestamp = Instant.now().toString();
+        String apiId = escapeJson(event.getUuid());
+        String vhostEscaped = escapeJson(vhost != null ? vhost : "");
+        String correlationId = escapeJson(event.getEventId());
+        return "{\"type\":\"api.deleted\",\"payload\":{\"apiId\":\"" + apiId + "\",\"vhost\":\"" + vhostEscaped
+                + "\"},\"timestamp\":\"" + escapeJson(timestamp) + "\",\"correlationId\":\"" + correlationId + "\"}";
     }
 }

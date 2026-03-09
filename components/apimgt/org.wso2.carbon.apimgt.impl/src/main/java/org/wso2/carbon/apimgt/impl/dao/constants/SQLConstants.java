@@ -5221,6 +5221,27 @@ public class SQLConstants {
         /** Revoke all active tokens for a gateway (used before regenerating a new token). */
         public static final String REVOKE_TOKENS_BY_GATEWAY_ID_SQL =
                 "UPDATE AM_PLATFORM_GATEWAY_TOKEN SET STATUS = 'revoked', REVOKED_AT = ? WHERE GATEWAY_ID = ? AND STATUS = 'active'";
+        /** Delete platform gateway and tokens (used when deleting gateway with no active deployments). */
+        public static final String DELETE_PLATFORM_GATEWAY_TOKENS_SQL =
+                "DELETE FROM AM_PLATFORM_GATEWAY_TOKEN WHERE GATEWAY_ID = ?";
+        public static final String DELETE_PLATFORM_GATEWAY_SQL =
+                "DELETE FROM AM_PLATFORM_GATEWAY WHERE ID = ?";
+    }
+
+    /** SQL for platform gateway deletion (references AM_GW_* and AM_GATEWAY_*). */
+    public static class PlatformGatewayDeletionSQLConstants {
+        /** Delete revision deployment records for this gateway (AM_GW_REVISION_DEPLOYMENT joined via AM_GW_INSTANCES). */
+        public static final String DELETE_AM_GW_REVISION_DEPLOYMENT_BY_GATEWAY_UUID_SQL =
+                "DELETE FROM AM_GW_REVISION_DEPLOYMENT WHERE GATEWAY_ID IN (SELECT GATEWAY_ID FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ? AND ORGANIZATION = ?)";
+        /** Delete revision mapping by environment name (platform gateway env name = gateway name). */
+        public static final String DELETE_AM_DEPLOYMENT_REVISION_MAPPING_BY_ENV_NAME_SQL =
+                "DELETE FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ?";
+        /** Delete gateway instance env mapping for this gateway. */
+        public static final String DELETE_AM_GW_INSTANCE_ENV_MAPPING_BY_GATEWAY_UUID_SQL =
+                "DELETE FROM AM_GW_INSTANCE_ENV_MAPPING WHERE GATEWAY_ID IN (SELECT GATEWAY_ID FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ? AND ORGANIZATION = ?)";
+        /** Delete gateway instance row. */
+        public static final String DELETE_AM_GW_INSTANCES_BY_UUID_ORG_SQL =
+                "DELETE FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ? AND ORGANIZATION = ?";
     }
 
     /** SQL for platform gateway API artifact storage (Scenario 1: platform-only api.yaml). */

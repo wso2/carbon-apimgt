@@ -39,10 +39,29 @@ public interface PlatformGatewayDeploymentDispatcher {
     void dispatchDeploy(DeployAPIInGatewayEvent event, Set<String> platformGatewayIds);
 
     /**
-     * Dispatch an undeploy event to the given platform gateways.
+     * Dispatch an undeploy event to the given platform gateways (revision undeployed; config preserved for redeploy).
      *
-     * @param event               undeploy event (type REMOVE_API_FROM_GATEWAY)
+     * @param event               undeploy event (type REMOVE_API_FROM_GATEWAY, deleted=false)
      * @param platformGatewayIds  set of platform gateway IDs to notify
      */
     void dispatchUndeploy(DeployAPIInGatewayEvent event, Set<String> platformGatewayIds);
+
+    /**
+     * Dispatch a delete event to the given platform gateways (API removed from publisher; config removed).
+     * Gateway will remove the API configuration so the same name+version can be reused.
+     *
+     * @param event               delete event (type REMOVE_API_FROM_GATEWAY, deleted=true)
+     * @param platformGatewayIds  set of platform gateway IDs to notify
+     */
+    void dispatchDelete(DeployAPIInGatewayEvent event, Set<String> platformGatewayIds);
+
+    /**
+     * Close the WebSocket connection for the given gateway (e.g. when the gateway is deleted from the admin).
+     * The gateway client will receive a close frame and can log/disconnect. No-op if no implementation is set.
+     *
+     * @param gatewayId platform gateway UUID
+     */
+    default void closeGatewayConnection(String gatewayId) {
+        // No-op by default; WebSocket implementation closes the session.
+    }
 }

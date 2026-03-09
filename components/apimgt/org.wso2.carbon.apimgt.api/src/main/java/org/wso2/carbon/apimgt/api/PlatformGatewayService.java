@@ -99,4 +99,15 @@ public interface PlatformGatewayService {
      */
     CreatePlatformGatewayResult regenerateGatewayToken(String organizationId, String gatewayId)
             throws APIManagementException;
+
+    /**
+     * Delete a platform gateway and all references (tokens, instance mappings, revision deployment
+     * records, gateway environment, permissions). Fails if any API revisions are currently deployed
+     * to this gateway.
+     *
+     * @param organizationId organization id
+     * @param gatewayId      gateway id
+     * @throws APIManagementException if gateway not found, not in organization, or has active API deployments
+     */
+    void deleteGateway(String organizationId, String gatewayId) throws APIManagementException;
 }

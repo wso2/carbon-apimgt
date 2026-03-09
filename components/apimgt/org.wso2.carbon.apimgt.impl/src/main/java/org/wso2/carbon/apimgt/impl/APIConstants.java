@@ -2524,6 +2524,7 @@ public final class APIConstants {
         public static final String LABELS = "Labels";
         public static final String APPLICATIONS = "Applications";
         public static final String GATEWAY_ENVIRONMENTS = "GatewayEnvironments";
+        public static final String PLATFORM_GATEWAY = "PlatformGateway";
         public static final String ROLES_FOR_SCOPE = "RolesForScope";
         public static final String ROLES_FOR_SCOPE_INFO = "User updated roles for a scope";
         public static final String SYSTEM_SCOPE_ROLE_ALIASES = "SystemScopesRoleAliases";

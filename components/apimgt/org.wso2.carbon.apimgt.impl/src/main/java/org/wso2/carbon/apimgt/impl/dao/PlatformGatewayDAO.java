@@ -396,4 +396,98 @@ public class PlatformGatewayDAO {
             throw new APIManagementException("Error getting database connection", e);
         }
     }
+
+    /**
+     * Delete a platform gateway and all references (revision deployments, instance mappings, environment,
+     * permissions, tokens). Call only after validating that no API revisions are deployed to this gateway.
+     *
+     * @param gatewayId       platform gateway UUID
+     * @param gatewayName     gateway name (used as env name for AM_DEPLOYMENT_REVISION_MAPPING)
+     * @param organizationId organization id
+     */
+    public void deleteGatewayWithReferences(String gatewayId, String gatewayName, String organizationId)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                // 1. AM_GW_REVISION_DEPLOYMENT (references AM_GW_INSTANCES.GATEWAY_ID)
+                try (PreparedStatement ps = connection.prepareStatement(
+                        SQLConstants.PlatformGatewayDeletionSQLConstants.DELETE_AM_GW_REVISION_DEPLOYMENT_BY_GATEWAY_UUID_SQL)) {
+                    ps.setString(1, gatewayId);
+                    ps.setString(2, organizationId);
+                    ps.executeUpdate();
+                }
+                // 2. AM_DEPLOYMENT_REVISION_MAPPING by env name (= gateway name)
+                try (PreparedStatement ps = connection.prepareStatement(
+                        SQLConstants.PlatformGatewayDeletionSQLConstants.DELETE_AM_DEPLOYMENT_REVISION_MAPPING_BY_ENV_NAME_SQL)) {
+                    ps.setString(1, gatewayName);
+                    ps.executeUpdate();
+                }
+                // 3. AM_GW_INSTANCE_ENV_MAPPING
+                try (PreparedStatement ps = connection.prepareStatement(
+                        SQLConstants.PlatformGatewayDeletionSQLConstants.DELETE_AM_GW_INSTANCE_ENV_MAPPING_BY_GATEWAY_UUID_SQL)) {
+                    ps.setString(1, gatewayId);
+                    ps.setString(2, organizationId);
+                    ps.executeUpdate();
+                }
+                // 4. AM_GW_INSTANCES
+                try (PreparedStatement ps = connection.prepareStatement(
+                        SQLConstants.PlatformGatewayDeletionSQLConstants.DELETE_AM_GW_INSTANCES_BY_UUID_ORG_SQL)) {
+                    ps.setString(1, gatewayId);
+                    ps.setString(2, organizationId);
+                    ps.executeUpdate();
+                }
+                // 5. AM_GATEWAY_PERMISSIONS (GATEWAY_UUID = gateway id for platform env)
+                try (PreparedStatement ps = connection.prepareStatement(
+                        SQLConstants.DELETE_ALL_GATEWAY_VISIBILITY_PERMISSION_SQL)) {
+                    ps.setString(1, gatewayId);
+                    ps.executeUpdate();
+                }
+                // 5b. AM_GW_VHOST and AM_GATEWAY_ENVIRONMENT (platform gateways are added here on create so
+                //     GET /environments returns them; must remove so the gateway disappears from the list)
+                try (PreparedStatement ps = connection.prepareStatement(
+                        SQLConstants.GET_ENVIRONMENT_BY_ORGANIZATION_AND_UUID_SQL)) {
+                    ps.setString(1, organizationId);
+                    ps.setString(2, gatewayId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            int envId = rs.getInt("ID");
+                            try (PreparedStatement delVhost = connection.prepareStatement(
+                                    SQLConstants.DELETE_GATEWAY_VHOSTS_SQL)) {
+                                delVhost.setInt(1, envId);
+                                delVhost.executeUpdate();
+                            }
+                            try (PreparedStatement delEnv = connection.prepareStatement(
+                                    SQLConstants.DELETE_ENVIRONMENT_SQL)) {
+                                delEnv.setString(1, gatewayId);
+                                delEnv.executeUpdate();
+                            }
+                        }
+                    }
+                }
+                // 6. AM_PLATFORM_GATEWAY_TOKEN
+                try (PreparedStatement ps = connection.prepareStatement(
+                        SQLConstants.PlatformGatewaySQLConstants.DELETE_PLATFORM_GATEWAY_TOKENS_SQL)) {
+                    ps.setString(1, gatewayId);
+                    ps.executeUpdate();
+                }
+                // 7. AM_PLATFORM_GATEWAY
+                try (PreparedStatement ps = connection.prepareStatement(
+                        SQLConstants.PlatformGatewaySQLConstants.DELETE_PLATFORM_GATEWAY_SQL)) {
+                    ps.setString(1, gatewayId);
+                    ps.executeUpdate();
+                }
+                connection.commit();
+                if (log.isDebugEnabled()) {
+                    log.debug("Deleted platform gateway and all references: id=" + gatewayId);
+                }
+            } catch (SQLException e) {
+                connection.rollback();
+                log.error("Failed to delete platform gateway " + gatewayId + ": " + e.getMessage());
+                throw new APIManagementException("Error deleting platform gateway and references", e);
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error getting database connection", e);
+        }
+    }
 }

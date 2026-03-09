@@ -94,7 +94,8 @@ public class EnvironmentMappingUtil {
         envDTO.setDisplayName(gateway.getDisplayName());
         envDTO.setDescription(gateway.getDescription());
         envDTO.setGatewayType(gatewayType);
-        envDTO.setIsReadOnly(true);
+        // Allow delete in UI; server validates and returns 409 if API revisions are deployed
+        envDTO.setIsReadOnly(false);
         envDTO.setMode(EnvironmentDTO.ModeEnum.WRITE_ONLY);
         envDTO.setType("hybrid");
 

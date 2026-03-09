@@ -62,7 +62,11 @@ public class PlatformGatewayDeployNotifier implements Notifier {
             if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(event.getType())) {
                 dispatcher.dispatchDeploy(deployEvent, platformGatewayIds);
             } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(event.getType())) {
-                dispatcher.dispatchUndeploy(deployEvent, platformGatewayIds);
+                if (deployEvent.isDeleted()) {
+                    dispatcher.dispatchDelete(deployEvent, platformGatewayIds);
+                } else {
+                    dispatcher.dispatchUndeploy(deployEvent, platformGatewayIds);
+                }
             }
         } catch (Exception e) {
             log.warn("Platform gateway deploy notifier failed to dispatch event for API " + deployEvent.getUuid()
