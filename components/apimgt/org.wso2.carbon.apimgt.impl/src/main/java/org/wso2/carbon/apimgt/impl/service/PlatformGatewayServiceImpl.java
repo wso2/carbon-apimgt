@@ -28,7 +28,10 @@ import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayDeploymentDispatcher;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 
 import java.security.NoSuchAlgorithmException;
@@ -194,6 +197,34 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
 
         String registrationToken = tokenId + PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR + plainToken;
         return new CreatePlatformGatewayResult(toApiModel(gateway), registrationToken);
+    }
+
+    @Override
+    public void deleteGateway(String organizationId, String gatewayId) throws APIManagementException {
+        PlatformGatewayDAO dao = PlatformGatewayDAO.getInstance();
+        PlatformGatewayDAO.PlatformGateway gateway = dao.getGatewayById(gatewayId);
+        if (gateway == null) {
+            throw new APIManagementException("Platform gateway not found: " + gatewayId,
+                    org.wso2.carbon.apimgt.api.ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
+        }
+        if (!organizationId.equals(gateway.organizationId)) {
+            throw new APIManagementException("Platform gateway not found in organization: " + gatewayId,
+                    org.wso2.carbon.apimgt.api.ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
+        }
+        if (ApiMgtDAO.getInstance().hasExistingAPIRevisions(gatewayId, organizationId)) {
+            throw new APIManagementException(
+                    "Cannot delete platform gateway: API revisions are currently deployed to it. Undeploy all APIs from this gateway first.",
+                    org.wso2.carbon.apimgt.api.ExceptionCodes.from(
+                            org.wso2.carbon.apimgt.api.ExceptionCodes.GATEWAY_ENVIRONMENT_API_REVISIONS_EXIST,
+                            String.format("UUID '%s'", gatewayId)));
+        }
+        // Close WebSocket connection so the gateway receives a close frame and can log/disconnect
+        PlatformGatewayDeploymentDispatcher dispatcher =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayDeploymentDispatcher();
+        if (dispatcher != null) {
+            dispatcher.closeGatewayConnection(gatewayId);
+        }
+        dao.deleteGatewayWithReferences(gatewayId, gateway.name, organizationId);
     }
 
     private static PlatformGateway toApiModel(PlatformGatewayDAO.PlatformGateway g) {

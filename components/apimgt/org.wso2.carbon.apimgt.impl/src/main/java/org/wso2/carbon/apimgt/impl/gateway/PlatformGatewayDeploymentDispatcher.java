@@ -54,4 +54,14 @@ public interface PlatformGatewayDeploymentDispatcher {
      * @param platformGatewayIds  set of platform gateway IDs to notify
      */
     void dispatchDelete(DeployAPIInGatewayEvent event, Set<String> platformGatewayIds);
+
+    /**
+     * Close the WebSocket connection for the given gateway (e.g. when the gateway is deleted from the admin).
+     * The gateway client will receive a close frame and can log/disconnect. No-op if no implementation is set.
+     *
+     * @param gatewayId platform gateway UUID
+     */
+    default void closeGatewayConnection(String gatewayId) {
+        // No-op by default; WebSocket implementation closes the session.
+    }
 }

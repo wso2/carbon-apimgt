@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayPermissionsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayWithTokenDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -294,6 +295,19 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                 .map(g -> toDTO(g, permissionsMap.get(g.getName())))
                 .collect(Collectors.toList()));
         return Response.ok().entity(listDTO).build();
+    }
+
+    @Override
+    public Response gatewaysGatewayIdDelete(String gatewayId, MessageContext messageContext)
+            throws APIManagementException {
+        validateIdentifier(gatewayId, "gatewayId");
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        org.wso2.carbon.apimgt.api.PlatformGatewayService service =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        service.deleteGateway(organization, gatewayId);
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.PLATFORM_GATEWAY, "{'id':'" + gatewayId + "'}",
+                APIConstants.AuditLogConstants.DELETED, RestApiCommonUtil.getLoggedInUsername());
+        return Response.ok().build();
     }
 
     @Override

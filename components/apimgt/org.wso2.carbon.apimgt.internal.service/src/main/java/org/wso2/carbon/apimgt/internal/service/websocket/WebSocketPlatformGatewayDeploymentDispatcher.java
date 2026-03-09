@@ -91,6 +91,18 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
         }
     }
 
+    @Override
+    public void closeGatewayConnection(String gatewayId) {
+        if (StringUtils.isBlank(gatewayId)) {
+            return;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Closing WebSocket connection for deleted gateway: " + gatewayId);
+        }
+        // Force-close the session; gateway will see connection close and log "Connection lost" (no new message type)
+        PlatformGatewaySessionRegistry.getInstance().closeAndUnregister(gatewayId);
+    }
+
     /**
      * Resolve vhost for the given gateway from platform gateway config; empty string if not available.
      */

@@ -23,6 +23,7 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface GatewaysApiService {
+      public Response gatewaysGatewayIdDelete(String gatewayId, MessageContext messageContext) throws APIManagementException;
       public Response gatewaysGatewayIdRegenerateTokenPost(String gatewayId, MessageContext messageContext) throws APIManagementException;
       public Response gatewaysGet(MessageContext messageContext) throws APIManagementException;
       public Response gatewaysPost(CreatePlatformGatewayRequestDTO createPlatformGatewayRequestDTO, MessageContext messageContext) throws APIManagementException;
