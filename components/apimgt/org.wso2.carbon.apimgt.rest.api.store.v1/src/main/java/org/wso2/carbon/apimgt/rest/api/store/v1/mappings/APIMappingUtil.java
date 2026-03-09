@@ -686,7 +686,8 @@ public class APIMappingUtil {
                 if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
                     apiurLsDTO.setHttps(httpsUrl + contextToAppend);
                 }
-            } else if (isWs || isGQLSubscription) {
+            }
+            if (isWs || isGQLSubscription) {
                 apiurLsDTO.setWs(vHost.getWsUrl() + context);
                 apiurLsDTO.setWss(vHost.getWssUrl() + context);
             }
