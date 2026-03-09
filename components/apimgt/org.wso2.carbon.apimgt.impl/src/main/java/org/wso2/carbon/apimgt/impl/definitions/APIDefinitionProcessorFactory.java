@@ -57,7 +57,8 @@ public class APIDefinitionProcessorFactory {
         if ("WS".equalsIgnoreCase(apiType) ||
             "WEBSUB".equalsIgnoreCase(apiType) ||
             "SSE".equalsIgnoreCase(apiType) ||
-            "ASYNC".equalsIgnoreCase(apiType)) {
+            "ASYNC".equalsIgnoreCase(apiType) ||
+            "WEBHOOK".equalsIgnoreCase(apiType)) {
             return ASYNC_PROCESSOR;
         }
         return OAS_PROCESSOR;
