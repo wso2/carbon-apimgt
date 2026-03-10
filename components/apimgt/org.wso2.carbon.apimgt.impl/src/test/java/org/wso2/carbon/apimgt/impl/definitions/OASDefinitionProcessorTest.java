@@ -31,7 +31,6 @@ import java.util.List;
 
 /**
  * Unit tests for {@link OASDefinitionProcessor}.
- * Uses real OAS parsers instead of PowerMock to avoid JDK module system issues.
  */
 public class OASDefinitionProcessorTest {
 
@@ -41,8 +40,6 @@ public class OASDefinitionProcessorTest {
     public void init() {
         processor = new OASDefinitionProcessor();
     }
-
-    // ======================== getType() ========================
 
     @Test
     public void testGetType() {
@@ -58,15 +55,11 @@ public class OASDefinitionProcessorTest {
         Assert.assertEquals("GRAPHQL", processor.getType(api));
     }
 
-    // ======================== isAsync() ========================
-
     @Test
     public void testIsAsyncReturnsFalse() {
         API api = Mockito.mock(API.class);
         Assert.assertFalse(processor.isAsync(api));
     }
-
-    // ======================== getDefinitionFromAPI() ========================
 
     @Test
     public void testGetDefinitionFromAPI() {
@@ -83,8 +76,6 @@ public class OASDefinitionProcessorTest {
         Assert.assertNull(processor.getDefinitionFromAPI(api));
     }
 
-    // ======================== setDefinitionToAPI() ========================
-
     @Test
     public void testSetDefinitionToAPI() {
         API api = Mockito.mock(API.class);
@@ -92,8 +83,6 @@ public class OASDefinitionProcessorTest {
         processor.setDefinitionToAPI(api, definition);
         Mockito.verify(api).setSwaggerDefinition(definition);
     }
-
-    // ======================== extractEndpointUrl() ========================
 
     @Test
     public void testExtractEndpointUrlOAS3WithServers() {
@@ -244,8 +233,6 @@ public class OASDefinitionProcessorTest {
         Assert.assertNull(url);
     }
 
-    // ======================== extractOperations() ========================
-
     @Test
     public void testExtractOperationsNullDefinition() throws APIManagementException {
         List<URITemplate> result = processor.extractOperations(null);
@@ -338,8 +325,6 @@ public class OASDefinitionProcessorTest {
         Assert.assertNotNull(result);
         Assert.assertTrue(result.isEmpty());
     }
-
-    // ======================== getDefinitionFileName() ========================
 
     @Test
     public void testGetDefinitionFileName() {
