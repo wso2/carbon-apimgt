@@ -7447,6 +7447,9 @@ components:
         applicationSharingEnabled:
           type: boolean
           default: false
+        IsLegacyApiKeysEnabled:
+          type: boolean
+          default: false
         mapExistingAuthApps:
           type: boolean
           default: false

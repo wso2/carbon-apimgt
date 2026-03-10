@@ -9178,6 +9178,17 @@ public final class APIUtil {
         return apiKeySignKeyStoreName;
     }
 
+    public static boolean isLegacyApiKeysEnabled() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String legacyApiKeysEnabled = config.getFirstProperty(APIConstants.ENABLE_API_STORE_LEGACY_API_KEYS);
+        if (legacyApiKeysEnabled == null) {
+            return false;
+        }
+        return Boolean.parseBoolean(legacyApiKeysEnabled);
+    }
+
     /**
      * Get the workflow status information for the given api for the given workflow type
      *
