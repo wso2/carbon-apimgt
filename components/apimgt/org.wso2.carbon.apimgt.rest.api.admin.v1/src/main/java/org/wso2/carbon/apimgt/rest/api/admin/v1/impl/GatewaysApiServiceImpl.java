@@ -26,7 +26,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.CreatePlatformGatewayResult;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -86,10 +88,10 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             log.info("Creating new platform gateway with name: " + body.getName());
         }
 
-        org.wso2.carbon.apimgt.api.PlatformGatewayService service =
+        PlatformGatewayService service =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
         String propertiesJson = serializeProperties(body.getProperties());
-        org.wso2.carbon.apimgt.api.model.CreatePlatformGatewayResult result = service.createGateway(
+        CreatePlatformGatewayResult result = service.createGateway(
                 organization,
                 body.getName(),
                 body.getDisplayName(),
@@ -119,9 +121,9 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             throws APIManagementException {
 
         // Check if a platform gateway with this name already exists
-        org.wso2.carbon.apimgt.api.PlatformGatewayService service =
+        PlatformGatewayService service =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
-        java.util.List<PlatformGateway> existingGateways = service.listGatewaysByOrganization(organization);
+        List<PlatformGateway> existingGateways = service.listGatewaysByOrganization(organization);
         boolean gatewayExists = existingGateways.stream()
                 .anyMatch(gw -> StringUtils.equals(gw.getName(), gatewayName));
         if (gatewayExists) {
@@ -276,7 +278,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
     @Override
     public Response gatewaysGet(MessageContext messageContext) throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        org.wso2.carbon.apimgt.api.PlatformGatewayService service =
+        PlatformGatewayService service =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
         List<PlatformGateway> gateways = service.listGatewaysByOrganization(organization);
 
@@ -302,7 +304,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             throws APIManagementException {
         validateIdentifier(gatewayId, "gatewayId");
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        org.wso2.carbon.apimgt.api.PlatformGatewayService service =
+        PlatformGatewayService service =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
         service.deleteGateway(organization, gatewayId);
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.PLATFORM_GATEWAY, "{'id':'" + gatewayId + "'}",
@@ -315,9 +317,9 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             throws APIManagementException {
         validateIdentifier(gatewayId, "gatewayId");
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        org.wso2.carbon.apimgt.api.PlatformGatewayService service =
+        PlatformGatewayService service =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
-        org.wso2.carbon.apimgt.api.model.CreatePlatformGatewayResult result =
+        CreatePlatformGatewayResult result =
                 service.regenerateGatewayToken(organization, gatewayId);
         PlatformGateway gateway = result.getGateway();
 
