@@ -18,19 +18,13 @@
 
 package org.wso2.carbon.apimgt.encryption.key.generator;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -42,8 +36,7 @@ import java.util.List;
  */
 public final class EncryptionKeyGenerator {
 
-    private static final String DEPLOYMENT_TOML_RELATIVE_PATH = "repository" + File.separator + "conf" +
-            File.separator + "deployment.toml";
+    private static final String DEPLOYMENT_TOML_FILE_NAME = "deployment.toml";
     private static final String ENCRYPTION_SECTION = "[encryption]";
     private static final String SYSTEM_PARAMETER_SECTION = "[system.parameter]";
     private static final String KEY_PROPERTY_NAME = "key";
@@ -65,7 +58,7 @@ public final class EncryptionKeyGenerator {
     /**
      * Application entry point.
      *
-     * @param args arguments containing CARBON_HOME path
+     * @param args arguments containing config directory path
      */
     public static void main(String[] args) {
 
@@ -75,13 +68,13 @@ public final class EncryptionKeyGenerator {
     /**
      * Executes encryption key generation flow.
      *
-     * @param args arguments containing CARBON_HOME path
+     * @param args arguments containing config directory path
      * @return process exit code
      */
     static int execute(String[] args) {
 
         if (args.length != 1) {
-            logFailureWithManualAction("Invalid arguments. Expected CARBON_HOME path.",
+            logFailureWithManualAction("Invalid arguments. Expected config directory path.",
                     null, null);
             return EXIT_ERROR;
         }
@@ -89,14 +82,14 @@ public final class EncryptionKeyGenerator {
         try {
             deploymentToml = resolveDeploymentToml(args[0]);
         } catch (IOException e) {
-            logFailureWithManualAction("Invalid CARBON_HOME path.", args[0], e);
+            logFailureWithManualAction("Invalid config directory path.", args[0], e);
             return EXIT_ERROR;
         }
 
         if (!Files.exists(deploymentToml, LinkOption.NOFOLLOW_LINKS)
                 || !Files.isRegularFile(deploymentToml, LinkOption.NOFOLLOW_LINKS)
                 || Files.isSymbolicLink(deploymentToml)) {
-            logFailureWithManualAction("deployment.toml file not found under CARBON_HOME.",
+            logFailureWithManualAction("deployment.toml file not found under the config directory.",
                     deploymentToml.toAbsolutePath().toString(), null);
             return EXIT_ERROR;
         }
@@ -105,23 +98,19 @@ public final class EncryptionKeyGenerator {
             String content = readFileContent(securedDeploymentTomlPath);
             String newline = content.contains("\r\n") ? "\r\n" : "\n";
             List<String> lines = new ArrayList<>(Arrays.asList(content.split("\\r?\\n", -1)));
+            int encryptionSectionIndex = findFirstEncryptionSection(lines);
             if (isRsaCipherTransformationConfigured(lines)) {
                 return EXIT_SUCCESS_NO_CHANGE;
             }
-            if (hasActiveEncryptionKey(lines)) {
+            if (encryptionSectionIndex >= 0) {
                 return EXIT_SUCCESS_NO_CHANGE;
             }
             String key = generateHexKey();
-            int sectionIndex = findFirstEncryptionSection(lines);
-            if (sectionIndex >= 0) {
-                upsertEncryptionKey(lines, sectionIndex, key);
-            } else {
-                if (!lines.isEmpty() && !lines.get(lines.size() - 1).isEmpty()) {
-                    lines.add("");
-                }
-                lines.add(ENCRYPTION_SECTION);
-                lines.add(toKeyLine(key));
+            if (!lines.isEmpty() && !lines.getLast().isEmpty()) {
+                lines.add("");
             }
+            lines.add(ENCRYPTION_SECTION);
+            lines.add(toKeyLine(key));
             writeFileContent(securedDeploymentTomlPath, joinLines(lines, newline));
             logGeneratedKeyMessage(securedDeploymentTomlPath.toString());
             return EXIT_SUCCESS_GENERATED;
@@ -137,23 +126,24 @@ public final class EncryptionKeyGenerator {
     }
 
     /**
-     * Resolves deployment.toml from CARBON_HOME directory path.
+     * Resolves deployment.toml from config directory path.
      *
-     * @param inputPath CARBON_HOME directory path
+     * @param inputPath config directory path
      * @return resolved deployment.toml file
      */
     private static Path resolveDeploymentToml(String inputPath) throws IOException {
 
         try {
-            Path carbonHome = Paths.get(inputPath).toAbsolutePath().normalize();
-            if (!Files.exists(carbonHome, LinkOption.NOFOLLOW_LINKS)
-                    || !Files.isDirectory(carbonHome, LinkOption.NOFOLLOW_LINKS)
-                    || Files.isSymbolicLink(carbonHome)) {
-                throw new IOException("CARBON_HOME path is not a valid non-symlink directory: " + carbonHome);
+            Path configDirectory = Path.of(inputPath).toAbsolutePath().normalize();
+            if (!Files.exists(configDirectory, LinkOption.NOFOLLOW_LINKS)
+                    || !Files.isDirectory(configDirectory, LinkOption.NOFOLLOW_LINKS)
+                    || Files.isSymbolicLink(configDirectory)) {
+                throw new IOException("Config directory path is not a valid non-symlink directory: "
+                        + configDirectory);
             }
-            return carbonHome.resolve(DEPLOYMENT_TOML_RELATIVE_PATH).normalize();
+            return configDirectory.resolve(DEPLOYMENT_TOML_FILE_NAME).normalize();
         } catch (InvalidPathException e) {
-            throw new IOException("Invalid CARBON_HOME path: " + inputPath, e);
+            throw new IOException("Invalid config directory path: " + inputPath, e);
         }
     }
 
@@ -166,15 +156,7 @@ public final class EncryptionKeyGenerator {
      */
     private static String readFileContent(Path file) throws IOException {
 
-        StringBuilder content = new StringBuilder();
-        char[] buffer = new char[2048];
-        try (Reader reader = new InputStreamReader(Files.newInputStream(file), StandardCharsets.UTF_8)) {
-            int read;
-            while ((read = reader.read(buffer)) != -1) {
-                content.append(buffer, 0, read);
-            }
-        }
-        return content.toString();
+        return Files.readString(file, StandardCharsets.UTF_8);
     }
 
     /**
@@ -211,9 +193,7 @@ public final class EncryptionKeyGenerator {
 
         Path tempFile = Files.createTempFile(realParent, fileName.toString(), ".tmp");
 
-        try (Writer writer = new OutputStreamWriter(Files.newOutputStream(tempFile), StandardCharsets.UTF_8)) {
-            writer.write(content);
-        }
+        Files.writeString(tempFile, content, StandardCharsets.UTF_8);
 
         try {
             Files.move(tempFile, targetInRealParent, StandardCopyOption.REPLACE_EXISTING,
@@ -266,32 +246,6 @@ public final class EncryptionKeyGenerator {
             }
         }
         return -1;
-    }
-
-    /**
-     * Checks whether an active key exists in [encryption] section.
-     *
-     * @param lines deployment.toml lines
-     * @return true if active key exists
-     */
-    private static boolean hasActiveEncryptionKey(List<String> lines) {
-
-        boolean inEncryptionSection = false;
-        for (String rawLine : lines) {
-            String normalized = normalizedLineWithoutComment(rawLine);
-            if (normalized.isEmpty()) {
-                continue;
-            }
-            String section = extractSectionHeader(normalized);
-            if (section != null) {
-                inEncryptionSection = ENCRYPTION_SECTION.equals(section);
-                continue;
-            }
-            if (inEncryptionSection && isActiveKeyLine(normalized)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -372,22 +326,6 @@ public final class EncryptionKeyGenerator {
     }
 
     /**
-     * Checks whether a normalized line defines active key property.
-     *
-     * @param normalizedLine normalized line
-     * @return true if key property has non-empty value
-     */
-    private static boolean isActiveKeyLine(String normalizedLine) {
-
-        String keyName = normalizePropertyName(extractKeyName(normalizedLine));
-        if (!KEY_PROPERTY_NAME.equals(keyName)) {
-            return false;
-        }
-        String value = extractValue(normalizedLine);
-        return !value.isEmpty() && !isEmptyQuotedValue(value);
-    }
-
-    /**
      * Extracts key/property name from an assignment line.
      *
      * @param normalizedLine normalized line
@@ -462,17 +400,6 @@ public final class EncryptionKeyGenerator {
     }
 
     /**
-     * Checks whether value is an empty quoted string.
-     *
-     * @param value value text
-     * @return true for empty single- or double-quoted values
-     */
-    private static boolean isEmptyQuotedValue(String value) {
-
-        return "\"\"".equals(value) || "''".equals(value);
-    }
-
-    /**
      * Removes inline comment marker while respecting quoted strings.
      *
      * @param line input line
@@ -500,63 +427,6 @@ public final class EncryptionKeyGenerator {
             escaped = false;
         }
         return line;
-    }
-
-    /**
-     * Inserts or replaces encryption key property within [encryption] section.
-     *
-     * @param lines deployment.toml lines
-     * @param sectionIndex index of [encryption] section
-     * @param key generated key
-     */
-    private static void upsertEncryptionKey(List<String> lines, int sectionIndex, String key) {
-
-        List<Integer> existingKeyIndexes = new ArrayList<>();
-        int sectionEnd = lines.size();
-        for (int i = sectionIndex + 1; i < lines.size(); i++) {
-            String normalized = normalizedLineWithoutComment(lines.get(i));
-            if (normalized.isEmpty()) {
-                continue;
-            }
-            if (extractSectionHeader(normalized) != null) {
-                sectionEnd = i;
-                break;
-            }
-            if (KEY_PROPERTY_NAME.equals(normalizePropertyName(extractKeyName(normalized)))) {
-                existingKeyIndexes.add(i);
-            }
-        }
-
-        if (existingKeyIndexes.isEmpty()) {
-            lines.add(sectionIndex + 1, toKeyLine(key));
-            return;
-        }
-
-        int firstKeyIndex = existingKeyIndexes.get(0);
-        String indentation = extractIndentation(lines.get(firstKeyIndex));
-        lines.set(firstKeyIndex, indentation + toKeyLine(key));
-
-        for (int i = existingKeyIndexes.size() - 1; i >= 1; i--) {
-            int removeIndex = existingKeyIndexes.get(i);
-            if (removeIndex < sectionEnd) {
-                lines.remove(removeIndex);
-            }
-        }
-    }
-
-    /**
-     * Extracts leading whitespace from a line.
-     *
-     * @param line input line
-     * @return indentation prefix
-     */
-    private static String extractIndentation(String line) {
-
-        int index = 0;
-        while (index < line.length() && Character.isWhitespace(line.charAt(index))) {
-            index++;
-        }
-        return line.substring(0, index);
     }
 
     /**

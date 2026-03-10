@@ -29,75 +29,70 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class EncryptionKeyGeneratorTest {
 
     private static final Pattern KEY_LINE_PATTERN = Pattern.compile("(?m)^\\s*key\\s*=\\s*\"([0-9a-f]{64})\"\\s*$");
-    private static final Pattern ENCRYPTION_SECTION_PATTERN = Pattern.compile("(?m)^\\[encryption\\](?:\\s*#.*)?$");
 
     /**
-     * Verifies empty double-quoted key is treated as missing and replaced.
+     * Verifies an existing [encryption] section with an empty double-quoted key remains unchanged.
      *
      * @throws IOException if temporary file operations fail
      */
     @Test
-    public void testGenerateForEmptyDoubleQuotedKey() throws IOException {
+    public void testNoChangeForExistingEncryptionSectionWithEmptyDoubleQuotedKey() throws IOException {
 
         String content = "[encryption]\nkey = \"\"\nname = \"default\"\n";
-        Path[] paths = createCarbonHomeWithDeployment(content);
-        Path carbonHome = paths[0];
+        Path[] paths = createConfigDirectoryWithDeployment(content);
+        Path configDirectory = paths[0];
         Path deploymentToml = paths[1];
 
-        int exitCode = EncryptionKeyGenerator.execute(new String[] {carbonHome.toString()});
+        int exitCode = EncryptionKeyGenerator.execute(new String[] {configDirectory.toString()});
         String updated = readFile(deploymentToml);
 
-        assertEquals(10, exitCode);
-        assertFalse(updated.contains("key = \"\""));
-        assertSingleGeneratedKey(updated);
+        assertEquals(0, exitCode);
+        assertEquals(content, updated);
     }
 
     /**
-     * Verifies empty single-quoted key is treated as missing and replaced.
+     * Verifies an existing [encryption] section with an empty single-quoted key remains unchanged.
      *
      * @throws IOException if temporary file operations fail
      */
     @Test
-    public void testGenerateForEmptySingleQuotedKey() throws IOException {
+    public void testNoChangeForExistingEncryptionSectionWithEmptySingleQuotedKey() throws IOException {
 
         String content = "[encryption]\nkey = ''\n";
-        Path[] paths = createCarbonHomeWithDeployment(content);
-        Path carbonHome = paths[0];
+        Path[] paths = createConfigDirectoryWithDeployment(content);
+        Path configDirectory = paths[0];
         Path deploymentToml = paths[1];
 
-        int exitCode = EncryptionKeyGenerator.execute(new String[] {carbonHome.toString()});
+        int exitCode = EncryptionKeyGenerator.execute(new String[] {configDirectory.toString()});
         String updated = readFile(deploymentToml);
 
-        assertEquals(10, exitCode);
-        assertFalse(updated.contains("key = ''"));
-        assertSingleGeneratedKey(updated);
+        assertEquals(0, exitCode);
+        assertEquals(content, updated);
     }
 
     /**
-     * Verifies an inline-comment section header does not create duplicate sections.
+     * Verifies an inline-comment [encryption] header remains unchanged.
      *
      * @throws IOException if temporary file operations fail
      */
     @Test
-    public void testInlineCommentSectionHeaderUsesExistingSection() throws IOException {
+    public void testNoChangeWhenEncryptionSectionExistsWithInlineComment() throws IOException {
 
-        String content = "[encryption] # initial section\n# key will be generated\n";
-        Path[] paths = createCarbonHomeWithDeployment(content);
-        Path carbonHome = paths[0];
+        String content = "[encryption] # initial section\n# key is assumed to exist by contract\n";
+        Path[] paths = createConfigDirectoryWithDeployment(content);
+        Path configDirectory = paths[0];
         Path deploymentToml = paths[1];
 
-        int exitCode = EncryptionKeyGenerator.execute(new String[] {carbonHome.toString()});
+        int exitCode = EncryptionKeyGenerator.execute(new String[] {configDirectory.toString()});
         String updated = readFile(deploymentToml);
 
-        assertEquals(10, exitCode);
-        assertEquals(1, countMatches(ENCRYPTION_SECTION_PATTERN, updated));
-        assertSingleGeneratedKey(updated);
+        assertEquals(0, exitCode);
+        assertEquals(content, updated);
     }
 
     /**
@@ -110,11 +105,11 @@ public class EncryptionKeyGeneratorTest {
 
         String key = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
         String content = "[encryption] # active key is present\nkey = \"" + key + "\" # keep\n";
-        Path[] paths = createCarbonHomeWithDeployment(content);
-        Path carbonHome = paths[0];
+        Path[] paths = createConfigDirectoryWithDeployment(content);
+        Path configDirectory = paths[0];
         Path deploymentToml = paths[1];
 
-        int exitCode = EncryptionKeyGenerator.execute(new String[] {carbonHome.toString()});
+        int exitCode = EncryptionKeyGenerator.execute(new String[] {configDirectory.toString()});
         String updated = readFile(deploymentToml);
 
         assertEquals(0, exitCode);
@@ -122,18 +117,18 @@ public class EncryptionKeyGeneratorTest {
     }
 
     /**
-     * Verifies CARBON_HOME input resolves deployment.toml and generates a key.
+     * Verifies config directory input resolves deployment.toml and generates a key.
      *
      * @throws IOException if temporary file operations fail
      */
     @Test
-    public void testGenerateWhenCarbonHomePathIsProvided() throws IOException {
+    public void testGenerateWhenConfigDirectoryPathIsProvided() throws IOException {
 
-        Path[] paths = createCarbonHomeWithDeployment("[server]\nhostname = \"localhost\"\n");
-        Path carbonHome = paths[0];
+        Path[] paths = createConfigDirectoryWithDeployment("[server]\nhostname = \"localhost\"\n");
+        Path configDirectory = paths[0];
         Path deploymentToml = paths[1];
 
-        int exitCode = EncryptionKeyGenerator.execute(new String[] {carbonHome.toString()});
+        int exitCode = EncryptionKeyGenerator.execute(new String[] {configDirectory.toString()});
         String updated = readFile(deploymentToml);
 
         assertEquals(10, exitCode);
@@ -142,17 +137,57 @@ public class EncryptionKeyGeneratorTest {
     }
 
     /**
-     * Verifies CARBON_HOME input returns error when deployment.toml is missing.
+     * Verifies a normalized existing [encryption] section prevents key generation.
      *
      * @throws IOException if temporary file operations fail
      */
     @Test
-    public void testCarbonHomePathReturnsErrorWhenDeploymentTomlMissing() throws IOException {
+    public void testNoChangeWhenEncryptionSectionIsIndented() throws IOException {
 
-        Path carbonHome = Files.createTempDirectory("carbon-home-missing");
-        carbonHome.toFile().deleteOnExit();
+        String content = "  [encryption]\nkey = \"\"\n";
+        Path[] paths = createConfigDirectoryWithDeployment(content);
+        Path configDirectory = paths[0];
+        Path deploymentToml = paths[1];
 
-        int exitCode = EncryptionKeyGenerator.execute(new String[] {carbonHome.toString()});
+        int exitCode = EncryptionKeyGenerator.execute(new String[] {configDirectory.toString()});
+        String updated = readFile(deploymentToml);
+
+        assertEquals(0, exitCode);
+        assertEquals(content, updated);
+    }
+
+    /**
+     * Verifies a commented [encryption] token does not prevent generation.
+     *
+     * @throws IOException if temporary file operations fail
+     */
+    @Test
+    public void testGenerateWhenEncryptionSectionIsOnlyInComment() throws IOException {
+
+        String content = "# [encryption]\n[server]\nhostname = \"localhost\"\n";
+        Path[] paths = createConfigDirectoryWithDeployment(content);
+        Path configDirectory = paths[0];
+        Path deploymentToml = paths[1];
+
+        int exitCode = EncryptionKeyGenerator.execute(new String[] {configDirectory.toString()});
+        String updated = readFile(deploymentToml);
+
+        assertEquals(10, exitCode);
+        assertSingleGeneratedKey(updated);
+    }
+
+    /**
+     * Verifies config directory input returns error when deployment.toml is missing.
+     *
+     * @throws IOException if temporary file operations fail
+     */
+    @Test
+    public void testConfigDirectoryPathReturnsErrorWhenDeploymentTomlMissing() throws IOException {
+
+        Path configDirectory = Files.createTempDirectory("config-directory-missing");
+        configDirectory.toFile().deleteOnExit();
+
+        int exitCode = EncryptionKeyGenerator.execute(new String[] {configDirectory.toString()});
         assertEquals(1, exitCode);
     }
 
@@ -166,11 +201,11 @@ public class EncryptionKeyGeneratorTest {
 
         String content = "[system.parameter]\n"
                 + "\"org.wso2.CipherTransformation\"=\"RSA/ECB/OAEPwithSHA1andMGF1Padding\"\n";
-        Path[] paths = createCarbonHomeWithDeployment(content);
-        Path carbonHome = paths[0];
+        Path[] paths = createConfigDirectoryWithDeployment(content);
+        Path configDirectory = paths[0];
         Path deploymentToml = paths[1];
 
-        int exitCode = EncryptionKeyGenerator.execute(new String[] {carbonHome.toString()});
+        int exitCode = EncryptionKeyGenerator.execute(new String[] {configDirectory.toString()});
         String updated = readFile(deploymentToml);
 
         assertEquals(0, exitCode);
@@ -178,20 +213,20 @@ public class EncryptionKeyGeneratorTest {
     }
 
     /**
-     * Verifies quoted key name is treated as active encryption key.
+     * Verifies an existing [encryption] section with quoted key syntax remains unchanged.
      *
      * @throws IOException if temporary file operations fail
      */
     @Test
-    public void testNoChangeWhenEncryptionKeyNameIsQuoted() throws IOException {
+    public void testNoChangeWhenEncryptionSectionContainsQuotedKeyName() throws IOException {
 
         String key = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
         String content = "[encryption]\n\"key\" = \"" + key + "\"\n";
-        Path[] paths = createCarbonHomeWithDeployment(content);
-        Path carbonHome = paths[0];
+        Path[] paths = createConfigDirectoryWithDeployment(content);
+        Path configDirectory = paths[0];
         Path deploymentToml = paths[1];
 
-        int exitCode = EncryptionKeyGenerator.execute(new String[] {carbonHome.toString()});
+        int exitCode = EncryptionKeyGenerator.execute(new String[] {configDirectory.toString()});
         String updated = readFile(deploymentToml);
 
         assertEquals(0, exitCode);
@@ -199,24 +234,23 @@ public class EncryptionKeyGeneratorTest {
     }
 
     /**
-     * Verifies quoted empty key name is replaced without creating duplicate key entries.
+     * Verifies an existing [encryption] section with a quoted empty key name remains unchanged.
      *
      * @throws IOException if temporary file operations fail
      */
     @Test
-    public void testReplaceQuotedEmptyEncryptionKeyWithoutDuplicate() throws IOException {
+    public void testNoChangeForExistingEncryptionSectionWithQuotedEmptyKey() throws IOException {
 
         String content = "[encryption]\n\"key\" = \"\"\n";
-        Path[] paths = createCarbonHomeWithDeployment(content);
-        Path carbonHome = paths[0];
+        Path[] paths = createConfigDirectoryWithDeployment(content);
+        Path configDirectory = paths[0];
         Path deploymentToml = paths[1];
 
-        int exitCode = EncryptionKeyGenerator.execute(new String[] {carbonHome.toString()});
+        int exitCode = EncryptionKeyGenerator.execute(new String[] {configDirectory.toString()});
         String updated = readFile(deploymentToml);
 
-        assertEquals(10, exitCode);
-        assertFalse(updated.contains("\"key\" = \"\""));
-        assertSingleGeneratedKey(updated);
+        assertEquals(0, exitCode);
+        assertEquals(content, updated);
     }
 
     /**
@@ -227,16 +261,14 @@ public class EncryptionKeyGeneratorTest {
     @Test
     public void testRejectSymlinkDeploymentToml() throws IOException {
 
-        Path carbonHome = Files.createTempDirectory("carbon-home-symlink");
-        carbonHome.toFile().deleteOnExit();
-        Path confDir = carbonHome.resolve("repository").resolve("conf");
-        Files.createDirectories(confDir);
+        Path configDirectory = Files.createTempDirectory("config-directory-symlink");
+        configDirectory.toFile().deleteOnExit();
 
         Path externalFile = Files.createTempFile("external-deployment", ".toml");
         externalFile.toFile().deleteOnExit();
         writeFile(externalFile, "[encryption]\n");
 
-        Path deploymentToml = confDir.resolve("deployment.toml");
+        Path deploymentToml = configDirectory.resolve("deployment.toml");
         try {
             Files.createSymbolicLink(deploymentToml, externalFile);
         } catch (UnsupportedOperationException e) {
@@ -245,41 +277,62 @@ public class EncryptionKeyGeneratorTest {
             Assume.assumeNoException("Symlink creation is not permitted in this environment", e);
         }
 
-        int exitCode = EncryptionKeyGenerator.execute(new String[] {carbonHome.toString()});
+        int exitCode = EncryptionKeyGenerator.execute(new String[] {configDirectory.toString()});
         assertEquals(1, exitCode);
     }
 
     /**
-     * Verifies non-directory CARBON_HOME path is rejected.
+     * Verifies an indented [system.parameter] section with RSA transformation still disables generation.
      *
      * @throws IOException if temporary file operations fail
      */
     @Test
-    public void testRejectNonDirectoryCarbonHomePath() throws IOException {
+    public void testNoActionWhenRsaCipherTransformationConfiguredInIndentedSystemParameterSection()
+            throws IOException {
 
-        Path carbonHomeFile = Files.createTempFile("carbon-home-file", ".tmp");
-        carbonHomeFile.toFile().deleteOnExit();
+        String content = "  [system.parameter]\n"
+                + "\"org.wso2.CipherTransformation\"=\"RSA/ECB/OAEPwithSHA1andMGF1Padding\"\n";
+        Path[] paths = createConfigDirectoryWithDeployment(content);
+        Path configDirectory = paths[0];
+        Path deploymentToml = paths[1];
 
-        int exitCode = EncryptionKeyGenerator.execute(new String[] {carbonHomeFile.toString()});
+        int exitCode = EncryptionKeyGenerator.execute(new String[] {configDirectory.toString()});
+        String updated = readFile(deploymentToml);
+
+        assertEquals(0, exitCode);
+        assertEquals(content, updated);
+    }
+
+    /**
+     * Verifies non-directory config directory path is rejected.
+     *
+     * @throws IOException if temporary file operations fail
+     */
+    @Test
+    public void testRejectNonDirectoryConfigDirectoryPath() throws IOException {
+
+        Path configDirectoryFile = Files.createTempFile("config-directory-file", ".tmp");
+        configDirectoryFile.toFile().deleteOnExit();
+
+        int exitCode = EncryptionKeyGenerator.execute(new String[] {configDirectoryFile.toString()});
         assertEquals(1, exitCode);
     }
 
     /**
-     * Creates CARBON_HOME structure with deployment.toml and returns both paths.
+     * Creates a config directory with deployment.toml and returns both paths.
      *
      * @param content deployment.toml content
-     * @return array with [0] = CARBON_HOME, [1] = deployment.toml path
+     * @return array with [0] = config directory, [1] = deployment.toml path
      * @throws IOException if file operations fail
      */
-    private static Path[] createCarbonHomeWithDeployment(String content) throws IOException {
+    private static Path[] createConfigDirectoryWithDeployment(String content) throws IOException {
 
-        Path carbonHome = Files.createTempDirectory("carbon-home");
-        carbonHome.toFile().deleteOnExit();
-        Path deploymentToml = carbonHome.resolve("repository").resolve("conf").resolve("deployment.toml");
-        Files.createDirectories(deploymentToml.getParent());
+        Path configDirectory = Files.createTempDirectory("config-directory");
+        configDirectory.toFile().deleteOnExit();
+        Path deploymentToml = configDirectory.resolve("deployment.toml");
         writeFile(deploymentToml, content);
         deploymentToml.toFile().deleteOnExit();
-        return new Path[] {carbonHome, deploymentToml};
+        return new Path[] {configDirectory, deploymentToml};
     }
 
     /**
@@ -319,22 +372,5 @@ public class EncryptionKeyGeneratorTest {
             keyCount++;
         }
         assertEquals(1, keyCount);
-    }
-
-    /**
-     * Counts regex matches in content.
-     *
-     * @param pattern regex pattern
-     * @param content text content
-     * @return number of matches
-     */
-    private static int countMatches(Pattern pattern, String content) {
-
-        Matcher matcher = pattern.matcher(content);
-        int count = 0;
-        while (matcher.find()) {
-            count++;
-        }
-        return count;
     }
 }
