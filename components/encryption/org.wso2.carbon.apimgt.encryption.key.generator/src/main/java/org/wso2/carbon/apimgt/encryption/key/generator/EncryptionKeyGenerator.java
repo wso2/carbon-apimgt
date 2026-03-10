@@ -172,14 +172,14 @@ public final class EncryptionKeyGenerator {
         Path parent = absoluteTargetPath.getParent();
         if (parent == null) {
             parent = absoluteTargetPath.getRoot();
-        }
-        if (parent == null) {
-            throw new IOException("Unable to determine parent directory for deployment.toml path: " + file);
+            if (parent == null) {
+                throw new IOException("Unable to determine parent directory for deployment.toml path: " + file);
+            }
         }
 
         Path realParent = parent.toRealPath(LinkOption.NOFOLLOW_LINKS);
         Path fileName = absoluteTargetPath.getFileName();
-        if (fileName == null) {
+        if (fileName == null || fileName.toString().isEmpty()) {
             throw new IOException("Invalid deployment.toml path without file name: " + absoluteTargetPath);
         }
         Path targetInRealParent = realParent.resolve(fileName).normalize();
@@ -192,10 +192,8 @@ public final class EncryptionKeyGenerator {
         }
 
         Path tempFile = Files.createTempFile(realParent, fileName.toString(), ".tmp");
-
-        Files.writeString(tempFile, content, StandardCharsets.UTF_8);
-
         try {
+            Files.writeString(tempFile, content, StandardCharsets.UTF_8);
             Files.move(tempFile, targetInRealParent, StandardCopyOption.REPLACE_EXISTING,
                     StandardCopyOption.ATOMIC_MOVE);
         } catch (AtomicMoveNotSupportedException e) {
