@@ -224,8 +224,8 @@ public class OAuthAuthenticator implements Authenticator {
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
 
         if (StringUtils.equals(APIConstants.API_TYPE_MCP, apiType)) {
-            httpMethod = synCtx.getProperty("MCP_HTTP_METHOD").toString();
-            matchingResource = (String) synCtx.getProperty("MCP_API_ELECTED_RESOURCE");
+            httpMethod = synCtx.getProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY).toString();
+            matchingResource = (String) synCtx.getProperty(APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE_KEY);
         }
         SignedJWTInfo signedJWTInfo = null;
 
