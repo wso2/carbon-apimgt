@@ -5204,17 +5204,17 @@ public class SQLConstants {
                         "AND EXISTS (SELECT 1 FROM AM_GW_INSTANCE_ENV_MAPPING env WHERE env.GATEWAY_ID = gwi.GATEWAY_ID) " +
                         "ORDER BY pg.CREATED_AT";
         public static final String INSERT_TOKEN_SQL =
-                "INSERT INTO AM_PLATFORM_GATEWAY_TOKEN (ID, GATEWAY_ID, TOKEN_HASH, STATUS, CREATED_AT, REVOKED_AT) " +
+                "INSERT INTO AM_GATEWAY_TOKEN (ID, GATEWAY_ID, TOKEN_HASH, STATUS, CREATED_AT, REVOKED_AT) " +
                         "VALUES (?, ?, ?, 'active', ?, NULL)";
         /** Single-row lookup by token hash (deterministic SHA-256(plainToken)). */
         public static final String SELECT_ACTIVE_TOKEN_BY_HASH_SQL =
                 "SELECT t.ID, t.GATEWAY_ID, t.TOKEN_HASH, g.ID AS GATEWAY_UUID, g.ORGANIZATION_ID " +
-                        "FROM AM_PLATFORM_GATEWAY_TOKEN t INNER JOIN AM_PLATFORM_GATEWAY g ON t.GATEWAY_ID = g.ID " +
+                        "FROM AM_GATEWAY_TOKEN t INNER JOIN AM_PLATFORM_GATEWAY g ON t.GATEWAY_ID = g.ID " +
                         "WHERE t.TOKEN_HASH = ? AND t.STATUS = 'active'";
         /** Single-row lookup by token ID (for combined format tokenId.plainToken). */
         public static final String SELECT_ACTIVE_TOKEN_BY_ID_SQL =
                 "SELECT t.ID, t.GATEWAY_ID, t.TOKEN_HASH, g.ID AS GATEWAY_UUID, g.ORGANIZATION_ID " +
-                        "FROM AM_PLATFORM_GATEWAY_TOKEN t INNER JOIN AM_PLATFORM_GATEWAY g ON t.GATEWAY_ID = g.ID " +
+                        "FROM AM_GATEWAY_TOKEN t INNER JOIN AM_PLATFORM_GATEWAY g ON t.GATEWAY_ID = g.ID " +
                         "WHERE t.ID = ? AND t.STATUS = 'active'";
         public static final String UPDATE_GATEWAY_ACTIVE_SQL =
                 "UPDATE AM_PLATFORM_GATEWAY SET IS_ACTIVE = ?, UPDATED_AT = ? WHERE ID = ?";
@@ -5223,10 +5223,10 @@ public class SQLConstants {
                 "UPDATE AM_PLATFORM_GATEWAY SET DISPLAY_NAME = ?, DESCRIPTION = ?, IS_CRITICAL = ?, PROPERTIES = ?, UPDATED_AT = ? WHERE ID = ? AND ORGANIZATION_ID = ?";
         /** Revoke all active tokens for a gateway (used before regenerating a new token). */
         public static final String REVOKE_TOKENS_BY_GATEWAY_ID_SQL =
-                "UPDATE AM_PLATFORM_GATEWAY_TOKEN SET STATUS = 'revoked', REVOKED_AT = ? WHERE GATEWAY_ID = ? AND STATUS = 'active'";
+                "UPDATE AM_GATEWAY_TOKEN SET STATUS = 'revoked', REVOKED_AT = ? WHERE GATEWAY_ID = ? AND STATUS = 'active'";
         /** Delete platform gateway and tokens (used when deleting gateway with no active deployments). */
         public static final String DELETE_PLATFORM_GATEWAY_TOKENS_SQL =
-                "DELETE FROM AM_PLATFORM_GATEWAY_TOKEN WHERE GATEWAY_ID = ?";
+                "DELETE FROM AM_GATEWAY_TOKEN WHERE GATEWAY_ID = ?";
         public static final String DELETE_PLATFORM_GATEWAY_SQL =
                 "DELETE FROM AM_PLATFORM_GATEWAY WHERE ID = ?";
     }

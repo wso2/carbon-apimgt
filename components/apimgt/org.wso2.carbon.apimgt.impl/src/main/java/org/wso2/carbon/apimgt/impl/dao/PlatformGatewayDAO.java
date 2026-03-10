@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * DAO for platform gateway registration (AM_PLATFORM_GATEWAY, AM_PLATFORM_GATEWAY_TOKEN).
+ * DAO for platform gateway registration (AM_PLATFORM_GATEWAY, AM_GATEWAY_TOKEN).
  */
 public class PlatformGatewayDAO {
 
@@ -497,7 +497,7 @@ public class PlatformGatewayDAO {
                         }
                     }
                 }
-                // 6. AM_PLATFORM_GATEWAY_TOKEN
+                // 6. AM_GATEWAY_TOKEN
                 try (PreparedStatement ps = connection.prepareStatement(
                         SQLConstants.PlatformGatewaySQLConstants.DELETE_PLATFORM_GATEWAY_TOKENS_SQL)) {
                     ps.setString(1, gatewayId);
