@@ -29,8 +29,6 @@ import org.wso2.carbon.apimgt.api.model.API;
  */
 public class APIDefinitionProcessorFactoryTest {
 
-    // ==================== getDefinitionProcessor(API) ====================
-
     @Test
     public void testGetDefinitionProcessorForHTTPApi() {
         API api = Mockito.mock(API.class);
@@ -126,8 +124,6 @@ public class APIDefinitionProcessorFactoryTest {
         Assert.assertTrue(processor instanceof OASDefinitionProcessor);
     }
 
-    // ==================== getDefinitionProcessor(String) ====================
-
     @Test
     public void testGetDefinitionProcessorByTypeHTTP() {
         APIDefinitionProcessor processor = APIDefinitionProcessorFactory.getDefinitionProcessor("HTTP");
@@ -216,8 +212,6 @@ public class APIDefinitionProcessorFactoryTest {
         Assert.assertNotNull(processor);
         Assert.assertTrue(processor instanceof OASDefinitionProcessor);
     }
-
-    // ==================== Singleton behavior ====================
 
     @Test
     public void testSameProcessorInstanceReturned() {

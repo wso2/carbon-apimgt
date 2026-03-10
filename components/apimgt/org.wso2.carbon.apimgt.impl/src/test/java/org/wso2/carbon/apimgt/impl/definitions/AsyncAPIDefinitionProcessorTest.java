@@ -30,7 +30,6 @@ import java.util.List;
 
 /**
  * Unit tests for {@link AsyncAPIDefinitionProcessor}.
- * Uses real AsyncAPI parsers instead of PowerMock to avoid JDK module system issues.
  */
 public class AsyncAPIDefinitionProcessorTest {
 
@@ -40,8 +39,6 @@ public class AsyncAPIDefinitionProcessorTest {
     public void init() {
         processor = new AsyncAPIDefinitionProcessor();
     }
-
-    // ======================== getType() ========================
 
     @Test
     public void testGetType() {
@@ -64,15 +61,11 @@ public class AsyncAPIDefinitionProcessorTest {
         Assert.assertEquals("WEBSUB", processor.getType(api));
     }
 
-    // ======================== isAsync() ========================
-
     @Test
     public void testIsAsyncReturnsTrue() {
         API api = Mockito.mock(API.class);
         Assert.assertTrue(processor.isAsync(api));
     }
-
-    // ======================== getDefinitionFromAPI() ========================
 
     @Test
     public void testGetDefinitionFromAPI() {
@@ -89,8 +82,6 @@ public class AsyncAPIDefinitionProcessorTest {
         Assert.assertNull(processor.getDefinitionFromAPI(api));
     }
 
-    // ======================== setDefinitionToAPI() ========================
-
     @Test
     public void testSetDefinitionToAPI() {
         API api = Mockito.mock(API.class);
@@ -98,8 +89,6 @@ public class AsyncAPIDefinitionProcessorTest {
         processor.setDefinitionToAPI(api, definition);
         Mockito.verify(api).setAsyncApiDefinition(definition);
     }
-
-    // ======================== extractEndpointUrl() ========================
 
     @Test
     public void testExtractEndpointUrlJsonWithServers() {
@@ -257,8 +246,6 @@ public class AsyncAPIDefinitionProcessorTest {
         Assert.assertEquals("api.example.com", url);
     }
 
-    // ======================== extractOperations() ========================
-
     @Test
     public void testExtractOperationsWithValidAsyncAPIDefinition() throws APIManagementException {
         String definition = "{\n" +
@@ -309,8 +296,6 @@ public class AsyncAPIDefinitionProcessorTest {
 
     @Test(expected = APIManagementException.class)
     public void testExtractOperationsNullDefinitionThrows() throws APIManagementException {
-        // Null definition causes getAsyncApiVersion to return null,
-        // which causes AsyncApiParserFactory to throw APIManagementException
         processor.extractOperations(null);
     }
 
@@ -323,8 +308,6 @@ public class AsyncAPIDefinitionProcessorTest {
     public void testExtractOperationsInvalidDefinitionThrows() throws APIManagementException {
         processor.extractOperations("not valid json");
     }
-
-    // ======================== getDefinitionFileName() ========================
 
     @Test
     public void testGetDefinitionFileName() {
