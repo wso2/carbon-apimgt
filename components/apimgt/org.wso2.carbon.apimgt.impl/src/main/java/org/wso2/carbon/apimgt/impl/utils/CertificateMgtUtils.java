@@ -855,14 +855,6 @@ public class CertificateMgtUtils {
                 try {
                     String xml = customSSLProfilesOmElement.toString();
                     DocumentBuilderFactory factory = APIUtil.getSecuredDocumentBuilder();
-                    factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-                    factory.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.DISALLOW_DOCTYPE_DECL_FEATURE,
-                            true);
-                    factory.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE,
-                            false);
-                    factory.setFeature(Constants.SAX_FEATURE_PREFIX +
-                            Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE, false);
-                    factory.setNamespaceAware(true);
                     DocumentBuilder builder = factory.newDocumentBuilder();
                     Document doc = builder.parse(new InputSource(new StringReader(xml)));
                     DOMSource source = new DOMSource(doc);

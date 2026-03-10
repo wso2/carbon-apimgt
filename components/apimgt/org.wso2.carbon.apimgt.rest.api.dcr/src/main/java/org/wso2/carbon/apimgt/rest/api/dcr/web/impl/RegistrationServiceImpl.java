@@ -122,7 +122,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             }
 
             if (isUserSuperAdmin(authUserName)) {
-                String tenantDomain = MultitenantUtils.getTenantDomain(owner);
+                String tenantDomain = MultitenantUtils.getTenantDomain(authUserName);
                 String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(owner);
                 try {
                     int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
