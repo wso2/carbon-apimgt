@@ -577,14 +577,19 @@ public final class EncryptionKeyGenerator {
     private static String generateHexKey() {
 
         byte[] keyBytes = new byte[KEY_BYTES];
-        SECURE_RANDOM.nextBytes(keyBytes);
         char[] hexBuffer = new char[KEY_BYTES * 2];
-        for (int i = 0; i < keyBytes.length; i++) {
-            int value = keyBytes[i] & 0xFF;
-            hexBuffer[i * 2] = HEX_DIGITS[value >>> 4];
-            hexBuffer[i * 2 + 1] = HEX_DIGITS[value & 0x0F];
+        try {
+            SECURE_RANDOM.nextBytes(keyBytes);
+            for (int i = 0; i < keyBytes.length; i++) {
+                int value = keyBytes[i] & 0xFF;
+                hexBuffer[i * 2] = HEX_DIGITS[value >>> 4];
+                hexBuffer[i * 2 + 1] = HEX_DIGITS[value & 0x0F];
+            }
+            return new String(hexBuffer);
+        } finally {
+            Arrays.fill(keyBytes, (byte) 0);
+            Arrays.fill(hexBuffer, '\0');
         }
-        return new String(hexBuffer);
     }
 
     /**
