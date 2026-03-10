@@ -31,8 +31,6 @@ public class PlatformGateway {
     private String displayName;
     private String description;
     private String vhost;
-    private boolean critical;
-    private String functionalityType;
     private String properties;
     private boolean active;
     private Date createdAt;
@@ -84,22 +82,6 @@ public class PlatformGateway {
 
     public void setVhost(String vhost) {
         this.vhost = vhost;
-    }
-
-    public boolean isCritical() {
-        return critical;
-    }
-
-    public void setCritical(boolean critical) {
-        this.critical = critical;
-    }
-
-    public String getFunctionalityType() {
-        return functionalityType;
-    }
-
-    public void setFunctionalityType(String functionalityType) {
-        this.functionalityType = functionalityType;
     }
 
     public String getProperties() {

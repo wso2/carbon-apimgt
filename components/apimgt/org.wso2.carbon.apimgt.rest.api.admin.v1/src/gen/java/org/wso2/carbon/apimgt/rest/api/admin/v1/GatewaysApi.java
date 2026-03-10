@@ -61,7 +61,7 @@ GatewaysApiService delegate = new GatewaysApiServiceImpl();
     @Path("/{gatewayId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Update a platform gateway", notes = "Update platform gateway metadata. Only the provided fields are updated; name, vhost, and functionalityType cannot be changed (platform API parity). Updatable fields: displayName, description, isCritical, properties. On-prem may also allow updating permissions (visibility/roles) for the gateway environment. ", response = PlatformGatewayDTO.class, authorizations = {
+    @ApiOperation(value = "Update a platform gateway", notes = "Update platform gateway metadata. Only the provided fields are updated; name and vhost cannot be changed (platform API parity). Updatable fields: displayName, description, properties. On-prem may also allow updating permissions (visibility/roles) for the gateway environment. ", response = PlatformGatewayDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })

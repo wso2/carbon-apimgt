@@ -11,7 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CreatePlatformGatewayRequest
 import javax.validation.constraints.*;
 
 /**
- * Request body for creating a platform gateway (name pattern, functionalityType enum, optional properties).
+ * Request body for creating a platform gateway (name pattern, optional properties).
  **/
 
 import io.swagger.annotations.*;
@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Request body for creating a platform gateway (name pattern, functionalityType enum, optional properties).")
+@ApiModel(description = "Request body for creating a platform gateway (name pattern, optional properties).")
 
 public class CreatePlatformGatewayRequestDTO   {
   
@@ -31,40 +31,6 @@ public class CreatePlatformGatewayRequestDTO   {
     private String displayName = null;
     private String description = null;
     private String vhost = null;
-    private Boolean isCritical = false;
-
-    @XmlType(name="FunctionalityTypeEnum")
-    @XmlEnum(String.class)
-    public enum FunctionalityTypeEnum {
-        REGULAR("regular"),
-        AI("ai"),
-        EVENT("event");
-        private String value;
-
-        FunctionalityTypeEnum (String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static FunctionalityTypeEnum fromValue(String v) {
-            for (FunctionalityTypeEnum b : FunctionalityTypeEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-return null;
-        }
-    }
-    private FunctionalityTypeEnum functionalityType = FunctionalityTypeEnum.REGULAR;
     private Map<String, Object> properties = new HashMap<String, Object>();
     private CreatePlatformGatewayRequestPermissionsDTO permissions = null;
 
@@ -144,43 +110,6 @@ return null;
   }
 
   /**
-   * Whether the gateway is marked as critical
-   **/
-  public CreatePlatformGatewayRequestDTO isCritical(Boolean isCritical) {
-    this.isCritical = isCritical;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "Whether the gateway is marked as critical")
-  @JsonProperty("isCritical")
-  public Boolean isIsCritical() {
-    return isCritical;
-  }
-  public void setIsCritical(Boolean isCritical) {
-    this.isCritical = isCritical;
-  }
-
-  /**
-   * Type of gateway functionality
-   **/
-  public CreatePlatformGatewayRequestDTO functionalityType(FunctionalityTypeEnum functionalityType) {
-    this.functionalityType = functionalityType;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "regular", required = true, value = "Type of gateway functionality")
-  @JsonProperty("functionalityType")
-  @NotNull
-  public FunctionalityTypeEnum getFunctionalityType() {
-    return functionalityType;
-  }
-  public void setFunctionalityType(FunctionalityTypeEnum functionalityType) {
-    this.functionalityType = functionalityType;
-  }
-
-  /**
    * Custom key-value properties for the gateway
    **/
   public CreatePlatformGatewayRequestDTO properties(Map<String, Object> properties) {
@@ -230,15 +159,13 @@ return null;
         Objects.equals(displayName, createPlatformGatewayRequest.displayName) &&
         Objects.equals(description, createPlatformGatewayRequest.description) &&
         Objects.equals(vhost, createPlatformGatewayRequest.vhost) &&
-        Objects.equals(isCritical, createPlatformGatewayRequest.isCritical) &&
-        Objects.equals(functionalityType, createPlatformGatewayRequest.functionalityType) &&
         Objects.equals(properties, createPlatformGatewayRequest.properties) &&
         Objects.equals(permissions, createPlatformGatewayRequest.permissions);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, displayName, description, vhost, isCritical, functionalityType, properties, permissions);
+    return Objects.hash(name, displayName, description, vhost, properties, permissions);
   }
 
   @Override
@@ -250,8 +177,6 @@ return null;
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
-    sb.append("    isCritical: ").append(toIndentedString(isCritical)).append("\n");
-    sb.append("    functionalityType: ").append(toIndentedString(functionalityType)).append("\n");
     sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
     sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
     sb.append("}");

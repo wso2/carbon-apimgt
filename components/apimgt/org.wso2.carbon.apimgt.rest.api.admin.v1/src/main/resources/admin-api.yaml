@@ -2356,10 +2356,9 @@ paths:
         - Platform Gateways
       summary: Update a platform gateway
       description: |
-        Update platform gateway metadata. Only the provided fields are updated; name, vhost,
-        and functionalityType cannot be changed (platform API parity). Updatable fields:
-        displayName, description, isCritical, properties. On-prem may also allow updating
-        permissions (visibility/roles) for the gateway environment.
+        Update platform gateway metadata. Only the provided fields are updated; name and vhost
+        cannot be changed (platform API parity). Updatable fields: displayName, description,
+        properties. On-prem may also allow updating permissions (visibility/roles) for the gateway environment.
       parameters:
         - name: gatewayId
           in: path
@@ -5767,12 +5766,11 @@ components:
             - EXPIRED
     CreatePlatformGatewayRequest:
       title: Create Platform Gateway Request
-      description: Request body for creating a platform gateway (name pattern, functionalityType enum, optional properties).
+      description: Request body for creating a platform gateway (name pattern, optional properties).
       required:
         - name
         - displayName
         - vhost
-        - functionalityType
       type: object
       properties:
         name:
@@ -5798,16 +5796,6 @@ components:
           minLength: 1
           description: Virtual host (domain name) for the gateway
           example: mg.wso2.com
-        isCritical:
-          type: boolean
-          default: false
-          description: Whether the gateway is marked as critical
-        functionalityType:
-          type: string
-          enum: [regular, ai, event]
-          default: regular
-          description: Type of gateway functionality
-          example: regular
         properties:
           type: object
           additionalProperties: true
@@ -5839,7 +5827,7 @@ components:
       title: Update Platform Gateway Request
       description: |
         Request body for PATCH /gateways/{gatewayId}. All fields are optional; only provided
-        fields are updated. Name, vhost, and functionalityType are not updatable (platform API parity).
+        fields are updated. Name and vhost are not updatable (platform API parity).
       type: object
       properties:
         displayName:
@@ -5852,9 +5840,6 @@ components:
           type: string
           maxLength: 1023
           description: Optional description
-        isCritical:
-          type: boolean
-          description: Whether the gateway is marked as critical
         properties:
           type: object
           additionalProperties: true
@@ -5897,11 +5882,6 @@ components:
           description: Custom key-value properties
         vhost:
           type: string
-        isCritical:
-          type: boolean
-        functionalityType:
-          type: string
-          enum: [regular, ai, event]
         isActive:
           type: boolean
           description: Indicates if the gateway is currently connected to the control plane via WebSocket

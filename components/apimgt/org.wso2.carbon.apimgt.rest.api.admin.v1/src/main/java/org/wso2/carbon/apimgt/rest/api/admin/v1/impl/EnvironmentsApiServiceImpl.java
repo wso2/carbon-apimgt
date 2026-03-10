@@ -12,7 +12,6 @@ import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -235,39 +234,21 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
     }
 
     /**
-     * Returns platform gateways that have an AM_GW_INSTANCES row (live IS_ACTIVE from DB).
-     * Prefers PlatformGatewayService when registered; otherwise uses PlatformGatewayDAO and
-     * PlatformGatewayServiceImpl.fromDAO for conversion.
+     * Returns platform gateways that have an AM_GW_INSTANCES row (live data from AM_GATEWAY_ENVIRONMENT).
+     * Uses PlatformGatewayService when registered; otherwise PlatformGatewayServiceImpl directly.
      */
     private List<PlatformGateway> getPlatformGatewaysWithInstance(String organization) {
         PlatformGatewayService service = ServiceReferenceHolder.getInstance().getPlatformGatewayService();
-        if (service != null) {
-            try {
-                List<PlatformGateway> list = service.listGatewaysByOrganizationWithInstance(organization);
-                if (list != null && !list.isEmpty()) {
-                    return list;
-                }
-            } catch (APIManagementException e) {
-                log.warn("Could not list platform gateways via service, falling back to DAO", e);
-            }
+        if (service == null) {
+            service = PlatformGatewayServiceImpl.getInstance();
         }
         try {
-            List<PlatformGatewayDAO.PlatformGateway> daoList =
-                    PlatformGatewayDAO.getInstance().listGatewaysByOrganizationWithInstance(organization);
-            if (daoList != null && !daoList.isEmpty()) {
-                List<PlatformGateway> result = new ArrayList<>(daoList.size());
-                for (PlatformGatewayDAO.PlatformGateway gw : daoList) {
-                    PlatformGateway api = PlatformGatewayServiceImpl.fromDAO(gw);
-                    if (api != null) {
-                        result.add(api);
-                    }
-                }
-                return result;
-            }
+            List<PlatformGateway> list = service.listGatewaysByOrganizationWithInstance(organization);
+            return (list != null && !list.isEmpty()) ? list : null;
         } catch (APIManagementException e) {
             log.warn("Could not list platform gateways for environments", e);
+            return null;
         }
-        return null;
     }
 
     /**

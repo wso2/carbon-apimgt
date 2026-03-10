@@ -15792,6 +15792,10 @@ public class ApiMgtDAO {
                     } catch (IOException e) {
                         log.error("Error while converting configurations in " + uuid, e);
                     }
+                    if (additionalProperties == null) {
+                        additionalProperties = new HashMap<>();
+                    }
+                    additionalProperties.put("organization", tenantDomain);
 
                     Environment env = new Environment();
                     env.setId(id);
@@ -15934,6 +15938,10 @@ public class ApiMgtDAO {
                     } catch (IOException e) {
                         log.error("Error while converting configurations in " + uuid, e);
                     }
+                    if (additionalProperties == null) {
+                        additionalProperties = new HashMap<>();
+                    }
+                    additionalProperties.put("organization", tenantDomain);
 
                     env = new Environment();
                     env.setId(id);
@@ -15952,6 +15960,72 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to get Environment in tenant domain:" + tenantDomain, e);
+        }
+        return env;
+    }
+
+    /**
+     * Returns the Environment for the given UUID (any organization). Used when only the gateway/env UUID is known
+     * (e.g. platform gateway get by id).
+     *
+     * @param uuid UUID of the environment
+     * @return Gateway environment with given UUID, or null if not found
+     */
+    public Environment getEnvironmentByUuid(String uuid) throws APIManagementException {
+        if (StringUtils.isBlank(uuid)) {
+            return null;
+        }
+        Environment env = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_BY_UUID_SQL)) {
+            prepStmt.setString(1, uuid);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    Integer id = rs.getInt("ID");
+                    String name = rs.getString("NAME");
+                    String displayName = rs.getString("DISPLAY_NAME");
+                    String description = rs.getString("DESCRIPTION");
+                    String provider = rs.getString("PROVIDER");
+                    String gatewayType = rs.getString("GATEWAY_TYPE");
+                    String organization = rs.getString("ORGANIZATION");
+                    String mode = rs.getString("ENV_MODE");
+                    if (StringUtils.isEmpty(mode)) {
+                        mode = GatewayMode.WRITE_ONLY.getMode();
+                    }
+                    int scheduledTime = rs.getInt("SCHEDULED_TIME");
+                    if (rs.wasNull()) {
+                        scheduledTime = 0;
+                    }
+                    Map<String, String> additionalProperties = new HashMap<>();
+                    try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
+                        if (configuration != null) {
+                            String configurationContent = IOUtils.toString(configuration);
+                            additionalProperties = new Gson().fromJson(configurationContent, Map.class);
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while converting configurations in " + uuid, e);
+                    }
+                    if (additionalProperties == null) {
+                        additionalProperties = new HashMap<>();
+                    }
+                    additionalProperties.put("organization", organization);
+                    env = new Environment();
+                    env.setId(id);
+                    env.setUuid(uuid);
+                    env.setName(name);
+                    env.setDisplayName(displayName);
+                    env.setDescription(description);
+                    env.setProvider(provider);
+                    env.setGatewayType(gatewayType);
+                    env.setMode(mode);
+                    env.setApiDiscoveryScheduledWindow(scheduledTime);
+                    env.setVhosts(getVhostGatewayEnvironments(connection, id));
+                    env.setPermissions(getGatewayVisibilityPermissions(uuid));
+                    env.setAdditionalProperties(additionalProperties);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Environment by UUID: " + uuid, e);
         }
         return env;
     }

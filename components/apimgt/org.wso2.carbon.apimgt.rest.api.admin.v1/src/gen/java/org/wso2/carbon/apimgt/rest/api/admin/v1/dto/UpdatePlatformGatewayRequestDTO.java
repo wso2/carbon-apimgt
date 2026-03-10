@@ -11,7 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.UpdatePlatformGatewayRequest
 import javax.validation.constraints.*;
 
 /**
- * Request body for PATCH /gateways/{gatewayId}. All fields are optional; only provided fields are updated. Name, vhost, and functionalityType are not updatable (platform API parity). 
+ * Request body for PATCH /gateways/{gatewayId}. All fields are optional; only provided fields are updated. Name and vhost are not updatable (platform API parity). 
  **/
 
 import io.swagger.annotations.*;
@@ -23,13 +23,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Request body for PATCH /gateways/{gatewayId}. All fields are optional; only provided fields are updated. Name, vhost, and functionalityType are not updatable (platform API parity). ")
+@ApiModel(description = "Request body for PATCH /gateways/{gatewayId}. All fields are optional; only provided fields are updated. Name and vhost are not updatable (platform API parity). ")
 
 public class UpdatePlatformGatewayRequestDTO   {
   
     private String displayName = null;
     private String description = null;
-    private Boolean isCritical = null;
     private Map<String, Object> properties = new HashMap<String, Object>();
     private UpdatePlatformGatewayRequestPermissionsDTO permissions = null;
 
@@ -67,24 +66,6 @@ public class UpdatePlatformGatewayRequestDTO   {
   }
   public void setDescription(String description) {
     this.description = description;
-  }
-
-  /**
-   * Whether the gateway is marked as critical
-   **/
-  public UpdatePlatformGatewayRequestDTO isCritical(Boolean isCritical) {
-    this.isCritical = isCritical;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "Whether the gateway is marked as critical")
-  @JsonProperty("isCritical")
-  public Boolean isIsCritical() {
-    return isCritical;
-  }
-  public void setIsCritical(Boolean isCritical) {
-    this.isCritical = isCritical;
   }
 
   /**
@@ -135,14 +116,13 @@ public class UpdatePlatformGatewayRequestDTO   {
     UpdatePlatformGatewayRequestDTO updatePlatformGatewayRequest = (UpdatePlatformGatewayRequestDTO) o;
     return Objects.equals(displayName, updatePlatformGatewayRequest.displayName) &&
         Objects.equals(description, updatePlatformGatewayRequest.description) &&
-        Objects.equals(isCritical, updatePlatformGatewayRequest.isCritical) &&
         Objects.equals(properties, updatePlatformGatewayRequest.properties) &&
         Objects.equals(permissions, updatePlatformGatewayRequest.permissions);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(displayName, description, isCritical, properties, permissions);
+    return Objects.hash(displayName, description, properties, permissions);
   }
 
   @Override
@@ -152,7 +132,6 @@ public class UpdatePlatformGatewayRequestDTO   {
     
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    isCritical: ").append(toIndentedString(isCritical)).append("\n");
     sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
     sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
     sb.append("}");

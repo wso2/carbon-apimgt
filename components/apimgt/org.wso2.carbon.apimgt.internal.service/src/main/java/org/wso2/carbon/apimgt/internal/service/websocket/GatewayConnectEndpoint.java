@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 
 import java.io.IOException;
@@ -123,7 +124,7 @@ public class GatewayConnectEndpoint {
         PlatformGatewaySessionRegistry.getInstance().register(gateway.id, session);
 
         try {
-            PlatformGatewayDAO.getInstance().updateGatewayActiveStatus(gateway.id, true);
+            PlatformGatewayServiceImpl.getInstance().updateGatewayActiveStatus(gateway.id, gateway.organizationId, true);
             if (log.isDebugEnabled()) {
                 log.debug("Gateway active status updated to true: gatewayId=" + gateway.id);
             }
@@ -225,7 +226,7 @@ public class GatewayConnectEndpoint {
         if (gateway != null) {
             PlatformGatewaySessionRegistry.getInstance().unregister(gateway.id, session);
             try {
-                PlatformGatewayDAO.getInstance().updateGatewayActiveStatus(gateway.id, false);
+                PlatformGatewayServiceImpl.getInstance().updateGatewayActiveStatus(gateway.id, gateway.organizationId, false);
             } catch (APIManagementException e) {
                 log.warn("Failed to update gateway active status to false: gatewayId=" + gateway.id + ", error="
                         + e.getMessage());

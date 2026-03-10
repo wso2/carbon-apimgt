@@ -99,8 +99,6 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                 body.getDisplayName(),
                 body.getDescription(),
                 body.getVhost(),
-                body.isIsCritical() != null && body.isIsCritical(),
-                body.getFunctionalityType().value(),
                 propertiesJson);
         PlatformGateway gateway = result.getGateway();
         GatewayVisibilityPermissionConfigurationDTO visibility = buildGatewayVisibility(body);
@@ -164,7 +162,6 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         // Update fields that weren't set during initial creation
         Map<String, String> environmentAdditionalProperties = new HashMap<>();
         environmentAdditionalProperties.put("platformGatewayId", platformGatewayId);
-        environmentAdditionalProperties.put("platformGatewayFunctionalityType", body.getFunctionalityType().value());
         existingEnvironment.setAdditionalProperties(environmentAdditionalProperties);
 
         List<VHost> vHosts = new ArrayList<>();
@@ -317,10 +314,9 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
         String displayName = body.getDisplayName();
         String description = body.getDescription();
-        Boolean isCritical = body.isIsCritical();
         String propertiesJson = serializeProperties(body.getProperties());
         PlatformGateway gateway = service.updateGateway(organization, gatewayId, displayName, description,
-                isCritical, propertiesJson);
+                propertiesJson);
         // Keep gateway environment in sync: update permissions and/or displayName/description so GET /environments reflects them
         if (body.getPermissions() != null || displayName != null || description != null) {
             updateEnvironmentForPlatformGatewayPatch(organization, gateway, body.getPermissions(),
@@ -400,9 +396,6 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         }
         if (StringUtils.isNotBlank(body.getDescription()) && body.getDescription().length() > 1023) {
             throw RestApiUtil.buildBadRequestException("description must be at most 1023 characters");
-        }
-        if (body.getFunctionalityType() == null) {
-            throw RestApiUtil.buildBadRequestException("functionalityType is required");
         }
     }
 
@@ -489,15 +482,6 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
     }
 
     /** Convert DB functionalityType string to response enum; defaults to REGULAR if unknown. */
-    private static PlatformGatewayDTO.FunctionalityTypeEnum functionalityTypeFromString(String value) {
-
-        if (value == null || value.trim().isEmpty()) {
-            return PlatformGatewayDTO.FunctionalityTypeEnum.REGULAR;
-        }
-        PlatformGatewayDTO.FunctionalityTypeEnum e = PlatformGatewayDTO.FunctionalityTypeEnum.fromValue(value.trim());
-        return e != null ? e : PlatformGatewayDTO.FunctionalityTypeEnum.REGULAR;
-    }
-
     private PlatformGatewayDTO toDTO(PlatformGateway g, GatewayVisibilityPermissionConfigurationDTO permissions) {
 
         PlatformGatewayDTO dto = new PlatformGatewayDTO();
@@ -508,8 +492,6 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         dto.setDescription(g.getDescription());
         dto.setProperties(deserializeProperties(g.getProperties()));
         dto.setVhost(g.getVhost());
-        dto.setIsCritical(g.isCritical());
-        dto.setFunctionalityType(functionalityTypeFromString(g.getFunctionalityType()));
         dto.setIsActive(g.isActive());
         dto.setPermissions(mapPermissionsToDTO(permissions));
         dto.setCreatedAt(g.getCreatedAt());
@@ -528,8 +510,6 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         dto.setDescription(g.getDescription());
         dto.setProperties(deserializeProperties(g.getProperties()));
         dto.setVhost(g.getVhost());
-        dto.setIsCritical(g.isCritical());
-        dto.setFunctionalityType(functionalityTypeFromStringWithToken(g.getFunctionalityType()));
         dto.setIsActive(g.isActive());
         dto.setPermissions(mapPermissionsToDTO(permissions));
         dto.setCreatedAt(g.getCreatedAt());
@@ -561,17 +541,6 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             dto.setRoles(new ArrayList<>(permissions.getRoles()));
         }
         return dto;
-    }
-
-    private static PlatformGatewayWithTokenDTO.FunctionalityTypeEnum functionalityTypeFromStringWithToken(
-            String value) {
-
-        if (value == null || value.trim().isEmpty()) {
-            return PlatformGatewayWithTokenDTO.FunctionalityTypeEnum.REGULAR;
-        }
-        PlatformGatewayWithTokenDTO.FunctionalityTypeEnum e =
-                PlatformGatewayWithTokenDTO.FunctionalityTypeEnum.fromValue(value.trim());
-        return e != null ? e : PlatformGatewayWithTokenDTO.FunctionalityTypeEnum.REGULAR;
     }
 
 }
