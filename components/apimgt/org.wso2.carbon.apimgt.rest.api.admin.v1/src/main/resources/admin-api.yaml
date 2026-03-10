@@ -2351,6 +2351,41 @@ paths:
           "https://127.0.0.1:9443/api/am/admin/v4/gateways/{gatewayId}/regenerate-token"'
 
   /gateways/{gatewayId}:
+    patch:
+      tags:
+        - Platform Gateways
+      summary: Update a platform gateway
+      description: |
+        Update platform gateway metadata. Only the provided fields are updated; name, vhost,
+        and functionalityType cannot be changed (platform API parity). Updatable fields:
+        displayName, description, isCritical, properties. On-prem may also allow updating
+        permissions (visibility/roles) for the gateway environment.
+      parameters:
+        - name: gatewayId
+          in: path
+          description: Gateway UUID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePlatformGatewayRequest'
+      responses:
+        200:
+          description: OK. Updated platform gateway in the response body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformGateway'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
     delete:
       tags:
         - Platform Gateways
@@ -5800,6 +5835,44 @@ components:
           example:
             permissionType: ALLOW
             roles: ["admin", "publisher"]
+    UpdatePlatformGatewayRequest:
+      title: Update Platform Gateway Request
+      description: |
+        Request body for PATCH /gateways/{gatewayId}. All fields are optional; only provided
+        fields are updated. Name, vhost, and functionalityType are not updatable (platform API parity).
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Human-readable gateway name
+          example: Production Gateway 01
+        description:
+          type: string
+          maxLength: 1023
+          description: Optional description
+        isCritical:
+          type: boolean
+          description: Whether the gateway is marked as critical
+        properties:
+          type: object
+          additionalProperties: true
+          description: Custom key-value properties for the gateway
+          example: {"region": "us-west", "tier": "premium"}
+        permissions:
+          type: object
+          description: Gateway visibility permissions (on-prem extension)
+          properties:
+            permissionType:
+              type: string
+              enum: [PUBLIC, ALLOW, DENY]
+              default: PUBLIC
+            roles:
+              type: array
+              items:
+                type: string
+              description: List of roles for ALLOW/DENY permission types
     PlatformGateway:
       title: Platform Gateway
       description: Platform gateway response (without registration token). Used for list and get.

@@ -228,6 +228,29 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         dao.deleteGatewayWithReferences(gatewayId, gateway.name, organizationId);
     }
 
+    @Override
+    public PlatformGateway updateGateway(String organizationId, String gatewayId, String displayName,
+                                         String description, Boolean isCritical, String propertiesJson)
+            throws APIManagementException {
+        PlatformGatewayDAO dao = PlatformGatewayDAO.getInstance();
+        PlatformGatewayDAO.PlatformGateway existing = dao.getGatewayById(gatewayId);
+        if (existing == null) {
+            throw new APIManagementException("Platform gateway not found: " + gatewayId,
+                    ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
+        }
+        if (!organizationId.equals(existing.organizationId)) {
+            throw new APIManagementException("Platform gateway not found in organization: " + gatewayId,
+                    ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
+        }
+        String mergedDisplayName = displayName != null ? displayName : existing.displayName;
+        String mergedDescription = description != null ? description : existing.description;
+        boolean mergedIsCritical = isCritical != null ? isCritical : existing.isCritical;
+        String mergedProperties = propertiesJson != null ? propertiesJson : existing.properties;
+        PlatformGatewayDAO.PlatformGateway updated = dao.updateGatewayMetadata(
+                gatewayId, organizationId, mergedDisplayName, mergedDescription, mergedIsCritical, mergedProperties);
+        return updated != null ? toApiModel(updated) : null;
+    }
+
     private static PlatformGateway toApiModel(PlatformGatewayDAO.PlatformGateway g) {
         return fromDAO(g);
     }

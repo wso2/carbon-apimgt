@@ -110,4 +110,22 @@ public interface PlatformGatewayService {
      * @throws APIManagementException if gateway not found, not in organization, or has active API deployments
      */
     void deleteGateway(String organizationId, String gatewayId) throws APIManagementException;
+
+    /**
+     * Update platform gateway metadata. Only updatable fields (displayName, description, isCritical,
+     * properties) are applied; null values mean leave existing value unchanged. Name, vhost, and
+     * functionalityType are not updatable (platform API parity).
+     *
+     * @param organizationId organization id
+     * @param gatewayId      gateway id
+     * @param displayName    new display name, or null to keep existing
+     * @param description    new description, or null to keep existing
+     * @param isCritical     new isCritical flag, or null to keep existing
+     * @param propertiesJson new properties JSON string, or null to keep existing
+     * @return the updated platform gateway
+     * @throws APIManagementException if gateway not found or not in organization (use ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND for 404)
+     */
+    PlatformGateway updateGateway(String organizationId, String gatewayId, String displayName,
+                                  String description, Boolean isCritical, String propertiesJson)
+            throws APIManagementException;
 }

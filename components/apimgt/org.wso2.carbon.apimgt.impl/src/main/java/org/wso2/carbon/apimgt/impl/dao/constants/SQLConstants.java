@@ -5218,6 +5218,9 @@ public class SQLConstants {
                         "WHERE t.ID = ? AND t.STATUS = 'active'";
         public static final String UPDATE_GATEWAY_ACTIVE_SQL =
                 "UPDATE AM_PLATFORM_GATEWAY SET IS_ACTIVE = ?, UPDATED_AT = ? WHERE ID = ?";
+        /** Update gateway metadata (displayName, description, isCritical, properties only; name, vhost, functionalityType not updated). */
+        public static final String UPDATE_GATEWAY_METADATA_SQL =
+                "UPDATE AM_PLATFORM_GATEWAY SET DISPLAY_NAME = ?, DESCRIPTION = ?, IS_CRITICAL = ?, PROPERTIES = ?, UPDATED_AT = ? WHERE ID = ? AND ORGANIZATION_ID = ?";
         /** Revoke all active tokens for a gateway (used before regenerating a new token). */
         public static final String REVOKE_TOKENS_BY_GATEWAY_ID_SQL =
                 "UPDATE AM_PLATFORM_GATEWAY_TOKEN SET STATUS = 'revoked', REVOKED_AT = ? WHERE GATEWAY_ID = ? AND STATUS = 'active'";

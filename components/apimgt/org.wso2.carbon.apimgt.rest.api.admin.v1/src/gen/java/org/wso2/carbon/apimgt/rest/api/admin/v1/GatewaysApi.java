@@ -2,8 +2,10 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CreatePlatformGatewayRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayWithTokenDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.UpdatePlatformGatewayRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.GatewaysApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.GatewaysApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -53,6 +55,23 @@ GatewaysApiService delegate = new GatewaysApiServiceImpl();
         @ApiResponse(code = 409, message = "Conflict. Cannot delete gateway while API revisions are deployed to it.", response = ErrorDTO.class) })
     public Response gatewaysGatewayIdDelete(@ApiParam(value = "Gateway UUID",required=true) @PathParam("gatewayId") String gatewayId) throws APIManagementException{
         return delegate.gatewaysGatewayIdDelete(gatewayId, securityContext);
+    }
+
+    @PATCH
+    @Path("/{gatewayId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update a platform gateway", notes = "Update platform gateway metadata. Only the provided fields are updated; name, vhost, and functionalityType cannot be changed (platform API parity). Updatable fields: displayName, description, isCritical, properties. On-prem may also allow updating permissions (visibility/roles) for the gateway environment. ", response = PlatformGatewayDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+        })
+    }, tags={ "Platform Gateways",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Updated platform gateway in the response body.", response = PlatformGatewayDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response gatewaysGatewayIdPatch(@ApiParam(value = "Gateway UUID",required=true) @PathParam("gatewayId") String gatewayId, @ApiParam(value = "" ) UpdatePlatformGatewayRequestDTO updatePlatformGatewayRequestDTO) throws APIManagementException{
+        return delegate.gatewaysGatewayIdPatch(gatewayId, updatePlatformGatewayRequestDTO, securityContext);
     }
 
     @POST

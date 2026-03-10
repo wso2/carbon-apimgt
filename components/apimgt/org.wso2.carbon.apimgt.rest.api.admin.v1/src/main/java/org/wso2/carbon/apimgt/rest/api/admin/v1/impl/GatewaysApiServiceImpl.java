@@ -43,6 +43,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayPermissionsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayWithTokenDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.UpdatePlatformGatewayRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.UpdatePlatformGatewayRequestPermissionsDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -300,6 +302,41 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
     }
 
     @Override
+    public Response gatewaysGatewayIdPatch(String gatewayId, UpdatePlatformGatewayRequestDTO body,
+            MessageContext messageContext) throws APIManagementException {
+        validateIdentifier(gatewayId, "gatewayId");
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        if (body == null) {
+            throw RestApiUtil.buildBadRequestException("Request body is required");
+        }
+        validateUpdateBody(body);
+        if (log.isInfoEnabled()) {
+            log.info("Updating platform gateway: " + gatewayId);
+        }
+        PlatformGatewayService service =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        String displayName = body.getDisplayName();
+        String description = body.getDescription();
+        Boolean isCritical = body.isIsCritical();
+        String propertiesJson = serializeProperties(body.getProperties());
+        PlatformGateway gateway = service.updateGateway(organization, gatewayId, displayName, description,
+                isCritical, propertiesJson);
+        // Keep gateway environment in sync: update permissions and/or displayName/description so GET /environments reflects them
+        if (body.getPermissions() != null || displayName != null || description != null) {
+            updateEnvironmentForPlatformGatewayPatch(organization, gateway, body.getPermissions(),
+                    displayName != null ? gateway.getDisplayName() : null,
+                    description != null ? gateway.getDescription() : null);
+        }
+        GatewayVisibilityPermissionConfigurationDTO permissions = null;
+        APIAdmin apiAdmin = new APIAdminImpl();
+        Environment env = apiAdmin.getEnvironment(organization, gateway.getId());
+        if (env != null) {
+            permissions = env.getPermissions();
+        }
+        return Response.ok().entity(toDTO(gateway, permissions)).build();
+    }
+
+    @Override
     public Response gatewaysGatewayIdDelete(String gatewayId, MessageContext messageContext)
             throws APIManagementException {
         validateIdentifier(gatewayId, "gatewayId");
@@ -374,6 +411,58 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (StringUtils.isBlank(identifier)) {
             throw RestApiUtil.buildBadRequestException(fieldName + " is required");
         }
+    }
+
+    private void validateUpdateBody(UpdatePlatformGatewayRequestDTO body) throws APIManagementException {
+        if (body.getDisplayName() != null && body.getDisplayName().length() > 128) {
+            throw RestApiUtil.buildBadRequestException("displayName must be at most 128 characters");
+        }
+        if (StringUtils.isNotBlank(body.getDescription()) && body.getDescription().length() > 1023) {
+            throw RestApiUtil.buildBadRequestException("description must be at most 1023 characters");
+        }
+    }
+
+    /**
+     * Update the gateway environment after PATCH: permissions and/or displayName/description so GET /environments reflects them.
+     */
+    private void updateEnvironmentForPlatformGatewayPatch(String organization, PlatformGateway gateway,
+            UpdatePlatformGatewayRequestPermissionsDTO requestPermissions, String newDisplayName, String newDescription)
+            throws APIManagementException {
+        APIAdmin apiAdmin = new APIAdminImpl();
+        Environment existingEnvironment = apiAdmin.getEnvironment(organization, gateway.getId());
+        if (existingEnvironment == null) {
+            log.warn("Environment not found for platform gateway ID: " + gateway.getId() + ", skipping environment update");
+            return;
+        }
+        if (newDisplayName != null) {
+            existingEnvironment.setDisplayName(newDisplayName);
+        }
+        if (newDescription != null) {
+            existingEnvironment.setDescription(newDescription);
+        }
+        if (requestPermissions != null) {
+            GatewayVisibilityPermissionConfigurationDTO visibility = new GatewayVisibilityPermissionConfigurationDTO();
+            if (requestPermissions.getPermissionType() != null) {
+                switch (requestPermissions.getPermissionType()) {
+                    case ALLOW:
+                        visibility.setPermissionType("ALLOW");
+                        break;
+                    case DENY:
+                        visibility.setPermissionType("DENY");
+                        break;
+                    default:
+                        visibility.setPermissionType("PUBLIC");
+                        break;
+                }
+            } else {
+                visibility.setPermissionType("PUBLIC");
+            }
+            if (requestPermissions.getRoles() != null) {
+                visibility.setRoles(new ArrayList<>(requestPermissions.getRoles()));
+            }
+            existingEnvironment.setPermissions(visibility);
+        }
+        apiAdmin.updateEnvironment(organization, existingEnvironment);
     }
 
     /** Serialize properties map to JSON string for DB storage; null if empty/null. */

@@ -273,6 +273,38 @@ public class PlatformGatewayDAO {
     }
 
     /**
+     * Update platform gateway metadata (displayName, description, isCritical, properties).
+     * Only these columns are updated; name, vhost, functionalityType are not changed.
+     * Caller must pass the full values for updatable fields (merge with existing when doing PATCH).
+     *
+     * @return updated gateway row, or null if no row matched (wrong id or organization)
+     */
+    public PlatformGateway updateGatewayMetadata(String gatewayId, String organizationId,
+                                                  String displayName, String description, boolean isCritical,
+                                                  String propertiesJson) throws APIManagementException {
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(
+                     SQLConstants.PlatformGatewaySQLConstants.UPDATE_GATEWAY_METADATA_SQL)) {
+            ps.setString(1, displayName);
+            ps.setString(2, description);
+            ps.setBoolean(3, isCritical);
+            ps.setString(4, propertiesJson);
+            ps.setTimestamp(5, now);
+            ps.setString(6, gatewayId);
+            ps.setString(7, organizationId);
+            int updated = ps.executeUpdate();
+            if (updated == 0) {
+                return null;
+            }
+            connection.commit();
+            return getGatewayById(gatewayId);
+        } catch (SQLException e) {
+            throw new APIManagementException("Error updating platform gateway metadata", e);
+        }
+    }
+
+    /**
      * Update gateway active status (e.g. connected/disconnected for control plane WebSocket).
      */
     public void updateGatewayActiveStatus(String gatewayId, boolean active) throws APIManagementException {
