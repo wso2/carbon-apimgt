@@ -81,6 +81,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
+    public Response applicationsApplicationIdUpgradeTokenTypePost(String applicationId, MessageContext messageContext) {
+        System.out.println("Inside applicationsApplicationIdUpgradeTokenTypePost");
+        return null;
+    }
+
+    @Override
     public Response applicationsApplicationIdDelete(String applicationId, MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {

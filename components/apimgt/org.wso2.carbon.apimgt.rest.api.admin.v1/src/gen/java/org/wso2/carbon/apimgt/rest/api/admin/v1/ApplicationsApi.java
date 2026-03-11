@@ -94,6 +94,25 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         return delegate.applicationsApplicationIdGet(applicationId, securityContext);
     }
 
+    @POST
+    @Path("/{applicationId}/upgrade-token-type")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Upgrade Application Token Type to JWT", notes = "This operation upgrades the token type of an application to JWT. Only applications currently using opaque tokens can be upgraded. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:app_token_type_upgrade", description = "Upgrade token type of an Application to JWT")
+        })
+    }, tags={ "Application",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Application token type changed successfully. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 409, message = "Conflict. The application is already using JWT. ", response = Void.class) })
+    public Response applicationsApplicationIdUpgradeTokenTypePost(@ApiParam(value = "Application UUID ",required=true) @PathParam("applicationId") String applicationId) throws APIManagementException{
+        return delegate.applicationsApplicationIdUpgradeTokenTypePost(applicationId, securityContext);
+    }
+
     @GET
     
     
@@ -102,6 +121,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:app_owner_change", description = "Retrieve and manage applications"),
+            @AuthorizationScope(scope = "apim:app_token_type_change", description = ""),
             @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications related operations"),
             @AuthorizationScope(scope = "apim:admin_application_view", description = "View Applications")
         })

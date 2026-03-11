@@ -1593,6 +1593,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:app_owner_change
+            - apim:app_token_type_change
             - apim:app_import_export
             - apim:admin_application_view
       x-code-samples:
@@ -1711,6 +1712,41 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v4/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b/change-owner?owner=admin"'
+
+  /applications/{applicationId}/upgrade-token-type:
+    post:
+      tags:
+        - Application
+      summary: Upgrade Application Token Type to JWT
+      description: |
+        This operation upgrades the token type of an application to JWT.
+        Only applications currently using opaque tokens can be upgraded.
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+      responses:
+        200:
+          description: |
+            OK.
+            Application token type changed successfully.
+          content: { }
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          description: |
+            Conflict.
+            The application is already using JWT.
+          content: { }
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:app_token_type_upgrade
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST \
+          -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" \
+          "https://127.0.0.1:9443/api/am/admin/v4/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b/upgrade-token-type"'
 
   ######################################################
   # AI Service Providers resource APIs
@@ -5408,6 +5444,15 @@ components:
         owner:
           type: string
           example: admin
+        tokenType:
+          type: string
+          enum:
+            - OAUTH
+            - JWT
+        createdTime:
+          type: string
+          readOnly: true
+          example: 1651555310208
         status:
           type: string
           example: APPROVED
@@ -7583,6 +7628,7 @@ components:
             apim:mediation_policy_view: View mediation policies
             apim:mediation_policy_create: Create and update mediation policies
             apim:app_owner_change: Retrieve and manage applications
+            apim:app_token_type_upgrade: Upgrade token type of an Application to JWT
             apim:app_import_export: Import and export applications related operations
             apim:api_import_export: Import and export APIs related operations
             apim:api_product_import_export: Import and export API Products related

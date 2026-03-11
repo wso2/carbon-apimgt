@@ -4518,12 +4518,14 @@ public class ApiMgtDAO {
                 Subscriber subscriber = new Subscriber(subscriberName);
                 application = new Application(applicationName, subscriber);
                 application.setName(applicationName);
+                application.setCreatedTime(rs.getString("APP_CREATED_TIME"));
                 application.setId(rs.getInt("APPLICATION_ID"));
                 application.setUUID(rs.getString("UUID"));
                 application.setGroupId(rs.getString("GROUP_ID"));
                 subscriber.setTenantId(rs.getInt("TENANT_ID"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setTokenType(rs.getString("TOKEN_TYPE"));
                 application.setOwner(subscriberName);
                 applicationList.add(application);
             }
