@@ -383,6 +383,11 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public void revokeAPIKey(String keyUUId, String tenantDomain) throws APIManagementException {
 
+        // Load existing metadata before revocation (revocation may remove/alter it)
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUId, tenantDomain);
+        if (apiKeyInfo.getKeyUUID() == null) {
+            throw new APIMgtResourceNotFoundException("Active API key not found for UUID: " + keyUUId);
+        }
         apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
     }
 
