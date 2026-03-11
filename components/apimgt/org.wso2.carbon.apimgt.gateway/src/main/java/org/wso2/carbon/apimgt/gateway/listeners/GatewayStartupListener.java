@@ -354,6 +354,11 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 log.debug(logMessage);
             }
             if (!(syncModeDeploymentCount > retryCount)) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    // Ignore
+                }
                 deployAPIsInSyncMode(tenantDomain);
             } else {
                 log.error("Maximum retry limit exceeded. Server is starting without deploying all synapse artifacts");
@@ -388,6 +393,11 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 log.debug(logMessage);
             }
             if (!(syncModeGatewayPolicyDeploymentCount > retryCount)) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    // Ignore
+                }
                 deployGatewayPoliciesInSyncMode(tenantDomain);
             } else {
                 log.error(
