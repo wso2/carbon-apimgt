@@ -54,15 +54,20 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing Application Registration Approval Workflow. Workflow Reference: " + workflowDTO.getWorkflowReference());
+            log.debug("Executing application registration approval workflow. Workflow reference: " + workflowDTO.getWorkflowReference());
         }
 
         ApplicationRegistrationWorkflowDTO appRegDTO = (ApplicationRegistrationWorkflowDTO) workflowDTO;
 
         Application application = appRegDTO.getApplication();
 
-        String message = "Approve request to create " + appRegDTO.getKeyType() + " keys for " + application.getName() +
-                " from requestor - " + appRegDTO.getUserName() + " with throttling tier - " + application.getTier();
+        String message = String.format(
+                "Approve request to create %s keys for %s from requestor - %s with throttling tier - %s",
+                appRegDTO.getKeyType(),
+                application.getName(),
+                appRegDTO.getUserName(),
+                application.getTier()
+        );
         workflowDTO.setWorkflowDescription(message);
         workflowDTO.setProperties(APPLICATION_NAME_PROPERTY, application.getName());
         workflowDTO.setProperties(APPLICATION_TIER_PROPERTY, application.getTier());
@@ -86,7 +91,7 @@ public class ApplicationRegistrationApprovalWorkflowExecutor extends AbstractApp
 
         super.execute(workflowDTO);
         if (log.isDebugEnabled()) {
-            log.debug("Application Registration Approval Workflow executed successfully. Workflow Reference: "
+            log.debug("Application registration approval workflow executed successfully. Workflow reference: "
                     + workflowDTO.getWorkflowReference());
         }
 

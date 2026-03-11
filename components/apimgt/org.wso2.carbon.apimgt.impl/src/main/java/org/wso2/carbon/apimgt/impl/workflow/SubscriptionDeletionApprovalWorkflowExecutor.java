@@ -48,12 +48,16 @@ public class SubscriptionDeletionApprovalWorkflowExecutor extends WorkflowExecut
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing Subscription Deletion Approval Workflow. Workflow Reference: " + workflowDTO.getWorkflowReference());
+            log.debug("Executing subscription deletion approval workflow. Workflow reference: " + workflowDTO.getWorkflowReference());
         }
         SubscriptionWorkflowDTO subsWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
-        String message = "Approve API " + subsWorkflowDTO.getApiName() + " - " + subsWorkflowDTO.getApiVersion() +
-                " subscription delete request from subscriber - " + subsWorkflowDTO.getSubscriber() +
-                " for the application - " + subsWorkflowDTO.getApplicationName();
+        String message = String.format(
+                "Approve API %s - %s subscription delete request from subscriber - %s for the application - %s",
+                subsWorkflowDTO.getApiName(),
+                subsWorkflowDTO.getApiVersion(),
+                subsWorkflowDTO.getSubscriber(),
+                subsWorkflowDTO.getApplicationName()
+        );
         workflowDTO.setWorkflowDescription(message);
         workflowDTO.setProperties(API_NAME_PROPERTY, subsWorkflowDTO.getApiName());
         workflowDTO.setProperties(API_VERSION_PROPERTY, subsWorkflowDTO.getApiVersion());
@@ -63,7 +67,7 @@ public class SubscriptionDeletionApprovalWorkflowExecutor extends WorkflowExecut
         workflowDTO.setProperties(SUBSCRIBER_PROPERTY, subsWorkflowDTO.getSubscriber());
         super.execute(workflowDTO);
         if (log.isDebugEnabled()) {
-            log.debug("Subscription Deletion Approval Workflow executed successfully. Workflow Reference: "
+            log.debug("Subscription deletion approval workflow executed successfully. Workflow reference: "
                     + workflowDTO.getWorkflowReference());
         }
 

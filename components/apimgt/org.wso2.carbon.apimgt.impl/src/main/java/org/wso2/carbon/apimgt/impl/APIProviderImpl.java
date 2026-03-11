@@ -4035,10 +4035,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         stateWorkflowDTO.setWorkflowReference(Integer.toString(apiOrApiProductId));
         stateWorkflowDTO.setInvoker(this.username);
         stateWorkflowDTO.setApiUUID(uuid);
-        String workflowDescription = "Approval request for " + apiType + " state change action " + stateWorkflowDTO.getApiLCAction() + " " +
-                "from " + stateWorkflowDTO.getApiCurrentState() + " state for the " + apiType + " "
-                + stateWorkflowDTO.getApiName() + " : " + stateWorkflowDTO.getApiVersion() + " by "
-                + stateWorkflowDTO.getApiProvider();
+
+        String workflowDescription = String.format(
+                "Approval request for %s state change action %s from %s state for the %s %s : %s by %s",
+                apiType,
+                stateWorkflowDTO.getApiLCAction(),
+                stateWorkflowDTO.getApiCurrentState(),
+                apiType,
+                stateWorkflowDTO.getApiName(),
+                stateWorkflowDTO.getApiVersion(),
+                stateWorkflowDTO.getApiProvider()
+        );
         stateWorkflowDTO.setWorkflowDescription(workflowDescription);
 
         return stateWorkflowDTO;
@@ -7377,9 +7384,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             workflowDTO.setEnvironment(deployment.getDeployment());
             workflowDTO.setRevisionId(String.valueOf(revisionId));
             workflowDTO.setInvoker(this.username);
-            String workflowDescription = "Approve revision " + workflowDTO.getRevisionId() + " deployment request from the user "
-                    + workflowDTO.getUserName() + " for the environment " + workflowDTO.getEnvironment()
-                    + " of the API " + workflowDTO.getApiName();
+
+            String workflowDescription = String.format(
+                    "Approve revision %s deployment request from the user %s for the environment %s of the API %s",
+                    workflowDTO.getRevisionId(),
+                    workflowDTO.getUserName(),
+                    workflowDTO.getEnvironment(),
+                    workflowDTO.getApiName()
+            );
             workflowDTO.setWorkflowDescription(workflowDescription);
 
             executor.execute(workflowDTO);

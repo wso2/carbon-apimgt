@@ -267,10 +267,15 @@ public class WorkflowUtils {
     protected static void setWorkflowParameters(APIStateWorkflowDTO apiStateWorkFlowDTO) {
 
         String callBackURL = apiStateWorkFlowDTO.getCallbackUrl();
-        String message = "Approval request for API state change action " + apiStateWorkFlowDTO.getApiLCAction() + " " +
-                "from " + apiStateWorkFlowDTO.getApiCurrentState() + " state for the API "
-                + apiStateWorkFlowDTO.getApiName() + " : " + apiStateWorkFlowDTO.getApiVersion() + " by "
-                + apiStateWorkFlowDTO.getApiProvider() + "";
+
+        String message = String.format(
+                "Approval request for API state change action %s from %s state for the API %s : %s by %s",
+                apiStateWorkFlowDTO.getApiLCAction(),
+                apiStateWorkFlowDTO.getApiCurrentState(),
+                apiStateWorkFlowDTO.getApiName(),
+                apiStateWorkFlowDTO.getApiVersion(),
+                apiStateWorkFlowDTO.getApiProvider()
+        );
         apiStateWorkFlowDTO.setWorkflowDescription(message);
         apiStateWorkFlowDTO.setMetadata("CurrentState", apiStateWorkFlowDTO.getApiCurrentState());
         apiStateWorkFlowDTO.setMetadata("Action", apiStateWorkFlowDTO.getApiLCAction());
@@ -495,8 +500,8 @@ public class WorkflowUtils {
                     OBJECT_MAPPER.writeValueAsString(applicationAttributes)
             );
         } catch (JsonProcessingException e) {
-            String msg = "Failed to serialize custom attributes of application " + application.getName();
-            log.error(msg, e);
+            String msg = String.format("Failed to serialize custom attributes of application %s",
+                    application.getName());
             throw new WorkflowException(msg, e);
         }
     }

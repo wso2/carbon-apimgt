@@ -88,7 +88,7 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing Application Update Approval Workflow. Workflow Reference: " + workflowDTO.getWorkflowReference());
+            log.debug("Executing application update approval workflow. Workflow reference: " + workflowDTO.getWorkflowReference());
         }
         ApplicationWorkflowDTO applicationWorkflowDTO = (ApplicationWorkflowDTO) workflowDTO;
         Application pendingApplication = applicationWorkflowDTO.getApplication();
@@ -197,7 +197,7 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
 
         super.execute(workflowDTO);
         if (log.isDebugEnabled()) {
-            log.debug("Application Update Approval Workflow executed successfully. Workflow Reference: "
+            log.debug("Application update approval workflow executed successfully. Workflow reference: "
                     + workflowDTO.getWorkflowReference());
         }
 

@@ -58,14 +58,18 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing Application Creation Approval Workflow. Workflow Reference: " + workflowDTO.getWorkflowReference());
+            log.debug("Executing application creation approval workflow. Workflow reference: " + workflowDTO.getWorkflowReference());
         }
 
         ApplicationWorkflowDTO appWorkFlowDTO = (ApplicationWorkflowDTO) workflowDTO;
 
         Application application = appWorkFlowDTO.getApplication();
-        String message = "Approve application " + application.getName() + " creation request from application creator - "
-                + appWorkFlowDTO.getUserName() + " with throttling tier - " + application.getTier();
+        String message = String.format(
+                "Approve application %s creation request from application creator - %s with throttling tier - %s",
+                application.getName(),
+                appWorkFlowDTO.getUserName(),
+                application.getTier()
+        );
         workflowDTO.setWorkflowDescription(message);
         workflowDTO.setProperties(APPLICATION_NAME_PROPERTY, appWorkFlowDTO.getApplication().getName());
         workflowDTO.setProperties(APPLICATION_TIER_PROPERTY, appWorkFlowDTO.getApplication().getTier());
@@ -88,7 +92,7 @@ public class ApplicationCreationApprovalWorkflowExecutor extends WorkflowExecuto
 
         super.execute(workflowDTO);
         if (log.isDebugEnabled()) {
-            log.debug("Application Creation Approval Workflow executed successfully. Workflow Reference: "
+            log.debug("Application creation approval workflow executed successfully. Workflow reference: "
                     + workflowDTO.getWorkflowReference());
         }
 

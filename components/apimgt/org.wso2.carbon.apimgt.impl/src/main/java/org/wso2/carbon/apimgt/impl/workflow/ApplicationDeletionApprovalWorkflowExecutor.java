@@ -15,8 +15,6 @@
  */
 package org.wso2.carbon.apimgt.impl.workflow;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,14 +51,18 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing Application Deletion Approval Workflow. Workflow Reference: " + workflowDTO.getWorkflowReference());
+            log.debug("Executing application deletion approval workflow. Workflow reference: " + workflowDTO.getWorkflowReference());
         }
 
         ApplicationWorkflowDTO appWorkFlowDTO = (ApplicationWorkflowDTO) workflowDTO;
 
         Application application = appWorkFlowDTO.getApplication();
-        String message = "Approve application " + application.getName() + " delete request from application creator - "
-                + appWorkFlowDTO.getUserName() + " with throttling tier - " + application.getTier();
+        String message = String.format(
+                "Approve application %s delete request from application creator - %s with throttling tier - %s",
+                application.getName(),
+                appWorkFlowDTO.getUserName(),
+                application.getTier()
+        );
         workflowDTO.setWorkflowDescription(message);
         workflowDTO.setProperties(APPLICATION_NAME_PROPERTY, application.getName());
         workflowDTO.setProperties(APPLICATION_TIER_PROPERTY, application.getTier());
@@ -84,7 +86,7 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
 
         super.execute(workflowDTO);
         if (log.isDebugEnabled()) {
-            log.debug("Application Deletion Approval Workflow executed successfully. Workflow Reference: "
+            log.debug("Application deletion approval workflow executed successfully. Workflow reference: "
                     + workflowDTO.getWorkflowReference());
         }
 

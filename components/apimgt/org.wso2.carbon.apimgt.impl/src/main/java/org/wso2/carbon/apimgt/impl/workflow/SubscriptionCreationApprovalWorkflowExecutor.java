@@ -60,12 +60,16 @@ public class SubscriptionCreationApprovalWorkflowExecutor extends WorkflowExecut
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing Subscription Creation Approval Workflow. Workflow Reference: " + workflowDTO.getWorkflowReference());
+            log.debug("Executing subscription creation approval workflow. Workflow reference: " + workflowDTO.getWorkflowReference());
         }
         SubscriptionWorkflowDTO subsWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
-        String message = "Approve API " + subsWorkflowDTO.getApiName() + " - " + subsWorkflowDTO.getApiVersion() +
-                " subscription creation request from subscriber - " + subsWorkflowDTO.getSubscriber() +
-                " for the application - " + subsWorkflowDTO.getApplicationName();
+        String message = String.format(
+                "Approve API %s - %s subscription creation request from subscriber - %s for the application - %s",
+                subsWorkflowDTO.getApiName(),
+                subsWorkflowDTO.getApiVersion(),
+                subsWorkflowDTO.getSubscriber(),
+                subsWorkflowDTO.getApplicationName()
+        );
         workflowDTO.setWorkflowDescription(message);
         workflowDTO.setProperties(API_NAME_PROPERTY, subsWorkflowDTO.getApiName());
         workflowDTO.setProperties(API_VERSION_PROPERTY, subsWorkflowDTO.getApiVersion());
@@ -75,7 +79,7 @@ public class SubscriptionCreationApprovalWorkflowExecutor extends WorkflowExecut
         workflowDTO.setProperties(SUBSCRIBER_PROPERTY, subsWorkflowDTO.getSubscriber());
         super.execute(workflowDTO);
         if (log.isDebugEnabled()) {
-            log.debug("Subscription Creation Approval Workflow executed successfully. Workflow Reference: "
+            log.debug("Subscription creation approval workflow executed successfully. Workflow reference: "
                     + workflowDTO.getWorkflowReference());
         }
         return new GeneralWorkflowResponse();

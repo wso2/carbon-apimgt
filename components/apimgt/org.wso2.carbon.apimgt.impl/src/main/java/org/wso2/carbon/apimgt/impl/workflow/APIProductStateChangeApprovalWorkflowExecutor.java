@@ -68,7 +68,7 @@ public class APIProductStateChangeApprovalWorkflowExecutor extends WorkflowExecu
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing API Product State Change Approval Workflow. Workflow Reference: " + workflowDTO.getWorkflowReference());
+            log.debug("Executing API product state change approval workflow. Workflow reference: " + workflowDTO.getWorkflowReference());
         }
 
         if (stateList != null) {
@@ -81,7 +81,7 @@ public class APIProductStateChangeApprovalWorkflowExecutor extends WorkflowExecu
                 setWorkflowParameters(apiStateWorkFlowDTO);
                 super.execute(workflowDTO);
                 if (log.isDebugEnabled()) {
-                    log.debug("API Product State Change Approval Workflow executed successfully. Workflow Reference: "
+                    log.debug("API product state change approval workflow executed successfully. Workflow reference: "
                             + workflowDTO.getWorkflowReference());
                 }
             } else {

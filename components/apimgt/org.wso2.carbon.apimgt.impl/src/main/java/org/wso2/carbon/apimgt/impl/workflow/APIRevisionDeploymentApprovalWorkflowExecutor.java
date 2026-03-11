@@ -65,15 +65,19 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Executing API Revision Deployment Approval Workflow. Workflow Reference: " + workflowDTO.getWorkflowReference());
+            log.debug("Executing API revision deployment approval workflow. Workflow reference: " + workflowDTO.getWorkflowReference());
         }
 
         APIRevisionWorkflowDTO revisionWorkFlowDTO = (APIRevisionWorkflowDTO) workflowDTO;
         APIRevision revision = revisionWorkFlowDTO.getAPIRevision();
 
-        String message = "Approve revision " + revision.getId() + " deployment request from the user "
-                + revisionWorkFlowDTO.getUserName() + " for the environment " + revisionWorkFlowDTO.getEnvironment()
-                + " of the API " + revisionWorkFlowDTO.getApiName();
+        String message = String.format(
+                "Approve revision %s deployment request from the user %s for the environment %s of the API %s",
+                revision.getId(),
+                revisionWorkFlowDTO.getUserName(),
+                revisionWorkFlowDTO.getEnvironment(),
+                revisionWorkFlowDTO.getApiName()
+        );
         workflowDTO.setWorkflowDescription(message);
 
         // set properties for Admin UI rendering
@@ -97,7 +101,7 @@ public class APIRevisionDeploymentApprovalWorkflowExecutor extends WorkflowExecu
 
         super.execute(workflowDTO);
         if (log.isDebugEnabled()) {
-            log.debug("API Revision Deployment Approval Workflow executed successfully. Workflow Reference: "
+            log.debug("API revision deployment approval workflow executed successfully. Workflow reference: "
                     + workflowDTO.getWorkflowReference());
         }
 

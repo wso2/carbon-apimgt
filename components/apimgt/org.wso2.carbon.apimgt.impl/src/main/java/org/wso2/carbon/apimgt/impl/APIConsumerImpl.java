@@ -1281,9 +1281,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setApplicationId(application.getId());
                 workflowDTO.setSubscriber(userId);
 
-                String workflowDescription = "Approve API " + workflowDTO.getApiName() + " - " + workflowDTO.getApiVersion() +
-                        " subscription creation request from subscriber - " + workflowDTO.getSubscriber() +
-                        " for the application - " + workflowDTO.getApplicationName();
+                String workflowDescription = String.format(
+                        "Approve API %s - %s subscription creation request from subscriber - %s for the application - %s",
+                        workflowDTO.getApiName(),
+                        workflowDTO.getApiVersion(),
+                        workflowDTO.getSubscriber(),
+                        workflowDTO.getApplicationName()
+                );
                 workflowDTO.setWorkflowDescription(workflowDescription);
 
                 Tier tier = null;
@@ -1479,9 +1483,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setApplicationId(application.getId());
                 workflowDTO.setSubscriber(userId);
 
-                String workflowDescription = "Approve API " + workflowDTO.getApiName() + " - " + workflowDTO.getApiVersion() +
-                        " subscription update request from subscriber - " + workflowDTO.getSubscriber() +
-                        " for the application - " + workflowDTO.getApplicationName();
+                String workflowDescription = String.format(
+                        "Approve API %s - %s subscription update request from subscriber - %s for the application - %s",
+                        workflowDTO.getApiName(),
+                        workflowDTO.getApiVersion(),
+                        workflowDTO.getSubscriber(),
+                        workflowDTO.getApplicationName()
+                );
                 workflowDTO.setWorkflowDescription(workflowDescription);
 
                 Tier tier = null;
@@ -1754,9 +1762,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setCreatedTime(System.currentTimeMillis());
             workflowDTO.setExternalWorkflowReference(removeSubscriptionWFExecutor.generateUUID());
 
-            String workflowDescription = "Approve API " + workflowDTO.getApiName() + " - " + workflowDTO.getApiVersion() +
-                    " subscription delete request from subscriber - " + workflowDTO.getSubscriber() +
-                    " for the application - " + workflowDTO.getApplicationName();
+            String workflowDescription = String.format(
+                    "Approve API %s - %s subscription delete request from subscriber - %s for the application - %s",
+                    workflowDTO.getApiName(),
+                    workflowDTO.getApiVersion(),
+                    workflowDTO.getSubscriber(),
+                    workflowDTO.getApplicationName()
+            );
             workflowDTO.setWorkflowDescription(workflowDescription);
 
             Tier tier = null;
@@ -2105,8 +2117,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appWFDto.setUserName(userId);
             appWFDto.setCreatedTime(System.currentTimeMillis());
 
-            String workflowDescription = "Approve application " + appWFDto.getApplication().getName() + " creation request from application creator - "
-                    + appWFDto.getUserName() + " with throttling tier - " + appWFDto.getApplication().getTier();
+            String workflowDescription = String.format(
+                    "Approve application %s creation request from application creator - %s with throttling tier - %s",
+                    appWFDto.getApplication().getName(),
+                    appWFDto.getUserName(),
+                    appWFDto.getApplication().getTier()
+            );
             appWFDto.setWorkflowDescription(workflowDescription);
 
             appCreationWFExecutor.execute(appWFDto);
@@ -2335,8 +2351,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appWFDto.setUserName(existingApp.getOwner());
             appWFDto.setCreatedTime(System.currentTimeMillis());
 
-            String workflowDescription = "Approve update request for application '" + appWFDto.getExistingApplication().getName() +
-                    "' submitted by user: " + appWFDto.getUserName();
+            String workflowDescription = String.format(
+                    "Approve update request for application '%s' submitted by user: %s",
+                    appWFDto.getExistingApplication().getName(),
+                    appWFDto.getUserName()
+            );
             appWFDto.setWorkflowDescription(workflowDescription);
 
             workflowResponse = updateApplicationWFExecutor.execute(appWFDto);
@@ -2516,8 +2535,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
             workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
 
-            String workflowDescription = "Approve application " + workflowDTO.getApplication().getName() + " delete request from application creator - "
-                    + workflowDTO.getUserName() + " with throttling tier - " + workflowDTO.getApplication().getTier();
+            String workflowDescription = String.format(
+                    "Approve application %s delete request from application creator - %s with throttling tier - %s",
+                    workflowDTO.getApplication().getName(),
+                    workflowDTO.getUserName(),
+                    workflowDTO.getApplication().getTier()
+            );
             workflowDTO.setWorkflowDescription(workflowDescription);
 
             if (!(removeApplicationWFExecutor instanceof ApplicationDeletionApprovalWorkflowExecutor)) {
@@ -2948,8 +2971,13 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             appRegWFDto.setAppInfoDTO(request);
             appRegWFDto.setDomainList(allowedDomains);
 
-            String workflowDescription = "Approve request to create " + appRegWFDto.getKeyType() + " keys for " + appRegWFDto.getApplication().getName() +
-                    " from application creator - " + appRegWFDto.getUserName() + " with throttling tier - " + appRegWFDto.getApplication().getTier();
+            String workflowDescription = String.format(
+                    "Approve request to create %s keys for %s from application creator - %s with throttling tier - %s",
+                    appRegWFDto.getKeyType(),
+                    appRegWFDto.getApplication().getName(),
+                    appRegWFDto.getUserName(),
+                    appRegWFDto.getApplication().getTier()
+            );
             appRegWFDto.setWorkflowDescription(workflowDescription);
             appRegWFDto.setKeyDetails(appKeysDto);
             appRegistrationWorkflow.execute(appRegWFDto);
