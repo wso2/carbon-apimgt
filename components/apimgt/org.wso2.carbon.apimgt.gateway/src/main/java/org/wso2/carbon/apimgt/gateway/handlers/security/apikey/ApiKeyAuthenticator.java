@@ -144,6 +144,9 @@ public class ApiKeyAuthenticator implements Authenticator {
             boolean jwtGenerationEnabled = false;
             if (jwtConfigurationDto != null) {
                 jwtGenerationEnabled = jwtConfigurationDto.isEnabled();
+                if (jwtGenerationEnabled) {
+                    log.debug("JWT generation is enabled for API key authentication");
+                }
             }
 
             // Initial guess of a JWT API key
@@ -298,6 +301,12 @@ public class ApiKeyAuthenticator implements Authenticator {
                     log.debug("User is subscribed to the API: " + apiContext + ", " +
                             "version: " + apiVersion + ". Token: " + apiKeyInfo.getKeyName());
                 }
+                // Check for permittedIP and permittedReferrers
+                ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(ip,
+                        apiContext, apiVersion, referrer, apiKeyInfo.getAdditionalProperties());
+                endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO,
+                        jwtConfigurationDto, apiKey, null, null, apiKeyHash, apiContext, apiVersion,
+                        isGatewayTokenCacheEnabled);
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("User is not subscribed to access the API: " + apiContext +
@@ -307,12 +316,6 @@ public class ApiKeyAuthenticator implements Authenticator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                         APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
             }
-            // Check for permittedIP and permittedReferrers
-            ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(ip,
-                    apiContext, apiVersion, referrer, apiKeyInfo.getAdditionalProperties());
-            endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO,
-                    jwtConfigurationDto, apiKey, null, null, apiKeyHash, apiContext, apiVersion,
-                    isGatewayTokenCacheEnabled);
         }
         ApiKeyAuthenticatorUtils.addTokenToTokenCache(isGatewayTokenCacheEnabled, apiKeyHash, isVerified,
                 tenantDomain);

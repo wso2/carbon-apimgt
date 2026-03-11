@@ -51,6 +51,7 @@ public class OpaqueApiKeyPublisher {
     private OpaqueAPIKeyNotifier opaqueApiKeyNotifier;
     private final ThreadPoolExecutor usageBatchProcessorExecutor;
     private final ScheduledExecutorService usageBatchScheduler;
+    private volatile boolean shutdownStarted;
     private final int batchSize;
     private final long batchIntervalMillis;
     private final int batchProcessorMinThread;
@@ -78,6 +79,7 @@ public class OpaqueApiKeyPublisher {
 
         if (opaqueApiKeyNotifier != null) {
             log.debug("Opaque API key notifier initialized");
+            log.debug("Starting periodic batch processing for API key usage notifications");
             startPeriodicBatchProcessing();
         } else {
             log.warn("Opaque API key notifier is not initialized. Realtime notifications will be disabled.");
@@ -96,7 +98,13 @@ public class OpaqueApiKeyPublisher {
 
     private ThreadFactory createThreadFactory(String namePrefix) {
         final AtomicInteger threadNumber = new AtomicInteger(1);
-        return r -> new Thread(r, namePrefix + "-" + threadNumber.getAndIncrement());
+        return r -> {
+            Thread thread = new Thread(r, namePrefix + "-" + threadNumber.getAndIncrement());
+            thread.setDaemon(true);
+            thread.setUncaughtExceptionHandler((t, e) -> log.error(
+                    "Uncaught exception in thread '" + t.getName() + "' of OpaqueApiKeyPublisher", e));
+            return thread;
+        };
     }
 
     private void startPeriodicBatchProcessing() {
@@ -171,11 +179,15 @@ public class OpaqueApiKeyPublisher {
      * Shutdown usage batch scheduler and executor.
      */
     private void shutdown() {
+        shutdownStarted = true;
         if (log.isDebugEnabled()) {
             log.debug("Shutting down OpaqueApiKeyPublisher usage batch processors");
         }
 
         usageBatchScheduler.shutdown();
+        synchronized (usageBatchLock) {
+            processCurrentUsageBatch();
+        }
         usageBatchProcessorExecutor.shutdown();
         currentUsageBatch.clear();
 
@@ -199,7 +211,7 @@ public class OpaqueApiKeyPublisher {
      */
     public void publishApiKeyUsageEvents(Properties properties) {
 
-        if (opaqueApiKeyNotifier == null || !notificationsEnabled || properties == null) {
+        if (shutdownStarted || opaqueApiKeyNotifier == null || !notificationsEnabled || properties == null) {
             return;
         }
 

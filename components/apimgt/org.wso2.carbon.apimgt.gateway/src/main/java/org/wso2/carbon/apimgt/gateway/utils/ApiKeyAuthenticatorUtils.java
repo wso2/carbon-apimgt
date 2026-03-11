@@ -540,6 +540,7 @@ public class ApiKeyAuthenticatorUtils {
         if (jwtGenerationEnabled) {
             JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
             if (payload == null) {
+                log.debug("JWT payload is null, using opaque API key validation");
                 // In case of opaque API key, JWT claims will not be available. Hence, build JWT validation info using the API key validation info DTO.
                 jwtValidationInfo = getJwtValidationInfoForOpaqueApiKey(apiKeyValidationInfoDTO);
             } else {

@@ -388,6 +388,7 @@ public class APIAdminImpl implements APIAdmin {
         if (apiKeyInfo.getKeyUUID() == null) {
             throw new APIMgtResourceNotFoundException("Active API key not found for UUID: " + keyUUId);
         }
+        log.info("Revoking API key with UUID: " + keyUUId + " for tenant: " + tenantDomain);
         apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
     }
 
