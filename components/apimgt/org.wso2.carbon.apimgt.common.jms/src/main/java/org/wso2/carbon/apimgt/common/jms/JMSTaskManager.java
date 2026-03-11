@@ -772,8 +772,16 @@ public class JMSTaskManager {
 
                 if (!connected) {
                     retryDuration = (long) (retryDuration * reconnectionProgressionFactor);
-                    log.error("Reconnection attempt : " + (r++) + " for " + jmsConsumerName +
-                            " failed. Next retry in " + (retryDuration / 1000) + " seconds");
+                    String logMessage = "Reconnection attempt : " + r + " for " + jmsConsumerName +
+                            " failed. Next retry in " + (retryDuration / 1000) + " seconds";
+                    if (r >= 4) {
+                        log.error(logMessage);
+                    } else if (r == 3) {
+                        log.warn(logMessage);
+                    } else {
+                        log.debug(logMessage);
+                    }
+                    r++;
                     if (retryDuration > maxReconnectDuration) {
                         retryDuration = maxReconnectDuration;
                     }

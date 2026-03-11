@@ -345,7 +345,14 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         syncModeDeploymentCount++;
         isAPIsDeployedInSyncMode = deployArtifactsAtStartup(tenantDomain);
         if (!isAPIsDeployedInSyncMode) {
-            log.error("Deployment attempt : " + syncModeDeploymentCount + " was unsuccessful");
+            String logMessage = "Deployment attempt : " + syncModeDeploymentCount + " was unsuccessful";
+            if (syncModeDeploymentCount >= 4) {
+                log.error(logMessage);
+            } else if (syncModeDeploymentCount == 3) {
+                log.warn(logMessage);
+            } else {
+                log.debug(logMessage);
+            }
             if (!(syncModeDeploymentCount > retryCount)) {
                 deployAPIsInSyncMode(tenantDomain);
             } else {
@@ -371,8 +378,15 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         isGatewayPoliciesDeployedInSyncMode = deployGatewayPolicyArtifactsAtStartup(tenantDomain);
         DataHolder.getInstance().setAllGatewayPoliciesDeployed(isGatewayPoliciesDeployedInSyncMode);
         if (!isGatewayPoliciesDeployedInSyncMode) {
-            log.error("Gateway policy deployment attempt : " + syncModeGatewayPolicyDeploymentCount +
-                    " was unsuccessful");
+            String logMessage = "Gateway policy deployment attempt : " + syncModeGatewayPolicyDeploymentCount +
+                    " was unsuccessful";
+            if (syncModeGatewayPolicyDeploymentCount >= 4) {
+                log.error(logMessage);
+            } else if (syncModeGatewayPolicyDeploymentCount == 3) {
+                log.warn(logMessage);
+            } else {
+                log.debug(logMessage);
+            }
             if (!(syncModeGatewayPolicyDeploymentCount > retryCount)) {
                 deployGatewayPoliciesInSyncMode(tenantDomain);
             } else {
@@ -443,8 +457,15 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 if (!ExceptionCodes.ARTIFACT_SYNC_HTTP_REQUEST_FAILED.equals(e.getErrorHandler())) {
                     retryCount++;
                     if (retryCount <= maxRetryCount) {
-                        log.error("Unable to deploy synapse artifacts at gateway. Retry Attempt " + retryCount
-                                + " in " + (retryDuration / 1000) + " seconds");
+                        String logMessage = "Unable to deploy synapse artifacts at gateway. Retry Attempt " + retryCount
+                                + " in " + (retryDuration / 1000) + " seconds";
+                        if (retryCount >= 4) {
+                            log.error(logMessage);
+                        } else if (retryCount == 3) {
+                            log.warn(logMessage);
+                        } else {
+                            log.debug(logMessage);
+                        }
                         try {
                             Thread.sleep(retryDuration);
                             retryDuration = (long) (retryDuration * reconnectionProgressionFactor);
@@ -489,8 +510,15 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 if (!ExceptionCodes.ARTIFACT_SYNC_HTTP_REQUEST_FAILED.equals(e.getErrorHandler())) {
                     retryCount++;
                     if (retryCount <= maxRetryCount) {
-                        log.error("Unable to deploy gateway policy artifacts at gateway. Retry Attempt " + retryCount
-                                + " in " + (retryDuration / 1000) + " seconds");
+                        String logMessage = "Unable to deploy gateway policy artifacts at gateway. Retry Attempt "
+                                + retryCount + " in " + (retryDuration / 1000) + " seconds";
+                        if (retryCount >= 4) {
+                            log.error(logMessage);
+                        } else if (retryCount == 3) {
+                            log.warn(logMessage);
+                        } else {
+                            log.debug(logMessage);
+                        }
                         try {
                             Thread.sleep(retryDuration);
                             retryDuration = (long) (retryDuration * reconnectionProgressionFactor);

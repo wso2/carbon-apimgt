@@ -107,8 +107,16 @@ public class JMSListener implements Runnable {
             } else {
                 log.error("JMS Provider is not yet started. Please start the JMS provider now.");
                 retryDuration = (long) (retryDuration * reconnectionProgressionFactor);
-                log.error("Connection attempt : " + (r++) + " for JMS Provider failed. Next retry in "
-                        + (retryDuration / 1000) + " seconds");
+                String logMessage = "Connection attempt : " + r + " for JMS Provider failed. Next retry in "
+                        + (retryDuration / 1000) + " seconds";
+                if (r >= 4) {
+                    log.error(logMessage);
+                } else if (r == 3) {
+                    log.warn(logMessage);
+                } else {
+                    log.debug(logMessage);
+                }
+                r++;
                 if (retryDuration > maxReconnectDuration) {
                     retryDuration = maxReconnectDuration;
                 }
