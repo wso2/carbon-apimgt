@@ -47,10 +47,11 @@ import org.wso2.carbon.apimgt.internal.service.dto.DeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeployedEnvInfoDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.DeploymentAcknowledgmentResponseDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
+import org.apache.cxf.message.Message;
 import org.wso2.carbon.apimgt.api.PlatformGatewayArtifactService;
+import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayAPIYamlConverter;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -168,76 +169,97 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     private Response getApiAsPlatformGatewayZip(String apiId, String organization, MessageContext messageContext)
             throws APIManagementException {
-        PlatformGatewayArtifactService artifactService =
-                ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
-
-        // 1. Try cache first (AM_PLATFORM_GATEWAY_API_ARTIFACT) to avoid conversion when possible
-        String yaml = null;
-        if (artifactService != null) {
-            yaml = artifactService.getStoredPlatformArtifact(apiId, organization);
+        // Platform gateway zip requires api-key: resolve gateway → revision → return stored artifact (or 404).
+        String apiKey = getApiKeyFromMessageContext(messageContext);
+        if (StringUtils.isBlank(apiKey)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Missing api-key header").build();
         }
-        if (yaml != null) {
-            // Cache hit: validate API still exists and is not an API Product, then serve from cache
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            ApiTypeWrapper wrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
-            if (wrapper == null) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-            if (wrapper.isAPIProduct()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("API Product not supported for platform gateway zip format: " + apiId);
-                }
-                return Response.status(Response.Status.BAD_REQUEST).entity("API Product not supported for zip format")
-                        .build();
-            }
-            byte[] zipBytes = buildZipWithYaml(yaml);
-            return Response.ok(zipBytes)
-                    .type("application/zip")
-                    .header("Content-Disposition", "attachment; filename=\"api.zip\"")
-                    .build();
+        PlatformGatewayDAO.PlatformGateway gateway;
+        try {
+            gateway = PlatformGatewayTokenUtil.verifyToken(apiKey);
+        } catch (Exception e) {
+            log.error("Platform gateway token verification failed", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Server error").build();
         }
-
-        // 2. Cache miss: load API, convert, persist for next time, then return
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        ApiTypeWrapper wrapper = apiProvider.getAPIorAPIProductByUUID(apiId, organization);
-        if (wrapper == null) {
+        if (gateway == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Platform gateway token verification failed: invalid or expired api-key");
+            }
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid api-key").build();
+        }
+        if (gateway.organizationId == null || !gateway.organizationId.equals(organization)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Organization mismatch for platform gateway zip: apiId=" + apiId + ", gatewayId=" + gateway.id);
+            }
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        if (wrapper.isAPIProduct()) {
-            if (log.isDebugEnabled()) {
-                log.debug("API Product not supported for platform gateway zip format: " + apiId);
-            }
-            return Response.status(Response.Status.BAD_REQUEST).entity("API Product not supported for zip format")
-                    .build();
+        PlatformGatewayArtifactService artifactService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
+        if (artifactService == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
-        org.wso2.carbon.apimgt.api.model.API api = wrapper.getApi();
-        String environment = "default";
-        if (api.getEnvironments() != null && !api.getEnvironments().isEmpty()) {
-            environment = api.getEnvironments().iterator().next();
-        }
-        if (StringUtils.isBlank(environment)) {
-            environment = "default";
-        }
-        yaml = PlatformGatewayAPIYamlConverter.toPlatformGatewayYaml(api, organization, environment);
-
-        // Lazy persist so subsequent zip requests hit the cache (same pattern as Synapse artifact storage)
-        if (artifactService != null) {
-            try {
-                artifactService.savePlatformArtifact(apiId, organization, yaml);
-                if (log.isDebugEnabled()) {
-                    log.debug("Stored platform gateway artifact for API " + apiId + " (org: " + organization + ")");
+        String gatewayName = gateway.name;
+        if (StringUtils.isBlank(gatewayName)) {
+            PlatformGatewayService platformGatewayService =
+                    ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+            if (platformGatewayService != null) {
+                try {
+                    org.wso2.carbon.apimgt.api.model.PlatformGateway gw =
+                            platformGatewayService.getGatewayById(gateway.id);
+                    if (gw != null && StringUtils.isNotBlank(gw.getName())) {
+                        gatewayName = gw.getName();
+                    }
+                } catch (APIManagementException e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Could not resolve gateway name for " + gateway.id + ": " + e.getMessage());
+                    }
                 }
-            } catch (APIManagementException e) {
-                log.warn("Failed to store platform gateway artifact for API " + apiId + "; will convert on next request: "
-                        + e.getMessage());
             }
         }
-
+        if (StringUtils.isBlank(gatewayName)) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        String revisionUuid = artifactService.getRevisionUuidByApiAndGatewayName(apiId, gatewayName);
+        if (StringUtils.isBlank(revisionUuid)) {
+            if (log.isDebugEnabled()) {
+                log.debug("No revision deployed for API " + apiId + " on gateway " + gatewayName);
+            }
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        String yaml = artifactService.getStoredRevisionArtifact(apiId, revisionUuid);
+        if (yaml == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("No stored artifact for API " + apiId + " revision " + revisionUuid);
+            }
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
         byte[] zipBytes = buildZipWithYaml(yaml);
         return Response.ok(zipBytes)
                 .type("application/zip")
                 .header("Content-Disposition", "attachment; filename=\"api.zip\"")
                 .build();
+    }
+
+    private static String getApiKeyFromMessageContext(MessageContext messageContext) {
+        if (messageContext == null) {
+            return null;
+        }
+        Message message = messageContext.get(Message.class);
+        if (message == null) {
+            return null;
+        }
+        @SuppressWarnings("unchecked")
+        Map<String, List<String>> headers = (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
+        if (headers == null) {
+            return null;
+        }
+        for (Map.Entry<String, List<String>> e : headers.entrySet()) {
+            if (e.getKey() != null && "api-key".equalsIgnoreCase(e.getKey()) && e.getValue() != null
+                    && !e.getValue().isEmpty()) {
+                return e.getValue().get(0);
+            }
+        }
+        return null;
     }
 
     private static byte[] buildZipWithYaml(String yamlContent) throws APIManagementException {

@@ -22,39 +22,50 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.PlatformGatewayArtifactValidationResult;
 
 /**
- * Service for API Platform Gateway artifact handling: store/retrieve platform api.yaml
- * (Scenario 1), convert internal API to platform format and validate (Scenario 2).
- * Follows the pattern: REST/Internal layer calls service, service uses DAO and converter.
+ * Service for API Platform Gateway artifact handling: revision-scoped store/retrieve in AM_GW_API_ARTIFACTS,
+ * convert internal API to platform format and validate.
+ * Follows the pattern: deploy → save revision artifact; callback → resolve revision, return stored artifact.
  */
 public interface PlatformGatewayArtifactService {
 
     /**
-     * Get stored platform gateway api.yaml for an API and organization, if any.
-     * Used when serving zip to gateway (prefer stored over conversion).
+     * Resolve REVISION_UUID for (apiId, gateway name) using AM_DEPLOYMENT_REVISION_MAPPING and AM_REVISION.
      *
-     * @param apiId         API UUID
-     * @param organization organization id (tenant domain)
-     * @return stored YAML content, or null if none stored
+     * @param apiId       API UUID
+     * @param gatewayName gateway/environment name
+     * @return REVISION_UUID or null if no deployment found
      */
-    String getStoredPlatformArtifact(String apiId, String organization) throws APIManagementException;
+    String getRevisionUuidByApiAndGatewayName(String apiId, String gatewayName) throws APIManagementException;
 
     /**
-     * Save platform gateway api.yaml for an API and organization.
+     * Get stored revision artifact (platform api.yaml) from AM_GW_API_ARTIFACTS.
      *
-     * @param apiId         API UUID
-     * @param organization organization id
-     * @param yamlContent   platform-format api.yaml content
+     * @param apiId      API UUID
+     * @param revisionId REVISION_UUID
+     * @return stored YAML content, or null if not found
      */
-    void savePlatformArtifact(String apiId, String organization, String yamlContent) throws APIManagementException;
+    String getStoredRevisionArtifact(String apiId, String revisionId) throws APIManagementException;
 
     /**
-     * Delete stored platform gateway artifact for an API and organization.
-     * Call when the API is updated so the next zip request re-converts (e.g. with updated policies).
+     * Save platform revision artifact (api.yaml) to AM_GW_API_ARTIFACTS. Call when deploy occurs.
      *
-     * @param apiId         API UUID
-     * @param organization organization id
+     * @param apiId       API UUID
+     * @param revisionId  REVISION_UUID
+     * @param yamlContent platform-format api.yaml content
      */
-    void deletePlatformArtifact(String apiId, String organization) throws APIManagementException;
+    void saveRevisionArtifact(String apiId, String revisionId, String yamlContent) throws APIManagementException;
+
+    /**
+     * Delete revision artifact for (apiId, revisionId). Optional (e.g. when revision undeployed from all).
+     */
+    void deleteRevisionArtifact(String apiId, String revisionId) throws APIManagementException;
+
+    /**
+     * Delete all artifact rows for an API from AM_GW_API_ARTIFACTS. Call on API delete.
+     *
+     * @param apiId API UUID
+     */
+    void deleteAllRevisionArtifactsForApi(String apiId) throws APIManagementException;
 
     /**
      * Convert internal API to platform api.yaml and run sanitization.

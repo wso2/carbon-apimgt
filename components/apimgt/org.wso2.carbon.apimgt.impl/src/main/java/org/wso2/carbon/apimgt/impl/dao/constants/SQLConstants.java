@@ -5234,15 +5234,15 @@ public class SQLConstants {
                 "DELETE FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ? AND ORGANIZATION = ?";
     }
 
-    /** SQL for platform gateway API artifact storage. */
+    /** SQL for platform gateway revision-scoped artifact (AM_GW_API_ARTIFACTS) and revision resolution. */
     public static class PlatformGatewayArtifactSQLConstants {
-        public static final String INSERT_ARTIFACT_SQL =
-                "INSERT INTO AM_PLATFORM_GATEWAY_API_ARTIFACT (API_UUID, ORGANIZATION_ID, YAML_CONTENT, CREATED_AT, UPDATED_AT) VALUES (?, ?, ?, ?, ?)";
-        public static final String UPDATE_ARTIFACT_SQL =
-                "UPDATE AM_PLATFORM_GATEWAY_API_ARTIFACT SET YAML_CONTENT = ?, UPDATED_AT = ? WHERE API_UUID = ? AND ORGANIZATION_ID = ?";
-        public static final String SELECT_ARTIFACT_SQL =
-                "SELECT YAML_CONTENT FROM AM_PLATFORM_GATEWAY_API_ARTIFACT WHERE API_UUID = ? AND ORGANIZATION_ID = ?";
-        public static final String DELETE_ARTIFACT_SQL =
-                "DELETE FROM AM_PLATFORM_GATEWAY_API_ARTIFACT WHERE API_UUID = ? AND ORGANIZATION_ID = ?";
+        /** Resolve (apiId, gateway name) to REVISION_UUID via AM_DEPLOYMENT_REVISION_MAPPING join AM_REVISION. */
+        public static final String SELECT_REVISION_UUID_BY_API_AND_GATEWAY_NAME =
+                "SELECT drm.REVISION_UUID FROM AM_DEPLOYMENT_REVISION_MAPPING drm "
+                        + "INNER JOIN AM_REVISION r ON drm.REVISION_UUID = r.REVISION_UUID "
+                        + "WHERE r.API_UUID = ? AND drm.NAME = ?";
+        /** Get platform revision artifact (YAML bytes) from AM_GW_API_ARTIFACTS. */
+        public static final String SELECT_REVISION_ARTIFACT_SQL =
+                "SELECT ARTIFACT FROM AM_GW_API_ARTIFACTS WHERE API_ID = ? AND REVISION_ID = ?";
     }
 }
