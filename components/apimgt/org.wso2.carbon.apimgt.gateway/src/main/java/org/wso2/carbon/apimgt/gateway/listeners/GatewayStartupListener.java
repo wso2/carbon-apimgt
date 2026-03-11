@@ -345,7 +345,8 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         syncModeDeploymentCount++;
         isAPIsDeployedInSyncMode = deployArtifactsAtStartup(tenantDomain);
         if (!isAPIsDeployedInSyncMode) {
-            String logMessage = "Deployment attempt : " + syncModeDeploymentCount + " was unsuccessful";
+            String logMessage = "Deployment attempt : " + syncModeDeploymentCount
+                    + " was unsuccessful, Next retry in 1 second";
             if (syncModeDeploymentCount >= 4) {
                 log.error(logMessage);
             } else if (syncModeDeploymentCount == 3) {
@@ -382,7 +383,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         DataHolder.getInstance().setAllGatewayPoliciesDeployed(isGatewayPoliciesDeployedInSyncMode);
         if (!isGatewayPoliciesDeployedInSyncMode) {
             String logMessage = "Gateway policy deployment attempt : " + syncModeGatewayPolicyDeploymentCount +
-                    " was unsuccessful";
+                    " was unsuccessful, Next retry in 1 second";
             if (syncModeGatewayPolicyDeploymentCount >= 4) {
                 log.error(logMessage);
             } else if (syncModeGatewayPolicyDeploymentCount == 3) {
