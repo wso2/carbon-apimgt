@@ -307,11 +307,22 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             throw RestApiUtil.buildBadRequestException("Request body is required");
         }
         validateUpdateBody(body);
+        PlatformGatewayService service =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        PlatformGateway existing = service.getGatewayById(gatewayId);
+        if (existing == null) {
+            throw new APIManagementException("Platform gateway not found: " + gatewayId,
+                    ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
+        }
+        if (!Objects.equals(body.getName(), existing.getName())) {
+            throw RestApiUtil.buildBadRequestException("name in body must match existing gateway (immutable)");
+        }
+        if (!Objects.equals(body.getVhost(), existing.getVhost())) {
+            throw RestApiUtil.buildBadRequestException("vhost in body must match existing gateway (immutable)");
+        }
         if (log.isInfoEnabled()) {
             log.info("Updating platform gateway: " + gatewayId);
         }
-        PlatformGatewayService service =
-                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
         String displayName = body.getDisplayName();
         String description = body.getDescription();
         String propertiesJson = serializeProperties(body.getProperties());
@@ -407,6 +418,15 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
     }
 
     private void validateUpdateBody(UpdatePlatformGatewayRequestDTO body) throws APIManagementException {
+        if (StringUtils.isBlank(body.getName())) {
+            throw RestApiUtil.buildBadRequestException("name is required (PUT full representation)");
+        }
+        if (StringUtils.isBlank(body.getVhost())) {
+            throw RestApiUtil.buildBadRequestException("vhost is required (PUT full representation)");
+        }
+        if (StringUtils.isBlank(body.getDisplayName())) {
+            throw RestApiUtil.buildBadRequestException("displayName is required");
+        }
         if (body.getDisplayName() != null && body.getDisplayName().length() > 128) {
             throw RestApiUtil.buildBadRequestException("displayName must be at most 128 characters");
         }

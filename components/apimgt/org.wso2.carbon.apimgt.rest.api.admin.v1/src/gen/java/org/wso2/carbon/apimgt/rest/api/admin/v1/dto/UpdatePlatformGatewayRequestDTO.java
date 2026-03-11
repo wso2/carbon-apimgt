@@ -11,7 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.UpdatePlatformGatewayRequest
 import javax.validation.constraints.*;
 
 /**
- * Request body for PUT /gateways/{gatewayId}. Send all updatable fields (displayName, description, properties, permissions). Name and vhost are not updatable. 
+ * Request body for PUT /gateways/{gatewayId}. Per PUT semantics, send the full resource representation. Name and vhost are immutable (server validates they match the existing gateway); all other fields are applied. 
  **/
 
 import io.swagger.annotations.*;
@@ -23,14 +23,54 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Request body for PUT /gateways/{gatewayId}. Send all updatable fields (displayName, description, properties, permissions). Name and vhost are not updatable. ")
+@ApiModel(description = "Request body for PUT /gateways/{gatewayId}. Per PUT semantics, send the full resource representation. Name and vhost are immutable (server validates they match the existing gateway); all other fields are applied. ")
 
 public class UpdatePlatformGatewayRequestDTO   {
   
+    private String name = null;
+    private String vhost = null;
     private String displayName = null;
     private String description = null;
     private Map<String, Object> properties = new HashMap<String, Object>();
     private UpdatePlatformGatewayRequestPermissionsDTO permissions = null;
+
+  /**
+   * Gateway identifier (immutable; must match existing). Required for PUT full representation.
+   **/
+  public UpdatePlatformGatewayRequestDTO name(String name) {
+    this.name = name;
+    return this;
+  }
+
+  
+  @ApiModelProperty(required = true, value = "Gateway identifier (immutable; must match existing). Required for PUT full representation.")
+  @JsonProperty("name")
+  @NotNull
+ @Pattern(regexp="^[a-z0-9-]+$") @Size(min=3,max=64)  public String getName() {
+    return name;
+  }
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  /**
+   * Virtual host (immutable; must match existing). Required for PUT full representation.
+   **/
+  public UpdatePlatformGatewayRequestDTO vhost(String vhost) {
+    this.vhost = vhost;
+    return this;
+  }
+
+  
+  @ApiModelProperty(required = true, value = "Virtual host (immutable; must match existing). Required for PUT full representation.")
+  @JsonProperty("vhost")
+  @NotNull
+ @Size(min=1,max=255)  public String getVhost() {
+    return vhost;
+  }
+  public void setVhost(String vhost) {
+    this.vhost = vhost;
+  }
 
   /**
    * Human-readable gateway name
@@ -41,8 +81,9 @@ public class UpdatePlatformGatewayRequestDTO   {
   }
 
   
-  @ApiModelProperty(example = "Production Gateway 01", value = "Human-readable gateway name")
+  @ApiModelProperty(example = "Production Gateway 01", required = true, value = "Human-readable gateway name")
   @JsonProperty("displayName")
+  @NotNull
  @Size(min=1,max=128)  public String getDisplayName() {
     return displayName;
   }
@@ -114,7 +155,9 @@ public class UpdatePlatformGatewayRequestDTO   {
       return false;
     }
     UpdatePlatformGatewayRequestDTO updatePlatformGatewayRequest = (UpdatePlatformGatewayRequestDTO) o;
-    return Objects.equals(displayName, updatePlatformGatewayRequest.displayName) &&
+    return Objects.equals(name, updatePlatformGatewayRequest.name) &&
+        Objects.equals(vhost, updatePlatformGatewayRequest.vhost) &&
+        Objects.equals(displayName, updatePlatformGatewayRequest.displayName) &&
         Objects.equals(description, updatePlatformGatewayRequest.description) &&
         Objects.equals(properties, updatePlatformGatewayRequest.properties) &&
         Objects.equals(permissions, updatePlatformGatewayRequest.permissions);
@@ -122,7 +165,7 @@ public class UpdatePlatformGatewayRequestDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(displayName, description, properties, permissions);
+    return Objects.hash(name, vhost, displayName, description, properties, permissions);
   }
 
   @Override
@@ -130,6 +173,8 @@ public class UpdatePlatformGatewayRequestDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class UpdatePlatformGatewayRequestDTO {\n");
     
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
