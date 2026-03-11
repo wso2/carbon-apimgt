@@ -113,8 +113,6 @@ public class JMSListener implements Runnable {
                     log.error(logMessage);
                 } else if (r == 3) {
                     log.warn(logMessage);
-                } else {
-                    log.debug(logMessage);
                 }
                 r++;
                 if (retryDuration > maxReconnectDuration) {

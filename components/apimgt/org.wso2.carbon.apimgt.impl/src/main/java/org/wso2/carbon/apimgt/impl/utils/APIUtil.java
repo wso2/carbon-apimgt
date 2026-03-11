@@ -606,8 +606,6 @@ public final class APIUtil {
                         log.error(logMessage);
                     } else if (retryCount == 3) {
                         log.warn(logMessage);
-                    } else {
-                        log.debug(logMessage);
                     }
                     try {
                         Thread.sleep(retryDuration);

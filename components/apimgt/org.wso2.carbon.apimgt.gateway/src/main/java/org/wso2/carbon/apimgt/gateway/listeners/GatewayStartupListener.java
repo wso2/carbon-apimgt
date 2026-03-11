@@ -350,8 +350,6 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 log.error(logMessage);
             } else if (syncModeDeploymentCount == 3) {
                 log.warn(logMessage);
-            } else {
-                log.debug(logMessage);
             }
             if (!(syncModeDeploymentCount > retryCount)) {
                 try {
@@ -389,8 +387,6 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 log.error(logMessage);
             } else if (syncModeGatewayPolicyDeploymentCount == 3) {
                 log.warn(logMessage);
-            } else {
-                log.debug(logMessage);
             }
             if (!(syncModeGatewayPolicyDeploymentCount > retryCount)) {
                 try {
@@ -473,8 +469,6 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                             log.error(logMessage);
                         } else if (retryCount == 3) {
                             log.warn(logMessage);
-                        } else {
-                            log.debug(logMessage);
                         }
                         try {
                             Thread.sleep(retryDuration);
@@ -526,8 +520,6 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                             log.error(logMessage);
                         } else if (retryCount == 3) {
                             log.warn(logMessage);
-                        } else {
-                            log.debug(logMessage);
                         }
                         try {
                             Thread.sleep(retryDuration);
