@@ -7,11 +7,13 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayPermissionsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayResponseWithTokenAllOfDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayResponsePermissionsDTO;
 import javax.validation.constraints.*;
 
 /**
- * Platform gateway response (without registration token). Used for list and get.
+ * Platform gateway response including the one-time registration token (POST create or regenerate-token).
  **/
 
 import io.swagger.annotations.*;
@@ -23,26 +25,26 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Platform gateway response (without registration token). Used for list and get.")
+@ApiModel(description = "Platform gateway response including the one-time registration token (POST create or regenerate-token).")
 
-public class PlatformGatewayDTO   {
+public class GatewayResponseWithTokenDTO   {
   
     private String id = null;
-    private String organizationId = null;
     private String name = null;
     private String displayName = null;
     private String description = null;
     private Map<String, Object> properties = new HashMap<String, Object>();
     private String vhost = null;
     private Boolean isActive = null;
-    private PlatformGatewayPermissionsDTO permissions = null;
+    private PlatformGatewayResponsePermissionsDTO permissions = null;
     private java.util.Date createdAt = null;
     private java.util.Date updatedAt = null;
+    private String registrationToken = null;
 
   /**
    * Gateway UUID
    **/
-  public PlatformGatewayDTO id(String id) {
+  public GatewayResponseWithTokenDTO id(String id) {
     this.id = id;
     return this;
   }
@@ -59,24 +61,7 @@ public class PlatformGatewayDTO   {
 
   /**
    **/
-  public PlatformGatewayDTO organizationId(String organizationId) {
-    this.organizationId = organizationId;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("organizationId")
-  public String getOrganizationId() {
-    return organizationId;
-  }
-  public void setOrganizationId(String organizationId) {
-    this.organizationId = organizationId;
-  }
-
-  /**
-   **/
-  public PlatformGatewayDTO name(String name) {
+  public GatewayResponseWithTokenDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -93,7 +78,7 @@ public class PlatformGatewayDTO   {
 
   /**
    **/
-  public PlatformGatewayDTO displayName(String displayName) {
+  public GatewayResponseWithTokenDTO displayName(String displayName) {
     this.displayName = displayName;
     return this;
   }
@@ -110,7 +95,7 @@ public class PlatformGatewayDTO   {
 
   /**
    **/
-  public PlatformGatewayDTO description(String description) {
+  public GatewayResponseWithTokenDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -128,7 +113,7 @@ public class PlatformGatewayDTO   {
   /**
    * Custom key-value properties
    **/
-  public PlatformGatewayDTO properties(Map<String, Object> properties) {
+  public GatewayResponseWithTokenDTO properties(Map<String, Object> properties) {
     this.properties = properties;
     return this;
   }
@@ -145,7 +130,7 @@ public class PlatformGatewayDTO   {
 
   /**
    **/
-  public PlatformGatewayDTO vhost(String vhost) {
+  public GatewayResponseWithTokenDTO vhost(String vhost) {
     this.vhost = vhost;
     return this;
   }
@@ -163,7 +148,7 @@ public class PlatformGatewayDTO   {
   /**
    * Indicates if the gateway is currently connected to the control plane via WebSocket
    **/
-  public PlatformGatewayDTO isActive(Boolean isActive) {
+  public GatewayResponseWithTokenDTO isActive(Boolean isActive) {
     this.isActive = isActive;
     return this;
   }
@@ -180,7 +165,7 @@ public class PlatformGatewayDTO   {
 
   /**
    **/
-  public PlatformGatewayDTO permissions(PlatformGatewayPermissionsDTO permissions) {
+  public GatewayResponseWithTokenDTO permissions(PlatformGatewayResponsePermissionsDTO permissions) {
     this.permissions = permissions;
     return this;
   }
@@ -189,16 +174,16 @@ public class PlatformGatewayDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("permissions")
-  public PlatformGatewayPermissionsDTO getPermissions() {
+  public PlatformGatewayResponsePermissionsDTO getPermissions() {
     return permissions;
   }
-  public void setPermissions(PlatformGatewayPermissionsDTO permissions) {
+  public void setPermissions(PlatformGatewayResponsePermissionsDTO permissions) {
     this.permissions = permissions;
   }
 
   /**
    **/
-  public PlatformGatewayDTO createdAt(java.util.Date createdAt) {
+  public GatewayResponseWithTokenDTO createdAt(java.util.Date createdAt) {
     this.createdAt = createdAt;
     return this;
   }
@@ -215,7 +200,7 @@ public class PlatformGatewayDTO   {
 
   /**
    **/
-  public PlatformGatewayDTO updatedAt(java.util.Date updatedAt) {
+  public GatewayResponseWithTokenDTO updatedAt(java.util.Date updatedAt) {
     this.updatedAt = updatedAt;
     return this;
   }
@@ -230,6 +215,24 @@ public class PlatformGatewayDTO   {
     this.updatedAt = updatedAt;
   }
 
+  /**
+   * Registration token (returned only once on create or regenerate). Use as api-key when connecting the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN. 
+   **/
+  public GatewayResponseWithTokenDTO registrationToken(String registrationToken) {
+    this.registrationToken = registrationToken;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Registration token (returned only once on create or regenerate). Use as api-key when connecting the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN. ")
+  @JsonProperty("registrationToken")
+  public String getRegistrationToken() {
+    return registrationToken;
+  }
+  public void setRegistrationToken(String registrationToken) {
+    this.registrationToken = registrationToken;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -239,32 +242,31 @@ public class PlatformGatewayDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PlatformGatewayDTO platformGateway = (PlatformGatewayDTO) o;
-    return Objects.equals(id, platformGateway.id) &&
-        Objects.equals(organizationId, platformGateway.organizationId) &&
-        Objects.equals(name, platformGateway.name) &&
-        Objects.equals(displayName, platformGateway.displayName) &&
-        Objects.equals(description, platformGateway.description) &&
-        Objects.equals(properties, platformGateway.properties) &&
-        Objects.equals(vhost, platformGateway.vhost) &&
-        Objects.equals(isActive, platformGateway.isActive) &&
-        Objects.equals(permissions, platformGateway.permissions) &&
-        Objects.equals(createdAt, platformGateway.createdAt) &&
-        Objects.equals(updatedAt, platformGateway.updatedAt);
+    GatewayResponseWithTokenDTO gatewayResponseWithToken = (GatewayResponseWithTokenDTO) o;
+    return Objects.equals(id, gatewayResponseWithToken.id) &&
+        Objects.equals(name, gatewayResponseWithToken.name) &&
+        Objects.equals(displayName, gatewayResponseWithToken.displayName) &&
+        Objects.equals(description, gatewayResponseWithToken.description) &&
+        Objects.equals(properties, gatewayResponseWithToken.properties) &&
+        Objects.equals(vhost, gatewayResponseWithToken.vhost) &&
+        Objects.equals(isActive, gatewayResponseWithToken.isActive) &&
+        Objects.equals(permissions, gatewayResponseWithToken.permissions) &&
+        Objects.equals(createdAt, gatewayResponseWithToken.createdAt) &&
+        Objects.equals(updatedAt, gatewayResponseWithToken.updatedAt) &&
+        Objects.equals(registrationToken, gatewayResponseWithToken.registrationToken);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, organizationId, name, displayName, description, properties, vhost, isActive, permissions, createdAt, updatedAt);
+    return Objects.hash(id, name, displayName, description, properties, vhost, isActive, permissions, createdAt, updatedAt, registrationToken);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PlatformGatewayDTO {\n");
+    sb.append("class GatewayResponseWithTokenDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    organizationId: ").append(toIndentedString(organizationId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
@@ -274,6 +276,7 @@ public class PlatformGatewayDTO   {
     sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
     sb.append("    createdAt: ").append(toIndentedString(createdAt)).append("\n");
     sb.append("    updatedAt: ").append(toIndentedString(updatedAt)).append("\n");
+    sb.append("    registrationToken: ").append(toIndentedString(registrationToken)).append("\n");
     sb.append("}");
     return sb.toString();
   }

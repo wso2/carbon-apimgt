@@ -39,10 +39,10 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.GatewaysApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CreatePlatformGatewayRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CreatePlatformGatewayRequestPermissionsDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayPermissionsDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayWithTokenDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayResponsePermissionsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayResponseWithTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.UpdatePlatformGatewayRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.UpdatePlatformGatewayRequestPermissionsDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -104,7 +104,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         GatewayVisibilityPermissionConfigurationDTO visibility = buildGatewayVisibility(body);
         // Update the environment created by PlatformGatewayServiceImpl with vhosts, permissions, and additional properties
         updateDynamicEnvironmentForPlatformGateway(organization, body, gateway.getId());
-        PlatformGatewayWithTokenDTO dto = toDTOWithToken(gateway, result.getRegistrationToken(), visibility);
+        GatewayResponseWithTokenDTO dto = toDTOWithToken(gateway, result.getRegistrationToken(), visibility);
         try {
             URI location = new URI(RestApiConstants.RESOURCE_PATH_PLATFORM_GATEWAYS + "/" + gateway.getId());
             return Response.created(location).entity(dto).build();
@@ -290,7 +290,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                 .collect(Collectors.toMap(Environment::getName, Environment::getPermissions,
                         (existing, replacement) -> existing));
 
-        PlatformGatewayListDTO listDTO = new PlatformGatewayListDTO();
+        GatewayListDTO listDTO = new GatewayListDTO();
         listDTO.setCount(gateways.size());
         listDTO.setList(gateways.stream()
                 .map(g -> toDTO(g, permissionsMap.get(g.getName())))
@@ -299,7 +299,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
     }
 
     @Override
-    public Response gatewaysGatewayIdPatch(String gatewayId, UpdatePlatformGatewayRequestDTO body,
+    public Response gatewaysGatewayIdPut(String gatewayId, UpdatePlatformGatewayRequestDTO body,
             MessageContext messageContext) throws APIManagementException {
         validateIdentifier(gatewayId, "gatewayId");
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -319,7 +319,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                 propertiesJson);
         // Keep gateway environment in sync: update permissions and/or displayName/description so GET /environments reflects them
         if (body.getPermissions() != null || displayName != null || description != null) {
-            updateEnvironmentForPlatformGatewayPatch(organization, gateway, body.getPermissions(),
+            updateEnvironmentForPlatformGatewayPut(organization, gateway, body.getPermissions(),
                     displayName != null ? gateway.getDisplayName() : null,
                     description != null ? gateway.getDescription() : null);
         }
@@ -416,9 +416,9 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
     }
 
     /**
-     * Update the gateway environment after PATCH: permissions and/or displayName/description so GET /environments reflects them.
+     * Update the gateway environment after PUT: permissions and/or displayName/description so GET /environments reflects them.
      */
-    private void updateEnvironmentForPlatformGatewayPatch(String organization, PlatformGateway gateway,
+    private void updateEnvironmentForPlatformGatewayPut(String organization, PlatformGateway gateway,
             UpdatePlatformGatewayRequestPermissionsDTO requestPermissions, String newDisplayName, String newDescription)
             throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
@@ -482,11 +482,10 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
     }
 
     /** Convert DB functionalityType string to response enum; defaults to REGULAR if unknown. */
-    private PlatformGatewayDTO toDTO(PlatformGateway g, GatewayVisibilityPermissionConfigurationDTO permissions) {
+    private PlatformGatewayResponseDTO toDTO(PlatformGateway g, GatewayVisibilityPermissionConfigurationDTO permissions) {
 
-        PlatformGatewayDTO dto = new PlatformGatewayDTO();
+        PlatformGatewayResponseDTO dto = new PlatformGatewayResponseDTO();
         dto.setId(g.getId());
-        dto.setOrganizationId(g.getOrganizationId());
         dto.setName(g.getName());
         dto.setDisplayName(g.getDisplayName());
         dto.setDescription(g.getDescription());
@@ -499,12 +498,11 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         return dto;
     }
 
-    private PlatformGatewayWithTokenDTO toDTOWithToken(PlatformGateway g, String registrationToken,
+    private GatewayResponseWithTokenDTO toDTOWithToken(PlatformGateway g, String registrationToken,
             GatewayVisibilityPermissionConfigurationDTO permissions) {
 
-        PlatformGatewayWithTokenDTO dto = new PlatformGatewayWithTokenDTO();
+        GatewayResponseWithTokenDTO dto = new GatewayResponseWithTokenDTO();
         dto.setId(g.getId());
-        dto.setOrganizationId(g.getOrganizationId());
         dto.setName(g.getName());
         dto.setDisplayName(g.getDisplayName());
         dto.setDescription(g.getDescription());
@@ -521,21 +519,21 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
     /**
      * Convert internal permissions model to REST API DTO.
      */
-    private PlatformGatewayPermissionsDTO mapPermissionsToDTO(
+    private PlatformGatewayResponsePermissionsDTO mapPermissionsToDTO(
             GatewayVisibilityPermissionConfigurationDTO permissions) {
 
-        PlatformGatewayPermissionsDTO dto = new PlatformGatewayPermissionsDTO();
+        PlatformGatewayResponsePermissionsDTO dto = new PlatformGatewayResponsePermissionsDTO();
         if (permissions == null) {
-            dto.setPermissionType(PlatformGatewayPermissionsDTO.PermissionTypeEnum.PUBLIC);
+            dto.setPermissionType(PlatformGatewayResponsePermissionsDTO.PermissionTypeEnum.PUBLIC);
             return dto;
         }
         String permType = permissions.getPermissionType();
         if ("ALLOW".equalsIgnoreCase(permType)) {
-            dto.setPermissionType(PlatformGatewayPermissionsDTO.PermissionTypeEnum.ALLOW);
+            dto.setPermissionType(PlatformGatewayResponsePermissionsDTO.PermissionTypeEnum.ALLOW);
         } else if ("DENY".equalsIgnoreCase(permType)) {
-            dto.setPermissionType(PlatformGatewayPermissionsDTO.PermissionTypeEnum.DENY);
+            dto.setPermissionType(PlatformGatewayResponsePermissionsDTO.PermissionTypeEnum.DENY);
         } else {
-            dto.setPermissionType(PlatformGatewayPermissionsDTO.PermissionTypeEnum.PUBLIC);
+            dto.setPermissionType(PlatformGatewayResponsePermissionsDTO.PermissionTypeEnum.PUBLIC);
         }
         if (permissions.getRoles() != null) {
             dto.setRoles(new ArrayList<>(permissions.getRoles()));

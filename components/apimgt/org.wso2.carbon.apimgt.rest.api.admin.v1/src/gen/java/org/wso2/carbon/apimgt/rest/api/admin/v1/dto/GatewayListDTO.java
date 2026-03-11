@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayResponseDTO;
 import javax.validation.constraints.*;
 
 
@@ -21,15 +21,15 @@ import javax.validation.Valid;
 
 
 
-public class PlatformGatewayListDTO   {
+public class GatewayListDTO   {
   
     private Integer count = null;
-    private List<PlatformGatewayDTO> list = new ArrayList<PlatformGatewayDTO>();
+    private List<PlatformGatewayResponseDTO> list = new ArrayList<PlatformGatewayResponseDTO>();
 
   /**
    * Number of platform gateways returned
    **/
-  public PlatformGatewayListDTO count(Integer count) {
+  public GatewayListDTO count(Integer count) {
     this.count = count;
     return this;
   }
@@ -46,7 +46,7 @@ public class PlatformGatewayListDTO   {
 
   /**
    **/
-  public PlatformGatewayListDTO list(List<PlatformGatewayDTO> list) {
+  public GatewayListDTO list(List<PlatformGatewayResponseDTO> list) {
     this.list = list;
     return this;
   }
@@ -55,10 +55,10 @@ public class PlatformGatewayListDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("list")
-  public List<PlatformGatewayDTO> getList() {
+  public List<PlatformGatewayResponseDTO> getList() {
     return list;
   }
-  public void setList(List<PlatformGatewayDTO> list) {
+  public void setList(List<PlatformGatewayResponseDTO> list) {
     this.list = list;
   }
 
@@ -71,9 +71,9 @@ public class PlatformGatewayListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PlatformGatewayListDTO platformGatewayList = (PlatformGatewayListDTO) o;
-    return Objects.equals(count, platformGatewayList.count) &&
-        Objects.equals(list, platformGatewayList.list);
+    GatewayListDTO gatewayList = (GatewayListDTO) o;
+    return Objects.equals(count, gatewayList.count) &&
+        Objects.equals(list, gatewayList.list);
   }
 
   @Override
@@ -84,7 +84,7 @@ public class PlatformGatewayListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PlatformGatewayListDTO {\n");
+    sb.append("class GatewayListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");

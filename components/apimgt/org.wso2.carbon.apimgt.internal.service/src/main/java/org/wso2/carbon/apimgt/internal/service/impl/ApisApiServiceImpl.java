@@ -109,24 +109,21 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String accept,
+    public Response apisApiIdGet(String apiId, String accept,
             MessageContext messageContext) throws APIManagementException {
         String organization = RestApiUtil.getOrganization(messageContext);
-        if (StringUtils.isEmpty(organization)) {
-            organization = xWSO2Tenant;
-        }
         organization = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
 
         if (accept != null && accept.toLowerCase().contains("application/zip")) {
             return getApiAsPlatformGatewayZip(apiId, organization, messageContext);
         }
-        return apisGet(xWSO2Tenant, apiId, null, null, null, true, accept != null ? accept : "application/json",
+        return apisGet(organization, apiId, null, null, null, true, accept != null ? accept : "application/json",
                 messageContext);
     }
 
     @Override
     public Response apisApiIdGatewayDeploymentsPost(String apiId, String apiKey, Map<String, Object> requestBody,
-            String xWSO2Tenant, String deploymentId, MessageContext messageContext) throws APIManagementException {
+            String deploymentId, MessageContext messageContext) throws APIManagementException {
         if (StringUtils.isEmpty(apiKey)) {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Missing api-key header").build();
         }

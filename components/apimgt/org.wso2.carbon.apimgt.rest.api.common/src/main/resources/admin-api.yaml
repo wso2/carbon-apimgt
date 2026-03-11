@@ -2266,7 +2266,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlatformGatewayList'
+                $ref: '#/components/schemas/GatewayList'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -2298,7 +2298,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlatformGatewayWithToken'
+                $ref: '#/components/schemas/GatewayResponseWithToken'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -2337,7 +2337,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlatformGatewayWithToken'
+                $ref: '#/components/schemas/GatewayResponseWithToken'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -2351,14 +2351,14 @@ paths:
           "https://127.0.0.1:9443/api/am/admin/v4/gateways/{gatewayId}/regenerate-token"'
 
   /gateways/{gatewayId}:
-    patch:
+    put:
       tags:
         - Platform Gateways
       summary: Update a platform gateway
       description: |
-        Update platform gateway metadata. Only the provided fields are updated; name and vhost
-        cannot be changed (platform API parity). Updatable fields: displayName, description,
-        properties. On-prem may also allow updating permissions (visibility/roles) for the gateway environment.
+        Update platform gateway metadata. Request body must include all updatable fields (displayName,
+        description, properties, permissions). Name and vhost cannot be changed. UI should send
+        the full resource representation to align with PUT semantics.
       parameters:
         - name: gatewayId
           in: path
@@ -2367,6 +2367,7 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -2377,7 +2378,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlatformGateway'
+                $ref: '#/components/schemas/PlatformGatewayResponse'
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -5826,8 +5827,8 @@ components:
     UpdatePlatformGatewayRequest:
       title: Update Platform Gateway Request
       description: |
-        Request body for PATCH /gateways/{gatewayId}. All fields are optional; only provided
-        fields are updated. Name and vhost are not updatable (platform API parity).
+        Request body for PUT /gateways/{gatewayId}. Send all updatable fields (displayName,
+        description, properties, permissions). Name and vhost are not updatable.
       type: object
       properties:
         displayName:
@@ -5858,8 +5859,8 @@ components:
               items:
                 type: string
               description: List of roles for ALLOW/DENY permission types
-    PlatformGateway:
-      title: Platform Gateway
+    PlatformGatewayResponse:
+      title: Platform Gateway Response
       description: Platform gateway response (without registration token). Used for list and get.
       type: object
       properties:
@@ -5867,9 +5868,6 @@ components:
           type: string
           readOnly: true
           description: Gateway UUID
-        organizationId:
-          type: string
-          readOnly: true
         name:
           type: string
         displayName:
@@ -5884,6 +5882,7 @@ components:
           type: string
         isActive:
           type: boolean
+          readOnly: true
           description: Indicates if the gateway is currently connected to the control plane via WebSocket
         permissions:
           type: object
@@ -5913,28 +5912,28 @@ components:
           readOnly: true
       readOnly:
         - id
-        - organizationId
+        - isActive
         - createdAt
         - updatedAt
-    PlatformGatewayWithToken:
-      title: Platform Gateway (Create Response)
-      description: Platform gateway response including the one-time registration token (POST create only).
+    GatewayResponseWithToken:
+      title: Gateway Response With Token
+      description: Platform gateway response including the one-time registration token (POST create or regenerate-token).
       allOf:
-        - $ref: '#/components/schemas/PlatformGateway'
+        - $ref: '#/components/schemas/PlatformGatewayResponse'
         - type: object
           properties:
             registrationToken:
               type: string
               description: |
-                Registration token (returned only once on create). Use as api-key when connecting
+                Registration token (returned only once on create or regenerate). Use as api-key when connecting
                 the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN.
       readOnly:
         - id
-        - organizationId
+        - isActive
         - createdAt
         - updatedAt
-    PlatformGatewayList:
-      title: Platform Gateway List
+    GatewayList:
+      title: Gateway List
       type: object
       properties:
         count:
@@ -5943,7 +5942,7 @@ components:
         list:
           type: array
           items:
-            $ref: '#/components/schemas/PlatformGateway'
+            $ref: '#/components/schemas/PlatformGatewayResponse'
     Organization:
       title: Organization
       required:

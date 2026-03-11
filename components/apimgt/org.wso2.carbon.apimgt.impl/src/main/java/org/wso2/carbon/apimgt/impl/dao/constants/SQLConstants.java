@@ -5234,7 +5234,7 @@ public class SQLConstants {
                 "DELETE FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ? AND ORGANIZATION = ?";
     }
 
-    /** SQL for platform gateway API artifact storage (Scenario 1: platform-only api.yaml). */
+    /** SQL for platform gateway API artifact storage. */
     public static class PlatformGatewayArtifactSQLConstants {
         public static final String INSERT_ARTIFACT_SQL =
                 "INSERT INTO AM_PLATFORM_GATEWAY_API_ARTIFACT (API_UUID, ORGANIZATION_ID, YAML_CONTENT, CREATED_AT, UPDATED_AT) VALUES (?, ?, ?, ?, ?)";

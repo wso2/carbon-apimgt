@@ -18,20 +18,20 @@ import javax.validation.Valid;
 
 
 
-public class PlatformGatewayWithTokenAllOfDTO   {
+public class GatewayResponseWithTokenAllOfDTO   {
   
     private String registrationToken = null;
 
   /**
-   * Registration token (returned only once on create). Use as api-key when connecting the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN. 
+   * Registration token (returned only once on create or regenerate). Use as api-key when connecting the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN. 
    **/
-  public PlatformGatewayWithTokenAllOfDTO registrationToken(String registrationToken) {
+  public GatewayResponseWithTokenAllOfDTO registrationToken(String registrationToken) {
     this.registrationToken = registrationToken;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Registration token (returned only once on create). Use as api-key when connecting the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN. ")
+  @ApiModelProperty(value = "Registration token (returned only once on create or regenerate). Use as api-key when connecting the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN. ")
   @JsonProperty("registrationToken")
   public String getRegistrationToken() {
     return registrationToken;
@@ -49,8 +49,8 @@ public class PlatformGatewayWithTokenAllOfDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PlatformGatewayWithTokenAllOfDTO platformGatewayWithTokenAllOf = (PlatformGatewayWithTokenAllOfDTO) o;
-    return Objects.equals(registrationToken, platformGatewayWithTokenAllOf.registrationToken);
+    GatewayResponseWithTokenAllOfDTO gatewayResponseWithTokenAllOf = (GatewayResponseWithTokenAllOfDTO) o;
+    return Objects.equals(registrationToken, gatewayResponseWithTokenAllOf.registrationToken);
   }
 
   @Override
@@ -61,7 +61,7 @@ public class PlatformGatewayWithTokenAllOfDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PlatformGatewayWithTokenAllOfDTO {\n");
+    sb.append("class GatewayResponseWithTokenAllOfDTO {\n");
     
     sb.append("    registrationToken: ").append(toIndentedString(registrationToken)).append("\n");
     sb.append("}");

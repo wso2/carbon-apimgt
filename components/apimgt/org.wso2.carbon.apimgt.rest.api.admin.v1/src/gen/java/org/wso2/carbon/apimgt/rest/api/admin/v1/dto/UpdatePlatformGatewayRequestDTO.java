@@ -11,7 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.UpdatePlatformGatewayRequest
 import javax.validation.constraints.*;
 
 /**
- * Request body for PATCH /gateways/{gatewayId}. All fields are optional; only provided fields are updated. Name and vhost are not updatable (platform API parity). 
+ * Request body for PUT /gateways/{gatewayId}. Send all updatable fields (displayName, description, properties, permissions). Name and vhost are not updatable. 
  **/
 
 import io.swagger.annotations.*;
@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Request body for PATCH /gateways/{gatewayId}. All fields are optional; only provided fields are updated. Name and vhost are not updatable (platform API parity). ")
+@ApiModel(description = "Request body for PUT /gateways/{gatewayId}. Send all updatable fields (displayName, description, properties, permissions). Name and vhost are not updatable. ")
 
 public class UpdatePlatformGatewayRequestDTO   {
   
