@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl.internal;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.PlatformGatewayArtifactService;
+import org.wso2.carbon.apimgt.api.PlatformGatewayDeploymentEventService;
 import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
@@ -34,6 +35,7 @@ import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigServiceImpl;
 import org.wso2.carbon.apimgt.impl.service.PlatformGatewayArtifactServiceImpl;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayDeploymentEventServiceImpl;
 import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayDeploymentDispatcher;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
@@ -449,5 +451,9 @@ public class ServiceReferenceHolder {
 
     public PlatformGatewayArtifactService getPlatformGatewayArtifactService() {
         return PlatformGatewayArtifactServiceImpl.getInstance();
+    }
+
+    public PlatformGatewayDeploymentEventService getPlatformGatewayDeploymentEventService() {
+        return PlatformGatewayDeploymentEventServiceImpl.getInstance();
     }
 }

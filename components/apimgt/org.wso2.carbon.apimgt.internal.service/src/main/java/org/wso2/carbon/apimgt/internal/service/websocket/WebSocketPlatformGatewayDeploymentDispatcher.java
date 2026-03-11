@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.PlatformGatewayDeploymentEventService;
 import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayDeploymentDispatcher;
@@ -52,9 +53,22 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
         PlatformGatewaySessionRegistry registry = PlatformGatewaySessionRegistry.getInstance();
         PlatformGatewayService platformGatewayService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        PlatformGatewayDeploymentEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayDeploymentEventService();
+        String apiId = event.getUuid();
+        String revisionUuid = event.getEventId();
         for (String gatewayId : platformGatewayIds) {
             String vhost = resolveVhost(platformGatewayService, gatewayId);
             String message = buildDeployMessage(event, vhost);
+            if (eventService != null) {
+                try {
+                    eventService.persistEvent(gatewayId, apiId, revisionUuid, "api.deployed", message);
+                } catch (Exception e) {
+                    if (log.isWarnEnabled()) {
+                        log.warn("Failed to persist deploy event for gateway " + gatewayId + ": " + e.getMessage());
+                    }
+                }
+            }
             registry.sendToGateways(Collections.singleton(gatewayId), message);
         }
     }
@@ -68,9 +82,22 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
         PlatformGatewaySessionRegistry registry = PlatformGatewaySessionRegistry.getInstance();
         PlatformGatewayService platformGatewayService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        PlatformGatewayDeploymentEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayDeploymentEventService();
+        String apiId = event.getUuid();
+        String revisionUuid = event.getEventId();
         for (String gatewayId : platformGatewayIds) {
             String vhost = resolveVhost(platformGatewayService, gatewayId);
             String message = buildUndeployMessage(event, vhost);
+            if (eventService != null) {
+                try {
+                    eventService.persistEvent(gatewayId, apiId, revisionUuid, "api.undeployed", message);
+                } catch (Exception e) {
+                    if (log.isWarnEnabled()) {
+                        log.warn("Failed to persist undeploy event for gateway " + gatewayId + ": " + e.getMessage());
+                    }
+                }
+            }
             registry.sendToGateways(Collections.singleton(gatewayId), message);
         }
     }
@@ -84,9 +111,22 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
         PlatformGatewaySessionRegistry registry = PlatformGatewaySessionRegistry.getInstance();
         PlatformGatewayService platformGatewayService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        PlatformGatewayDeploymentEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayDeploymentEventService();
+        String apiId = event.getUuid();
+        String revisionUuid = event.getEventId();
         for (String gatewayId : platformGatewayIds) {
             String vhost = resolveVhost(platformGatewayService, gatewayId);
             String message = buildDeleteMessage(event, vhost);
+            if (eventService != null) {
+                try {
+                    eventService.persistEvent(gatewayId, apiId, revisionUuid, "api.deleted", message);
+                } catch (Exception e) {
+                    if (log.isWarnEnabled()) {
+                        log.warn("Failed to persist delete event for gateway " + gatewayId + ": " + e.getMessage());
+                    }
+                }
+            }
             registry.sendToGateways(Collections.singleton(gatewayId), message);
         }
     }

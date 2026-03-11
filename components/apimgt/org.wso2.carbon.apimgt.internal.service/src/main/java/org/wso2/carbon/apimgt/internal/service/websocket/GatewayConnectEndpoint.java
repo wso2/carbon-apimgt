@@ -21,7 +21,10 @@ package org.wso2.carbon.apimgt.internal.service.websocket;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.PlatformGatewayDeploymentEventService;
+import org.wso2.carbon.apimgt.api.model.PlatformGatewayDeploymentEventRecord;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 
@@ -29,6 +32,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -135,10 +139,45 @@ public class GatewayConnectEndpoint {
 
         sendConnectionAck(session, gateway.id);
 
+        sendPendingDeploymentEvents(session, gateway.id);
+
         startHeartbeat(session);
 
         if (log.isInfoEnabled()) {
             log.info("Gateway WebSocket connection established: gatewayId=" + gateway.id + " name=" + gateway.name);
+        }
+    }
+
+    /**
+     * Push pending deploy/undeploy/delete events for this gateway (multi-CP sync).
+     * Events were already marked delivered by getAndMarkDeliveredPendingEventsForGateway; we send each payload.
+     */
+    private static void sendPendingDeploymentEvents(Session session, String gatewayId) {
+        PlatformGatewayDeploymentEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayDeploymentEventService();
+        if (eventService == null) {
+            return;
+        }
+        try {
+            List<PlatformGatewayDeploymentEventRecord> events =
+                    eventService.getAndMarkDeliveredPendingEventsForGateway(gatewayId);
+            for (PlatformGatewayDeploymentEventRecord event : events) {
+                try {
+                    if (session.isOpen()) {
+                        session.getBasicRemote().sendText(event.getPayload());
+                    }
+                } catch (IOException e) {
+                    if (log.isWarnEnabled()) {
+                        log.warn("Failed to send pending deployment event to gateway " + gatewayId + ": "
+                                + e.getMessage());
+                    }
+                    // Continue with remaining events; already marked delivered so we don't retry
+                }
+            }
+        } catch (APIManagementException e) {
+            if (log.isWarnEnabled()) {
+                log.warn("Failed to get pending deployment events for gateway " + gatewayId + ": " + e.getMessage());
+            }
         }
     }
 

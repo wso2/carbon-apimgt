@@ -5245,4 +5245,14 @@ public class SQLConstants {
         public static final String SELECT_REVISION_ARTIFACT_SQL =
                 "SELECT ARTIFACT FROM AM_GW_API_ARTIFACTS WHERE API_ID = ? AND REVISION_ID = ?";
     }
+
+    /** SQL for AM_GW_PLATFORM_DEPLOYMENT_EVENT (multi-CP WebSocket sync: persist then push on connect). */
+    public static class PlatformGatewayDeploymentEventSQLConstants {
+        public static final String INSERT_EVENT =
+                "INSERT INTO AM_GW_PLATFORM_DEPLOYMENT_EVENT (ID, GATEWAY_ID, API_ID, REVISION_UUID, EVENT_TYPE, PAYLOAD, CREATED_AT) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        public static final String SELECT_PENDING_FOR_GATEWAY =
+                "SELECT ID, PAYLOAD FROM AM_GW_PLATFORM_DEPLOYMENT_EVENT WHERE GATEWAY_ID = ? AND DELIVERED_AT IS NULL ORDER BY CREATED_AT";
+        public static final String UPDATE_MARK_DELIVERED =
+                "UPDATE AM_GW_PLATFORM_DEPLOYMENT_EVENT SET DELIVERED_AT = ? WHERE ID = ?";
+    }
 }
