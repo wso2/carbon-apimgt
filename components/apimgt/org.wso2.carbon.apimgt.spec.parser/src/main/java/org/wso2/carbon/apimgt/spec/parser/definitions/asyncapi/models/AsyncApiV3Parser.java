@@ -549,6 +549,8 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
 
             String channelName = AsyncApiV3ParserUtil.extractChannelNameFromRef(ref.get$ref());
             if (channelName == null) continue;
+            AsyncApi30Channel channel = channels.get(channelName);
+            String channelAddress = StringUtils.isNotBlank(channel.getAddress()) ? channel.getAddress() : channelName;
 
             Map<String, JsonNode> extensions = operation.getExtensions();
             if (extensions == null) continue;
@@ -559,9 +561,9 @@ public class AsyncApiV3Parser extends AbstractAsyncApiParser {
             String mappingValue = mappingNode.asText();
 
             if (APISpecParserConstants.ASYNCAPI_ACTION_SEND.equalsIgnoreCase(action)) {
-                wsUriMapping.put(APISpecParserConstants.WS_URI_MAPPING_PUBLISH + channelName, mappingValue);
+                wsUriMapping.put(APISpecParserConstants.WS_URI_MAPPING_PUBLISH + channelAddress, mappingValue);
             } else if (APISpecParserConstants.ASYNCAPI_ACTION_RECEIVE.equalsIgnoreCase(action)) {
-                wsUriMapping.put(APISpecParserConstants.WS_URI_MAPPING_SUBSCRIBE + channelName, mappingValue);
+                wsUriMapping.put(APISpecParserConstants.WS_URI_MAPPING_SUBSCRIBE + channelAddress, mappingValue);
             }
         }
         return wsUriMapping;
