@@ -37,15 +37,12 @@ public interface PlatformGatewayService {
      * @param displayName     display name
      * @param description     optional description
      * @param vhost           vhost
-     * @param isCritical      whether the gateway is critical
-     * @param functionalityType functionality type (e.g. regular, ai, event)
      * @param propertiesJson  optional JSON string for custom properties
      * @return created gateway and registration token (returned only once)
      * @throws APIManagementException if validation fails or name already exists (use ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS for 409)
      */
     CreatePlatformGatewayResult createGateway(String organizationId, String name, String displayName,
-                                              String description, String vhost, boolean isCritical,
-                                              String functionalityType, String propertiesJson)
+                                              String description, String vhost, String propertiesJson)
             throws APIManagementException;
 
     /**
@@ -110,4 +107,30 @@ public interface PlatformGatewayService {
      * @throws APIManagementException if gateway not found, not in organization, or has active API deployments
      */
     void deleteGateway(String organizationId, String gatewayId) throws APIManagementException;
+
+    /**
+     * Update platform gateway metadata. Only updatable fields (displayName, description, properties)
+     * are applied; null values mean leave existing value unchanged. Name and vhost are not updatable.
+     *
+     * @param organizationId organization id
+     * @param gatewayId      gateway id
+     * @param displayName    new display name, or null to keep existing
+     * @param description    new description, or null to keep existing
+     * @param propertiesJson new properties JSON string, or null to keep existing
+     * @return the updated platform gateway
+     * @throws APIManagementException if gateway not found or not in organization (use ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND for 404)
+     */
+    PlatformGateway updateGateway(String organizationId, String gatewayId, String displayName,
+                                  String description, String propertiesJson)
+            throws APIManagementException;
+
+    /**
+     * Update gateway connection status (e.g. WebSocket connect/disconnect). Stores in environment additionalProperties.
+     *
+     * @param gatewayId      gateway (environment) UUID
+     * @param organizationId organization id
+     * @param active         true when connected, false when disconnected
+     */
+    void updateGatewayActiveStatus(String gatewayId, String organizationId, boolean active)
+            throws APIManagementException;
 }

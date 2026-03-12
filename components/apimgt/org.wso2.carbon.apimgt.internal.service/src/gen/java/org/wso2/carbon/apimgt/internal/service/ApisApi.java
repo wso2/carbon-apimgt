@@ -52,8 +52,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 401, message = "Invalid or missing api-key.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal server error.", response = ErrorDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response apisApiIdGatewayDeploymentsPost(@ApiParam(value = "API UUID (must match the deployed API).",required=true) @PathParam("apiId") String apiId,  @NotNull  @ApiParam(value = "Platform gateway registration token." ,required=true)@HeaderParam("api-key") String apiKey, @ApiParam(value = "" ,required=true) Map<String, Object> requestBody,  @ApiParam(value = "Tenant/organization (optional; gateway identity from api-key)." )@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "Deployment/revision identifier.")  @QueryParam("deploymentId") String deploymentId) throws APIManagementException{
-        return delegate.apisApiIdGatewayDeploymentsPost(apiId, apiKey, requestBody, xWSO2Tenant, deploymentId, securityContext);
+    public Response apisApiIdGatewayDeploymentsPost(@ApiParam(value = "API UUID (must match the deployed API).",required=true) @PathParam("apiId") String apiId,  @NotNull  @ApiParam(value = "Platform gateway registration token." ,required=true)@HeaderParam("api-key") String apiKey, @ApiParam(value = "" ,required=true) Map<String, Object> requestBody,  @ApiParam(value = "Deployment/revision identifier.")  @QueryParam("deploymentId") String deploymentId) throws APIManagementException{
+        return delegate.apisApiIdGatewayDeploymentsPost(apiId, apiKey, requestBody, deploymentId, securityContext);
     }
 
     @GET
@@ -65,8 +65,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "API definition (zip with api.yaml when Accept application/zip, else JSON).", response = File.class),
         @ApiResponse(code = 404, message = "API not found", response = Void.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = Void.class) })
-    public Response apisApiIdGet(@ApiParam(value = "API UUID.",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Tenant/organization domain (optional; derived from api-key or context when omitted)." )@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "application/zip for API Platform gateway format; application/json for APIList." , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
-        return delegate.apisApiIdGet(apiId, xWSO2Tenant, accept, securityContext);
+    public Response apisApiIdGet(@ApiParam(value = "API UUID.",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "application/zip for API Platform gateway format; application/json for APIList." , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
+        return delegate.apisApiIdGet(apiId, accept, securityContext);
     }
 
     @GET

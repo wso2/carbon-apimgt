@@ -180,12 +180,6 @@ paths:
         Get a single API by UUID. When Accept is application/zip, returns a zip archive
         containing api.yaml in API Platform Gateway format (for platform gateway fetch after api.deployed).
       parameters:
-        - name: xWSO2Tenant
-          in: header
-          required: false
-          description: Tenant/organization domain (optional; derived from api-key or context when omitted).
-          schema:
-            type: string
         - name: apiId
           in: path
           required: true
@@ -225,12 +219,6 @@ paths:
         Authenticated via api-key header (platform gateway registration token).
       operationId: apisApiIdGatewayDeploymentsPost
       parameters:
-        - name: xWSO2Tenant
-          in: header
-          required: false
-          description: Tenant/organization (optional; gateway identity from api-key).
-          schema:
-            type: string
         - name: apiId
           in: path
           required: true

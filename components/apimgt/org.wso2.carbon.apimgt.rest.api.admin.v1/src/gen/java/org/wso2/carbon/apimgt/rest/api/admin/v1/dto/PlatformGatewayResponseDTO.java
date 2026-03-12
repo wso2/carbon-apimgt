@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayPermissionsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayResponsePermissionsDTO;
 import javax.validation.constraints.*;
 
 /**
@@ -25,58 +25,23 @@ import javax.validation.Valid;
 
 @ApiModel(description = "Platform gateway response (without registration token). Used for list and get.")
 
-public class PlatformGatewayDTO   {
+public class PlatformGatewayResponseDTO   {
   
     private String id = null;
-    private String organizationId = null;
     private String name = null;
     private String displayName = null;
     private String description = null;
     private Map<String, Object> properties = new HashMap<String, Object>();
     private String vhost = null;
-    private Boolean isCritical = null;
-
-    @XmlType(name="FunctionalityTypeEnum")
-    @XmlEnum(String.class)
-    public enum FunctionalityTypeEnum {
-        REGULAR("regular"),
-        AI("ai"),
-        EVENT("event");
-        private String value;
-
-        FunctionalityTypeEnum (String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static FunctionalityTypeEnum fromValue(String v) {
-            for (FunctionalityTypeEnum b : FunctionalityTypeEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-return null;
-        }
-    }
-    private FunctionalityTypeEnum functionalityType = null;
     private Boolean isActive = null;
-    private PlatformGatewayPermissionsDTO permissions = null;
+    private PlatformGatewayResponsePermissionsDTO permissions = null;
     private java.util.Date createdAt = null;
     private java.util.Date updatedAt = null;
 
   /**
    * Gateway UUID
    **/
-  public PlatformGatewayDTO id(String id) {
+  public PlatformGatewayResponseDTO id(String id) {
     this.id = id;
     return this;
   }
@@ -93,24 +58,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayDTO organizationId(String organizationId) {
-    this.organizationId = organizationId;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("organizationId")
-  public String getOrganizationId() {
-    return organizationId;
-  }
-  public void setOrganizationId(String organizationId) {
-    this.organizationId = organizationId;
-  }
-
-  /**
-   **/
-  public PlatformGatewayDTO name(String name) {
+  public PlatformGatewayResponseDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -127,7 +75,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayDTO displayName(String displayName) {
+  public PlatformGatewayResponseDTO displayName(String displayName) {
     this.displayName = displayName;
     return this;
   }
@@ -144,7 +92,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayDTO description(String description) {
+  public PlatformGatewayResponseDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -162,7 +110,7 @@ return null;
   /**
    * Custom key-value properties
    **/
-  public PlatformGatewayDTO properties(Map<String, Object> properties) {
+  public PlatformGatewayResponseDTO properties(Map<String, Object> properties) {
     this.properties = properties;
     return this;
   }
@@ -179,7 +127,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayDTO vhost(String vhost) {
+  public PlatformGatewayResponseDTO vhost(String vhost) {
     this.vhost = vhost;
     return this;
   }
@@ -195,43 +143,9 @@ return null;
   }
 
   /**
-   **/
-  public PlatformGatewayDTO isCritical(Boolean isCritical) {
-    this.isCritical = isCritical;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("isCritical")
-  public Boolean isIsCritical() {
-    return isCritical;
-  }
-  public void setIsCritical(Boolean isCritical) {
-    this.isCritical = isCritical;
-  }
-
-  /**
-   **/
-  public PlatformGatewayDTO functionalityType(FunctionalityTypeEnum functionalityType) {
-    this.functionalityType = functionalityType;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("functionalityType")
-  public FunctionalityTypeEnum getFunctionalityType() {
-    return functionalityType;
-  }
-  public void setFunctionalityType(FunctionalityTypeEnum functionalityType) {
-    this.functionalityType = functionalityType;
-  }
-
-  /**
    * Indicates if the gateway is currently connected to the control plane via WebSocket
    **/
-  public PlatformGatewayDTO isActive(Boolean isActive) {
+  public PlatformGatewayResponseDTO isActive(Boolean isActive) {
     this.isActive = isActive;
     return this;
   }
@@ -248,7 +162,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayDTO permissions(PlatformGatewayPermissionsDTO permissions) {
+  public PlatformGatewayResponseDTO permissions(PlatformGatewayResponsePermissionsDTO permissions) {
     this.permissions = permissions;
     return this;
   }
@@ -257,16 +171,16 @@ return null;
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("permissions")
-  public PlatformGatewayPermissionsDTO getPermissions() {
+  public PlatformGatewayResponsePermissionsDTO getPermissions() {
     return permissions;
   }
-  public void setPermissions(PlatformGatewayPermissionsDTO permissions) {
+  public void setPermissions(PlatformGatewayResponsePermissionsDTO permissions) {
     this.permissions = permissions;
   }
 
   /**
    **/
-  public PlatformGatewayDTO createdAt(java.util.Date createdAt) {
+  public PlatformGatewayResponseDTO createdAt(java.util.Date createdAt) {
     this.createdAt = createdAt;
     return this;
   }
@@ -283,7 +197,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayDTO updatedAt(java.util.Date updatedAt) {
+  public PlatformGatewayResponseDTO updatedAt(java.util.Date updatedAt) {
     this.updatedAt = updatedAt;
     return this;
   }
@@ -307,41 +221,35 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PlatformGatewayDTO platformGateway = (PlatformGatewayDTO) o;
-    return Objects.equals(id, platformGateway.id) &&
-        Objects.equals(organizationId, platformGateway.organizationId) &&
-        Objects.equals(name, platformGateway.name) &&
-        Objects.equals(displayName, platformGateway.displayName) &&
-        Objects.equals(description, platformGateway.description) &&
-        Objects.equals(properties, platformGateway.properties) &&
-        Objects.equals(vhost, platformGateway.vhost) &&
-        Objects.equals(isCritical, platformGateway.isCritical) &&
-        Objects.equals(functionalityType, platformGateway.functionalityType) &&
-        Objects.equals(isActive, platformGateway.isActive) &&
-        Objects.equals(permissions, platformGateway.permissions) &&
-        Objects.equals(createdAt, platformGateway.createdAt) &&
-        Objects.equals(updatedAt, platformGateway.updatedAt);
+    PlatformGatewayResponseDTO platformGatewayResponse = (PlatformGatewayResponseDTO) o;
+    return Objects.equals(id, platformGatewayResponse.id) &&
+        Objects.equals(name, platformGatewayResponse.name) &&
+        Objects.equals(displayName, platformGatewayResponse.displayName) &&
+        Objects.equals(description, platformGatewayResponse.description) &&
+        Objects.equals(properties, platformGatewayResponse.properties) &&
+        Objects.equals(vhost, platformGatewayResponse.vhost) &&
+        Objects.equals(isActive, platformGatewayResponse.isActive) &&
+        Objects.equals(permissions, platformGatewayResponse.permissions) &&
+        Objects.equals(createdAt, platformGatewayResponse.createdAt) &&
+        Objects.equals(updatedAt, platformGatewayResponse.updatedAt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, organizationId, name, displayName, description, properties, vhost, isCritical, functionalityType, isActive, permissions, createdAt, updatedAt);
+    return Objects.hash(id, name, displayName, description, properties, vhost, isActive, permissions, createdAt, updatedAt);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PlatformGatewayDTO {\n");
+    sb.append("class PlatformGatewayResponseDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    organizationId: ").append(toIndentedString(organizationId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
     sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
-    sb.append("    isCritical: ").append(toIndentedString(isCritical)).append("\n");
-    sb.append("    functionalityType: ").append(toIndentedString(functionalityType)).append("\n");
     sb.append("    isActive: ").append(toIndentedString(isActive)).append("\n");
     sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
     sb.append("    createdAt: ").append(toIndentedString(createdAt)).append("\n");

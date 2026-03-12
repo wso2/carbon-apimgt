@@ -7,13 +7,13 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayPermissionsDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayWithTokenAllOfDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayResponseWithTokenAllOfDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayResponsePermissionsDTO;
 import javax.validation.constraints.*;
 
 /**
- * Platform gateway response including the one-time registration token (POST create only).
+ * Platform gateway response including the one-time registration token (POST create or regenerate-token).
  **/
 
 import io.swagger.annotations.*;
@@ -25,53 +25,18 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Platform gateway response including the one-time registration token (POST create only).")
+@ApiModel(description = "Platform gateway response including the one-time registration token (POST create or regenerate-token).")
 
-public class PlatformGatewayWithTokenDTO   {
+public class GatewayResponseWithTokenDTO   {
   
     private String id = null;
-    private String organizationId = null;
     private String name = null;
     private String displayName = null;
     private String description = null;
     private Map<String, Object> properties = new HashMap<String, Object>();
     private String vhost = null;
-    private Boolean isCritical = null;
-
-    @XmlType(name="FunctionalityTypeEnum")
-    @XmlEnum(String.class)
-    public enum FunctionalityTypeEnum {
-        REGULAR("regular"),
-        AI("ai"),
-        EVENT("event");
-        private String value;
-
-        FunctionalityTypeEnum (String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static FunctionalityTypeEnum fromValue(String v) {
-            for (FunctionalityTypeEnum b : FunctionalityTypeEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-return null;
-        }
-    }
-    private FunctionalityTypeEnum functionalityType = null;
     private Boolean isActive = null;
-    private PlatformGatewayPermissionsDTO permissions = null;
+    private PlatformGatewayResponsePermissionsDTO permissions = null;
     private java.util.Date createdAt = null;
     private java.util.Date updatedAt = null;
     private String registrationToken = null;
@@ -79,7 +44,7 @@ return null;
   /**
    * Gateway UUID
    **/
-  public PlatformGatewayWithTokenDTO id(String id) {
+  public GatewayResponseWithTokenDTO id(String id) {
     this.id = id;
     return this;
   }
@@ -96,24 +61,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayWithTokenDTO organizationId(String organizationId) {
-    this.organizationId = organizationId;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("organizationId")
-  public String getOrganizationId() {
-    return organizationId;
-  }
-  public void setOrganizationId(String organizationId) {
-    this.organizationId = organizationId;
-  }
-
-  /**
-   **/
-  public PlatformGatewayWithTokenDTO name(String name) {
+  public GatewayResponseWithTokenDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -130,7 +78,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayWithTokenDTO displayName(String displayName) {
+  public GatewayResponseWithTokenDTO displayName(String displayName) {
     this.displayName = displayName;
     return this;
   }
@@ -147,7 +95,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayWithTokenDTO description(String description) {
+  public GatewayResponseWithTokenDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -165,7 +113,7 @@ return null;
   /**
    * Custom key-value properties
    **/
-  public PlatformGatewayWithTokenDTO properties(Map<String, Object> properties) {
+  public GatewayResponseWithTokenDTO properties(Map<String, Object> properties) {
     this.properties = properties;
     return this;
   }
@@ -182,7 +130,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayWithTokenDTO vhost(String vhost) {
+  public GatewayResponseWithTokenDTO vhost(String vhost) {
     this.vhost = vhost;
     return this;
   }
@@ -198,43 +146,9 @@ return null;
   }
 
   /**
-   **/
-  public PlatformGatewayWithTokenDTO isCritical(Boolean isCritical) {
-    this.isCritical = isCritical;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("isCritical")
-  public Boolean isIsCritical() {
-    return isCritical;
-  }
-  public void setIsCritical(Boolean isCritical) {
-    this.isCritical = isCritical;
-  }
-
-  /**
-   **/
-  public PlatformGatewayWithTokenDTO functionalityType(FunctionalityTypeEnum functionalityType) {
-    this.functionalityType = functionalityType;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("functionalityType")
-  public FunctionalityTypeEnum getFunctionalityType() {
-    return functionalityType;
-  }
-  public void setFunctionalityType(FunctionalityTypeEnum functionalityType) {
-    this.functionalityType = functionalityType;
-  }
-
-  /**
    * Indicates if the gateway is currently connected to the control plane via WebSocket
    **/
-  public PlatformGatewayWithTokenDTO isActive(Boolean isActive) {
+  public GatewayResponseWithTokenDTO isActive(Boolean isActive) {
     this.isActive = isActive;
     return this;
   }
@@ -251,7 +165,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayWithTokenDTO permissions(PlatformGatewayPermissionsDTO permissions) {
+  public GatewayResponseWithTokenDTO permissions(PlatformGatewayResponsePermissionsDTO permissions) {
     this.permissions = permissions;
     return this;
   }
@@ -260,16 +174,16 @@ return null;
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("permissions")
-  public PlatformGatewayPermissionsDTO getPermissions() {
+  public PlatformGatewayResponsePermissionsDTO getPermissions() {
     return permissions;
   }
-  public void setPermissions(PlatformGatewayPermissionsDTO permissions) {
+  public void setPermissions(PlatformGatewayResponsePermissionsDTO permissions) {
     this.permissions = permissions;
   }
 
   /**
    **/
-  public PlatformGatewayWithTokenDTO createdAt(java.util.Date createdAt) {
+  public GatewayResponseWithTokenDTO createdAt(java.util.Date createdAt) {
     this.createdAt = createdAt;
     return this;
   }
@@ -286,7 +200,7 @@ return null;
 
   /**
    **/
-  public PlatformGatewayWithTokenDTO updatedAt(java.util.Date updatedAt) {
+  public GatewayResponseWithTokenDTO updatedAt(java.util.Date updatedAt) {
     this.updatedAt = updatedAt;
     return this;
   }
@@ -302,15 +216,15 @@ return null;
   }
 
   /**
-   * Registration token (returned only once on create). Use as api-key when connecting the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN. 
+   * Registration token (returned only once on create or regenerate). Use as api-key when connecting the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN. 
    **/
-  public PlatformGatewayWithTokenDTO registrationToken(String registrationToken) {
+  public GatewayResponseWithTokenDTO registrationToken(String registrationToken) {
     this.registrationToken = registrationToken;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Registration token (returned only once on create). Use as api-key when connecting the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN. ")
+  @ApiModelProperty(value = "Registration token (returned only once on create or regenerate). Use as api-key when connecting the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN. ")
   @JsonProperty("registrationToken")
   public String getRegistrationToken() {
     return registrationToken;
@@ -328,42 +242,36 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PlatformGatewayWithTokenDTO platformGatewayWithToken = (PlatformGatewayWithTokenDTO) o;
-    return Objects.equals(id, platformGatewayWithToken.id) &&
-        Objects.equals(organizationId, platformGatewayWithToken.organizationId) &&
-        Objects.equals(name, platformGatewayWithToken.name) &&
-        Objects.equals(displayName, platformGatewayWithToken.displayName) &&
-        Objects.equals(description, platformGatewayWithToken.description) &&
-        Objects.equals(properties, platformGatewayWithToken.properties) &&
-        Objects.equals(vhost, platformGatewayWithToken.vhost) &&
-        Objects.equals(isCritical, platformGatewayWithToken.isCritical) &&
-        Objects.equals(functionalityType, platformGatewayWithToken.functionalityType) &&
-        Objects.equals(isActive, platformGatewayWithToken.isActive) &&
-        Objects.equals(permissions, platformGatewayWithToken.permissions) &&
-        Objects.equals(createdAt, platformGatewayWithToken.createdAt) &&
-        Objects.equals(updatedAt, platformGatewayWithToken.updatedAt) &&
-        Objects.equals(registrationToken, platformGatewayWithToken.registrationToken);
+    GatewayResponseWithTokenDTO gatewayResponseWithToken = (GatewayResponseWithTokenDTO) o;
+    return Objects.equals(id, gatewayResponseWithToken.id) &&
+        Objects.equals(name, gatewayResponseWithToken.name) &&
+        Objects.equals(displayName, gatewayResponseWithToken.displayName) &&
+        Objects.equals(description, gatewayResponseWithToken.description) &&
+        Objects.equals(properties, gatewayResponseWithToken.properties) &&
+        Objects.equals(vhost, gatewayResponseWithToken.vhost) &&
+        Objects.equals(isActive, gatewayResponseWithToken.isActive) &&
+        Objects.equals(permissions, gatewayResponseWithToken.permissions) &&
+        Objects.equals(createdAt, gatewayResponseWithToken.createdAt) &&
+        Objects.equals(updatedAt, gatewayResponseWithToken.updatedAt) &&
+        Objects.equals(registrationToken, gatewayResponseWithToken.registrationToken);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, organizationId, name, displayName, description, properties, vhost, isCritical, functionalityType, isActive, permissions, createdAt, updatedAt, registrationToken);
+    return Objects.hash(id, name, displayName, description, properties, vhost, isActive, permissions, createdAt, updatedAt, registrationToken);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PlatformGatewayWithTokenDTO {\n");
+    sb.append("class GatewayResponseWithTokenDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    organizationId: ").append(toIndentedString(organizationId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
     sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
-    sb.append("    isCritical: ").append(toIndentedString(isCritical)).append("\n");
-    sb.append("    functionalityType: ").append(toIndentedString(functionalityType)).append("\n");
     sb.append("    isActive: ").append(toIndentedString(isActive)).append("\n");
     sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
     sb.append("    createdAt: ").append(toIndentedString(createdAt)).append("\n");

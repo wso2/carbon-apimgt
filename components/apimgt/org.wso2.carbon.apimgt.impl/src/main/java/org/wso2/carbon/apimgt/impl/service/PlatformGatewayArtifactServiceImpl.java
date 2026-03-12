@@ -28,8 +28,7 @@ import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayAPIYamlConverter;
 
 /**
  * Implementation of platform gateway artifact service. Uses {@link PlatformGatewayArtifactDAO}
- * for storage and {@link PlatformGatewayAPIYamlConverter} for conversion; runs sanitization
- * after conversion to report missing/invalid fields.
+ * for revision-scoped storage in AM_GW_API_ARTIFACTS and {@link PlatformGatewayAPIYamlConverter} for conversion.
  */
 public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifactService {
 
@@ -43,30 +42,48 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
     }
 
     @Override
-    public String getStoredPlatformArtifact(String apiId, String organization) throws APIManagementException {
-        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(organization)) {
+    public String getRevisionUuidByApiAndGatewayName(String apiId, String gatewayName) throws APIManagementException {
+        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(gatewayName)) {
             return null;
         }
-        return PlatformGatewayArtifactDAO.getInstance().getArtifact(apiId.trim(), organization.trim());
+        return PlatformGatewayArtifactDAO.getInstance().getRevisionUuidByApiAndGatewayName(apiId.trim(),
+                gatewayName.trim());
     }
 
     @Override
-    public void savePlatformArtifact(String apiId, String organization, String yamlContent) throws APIManagementException {
-        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(organization)) {
-            throw new APIManagementException("API ID and organization are required");
+    public String getStoredRevisionArtifact(String apiId, String revisionId) throws APIManagementException {
+        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(revisionId)) {
+            return null;
+        }
+        return PlatformGatewayArtifactDAO.getInstance().getRevisionArtifact(apiId.trim(), revisionId.trim());
+    }
+
+    @Override
+    public void saveRevisionArtifact(String apiId, String revisionId, String yamlContent) throws APIManagementException {
+        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(revisionId)) {
+            throw new APIManagementException("API ID and revision ID are required");
         }
         if (yamlContent == null || yamlContent.trim().isEmpty()) {
             throw new APIManagementException("YAML content is required");
         }
-        PlatformGatewayArtifactDAO.getInstance().saveArtifact(apiId.trim(), organization.trim(), yamlContent.trim());
+        PlatformGatewayArtifactDAO.getInstance().saveRevisionArtifact(apiId.trim(), revisionId.trim(),
+                yamlContent.trim());
     }
 
     @Override
-    public void deletePlatformArtifact(String apiId, String organization) throws APIManagementException {
-        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(organization)) {
+    public void deleteRevisionArtifact(String apiId, String revisionId) throws APIManagementException {
+        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(revisionId)) {
             return;
         }
-        PlatformGatewayArtifactDAO.getInstance().deleteArtifact(apiId.trim(), organization.trim());
+        PlatformGatewayArtifactDAO.getInstance().deleteRevisionArtifact(apiId.trim(), revisionId.trim());
+    }
+
+    @Override
+    public void deleteAllRevisionArtifactsForApi(String apiId) throws APIManagementException {
+        if (StringUtils.isBlank(apiId)) {
+            return;
+        }
+        PlatformGatewayArtifactDAO.getInstance().deleteAllRevisionArtifactsForApi(apiId.trim());
     }
 
     @Override

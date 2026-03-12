@@ -23,7 +23,7 @@ import javax.validation.Valid;
 
 @ApiModel(description = "Gateway visibility permissions configuration")
 
-public class PlatformGatewayPermissionsDTO   {
+public class PlatformGatewayResponsePermissionsDTO   {
   
 
     @XmlType(name="PermissionTypeEnum")
@@ -63,7 +63,7 @@ return null;
   /**
    * Permission type for gateway visibility: - PUBLIC: Gateway is visible to all users - ALLOW: Gateway is visible only to specified roles - DENY: Gateway is hidden from specified roles 
    **/
-  public PlatformGatewayPermissionsDTO permissionType(PermissionTypeEnum permissionType) {
+  public PlatformGatewayResponsePermissionsDTO permissionType(PermissionTypeEnum permissionType) {
     this.permissionType = permissionType;
     return this;
   }
@@ -81,7 +81,7 @@ return null;
   /**
    * List of roles for ALLOW/DENY permission types
    **/
-  public PlatformGatewayPermissionsDTO roles(List<String> roles) {
+  public PlatformGatewayResponsePermissionsDTO roles(List<String> roles) {
     this.roles = roles;
     return this;
   }
@@ -105,9 +105,9 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PlatformGatewayPermissionsDTO platformGatewayPermissions = (PlatformGatewayPermissionsDTO) o;
-    return Objects.equals(permissionType, platformGatewayPermissions.permissionType) &&
-        Objects.equals(roles, platformGatewayPermissions.roles);
+    PlatformGatewayResponsePermissionsDTO platformGatewayResponsePermissions = (PlatformGatewayResponsePermissionsDTO) o;
+    return Objects.equals(permissionType, platformGatewayResponsePermissions.permissionType) &&
+        Objects.equals(roles, platformGatewayResponsePermissions.roles);
   }
 
   @Override
@@ -118,7 +118,7 @@ return null;
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PlatformGatewayPermissionsDTO {\n");
+    sb.append("class PlatformGatewayResponsePermissionsDTO {\n");
     
     sb.append("    permissionType: ").append(toIndentedString(permissionType)).append("\n");
     sb.append("    roles: ").append(toIndentedString(roles)).append("\n");

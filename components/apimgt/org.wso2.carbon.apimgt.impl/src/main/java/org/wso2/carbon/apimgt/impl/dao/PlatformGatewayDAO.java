@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.impl.dao;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
@@ -31,12 +30,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * DAO for platform gateway registration (AM_PLATFORM_GATEWAY, AM_PLATFORM_GATEWAY_TOKEN).
+ * DAO for platform gateway tokens (AM_GATEWAY_TOKEN) and instance registration (AM_GW_INSTANCES).
+ * Platform gateway metadata is stored in AM_GATEWAY_ENVIRONMENT (GATEWAY_TYPE='api-platform').
  */
 public class PlatformGatewayDAO {
 
@@ -61,24 +59,20 @@ public class PlatformGatewayDAO {
         public final String displayName;
         public final String description;
         public final String vhost;
-        public final boolean isCritical;
-        public final String functionalityType;
         public final String properties;
         public final boolean isActive;
         public final Timestamp createdAt;
         public final Timestamp updatedAt;
 
         public PlatformGateway(String id, String organizationId, String name, String displayName,
-                               String description, String vhost, boolean isCritical, String functionalityType,
-                               String properties, boolean isActive, Timestamp createdAt, Timestamp updatedAt) {
+                               String description, String vhost, String properties, boolean isActive,
+                               Timestamp createdAt, Timestamp updatedAt) {
             this.id = id;
             this.organizationId = organizationId;
             this.name = name;
             this.displayName = displayName;
             this.description = description;
             this.vhost = vhost;
-            this.isCritical = isCritical;
-            this.functionalityType = functionalityType;
             this.properties = properties;
             this.isActive = isActive;
             this.createdAt = createdAt;
@@ -93,56 +87,14 @@ public class PlatformGatewayDAO {
         public final String tokenHash;
         public final String gatewayId;
         public final String organizationId;
+        public final String gatewayName;
 
-        public TokenWithGateway(String tokenHash, String gatewayId, String organizationId) {
+        public TokenWithGateway(String tokenHash, String gatewayId, String organizationId, String gatewayName) {
             this.tokenHash = tokenHash;
             this.gatewayId = gatewayId;
             this.organizationId = organizationId;
+            this.gatewayName = gatewayName != null ? gatewayName : "";
         }
-    }
-
-    /**
-     * Insert a platform gateway. Caller must open transaction if also inserting token.
-     */
-    public void createGateway(Connection connection, PlatformGateway gateway) throws APIManagementException {
-        if (log.isDebugEnabled()) {
-            log.debug("Creating platform gateway with name: " + gateway.name + " for organization: "
-                    + gateway.organizationId);
-        }
-        try (PreparedStatement ps = connection.prepareStatement(
-                SQLConstants.PlatformGatewaySQLConstants.INSERT_GATEWAY_SQL)) {
-            ps.setString(1, gateway.id);
-            ps.setString(2, gateway.organizationId);
-            ps.setString(3, gateway.name);
-            ps.setString(4, gateway.displayName);
-            ps.setString(5, gateway.description);
-            ps.setString(6, gateway.vhost);
-            ps.setBoolean(7, gateway.isCritical);
-            ps.setString(8, gateway.functionalityType);
-            ps.setString(9, gateway.properties);
-            ps.setBoolean(10, gateway.isActive);
-            ps.setTimestamp(11, gateway.createdAt);
-            ps.setTimestamp(12, gateway.updatedAt);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            if (isUniqueOrDuplicateViolation(e)) {
-                String msg = String.format(
-                        ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS.getErrorDescription(), gateway.name);
-                throw new APIManagementException(msg, ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS);
-            }
-            log.error("Failed to create platform gateway with name: " + gateway.name + ". Error: " + e.getMessage());
-            throw new APIManagementException("Error inserting platform gateway", e);
-        }
-    }
-
-    private static boolean isUniqueOrDuplicateViolation(SQLException e) {
-        for (Throwable t = e; t != null; t = t.getCause()) {
-            String msg = t.getMessage();
-            if (msg != null && (msg.toUpperCase().contains("UNIQUE") || msg.toUpperCase().contains("DUPLICATE"))) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -163,8 +115,8 @@ public class PlatformGatewayDAO {
     }
 
     /**
-     * Creates a platform gateway, its token, and registers it in AM_GW_INSTANCES in a single transaction.
-     * Keeps connection and transaction boundary inside the DAO layer (service -> impl -> dao).
+     * Creates the token and registers the gateway in AM_GW_INSTANCES in a single transaction.
+     * Caller must have already created the environment (AM_GATEWAY_ENVIRONMENT) with UUID = gateway.id.
      */
     public void createGatewayWithTokenAndGatewayInstance(PlatformGateway gateway, String tokenId, String tokenHash,
                                                          List<String> envLabels)
@@ -172,7 +124,6 @@ public class PlatformGatewayDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                createGateway(connection, gateway);
                 createToken(connection, tokenId, gateway.id, tokenHash, gateway.createdAt);
                 GatewayManagementDAO.getInstance().insertGatewayInstance(connection, gateway.id, gateway.organizationId,
                         envLabels, gateway.createdAt, new byte[0]);
@@ -190,103 +141,35 @@ public class PlatformGatewayDAO {
     }
 
     /**
-     * Get platform gateway by ID.
+     * UUIDs of platform gateways (AM_GATEWAY_ENVIRONMENT with GATEWAY_TYPE='api-platform') that have a row in AM_GW_INSTANCES.
      */
-    public PlatformGateway getGatewayById(String id) throws APIManagementException {
+    public List<String> getPlatformGatewayUuidsWithInstance(String organizationId) throws APIManagementException {
+        List<String> uuids = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(
-                     SQLConstants.PlatformGatewaySQLConstants.SELECT_GATEWAY_BY_ID_SQL)) {
-            ps.setString(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? mapRowToGateway(rs) : null;
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException("Error getting platform gateway by id", e);
-        }
-    }
-
-    /**
-     * Get platform gateway by name and organization (for uniqueness check).
-     */
-    public PlatformGateway getGatewayByNameAndOrganization(String name, String organizationId)
-            throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = connection.prepareStatement(
-                     SQLConstants.PlatformGatewaySQLConstants.SELECT_GATEWAY_BY_NAME_AND_ORG_SQL)) {
-            ps.setString(1, name);
-            ps.setString(2, organizationId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
-                    return null;
-                }
-                return getGatewayById(rs.getString("ID"));
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException("Error getting platform gateway by name and org", e);
-        }
-    }
-
-    /**
-     * List platform gateways by organization.
-     */
-    public List<PlatformGateway> listGatewaysByOrganization(String organizationId) throws APIManagementException {
-        List<PlatformGateway> list = new ArrayList<>();
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = connection.prepareStatement(
-                     SQLConstants.PlatformGatewaySQLConstants.SELECT_GATEWAYS_BY_ORG_SQL)) {
+                     SQLConstants.PlatformGatewaySQLConstants.SELECT_PLATFORM_GATEWAY_UUIDS_WITH_INSTANCE_SQL)) {
             ps.setString(1, organizationId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    list.add(mapRowToGateway(rs));
+                    uuids.add(rs.getString("UUID"));
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error listing platform gateways", e);
+            throw new APIManagementException("Error listing platform gateway UUIDs with instance", e);
         }
-        return list;
+        return uuids;
     }
 
     /**
-     * List platform gateways that have a row in AM_GW_INSTANCES (same source as deployment acks and stats).
-     * Use this for GET /environments so the list is consistent with deployment feedback.
-     * Deduplicates by gateway id so each gateway appears once even if SQL returns multiple rows per env mapping.
+     * Build a minimal PlatformGateway from a token row (for WebSocket session; has id and organizationId only).
      */
-    public List<PlatformGateway> listGatewaysByOrganizationWithInstance(String organizationId)
-            throws APIManagementException {
-        Map<String, PlatformGateway> byId = new LinkedHashMap<>();
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = connection.prepareStatement(
-                     SQLConstants.PlatformGatewaySQLConstants.SELECT_GATEWAYS_BY_ORG_WITH_INSTANCE_SQL)) {
-            ps.setString(1, organizationId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    PlatformGateway gw = mapRowToGateway(rs);
-                    if (gw != null && gw.id != null && !byId.containsKey(gw.id)) {
-                        byId.put(gw.id, gw);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException("Error listing platform gateways with instance", e);
+    public static PlatformGateway fromTokenWithGateway(TokenWithGateway tokenRow) {
+        if (tokenRow == null) {
+            return null;
         }
-        return new ArrayList<>(byId.values());
-    }
-
-    /**
-     * Update gateway active status (e.g. connected/disconnected for control plane WebSocket).
-     */
-    public void updateGatewayActiveStatus(String gatewayId, boolean active) throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = connection.prepareStatement(
-                     SQLConstants.PlatformGatewaySQLConstants.UPDATE_GATEWAY_ACTIVE_SQL)) {
-            ps.setBoolean(1, active);
-            ps.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
-            ps.setString(3, gatewayId);
-            ps.executeUpdate();
-            connection.commit();
-        } catch (SQLException e) {
-            throw new APIManagementException("Error updating platform gateway active status", e);
-        }
+        String name = tokenRow.gatewayName != null ? tokenRow.gatewayName : "";
+        return new PlatformGateway(tokenRow.gatewayId, tokenRow.organizationId, name, name, null, "",
+                null, false, null, null);
     }
 
     /**
@@ -325,31 +208,8 @@ public class PlatformGatewayDAO {
         return new TokenWithGateway(
                 rs.getString("TOKEN_HASH"),
                 rs.getString("GATEWAY_UUID"),
-                rs.getString("ORGANIZATION_ID")
-        );
-    }
-
-    /**
-     * Map a result set row to PlatformGateway.
-     * <p>PROPERTIES is stored as a string type (VARCHAR/TEXT/MEDIUMTEXT/CLOB depending on DB). For moderate
-     * sizes (typical for gateway custom JSON), {@link ResultSet#getString(String)} is standard and works for
-     * VARCHAR/TEXT/CLOB in modern drivers (Oracle 10g+, MySQL, PostgreSQL, H2). If a driver required CLOB-
-     * specific handling or very large values, use {@code getClob()} and stream via {@code getCharacterStream()}.</p>
-     */
-    private static PlatformGateway mapRowToGateway(ResultSet rs) throws SQLException {
-        return new PlatformGateway(
-                rs.getString("ID"),
                 rs.getString("ORGANIZATION_ID"),
-                rs.getString("NAME"),
-                rs.getString("DISPLAY_NAME"),
-                rs.getString("DESCRIPTION"),
-                rs.getString("VHOST"),
-                rs.getBoolean("IS_CRITICAL"),
-                rs.getString("FUNCTIONALITY_TYPE"),
-                rs.getString("PROPERTIES"),
-                rs.getBoolean("IS_ACTIVE"),
-                rs.getTimestamp("CREATED_AT"),
-                rs.getTimestamp("UPDATED_AT")
+                rs.getString("GATEWAY_NAME")
         );
     }
 
@@ -443,8 +303,13 @@ public class PlatformGatewayDAO {
                     ps.setString(1, gatewayId);
                     ps.executeUpdate();
                 }
-                // 5b. AM_GW_VHOST and AM_GATEWAY_ENVIRONMENT (platform gateways are added here on create so
-                //     GET /environments returns them; must remove so the gateway disappears from the list)
+                // 6. AM_GATEWAY_TOKEN (before env delete so FK to AM_GATEWAY_ENVIRONMENT is satisfied)
+                try (PreparedStatement ps = connection.prepareStatement(
+                        SQLConstants.PlatformGatewaySQLConstants.DELETE_PLATFORM_GATEWAY_TOKENS_SQL)) {
+                    ps.setString(1, gatewayId);
+                    ps.executeUpdate();
+                }
+                // 7. AM_GW_VHOST and AM_GATEWAY_ENVIRONMENT
                 try (PreparedStatement ps = connection.prepareStatement(
                         SQLConstants.GET_ENVIRONMENT_BY_ORGANIZATION_AND_UUID_SQL)) {
                     ps.setString(1, organizationId);
@@ -464,18 +329,6 @@ public class PlatformGatewayDAO {
                             }
                         }
                     }
-                }
-                // 6. AM_PLATFORM_GATEWAY_TOKEN
-                try (PreparedStatement ps = connection.prepareStatement(
-                        SQLConstants.PlatformGatewaySQLConstants.DELETE_PLATFORM_GATEWAY_TOKENS_SQL)) {
-                    ps.setString(1, gatewayId);
-                    ps.executeUpdate();
-                }
-                // 7. AM_PLATFORM_GATEWAY
-                try (PreparedStatement ps = connection.prepareStatement(
-                        SQLConstants.PlatformGatewaySQLConstants.DELETE_PLATFORM_GATEWAY_SQL)) {
-                    ps.setString(1, gatewayId);
-                    ps.executeUpdate();
                 }
                 connection.commit();
                 if (log.isDebugEnabled()) {

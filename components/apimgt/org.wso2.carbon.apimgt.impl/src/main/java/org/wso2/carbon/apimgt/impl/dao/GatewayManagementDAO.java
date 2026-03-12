@@ -553,7 +553,7 @@ public class GatewayManagementDAO {
             return false;
         }
         try (PreparedStatement ps = connection.prepareStatement(
-                SQLConstants.PlatformGatewaySQLConstants.SELECT_GATEWAY_BY_NAME_AND_ORG_SQL)) {
+                SQLConstants.PlatformGatewaySQLConstants.CHECK_PLATFORM_GATEWAY_EXISTS_BY_NAME_AND_ORG_SQL)) {
             ps.setString(1, environmentName);
             ps.setString(2, organization);
             try (ResultSet rs = ps.executeQuery()) {

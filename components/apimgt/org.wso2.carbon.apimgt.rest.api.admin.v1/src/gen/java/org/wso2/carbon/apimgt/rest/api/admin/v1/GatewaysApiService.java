@@ -11,8 +11,10 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CreatePlatformGatewayRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayWithTokenDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayResponseWithTokenDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.UpdatePlatformGatewayRequestDTO;
 
 import java.util.List;
 
@@ -24,6 +26,7 @@ import javax.ws.rs.core.SecurityContext;
 
 public interface GatewaysApiService {
       public Response gatewaysGatewayIdDelete(String gatewayId, MessageContext messageContext) throws APIManagementException;
+      public Response gatewaysGatewayIdPut(String gatewayId, UpdatePlatformGatewayRequestDTO updatePlatformGatewayRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response gatewaysGatewayIdRegenerateTokenPost(String gatewayId, MessageContext messageContext) throws APIManagementException;
       public Response gatewaysGet(MessageContext messageContext) throws APIManagementException;
       public Response gatewaysPost(CreatePlatformGatewayRequestDTO createPlatformGatewayRequestDTO, MessageContext messageContext) throws APIManagementException;

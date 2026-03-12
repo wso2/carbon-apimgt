@@ -164,6 +164,6 @@ public final class PlatformGatewayTokenUtil {
         if (log.isInfoEnabled()) {
             log.info("Platform gateway token verified successfully for gateway: " + tokenRow.gatewayId);
         }
-        return dao.getGatewayById(tokenRow.gatewayId);
+        return PlatformGatewayDAO.fromTokenWithGateway(tokenRow);
     }
 }

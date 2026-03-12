@@ -7,11 +7,11 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CreatePlatformGatewayRequestPermissionsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.UpdatePlatformGatewayRequestPermissionsDTO;
 import javax.validation.constraints.*;
 
 /**
- * Request body for creating a platform gateway (name pattern, optional properties).
+ * Request body for PUT /gateways/{gatewayId}. Per PUT semantics, send the full resource representation. Name and vhost are immutable (server validates they match the existing gateway); all other fields are applied. 
  **/
 
 import io.swagger.annotations.*;
@@ -23,27 +23,27 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Request body for creating a platform gateway (name pattern, optional properties).")
+@ApiModel(description = "Request body for PUT /gateways/{gatewayId}. Per PUT semantics, send the full resource representation. Name and vhost are immutable (server validates they match the existing gateway); all other fields are applied. ")
 
-public class CreatePlatformGatewayRequestDTO   {
+public class UpdatePlatformGatewayRequestDTO   {
   
     private String name = null;
+    private String vhost = null;
     private String displayName = null;
     private String description = null;
-    private String vhost = null;
     private Map<String, Object> properties = new HashMap<String, Object>();
-    private CreatePlatformGatewayRequestPermissionsDTO permissions = null;
+    private UpdatePlatformGatewayRequestPermissionsDTO permissions = null;
 
   /**
-   * URL-friendly gateway identifier (lowercase alphanumeric with hyphens, unique per organization)
+   * Gateway identifier (immutable; must match existing). Required for PUT full representation.
    **/
-  public CreatePlatformGatewayRequestDTO name(String name) {
+  public UpdatePlatformGatewayRequestDTO name(String name) {
     this.name = name;
     return this;
   }
 
   
-  @ApiModelProperty(example = "prod-gateway-01", required = true, value = "URL-friendly gateway identifier (lowercase alphanumeric with hyphens, unique per organization)")
+  @ApiModelProperty(required = true, value = "Gateway identifier (immutable; must match existing). Required for PUT full representation.")
   @JsonProperty("name")
   @NotNull
  @Pattern(regexp="^[a-z0-9-]+$") @Size(min=3,max=64)  public String getName() {
@@ -54,9 +54,28 @@ public class CreatePlatformGatewayRequestDTO   {
   }
 
   /**
+   * Virtual host (immutable; must match existing). Required for PUT full representation.
+   **/
+  public UpdatePlatformGatewayRequestDTO vhost(String vhost) {
+    this.vhost = vhost;
+    return this;
+  }
+
+  
+  @ApiModelProperty(required = true, value = "Virtual host (immutable; must match existing). Required for PUT full representation.")
+  @JsonProperty("vhost")
+  @NotNull
+ @Size(min=1,max=255)  public String getVhost() {
+    return vhost;
+  }
+  public void setVhost(String vhost) {
+    this.vhost = vhost;
+  }
+
+  /**
    * Human-readable gateway name
    **/
-  public CreatePlatformGatewayRequestDTO displayName(String displayName) {
+  public UpdatePlatformGatewayRequestDTO displayName(String displayName) {
     this.displayName = displayName;
     return this;
   }
@@ -75,7 +94,7 @@ public class CreatePlatformGatewayRequestDTO   {
   /**
    * Optional description
    **/
-  public CreatePlatformGatewayRequestDTO description(String description) {
+  public UpdatePlatformGatewayRequestDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -91,28 +110,9 @@ public class CreatePlatformGatewayRequestDTO   {
   }
 
   /**
-   * Virtual host (domain name) for the gateway
-   **/
-  public CreatePlatformGatewayRequestDTO vhost(String vhost) {
-    this.vhost = vhost;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "mg.wso2.com", required = true, value = "Virtual host (domain name) for the gateway")
-  @JsonProperty("vhost")
-  @NotNull
- @Size(min=1,max=255)  public String getVhost() {
-    return vhost;
-  }
-  public void setVhost(String vhost) {
-    this.vhost = vhost;
-  }
-
-  /**
    * Custom key-value properties for the gateway
    **/
-  public CreatePlatformGatewayRequestDTO properties(Map<String, Object> properties) {
+  public UpdatePlatformGatewayRequestDTO properties(Map<String, Object> properties) {
     this.properties = properties;
     return this;
   }
@@ -129,7 +129,7 @@ public class CreatePlatformGatewayRequestDTO   {
 
   /**
    **/
-  public CreatePlatformGatewayRequestDTO permissions(CreatePlatformGatewayRequestPermissionsDTO permissions) {
+  public UpdatePlatformGatewayRequestDTO permissions(UpdatePlatformGatewayRequestPermissionsDTO permissions) {
     this.permissions = permissions;
     return this;
   }
@@ -138,10 +138,10 @@ public class CreatePlatformGatewayRequestDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("permissions")
-  public CreatePlatformGatewayRequestPermissionsDTO getPermissions() {
+  public UpdatePlatformGatewayRequestPermissionsDTO getPermissions() {
     return permissions;
   }
-  public void setPermissions(CreatePlatformGatewayRequestPermissionsDTO permissions) {
+  public void setPermissions(UpdatePlatformGatewayRequestPermissionsDTO permissions) {
     this.permissions = permissions;
   }
 
@@ -154,29 +154,29 @@ public class CreatePlatformGatewayRequestDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CreatePlatformGatewayRequestDTO createPlatformGatewayRequest = (CreatePlatformGatewayRequestDTO) o;
-    return Objects.equals(name, createPlatformGatewayRequest.name) &&
-        Objects.equals(displayName, createPlatformGatewayRequest.displayName) &&
-        Objects.equals(description, createPlatformGatewayRequest.description) &&
-        Objects.equals(vhost, createPlatformGatewayRequest.vhost) &&
-        Objects.equals(properties, createPlatformGatewayRequest.properties) &&
-        Objects.equals(permissions, createPlatformGatewayRequest.permissions);
+    UpdatePlatformGatewayRequestDTO updatePlatformGatewayRequest = (UpdatePlatformGatewayRequestDTO) o;
+    return Objects.equals(name, updatePlatformGatewayRequest.name) &&
+        Objects.equals(vhost, updatePlatformGatewayRequest.vhost) &&
+        Objects.equals(displayName, updatePlatformGatewayRequest.displayName) &&
+        Objects.equals(description, updatePlatformGatewayRequest.description) &&
+        Objects.equals(properties, updatePlatformGatewayRequest.properties) &&
+        Objects.equals(permissions, updatePlatformGatewayRequest.permissions);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, displayName, description, vhost, properties, permissions);
+    return Objects.hash(name, vhost, displayName, description, properties, permissions);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class CreatePlatformGatewayRequestDTO {\n");
+    sb.append("class UpdatePlatformGatewayRequestDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
     sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
     sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
     sb.append("}");

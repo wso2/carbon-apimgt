@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -126,86 +130,78 @@ public final class PlatformGatewayAPIYamlConverter {
         String productionUrl = extractProductionEndpointUrl(api.getEndpointConfig());
         String sandboxUrl = extractSandboxEndpointUrl(api.getEndpointConfig());
 
-        StringBuilder yaml = new StringBuilder();
-        yaml.append("apiVersion: ").append(quote(API_VERSION)).append("\n");
-        yaml.append("kind: ").append(quote(KIND)).append("\n");
-        yaml.append("metadata:\n");
-        yaml.append("  name: ").append(quote(metadataName)).append("\n");
-        yaml.append("spec:\n");
-        yaml.append("  displayName: ").append(quote(displayName)).append("\n");
-        yaml.append("  version: ").append(quote(version)).append("\n");
-        yaml.append("  context: ").append(quote(context)).append("\n");
-        yaml.append("  upstream:\n");
-        yaml.append("    main:\n");
-        yaml.append("      url: ").append(quote(productionUrl)).append("\n");
+        // Build a DTO structure compatible with API Platform APIDeploymentYAML (apiVersion/kind/metadata/spec)
+        DeploymentYaml deployment = new DeploymentYaml();
+        deployment.apiVersion = API_VERSION;
+        deployment.kind = KIND;
+
+        DeploymentMetadata metadata = new DeploymentMetadata();
+        metadata.name = metadataName;
+        deployment.metadata = metadata;
+
+        ApiSpec spec = new ApiSpec();
+        spec.displayName = displayName;
+        spec.version = version;
+        spec.context = context;
+
+        UpstreamYaml upstream = new UpstreamYaml();
+        UpstreamTarget main = new UpstreamTarget();
+        main.url = productionUrl;
+        upstream.main = main;
         if (StringUtils.isNotBlank(sandboxUrl)) {
-            yaml.append("    sandbox:\n");
-            yaml.append("      url: ").append(quote(sandboxUrl)).append("\n");
+            UpstreamTarget sandbox = new UpstreamTarget();
+            sandbox.url = sandboxUrl;
+            upstream.sandbox = sandbox;
         }
-        appendApiLevelPolicies(api, yaml);
-        yaml.append("  operations:\n");
-        appendOperations(api, yaml);
-        return yaml.toString();
-    }
+        spec.upstream = upstream;
 
-    /**
-     * Appends API-level policies to spec so the platform gateway can enforce them.
-     * Gateway expects Policy with name, version (major-only e.g. v0, v1), and optional params.
-     */
-    private static void appendApiLevelPolicies(API api, StringBuilder yaml) {
+        // API-level policies
         List<OperationPolicy> apiPolicies = api.getApiPolicies();
-        if (apiPolicies == null || apiPolicies.isEmpty()) {
-            return;
+        if (apiPolicies != null && !apiPolicies.isEmpty()) {
+            for (OperationPolicy policy : apiPolicies) {
+                spec.policies.add(toPolicyDto(policy));
+            }
         }
-        yaml.append("  policies:\n");
-        for (OperationPolicy policy : apiPolicies) {
-            appendPolicyYaml(policy, yaml, "  ");
+
+        // Operation-level policies
+        appendOperations(api, spec);
+
+        deployment.spec = spec;
+
+        ObjectMapper yamlMapper = new ObjectMapper(
+                new YAMLFactory()
+                        .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+                        .disable(YAMLGenerator.Feature.SPLIT_LINES)
+        );
+        try {
+            return yamlMapper.writeValueAsString(deployment);
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Failed to serialize platform gateway YAML", e);
         }
     }
 
     /**
-     * Appends a single policy in platform gateway YAML form (name, version, optional params).
-     * Version is normalized to major-only (e.g. 0.2 -> v0) as required by the gateway.
-     * Includes flow (request/response/fault) from policy direction so the gateway can enforce
-     * policies in the correct phase.
+     * Convert an APIM OperationPolicy into a generic policy DTO for platform gateway.
+     * Uses major-only policy version (v0, v1, ...) and retains parameter types for Policy Hub validation.
      */
-    private static void appendPolicyYaml(OperationPolicy policy, StringBuilder yaml, String indent) {
-        if (policy == null) return;
+    private static PolicyDto toPolicyDto(OperationPolicy policy) {
+        if (policy == null) {
+            return null;
+        }
+        PolicyDto dto = new PolicyDto();
         String name = policy.getPolicyName();
-        if (StringUtils.isBlank(name)) name = "policy";
-        String version = toPolicyVersionMajorOnly(policy.getPolicyVersion());
-        String flow = normalizeFlow(policy.getDirection());
-        yaml.append(indent).append("- name: ").append(quote(name)).append("\n");
-        yaml.append(indent).append("  version: ").append(quote(version)).append("\n");
+        if (StringUtils.isBlank(name)) {
+            name = "policy";
+        }
+        dto.name = name;
+        dto.version = toPolicyVersionMajorOnly(policy.getPolicyVersion());
+        // Leave executionCondition unset so the gateway executes the policy unconditionally.
+        // Direction (request/response) is determined by the chain (request vs response) the policy belongs to.
         Map<String, Object> params = policy.getParameters();
-        boolean hasParams = params != null && !params.isEmpty();
-        boolean needFlowParam = StringUtils.isNotBlank(flow);
-        if (needFlowParam && params != null && params.containsKey("flow")) {
-            needFlowParam = false;
+        if (params != null && !params.isEmpty()) {
+            dto.params = params;
         }
-        if (hasParams || needFlowParam) {
-            yaml.append(indent).append("  params:\n");
-            if (needFlowParam) {
-                yaml.append(indent).append("    flow: ").append(quote(flow)).append("\n");
-            }
-            if (params != null) {
-                for (Map.Entry<String, Object> e : params.entrySet()) {
-                    Object v = e.getValue();
-                    String valueStr = v != null ? v.toString() : "";
-                    yaml.append(indent).append("    ").append(quoteYamlKey(e.getKey())).append(": ")
-                            .append(quote(valueStr)).append("\n");
-                }
-            }
-        }
-    }
-
-    /** Normalizes policy direction to flow: request, response, or fault (lowercase). Defaults to request. */
-    private static String normalizeFlow(String direction) {
-        if (StringUtils.isBlank(direction)) return "request";
-        String d = direction.trim().toLowerCase();
-        if ("response".equals(d) || "outbound".equals(d)) return "response";
-        if ("fault".equals(d) || "onfault".equals(d)) return "fault";
-        return "request";
+        return dto;
     }
 
     /** Gateway expects major-only version (e.g. v0, v1). Converts 0.2 -> v0, 1.0 -> v1. */
@@ -228,17 +224,6 @@ public final class PlatformGatewayAPIYamlConverter {
         } catch (NumberFormatException e) {
             return "v1";
         }
-    }
-
-    private static String quoteYamlKey(String key) {
-        if (key == null) return "\"\"";
-        if (key.matches("^[a-zA-Z_][a-zA-Z0-9_]*$")) return key;
-        return quote(key);
-    }
-
-    private static String quote(String s) {
-        if (s == null) return "\"\"";
-        return "\"" + s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n") + "\"";
     }
 
     private static String sanitizeDisplayName(String name) {
@@ -269,11 +254,13 @@ public final class PlatformGatewayAPIYamlConverter {
         return base;
     }
 
-    private static void appendOperations(API api, StringBuilder yaml) {
+    private static void appendOperations(API api, ApiSpec spec) {
         Set<URITemplate> templates = api.getUriTemplates();
         if (templates == null || templates.isEmpty()) {
-            yaml.append("  - method: GET\n");
-            yaml.append("    path: \"/*\"\n");
+            OperationYaml op = new OperationYaml();
+            op.method = "GET";
+            op.path = "/*";
+            spec.operations.add(op);
             return;
         }
         for (URITemplate template : templates) {
@@ -284,20 +271,27 @@ public final class PlatformGatewayAPIYamlConverter {
             if (verbs == null || verbs.isEmpty()) {
                 String verb = template.getHTTPVerb();
                 verbs = new LinkedHashSet<>();
-                if (verb != null && !verb.isEmpty()) verbs.add(verb);
-                else verbs.add("GET");
+                if (verb != null && !verb.isEmpty()) {
+                    verbs.add(verb);
+                } else {
+                    verbs.add("GET");
+                }
             }
             List<OperationPolicy> opPolicies = template.getOperationPolicies();
             for (String method : verbs) {
                 String m = (method == null || method.isEmpty()) ? "GET" : method.toUpperCase();
-                yaml.append("  - method: ").append(m).append("\n");
-                yaml.append("    path: ").append(quote(path)).append("\n");
+                OperationYaml op = new OperationYaml();
+                op.method = m;
+                op.path = path;
                 if (opPolicies != null && !opPolicies.isEmpty()) {
-                    yaml.append("    policies:\n");
                     for (OperationPolicy policy : opPolicies) {
-                        appendPolicyYaml(policy, yaml, "    ");
+                        PolicyDto dto = toPolicyDto(policy);
+                        if (dto != null) {
+                            op.policies.add(dto);
+                        }
                     }
                 }
+                spec.operations.add(op);
             }
         }
     }
@@ -377,5 +371,62 @@ public final class PlatformGatewayAPIYamlConverter {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Top-level deployment YAML DTO (apiVersion/kind/metadata/spec).
+     * Shape is compatible with API Platform APIDeploymentYAML so the same gateway binary can consume it.
+     */
+    private static class DeploymentYaml {
+        public String apiVersion;
+        public String kind;
+        public DeploymentMetadata metadata;
+        public ApiSpec spec;
+    }
+
+    private static class DeploymentMetadata {
+        public String name;
+    }
+
+    /**
+     * spec section DTO: displayName, version, context, upstream, policies, operations.
+     */
+    private static class ApiSpec {
+        public String displayName;
+        public String version;
+        public String context;
+        public UpstreamYaml upstream;
+        public List<PolicyDto> policies = new java.util.ArrayList<>();
+        public List<OperationYaml> operations = new java.util.ArrayList<>();
+    }
+
+    private static class UpstreamYaml {
+        public UpstreamTarget main;
+        public UpstreamTarget sandbox;
+    }
+
+    private static class UpstreamTarget {
+        public String url;
+        public String ref;
+    }
+
+    /**
+     * Generic policy DTO aligned with api-platform's Policy:
+     * name, version (major-only), executionCondition, params (arbitrary JSON).
+     */
+    private static class PolicyDto {
+        public String name;
+        public String version;
+        public String executionCondition;
+        public Map<String, Object> params;
+    }
+
+    /**
+     * Operation DTO: method, path, and attached policies.
+     */
+    private static class OperationYaml {
+        public String method;
+        public String path;
+        public List<PolicyDto> policies = new java.util.ArrayList<>();
     }
 }
