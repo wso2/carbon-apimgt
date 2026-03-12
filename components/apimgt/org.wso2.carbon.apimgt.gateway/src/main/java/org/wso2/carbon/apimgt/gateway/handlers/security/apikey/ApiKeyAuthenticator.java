@@ -139,6 +139,15 @@ public class ApiKeyAuthenticator implements Authenticator {
             if (transportHeaderMap != null) {
                 referer = transportHeaderMap.get(APIMgtGatewayConstants.REFERER);
             }
+            ExtendedJWTConfigurationDto jwtConfigurationDto = ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfiguration().getJwtConfigurationDto();
+            boolean jwtGenerationEnabled = false;
+            if (jwtConfigurationDto != null) {
+                jwtGenerationEnabled = jwtConfigurationDto.isEnabled();
+                if (jwtGenerationEnabled) {
+                    log.debug("JWT generation is enabled for API key authentication");
+                }
+            }
 
             // Initial guess of a JWT API key
             if (StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT)) {
@@ -170,12 +179,6 @@ public class ApiKeyAuthenticator implements Authenticator {
                             tenantDomain);
                     // If Api Key signature is verified
                     if (isVerified) {
-                        ExtendedJWTConfigurationDto jwtConfigurationDto = ServiceReferenceHolder.getInstance().
-                                getAPIManagerConfiguration().getJwtConfigurationDto();
-                        boolean jwtGenerationEnabled = false;
-                        if (jwtConfigurationDto != null) {
-                            jwtGenerationEnabled = jwtConfigurationDto.isEnabled();
-                        }
                         ApiKeyAuthenticatorUtils.overridePayloadFromDataCache(isGatewayTokenCacheEnabled, cacheKey, payload);
                         ApiKeyAuthenticatorUtils.checkTokenExpired(isGatewayTokenCacheEnabled, cacheKey, tokenIdentifier, apiKey,
                                 tenantDomain, payload);
@@ -207,7 +210,8 @@ public class ApiKeyAuthenticator implements Authenticator {
             AuthenticationContext opaqueApiKeyAuthenticationContext = validateOpaqueApiKey(apiKey, apiContext,
                     apiVersion, referer, GatewayUtils.getIp(axis2MessageContext), tenantDomain);
             if (opaqueApiKeyAuthenticationContext.isAuthenticated()) {
-                APISecurityUtils.setAuthenticationContext(synCtx, opaqueApiKeyAuthenticationContext, null);
+                APISecurityUtils.setAuthenticationContext(synCtx, opaqueApiKeyAuthenticationContext,
+                        jwtGenerationEnabled ? getContextHeader() : null);
                 synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, opaqueApiKeyAuthenticationContext.getUsername());
                 log.debug("User is authorized to access the resource using Api Key.");
                 return new AuthenticationResponse(true, isMandatory, false,
@@ -249,6 +253,9 @@ public class ApiKeyAuthenticator implements Authenticator {
         // Hash the provided API key
         String apiKeyHash = APIUtil.sha256Hash(apiKey);
         String lookupKey = apiKeyHash;
+        String endUserToken = null;
+        ExtendedJWTConfigurationDto jwtConfigurationDto = ServiceReferenceHolder.getInstance()
+            .getAPIManagerConfiguration().getJwtConfigurationDto();
         APIKeyInfo apiKeyInfo;
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
         if (RevokedJWTDataHolder.getInstance().isApiKeyExistsInRevokedMap(apiKeyHash)) {
@@ -294,6 +301,12 @@ public class ApiKeyAuthenticator implements Authenticator {
                     log.debug("User is subscribed to the API: " + apiContext + ", " +
                             "version: " + apiVersion + ". Token: " + apiKeyInfo.getKeyName());
                 }
+                // Check for permittedIP and permittedReferrers
+                ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(ip,
+                        apiContext, apiVersion, referrer, apiKeyInfo.getAdditionalProperties());
+                endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO,
+                        jwtConfigurationDto, apiKey, null, null, apiKeyHash, apiContext, apiVersion,
+                        isGatewayTokenCacheEnabled);
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("User is not subscribed to access the API: " + apiContext +
@@ -303,15 +316,12 @@ public class ApiKeyAuthenticator implements Authenticator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                         APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
             }
-            // Check for permittedIP and permittedReferrers
-            ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(ip,
-                    apiContext, apiVersion, referrer, apiKeyInfo.getAdditionalProperties());
         }
         ApiKeyAuthenticatorUtils.addTokenToTokenCache(isGatewayTokenCacheEnabled, apiKeyHash, isVerified,
                 tenantDomain);
         ApiKeyAuthenticatorUtils.updateApiKeyLastUsedTime(apiKeyHash, tenantDomain);
         // Set and return auth context
-        return GatewayUtils.generateAuthenticationContext(apiKey, null, apiKeyValidationInfoDTO, null);
+        return GatewayUtils.generateAuthenticationContext(apiKey, null, apiKeyValidationInfoDTO, endUserToken);
     }
 
     private String extractApiKey(MessageContext mCtx) throws APISecurityException {

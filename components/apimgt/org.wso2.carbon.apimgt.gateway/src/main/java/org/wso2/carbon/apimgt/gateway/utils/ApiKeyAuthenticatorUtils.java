@@ -538,8 +538,15 @@ public class ApiKeyAuthenticatorUtils {
         }
         String endUserToken = null;
         if (jwtGenerationEnabled) {
-            SignedJWTInfo signedJWTInfo = new SignedJWTInfo(apiKey, signedJWT, payload);
-            JWTValidationInfo jwtValidationInfo = getJwtValidationInfo(signedJWTInfo);
+            JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
+            if (payload == null) {
+                log.debug("JWT payload is null, using opaque API key validation");
+                // In case of opaque API key, JWT claims will not be available. Hence, build JWT validation info using the API key validation info DTO.
+                jwtValidationInfo = getJwtValidationInfoForOpaqueApiKey(apiKeyValidationInfoDTO);
+            } else {
+                SignedJWTInfo signedJWTInfo = new SignedJWTInfo(apiKey, signedJWT, payload);
+                jwtValidationInfo = getJwtValidationInfo(signedJWTInfo);
+            }
             JWTInfoDto jwtInfoDto = GatewayUtils.generateJWTInfoDto(jwtValidationInfo,
                     apiKeyValidationInfoDTO, apiContext, apiVersion);
             endUserToken = generateAndRetrieveBackendJWTToken(tokenIdentifier, jwtInfoDto, isGatewayTokenCacheEnabled,
@@ -636,6 +643,24 @@ public class ApiKeyAuthenticatorUtils {
         JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
         jwtValidationInfo.setClaims(new HashMap<>(signedJWTInfo.getJwtClaimsSet().getClaims()));
         jwtValidationInfo.setUser(signedJWTInfo.getJwtClaimsSet().getSubject());
+        return jwtValidationInfo;
+    }
+
+    /**
+     * Build JWT validation information for opaque API keys where JWT claims are not available.
+     *
+     * @param apiKeyValidationInfoDTO The API key validation info DTO.
+     * @return JWT validation info populated with end user and empty claims.
+     */
+    private static JWTValidationInfo getJwtValidationInfoForOpaqueApiKey(APIKeyValidationInfoDTO apiKeyValidationInfoDTO) {
+        JWTValidationInfo jwtValidationInfo = new JWTValidationInfo();
+        jwtValidationInfo.setClaims(new HashMap<>());
+
+        String endUser = apiKeyValidationInfoDTO.getEndUserName();
+        if (StringUtils.isBlank(endUser)) {
+            endUser = apiKeyValidationInfoDTO.getSubscriber();
+        }
+        jwtValidationInfo.setUser(endUser);
         return jwtValidationInfo;
     }
 
