@@ -600,9 +600,13 @@ public final class APIUtil {
                 retryCount++;
                 if (retryCount <= maxRetryCount) {
                     retry = true;
-                    log.error("Failed to retrieve " + path + " from remote endpoint: " + ex.getMessage()
-                            + ". Retry attempt " + retryCount + " in " + (retryDuration / 1000) +
-                            " seconds.");
+                    String logMessage = "Failed to retrieve " + path + " from remote endpoint: " + ex.getMessage()
+                            + ". Retry attempt " + retryCount + " in " + (retryDuration / 1000) + " seconds.";
+                    if (retryCount >= 4) {
+                        log.error(logMessage);
+                    } else if (retryCount == 3) {
+                        log.warn(logMessage);
+                    }
                     try {
                         Thread.sleep(retryDuration);
                         retryDuration = (long) (retryDuration * retryProgressionFactor);
