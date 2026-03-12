@@ -1149,6 +1149,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(api.getId().getApiName(),
                 api.getOrganization(), uriTemplates);
+        // Sync scope metadata from API level scopes to URI template scopes
+        if (api.getScopes() != null) {
+            Map<String, Scope> apiScopesByKey = new HashMap<>();
+            for (Scope apiScope : api.getScopes()) {
+                if (apiScope.getKey() != null) {
+                    apiScopesByKey.put(apiScope.getKey(), apiScope);
+                }
+            }
+            for (Scope scope : newLocalScopes) {
+                Scope updatedScope = apiScopesByKey.get(scope.getKey());
+                if (updatedScope != null) {
+                    scope.setName(updatedScope.getName());
+                    scope.setDescription(updatedScope.getDescription());
+                    scope.setRoles(updatedScope.getRoles());
+                }
+            }
+        }
         Set<String> newLocalScopeKeys = newLocalScopes.stream().filter(Objects::nonNull)
                 .map(Scope::getKey).filter(key -> key != null
                         && !key.trim().isEmpty()).collect(Collectors.toSet());
@@ -1444,6 +1461,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Set<URITemplate> oldURITemplates = apiMgtDAO.getURITemplatesOfAPI(api.getUuid());
         // Get the new local scope keys from URI templates
         Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(api.getId().getApiName(), api.getOrganization(), uriTemplates);
+        // Sync scope metadata from API level scopes to URI template scopes
+        if (api.getScopes() != null) {
+            Map<String, Scope> apiScopesByKey = new HashMap<>();
+            for (Scope apiScope : api.getScopes()) {
+                if (apiScope.getKey() != null) {
+                    apiScopesByKey.put(apiScope.getKey(), apiScope);
+                }
+            }
+            for (Scope scope : newLocalScopes) {
+                Scope updatedScope = apiScopesByKey.get(scope.getKey());
+                if (updatedScope != null) {
+                    scope.setName(updatedScope.getName());
+                    scope.setDescription(updatedScope.getDescription());
+                    scope.setRoles(updatedScope.getRoles());
+                }
+            }
+        }
         Set<String> newLocalScopeKeys = newLocalScopes.stream().map(Scope::getKey).collect(Collectors.toSet());
         // Get the existing versioned local scope keys attached for the API
         Set<String> oldVersionedLocalScopeKeys = apiMgtDAO.getVersionedLocalScopeKeysForAPI(api.getUuid(), tenantId);
