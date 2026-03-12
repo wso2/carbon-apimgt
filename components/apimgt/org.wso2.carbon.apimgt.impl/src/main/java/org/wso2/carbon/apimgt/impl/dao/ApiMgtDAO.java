@@ -4154,6 +4154,39 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Upgrades the token type of the given application to JWT
+     *
+     * @param application
+     * @return
+     * @throws APIManagementException
+     */
+    public boolean upgradeApplicationTokenType(Application application) throws
+            APIManagementException {
+
+        boolean isAppUpdated = false;
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+
+        String sqlQuery = SQLConstants.UPDATE_APPLICATION_TOKEN_TYPE;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setString(1, APIConstants.JWT);
+            prepStmt.setString(2, application.getUUID());
+            prepStmt.executeUpdate();
+            connection.commit();
+            isAppUpdated = true;
+        } catch (SQLException e) {
+            handleException("Error when updating application token type for applicationId " + application.getName(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+        return isAppUpdated;
+    }
+
+    /**
      * #TODO later we might need to use only this method.
      *
      * @param subscriber   The subscriber.

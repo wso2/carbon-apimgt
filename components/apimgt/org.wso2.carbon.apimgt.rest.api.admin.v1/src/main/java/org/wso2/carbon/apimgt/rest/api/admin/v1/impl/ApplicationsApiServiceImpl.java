@@ -82,7 +82,27 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
     @Override
     public Response applicationsApplicationIdUpgradeTokenTypePost(String applicationId, MessageContext messageContext) {
-        System.out.println("Inside applicationsApplicationIdUpgradeTokenTypePost");
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = null;
+        try {
+            apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            boolean applicationUpdated = apiConsumer.upgradeApplicationTokenType(organization, application);
+            if (applicationUpdated) {
+                String info = "Application ID:" + applicationId + " token type has been upgraded to JWT";
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATIONS, info,
+                        APIConstants.AuditLogConstants.UPDATED, username);
+                return Response.ok().build();
+            } else {
+                RestApiUtil.handleInternalServerError(
+                        "Error while upgrading application token type for applicationId " + applicationId, log);
+            }
+
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError(
+                    "Error while upgrading application token type for applicationId " + applicationId, e, log);
+        }
         return null;
     }
 

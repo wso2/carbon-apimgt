@@ -1181,6 +1181,13 @@ public class SQLConstants {
             " WHERE " +
             "   UUID = ? ";
 
+    public static final String UPDATE_APPLICATION_TOKEN_TYPE =
+            "UPDATE AM_APPLICATION " +
+                    " SET " +
+                    " TOKEN_TYPE = ? " +
+                    " WHERE " +
+                    "   UUID = ? ";
+
         public static final String GET_APPLICATIONS_COUNNT_CASESENSITVE_WITHGROUPID = "SELECT " +
                 "   count(*) count " +
                 " FROM" +

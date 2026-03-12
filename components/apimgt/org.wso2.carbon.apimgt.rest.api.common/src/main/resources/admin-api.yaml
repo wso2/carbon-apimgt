@@ -1593,7 +1593,7 @@ paths:
         - OAuth2Security:
             - apim:admin
             - apim:app_owner_change
-            - apim:app_token_type_change
+            - apim:app_token_type_upgrade
             - apim:app_import_export
             - apim:admin_application_view
       x-code-samples:

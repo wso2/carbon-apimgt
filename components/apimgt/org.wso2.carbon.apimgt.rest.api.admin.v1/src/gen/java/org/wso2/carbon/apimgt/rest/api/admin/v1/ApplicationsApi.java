@@ -121,7 +121,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:app_owner_change", description = "Retrieve and manage applications"),
-            @AuthorizationScope(scope = "apim:app_token_type_change", description = ""),
+            @AuthorizationScope(scope = "apim:app_token_type_upgrade", description = "Upgrade token type of an Application to JWT"),
             @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications related operations"),
             @AuthorizationScope(scope = "apim:admin_application_view", description = "View Applications")
         })
