@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineFactory;
-import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -92,8 +91,10 @@ public class ComplianceEvaluationScheduler {
                                     .getAPIMConfigurationService().getAPIManagerConfiguration());
             threadPoolSize = (int) configDto.getClass().getMethod("getSchedulerThreadPoolSize").invoke(configDto);
             queueSize = (int) configDto.getClass().getMethod("getSchedulerQueueSize").invoke(configDto);
-            checkIntervalMinutes = (int) configDto.getClass().getMethod("getSchedulerTaskCheckInterval").invoke(configDto);
-            cleanupIntervalMinutes = (int) configDto.getClass().getMethod("getSchedulerTaskCleanupInterval").invoke(configDto);
+            checkIntervalMinutes = (int) configDto.getClass()
+                    .getMethod("getSchedulerTaskCheckInterval").invoke(configDto);
+            cleanupIntervalMinutes = (int) configDto.getClass()
+                    .getMethod("getSchedulerTaskCleanupInterval").invoke(configDto);
             log.info("Loaded scheduler config from APIMGovernanceConfigDTO: threadPool=" + threadPoolSize
                     + ", queue=" + queueSize + ", checkInterval=" + checkIntervalMinutes + "min");
         } catch (Throwable e) {
@@ -338,6 +339,13 @@ public class ComplianceEvaluationScheduler {
                 }
                 List<RuleViolation> realTimeViolations = performRealTimeDedupCheck(
                         artifactRefId, ruleset, artifactProjectContentMap, organization);
+                if (realTimeViolations == null) {
+                    // Engine unavailable — skip this ruleset so it shows "Unapplied"
+                    // rather than falsely reporting "Passed" with 0 violations.
+                    log.warn("Skipping GENERIC ruleset '" + ruleset.getName()
+                            + "' for artifact " + artifactRefId + " — validation engine unavailable");
+                    continue;
+                }
                 if (log.isDebugEnabled()) {
                     log.debug("GENERIC ruleset '" + ruleset.getName() + "' returned " 
                             + realTimeViolations.size() + " violations for artifact " + artifactRefId);
@@ -375,13 +383,22 @@ public class ComplianceEvaluationScheduler {
                     continue;
                 }
 
-                // Send target content and ruleset for validation
-                List<RuleViolation> violations = validationEngine.validate(contentToValidate, ruleset);
-                AuditLogger.log("Async Eval Request", "Validated artifact %s " +
-                                "in organization %s against ruleset %s", artifactRefId,
-                        organization, ruleset.getId());
-                ruleViolations.addAll(violations);
-                rulesetViolationsMap.put(ruleset.getId(), ruleViolations);
+                // Send target content and ruleset for validation — isolated so one
+                // ruleset's failure does not prevent other rulesets from being saved.
+                try {
+                    List<RuleViolation> violations = validationEngine.validate(contentToValidate, ruleset);
+                    AuditLogger.log("Async Eval Request", "Validated artifact %s " +
+                                    "in organization %s against ruleset %s", artifactRefId,
+                            organization, ruleset.getId());
+                    ruleViolations.addAll(violations);
+                    rulesetViolationsMap.put(ruleset.getId(), ruleViolations);
+                } catch (Exception e) {
+                    log.error("Validation failed for ruleset " + ruleset.getId()
+                            + " on artifact " + artifactRefId + " — isolating failure", e);
+                    // Still add an empty list so the DAO's clear-all doesn't wipe
+                    // this ruleset's result to "Unapplied"
+                    rulesetViolationsMap.put(ruleset.getId(), ruleViolations);
+                }
 
             } else {
                 skippedRulesets++;
@@ -567,7 +584,7 @@ public class ComplianceEvaluationScheduler {
             ValidationEngine validationEngine = ValidationEngineFactory.getValidationEngine(ruleset);
             if (validationEngine == null) {
                 log.warn("No validation engine found for GENERIC ruleset " + ruleset.getId());
-                return new ArrayList<>();
+                return null;
             }
             if (log.isDebugEnabled()) {
                 log.debug("ValidationEngine resolved for ruleset '" + ruleset.getName()
