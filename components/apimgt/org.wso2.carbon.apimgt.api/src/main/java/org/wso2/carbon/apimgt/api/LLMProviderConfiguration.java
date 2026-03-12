@@ -49,6 +49,10 @@ public class LLMProviderConfiguration {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     LLMProviderAuthenticationConfiguration authenticationConfiguration;
 
+    @JsonProperty(APIConstants.AIAPIConstants.LLM_PROVIDER_DEPRECATED)
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private boolean deprecated = false;
+
     public LLMProviderConfiguration() {
     }
 
@@ -59,13 +63,17 @@ public class LLMProviderConfiguration {
             @JsonProperty("authHeader") String authHeader,
             @JsonProperty("authQueryParameter") String authQueryParameter,
             @JsonProperty("authenticationConfiguration")
-            LLMProviderAuthenticationConfiguration authenticationConfiguration) {
+            LLMProviderAuthenticationConfiguration authenticationConfiguration,
+            @JsonProperty("deprecated") Boolean deprecated) {
 
         this.connectorType = connectorType;
         this.metadata = metadata;
         this.authHeader = authHeader;
         this.authQueryParameter = authQueryParameter;
         this.authenticationConfiguration = authenticationConfiguration;
+        if (deprecated != null) {
+            this.deprecated = deprecated;
+        }
     }
 
     public void setAuthQueryParameter(String authQueryParameter) {
@@ -139,6 +147,14 @@ public class LLMProviderConfiguration {
     public void setAuthQueryParam(String authQueryParameter) {
 
         this.authQueryParameter = authQueryParameter;
+    }
+
+    public boolean isDeprecated() {
+        return deprecated;
+    }
+
+    public void setDeprecated(boolean deprecated) {
+        this.deprecated = deprecated;
     }
 
     public String toJsonString() throws APIManagementException {

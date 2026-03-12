@@ -372,6 +372,9 @@ public final class RestApiConstants {
             Arrays.asList("image/jpeg", "image/png", "image/gif", "image/svg+xml"));
 
     public static final String SVG_MEDIA_TYPE = "image/svg+xml";
+    public static final String JPEG_MEDIA_TYPE = "image/jpeg";
+    public static final String PNG_MEDIA_TYPE = "image/png";
+    public static final String GIF_MEDIA_TYPE = "image/gif";
 
     public static final int TAG_LIMIT_DEFAULT = 1000;
     public static final int TAG_OFFSET_DEFAULT = 0;

@@ -24,11 +24,17 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.ConsumerSecretInfo;
 import org.wso2.carbon.apimgt.api.model.ConsumerSecretRequest;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAPIKeyInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyAssociationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIWithKeyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDTO;
@@ -42,6 +48,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for application key generation related operations
@@ -148,11 +155,32 @@ public class ApplicationKeyMappingUtil {
         return applicationKeyDTO;
     }
 
+    @Deprecated
     public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime){
         APIKeyDTO apiKeyDto = new APIKeyDTO();
         apiKeyDto.setApikey(apiKey);
-        apiKeyDto.setValidityTime(validityTime);
+        apiKeyDto.setValidityPeriod(validityTime);
         return apiKeyDto;
+    }
+
+    public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime, String keyName){
+        APIKeyDTO apiKeyDto = new APIKeyDTO();
+        apiKeyDto.setApikey(apiKey);
+        apiKeyDto.setValidityPeriod(validityTime);
+        if (keyName != null) {
+            apiKeyDto.setKeyName(keyName);
+        } else {
+            apiKeyDto.setKeyName("N/A");
+        }
+        return apiKeyDto;
+    }
+
+    public static APIKeyAssociationDTO formApiAssociationToDTO(String apiName, String appName, String keyName){
+        APIKeyAssociationDTO apiKeyAssociationDTO = new APIKeyAssociationDTO();
+        apiKeyAssociationDTO.setKeyName(keyName);
+        apiKeyAssociationDTO.setApiName(apiName);
+        apiKeyAssociationDTO.setApplicationName(appName);
+        return apiKeyAssociationDTO;
     }
 
     /**
@@ -238,5 +266,99 @@ public class ApplicationKeyMappingUtil {
         consumerSecretListDTO.setCount(consumerSecretDTOs.size());
         consumerSecretListDTO.setList(consumerSecretDTOs);
         return consumerSecretListDTO;
+    }
+
+    /**
+     * Insert the api key related details to a DTO Object
+     *
+     * @param apiKeyInfoList A list of API keys
+     * @return A list of DTO objects with api key related details
+     */
+    public static List<APIKeyInfoDTO> formApiKeyListToDTOList(List<APIKeyInfo> apiKeyInfoList){
+        List<APIKeyInfoDTO> apiKeyInfoDTOList = apiKeyInfoList.stream()
+                .map(src -> {
+                    APIKeyInfoDTO dto = new APIKeyInfoDTO();
+                    dto.setKeyUUID(src.getKeyUUID());
+                    dto.setKeyName(src.getKeyName());
+                    dto.setIssuedOn(src.getCreatedTime());
+                    dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
+                    dto.setLastUsed(getLastUsedTimeOrDefault(src.getLastUsedTime()));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        return apiKeyInfoDTOList;
+    }
+
+    /**
+     * Insert the api key related details to a DTO Object
+     *
+     * @param apiKeyInfoList A list of API keys
+     * @return A list of DTO objects with api key association related details
+     */
+    public static List<APIKeyAssociationInfoDTO> formApiKeyAssociationListToDTOList(List<APIKeyInfo> apiKeyInfoList){
+        List<APIKeyAssociationInfoDTO> apiKeyAssociationInfoDTOList = apiKeyInfoList.stream()
+                .map(src -> {
+                    APIKeyAssociationInfoDTO dto = new APIKeyAssociationInfoDTO();
+                    dto.setKeyUUID(src.getKeyUUID());
+                    dto.setKeyName(src.getKeyName());
+                    dto.setApiName(src.getApiName());
+                    dto.setApiUUID(src.getApiUUId());
+                    dto.setIssuedOn(src.getCreatedTime());
+                    dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
+                    dto.setLastUsed(getLastUsedTimeOrDefault(src.getLastUsedTime()));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        return apiKeyAssociationInfoDTOList;
+    }
+
+    /**
+     * Insert the api key related details to a DTO Object
+     *
+     * @param apiKeyInfoList A list of API keys
+     * @return A list of DTO objects with api key related details
+     */
+    public static List<APIAPIKeyInfoDTO> formApiApiKeyListToDTOList(List<APIKeyInfo> apiKeyInfoList){
+        List<APIAPIKeyInfoDTO> apiKeyInfoDTOList = apiKeyInfoList.stream()
+                .map(src -> {
+                    APIAPIKeyInfoDTO dto = new APIAPIKeyInfoDTO();
+                    dto.setKeyUUID(src.getKeyUUID());
+                    dto.setKeyName(src.getKeyName());
+                    dto.setIssuedOn(src.getCreatedTime());
+                    dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
+                    dto.setLastUsed(getLastUsedTimeOrDefault(src.getLastUsedTime()));
+                    dto.setAssociatedApp(src.getApplicationName());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        return apiKeyInfoDTOList;
+    }
+
+    /**
+     * Insert the api key related details to a DTO Object
+     *
+     * @param apiKeyInfoList A list of API keys
+     * @return A list of DTO objects with apis with api key related details
+     */
+    public static List<APIWithKeyInfoDTO> formApiWithApiKeyListToDTOList(List<APIKeyInfo> apiKeyInfoList){
+        List<APIWithKeyInfoDTO> apiApiKeyInfoDTOList = apiKeyInfoList.stream()
+                .map(src -> {
+                    APIWithKeyInfoDTO dto = new APIWithKeyInfoDTO();
+                    dto.setKeyUUID(src.getKeyUUID());
+                    dto.setKeyName(src.getKeyName());
+                    dto.setApiUUID(src.getApiUUId());
+                    dto.setApiName(src.getApiName());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        return apiApiKeyInfoDTOList;
+    }
+
+    private static String getLastUsedTimeOrDefault(String lastUsedTime) {
+        return lastUsedTime == null ? "NOT_USED" : lastUsedTime;
+    }
+
+    private static int toSafeValidityPeriod(long validityPeriod) {
+        return (int) Math.min(validityPeriod, Integer.MAX_VALUE);
     }
 }

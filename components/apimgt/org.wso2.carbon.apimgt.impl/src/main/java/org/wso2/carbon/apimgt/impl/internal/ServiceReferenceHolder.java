@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
+import org.wso2.carbon.apimgt.impl.token.OpaqueAPIKeyNotifier;
 import org.wso2.carbon.apimgt.impl.workflow.DefaultWorkflowTaskService;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -89,6 +90,7 @@ public class ServiceReferenceHolder {
     private Map<String, APIDefinition> apiDefinitionMap = new HashMap<>();
     private WorkflowTaskService workflowTaskService;
     private FederatedAPIDiscoveryService federatedAPIDiscoveryService;
+    private OpaqueAPIKeyNotifier opaqueApiKeyNotifier;
 
     private Map<String, LLMProviderService> llmProviderServiceMap = new HashMap();
 
@@ -442,6 +444,14 @@ public class ServiceReferenceHolder {
     public FederatedAPIDiscoveryService getFederatedAPIDiscoveryService() {
 
         return federatedAPIDiscoveryService;
+    }
+
+    public OpaqueAPIKeyNotifier getOpaqueApiKeyNotifier() {
+        return opaqueApiKeyNotifier;
+    }
+
+    public void setOpaqueApiKeyNotifier(OpaqueAPIKeyNotifier opaqueApiKeyNotifier) {
+        this.opaqueApiKeyNotifier = opaqueApiKeyNotifier;
     }
 
     public PlatformGatewayService getPlatformGatewayService() {

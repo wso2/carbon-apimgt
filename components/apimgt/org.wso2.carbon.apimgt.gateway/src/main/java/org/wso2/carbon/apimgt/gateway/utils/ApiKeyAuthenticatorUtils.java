@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
@@ -37,6 +38,7 @@ import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJ
 import org.wso2.carbon.apimgt.gateway.dto.JWTTokenPayloadInfo;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -44,6 +46,7 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
+import org.wso2.carbon.apimgt.impl.publishers.OpaqueApiKeyPublisher;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.SigningUtil;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -53,6 +56,9 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import javax.cache.Cache;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
 
 /**
  * This class contains the common utility methods required for API Key authentication.
@@ -149,6 +155,57 @@ public class ApiKeyAuthenticatorUtils {
             checkJWTTokenSignatureExistsInRevokedMap(tokenIdentifier, header);
         }
         return isVerified;
+    }
+
+    /**
+     * This method is used to verify the hash of the API Key. It uses the API Key cache to check the received APIKey
+     * is in it.
+     *
+     * @param isGatewayTokenCacheEnabled Whether the gateway token cache is enabled or not.
+     * @param apiKeyHash                 The api key hash.
+     * @param apiKey                     The API Key.
+     * @return true if the API Key is valid.
+     * @throws APISecurityException If the key is not valid and found in the invalid key cache or revoke map.
+     */
+    public static boolean verifyAPIKeyHashFromTokenCache(boolean isGatewayTokenCacheEnabled, String apiKeyHash, String apiKey)
+            throws APISecurityException {
+
+        boolean isVerified = false;
+        if (isGatewayTokenCacheEnabled) {
+            String cacheToken = (String) getGatewayApiKeyCache().get(apiKeyHash);
+            if (cacheToken != null) {
+                log.debug("Api Key retrieved from the Api Key cache.");
+                isVerified = true;
+            } else if (getInvalidGatewayApiKeyCache().get(apiKeyHash) != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Api Key retrieved from the invalid Api Key cache. Api Key: " + GatewayUtils.getMaskedToken(apiKeyHash));
+                }
+                log.error("Invalid Api Key." + GatewayUtils.getMaskedToken(apiKeyHash));
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+            }
+        }
+        return isVerified;
+    }
+
+    /**
+     * Publish API key usage events to CP
+     * @param apiKeyHash API key hash value
+     * @param tenantDomain Tenant domain
+     */
+    public static void updateApiKeyLastUsedTime(String apiKeyHash, String tenantDomain) {
+        OpaqueApiKeyPublisher apiKeyUsagePublisher = OpaqueApiKeyPublisher.getInstance();
+        Properties properties = new Properties();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        String eventID = UUID.randomUUID().toString();
+        properties.put(APIConstants.NotificationEvent.EVENT_ID, eventID);
+        properties.put(APIConstants.NotificationEvent.EVENT_TYPE, APIConstants.API_KEY_AUTH_TYPE);
+        properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
+        properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
+        properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.API_KEY_USAGE_STREAM_ID);
+        properties.put(APIConstants.NotificationEvent.API_KEY_HASH, apiKeyHash);
+        properties.put(APIConstants.NotificationEvent.LAST_USED_TIME, System.currentTimeMillis());
+        apiKeyUsagePublisher.publishApiKeyUsageEvents(properties);
     }
 
     /**
@@ -269,6 +326,36 @@ public class ApiKeyAuthenticatorUtils {
     }
 
     /**
+     * This method is used to check whether the api key is expired or not.
+     *
+     * @param isGatewayTokenCacheEnabled Whether the gateway token cache is enabled or not.
+     * @param apiKeyHash                 The api key hash.
+     * @param tenantDomain               The tenant domain.
+     * @param apiKeyInfo                 Api key info object.
+     * @throws APISecurityException If the api key is expired.
+     */
+    public static void checkApiKeyExpired(boolean isGatewayTokenCacheEnabled, String apiKeyHash, String tenantDomain, APIKeyInfo apiKeyInfo)
+            throws APISecurityException {
+
+        log.debug("Api Key is verified and started checking whether the Api key is expired or not.");
+        boolean isApiKeyExpired = false;
+        long expiresAt = apiKeyInfo.getExpiresAt();
+        if (expiresAt > 0 && expiresAt < System.currentTimeMillis()) {
+            isApiKeyExpired = true;
+            DataHolder.getInstance().removeOpaqueAPIKeyInfo(apiKeyHash);
+        }
+        if (isApiKeyExpired) {
+            if (isGatewayTokenCacheEnabled) {
+                getGatewayApiKeyCache().remove(apiKeyHash);
+                getInvalidGatewayApiKeyCache().put(apiKeyHash, tenantDomain);
+            }
+            log.error("Api Key is expired");
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+        }
+    }
+
+    /**
      * This method is used to validate the API Key against the given restrictions.
      *
      * @param payload    The payload of the API Key.
@@ -277,13 +364,21 @@ public class ApiKeyAuthenticatorUtils {
      * @param apiVersion The API version.
      * @param referer    The http referer.
      * @throws APISecurityException If the API Key is not allowed to access the API.
+     * @throws APIManagementException If an error occurs while validating the restrictions.
      */
     public static void validateAPIKeyRestrictions(JWTClaimsSet payload, String clientIP, String apiContext,
-                                                  String apiVersion, String referer) throws APISecurityException {
+                                                  String apiVersion, String referer)
+            throws APISecurityException, APIManagementException {
 
         String permittedIPList = null;
-        if (payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_IP) != null) {
-            permittedIPList = (String) payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_IP);
+        String permittedRefererList = null;
+        if (payload != null) {
+            if (payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_IP) != null) {
+                permittedIPList = (String) payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_IP);
+            }
+            if (payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_REFERER) != null) {
+                permittedRefererList = (String) payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_REFERER);
+            }
         }
         if (StringUtils.isNotEmpty(permittedIPList)) {
             // Validate client IP against permitted IPs
@@ -304,17 +399,79 @@ public class ApiKeyAuthenticatorUtils {
                         "Access forbidden for the invocations");
             }
         }
+        if (StringUtils.isNotEmpty(permittedRefererList)) {
+            // Validate http referer against the permitted referrers
+            if (StringUtils.isNotEmpty(referer)) {
+                for (String restrictedReferer : permittedRefererList.split(",")) {
+                    String restrictedRefererRegExp = "^" + java.util.Arrays.stream(restrictedReferer.trim().split("\\*", -1))
+                            .map(java.util.regex.Pattern::quote)
+                            .collect(java.util.stream.Collectors.joining(".*")) +
+                            "$";
+                    if (referer.matches(restrictedRefererRegExp)) {
+                        // Referer is allowed
+                        return;
+                    }
+                }
+                if (log.isDebugEnabled()) {
+                    if (StringUtils.isNotEmpty(referer)) {
+                        log.debug("Invocations to API: " + apiContext + ":" + apiVersion +
+                                " is not permitted for referer: " + referer);
+                    }
+                }
+            }
+            throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                    "Access forbidden for the invocations");
+        }
+    }
 
+    /**
+     * This method is used to validate the API Key against the given restrictions.
+     * @param clientIP   The client IP.
+     * @param apiContext The API context.
+     * @param apiVersion The API version.
+     * @param referer    The http referer.
+     * @param additionalProperties Additional properties sent with an opaque API key.
+     * @throws APISecurityException If the API Key is not allowed to access the API.
+     * @throws APIManagementException If an error occurs while validating the restrictions.
+     */
+    public static void validateAPIKeyRestrictions(String clientIP, String apiContext,
+                                                  String apiVersion, String referer, Map<String, String> additionalProperties)
+            throws APISecurityException {
+
+        String permittedIPList = null;
         String permittedRefererList = null;
-        if (payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_REFERER) != null) {
-            permittedRefererList = (String) payload.getClaim(APIConstants.JwtTokenConstants.PERMITTED_REFERER);
+        if (additionalProperties != null) {
+            // Taking values from the DB for an opaque API key
+            permittedIPList = additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_IP);
+            permittedRefererList = additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_REFERER);
+        }
+        if (StringUtils.isNotEmpty(permittedIPList)) {
+            // Validate client IP against permitted IPs
+            if (StringUtils.isNotEmpty(clientIP)) {
+                for (String restrictedIP : permittedIPList.split(",")) {
+                    if (APIUtil.isIpInNetwork(clientIP, restrictedIP.trim())) {
+                        // Client IP is allowed
+                        return;
+                    }
+                }
+                if (log.isDebugEnabled()) {
+                    if (StringUtils.isNotEmpty(clientIP)) {
+                        log.debug("Invocations to API: " + apiContext + ":" + apiVersion +
+                                " is not permitted for client with IP: " + clientIP);
+                    }
+                }
+                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                        "Access forbidden for the invocations");
+            }
         }
         if (StringUtils.isNotEmpty(permittedRefererList)) {
             // Validate http referer against the permitted referrers
             if (StringUtils.isNotEmpty(referer)) {
                 for (String restrictedReferer : permittedRefererList.split(",")) {
-                    String restrictedRefererRegExp = restrictedReferer.trim()
-                            .replace("*", "[^ ]*");
+                    String restrictedRefererRegExp = "^" + java.util.Arrays.stream(restrictedReferer.trim().split("\\*", -1))
+                            .map(java.util.regex.Pattern::quote)
+                            .collect(java.util.stream.Collectors.joining(".*")) +
+                            "$";
                     if (referer.matches(restrictedRefererRegExp)) {
                         // Referer is allowed
                         return;

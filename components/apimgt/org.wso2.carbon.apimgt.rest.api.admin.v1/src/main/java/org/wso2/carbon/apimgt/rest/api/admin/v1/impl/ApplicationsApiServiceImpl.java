@@ -144,14 +144,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     private static String getApplicationsSortByField(String sortBy) {
-        String updatedSortBy = StringUtils.EMPTY;
-        // Default sortBy field is name
-        if (sortBy == null || "name".equals(sortBy)) {
-            updatedSortBy = "NAME";
-        } else if ("owner".equals(sortBy)) {
-            updatedSortBy = "CREATED_BY";
-        }
-        return updatedSortBy;
+        return RestApiConstants.SORT_BY_OWNER.equalsIgnoreCase(sortBy) ? APIConstants.APPLICATION_CREATED_BY
+                : APIConstants.APPLICATION_NAME;
     }
 
     @Override

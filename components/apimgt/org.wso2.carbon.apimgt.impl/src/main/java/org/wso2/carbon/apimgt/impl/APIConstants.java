@@ -101,6 +101,7 @@ public final class APIConstants {
     public static final String WSDL_ELEMENT_LOCAL_NAME = "Address";
 
     public static final String API_TENANT_CONF = "tenant-conf.json";
+    public static final String NO_ASSOCIATION = "NO_ASSOCIATION";
 
     public static final String API_TENANT_CONF_LOCATION = API_APPLICATION_DATA_LOCATION + "/" + API_TENANT_CONF;
 
@@ -615,6 +616,27 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
 
+        // LLM Provider constants
+        public static final String OPENAI_LLM_PROVIDER_TYPE = "openai";
+        public static final String AZURE_OPENAI_LLM_PROVIDER_TYPE = "azure-openai";
+        public static final String MISTRAL_LLM_PROVIDER_TYPE = "mistral";
+        public static final String LLM_PROVIDER = "LLMProvider";
+        public static final String LLM_PROVIDER_TYPE = "type";
+        public static final String LLM_PROVIDER_PROPERTY = "Property";
+        public static final String LLM_PROVIDER_PROPERTY_KEY = "name";
+        public static final String LLM_PROVIDER_API_KEY = "apikey";
+        public static final String LLM_PROVIDER_LLM_ENDPOINT = "llm_endpoint";
+        public static final String LLM_PROVIDER_LLM_MODEL = "llm_model";
+        public static final String LLM_PROVIDER_MESSAGE_ROLE = "role";
+        public static final String LLM_PROVIDER_MESSAGE_ROLE_SYSTEM = "system";
+        public static final String LLM_PROVIDER_MESSAGE_ROLE_USER = "user";
+        public static final String LLM_PROVIDER_MESSAGE_CONTENT = "content";
+        public static final String LLM_PROVIDER_REQUEST_MESSAGES = "messages";
+        public static final String LLM_PROVIDER_REQUEST_MODEL = "model";
+        public static final String LLM_PROVIDER_RESPONSE_CHOICES = "choices";
+        public static final String LLM_PROVIDER_MESSAGE = "message";
+        public static final String LLM_PROVIDER_RESPONSE_CONTENT_PATH = "/choices/0/message/content";
+
         public static final String OPENAI_EMBEDDING_PROVIDER_TYPE = "openai";
         public static final String AZURE_OPENAI_EMBEDDING_PROVIDER_TYPE = "azure-openai";
         public static final String MISTRAL_EMBEDDING_PROVIDER_TYPE = "mistral";
@@ -721,6 +743,10 @@ public final class APIConstants {
         public static final String DEFAULT_RETRIEVAL_TIMEOUT = "500"; // 500 milliseconds
         public static final String DEFAULT_RETRY_COUNT = "0"; // 0 retry
         public static final String DEFAULT_RETRY_PROGRESSION_FACTOR = "1"; // No progression factor, fixed retry time
+
+        public static final String CLASSIFICATION_SYSTEM_PROMPT =
+                "You are an API routing assistant. Analyze the user request and determine the best category. " +
+                "Respond with ONLY the category name, nothing else.";
 
         private AI() {
 
@@ -830,6 +856,9 @@ public final class APIConstants {
     public static final String IS_ENABLED = "is_enabled";
     public static final String BLOCKING_CONDITIONS_STREAM_ID = "org.wso2.blocking.request.stream:1.0.0";
     public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.apimgt.token.revocation.stream:1.0.0";
+    public static final String API_KEY_USAGE_STREAM_ID = "org.wso2.apimgt.api.key.usage.stream:1.0.0";
+    public static final String API_KEY_INFO_STREAM_ID = "org.wso2.apimgt.api.key.info.stream:1.0.0";
+    public static final String API_KEY_ASSOCIATION_INFO_STREAM_ID = "org.wso2.apimgt.api.key.association.info.stream:1.0.0";
     public static final String CACHE_INVALIDATION_STREAM_ID = "org.wso2.apimgt.cache.invalidation.stream:1.0.0";
     public static final String NOTIFICATION_STREAM_ID = "org.wso2.apimgt.notification.stream:1.0.0";
     public static final String WEBHOOKS_SUBSCRIPTION_STREAM_ID = "org.wso2.apimgt.webhooks.request.stream:1.0.0";
@@ -1049,6 +1078,10 @@ public final class APIConstants {
             API_KEY_VALIDATOR + "EnableProvisionedAppValidation";
     public static final String LIGHTWEIGHT_API_KEY_GENERATION_ENABLED =
             API_KEY_VALIDATOR + "EnableLightWeightAPIKeyGeneration";
+
+    public static final String JWT_API_KEY_GENERATION_ENABLED =
+            API_KEY_VALIDATOR + "EnableJWTAPIKeyGeneration";
+
     public static final String ALLOW_SUBSCRIPTION_VALIDATION_DISABLING = API_KEY_VALIDATOR +
             "AllowSubscriptionValidationDisabling";
     public static final String DISABLE_RETRIEVE_KEY_MAPPING = API_KEY_VALIDATOR + "DisableRetrieveKeyMapping";
@@ -1132,6 +1165,7 @@ public final class APIConstants {
     public static final String API_STORE_MAP_EXISTING_AUTH_APPS = API_STORE + "MapExistingAuthApps";
     public static final String API_STORE_API_KEY_ALIAS = API_STORE + "ApiKeyAlias";
     public static final String API_STORE_API_KEY_GENERATOR_IMPL = API_STORE + "ApiKeyGeneratorImpl";
+    public static final String ENABLE_API_STORE_LEGACY_API_KEYS = API_STORE + "EnableLegacyApiKeys";
     public static final String API_STORE_API_KEY_SIGN_KEY_STORE = API_STORE + "APIKeyKeystore";
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
     public static final String API_DEVPORTAL_ANONYMOUS_MODE = API_STORE + "EnableAnonymousMode";
@@ -2333,6 +2367,7 @@ public final class APIConstants {
     public static final String BLOCK_CONDITION_TYPE = "conditionType";
     public static final String BLOCK_CONDITION_VALUE = "conditionValue";
     public static final String REVOKED_TOKEN_KEY = "revokedToken";
+    public static final String ENCODED_API_KEY_INFO = "encodedApiKeyInfo";
     public static final String REVOKED_TOKEN_EXPIRY_TIME = "expiryTime";
     public static final String EVENT_TYPE = "eventType";
     public static final String EVENT_WAITING_TIME_CONFIG = "EventWaitingTime";
@@ -3312,6 +3347,9 @@ public final class APIConstants {
         public static final String TOPIC_CACHE_INVALIDATION = "cacheInvalidation";
         public static final String TOPIC_KEY_MANAGER = "keyManager";
         public static final String TOPIC_NOTIFICATION = "notification";
+        public static final String TOPIC_OPAQUE_API_KEY_INFO = "opaqueAPIKeyInfo";
+        public static final String TOPIC_OPAQUE_API_KEY_ASSOCIATION_INFO = "opaqueAPIKeyAssociationInfo";
+        public static final String TOPIC_API_KEY_USAGE = "apiKeyUsage";
         public static final String TOPIC_ASYNC_WEBHOOKS_DATA = "asyncWebhooksData";
     }
 
@@ -3385,12 +3423,29 @@ public final class APIConstants {
     public static class NotificationEvent {
 
         public static final String TOKEN_TYPE = "token_type";
+        public static final String USAGE_TYPE = "usage_type";
+        public static final String INFO_TYPE = "info_type";
         public static final String TOKEN_REVOCATION_EVENT = "token_revocation";
+        public static final String API_KEY_USAGE_EVENT = "api_key_usage";
+        public static final String API_KEY_INFO_EVENT = "api_key_info";
         public static final String CONSUMER_APP_REVOCATION_EVENT
                 = "consumer_app_revocation_event";
         public static final String SUBJECT_ENTITY_REVOCATION_EVENT
                 = "subject_entity_revocation_event";
         public static final String CONSUMER_KEY = "consumer_key";
+        public static final String API_KEY_HASH = "apiKeyHash";
+        public static final String API_KEY = "apiKey";
+        public static final String KEY_TYPE = "keyType";
+        public static final String ASSOCIATION_TYPE = "associationType";
+        public static final String KEY_NAME = "keyName";
+        public static final String ADDITIONAL_PROPERTIES = "additionalProperties";
+        public static final String APPLICATION_ID = "applicationId";
+        public static final String APPLICATION_UUID = "applicationUUId";
+        public static final String API_UUID = "apiUUId";
+        public static final String ACTIVE = "ACTIVE";
+        public static final String APP_UUID = "appUUId";
+        public static final String EXPIRES_AT = "expiresAt";
+        public static final String STATUS = "status";
         public static final String EVENT_ID = "eventId";
         public static final String TENANT_ID = "tenantId";
         public static final String TENANT_DOMAIN = "tenant_domain";
@@ -3398,6 +3453,7 @@ public final class APIConstants {
         public static final String APPLICATION_TOKEN_TYPE_OAUTH2 = "Default";
         public static final String EXPIRY_TIME = "expiryTime";
         public static final String REVOCATION_TIME = "revocationTime";
+        public static final String LAST_USED_TIME = "lastUsedTime";
         public static final String ORGANIZATION = "organization";
         public static final String STREAM_ID = "streamId";
         public static final String ENTITY_ID = "entityId";

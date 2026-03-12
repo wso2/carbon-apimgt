@@ -4745,6 +4745,74 @@ paths:
           "https://127.0.0.1:9443/api/am/admin/v4/labels/d7cf8523-9180-4255-84fa-6cb171c1f779/usage"'
       operationId: getLabelUsage
 
+  ######################################################
+  # The "API Key Collection" resource API
+  ######################################################
+  /api-keys:
+    get:
+      tags:
+        - APIKeys
+      summary: Get all API Keys
+      description: |
+        Retrieve all API Keys.
+      operationId: getAllAPIKeys
+      responses:
+        200:
+          description: |
+            OK.
+            API keys returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X GET "https://127.0.0.1:9443/api/am/admin/v4/api-keys"'
+
+  /api-keys/revoke:
+    post:
+      tags:
+        - APIKeys
+      summary: Revoke an API Key
+      description: |
+        Revoke an API Key for the API
+      operationId: revokeAPIKeyFromAdmin
+      requestBody:
+        description: |
+          API key revoke object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIKeyRevokeRequest'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Api key revoked successfully.
+          content: { }
+        400:
+          $ref: '#/components/responses/BadRequest'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -X POST -d @data.json 
+          "https://127.0.0.1:9443/api/am/admin/v4/api-keys/ght65523-7650-4255-84fa-6cb171c1f779/d7cf8523-9180-4255-84fa-6cb171c1f779/PRODUCTION/revoke"'
+
 components:
   schemas:
     Error:
@@ -6100,6 +6168,10 @@ components:
           description: List of model providers supported by the AI Service Provider
           items:
             $ref: '#/components/schemas/ModelProvider'
+        deprecated:
+          type: boolean
+          description: Indicates if the LLM provider is deprecated
+          example: false
     AIServiceProviderSummaryResponse:
       title: AIServiceProviderSummaryResponse
       type: object
@@ -6128,6 +6200,10 @@ components:
           maxLength: 1023
           type: string
           example: OpenAI LLM Provider
+        deprecated:
+          type: boolean
+          description: Indicates if the LLM provider is deprecated
+          example: false
     AIServiceProviderSummaryResponseList:
       title: AIServiceProviderSummaryResponseList
       type: object
@@ -7443,6 +7519,70 @@ components:
               description: List of APIs associated with the label.
               items:
                 $ref: '#/components/schemas/ApiResult'
+    APIKey:
+      title: API Key details to invoke APIs
+      type: object
+      properties:
+        keyUUID:
+          type: string
+          description: The UUID of the API key
+        keyName:
+          type: string
+          description: API Key name
+          example: Test_Key
+        apiName:
+          type: string
+          description: API Name
+          example: NotificationsAPI
+        applicationName:
+          type: string
+          description: Application Name
+          example: DefaultApplication
+        keyType:
+          type: string
+          description: Application Key Type
+          example: PRODUCTION
+          enum:
+            - PRODUCTION
+            - SANDBOX
+        user:
+          type: string
+          description: Owner of the Application
+          example: Bob
+        issuedOn:
+          type: string
+          description: Created Time
+          example: 2026-02-06 23:45:07
+        validityPeriod:
+          type: integer
+          format: int32
+          example: 3600
+        lastUsed:
+          type: string
+          description: Last Used Time
+          example: 2026-02-06 23:45:07
+    APIKeyList:
+      title: API Keys List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of API keys returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIKey'
+    APIKeyRevokeRequest:
+      title: API Key revoke request object
+      type: object
+      required:
+        - keyUUID
+      properties:
+        keyUUID:
+          type: string
+          description: The UUID of the API key
 
   responses:
     BadRequest:
@@ -7784,6 +7924,17 @@ components:
       required: true
       schema:
         type: string
+    keyType:
+      name: keyType
+      in: path
+      description: |
+        **Application Key Type** standing for the type of the keys (i.e. Production or Sandbox).
+      required: true
+      schema:
+        type: string
+        enum:
+          - PRODUCTION
+          - SANDBOX
   securitySchemes:
     OAuth2Security:
       type: oauth2
