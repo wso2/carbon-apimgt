@@ -31,7 +31,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityIn
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.InlineResponse200DTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.IntegratedAPIResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
@@ -1485,14 +1484,14 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/deprecation-guide")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get Deprecation Guide for an API", notes = "This operation returns a structural successor recommendation for an API that is about to be deprecated. It uses MinHash/LSH similarity analysis to find the best matching active API that could serve as a successor. The response includes RFC 8594 compliant Sunset and Link headers for the deprecation notice. ", response = InlineResponse200DTO.class, authorizations = {
+    @ApiOperation(value = "Get Deprecation Guide for an API", notes = "This operation returns a structural successor recommendation for an API that is about to be deprecated. It uses MinHash/LSH similarity analysis to find the best matching active API that could serve as a successor. The response includes RFC 8594 compliant Sunset and Link headers for the deprecation notice. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
         })
     }, tags={ "API Lifecycle",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Deprecation guide returned successfully. ", response = InlineResponse200DTO.class),
+        @ApiResponse(code = 200, message = "OK. Deprecation guide returned successfully. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response getDeprecationGuide(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
         return delegate.getDeprecationGuide(apiId, securityContext);

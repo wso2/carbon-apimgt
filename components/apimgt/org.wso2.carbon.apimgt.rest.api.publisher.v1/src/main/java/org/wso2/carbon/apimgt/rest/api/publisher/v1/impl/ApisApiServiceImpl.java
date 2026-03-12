@@ -1683,8 +1683,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 return null;
             }
             PublisherCommonUtils.clearArtifactComplianceInfo(apiId, RestApiConstants.RESOURCE_API , organization);
-            // Clean up stale deduplication violations on OTHER APIs that reference this deleted API
-            PublisherCommonUtils.cleanupViolationsReferencingApi(apiId, organization);
+            // [DORMANT] Stale deduplication violation cleanup — deactivated until
+            // APIMGovernanceService.cleanupViolationsReferencingApi() is implemented.
+            // PublisherCommonUtils.cleanupViolationsReferencingApi(apiId, organization);
             // [DORMANT] Successor mapping cleanup — deactivated while
             // AM_API_SUCCESSOR_MAPPING persistence is dormant. Will be re-enabled
             // once successor selection flow is fully integrated.
@@ -3739,138 +3740,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIStateChangeResponse stateChangeResponse = PublisherCommonUtils.changeApiOrApiProductLifecycle(action,
                     apiWrapper, lifecycleChecklist, organization);
 
-            // ── RFC 8594 Header Injection + Successor Persistence ─────────────
-            // [DORMANT] The full RFC 8594 Sunset header injection and
-            // AM_API_SUCCESSOR_MAPPING persistence logic is temporarily deactivated.
-            // Block-mode enforcement remains active to reject lifecycle transitions
-            // when no successor exists in block mode. The persistence, header
-            // injection, and successor resolution via MinHash/DAO will be re-enabled
-            // once the successor selection flow is fully integrated.
-            if ("Deprecate".equalsIgnoreCase(action) || "Retire".equalsIgnoreCase(action)) {
-                try {
-                    org.wso2.carbon.apimgt.governance.gatekeeper.service.GatekeeperService gatekeeperService =
-                            org.wso2.carbon.apimgt.governance.gatekeeper.service.GatekeeperService.getInstance();
-
-                    if (gatekeeperService != null && gatekeeperService.isInitialized()) {
-
-                        // ── [DORMANT] Successor resolution via parameter/DAO/MinHash ──
-                        // String selectedSuccessorUuid = successorUuid;
-                        // org.wso2.carbon.apimgt.governance.gatekeeper.dao.SuccessorMappingDAO successorDAO =
-                        //         org.wso2.carbon.apimgt.governance.gatekeeper.dao.impl
-                        //                 .SuccessorMappingDAOImpl.getInstance();
-                        // if (selectedSuccessorUuid == null || selectedSuccessorUuid.isEmpty()) {
-                        //     try {
-                        //         String existing = successorDAO.getSuccessorId(apiId, organization);
-                        //         if (existing != null && !existing.isEmpty()) {
-                        //             selectedSuccessorUuid = existing;
-                        //         }
-                        //     } catch (Exception daoEx) {
-                        //         log.debug("[DEPRECATION-GUIDE] Could not query persisted successor");
-                        //     }
-                        // }
-                        // org.wso2.carbon.apimgt.governance.gatekeeper.model.DeprecationGuideResult guide;
-                        // if (selectedSuccessorUuid != null && !selectedSuccessorUuid.isEmpty()) {
-                        //     guide = gatekeeperService.buildGuideForKnownSuccessor(
-                        //             apiId, selectedSuccessorUuid, organization, action);
-                        // } else {
-                        //     guide = gatekeeperService.findSuccessorForDeprecation(
-                        //             apiId, organization, action);
-                        // }
-
-                        // ── Block Mode Enforcement (ACTIVE) ──────────────────────
-                        // Use findSuccessorForDeprecation to check for a successor
-                        // and read the lifecycle enforcement mode. If mode=block and
-                        // no successor is found, the lifecycle transition is rejected.
-                        org.wso2.carbon.apimgt.governance.gatekeeper.model.DeprecationGuideResult guide =
-                                gatekeeperService.findSuccessorForDeprecation(
-                                        apiId, organization, action);
-
-                        // ── Enforcement mode check (WARN-ONLY) ──
-                        // Block mode is disabled: deprecation always proceeds.
-                        // Violations are recorded in the compliance tab instead.
-                        try {
-                            java.lang.reflect.Method getMode =
-                                    guide.getClass().getMethod("getEnforcementMode");
-                            String mode = (String) getMode.invoke(guide);
-                            log.info("[DEPRECATION-GUIDE] Enforcement mode='" + mode
-                                    + "', successorFound=" + guide.isSuccessorFound()
-                                    + " for API " + apiId + " (action=" + action + ")."
-                                    + " Deprecation will proceed (warn-only mode active).");
-                        } catch (NoSuchMethodException nsm) {
-                            // Old version without enforcement mode — allow transition
-                        } catch (java.lang.reflect.InvocationTargetException ite) {
-                            log.debug("[DEPRECATION-GUIDE] Could not read enforcement mode: "
-                                    + ite.getMessage());
-                        }
-
-                        // ── [DORMANT] Persist mapping + inject RFC 8594 headers ──
-                        // if (guide.isSuccessorFound()) {
-                        //     try {
-                        //         successorDAO.addSuccessorMapping(
-                        //                 apiId, guide.getSuccessorApiUuid(), organization);
-                        //     } catch (Exception persistEx) {
-                        //         log.warn("[DEPRECATION-GUIDE] Failed to persist successor mapping");
-                        //     }
-                        //     API targetApi = apiProvider.getAPIbyUUID(apiId, organization);
-                        //     if (targetApi != null) {
-                        //         targetApi.addProperty("X-Deprecation-Successor-UUID",
-                        //                 guide.getSuccessorApiUuid());
-                        //         targetApi.addProperty("X-Deprecation-Successor",
-                        //                 guide.getSuccessorApiName() + " "
-                        //                         + guide.getSuccessorApiVersion());
-                        //         targetApi.addProperty("X-RFC8594-Link",
-                        //                 guide.getRfc8594LinkHeader());
-                        //         targetApi.addProperty("X-RFC8594-Sunset",
-                        //                 guide.getRfc8594SunsetHeader());
-                        //         targetApi.addProperty("X-Deprecation-Similarity",
-                        //                 String.format("%.1f%%", guide.getSimilarityPercentage()));
-                        //         targetApi.addProperty("X-Lifecycle-Action", action);
-                        //         apiProvider.updateAPI(targetApi, targetApi);
-                        //     }
-                        // }
-                        log.info("[DEPRECATION-GUIDE] Block-mode check completed for API "
-                                + apiId + " (action: " + action + "). "
-                                + "Successor found: " + guide.isSuccessorFound()
-                                + ". RFC 8594 injection & persistence are DORMANT.");
-                    }
-                } catch (Exception guideEx) {
-                    // Don't block transition if guide check fails
-                    log.warn("[DEPRECATION-GUIDE] Lifecycle enforcement check failed for API "
-                            + apiId + " (action: " + action + "): " + guideEx.getMessage());
-                }
-            }
-            // ── End RFC 8594 + Successor Persistence ──────────────────────────
-
-            // ── Trigger governance lifecycle compliance evaluation on Deprecate/Retire ──
-            // This ensures the lifecycle ruleset (successor check) runs and
-            // violations appear in the compliance dashboard.
-            if ("Deprecate".equalsIgnoreCase(action) || "Retire".equalsIgnoreCase(action)) {
-                log.info("[LIFECYCLE-GOVERNANCE] Triggering compliance evaluation for API "
-                        + apiId + " after " + action + " action.");
-                try {
-                    // Use reflection to create APIMGovernanceServiceImpl directly
-                    // (ServiceReferenceHolder.getAPIMGovernanceService() is 9.33.x-only)
-                    Class<?> serviceImplClass = Class.forName(
-                            "org.wso2.carbon.apimgt.governance.impl.service.APIMGovernanceServiceImpl");
-                    Object govService = serviceImplClass.getDeclaredConstructor().newInstance();
-                    java.lang.reflect.Method evalMethod = serviceImplClass.getMethod(
-                            "evaluateComplianceAsync",
-                            String.class,
-                            ArtifactType.class,
-                            APIMGovernableState.class,
-                            String.class);
-                    log.info("[LIFECYCLE-GOVERNANCE] Calling evaluateComplianceAsync via reflection for "
-                            + apiId);
-                    evalMethod.invoke(govService, apiId, ArtifactType.API,
-                            APIMGovernableState.API_UPDATE, organization);
-                    log.info("[LIFECYCLE-GOVERNANCE] evaluateComplianceAsync completed for " + apiId);
-                } catch (Throwable govEx) {
-                    // Catch ALL throwables including NoClassDefFoundError, etc.
-                    log.error("[LIFECYCLE-GOVERNANCE] Governance compliance evaluation failed for API "
-                            + apiId + " after " + action + ": " + govEx.getClass().getName()
-                            + " - " + govEx.getMessage(), govEx);
-                }
-            }
+            // ── Governance checks and compliance evaluation are now handled by
+            // APIStateChangeGovernanceWorkflowExecutor (execute() + complete()).
+            // The executor runs successor checks in runGovernanceCheck() and
+            // triggers compliance evaluation in triggerComplianceEvaluation()
+            // after admin approval. Direct GatekeeperService calls removed to
+            // avoid NoClassDefFoundError from webapp classloader context.
 
             //returns the current lifecycle state
             LifecycleStateDTO stateDTO = getLifecycleState(apiId, organization); // todo try to prevent this call
@@ -3921,12 +3796,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                 log.debug("[DEPRECATION-GUIDE] Could not read action query param, defaulting to Deprecate");
             }
 
-            // Try to get GatekeeperService and find successor
+            // Try to get GatekeeperService via reflection (loaded by OSGi, not webapp classloader)
             try {
-                org.wso2.carbon.apimgt.governance.gatekeeper.service.GatekeeperService gatekeeperService =
-                        org.wso2.carbon.apimgt.governance.gatekeeper.service.GatekeeperService.getInstance();
+                Class<?> gsClass = Class.forName(
+                        "org.wso2.carbon.apimgt.governance.gatekeeper.service.GatekeeperService");
+                java.lang.reflect.Method getInstanceMethod = gsClass.getMethod("getInstance");
+                Object gatekeeperService = getInstanceMethod.invoke(null);
 
-                if (gatekeeperService == null || !gatekeeperService.isInitialized()) {
+                java.lang.reflect.Method isInitMethod = gsClass.getMethod("isInitialized");
+                if (gatekeeperService == null ||
+                        !((Boolean) isInitMethod.invoke(gatekeeperService))) {
                     log.warn("GatekeeperService not available for deprecation guide. " +
                             "Returning no-successor result.");
                     java.util.Map<String, Object> fallback = new java.util.LinkedHashMap<>();
@@ -3940,18 +3819,21 @@ public class ApisApiServiceImpl implements ApisApiService {
                     return Response.ok().entity(fallback).build();
                 }
 
-                org.wso2.carbon.apimgt.governance.gatekeeper.model.DeprecationGuideResult guideResult =
-                        gatekeeperService.findSuccessorForDeprecation(apiId, organization, lifecycleAction);
+                java.lang.reflect.Method findSuccessorMethod = gsClass.getMethod(
+                        "findSuccessorForDeprecation", String.class, String.class, String.class);
+                Object guideResult = findSuccessorMethod.invoke(
+                        gatekeeperService, apiId, organization, lifecycleAction);
 
                 // Convert to a JSON-friendly map for the response
+                Class<?> grClass = guideResult.getClass();
                 java.util.Map<String, Object> response = new java.util.LinkedHashMap<>();
-                response.put("apiUuid", guideResult.getApiUuid());
-                response.put("apiName", guideResult.getApiName());
-                response.put("apiVersion", guideResult.getApiVersion());
-                response.put("organization", guideResult.getOrganization());
-                response.put("successorFound", guideResult.isSuccessorFound());
-                response.put("migrationRisk", guideResult.isMigrationRisk());
-                response.put("message", guideResult.getMessage());
+                response.put("apiUuid", grClass.getMethod("getApiUuid").invoke(guideResult));
+                response.put("apiName", grClass.getMethod("getApiName").invoke(guideResult));
+                response.put("apiVersion", grClass.getMethod("getApiVersion").invoke(guideResult));
+                response.put("organization", grClass.getMethod("getOrganization").invoke(guideResult));
+                response.put("successorFound", grClass.getMethod("isSuccessorFound").invoke(guideResult));
+                response.put("migrationRisk", grClass.getMethod("isMigrationRisk").invoke(guideResult));
+                response.put("message", grClass.getMethod("getMessage").invoke(guideResult));
 
                 // ── New fields: lifecycleAction, enforcementMode, successorCarriedOver ──
                 try {
@@ -3976,11 +3858,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                     response.put("successorCarriedOver", false);
                 }
 
-                if (guideResult.isSuccessorFound()) {
-                    response.put("successorApiUuid", guideResult.getSuccessorApiUuid());
-                    response.put("successorApiName", guideResult.getSuccessorApiName());
-                    response.put("successorApiVersion", guideResult.getSuccessorApiVersion());
-                    response.put("similarityPercentage", guideResult.getSimilarityPercentage());
+                boolean successorFound = (Boolean) grClass.getMethod("isSuccessorFound").invoke(guideResult);
+                if (successorFound) {
+                    response.put("successorApiUuid", grClass.getMethod("getSuccessorApiUuid").invoke(guideResult));
+                    response.put("successorApiName", grClass.getMethod("getSuccessorApiName").invoke(guideResult));
+                    response.put("successorApiVersion", grClass.getMethod("getSuccessorApiVersion").invoke(guideResult));
+                    response.put("similarityPercentage", grClass.getMethod("getSimilarityPercentage").invoke(guideResult));
                     // Use reflection so it works regardless of class version loaded by OSGi
                     try {
                         java.lang.reflect.Method getStatus =
@@ -3996,8 +3879,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     } catch (NoSuchMethodException nsm) {
                         response.put("successorType", "UNKNOWN");
                     }
-                    response.put("rfc8594LinkHeader", guideResult.getRfc8594LinkHeader());
-                    response.put("rfc8594SunsetHeader", guideResult.getRfc8594SunsetHeader());
+                    response.put("rfc8594LinkHeader", grClass.getMethod("getRfc8594LinkHeader").invoke(guideResult));
+                    response.put("rfc8594SunsetHeader", grClass.getMethod("getRfc8594SunsetHeader").invoke(guideResult));
                 }
 
                 // ── All Candidate Versions (multi-version successor list) ──────

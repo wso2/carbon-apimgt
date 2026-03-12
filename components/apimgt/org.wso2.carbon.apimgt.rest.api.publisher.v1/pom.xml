@@ -87,13 +87,7 @@
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
             <scope>provided</scope>
         </dependency>
-        <!-- Gatekeeper module for Deprecation Guide -->
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.governance.gatekeeper</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
+
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
