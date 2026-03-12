@@ -199,6 +199,9 @@ public class ApiKeyAuthenticator implements Authenticator {
         // Hash the provided API key
         String apiKeyHash = APIUtil.sha256Hash(apiKey);
         String lookupKey = apiKeyHash;
+        String endUserToken = null;
+        ExtendedJWTConfigurationDto jwtConfigurationDto = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfiguration().getJwtConfigurationDto();
         APIKeyInfo apiKeyInfo;
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
         if (RevokedJWTDataHolder.getInstance().isApiKeyExistsInRevokedMap(apiKeyHash)) {
@@ -243,6 +246,9 @@ public class ApiKeyAuthenticator implements Authenticator {
                     apiKeyInfo.getAppId(), apiKey);
             ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(ip, apiContext, apiVersion, referrer,
                     apiKeyInfo.getAdditionalProperties());
+            endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO,
+                    jwtConfigurationDto, apiKey, null, null, apiKeyHash, apiContext, apiVersion,
+                    isGatewayTokenCacheEnabled);
             if (apiKeyValidationInfoDTO != null && apiKeyValidationInfoDTO.isAuthorized()) {
                 if (log.isDebugEnabled()) {
                     log.debug("User is subscribed to the API: " + apiContext + ", " +
@@ -262,6 +268,6 @@ public class ApiKeyAuthenticator implements Authenticator {
                 tenantDomain);
         ApiKeyAuthenticatorUtils.updateApiKeyLastUsedTime(apiKeyHash, tenantDomain);
         // Set and return auth context
-        return GatewayUtils.generateAuthenticationContext(apiKey, null, apiKeyValidationInfoDTO, null);
+        return GatewayUtils.generateAuthenticationContext(apiKey, null, apiKeyValidationInfoDTO, endUserToken);
     }
 }
