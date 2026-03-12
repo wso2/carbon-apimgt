@@ -329,6 +329,21 @@ public class GatekeeperService {
                         + ": " + e.getMessage());
             }
 
+            // Stale-entry guard: if the matched API no longer exists in AM_API (was deleted),
+            // skip it and remove the orphaned MinHash signature from the index and DB.
+            if (matchedApiName == null && matchedApiVersion == null) {
+                log.info("Skipping stale LSH match for deleted API " + similar.getApiUuid()
+                        + ". Removing orphaned MinHash signature.");
+                lshIndex.removeSignature(similar.getApiUuid());
+                try {
+                    minHashDAO.deleteSignature(similar.getApiUuid(), organization);
+                } catch (Exception cleanupEx) {
+                    log.debug("Could not clean up stale MinHash for " + similar.getApiUuid()
+                            + ": " + cleanupEx.getMessage());
+                }
+                continue;
+            }
+
             // Version-family exclusion: APIs with the SAME name but different versions are
             // intentional API versioning (via "Create New Version"), NOT duplicates.
             // Skip these matches unless we are explicitly looking for successors (deprecation guide).
@@ -1209,7 +1224,7 @@ public class GatekeeperService {
      * @param organization The organization (tenant domain)
      * @return true if the lifecycle ruleset is in an active policy, false otherwise
      */
-    private boolean isLifecycleRulesetInActivePolicy(String organization) {
+    public boolean isLifecycleRulesetInActivePolicy(String organization) {
         String tenantDomain = organization != null ? organization : "carbon.super";
         String sql = "SELECT COUNT(*) AS CNT FROM GOV_POLICY_RULESET pr "
                 + "JOIN GOV_RULESET r ON pr.RULESET_ID = r.RULESET_ID "
