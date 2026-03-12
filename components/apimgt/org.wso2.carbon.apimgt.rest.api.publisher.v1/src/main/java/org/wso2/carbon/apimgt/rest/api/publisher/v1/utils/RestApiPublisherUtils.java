@@ -726,26 +726,21 @@ public class RestApiPublisherUtils {
                 PublisherCommonUtils.prepareToCreateAPIByDTO(apiDtoTypeWrapper, apiProvider, username, organization);
         boolean syncOperations = !apiDtoTypeWrapper.isOperationsEmpty();
 
-        boolean isNotMCPServer = !APIConstants.API_TYPE_MCP.equals(apiToAdd.getType());
+        Map<String, String> complianceResult =
+                PublisherCommonUtils.checkGovernanceComplianceSync(apiToAdd.getUuid(),
+                        APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
+        if (!complianceResult.isEmpty()
+                && Boolean.FALSE.toString()
+                .equalsIgnoreCase(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
 
-        if (isNotMCPServer) {
-            Map<String, String> complianceResult =
-                    PublisherCommonUtils.checkGovernanceComplianceSync(apiToAdd.getUuid(),
-                            APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
-            if (!complianceResult.isEmpty()
-                    && Boolean.FALSE.toString()
-                    .equalsIgnoreCase(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
-                throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
-            }
+            throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
 
         API addedAPI = ApisApiServiceImplUtils.importAPIDefinition(apiToAdd, apiProvider, organization,
                 service, validationResponse, isServiceAPI, syncOperations);
 
-        if (isNotMCPServer) {
-            PublisherCommonUtils.checkGovernanceComplianceAsync(addedAPI.getUuid(), APIMGovernableState.API_CREATE,
-                    ArtifactType.API, organization);
-        }
+        PublisherCommonUtils.checkGovernanceComplianceAsync(addedAPI.getUuid(), APIMGovernableState.API_CREATE,
+                ArtifactType.API, organization);
 
         return addedAPI;
     }
