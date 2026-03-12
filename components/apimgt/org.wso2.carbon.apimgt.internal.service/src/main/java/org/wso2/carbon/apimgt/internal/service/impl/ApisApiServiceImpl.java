@@ -244,7 +244,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (messageContext == null) {
             return null;
         }
-        Message message = messageContext.get(Message.class);
+        Message message = (Message) messageContext.get(Message.class);
         if (message == null) {
             return null;
         }
