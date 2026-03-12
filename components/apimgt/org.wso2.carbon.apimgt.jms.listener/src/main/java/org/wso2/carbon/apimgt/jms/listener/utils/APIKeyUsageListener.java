@@ -34,10 +34,13 @@ import javax.jms.TextMessage;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -49,8 +52,9 @@ public class APIKeyUsageListener implements MessageListener {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final int API_KEY_USAGE_DB_BATCH_SIZE = 100;
     private static final long API_KEY_USAGE_DB_BATCH_INTERVAL_MILLIS = 5000L;
-    private static final Object batchLock = new Object();
-    private static final Map<String, Timestamp> pendingUsageUpdates = new HashMap<>();
+    private static final ConcurrentHashMap<String, Optional<Timestamp>> pendingUsageUpdates =
+            new ConcurrentHashMap<>();
+    private static final AtomicBoolean flushInProgress = new AtomicBoolean(false);
     private static final ScheduledExecutorService periodicBatchProcessor = createSchedulerExecutor();
 
     static {
@@ -84,6 +88,8 @@ public class APIKeyUsageListener implements MessageListener {
             periodicBatchProcessor.shutdownNow();
             Thread.currentThread().interrupt();
         }
+        // Final flush to catch any re-queued entries from failed batches
+        flushPendingUsageUpdates();
     }
 
     @Override
@@ -110,16 +116,9 @@ public class APIKeyUsageListener implements MessageListener {
                     Timestamp lastUsedTimestamp = epoch != null ? new Timestamp(epoch) : null;
 
                     if (apiKeyHash != null && !apiKeyHash.isEmpty()) {
-                        boolean shouldFlush = false;
-                        synchronized (batchLock) {
-                            Timestamp existingTimestamp = pendingUsageUpdates.get(apiKeyHash);
-                            if (existingTimestamp == null || (lastUsedTimestamp != null
-                                    && lastUsedTimestamp.after(existingTimestamp))) {
-                                pendingUsageUpdates.put(apiKeyHash, lastUsedTimestamp);
-                            }
-                            shouldFlush = pendingUsageUpdates.size() >= API_KEY_USAGE_DB_BATCH_SIZE;
-                        }
-                        if (shouldFlush) {
+                        pendingUsageUpdates.merge(apiKeyHash, Optional.ofNullable(lastUsedTimestamp),
+                                APIKeyUsageListener::selectLatestTimestamp);
+                        if (pendingUsageUpdates.size() >= API_KEY_USAGE_DB_BATCH_SIZE) {
                             flushPendingUsageUpdates();
                         }
                     } else {
@@ -136,36 +135,51 @@ public class APIKeyUsageListener implements MessageListener {
 
     private static void flushPendingUsageUpdates() {
 
-        Map<String, Timestamp> updatesToFlush;
-        synchronized (batchLock) {
-            if (pendingUsageUpdates.isEmpty()) {
-                return;
-            }
-            updatesToFlush = new HashMap<>(pendingUsageUpdates);
-            pendingUsageUpdates.clear();
+        if (!flushInProgress.compareAndSet(false, true)) {
+            return;
         }
 
         try {
-            ApiKeyMgtDAO.getInstance().updateAPIKeyUsageBatch(updatesToFlush);
-            if (log.isDebugEnabled()) {
-                log.debug("Flushed API key usage DB batch with size: " + updatesToFlush.size());
+            Map<String, Timestamp> updatesToFlush = drainPendingUsageUpdates();
+            if (updatesToFlush.isEmpty()) {
+                return;
             }
-        } catch (APIManagementException e) {
-            log.error("Error occurred while flushing API key usage DB batch", e);
-            synchronized (batchLock) {
-                for (Map.Entry<String, Timestamp> entry : updatesToFlush.entrySet()) {
-                    String apiKeyHash = entry.getKey();
-                    Timestamp incomingTimestamp = entry.getValue();
-                    Timestamp existingTimestamp = pendingUsageUpdates.get(apiKeyHash);
-                    if (existingTimestamp == null || (incomingTimestamp != null
-                            && incomingTimestamp.after(existingTimestamp))) {
-                        pendingUsageUpdates.put(apiKeyHash, incomingTimestamp);
-                    }
+
+            try {
+                ApiKeyMgtDAO.getInstance().updateAPIKeyUsageBatch(updatesToFlush);
+                if (log.isDebugEnabled()) {
+                    log.debug("Flushed API key usage DB batch with size: " + updatesToFlush.size());
                 }
+            } catch (APIManagementException e) {
+                log.error("Error occurred while flushing API key usage DB batch", e);
+                updatesToFlush.forEach((apiKeyHash, timestamp) -> pendingUsageUpdates.merge(
+                        apiKeyHash, Optional.ofNullable(timestamp), APIKeyUsageListener::selectLatestTimestamp));
             }
+        } finally {
+            flushInProgress.set(false);
         }
     }
+
+    private static Map<String, Timestamp> drainPendingUsageUpdates() {
+
+        Map<String, Timestamp> updatesToFlush = new HashMap<>();
+        pendingUsageUpdates.forEach((apiKeyHash, timestamp) -> {
+            if (pendingUsageUpdates.remove(apiKeyHash, timestamp)) {
+                updatesToFlush.put(apiKeyHash, timestamp.orElse(null));
+            }
+        });
+        return updatesToFlush;
+    }
+
+    private static Optional<Timestamp> selectLatestTimestamp(Optional<Timestamp> existingTimestamp,
+                                                             Optional<Timestamp> incomingTimestamp) {
+
+        if (!incomingTimestamp.isPresent()) {
+            return existingTimestamp;
+        }
+        if (!existingTimestamp.isPresent()) {
+            return incomingTimestamp;
+        }
+        return incomingTimestamp.get().after(existingTimestamp.get()) ? incomingTimestamp : existingTimestamp;
+    }
 }
-
-
-
