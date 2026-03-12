@@ -83,7 +83,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     @Override
     public Response applicationsApplicationIdUpgradeTokenTypePost(String applicationId, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        APIConsumer apiConsumer = null;
+        APIConsumer apiConsumer;
         try {
             apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);

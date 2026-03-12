@@ -4154,14 +4154,13 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Upgrades the token type of the given application to JWT
+     * Upgrades the token type of the given application to JWT.
      *
-     * @param application
-     * @return
-     * @throws APIManagementException
+     * @param application the application to be updated
+     * @return {@code true} if the token type was successfully updated, {@code false} otherwise
+     * @throws APIManagementException if an error occurs while updating the token type
      */
-    public boolean upgradeApplicationTokenType(Application application) throws
-            APIManagementException {
+    public boolean upgradeApplicationTokenType(Application application) throws APIManagementException {
 
         boolean isAppUpdated = false;
         Connection connection = null;
@@ -4179,7 +4178,8 @@ public class ApiMgtDAO {
             connection.commit();
             isAppUpdated = true;
         } catch (SQLException e) {
-            handleException("Error when updating application token type for applicationId " + application.getName(), e);
+            handleException(
+                    "Error when updating application token type to JWT for application " + application.getName(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }

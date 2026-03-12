@@ -3587,43 +3587,46 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public boolean upgradeApplicationTokenType(String organization, Application application)
             throws APIManagementException {
 
-        boolean isAppUpdated = false;
+        boolean isAppUpdated;
         String consumerKey;
         String owner = application.getSubscriber().getName();
         String ownerTenantDomain = MultitenantUtils.getTenantDomain(owner);
-        String applicationName = application.getName();
         for (APIKey apiKey : application.getKeys()) {
             KeyManager keyManager = KeyManagerHolder.getTenantKeyManagerInstance(ownerTenantDomain,
                     apiKey.getKeyManager());
             if (keyManager != null && !APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(
                     keyManager.getKeyManagerConfiguration().getName())) {
-                // Prevent updating the OAuth app owner in the case of other key managers rather than Resident KM.
+                // Prevent updating the OAuth app token type in the case of other key managers rather than Resident KM.
                 continue;
             }
-            /* retrieving OAuth application information for specific consumer key */
+            // Retrieving OAuth application information for specific consumer key
             if (keyManager != null && !APIConstants.OAuthAppMode.MAPPED.name()
                     .equalsIgnoreCase(apiKey.getCreateMode())) {
                 consumerKey = apiKey.getConsumerKey();
                 OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
                 Object oauthClientName = oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME);
                 if (oauthClientName != null) {
-                    OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(
-                            oauthClientName.toString(), consumerKey, oAuthApplicationInfo.getCallBackURL(), null, null,
-                            APIConstants.JWT, this.tenantDomain, apiKey.getKeyManager());
-                    oauthAppRequest.getOAuthApplicationInfo().addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, owner);
-                    oauthAppRequest.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, apiKey.getType());
-                    oauthAppRequest.getOAuthApplicationInfo().putAllAppAttributes(application.getApplicationAttributes());
+                    OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(oauthClientName.toString(),
+                            consumerKey, oAuthApplicationInfo.getCallBackURL(), null, null, APIConstants.JWT,
+                            this.tenantDomain, apiKey.getKeyManager());
+                    oauthAppRequest.getOAuthApplicationInfo()
+                            .addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, owner);
+                    oauthAppRequest.getOAuthApplicationInfo()
+                            .addParameter(ApplicationConstants.APP_KEY_TYPE, apiKey.getType());
+                    oauthAppRequest.getOAuthApplicationInfo()
+                            .putAllAppAttributes(application.getApplicationAttributes());
                     oauthAppRequest.getOAuthApplicationInfo().setApplicationUUID(application.getUUID());
-                    /* updating the owner of the OAuth application with userId */
+                    // Updating the token type of the OAuth application
                     OAuthApplicationInfo updatedAppInfo = keyManager.updateApplication(oauthAppRequest);
-                    isAppUpdated = true;
-                    audit.info("Successfully updated the owner of application " + application.getName() + " from.");
+                    audit.info(
+                            "Successfully updated the token type of the application "
+                                    + updatedAppInfo.getClientName());
                 } else {
                     throw new APIManagementException("Unable to retrieve OAuth application information.");
                 }
             }
         }
-
+        // Update TOKEN_TYPE column in API-M DB
         isAppUpdated = apiMgtDAO.upgradeApplicationTokenType(application);
 
         if (isAppUpdated) {
