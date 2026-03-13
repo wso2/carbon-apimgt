@@ -889,9 +889,9 @@ public interface APIConsumer extends APIManager {
     void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException;
 
     /**
-     * Revoke opaque api key and delete from the DB
+     * Revoke opaque api key and delete from the DB.
      *
-     * @param keyUUId Api key UUID
+     * @param keyUUId      Api key UUID
      * @param tenantDomain Tenant domain
      * @param username User name
      * @throws APIManagementException
@@ -899,7 +899,8 @@ public interface APIConsumer extends APIManager {
     void revokeApiKey(String keyUUId, String tenantDomain, String username) throws APIManagementException;
 
     /**
-     * Remove association of an opaque api key
+     * Remove association of an opaque api key.
+     *
      * @param apiUUId UUId of the API
      * @param keyUUID Api key UUID
      * @param tenantDomain TenantDomain
@@ -909,8 +910,9 @@ public interface APIConsumer extends APIManager {
     void removeApiKeyAssociation(String apiUUId, String keyUUID, String tenantDomain, String username) throws APIManagementException;
 
     /**
-     * Remove association of an opaque api key
-     * @param appId Id of the Application
+     * Remove association of an opaque api key.
+     *
+     * @param appId   Id of the Application
      * @param keyName Api key name
      * @param tenantDomain   Tenant domain
      * @param username       Username
@@ -919,27 +921,46 @@ public interface APIConsumer extends APIManager {
     void removeApiKeyAssociationViaApp(String appId, String keyName, String tenantDomain, String username) throws APIManagementException;
 
     /**
-     * Regenerate opaque api key for the given key name with same properties
+     * Regenerate opaque api key for the given key name with same properties.
+     *
      * @param applicationId Id of the application
-     * @param keyType Key type of the token
-     * @param keyUUId Api key UUId
-     * @param tenantDomain Tenant domain
-     * @param username User name
+     * @param keyType       Key type of the token
+     * @param keyUUId       Api key UUId
+     * @param tenantDomain  Tenant domain
+     * @param username      User name
      * @return API key info object
      * @throws APIManagementException
      */
-    APIKeyInfo regenerateApiKey(String applicationId, String keyType, String keyUUId, String tenantDomain, String username) throws APIManagementException;
+    APIKeyInfo regenerateApiKey(String applicationId, String keyType, String keyUUId, String tenantDomain,
+                                String username) throws APIManagementException;
 
     /**
-     * Regenerate opaque api key for the given key name with same properties
-     * @param apiId Id of the API
-     * @param keyUUId Api key UUId
+     * Regenerate opaque api key for the given key name with same properties.
+     *
+     * @param apiId        Id of the API
+     * @param keyUUId      Api key UUId
      * @param tenantDomain Tenant domain
-     * @param username User name
+     * @param organization Organization
+     * @param username     User name
      * @return API key info object
      * @throws APIManagementException
      */
-    APIKeyInfo regenerateApiApiKey(String apiId, String keyUUId, String tenantDomain, String organization, String username)
+    APIKeyInfo regenerateApiApiKey(String apiId, String keyUUId, String tenantDomain, String organization,
+                                   String username) throws APIManagementException;
+
+    /**
+     * Revoke an API key and optionally notify connected platform gateways (when apiId and keyName are provided).
+     * Use this overload when revoking an opaque API key and the apiId/keyName are known (e.g. from opaque key store).
+     *
+     * @param apiKey       token identifier to revoke
+     * @param expiryTime   expiry time
+     * @param tenantDomain tenant domain
+     * @param apiId        API UUID (optional; when non-null and keyName non-null, apikey.revoked is broadcast to
+     *                     platform gateways)
+     * @param keyName      key name (optional)
+     * @param userId       user id (optional, for event payload)
+     */
+    void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain, String apiId, String keyName, String userId)
             throws APIManagementException;
 
     /**

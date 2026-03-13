@@ -1681,7 +1681,21 @@ public class API implements Serializable {
     public void setApiPolicies(List<OperationPolicy> apiPolicies) {
         this.apiPolicies = apiPolicies;
     }
-    
+
+    /**
+     * Policy Hub policies at API level (not persisted to AM_API_OPERATION_POLICY_MAPPING).
+     * Set from API definition when building platform gateway YAML (Option B).
+     */
+    private List<OperationPolicy> hubPolicies;
+
+    public List<OperationPolicy> getHubPolicies() {
+        return hubPolicies;
+    }
+
+    public void setHubPolicies(List<OperationPolicy> hubPolicies) {
+        this.hubPolicies = hubPolicies;
+    }
+
     public String getVisibleOrganizations() {
         return visibleOrganizations;
     }

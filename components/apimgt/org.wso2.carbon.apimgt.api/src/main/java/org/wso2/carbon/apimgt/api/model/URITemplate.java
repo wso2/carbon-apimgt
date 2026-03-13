@@ -51,6 +51,11 @@ public class URITemplate implements Serializable{
     private int amznResourceTimeout;
     private boolean amznResourceContentEncoded;
     private List<OperationPolicy> operationPolicies = new ArrayList<>();
+    /**
+     * Policy Hub policies at resource level (not persisted to AM_API_OPERATION_POLICY_MAPPING).
+     * Set from API definition when building platform gateway YAML (Option B).
+     */
+    private List<OperationPolicy> hubPolicies = new ArrayList<>();
     private String description;
     private String schemaDefinition = null;
     private APIOperationMapping APIOperationMapping = null;
@@ -493,6 +498,14 @@ public class URITemplate implements Serializable{
 
     public void addOperationPolicy(OperationPolicy policy) {
         operationPolicies.add(policy);
+    }
+
+    public List<OperationPolicy> getHubPolicies() {
+        return hubPolicies;
+    }
+
+    public void setHubPolicies(List<OperationPolicy> hubPolicies) {
+        this.hubPolicies = hubPolicies != null ? hubPolicies : new ArrayList<>();
     }
 
     public String getDescription() {

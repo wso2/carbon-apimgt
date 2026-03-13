@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubtypeConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
@@ -198,6 +199,7 @@ return null;
     private List<String> visibleOrganizations = new ArrayList<String>();
     private List<MediationPolicyDTO> mediationPolicies = new ArrayList<MediationPolicyDTO>();
     private APIOperationPoliciesDTO apiPolicies = null;
+    private List<OperationPolicyDTO> apiHubPolicies = new ArrayList<OperationPolicyDTO>();
 
     @XmlType(name="SubscriptionAvailabilityEnum")
     @XmlEnum(String.class)
@@ -989,6 +991,25 @@ return null;
   }
 
   /**
+   * Policy Hub policies at API level (sibling to apiPolicies; not persisted to operation policy mapping).
+   **/
+  public APIDTO apiHubPolicies(List<OperationPolicyDTO> apiHubPolicies) {
+    this.apiHubPolicies = apiHubPolicies;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Policy Hub policies at API level (sibling to apiPolicies; not persisted to operation policy mapping).")
+      @Valid
+  @JsonProperty("apiHubPolicies")
+  public List<OperationPolicyDTO> getApiHubPolicies() {
+    return apiHubPolicies;
+  }
+  public void setApiHubPolicies(List<OperationPolicyDTO> apiHubPolicies) {
+    this.apiHubPolicies = apiHubPolicies;
+  }
+
+  /**
    * The subscription availability. Accepts one of the following. CURRENT_TENANT, ALL_TENANTS or SPECIFIC_TENANTS.
    **/
   public APIDTO subscriptionAvailability(SubscriptionAvailabilityEnum subscriptionAvailability) {
@@ -1587,6 +1608,7 @@ return null;
         Objects.equals(visibleOrganizations, API.visibleOrganizations) &&
         Objects.equals(mediationPolicies, API.mediationPolicies) &&
         Objects.equals(apiPolicies, API.apiPolicies) &&
+        Objects.equals(apiHubPolicies, API.apiHubPolicies) &&
         Objects.equals(subscriptionAvailability, API.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, API.subscriptionAvailableTenants) &&
         Objects.equals(additionalProperties, API.additionalProperties) &&
@@ -1622,7 +1644,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, type, audience, audiences, transport, tags, policies, organizationPolicies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, visibleOrganizations, mediationPolicies, apiPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, endpointConfig, primaryProductionEndpointId, primarySandboxEndpointId, endpointImplementationType, subtypeConfiguration, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, initiatedFromGateway, asyncTransportProtocols, egress);
+    return Objects.hash(id, name, displayName, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, type, audience, audiences, transport, tags, policies, organizationPolicies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, visibleOrganizations, mediationPolicies, apiPolicies, apiHubPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, endpointConfig, primaryProductionEndpointId, primarySandboxEndpointId, endpointImplementationType, subtypeConfiguration, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, initiatedFromGateway, asyncTransportProtocols, egress);
   }
 
   @Override
@@ -1667,6 +1689,7 @@ return null;
     sb.append("    visibleOrganizations: ").append(toIndentedString(visibleOrganizations)).append("\n");
     sb.append("    mediationPolicies: ").append(toIndentedString(mediationPolicies)).append("\n");
     sb.append("    apiPolicies: ").append(toIndentedString(apiPolicies)).append("\n");
+    sb.append("    apiHubPolicies: ").append(toIndentedString(apiHubPolicies)).append("\n");
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");

@@ -930,16 +930,16 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                 applicationId, log);
                     }
                 } else {
-                    if(log.isDebugEnabled()) {
+                    if (log.isDebugEnabled()) {
                         log.debug("Application with given id " + applicationId + " doesn't exist ");
                     }
                     RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 }
             } catch (APIManagementException e) {
                 String msg = "Error while regenerating API Key of application " + applicationId;
-                if(log.isDebugEnabled()) {
+                if (log.isDebugEnabled()) {
                     log.debug("Error while regenerating API Key of application " +
-                            applicationId+ " and API Key " + keyUUID);
+                            applicationId + " and API Key " + keyUUID);
                 }
                 log.error(msg, e);
                 RestApiUtil.handleInternalServerError(msg, e, log);
