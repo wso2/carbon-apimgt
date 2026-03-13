@@ -1184,7 +1184,9 @@ public class SQLConstants {
     public static final String UPDATE_APPLICATION_TOKEN_TYPE =
             "UPDATE AM_APPLICATION " +
                     " SET " +
-                    " TOKEN_TYPE = ? " +
+                    "   TOKEN_TYPE = ?, " +
+                    "   UPDATED_BY = ?, " +
+                    "   UPDATED_TIME = ? " +
                     " WHERE " +
                     "   UUID = ? ";
 

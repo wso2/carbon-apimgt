@@ -107,8 +107,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Application token type changed successfully. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 409, message = "Conflict. The application is already using JWT. ", response = Void.class) })
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response applicationsApplicationIdUpgradeTokenTypePost(@ApiParam(value = "Application UUID ",required=true) @PathParam("applicationId") String applicationId) throws APIManagementException{
         return delegate.applicationsApplicationIdUpgradeTokenTypePost(applicationId, securityContext);
     }

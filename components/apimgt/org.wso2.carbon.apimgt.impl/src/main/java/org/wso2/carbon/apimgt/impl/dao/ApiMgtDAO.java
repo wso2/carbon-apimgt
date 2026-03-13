@@ -4156,32 +4156,35 @@ public class ApiMgtDAO {
     /**
      * Upgrades the token type of the given application to JWT.
      *
-     * @param application the application to be updated
-     * @return {@code true} if the token type was successfully updated, {@code false} otherwise
+     * @param application the application to be updated `@return` {`@code` true} if the token type was successfully
+     *                    updated
      * @throws APIManagementException if an error occurs while updating the token type
      */
-    public boolean upgradeApplicationTokenType(Application application) throws APIManagementException {
+    public boolean upgradeApplicationTokenType(String username, Application application) throws APIManagementException {
 
         boolean isAppUpdated = false;
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
 
         String sqlQuery = SQLConstants.UPDATE_APPLICATION_TOKEN_TYPE;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setString(1, APIConstants.JWT);
-            prepStmt.setString(2, application.getUUID());
-            prepStmt.executeUpdate();
-            connection.commit();
-            isAppUpdated = true;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            try {
+                connection.setAutoCommit(false);
+                prepStmt.setString(1, APIConstants.JWT);
+                prepStmt.setString(2, username);
+                prepStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+                prepStmt.setString(4, application.getUUID());
+                prepStmt.executeUpdate();
+                connection.commit();
+                isAppUpdated = true;
+            } catch (SQLException ex) {
+                connection.rollback();
+                handleException(
+                        "Error when updating application token type to JWT for application " + application.getName(),
+                        ex);
+            }
         } catch (SQLException e) {
             handleException(
                     "Error when updating application token type to JWT for application " + application.getName(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
         return isAppUpdated;
     }

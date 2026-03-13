@@ -1733,11 +1733,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
-        409:
-          description: |
-            Conflict.
-            The application is already using JWT.
-          content: { }
       security:
         - OAuth2Security:
             - apim:admin
@@ -5452,7 +5447,7 @@ components:
         createdTime:
           type: string
           readOnly: true
-          example: 1651555310208
+          example: "1651555310208"
         status:
           type: string
           example: APPROVED

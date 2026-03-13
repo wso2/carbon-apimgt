@@ -3584,7 +3584,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         return isAppUpdated;
     }
 
-    public boolean upgradeApplicationTokenType(String organization, Application application)
+    public boolean upgradeApplicationTokenType(String username, String organization, Application application)
             throws APIManagementException {
 
         boolean isAppUpdated;
@@ -3627,7 +3627,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
         }
         // Update TOKEN_TYPE column in API-M DB
-        isAppUpdated = apiMgtDAO.upgradeApplicationTokenType(application);
+        isAppUpdated = apiMgtDAO.upgradeApplicationTokenType(username, application);
 
         if (isAppUpdated) {
             String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);

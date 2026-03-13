@@ -90,6 +90,10 @@
         "Roles": "admin"
       },
       {
+        "Name": "apim:app_token_type_upgrade,",
+        "Roles": "admin"
+      },
+      {
         "Name": "apim:app_import_export",
         "Roles": "admin,Internal/devops"
       },
