@@ -356,10 +356,13 @@ public class URITemplate implements Serializable{
                 .resourceSandboxURI != null) {
             return false;
         }
-        if (!httpVerb.equals(that.httpVerb)) {
+        if (httpVerb != null ? !httpVerb.equals(that.httpVerb) : that.httpVerb != null) {
             return false;
         }
-        if (!authType.equals(that.authType)) {
+        if (authType != null ? !authType.equals(that.authType) : that.authType != null) {
+            return false;
+        }
+        if (throttlingTier != null ? !throttlingTier.equals(that.throttlingTier) : that.throttlingTier != null) {
             return false;
         }
         if (!httpVerbs.equals(that.httpVerbs)) {
@@ -373,9 +376,6 @@ public class URITemplate implements Serializable{
             return false;
         }
         if (applicableLevel != null ? !applicableLevel.equals(that.applicableLevel) : that.applicableLevel != null) {
-            return false;
-        }
-        if (!throttlingTier.equals(that.throttlingTier)) {
             return false;
         }
         if (!throttlingTiers.equals(that.throttlingTiers)) {

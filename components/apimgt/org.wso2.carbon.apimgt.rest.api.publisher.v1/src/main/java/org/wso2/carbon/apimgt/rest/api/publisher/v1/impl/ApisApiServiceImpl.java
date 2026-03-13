@@ -4682,7 +4682,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         //validate websocket url and change transport types
-        if (PublisherCommonUtils.isValidWSAPI(apiDTOFromProperties)) {
+        if (APIDTO.TypeEnum.WS.equals(apiDTOFromProperties.getType()) && PublisherCommonUtils.isValidWSAPI(
+                apiDTOFromProperties)) {
             ArrayList<String> websocketTransports = new ArrayList<>();
             websocketTransports.add(APIConstants.WS_PROTOCOL);
             websocketTransports.add(APIConstants.WSS_PROTOCOL);
