@@ -27,6 +27,7 @@ public class ApplicationKeyDTO   {
     private String keyManager = null;
     private String consumerKey = null;
     private String consumerSecret = null;
+    private List<String> additionalConsumerSecrets = new ArrayList<String>();
     private List<String> supportedGrantTypes = new ArrayList<String>();
     private String callbackUrl = null;
     private String keyState = null;
@@ -168,6 +169,24 @@ return null;
   }
   public void setConsumerSecret(String consumerSecret) {
     this.consumerSecret = consumerSecret;
+  }
+
+  /**
+   * List of other consumer secrets of the application (if exist)
+   **/
+  public ApplicationKeyDTO additionalConsumerSecrets(List<String> additionalConsumerSecrets) {
+    this.additionalConsumerSecrets = additionalConsumerSecrets;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "[\"TIDlOFkpzB7WjufO3OJUhy1fsvAa\",\"1234567890abcdef1234567890abcdef\"]", value = "List of other consumer secrets of the application (if exist)")
+  @JsonProperty("additionalConsumerSecrets")
+  public List<String> getAdditionalConsumerSecrets() {
+    return additionalConsumerSecrets;
+  }
+  public void setAdditionalConsumerSecrets(List<String> additionalConsumerSecrets) {
+    this.additionalConsumerSecrets = additionalConsumerSecrets;
   }
 
   /**
@@ -329,6 +348,7 @@ return null;
         Objects.equals(keyManager, applicationKey.keyManager) &&
         Objects.equals(consumerKey, applicationKey.consumerKey) &&
         Objects.equals(consumerSecret, applicationKey.consumerSecret) &&
+        Objects.equals(additionalConsumerSecrets, applicationKey.additionalConsumerSecrets) &&
         Objects.equals(supportedGrantTypes, applicationKey.supportedGrantTypes) &&
         Objects.equals(callbackUrl, applicationKey.callbackUrl) &&
         Objects.equals(keyState, applicationKey.keyState) &&
@@ -341,7 +361,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyMappingId, keyManager, consumerKey, consumerSecret, supportedGrantTypes, callbackUrl, keyState, keyType, mode, groupId, token, additionalProperties);
+    return Objects.hash(keyMappingId, keyManager, consumerKey, consumerSecret, additionalConsumerSecrets, supportedGrantTypes, callbackUrl, keyState, keyType, mode, groupId, token, additionalProperties);
   }
 
   @Override
@@ -353,6 +373,7 @@ return null;
     sb.append("    keyManager: ").append(toIndentedString(keyManager)).append("\n");
     sb.append("    consumerKey: ").append(toIndentedString(consumerKey)).append("\n");
     sb.append("    consumerSecret: ").append(toIndentedString(consumerSecret)).append("\n");
+    sb.append("    additionalConsumerSecrets: ").append(toIndentedString(additionalConsumerSecrets)).append("\n");
     sb.append("    supportedGrantTypes: ").append(toIndentedString(supportedGrantTypes)).append("\n");
     sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
     sb.append("    keyState: ").append(toIndentedString(keyState)).append("\n");

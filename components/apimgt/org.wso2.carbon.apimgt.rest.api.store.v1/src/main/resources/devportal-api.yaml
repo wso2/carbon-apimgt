@@ -6754,6 +6754,15 @@ components:
           description: Consumer secret of the application
           readOnly: true
           example: TIDlOFkpzB7WjufO3OJUhy1fsvAa
+        additionalConsumerSecrets:
+          type: array
+          description: List of other consumer secrets of the application (if exist)
+          readOnly: true
+          example:
+            - TIDlOFkpzB7WjufO3OJUhy1fsvAa
+            - 1234567890abcdef1234567890abcdef
+          items:
+            type: string
         supportedGrantTypes:
           type: array
           description: The grant types that are supported by the application
