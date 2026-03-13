@@ -42,13 +42,11 @@
                 org.wso2.carbon.apimgt.internal.service.BlockApi,
                 org.wso2.carbon.apimgt.internal.service.RevokedjwtApi,
                 org.wso2.carbon.apimgt.internal.service.ApisApi,
-                org.wso2.carbon.apimgt.internal.service.ApiKeysApi,
                 org.wso2.carbon.apimgt.internal.service.ApplicationKeyMappingsApi,
                 org.wso2.carbon.apimgt.internal.service.ApplicationPoliciesApi,
                 org.wso2.carbon.apimgt.internal.service.ApplicationsApi,
                 org.wso2.carbon.apimgt.internal.service.SubscriptionsApi,
                 org.wso2.carbon.apimgt.internal.service.SubscriptionPoliciesApi,
-                org.wso2.carbon.apimgt.internal.service.SubscriptionPlansApi,
                 org.wso2.carbon.apimgt.internal.service.KeymanagersApi,
                 org.wso2.carbon.apimgt.internal.service.ApiPoliciesApi,
                 org.wso2.carbon.apimgt.internal.service.NotifyApi,
@@ -68,7 +66,10 @@
                 org.wso2.carbon.apimgt.internal.service.TransactionRecordsApi,
                 org.wso2.carbon.apimgt.internal.service.TenantInfoApi,
                 org.wso2.carbon.apimgt.internal.service.NotifyGatewayApi,
-                org.wso2.carbon.apimgt.internal.service.NotifyApiDeploymentStatusApi
+                org.wso2.carbon.apimgt.internal.service.NotifyApiDeploymentStatusApi,
+                org.wso2.carbon.apimgt.internal.service.ApiKeysApi,
+                org.wso2.carbon.apimgt.internal.service.DeploymentsApi
+                org.wso2.carbon.apimgt.internal.service.GatewayWellKnownApi
             </param-value>
         </init-param>
         <init-param>
