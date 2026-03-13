@@ -672,20 +672,29 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
 
         apiConsumer = RestApiCommonUtil.getConsumer(username);
-        if (appOwner != null && apiConsumer.getSubscriber(appOwner) != null) {
-            application = ExportUtils.getApplicationDetails(appName, appOwner, apiConsumer);
-        }
-        if (application == null) {
-            throw new APIManagementException("No application found with name " + appName + " owned by " + appOwner,
-                    ExceptionCodes.APPLICATION_NOT_FOUND);
-        } else if (!MultitenantUtils.getTenantDomain(application.getSubscriber().getName())
-                .equals(MultitenantUtils.getTenantDomain(username))) {
-            throw new APIManagementException("Cross Tenant Exports are not allowed", ExceptionCodes.TENANT_MISMATCH);
-        }
 
-        File file = ExportUtils.exportApplication(application, apiConsumer, exportFormat, withKeys);
-        return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
-                "attachment; filename=\"" + file.getName() + "\"").build();
+        try {
+            // Enable skip secret masking when exporting with keys to get actual secrets
+            if (withKeys != null && withKeys) {
+                APIUtil.enableSkipSecretMasking();
+            }
+            if (appOwner != null && apiConsumer.getSubscriber(appOwner) != null) {
+                application = ExportUtils.getApplicationDetails(appName, appOwner, apiConsumer);
+            }
+            if (application == null) {
+                throw new APIManagementException("No application found with name " + appName + " owned by " + appOwner,
+                        ExceptionCodes.APPLICATION_NOT_FOUND);
+            } else if (!MultitenantUtils.getTenantDomain(application.getSubscriber().getName())
+                    .equals(MultitenantUtils.getTenantDomain(username))) {
+                throw new APIManagementException("Cross Tenant Exports are not allowed", ExceptionCodes.TENANT_MISMATCH);
+            }
+
+            File file = ExportUtils.exportApplication(application, apiConsumer, exportFormat, withKeys);
+            return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + file.getName() + "\"").build();
+        } finally {
+            APIUtil.clearSkipSecretMasking();
+        }
     }
 
     @Override
