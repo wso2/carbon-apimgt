@@ -3634,7 +3634,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
                     tenantDomain, application.getId(), application.getUUID(), application.getName(),
-                    application.getTokenType(), application.getTier(), application.getGroupId(),
+                    APIConstants.JWT, application.getTier(), application.getGroupId(),
                     application.getApplicationAttributes(), owner);
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }

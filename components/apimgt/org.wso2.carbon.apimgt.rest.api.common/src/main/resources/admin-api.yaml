@@ -5448,6 +5448,13 @@ components:
           type: string
           readOnly: true
           example: "1651555310208"
+        type:
+          type: array
+          items:
+            type: string
+          example:
+            - default
+            - WSO2-IS
         status:
           type: string
           example: APPROVED

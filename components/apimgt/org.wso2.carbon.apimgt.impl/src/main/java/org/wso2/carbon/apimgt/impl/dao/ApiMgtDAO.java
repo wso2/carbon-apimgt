@@ -4155,9 +4155,9 @@ public class ApiMgtDAO {
 
     /**
      * Upgrades the token type of the given application to JWT.
-     *
-     * @param application the application to be updated `@return` {`@code` true} if the token type was successfully
-     *                    updated
+     * @param username    the username performing the upgrade
+     * @param application the application to be updated
+     * @return {@code true} if the token type was successfully updated
      * @throws APIManagementException if an error occurs while updating the token type
      */
     public boolean upgradeApplicationTokenType(String username, Application application) throws APIManagementException {

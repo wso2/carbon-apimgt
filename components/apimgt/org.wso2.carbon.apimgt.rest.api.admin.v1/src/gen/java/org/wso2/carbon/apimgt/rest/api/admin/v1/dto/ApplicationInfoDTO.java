@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.*;
 
 
@@ -56,6 +58,7 @@ return null;
     }
     private TokenTypeEnum tokenType = null;
     private String createdTime = null;
+    private List<String> type = new ArrayList<String>();
     private String status = null;
     private String groupId = null;
 
@@ -146,6 +149,23 @@ return null;
 
   /**
    **/
+  public ApplicationInfoDTO type(List<String> type) {
+    this.type = type;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "[\"default\",\"WSO2-IS\"]", value = "")
+  @JsonProperty("type")
+  public List<String> getType() {
+    return type;
+  }
+  public void setType(List<String> type) {
+    this.type = type;
+  }
+
+  /**
+   **/
   public ApplicationInfoDTO status(String status) {
     this.status = status;
     return this;
@@ -193,13 +213,14 @@ return null;
         Objects.equals(owner, applicationInfo.owner) &&
         Objects.equals(tokenType, applicationInfo.tokenType) &&
         Objects.equals(createdTime, applicationInfo.createdTime) &&
+        Objects.equals(type, applicationInfo.type) &&
         Objects.equals(status, applicationInfo.status) &&
         Objects.equals(groupId, applicationInfo.groupId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, owner, tokenType, createdTime, status, groupId);
+    return Objects.hash(applicationId, name, owner, tokenType, createdTime, type, status, groupId);
   }
 
   @Override
@@ -212,6 +233,7 @@ return null;
     sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
     sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    groupId: ").append(toIndentedString(groupId)).append("\n");
     sb.append("}");

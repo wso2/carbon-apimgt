@@ -86,11 +86,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         APIConsumer apiConsumer;
         try {
             apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             boolean applicationUpdated = apiConsumer.upgradeApplicationTokenType(username, organization, application);
             if (applicationUpdated) {
                 String info = "Application ID:" + applicationId + " token type has been upgraded to JWT";
