@@ -600,11 +600,12 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             mcpAnalytics.put(APIMgtGatewayConstants.MCP_SESSION_ID, sessionId);
         }
 
-        mcpAnalytics.put(Constants.MCP_METHOD, messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
-
-        String capability = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY);
-        if (capability != null) {
-            mcpAnalytics.put(APIMgtGatewayConstants.MCP_CAPABILITY, capability);
+        String method = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
+        if (method != null) {
+            mcpAnalytics.put(Constants.MCP_METHOD, method);
+            if (APIMgtGatewayConstants.MCP_TOOL_CALL.equals(method)) {
+                mcpAnalytics.put(APIMgtGatewayConstants.MCP_CAPABILITY, APIMgtGatewayConstants.TOOL);
+            }
         }
 
         String capabilityName = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_CAPABILITY_NAME_KEY);
