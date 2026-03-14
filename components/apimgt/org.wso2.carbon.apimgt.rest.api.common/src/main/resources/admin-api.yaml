@@ -1592,8 +1592,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+            - apim:app_update
             - apim:app_owner_change
-            - apim:app_token_type_upgrade
             - apim:app_import_export
             - apim:admin_application_view
       x-code-samples:
@@ -1679,12 +1679,60 @@ paths:
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v4/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b"'
 
+  /applications/{applicationId}/change-settings:
+    post:
+      tags:
+        - Application
+      operationId: updateApplicationSettings
+      summary: Update Application Settings
+      description: |
+        This operation allows updating one or more settings of an application.
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationUpdateRequest'
+      responses:
+        200:
+          description: Application updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:app_update
+      x-code-samples:
+        - lang: Curl
+          source: |
+            curl -k -X POST \
+            -H "Authorization: Bearer <access-token>" \
+            -H "Content-Type: application/json" \
+            -d '{
+                  "owner": "newOwner",
+                  "tokenType": "JWT"
+                }' \
+            "https://127.0.0.1:9443/api/am/admin/v4/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b"
+
   /applications/{applicationId}/change-owner:
     post:
+      deprecated: true
       tags:
         - Application
       summary: Change Application Owner
       description: |
+        **Deprecated.**
+        This API will be removed in a future release.
+        Use `/applications/{applicationId}/change-settings` instead.
+        
         This operation is used to change the owner of an Application.
         In order to change the owner of an application, we need to pass the new application owner as a query parameter
       parameters:
@@ -1712,36 +1760,6 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v4/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b/change-owner?owner=admin"'
-
-  /applications/{applicationId}/upgrade-token-type:
-    post:
-      tags:
-        - Application
-      summary: Upgrade Application Token Type to JWT
-      description: |
-        This operation upgrades the token type of an application to JWT.
-        Only applications currently using opaque tokens can be upgraded.
-      parameters:
-        - $ref: '#/components/parameters/applicationId'
-      responses:
-        200:
-          description: |
-            OK.
-            Application token type changed successfully.
-          content: { }
-        400:
-          $ref: '#/components/responses/BadRequest'
-        404:
-          $ref: '#/components/responses/NotFound'
-      security:
-        - OAuth2Security:
-            - apim:admin
-            - apim:app_token_type_upgrade
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -X POST \
-          -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" \
-          "https://127.0.0.1:9443/api/am/admin/v4/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b/upgrade-token-type"'
 
   ######################################################
   # AI Service Providers resource APIs
@@ -5700,6 +5718,18 @@ components:
           enum:
             - ACTIVE
             - EXPIRED
+    ApplicationUpdateRequest:
+      type: object
+      description: Request body to update application attributes
+      properties:
+        owner:
+          type: string
+          description: The new owner of the application
+        tokenType:
+          type: string
+          description: The type of token for the application (e.g., JWT)
+          enum:
+            - JWT
     Organization:
       title: Organization
       required:
@@ -7627,7 +7657,7 @@ components:
             apim:mediation_policy_view: View mediation policies
             apim:mediation_policy_create: Create and update mediation policies
             apim:app_owner_change: Retrieve and manage applications
-            apim:app_token_type_upgrade: Upgrade token type of an Application to JWT
+            apim:app_update: Update application
             apim:app_import_export: Import and export applications related operations
             apim:api_import_export: Import and export APIs related operations
             apim:api_product_import_export: Import and export API Products related

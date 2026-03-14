@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationUpdateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -81,7 +82,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdUpgradeTokenTypePost(String applicationId, MessageContext messageContext) {
+    public Response updateApplicationSettings(String applicationId,
+            ApplicationUpdateRequestDTO applicationUpdateRequestDTO, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
         try {
@@ -91,20 +93,37 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (application == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
-            boolean applicationUpdated = apiConsumer.upgradeApplicationTokenType(username, organization, application);
-            if (applicationUpdated) {
+            boolean updated = false;
+            if (applicationUpdateRequestDTO.getOwner() != null) {
+                String newOwner = applicationUpdateRequestDTO.getOwner();
+                boolean ownerUpdated = apiConsumer.updateApplicationOwner(newOwner, organization, application);
+                if (!ownerUpdated) {
+                    RestApiUtil.handleInternalServerError("Error while updating application owner " + applicationId,
+                            log);
+                }
+                String info = "Application ID:" + applicationId + " owner has been changed to " + newOwner;
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATIONS, info,
+                        APIConstants.AuditLogConstants.UPDATED, username);
+                updated = true;
+            }
+            if (APIConstants.JWT.equals(String.valueOf(applicationUpdateRequestDTO.getTokenType()))) {
+                boolean tokenUpdated = apiConsumer.upgradeApplicationTokenType(username, organization, application);
+                if (!tokenUpdated) {
+                    RestApiUtil.handleInternalServerError(
+                            "Error while upgrading application token type for applicationId " + applicationId, log);
+                }
                 String info = "Application ID:" + applicationId + " token type has been upgraded to JWT";
                 APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATIONS, info,
                         APIConstants.AuditLogConstants.UPDATED, username);
-                return Response.ok().build();
-            } else {
-                RestApiUtil.handleInternalServerError(
-                        "Error while upgrading application token type for applicationId " + applicationId, log);
+                updated = true;
             }
-
+            if (!updated) {
+                RestApiUtil.handleBadRequest("No valid application settings provided for update.", log);
+            }
+            return Response.ok().build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError(
-                    "Error while upgrading application token type for applicationId " + applicationId, e, log);
+                    "Error while updating application settings for applicationId " + applicationId, e, log);
         }
         return null;
     }

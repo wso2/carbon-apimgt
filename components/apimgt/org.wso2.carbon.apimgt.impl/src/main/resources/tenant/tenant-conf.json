@@ -90,7 +90,7 @@
         "Roles": "admin"
       },
       {
-        "Name": "apim:app_token_type_upgrade",
+        "Name": "apim:app_update",
         "Roles": "admin"
       },
       {
