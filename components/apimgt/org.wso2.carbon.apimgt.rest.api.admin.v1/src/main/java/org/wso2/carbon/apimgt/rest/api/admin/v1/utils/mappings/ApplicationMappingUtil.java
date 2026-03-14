@@ -19,13 +19,10 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
@@ -110,7 +107,20 @@ public class ApplicationMappingUtil {
                 .equals(application.getTokenType())) {
             applicationInfoDTO.setTokenType(ApplicationInfoDTO.TokenTypeEnum.valueOf(application.getTokenType()));
         }
+        List<KeyManagerInfoDTO> keyManagers = new ArrayList<>();
+        for (KeyManagerConfiguration config : application.getKeyManagers()) {
+            keyManagers.add(fromKeyManagerConfigurationToInfoDTO(config));
+        }
+        applicationInfoDTO.setKeyManagers(keyManagers);
         return applicationInfoDTO;
+    }
+
+    private static KeyManagerInfoDTO fromKeyManagerConfigurationToInfoDTO(
+            KeyManagerConfiguration keyManagerConfiguration) {
+        KeyManagerInfoDTO keyManagerInfoDTO = new KeyManagerInfoDTO();
+        keyManagerInfoDTO.setName(keyManagerConfiguration.getName());
+        keyManagerInfoDTO.setType(keyManagerConfiguration.getType());
+        return keyManagerInfoDTO;
     }
 
     public static ApplicationDTO fromApplicationtoDTO(Application application) {

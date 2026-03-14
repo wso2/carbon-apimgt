@@ -60,6 +60,7 @@ public class Application {
     private String keyManager;
     private String sharedOrganization;
     private String subOrganization; // organization of the application within the super organization.
+    private List<KeyManagerConfiguration> keyManagers = new ArrayList<>();
     
     public String getCreatedTime() {
         return createdTime;
@@ -338,5 +339,13 @@ public class Application {
 
     public void setSubOrganization(String subOrganization) {
         this.subOrganization = subOrganization;
+    }
+
+    public List<KeyManagerConfiguration> getKeyManagers() {
+        return keyManagers;
+    }
+
+    public void setKeyManagers(List<KeyManagerConfiguration> keyManagers) {
+        this.keyManagers = keyManagers;
     }
 }

@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -58,7 +59,7 @@ return null;
     }
     private TokenTypeEnum tokenType = null;
     private String createdTime = null;
-    private List<String> type = new ArrayList<String>();
+    private List<KeyManagerInfoDTO> keyManagers = new ArrayList<KeyManagerInfoDTO>();
     private String status = null;
     private String groupId = null;
 
@@ -149,19 +150,20 @@ return null;
 
   /**
    **/
-  public ApplicationInfoDTO type(List<String> type) {
-    this.type = type;
+  public ApplicationInfoDTO keyManagers(List<KeyManagerInfoDTO> keyManagers) {
+    this.keyManagers = keyManagers;
     return this;
   }
 
   
-  @ApiModelProperty(example = "[\"default\",\"WSO2-IS\"]", value = "")
-  @JsonProperty("type")
-  public List<String> getType() {
-    return type;
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("keyManagers")
+  public List<KeyManagerInfoDTO> getKeyManagers() {
+    return keyManagers;
   }
-  public void setType(List<String> type) {
-    this.type = type;
+  public void setKeyManagers(List<KeyManagerInfoDTO> keyManagers) {
+    this.keyManagers = keyManagers;
   }
 
   /**
@@ -213,14 +215,14 @@ return null;
         Objects.equals(owner, applicationInfo.owner) &&
         Objects.equals(tokenType, applicationInfo.tokenType) &&
         Objects.equals(createdTime, applicationInfo.createdTime) &&
-        Objects.equals(type, applicationInfo.type) &&
+        Objects.equals(keyManagers, applicationInfo.keyManagers) &&
         Objects.equals(status, applicationInfo.status) &&
         Objects.equals(groupId, applicationInfo.groupId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, owner, tokenType, createdTime, type, status, groupId);
+    return Objects.hash(applicationId, name, owner, tokenType, createdTime, keyManagers, status, groupId);
   }
 
   @Override
@@ -233,7 +235,7 @@ return null;
     sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
     sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
-    sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    groupId: ").append(toIndentedString(groupId)).append("\n");
     sb.append("}");

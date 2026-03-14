@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
@@ -4563,6 +4564,9 @@ public class ApiMgtDAO {
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
                 application.setOwner(subscriberName);
+                List<KeyManagerConfiguration> keyManagers =
+                        getKeyManagersOfApplication(connection, application.getId());
+                application.setKeyManagers(keyManagers);
                 applicationList.add(application);
             }
             applications = applicationList.toArray(new Application[applicationList.size()]);
@@ -4572,6 +4576,32 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return applications;
+    }
+
+    private List<KeyManagerConfiguration> getKeyManagersOfApplication(Connection connection, int applicationId)
+            throws APIManagementException {
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        List<KeyManagerConfiguration> keyManagers = new ArrayList<>();
+        try {
+            ps = connection.prepareStatement(SQLConstants.GET_KEY_MANAGERS_OF_APPLICATION);
+            ps.setInt(1, applicationId);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                KeyManagerConfiguration kmConfig = new KeyManagerConfiguration();
+                kmConfig.setName(rs.getString("NAME"));
+                kmConfig.setType(rs.getString("TYPE"));
+                kmConfig.setTenantDomain(rs.getString("ORGANIZATION"));
+                keyManagers.add(kmConfig);
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while obtaining key manager details of the Application : " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, rs);
+        }
+        return keyManagers;
     }
 
     public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication) throws
@@ -25245,6 +25275,32 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, keyManagerId);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                ApplicationInfoKeyManager application;
+                while (rs.next()) {
+                    application = new ApplicationInfoKeyManager();
+                    application.setUuid(rs.getString("UUID"));
+                    application.setName(rs.getString("NAME"));
+                    application.setOwner(rs.getString("CREATED_BY"));
+                    application.setOrganization(rs.getString("ORGANIZATION"));
+                    applicationsList.add(application);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error when reading the application information from the persistence store.", e);
+        }
+        return applicationsList;
+    }
+
+    public List<ApplicationInfoKeyManager> getAllKeyManagersOfApplication(String applicationId)
+            throws APIManagementException {
+
+        ArrayList<ApplicationInfoKeyManager> applicationsList = new ArrayList<>();
+        String sqlQuery = SQLConstants.GET_APPLICATIONS_OF_KEY_MANAGERS_SQL;
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            prepStmt.setString(1, applicationId);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 ApplicationInfoKeyManager application;
                 while (rs.next()) {

@@ -5448,13 +5448,10 @@ components:
           type: string
           readOnly: true
           example: "1651555310208"
-        type:
+        keyManagers:
           type: array
           items:
-            type: string
-          example:
-            - default
-            - WSO2-IS
+            $ref: '#/components/schemas/KeyManagerInfo'
         status:
           type: string
           example: APPROVED
