@@ -101,6 +101,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     RestApiUtil.handleInternalServerError("Error while updating application owner " + applicationId,
                             log);
                 }
+                application = apiConsumer.getApplicationByUUID(applicationId, organization);
+                if (application == null) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
                 String info = "Application ID:" + applicationId + " owner has been changed to " + newOwner;
                 APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATIONS, info,
                         APIConstants.AuditLogConstants.UPDATED, username);
@@ -120,7 +124,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (!updated) {
                 RestApiUtil.handleBadRequest("No valid application settings provided for update.", log);
             }
-            return Response.ok().build();
+            application = apiConsumer.getApplicationByUUID(applicationId, organization);
+            if (application == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+            ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
+            return Response.ok().entity(applicationDTO).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError(
                     "Error while updating application settings for applicationId " + applicationId, e, log);

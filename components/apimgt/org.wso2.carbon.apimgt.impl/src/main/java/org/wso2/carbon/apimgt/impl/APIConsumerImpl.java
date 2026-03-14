@@ -3594,8 +3594,12 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         for (APIKey apiKey : application.getKeys()) {
             KeyManager keyManager = KeyManagerHolder.getTenantKeyManagerInstance(ownerTenantDomain,
                     apiKey.getKeyManager());
-            if (keyManager != null && !APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(
-                    keyManager.getKeyManagerConfiguration().getName())) {
+            if (keyManager != null && !(APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(
+                    keyManager.getKeyManagerConfiguration()
+                            .getName()) && (APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(
+                    keyManager.getKeyManagerConfiguration()
+                            .getType()) || APIConstants.KeyManager.WSO2_IS_KEY_MANAGER_TYPE.equals(
+                    keyManager.getKeyManagerConfiguration().getType())))) {
                 // Prevent updating the OAuth app token type in the case of other key managers rather than Resident KM.
                 continue;
             }
@@ -3603,26 +3607,30 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             if (keyManager != null && !APIConstants.OAuthAppMode.MAPPED.name()
                     .equalsIgnoreCase(apiKey.getCreateMode())) {
                 consumerKey = apiKey.getConsumerKey();
-                OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
-                Object oauthClientName = oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME);
-                if (oauthClientName != null) {
-                    OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(oauthClientName.toString(),
-                            consumerKey, oAuthApplicationInfo.getCallBackURL(), null, null, APIConstants.JWT,
-                            this.tenantDomain, apiKey.getKeyManager());
-                    oauthAppRequest.getOAuthApplicationInfo()
-                            .addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, owner);
-                    oauthAppRequest.getOAuthApplicationInfo()
-                            .addParameter(ApplicationConstants.APP_KEY_TYPE, apiKey.getType());
-                    oauthAppRequest.getOAuthApplicationInfo()
-                            .putAllAppAttributes(application.getApplicationAttributes());
-                    oauthAppRequest.getOAuthApplicationInfo().setApplicationUUID(application.getUUID());
-                    // Updating the token type of the OAuth application
-                    OAuthApplicationInfo updatedAppInfo = keyManager.updateApplication(oauthAppRequest);
-                    audit.info(
-                            "Successfully updated the token type of the application "
-                                    + updatedAppInfo.getClientName());
-                } else {
-                    throw new APIManagementException("Unable to retrieve OAuth application information.");
+                try {
+                    OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                    Object oauthClientName = oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME);
+                    if (oauthClientName != null) {
+                        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(
+                                oauthClientName.toString(), consumerKey, oAuthApplicationInfo.getCallBackURL(), null,
+                                null, APIConstants.JWT, this.tenantDomain, apiKey.getKeyManager());
+                        oauthAppRequest.getOAuthApplicationInfo()
+                                .addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, owner);
+                        oauthAppRequest.getOAuthApplicationInfo()
+                                .addParameter(ApplicationConstants.APP_KEY_TYPE, apiKey.getType());
+                        oauthAppRequest.getOAuthApplicationInfo()
+                                .putAllAppAttributes(application.getApplicationAttributes());
+                        oauthAppRequest.getOAuthApplicationInfo().setApplicationUUID(application.getUUID());
+                        // Updating the token type of the OAuth application
+                        OAuthApplicationInfo updatedAppInfo = keyManager.updateApplication(oauthAppRequest);
+                        audit.info(
+                                "Successfully updated the token type of the application "
+                                        + updatedAppInfo.getClientName());
+                    }
+                } catch (APIManagementException e) {
+                    log.warn(
+                            "Failed to upgrade token type for consumer key " + consumerKey + " of application "
+                                    + application.getUUID(), e);
                 }
             }
         }
@@ -3633,9 +3641,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
             ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
-                    tenantDomain, application.getId(), application.getUUID(), application.getName(),
-                    APIConstants.JWT, application.getTier(), application.getGroupId(),
-                    application.getApplicationAttributes(), owner);
+                    tenantDomain, application.getId(), application.getUUID(), application.getName(), APIConstants.JWT,
+                    application.getTier(), application.getGroupId(), application.getApplicationAttributes(), owner);
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
         return isAppUpdated;
