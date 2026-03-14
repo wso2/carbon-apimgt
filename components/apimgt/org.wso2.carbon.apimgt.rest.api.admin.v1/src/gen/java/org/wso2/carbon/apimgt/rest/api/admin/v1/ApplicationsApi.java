@@ -102,7 +102,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiOperation(value = "Retrieve/Search Applications ", notes = "This operation can be used to retrieve list of applications owned by the given user, If no user is provided, the applications owned by the user associated with the provided access token will be returned. ", response = ApplicationListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:app_update", description = "Update application"),
+            @AuthorizationScope(scope = "apim:app_settings_change", description = "Change Application Settings"),
             @AuthorizationScope(scope = "apim:app_owner_change", description = "Retrieve and manage applications"),
             @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications related operations"),
             @AuthorizationScope(scope = "apim:admin_application_view", description = "View Applications")
@@ -123,7 +123,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiOperation(value = "Update Application Settings", notes = "This operation allows updating one or more settings of an application. ", response = ApplicationDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:app_update", description = "Update application")
+            @AuthorizationScope(scope = "apim:app_settings_change", description = "Change Application Settings")
         })
     }, tags={ "Application" })
     @ApiResponses(value = { 

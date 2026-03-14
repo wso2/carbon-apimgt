@@ -87,6 +87,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
         try {
+            if (applicationUpdateRequestDTO == null) {
+                RestApiUtil.handleBadRequest("Application settings payload cannot be null.", log);
+            }
             apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             Application application = apiConsumer.getApplicationByUUID(applicationId);

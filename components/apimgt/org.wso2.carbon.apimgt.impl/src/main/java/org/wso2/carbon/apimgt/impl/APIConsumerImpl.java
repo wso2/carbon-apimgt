@@ -3609,6 +3609,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 consumerKey = apiKey.getConsumerKey();
                 try {
                     OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                    if (oAuthApplicationInfo == null) {
+                        log.warn("Skipping token type upgrade for consumer key " + consumerKey
+                                        + " as OAuth application info is unavailable.");
+                        continue;
+                    }
                     Object oauthClientName = oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME);
                     if (oauthClientName != null) {
                         OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(
@@ -3626,6 +3631,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         audit.info(
                                 "Successfully updated the token type of the application "
                                         + updatedAppInfo.getClientName());
+                    } else {
+                        log.warn("Skipping token type upgrade for consumer key " + consumerKey
+                                        + " as OAuth client name is unavailable.");
                     }
                 } catch (APIManagementException e) {
                     log.warn(

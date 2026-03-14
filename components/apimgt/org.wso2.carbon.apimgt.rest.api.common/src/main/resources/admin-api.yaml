@@ -1592,7 +1592,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
-            - apim:app_update
+            - apim:app_settings_change
             - apim:app_owner_change
             - apim:app_import_export
             - apim:admin_application_view
@@ -1709,7 +1709,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
-            - apim:app_update
+            - apim:app_settings_change
       x-code-samples:
         - lang: Curl
           source: |
@@ -7657,7 +7657,7 @@ components:
             apim:mediation_policy_view: View mediation policies
             apim:mediation_policy_create: Create and update mediation policies
             apim:app_owner_change: Retrieve and manage applications
-            apim:app_update: Update application
+            apim:app_settings_change: Change Application Settings
             apim:app_import_export: Import and export applications related operations
             apim:api_import_export: Import and export APIs related operations
             apim:api_product_import_export: Import and export API Products related

@@ -212,7 +212,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         scopesToCheck.put("apim:keymanagers_manage", "admin");
         scopesToCheck.put("apim:api_category", "admin");
         scopesToCheck.put("apim:api_provider_change", "admin");
-        scopesToCheck.put("apim:app_update", "admin");
+        scopesToCheck.put("apim:app_settings_change", "admin");
         scopesToCheck.put("apim:gateway_policy_manage", "admin");
         scopesToCheck.put("apim:gateway_policy_view", "admin,Internal/creator,Internal/publisher,Internal/observer");
         scopesToCheck.put("apim:llm_provider_manage", "admin");
