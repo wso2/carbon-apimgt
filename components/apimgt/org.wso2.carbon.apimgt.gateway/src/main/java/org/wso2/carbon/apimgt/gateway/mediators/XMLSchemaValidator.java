@@ -63,7 +63,7 @@ public class XMLSchemaValidator extends AbstractMediator {
     private static final Log logger = LogFactory.getLog(XMLSchemaValidator.class);
     private static final String APPLICATION_BUILDER_ALLOW_DTD = "ApplicationXMLBuilder.allowDTD";
     APIManagerConfiguration apiManagerConfiguration;
-    boolean isSecureXMLProcessingEnabled = false;
+    boolean isSecureXMLProcessingEnabled = true;
 
     /**
      * This mediate method validates the xml request message.
