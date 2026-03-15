@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayResponsePermi
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayResponseWithTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.UpdatePlatformGatewayRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.UpdatePlatformGatewayRequestPermissionsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -93,12 +94,13 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         PlatformGatewayService service =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
         String propertiesJson = serializeProperties(body.getProperties());
+        String vhostHost = body.getVhost() != null ? body.getVhost().getHost() : null;
         CreatePlatformGatewayResult result = service.createGateway(
                 organization,
                 body.getName(),
                 body.getDisplayName(),
                 body.getDescription(),
-                body.getVhost(),
+                vhostHost,
                 propertiesJson);
         PlatformGateway gateway = result.getGateway();
         GatewayVisibilityPermissionConfigurationDTO visibility = buildGatewayVisibility(body);
@@ -177,9 +179,12 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
     private VHost buildVHost(CreatePlatformGatewayRequestDTO body) {
 
         VHost vHost = new VHost();
-        String host = body.getVhost();
-        int httpsPort = VHost.DEFAULT_HTTPS_PORT;
-        int httpPort = VHost.DEFAULT_HTTP_PORT;
+        VHostDTO vhostDto = body.getVhost();
+        String host = vhostDto != null ? vhostDto.getHost() : null;
+        int httpsPort = (vhostDto != null && vhostDto.getHttpsPort() != null && vhostDto.getHttpsPort() > 0)
+                ? vhostDto.getHttpsPort() : VHost.DEFAULT_HTTPS_PORT;
+        int httpPort = (vhostDto != null && vhostDto.getHttpPort() != null && vhostDto.getHttpPort() > 0)
+                ? vhostDto.getHttpPort() : VHost.DEFAULT_HTTP_PORT;
         if (body.getProperties() != null) {
             Object controller = body.getProperties().get(GATEWAY_PROPERTIES_SECTION);
             if (controller instanceof Map) {
@@ -199,7 +204,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                 }
             }
         }
-        vHost.setHost(host);
+        vHost.setHost(host != null ? host : "");
         vHost.setHttpsPort(httpsPort);
         vHost.setHttpPort(httpPort);
         vHost.setWsHost(host);
@@ -317,7 +322,8 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (!Objects.equals(body.getName(), existing.getName())) {
             throw RestApiUtil.buildBadRequestException("name in body must match existing gateway (immutable)");
         }
-        if (!Objects.equals(body.getVhost(), existing.getVhost())) {
+        String bodyVhostHost = body.getVhost() != null ? body.getVhost().getHost() : null;
+        if (!Objects.equals(bodyVhostHost, existing.getVhost())) {
             throw RestApiUtil.buildBadRequestException("vhost in body must match existing gateway (immutable)");
         }
         if (log.isInfoEnabled()) {
@@ -399,10 +405,10 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (body.getDisplayName().length() > 128) {
             throw RestApiUtil.buildBadRequestException("displayName must be at most 128 characters");
         }
-        if (StringUtils.isBlank(body.getVhost())) {
-            throw RestApiUtil.buildBadRequestException("vhost is required");
+        if (body.getVhost() == null || StringUtils.isBlank(body.getVhost().getHost())) {
+            throw RestApiUtil.buildBadRequestException("vhost is required (VHost object with host)");
         }
-        if (body.getVhost().length() > 255) {
+        if (body.getVhost().getHost().length() > 255) {
             throw RestApiUtil.buildBadRequestException("vhost must be at most 255 characters");
         }
         if (StringUtils.isNotBlank(body.getDescription()) && body.getDescription().length() > 1023) {
@@ -421,7 +427,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (StringUtils.isBlank(body.getName())) {
             throw RestApiUtil.buildBadRequestException("name is required (PUT full representation)");
         }
-        if (StringUtils.isBlank(body.getVhost())) {
+        if (body.getVhost() == null || StringUtils.isBlank(body.getVhost().getHost())) {
             throw RestApiUtil.buildBadRequestException("vhost is required (PUT full representation)");
         }
         if (StringUtils.isBlank(body.getDisplayName())) {

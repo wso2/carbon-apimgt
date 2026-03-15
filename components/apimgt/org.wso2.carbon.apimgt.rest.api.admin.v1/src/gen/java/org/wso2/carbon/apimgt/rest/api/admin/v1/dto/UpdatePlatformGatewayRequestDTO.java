@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.UpdatePlatformGatewayRequestPermissionsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
 import javax.validation.constraints.*;
 
 /**
@@ -28,7 +29,7 @@ import javax.validation.Valid;
 public class UpdatePlatformGatewayRequestDTO   {
   
     private String name = null;
-    private String vhost = null;
+    private VHostDTO vhost = null;
     private String displayName = null;
     private String description = null;
     private Map<String, Object> properties = new HashMap<String, Object>();
@@ -54,21 +55,21 @@ public class UpdatePlatformGatewayRequestDTO   {
   }
 
   /**
-   * Virtual host (immutable; must match existing). Required for PUT full representation.
    **/
-  public UpdatePlatformGatewayRequestDTO vhost(String vhost) {
+  public UpdatePlatformGatewayRequestDTO vhost(VHostDTO vhost) {
     this.vhost = vhost;
     return this;
   }
 
   
-  @ApiModelProperty(required = true, value = "Virtual host (immutable; must match existing). Required for PUT full representation.")
+  @ApiModelProperty(required = true, value = "")
+      @Valid
   @JsonProperty("vhost")
   @NotNull
- @Size(min=1,max=255)  public String getVhost() {
+  public VHostDTO getVhost() {
     return vhost;
   }
-  public void setVhost(String vhost) {
+  public void setVhost(VHostDTO vhost) {
     this.vhost = vhost;
   }
 

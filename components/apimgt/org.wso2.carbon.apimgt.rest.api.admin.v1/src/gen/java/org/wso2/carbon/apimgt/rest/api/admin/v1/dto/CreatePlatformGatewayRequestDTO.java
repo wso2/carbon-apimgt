@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CreatePlatformGatewayRequestPermissionsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
 import javax.validation.constraints.*;
 
 /**
@@ -30,7 +31,7 @@ public class CreatePlatformGatewayRequestDTO   {
     private String name = null;
     private String displayName = null;
     private String description = null;
-    private String vhost = null;
+    private VHostDTO vhost = null;
     private Map<String, Object> properties = new HashMap<String, Object>();
     private CreatePlatformGatewayRequestPermissionsDTO permissions = null;
 
@@ -91,21 +92,21 @@ public class CreatePlatformGatewayRequestDTO   {
   }
 
   /**
-   * Virtual host (domain name) for the gateway
    **/
-  public CreatePlatformGatewayRequestDTO vhost(String vhost) {
+  public CreatePlatformGatewayRequestDTO vhost(VHostDTO vhost) {
     this.vhost = vhost;
     return this;
   }
 
   
-  @ApiModelProperty(example = "mg.wso2.com", required = true, value = "Virtual host (domain name) for the gateway")
+  @ApiModelProperty(required = true, value = "")
+      @Valid
   @JsonProperty("vhost")
   @NotNull
- @Size(min=1,max=255)  public String getVhost() {
+  public VHostDTO getVhost() {
     return vhost;
   }
-  public void setVhost(String vhost) {
+  public void setVhost(VHostDTO vhost) {
     this.vhost = vhost;
   }
 

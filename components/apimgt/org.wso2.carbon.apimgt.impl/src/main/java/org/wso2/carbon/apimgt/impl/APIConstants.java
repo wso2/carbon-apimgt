@@ -3627,6 +3627,12 @@ public final class APIConstants {
     public static final String OPERATION_SEQUENCE_TYPE_REQUEST = "request";
     public static final String OPERATION_SEQUENCE_TYPE_RESPONSE = "response";
     public static final String OPERATION_SEQUENCE_TYPE_FAULT = "fault";
+    /**
+     * Policy Hub policies have no direction in the UI (flow is handled inside the policy).
+     * We persist them with direction "hub" in AM_API_POLICY_MAPPING / AM_API_OPERATION_POLICY_MAPPING
+     * so they can be loaded into apiHubPolicies / operationHubPolicies separately from request/response/fault.
+     */
+    public static final String OPERATION_SEQUENCE_TYPE_HUB = "hub";
     public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION = ".j2";
     public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION_XML = ".xml";
     public static final String CC_POLICY_DEFINITION_EXTENSION = ".gotmpl";

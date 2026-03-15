@@ -706,8 +706,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Validate and process API level and operation level policies
         validateAndProcessAPIPolicyParameters(api, null, tenantDomain);
         // Add API level and operation level policies
-        apiMgtDAO.addAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain,
-                isPlatformGatewayApi(api));
+        apiMgtDAO.addAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(),
+                api.getHubPolicies(), tenantDomain, isPlatformGatewayApi(api));
     }
 
     /**
@@ -1246,8 +1246,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Validate and process API level and operation level policies
         validateAndProcessAPIPolicyParameters(api, existingApi, tenantDomain);
         // Update API level and operation level policies
-        apiMgtDAO.updateAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain,
-                isPlatformGatewayApi(api));
+        apiMgtDAO.updateAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(),
+                api.getHubPolicies(), tenantDomain, isPlatformGatewayApi(api));
     }
 
     @Override
@@ -6373,6 +6373,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<OperationPolicy> apiPolicyMapping = apiMgtDAO.getAPIPolicyMapping(api.getUuid(), null);
         if (!apiPolicyMapping.isEmpty()) {
             api.setApiPolicies(apiPolicyMapping);
+        }
+        List<OperationPolicy> apiHubPolicyMapping = apiMgtDAO.getAPIHubPolicyMapping(api.getUuid(), null);
+        if (!apiHubPolicyMapping.isEmpty()) {
+            api.setHubPolicies(apiHubPolicyMapping);
         }
     }
 

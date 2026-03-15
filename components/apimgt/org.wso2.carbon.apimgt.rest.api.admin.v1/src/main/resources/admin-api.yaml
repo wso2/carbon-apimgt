@@ -5934,11 +5934,7 @@ components:
           maxLength: 1023
           description: Optional description
         vhost:
-          type: string
-          maxLength: 255
-          minLength: 1
-          description: Virtual host (domain name) for the gateway
-          example: mg.wso2.com
+          $ref: '#/components/schemas/VHost'
         properties:
           type: object
           additionalProperties: true
@@ -5985,10 +5981,7 @@ components:
           maxLength: 64
           description: Gateway identifier (immutable; must match existing). Required for PUT full representation.
         vhost:
-          type: string
-          maxLength: 255
-          minLength: 1
-          description: Virtual host (immutable; must match existing). Required for PUT full representation.
+          $ref: '#/components/schemas/VHost'
         displayName:
           type: string
           minLength: 1
