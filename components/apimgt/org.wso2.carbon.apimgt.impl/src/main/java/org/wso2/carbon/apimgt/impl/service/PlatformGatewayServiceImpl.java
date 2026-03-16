@@ -95,23 +95,32 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         env.setAdditionalProperties(additional);
 
         apiAdmin.addEnvironment(organizationId, env);
-
-        String tokenId = PlatformGatewayTokenUtil.generateTokenId();
-        String plainToken = PlatformGatewayTokenUtil.generateToken();
-        String tokenHash;
         try {
-            tokenHash = PlatformGatewayTokenUtil.hashToken(plainToken);
-        } catch (NoSuchAlgorithmException e) {
-            throw new APIManagementException("Error hashing gateway token", e);
-        }
-        PlatformGatewayDAO.PlatformGateway gateway = new PlatformGatewayDAO.PlatformGateway(
-                gatewayId, organizationId, name, displayName, description, vhost,
-                propertiesJson, false, now, now);
-        PlatformGatewayDAO.getInstance().createGatewayWithTokenAndGatewayInstance(gateway, tokenId, tokenHash,
-                Collections.singletonList(name));
+            String tokenId = PlatformGatewayTokenUtil.generateTokenId();
+            String plainToken = PlatformGatewayTokenUtil.generateToken();
+            String tokenHash;
+            try {
+                tokenHash = PlatformGatewayTokenUtil.hashToken(plainToken);
+            } catch (NoSuchAlgorithmException e) {
+                throw new APIManagementException("Error hashing gateway token", e);
+            }
+            PlatformGatewayDAO.PlatformGateway gateway = new PlatformGatewayDAO.PlatformGateway(
+                    gatewayId, organizationId, name, displayName, description, vhost,
+                    propertiesJson, false, now, now);
+            PlatformGatewayDAO.getInstance().createGatewayWithTokenAndGatewayInstance(gateway, tokenId, tokenHash,
+                    Collections.singletonList(name));
 
-        String registrationToken = tokenId + PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR + plainToken;
-        return new CreatePlatformGatewayResult(envToApiModel(env), registrationToken);
+            String registrationToken = tokenId + PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR + plainToken;
+            return new CreatePlatformGatewayResult(envToApiModel(env), registrationToken);
+        } catch (APIManagementException e) {
+            try {
+                apiAdmin.deleteEnvironment(organizationId, gatewayId);
+            } catch (Exception rollbackEx) {
+                log.warn("Rollback: failed to delete orphan environment for gateway " + gatewayId
+                        + " after DAO failure; manual cleanup may be required", rollbackEx);
+            }
+            throw e;
+        }
     }
 
     /**

@@ -28,6 +28,8 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
  * via platform gateway api-key, {@link PlatformGatewayApiKeyAuthInterceptor} sets
  * a message property. This interceptor calls {@link PrivilegedCarbonContext#endTenantFlow()}
  * so the tenant flow started there is properly closed and the thread-local is cleared.
+ * {@link #handleFault(Message)} runs on fault responses so cleanup also occurs when
+ * an exception is thrown after the auth interceptor started the tenant flow.
  */
 public class PlatformGatewayTenantFlowCleanupInterceptor extends AbstractPhaseInterceptor<Message> {
 
@@ -37,6 +39,20 @@ public class PlatformGatewayTenantFlowCleanupInterceptor extends AbstractPhaseIn
 
     @Override
     public void handleMessage(Message message) {
+        ensureTenantFlowCleanedUp(message);
+    }
+
+    @Override
+    public void handleFault(Message message) {
+        ensureTenantFlowCleanedUp(message);
+    }
+
+    /**
+     * Ends the tenant flow and clears message/thread-local state when this request
+     * was authenticated via platform gateway api-key. Safe to call from both
+     * handleMessage (success path) and handleFault (exception path).
+     */
+    private void ensureTenantFlowCleanedUp(Message message) {
         if (!Boolean.TRUE.equals(message.get(PlatformGatewayApiKeyAuthInterceptor.MESSAGE_PROPERTY_TENANT_FLOW_STARTED))) {
             return;
         }

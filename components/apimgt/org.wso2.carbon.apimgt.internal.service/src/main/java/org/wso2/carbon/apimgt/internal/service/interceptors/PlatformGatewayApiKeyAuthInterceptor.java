@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -59,12 +60,26 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
     /** ThreadLocal set to the connect config that matched (for multiple gateways). */
     public static final ThreadLocal<ConnectGatewayConfig> CONNECT_WITH_TOKEN_MATCHED_ENTRY = new ThreadLocal<>();
 
+    /**
+     * Path prefixes for which platform gateway api-key auth is allowed. Requests to other paths
+     * are not authenticated by this interceptor (no route filtering would expose all endpoints).
+     */
+    private static final String[] PLATFORM_GATEWAY_ALLOWED_PATH_PREFIXES = {
+            "/apis",
+            "/api-keys",
+            "/subscription-plans",
+            "/notify-gateway"
+    };
+
     public PlatformGatewayApiKeyAuthInterceptor() {
         super(Phase.PRE_INVOKE);
     }
 
     @Override
     public void handleMessage(Message message) {
+        if (!isPlatformGatewayAllowedPath(message)) {
+            return;
+        }
         @SuppressWarnings("unchecked")
         Map<String, List<String>> headers = (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
         if (headers == null) {
@@ -133,7 +148,12 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
             throw new AuthenticationException("Unauthenticated request");
         }
         message.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.PLATFORM_GATEWAY_API_KEY);
-        String org = StringUtils.isNotBlank(gateway.organizationId) ? gateway.organizationId : "carbon.super";
+        String org = StringUtils.trimToNull(gateway.organizationId);
+        if (org == null) {
+            log.error("Gateway token verification returned empty organization; rejecting request for gateway: "
+                    + gateway.id);
+            throw new AuthenticationException("Unauthenticated request");
+        }
         message.put(RestApiConstants.ORGANIZATION, org);
 
         // Set CarbonContext so getLoggedInUserProvider() and Registry/tenant lookups use this org (avoids "organizationnull").
@@ -168,6 +188,27 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
     private static String getCurrentOrganization() {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         return StringUtils.isNotBlank(tenantDomain) ? tenantDomain : APIConstants.GatewayNotification.WSO2_ALL_TENANTS;
+    }
+
+    /**
+     * Returns true only if the request path is one of the allow-listed platform gateway routes.
+     * This prevents api-key header from authenticating requests to other servlet endpoints.
+     */
+    private static boolean isPlatformGatewayAllowedPath(Message message) {
+        Object req = message.get("http.request");
+        if (!(req instanceof HttpServletRequest)) {
+            return false;
+        }
+        String path = ((HttpServletRequest) req).getRequestURI();
+        if (path == null) {
+            return false;
+        }
+        for (String prefix : PLATFORM_GATEWAY_ALLOWED_PATH_PREFIXES) {
+            if (path.endsWith("/" + prefix) || path.contains("/" + prefix + "/")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static String getFirstHeader(Map<String, List<String>> headers, String name) {

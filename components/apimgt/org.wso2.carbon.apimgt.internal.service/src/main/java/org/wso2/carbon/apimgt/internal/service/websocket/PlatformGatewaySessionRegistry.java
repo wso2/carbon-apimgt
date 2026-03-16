@@ -76,13 +76,19 @@ public class PlatformGatewaySessionRegistry {
     /**
      * Unregister a gateway's session (e.g. on WebSocket close). Only removes if the current mapping
      * is still this exact session, so a newly registered session is not removed during reconnects.
+     *
+     * @return true if this session was the one registered and was removed; false if no change
+     *         (e.g. a newer session is already registered for this gateway)
      */
-    public void unregister(String gatewayId, Session session) {
-        if (gatewayId != null && session != null && gatewaySessions.remove(gatewayId, session)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Unregistered WebSocket session for gateway: " + gatewayId);
-            }
+    public boolean unregister(String gatewayId, Session session) {
+        if (gatewayId == null || session == null) {
+            return false;
         }
+        boolean removed = gatewaySessions.remove(gatewayId, session);
+        if (removed && log.isDebugEnabled()) {
+            log.debug("Unregistered WebSocket session for gateway: " + gatewayId);
+        }
+        return removed;
     }
 
     /**

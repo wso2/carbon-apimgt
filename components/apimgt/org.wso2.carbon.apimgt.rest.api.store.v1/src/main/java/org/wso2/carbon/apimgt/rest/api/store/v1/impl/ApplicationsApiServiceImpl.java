@@ -990,7 +990,18 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                             }
                                             String tokenIdentifier = payload.getString(APIConstants.JwtTokenConstants.JWT_ID);
                                             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                                            apiConsumer.revokeAPIKey(tokenIdentifier, expiryTime, tenantDomain);
+                                            // Resolve apiId/keyName so platform gateways can be notified (6-arg revoke broadcasts)
+                                            List<APIKeyInfo> appKeys = apiConsumer.getApiKeys(applicationId, keyType);
+                                            APIKeyInfo keyInfo = (appKeys != null) ? appKeys.stream()
+                                                    .filter(k -> tokenIdentifier.equals(k.getKeyUUID()))
+                                                    .findFirst().orElse(null) : null;
+                                            if (keyInfo != null && StringUtils.isNotBlank(keyInfo.getApiUUId())
+                                                    && StringUtils.isNotBlank(keyInfo.getKeyName())) {
+                                                apiConsumer.revokeAPIKey(tokenIdentifier, expiryTime, tenantDomain,
+                                                        keyInfo.getApiUUId(), keyInfo.getKeyName(), username);
+                                            } else {
+                                                apiConsumer.revokeAPIKey(tokenIdentifier, expiryTime, tenantDomain);
+                                            }
                                             return Response.ok().build();
                                         } else {
                                             if (log.isDebugEnabled()) {

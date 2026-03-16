@@ -273,12 +273,15 @@ public class GatewayConnectEndpoint {
         PlatformGatewayDAO.PlatformGateway gateway =
                 (PlatformGatewayDAO.PlatformGateway) session.getUserProperties().get(GATEWAY_PROPERTY);
         if (gateway != null) {
-            PlatformGatewaySessionRegistry.getInstance().unregister(gateway.id, session);
-            try {
-                PlatformGatewayServiceImpl.getInstance().updateGatewayActiveStatus(gateway.id, gateway.organizationId, false);
-            } catch (APIManagementException e) {
-                log.warn("Failed to update gateway active status to false: gatewayId=" + gateway.id + ", error="
-                        + e.getMessage());
+            boolean wasRemoved = PlatformGatewaySessionRegistry.getInstance().unregister(gateway.id, session);
+            if (wasRemoved) {
+                try {
+                    PlatformGatewayServiceImpl.getInstance().updateGatewayActiveStatus(gateway.id,
+                            gateway.organizationId, false);
+                } catch (APIManagementException e) {
+                    log.warn("Failed to update gateway active status to false: gatewayId=" + gateway.id + ", error="
+                            + e.getMessage());
+                }
             }
             if (log.isInfoEnabled()) {
                 log.info("Gateway WebSocket connection closed: gatewayId=" + gateway.id + " closeCode="
