@@ -16822,16 +16822,95 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Add api product url mappings to DB
-     * - url templeates to product mappings (resource bundling) - AM_API_PRODUCT_MAPPING
+     * Updates API product resource mappings for the given API product resources.
      *
-     * @param productResources
-     * @param organization
-     * @param connection
-     * @throws APIManagementException
+     * <p>This method obtains a database connection internally and delegates the
+     * update operation to {@link #updateAPIProductResourceMappings(List, String, Connection)}.</p>
+     *
+     * @param productResources list of API product resources to update
+     * @param organization     organization name
+     * @throws APIManagementException if an error occurs while updating the API product resources
+     */
+    public void updateAPIProductResourceMappings(List<APIProductResource> productResources, String organization)
+            throws APIManagementException {
+
+        Connection connection = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            updateAPIProductResourceMappings(productResources, organization, connection);
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    throw new APIManagementException("Error while rolling back API product resource update", ex);
+                }
+            }
+            handleException("Error while updating API product resources", e);
+        } finally {
+            if (connection != null) {
+                APIMgtDBUtil.closeAllConnections(null, connection, null);
+            }
+        }
+    }
+
+    /**
+     * Updates API product resource mappings, including URL mappings, scope mappings,
+     * product-resource mappings, and operation policy mappings.
+     *
+     * @param productResources list of API product resources to update
+     * @param organization     organization name
+     * @param connection       database connection
+     * @throws APIManagementException if an error occurs while updating the mappings
+     */
+    public void updateAPIProductResourceMappings(List<APIProductResource> productResources, String organization,
+                                                 Connection connection)
+            throws APIManagementException {
+        try {
+            processAPIProductResourceMappings(productResources, organization, connection, true);
+        } catch (SQLException e) {
+            handleException("Error while updating API product resource mapping", e);
+        }
+    }
+
+    /**
+     * Adds API product resource mappings including URL mappings, scope mappings,
+     * product-resource mappings, and operation policy mappings.
+     *
+     * @param productResources list of API product resources to add
+     * @param organization     organization name
+     * @param connection       database connection
+     * @throws APIManagementException if an error occurs while adding the mappings
      */
     public void addAPIProductResourceMappings(List<APIProductResource> productResources, String organization,
                                               Connection connection) throws APIManagementException {
+
+        try {
+            processAPIProductResourceMappings(productResources, organization, connection, false);
+        } catch (SQLException e) {
+            handleException("Error while updating API product resource mapping", e);
+        }
+    }
+
+    /**
+     * Processes API product resource mappings including URL mappings, scope mappings,
+     * product-resource mappings, and operation policy mappings.
+     *
+     * <p>This method is used by both add and update operations. When {@code isUpdate}
+     * is true, existing product URL mappings are removed before inserting the new mappings.</p>
+     *
+     * @param productResources list of API product resources to be processed
+     * @param organization     organization name
+     * @param connection       database connection
+     * @param isUpdate         indicates whether the operation is an update (true) or add (false)
+     * @throws APIManagementException if an error occurs while processing API product resource mappings
+     */
+    private void processAPIProductResourceMappings(List<APIProductResource> productResources, String organization,
+                                              Connection connection, boolean isUpdate)
+            throws APIManagementException, SQLException {
+
         String addProductResourceMappingSql = SQLConstants.ADD_PRODUCT_RESOURCE_MAPPING_SQL;
 
         boolean isNewConnection = false;
@@ -16839,6 +16918,7 @@ public class ApiMgtDAO {
         try {
             if (connection == null) {
                 connection = APIMgtDBUtil.getConnection();
+                connection.setAutoCommit(false);
                 isNewConnection = true;
             }
 
@@ -16925,7 +17005,35 @@ public class ApiMgtDAO {
                         uriTemplateMap.put(urlMapping.getUriTemplate() + urlMapping.getHTTPVerb(), urlMapping);
                     }
                 }
-
+                if (isUpdate) {
+                    List<Integer> productUrlMappingIds = new ArrayList<>();
+                    int apiId = uriTemplateMap
+                            .get(uriTemplateOriginal.getUriTemplate() + uriTemplateOriginal.getHTTPVerb())
+                            .getId();
+                    try (PreparedStatement getUrlMappingIdsStmt = connection.prepareStatement(
+                            SQLConstants.GET_PRODUCT_URL_MAPPING_IDS)) {
+                        getUrlMappingIdsStmt.setInt(1, apiId);
+                        getUrlMappingIdsStmt.setString(2, String.valueOf(productId));
+                        getUrlMappingIdsStmt.setString(3, uriTemplateOriginal.getUriTemplate());
+                        getUrlMappingIdsStmt.setString(4, uriTemplateOriginal.getHTTPVerb());
+                        try (ResultSet rs = getUrlMappingIdsStmt.executeQuery()) {
+                            while (rs.next()) {
+                                productUrlMappingIds.add(rs.getInt("URL_MAPPING_ID"));
+                            }
+                        }
+                    }
+                    if (!productUrlMappingIds.isEmpty()) {
+                        try (PreparedStatement removeUrlMappingsStmt = connection.prepareStatement(
+                                SQLConstants.APIRevisionSqlConstants
+                                        .REMOVE_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING_BY_URL_MAPPING_ID)) {
+                            for (Integer mappingId : productUrlMappingIds) {
+                                removeUrlMappingsStmt.setInt(1, mappingId);
+                                removeUrlMappingsStmt.addBatch();
+                            }
+                            removeUrlMappingsStmt.executeBatch();
+                        }
+                    }
+                }
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(INSERT_URL_MAPPINGS);
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
@@ -16973,7 +17081,7 @@ public class ApiMgtDAO {
                     getRevisionedURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
                     getRevisionedURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
                     getRevisionedURLMappingsStatement.setString(6, String.valueOf(productId));
-                    if (!urlMapping.getScopes().isEmpty()) {
+                    if (urlMapping.getScopes() != null && !urlMapping.getScopes().isEmpty()) {
                         try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
                             while (rs.next()) {
                                 for (Scope scope : urlMapping.getScopes()) {
@@ -16995,26 +17103,32 @@ public class ApiMgtDAO {
                     }
                     try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
                         while (rs.next()) {
-                            for (OperationPolicy policy : urlMapping.getOperationPolicies()) {
-                                handlePolicyCloning(policy, uuid, tenantDomain, connection, clonedPoliciesMap,
-                                        usedClonedPolicies, toBeClonedPolicyDetails);
+                            if (urlMapping.getOperationPolicies() != null) {
+                                for (OperationPolicy policy : urlMapping.getOperationPolicies()) {
+                                    handlePolicyCloning(policy, uuid, tenantDomain, connection, clonedPoliciesMap,
+                                            usedClonedPolicies, toBeClonedPolicyDetails);
 
-                                Gson gson = new Gson();
-                                String paramJSON = gson.toJson(policy.getParameters());
-                                insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
-                                insertOperationPolicyMappingStatement
-                                        .setString(2, clonedPoliciesMap.get(policy.getPolicyId()));
-                                insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
+                                    Gson gson = new Gson();
+                                    String paramJSON = gson.toJson(policy.getParameters());
+                                    insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
+                                    insertOperationPolicyMappingStatement
+                                            .setString(2, clonedPoliciesMap.get(policy.getPolicyId()));
+                                    insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
 
-                                try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
-                                    insertOperationPolicyMappingStatement.setBinaryStream(4, paramInputStream, paramJSON.length());
-                                } catch (IOException e) {
-                                    log.error("Error creating or reading InputStream for operation policy");
-                                    throw new APIManagementException("Error processing operation policy parameters for policy ID: " +
-                                            policy.getPolicyId() + " in URL Mapping ID: " + rs.getInt(1), e);
+                                    try (InputStream paramInputStream = new ByteArrayInputStream(
+                                            paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                                        insertOperationPolicyMappingStatement.setBinaryStream(4, paramInputStream,
+                                                paramJSON.length());
+                                    } catch (IOException e) {
+                                        log.error("Error creating or reading InputStream for operation policy");
+                                        throw new APIManagementException(
+                                                "Error processing operation policy parameters for policy ID: " +
+                                                        policy.getPolicyId() + " in URL Mapping ID: " + rs.getInt(1),
+                                                e);
+                                    }
+                                    insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
+                                    insertOperationPolicyMappingStatement.addBatch();
                                 }
-                                insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
-                                insertOperationPolicyMappingStatement.addBatch();
                             }
                         }
                     }
@@ -17028,8 +17142,17 @@ public class ApiMgtDAO {
                 insertOperationPolicyMappingStatement.executeBatch();
             }
             cleanUnusedClonedOperationPolicies(connection, usedClonedPolicies, uuid);
+            if (isNewConnection) {
+                connection.commit();
+            }
         } catch (SQLException e) {
-            handleException("Error while adding API product Resources", e);
+            String errorMessage = isUpdate ?
+                    "Error while updating API product resources" :
+                    "Error while adding API product resources";
+            if (isNewConnection) {
+                APIMgtDBUtil.rollbackConnection(connection, errorMessage, e);
+            }
+            handleException(errorMessage, e);
         } finally {
             if (isNewConnection) {
                 APIMgtDBUtil.closeAllConnections(null, connection, null);
@@ -17069,8 +17192,8 @@ public class ApiMgtDAO {
                 removeURLMappingsStatement.addBatch();
             }
             removeURLMappingsStatement.executeBatch();
-            //Add new resources
-            addAPIProductResourceMappings(apiProduct.getProductResources(), apiProduct.getOrganization(), connection);
+            updateAPIProductResourceMappings(apiProduct.getProductResources(), apiProduct.getOrganization(),
+                    connection);
         } catch (SQLException e) {
             handleException("Error while updating API-Product Resources.", e);
         } finally {

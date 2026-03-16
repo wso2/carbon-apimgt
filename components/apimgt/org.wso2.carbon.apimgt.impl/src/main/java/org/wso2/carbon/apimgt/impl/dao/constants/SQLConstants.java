@@ -4258,6 +4258,10 @@ public class SQLConstants {
         public static final String DELETE_API_ID = "DELETE FROM AM_DEVPORTAL_API_CONTENT WHERE ORGANIZATION = ? AND API_UUID = ?";
     }
 
+    public static final String GET_PRODUCT_URL_MAPPING_IDS =
+            "SELECT URL_MAPPING_ID FROM AM_API_URL_MAPPING WHERE API_ID = ? AND REVISION_UUID = ? AND URL_PATTERN" +
+                    " = ? AND HTTP_METHOD = ?";
+
     public static final String GET_API_VERSIONS =
             "SELECT API.API_VERSION FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND ORGANIZATION = ?";
     public static final String GET_API_VERSIONS_UUID =

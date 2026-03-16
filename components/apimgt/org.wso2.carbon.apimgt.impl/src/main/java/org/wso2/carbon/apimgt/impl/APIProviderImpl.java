@@ -5596,8 +5596,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             int updatedURITemplateId = apiResources.get(productResourceKey).getId();
             uriTemplate.setId(updatedURITemplateId);
         }
-
-        apiMgtDAO.addAPIProductResourceMappings(productResources, organization, null);
+        apiMgtDAO.updateAPIProductResourceMappings(productResources, organization);
     }
 
     /**
