@@ -846,7 +846,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         Map<String, Scope> apiScopesByKey = new HashMap<>();
         for (Scope apiScope : apiScopes) {
-            if (apiScope.getKey() != null) {
+            if (apiScope != null && apiScope.getKey() != null) {
                 apiScopesByKey.put(apiScope.getKey(), apiScope);
             }
         }
