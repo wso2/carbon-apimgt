@@ -851,6 +851,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         for (Scope scope : localScopes) {
+            if (scope == null) {
+                continue;
+            }
+            if (scope.getKey() == null) {
+                continue;
+            }
             Scope updatedScope = apiScopesByKey.get(scope.getKey());
             if (updatedScope != null) {
                 scope.setName(updatedScope.getName());

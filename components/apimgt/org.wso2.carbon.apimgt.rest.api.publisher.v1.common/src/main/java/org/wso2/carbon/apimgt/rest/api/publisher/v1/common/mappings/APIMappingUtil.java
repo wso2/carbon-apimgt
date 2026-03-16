@@ -1912,6 +1912,10 @@ public class APIMappingUtil {
                     }
                 }
                 for (APIScopeDTO apiScopeDTO : dto.getScopes()) {
+                    if (apiScopeDTO == null || apiScopeDTO.getScope() == null
+                            || apiScopeDTO.getScope().getName() == null) {
+                        continue;
+                    }
                     Scope modelScope = modelScopesByKey.get(apiScopeDTO.getScope().getName());
                     if (modelScope != null && modelScope.getName() != null) {
                         apiScopeDTO.getScope().setDisplayName(modelScope.getName());
