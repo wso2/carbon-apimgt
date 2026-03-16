@@ -87,10 +87,14 @@ public class XMLSchemaValidator extends AbstractMediator {
         if (apiManagerConfiguration != null) {
             isSecureXMLProcessingEnabled = apiManagerConfiguration.isEnableSecureXMLProcessing();
         }
-        if (!isSecureXMLProcessingEnabled) {
+        if (isSecureXMLProcessingEnabled) {
+            logger.debug("Secure XML processing is enabled, disallowing DTD processing");
             ((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                    .setProperty(APPLICATION_BUILDER_ALLOW_DTD, "true");
-        }
+                    .setProperty(APPLICATION_BUILDER_ALLOW_DTD, "false");
+        } else {
+             ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                     .setProperty(APPLICATION_BUILDER_ALLOW_DTD, "true");
+         }
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
         requestMethod = axis2MC.getProperty(ThreatProtectorConstants.HTTP_REQUEST_METHOD).toString();

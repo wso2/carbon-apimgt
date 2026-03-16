@@ -138,7 +138,8 @@ public class XMLSchemaValidatorTest {
         Mockito.when(messageContext.getProperty(ThreatProtectorConstants.ENTITY_EXPANSION_LIMIT)).thenReturn("5");
         Mockito.when((messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 
-        XMLSchemaValidator xmlSchemaValidator = new XMLSchemaValidator();
+        TestableXMLSchemaValidator xmlSchemaValidator = new TestableXMLSchemaValidator();
+        xmlSchemaValidator.setSecureXMLProcessingEnabled(true);
         XMLConfig testConfig = xmlSchemaValidator.configureSchemaProperties(messageContext);
 
     // Verify that DTD and external entities are forced disabled
@@ -155,4 +156,14 @@ public class XMLSchemaValidatorTest {
 
         log.info("Successfully completed testConfigureSchemaPropertiesWithSecureXMLProcessingEnabled test case.");
     }
+
+    /**
+      * Test-only subclass of {@link XMLSchemaValidator} to control secure XML processing state
+      * without directly mutating internal fields from the test.
+      */
+     private static class TestableXMLSchemaValidator extends XMLSchemaValidator {
+         void setSecureXMLProcessingEnabled(boolean enabled) {
+             this.isSecureXMLProcessingEnabled = enabled;
+         }
+     }
 }
