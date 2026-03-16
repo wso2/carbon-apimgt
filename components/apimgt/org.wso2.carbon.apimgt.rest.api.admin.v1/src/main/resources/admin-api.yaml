@@ -6677,6 +6677,10 @@ components:
           type: boolean
           description: Is Gateway Notification Enabled
           default: false
+        universalGatewayVersion:
+          type: string
+          description: Universal Gateway version for quick-start guide (e.g. "0.9.0")
+          example: "0.9.0"
     ScopeList:
       title: Scope Role Mapping List
       type: object

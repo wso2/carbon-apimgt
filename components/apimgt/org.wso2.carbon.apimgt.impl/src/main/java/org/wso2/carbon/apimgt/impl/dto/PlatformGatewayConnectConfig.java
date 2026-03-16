@@ -29,6 +29,18 @@ import java.util.List;
  */
 public class PlatformGatewayConnectConfig {
     private List<ConnectGatewayConfig> connectGateways = new ArrayList<>();
+    private String universalGatewayVersion;
+
+    /**
+     * Global default Universal Gateway version (e.g. "0.9.0"). From apim.universal_gateway.version.
+     */
+    public String getUniversalGatewayVersion() {
+        return universalGatewayVersion;
+    }
+
+    public void setUniversalGatewayVersion(String universalGatewayVersion) {
+        this.universalGatewayVersion = universalGatewayVersion != null ? universalGatewayVersion : "";
+    }
 
     /**
      * Connect configs (one per gateway) for connect-with-token. If empty, platform connect is disabled.

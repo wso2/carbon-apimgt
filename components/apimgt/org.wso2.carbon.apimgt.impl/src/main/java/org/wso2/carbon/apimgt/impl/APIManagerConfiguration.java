@@ -3502,6 +3502,13 @@ public class APIManagerConfiguration {
             }
         }
 
+        org.apache.axiom.om.OMElement universalGatewayVersionElem = omElement.getFirstChildWithName(
+                new QName("UniversalGatewayVersion"));
+        if (universalGatewayVersionElem != null && universalGatewayVersionElem.getText() != null
+                && !universalGatewayVersionElem.getText().trim().isEmpty()) {
+            platformGatewayConnectConfig.setUniversalGatewayVersion(universalGatewayVersionElem.getText().trim());
+        }
+
         // New: platform gateway connect-with-token configuration (separate element)
         OMElement pgConnectElem = omElement.getFirstChildWithName(
                 new QName(APIConstants.GatewayNotification.PLATFORM_GATEWAY_CONNECT_CONFIGURATION));
@@ -3543,6 +3550,10 @@ public class APIManagerConfiguration {
                             new QName(APIConstants.GatewayNotification.CONNECT_URL));
                     if (urlEl != null && urlEl.getText() != null && !urlEl.getText().trim().isEmpty()) {
                         entry.setUrl(urlEl.getText().trim());
+                    }
+                    OMElement ugVersionEl = connectElem.getFirstChildWithName(new QName("UniversalGatewayVersion"));
+                    if (ugVersionEl != null && ugVersionEl.getText() != null && !ugVersionEl.getText().trim().isEmpty()) {
+                        entry.setUniversalGatewayVersion(ugVersionEl.getText().trim());
                     }
                     if (!entry.getRegistrationToken().isEmpty()) {
                         connectGateways.add(entry);

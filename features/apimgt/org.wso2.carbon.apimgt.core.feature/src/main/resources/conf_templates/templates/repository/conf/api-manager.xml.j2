@@ -2070,6 +2070,7 @@
       <GatewayNotificationConfiguration>
           <Enabled>{{apim.gateway_notification.enabled}}</Enabled>
           <GatewayID>{{apim.gateway_notification.gateway_id}}</GatewayID>
+          {% if apim.universal_gateway.version is defined and apim.universal_gateway.version %}<UniversalGatewayVersion>{{ apim.universal_gateway.version }}</UniversalGatewayVersion>{% endif %}
           <Heartbeat>
               <NotifyIntervalSeconds>{{apim.gateway_notification.heartbeat.notify_interval}}</NotifyIntervalSeconds>
           </Heartbeat>
@@ -2105,6 +2106,7 @@
                 {% if c.display_name is defined and c.display_name %}<DisplayName>{{ c.display_name }}</DisplayName>{% endif %}
                 {% if c.description is defined and c.description %}<Description>{{ c.description }}</Description>{% endif %}
                 {% if c.url is defined and c.url %}<Url>{{ c.url }}</Url>{% endif %}
+                {% if c.gateway_version is defined and c.gateway_version %}<UniversalGatewayVersion>{{ c.gateway_version }}</UniversalGatewayVersion>{% endif %}
             </Connect>
           {% endfor %}
           </ConnectGateways>
