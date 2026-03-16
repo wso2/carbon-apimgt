@@ -104,7 +104,7 @@ public class PublisherCommonUtilsTest {
         List<String> expectedInvalidTier = Arrays.asList(new String[]{"Platinum", "gold"});
         Assert.assertEquals(PublisherCommonUtils.getInvalidTierNames(allTiers, currentTiers), expectedInvalidTier);
     }
-
+    
     @Test
     public void testWebhookApisAreClassifiedAsAsyncAcrossHelpers() {
 
