@@ -114,6 +114,8 @@ public class EnvironmentMappingUtil {
         vHostDTO.setHttpsPort(vHost.getHttpsPort());
         vHostDTO.setWsPort(vHost.getWsPort());
         vHostDTO.setWssPort(vHost.getWssPort());
+        vHostDTO.setWsHost(vHost.getWsHost());
+        vHostDTO.setWssHost(vHost.getWssHost());
         return vHostDTO;
     }
 
@@ -179,16 +181,8 @@ public class EnvironmentMappingUtil {
         vhost.setHttpsPort(vhostDTO.getHttpsPort());
         vhost.setWsPort(vhostDTO.getWsPort());
         vhost.setWssPort(vhostDTO.getWssPort());
-        if (vhostDTO.getWsHost() == null) {
-            vhost.setWsHost(vhostDTO.getHost());
-        } else {
-            vhost.setWsHost(vhostDTO.getWsHost());
-        }
-        if (vhostDTO.getWssHost() == null) {
-            vhost.setWssHost(vhostDTO.getHost());
-        } else {
-            vhost.setWssHost(vhostDTO.getWssHost());
-        }
+        vhost.setWsHost(vhostDTO.getWsHost());
+        vhost.setWssHost(vhostDTO.getWssHost());
         return vhost;
     }
 

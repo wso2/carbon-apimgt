@@ -117,6 +117,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Objects;
 
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.constructEndpointConfigForService;
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.validateScopes;
@@ -1138,7 +1139,8 @@ public class ApisApiServiceImplUtils {
             //Checking the vhost is included in the available vhost list
             if (vhostItem.getHost().equals(vhost)) {
                 isVhostValidated = true;
-            } else if (vhostItem.getWsHost().equals(vhost)) {
+            } else if (Objects.equals(vhostItem.getWsHost(), vhost) 
+                    || Objects.equals(vhostItem.getWssHost(), vhost)) {
                 // This was added to preserve the functionality in case of Deploying a WebSocket API revision.
                 // For WebSocket APIs apiRevisionDeploymentDTO.getVhost() returns the wsHost
                 isVhostValidated = true;
