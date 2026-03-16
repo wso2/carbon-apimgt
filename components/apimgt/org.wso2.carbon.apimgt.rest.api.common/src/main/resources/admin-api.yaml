@@ -6066,6 +6066,11 @@ components:
           type: string
           format: date-time
           readOnly: true
+      readOnly:
+        - id
+        - isActive
+        - createdAt
+        - updatedAt
     GatewayResponseWithToken:
       title: Gateway Response With Token
       description: Platform gateway response including the one-time registration token (POST create or regenerate-token).
@@ -6078,6 +6083,11 @@ components:
               description: |
                 Registration token (returned only once on create or regenerate). Use as api-key when connecting
                 the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN.
+      readOnly:
+        - id
+        - isActive
+        - createdAt
+        - updatedAt
     GatewayList:
       title: Gateway List
       type: object
@@ -6667,6 +6677,10 @@ components:
           type: boolean
           description: Is Gateway Notification Enabled
           default: false
+        universalGatewayVersion:
+          type: string
+          description: Universal Gateway version for quick-start guide (e.g. "0.9.0")
+          example: "0.9.0"
     ScopeList:
       title: Scope Role Mapping List
       type: object

@@ -40,6 +40,24 @@ public class GatewaysApi  {
 GatewaysApiService delegate = new GatewaysApiServiceImpl();
 
 
+    @POST
+    
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Register a platform gateway", notes = "Register a new platform gateway. A registration token is generated and returned once in the response; store it (e.g. as GATEWAY_CONTROL_PLANE_TOKEN in Docker Compose) for the gateway to connect to the control plane WebSocket. The token is stored hashed and cannot be retrieved later. ", response = GatewayResponseWithTokenDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+        })
+    }, tags={ "Platform Gateways",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 201, message = "Created. Gateway and registration token (returned once) in the response body. ", response = GatewayResponseWithTokenDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class) })
+    public Response createPlatformGateway(@ApiParam(value = "" ,required=true) CreatePlatformGatewayRequestDTO createPlatformGatewayRequestDTO) throws APIManagementException{
+        return delegate.createPlatformGateway(createPlatformGatewayRequestDTO, securityContext);
+    }
+
     @DELETE
     @Path("/{gatewayId}")
     
@@ -55,40 +73,6 @@ GatewaysApiService delegate = new GatewaysApiServiceImpl();
         @ApiResponse(code = 409, message = "Conflict. Cannot delete gateway while API revisions are deployed to it.", response = ErrorDTO.class) })
     public Response deletePlatformGateway(@ApiParam(value = "Gateway UUID",required=true) @PathParam("gatewayId") String gatewayId) throws APIManagementException{
         return delegate.deletePlatformGateway(gatewayId, securityContext);
-    }
-
-    @PUT
-    @Path("/{gatewayId}")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Update a platform gateway", notes = "Update platform gateway metadata. Request body must include all updatable fields (displayName, description, properties, permissions). Name and vhost cannot be changed. UI should send the full resource representation to align with PUT semantics. ", response = PlatformGatewayResponseDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
-        })
-    }, tags={ "Platform Gateways",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Updated platform gateway in the response body.", response = PlatformGatewayResponseDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response updatePlatformGateway(@ApiParam(value = "Gateway UUID",required=true) @PathParam("gatewayId") String gatewayId, @ApiParam(value = "" ,required=true) UpdatePlatformGatewayRequestDTO updatePlatformGatewayRequestDTO) throws APIManagementException{
-        return delegate.updatePlatformGateway(gatewayId, updatePlatformGatewayRequestDTO, securityContext);
-    }
-
-    @POST
-    @Path("/{gatewayId}/regenerate-token")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Regenerate registration token for a platform gateway", notes = "Regenerate the registration token for an existing platform gateway. The old token is revoked and a new one is generated. Store the new token (e.g. as GATEWAY_CONTROL_PLANE_TOKEN in Docker Compose) for the gateway to reconnect to the control plane WebSocket. The token is returned only once. ", response = GatewayResponseWithTokenDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
-        })
-    }, tags={ "Platform Gateways",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Gateway and new registration token (returned once) in the response body. ", response = GatewayResponseWithTokenDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response regeneratePlatformGatewayToken(@ApiParam(value = "Gateway UUID",required=true) @PathParam("gatewayId") String gatewayId) throws APIManagementException{
-        return delegate.regeneratePlatformGatewayToken(gatewayId, securityContext);
     }
 
     @GET
@@ -108,20 +92,36 @@ GatewaysApiService delegate = new GatewaysApiServiceImpl();
     }
 
     @POST
+    @Path("/{gatewayId}/regenerate-token")
     
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Regenerate registration token for a platform gateway", notes = "Regenerate the registration token for an existing platform gateway. The old token is revoked and a new one is generated. Store the new token (e.g. as GATEWAY_CONTROL_PLANE_TOKEN in Docker Compose) for the gateway to reconnect to the control plane WebSocket. The token is returned only once. ", response = GatewayResponseWithTokenDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+        })
+    }, tags={ "Platform Gateways",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Gateway and new registration token (returned once) in the response body. ", response = GatewayResponseWithTokenDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response regeneratePlatformGatewayToken(@ApiParam(value = "Gateway UUID",required=true) @PathParam("gatewayId") String gatewayId) throws APIManagementException{
+        return delegate.regeneratePlatformGatewayToken(gatewayId, securityContext);
+    }
+
+    @PUT
+    @Path("/{gatewayId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Register a platform gateway", notes = "Register a new platform gateway. A registration token is generated and returned once in the response; store it (e.g. as GATEWAY_CONTROL_PLANE_TOKEN in Docker Compose) for the gateway to connect to the control plane WebSocket. The token is stored hashed and cannot be retrieved later. ", response = GatewayResponseWithTokenDTO.class, authorizations = {
+    @ApiOperation(value = "Update a platform gateway", notes = "Update platform gateway metadata. Request body must include all updatable fields (displayName, description, properties, permissions). Name and vhost cannot be changed. UI should send the full resource representation to align with PUT semantics. ", response = PlatformGatewayResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Platform Gateways" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 201, message = "Created. Gateway and registration token (returned once) in the response body. ", response = GatewayResponseWithTokenDTO.class),
+        @ApiResponse(code = 200, message = "OK. Updated platform gateway in the response body.", response = PlatformGatewayResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class) })
-    public Response createPlatformGateway(@ApiParam(value = "" ,required=true) CreatePlatformGatewayRequestDTO createPlatformGatewayRequestDTO) throws APIManagementException{
-        return delegate.createPlatformGateway(createPlatformGatewayRequestDTO, securityContext);
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response updatePlatformGateway(@ApiParam(value = "Gateway UUID",required=true) @PathParam("gatewayId") String gatewayId, @ApiParam(value = "" ,required=true) UpdatePlatformGatewayRequestDTO updatePlatformGatewayRequestDTO) throws APIManagementException{
+        return delegate.updatePlatformGateway(gatewayId, updatePlatformGatewayRequestDTO, securityContext);
     }
 }

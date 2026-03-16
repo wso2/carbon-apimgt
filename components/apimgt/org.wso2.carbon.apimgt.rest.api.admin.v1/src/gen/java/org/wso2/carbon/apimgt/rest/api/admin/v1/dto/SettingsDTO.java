@@ -195,7 +195,7 @@ public class SettingsDTO   {
   }
 
   /**
-   * Universal Gateway version for quick-start guide (e.g. "0.9.0")
+   * Universal Gateway version for quick-start guide (e.g. \&quot;0.9.0\&quot;)
    **/
   public SettingsDTO universalGatewayVersion(String universalGatewayVersion) {
     this.universalGatewayVersion = universalGatewayVersion;

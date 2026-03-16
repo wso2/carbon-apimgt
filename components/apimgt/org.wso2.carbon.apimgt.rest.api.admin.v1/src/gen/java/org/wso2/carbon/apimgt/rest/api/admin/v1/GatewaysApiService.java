@@ -25,9 +25,9 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface GatewaysApiService {
-      public Response deletePlatformGateway(String gatewayId, MessageContext messageContext) throws APIManagementException;
-      public Response updatePlatformGateway(String gatewayId, UpdatePlatformGatewayRequestDTO updatePlatformGatewayRequestDTO, MessageContext messageContext) throws APIManagementException;
-      public Response regeneratePlatformGatewayToken(String gatewayId, MessageContext messageContext) throws APIManagementException;
-      public Response getPlatformGateways(MessageContext messageContext) throws APIManagementException;
       public Response createPlatformGateway(CreatePlatformGatewayRequestDTO createPlatformGatewayRequestDTO, MessageContext messageContext) throws APIManagementException;
+      public Response deletePlatformGateway(String gatewayId, MessageContext messageContext) throws APIManagementException;
+      public Response getPlatformGateways(MessageContext messageContext) throws APIManagementException;
+      public Response regeneratePlatformGatewayToken(String gatewayId, MessageContext messageContext) throws APIManagementException;
+      public Response updatePlatformGateway(String gatewayId, UpdatePlatformGatewayRequestDTO updatePlatformGatewayRequestDTO, MessageContext messageContext) throws APIManagementException;
 }

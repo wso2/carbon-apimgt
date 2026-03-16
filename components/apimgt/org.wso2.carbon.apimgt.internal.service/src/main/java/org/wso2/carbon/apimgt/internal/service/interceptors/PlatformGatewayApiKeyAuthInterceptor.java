@@ -106,8 +106,7 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
                 message.put(MESSAGE_PROPERTY_CONNECT_WITH_TOKEN, Boolean.TRUE);
                 CONNECT_WITH_TOKEN_AUTH.set(Boolean.TRUE);
                 CONNECT_WITH_TOKEN_MATCHED_ENTRY.set(matchedEntry);
-                String org = connectConfig != null && StringUtils.isNotBlank(connectConfig.getAdoptOrganizationId())
-                        ? connectConfig.getAdoptOrganizationId() : APIConstants.GatewayNotification.WSO2_ALL_TENANTS;
+                String org = getCurrentOrganization();
                 message.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.PLATFORM_GATEWAY_API_KEY);
                 message.put(RestApiConstants.ORGANIZATION, org);
                 PrivilegedCarbonContext.startTenantFlow();
@@ -161,6 +160,14 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
         } finally {
             // endTenantFlow() is called in PlatformGatewayTenantFlowCleanupInterceptor (POST_INVOKE) so tenant remains set for resource invocation
         }
+    }
+
+    /**
+     * When config does not provide an explicit org, use the current APIM tenant (from CarbonContext).
+     */
+    private static String getCurrentOrganization() {
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        return StringUtils.isNotBlank(tenantDomain) ? tenantDomain : APIConstants.GatewayNotification.WSO2_ALL_TENANTS;
     }
 
     private static String getFirstHeader(Map<String, List<String>> headers, String name) {

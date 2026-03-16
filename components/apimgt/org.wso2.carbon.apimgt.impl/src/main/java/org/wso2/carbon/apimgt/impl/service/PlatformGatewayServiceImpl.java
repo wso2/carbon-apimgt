@@ -442,7 +442,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
                         .orElse(null);
                 if (existingByName != null && !gatewayId.equals(existingByName.getUuid())) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Connect with token: name '" + adoptName + "' already exists; using gateway_id as name");
+                        log.debug("Connect with token: name '" + entry.getName() + "' already exists; using gateway_id as name");
                     }
                     name = gatewayId;
                 }
@@ -480,11 +480,11 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
             }
             String displayName = StringUtils.isNotBlank(displayNameOverride) ? displayNameOverride : name;
             String description = StringUtils.isNotBlank(descriptionOverride) ? descriptionOverride : "";
-            String vhostForDao = StringUtils.isNotBlank(urlOverride) ? urlOverride : (StringUtils.isNotBlank(vhostOverride) ? vhostOverride : "default");
+            String vhostForDao = StringUtils.isNotBlank(urlOverride) ? urlOverride : "default";
             if (existing == null) {
                 Environment env = StringUtils.isNotBlank(urlOverride)
                         ? toEnvironmentFromUrl(gatewayId, name, displayName, description, urlOverride)
-                        : toEnvironment(gatewayId, name, displayName, description, StringUtils.isNotBlank(vhostOverride) ? vhostOverride : "default");
+                        : toEnvironment(gatewayId, name, displayName, description, "default");
                 apiAdmin.addEnvironment(orgId, env);
             }
             Timestamp now = Timestamp.from(Instant.now());

@@ -31,18 +31,6 @@ public class ConnectGatewayConfig {
     private String displayName = "";
     private String description = "";
     private String url;
-    private String universalGatewayVersion;
-
-    /**
-     * Per-gateway override for Universal Gateway version (from gateway_version in [[apim.universal_gateway.connect]]).
-     */
-    public String getUniversalGatewayVersion() {
-        return universalGatewayVersion;
-    }
-
-    public void setUniversalGatewayVersion(String universalGatewayVersion) {
-        this.universalGatewayVersion = universalGatewayVersion != null ? universalGatewayVersion : "";
-    }
 
     public String getRegistrationToken() {
         return registrationToken;

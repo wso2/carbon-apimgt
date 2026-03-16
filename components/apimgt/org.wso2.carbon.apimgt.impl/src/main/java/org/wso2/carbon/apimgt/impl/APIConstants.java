@@ -3950,6 +3950,15 @@ public final class APIConstants {
         public static final String CLEANUP_INTERVAL_SECONDS = "CleanupIntervalSeconds";
         public static final int DEFAULT_CLEANUP_STARTUP_DELAY = 60;
 
+        public static final String PLATFORM_GATEWAY_CONNECT_CONFIGURATION = "PlatformGatewayConnectConfiguration";
+        public static final String CONNECT_GATEWAYS = "ConnectGateways";
+        public static final String CONNECT = "Connect";
+        public static final String REGISTRATION_TOKEN = "RegistrationToken";
+        public static final String CONNECT_NAME = "Name";
+        public static final String CONNECT_DISPLAY_NAME = "DisplayName";
+        public static final String CONNECT_DESCRIPTION = "Description";
+        public static final String CONNECT_URL = "Url";
+
         public enum GatewayRegistrationResponse {
             NOT_RESPONDED,
             ACKNOWLEDGED,
