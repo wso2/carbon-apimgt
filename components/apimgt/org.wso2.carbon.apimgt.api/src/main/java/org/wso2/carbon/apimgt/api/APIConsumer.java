@@ -674,10 +674,11 @@ public interface APIConsumer extends APIManager {
      *
      * @param applicationId Application Id of the application.
      * @param keyType Key type of the api keys
+     * @param tenantDomain Tenant domain
      * @return A List of api keys.
      * @throws APIManagementException This is the custom exception class for API management.
      */
-    List<APIKeyInfo> getApiKeys(String applicationId, String keyType)
+    List<APIKeyInfo> getApiKeys(String applicationId, String keyType, String tenantDomain)
             throws APIManagementException;
 
     /**
@@ -695,10 +696,11 @@ public interface APIConsumer extends APIManager {
      * Returns a list of api keys for a given API.
      *
      * @param apiId API Id of the API.
+     * @param tenantDomain Tenant Domain
      * @return A List of api keys.
      * @throws APIManagementException This is the custom exception class for API management.
      */
-    List<APIKeyInfo> getApiApiKeys(String apiId)
+    List<APIKeyInfo> getApiApiKeys(String apiId, String tenantDomain)
             throws APIManagementException;
 
     /**

@@ -124,10 +124,11 @@ public class ApiKeyMgtDAO {
      *
      * @param applicationUUID Application UUID
      * @param keyType Key type of the api keys
+     * @param tenantDomain Tenant domain
      * @return Returns a list of api keys
      * @throws APIManagementException
      */
-    public List<APIKeyInfo> getAPIKeys(String applicationUUID, String keyType) throws APIManagementException {
+    public List<APIKeyInfo> getAPIKeys(String applicationUUID, String keyType, String tenantDomain) throws APIManagementException {
 
         List<APIKeyInfo> apiKeyInfoList = new ArrayList<APIKeyInfo>();
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -136,6 +137,7 @@ public class ApiKeyMgtDAO {
             try (PreparedStatement ps = conn.prepareStatement(getApiKeysSql)) {
                 ps.setString(1, applicationUUID);
                 ps.setString(2, keyType);
+                ps.setString(3, tenantDomain);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         APIKeyInfo keyInfo = new APIKeyInfo();
@@ -203,10 +205,11 @@ public class ApiKeyMgtDAO {
      * Returns a list of api keys against an API
      *
      * @param apiUUID API UUID
+     * @param tenantDomain Tenant domain
      * @return Returns a list of api keys
      * @throws APIManagementException
      */
-    public List<APIKeyInfo> getAPIKeys(String apiUUID) throws APIManagementException {
+    public List<APIKeyInfo> getAPIKeys(String apiUUID, String tenantDomain) throws APIManagementException {
 
         List<APIKeyInfo> apiKeyInfoList = new ArrayList<APIKeyInfo>();
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -214,6 +217,8 @@ public class ApiKeyMgtDAO {
             String sqlQuery = SQLConstants.GET_API_API_KEY_SQL;
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
                 ps.setString(1, apiUUID);
+                ps.setString(2, tenantDomain);
+                ps.setString(3, tenantDomain);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         APIKeyInfo keyInfo = new APIKeyInfo();
@@ -392,14 +397,15 @@ public class ApiKeyMgtDAO {
     }
 
     /**
-     * Returns the API bound api key specified by the key name
+     * Returns the API bound api key specified by the key UUID
      *
      * @param apiUUId API UUID
      * @param keyUUId UUID of the api key
+     * @param tenantDomain Tenant domain
      * @return API key info
      * @throws APIManagementException
      */
-    public APIKeyInfo getAPIAPIKey(String apiUUId, String keyUUId) throws APIManagementException {
+    public APIKeyInfo getAPIAPIKey(String apiUUId, String keyUUId, String tenantDomain) throws APIManagementException {
 
         APIKeyInfo keyInfo = new APIKeyInfo();
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -407,9 +413,12 @@ public class ApiKeyMgtDAO {
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
                 ps.setString(1, apiUUId);
                 ps.setString(2, keyUUId);
+                ps.setString(3, tenantDomain);
+                ps.setString(4, tenantDomain);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         keyInfo.setKeyName(rs.getString("NAME"));
+                        keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
                         keyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                         Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
