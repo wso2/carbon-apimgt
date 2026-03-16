@@ -25292,32 +25292,6 @@ public class ApiMgtDAO {
         return applicationsList;
     }
 
-    public List<ApplicationInfoKeyManager> getAllKeyManagersOfApplication(String applicationId)
-            throws APIManagementException {
-
-        ArrayList<ApplicationInfoKeyManager> applicationsList = new ArrayList<>();
-        String sqlQuery = SQLConstants.GET_APPLICATIONS_OF_KEY_MANAGERS_SQL;
-
-        try (Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
-            prepStmt.setString(1, applicationId);
-            try (ResultSet rs = prepStmt.executeQuery()) {
-                ApplicationInfoKeyManager application;
-                while (rs.next()) {
-                    application = new ApplicationInfoKeyManager();
-                    application.setUuid(rs.getString("UUID"));
-                    application.setName(rs.getString("NAME"));
-                    application.setOwner(rs.getString("CREATED_BY"));
-                    application.setOrganization(rs.getString("ORGANIZATION"));
-                    applicationsList.add(application);
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Error when reading the application information from the persistence store.", e);
-        }
-        return applicationsList;
-    }
-
     /**
      * This method will query AM_API_OPERATION_POLICY table from CLONED_POLICY_ID row for a matching policy ID
      * for the required API. This is useful to find the cloned API specific policy ID from a common policy.

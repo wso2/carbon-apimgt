@@ -90,7 +90,7 @@
         "Roles": "admin"
       },
       {
-        "Name": "apim:app_update",
+        "Name": "apim:app_settings_change",
         "Roles": "admin"
       },
       {

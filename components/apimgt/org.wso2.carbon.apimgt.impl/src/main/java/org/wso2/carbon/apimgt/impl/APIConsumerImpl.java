@@ -3584,7 +3584,15 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         return isAppUpdated;
     }
 
-    public boolean upgradeApplicationTokenType(String username, String organization, Application application)
+    /**
+     * This method upgrades the token type of the given application to JWT
+     *
+     * @param username the name of the user upgrading the application
+     * @param application  the application to upgrade
+     * @return the status of the upgrade operation
+     * @throws APIManagementException when there is an error during the token type upgrade
+     */
+    public boolean upgradeApplicationTokenType(String username, Application application)
             throws APIManagementException {
 
         boolean isAppUpdated;
@@ -3594,7 +3602,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         for (APIKey apiKey : application.getKeys()) {
             KeyManager keyManager = KeyManagerHolder.getTenantKeyManagerInstance(ownerTenantDomain,
                     apiKey.getKeyManager());
-            if (keyManager != null && !(APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(
+            if (keyManager != null && keyManager.getKeyManagerConfiguration() != null &&
+                    !(APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(
                     keyManager.getKeyManagerConfiguration()
                             .getName()) && (APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(
                     keyManager.getKeyManagerConfiguration()

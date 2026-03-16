@@ -474,7 +474,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 return null;
             } else if (APIConstants.TOKEN_TYPE_JWT.equals(infoInRequest.getTokenType()) &&
                     (APIConstants.DEFAULT_TOKEN_TYPE.equalsIgnoreCase(existingTokenType)
-                            || APIConstants.TOKEN_TYPE_OAUTH.equals(existingTokenType))) {
+                            || APIConstants.TOKEN_TYPE_OAUTH.equals(existingTokenType)
+                            || APIConstants.TOKEN_TYPE_DEFAULT.equals(existingTokenType))) {
                 // requested token type is JWT and existing token type is either default or oauth then allow to change
                 // the token type to JWT
                 return APIConstants.TOKEN_TYPE_JWT;

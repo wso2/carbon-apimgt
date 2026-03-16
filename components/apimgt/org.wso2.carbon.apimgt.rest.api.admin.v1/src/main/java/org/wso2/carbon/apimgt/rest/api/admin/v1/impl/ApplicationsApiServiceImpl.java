@@ -114,7 +114,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 updated = true;
             }
             if (APIConstants.JWT.equals(String.valueOf(applicationUpdateRequestDTO.getTokenType()))) {
-                boolean tokenUpdated = apiConsumer.upgradeApplicationTokenType(username, organization, application);
+                boolean tokenUpdated = apiConsumer.upgradeApplicationTokenType(username, application);
                 if (!tokenUpdated) {
                     RestApiUtil.handleInternalServerError(
                             "Error while upgrading application token type for applicationId " + applicationId, log);
