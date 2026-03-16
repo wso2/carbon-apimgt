@@ -4936,7 +4936,7 @@ public final class APIUtil {
     public static void enableSkipSecretMasking() {
         skipSecretMasking.set(Boolean.TRUE);
         if (log.isDebugEnabled()) {
-            log.debug("Secret masking disabled for current thread");
+            log.debug("Secret masking disabled");
         }
     }
 
@@ -4947,7 +4947,7 @@ public final class APIUtil {
     public static void disableSkipSecretMasking() {
         skipSecretMasking.set(Boolean.FALSE);
         if (log.isDebugEnabled()) {
-            log.debug("Secret masking enabled for current thread");
+            log.debug("Secret masking enabled");
         }
     }
 
@@ -4958,7 +4958,7 @@ public final class APIUtil {
     public static void clearSkipSecretMasking() {
         skipSecretMasking.remove();
         if (log.isDebugEnabled()) {
-            log.debug("Cleared skip secret masking ThreadLocal for current thread");
+            log.debug("Cleared skip secret masking flag");
         }
     }
 
