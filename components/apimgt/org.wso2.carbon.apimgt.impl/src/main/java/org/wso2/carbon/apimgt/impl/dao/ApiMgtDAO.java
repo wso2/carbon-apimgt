@@ -15957,6 +15957,9 @@ public class ApiMgtDAO {
                         additionalProperties = new HashMap<>();
                     }
                     additionalProperties.put("organization", tenantDomain);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding organization '" + tenantDomain + "' to environment '" + uuid + "'.");
+                    }
 
                     Environment env = new Environment();
                     env.setId(id);
@@ -16134,6 +16137,9 @@ public class ApiMgtDAO {
      */
     public Environment getEnvironmentByUuid(String uuid) throws APIManagementException {
         if (StringUtils.isBlank(uuid)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Environment UUID is blank, returning null.");
+            }
             return null;
         }
         Environment env = null;
@@ -16170,6 +16176,9 @@ public class ApiMgtDAO {
                         additionalProperties = new HashMap<>();
                     }
                     additionalProperties.put("organization", organization);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding organization '" + organization + "' to environment '" + uuid + "'.");
+                    }
                     env = new Environment();
                     env.setId(id);
                     env.setUuid(uuid);

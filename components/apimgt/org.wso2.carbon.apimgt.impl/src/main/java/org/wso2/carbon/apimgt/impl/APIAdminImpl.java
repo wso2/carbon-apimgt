@@ -267,9 +267,13 @@ public class APIAdminImpl implements APIAdmin {
         // name is the UUID of environments configured in api-manager.xml
         Environment env = APIUtil.getReadOnlyEnvironments().get(uuid);
         if (env == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Environment with UUID " + uuid + " not found in read-only cache, checking database");
+            }
             env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
         }
         if (env == null) {
+            log.error("Failed to retrieve Environment with UUID " + uuid + " for tenant domain " + tenantDomain);
             String errorMessage = String.format("Failed to retrieve Environment with UUID %s. " +
                             "Environment not found", uuid);
             throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(

@@ -2095,6 +2095,22 @@
           </GatewayCleanup>
       </GatewayNotificationConfiguration>
 
+      {% if apim.platform_gateway.connect is defined and apim.platform_gateway.connect | length > 0 %}
+      <PlatformGatewayConnectConfiguration>
+          <ConnectGateways>
+          {% for c in apim.platform_gateway.connect %}
+            <Connect>
+                <RegistrationToken>{{ c.registration_token }}</RegistrationToken>
+                {% if c.name is defined and c.name %}<Name>{{ c.name }}</Name>{% endif %}
+                {% if c.display_name is defined and c.display_name %}<DisplayName>{{ c.display_name }}</DisplayName>{% endif %}
+                {% if c.description is defined and c.description %}<Description>{{ c.description }}</Description>{% endif %}
+                {% if c.url is defined and c.url %}<Url>{{ c.url }}</Url>{% endif %}
+            </Connect>
+          {% endfor %}
+          </ConnectGateways>
+      </PlatformGatewayConnectConfiguration>
+      {% endif %}
+
       <!-- SynapseArtifactGenerator thread pool configuration -->
       <SynapseArtifactGenerator>
           <ThreadPool>

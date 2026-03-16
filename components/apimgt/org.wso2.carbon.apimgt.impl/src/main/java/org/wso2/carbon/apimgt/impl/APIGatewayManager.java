@@ -89,6 +89,10 @@ public class APIGatewayManager {
         boolean useRevisionAsEventId = revisionUuidForPlatform != null && !revisionUuidForPlatform.isEmpty()
                 && platformGatewayIds != null && !platformGatewayIds.isEmpty();
         String eventId = useRevisionAsEventId ? revisionUuidForPlatform : UUID.randomUUID().toString();
+        if (log.isDebugEnabled()) {
+            log.debug("Creating deployment event with eventId: " + eventId + " for API: " + apiIdentifier.getName()
+                    + ", useRevisionAsEventId: " + useRevisionAsEventId);
+        }
         DeployAPIInGatewayEvent deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(eventId,
                 System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), api.getOrganization(),
                 api.getId().getId(), api.getUuid(), gateways, apiIdentifier.getName(), apiIdentifier.getVersion(),
@@ -315,6 +319,10 @@ public class APIGatewayManager {
     public void unDeployFromGateway(APIProduct apiProduct, String tenantDomain, Set<API> associatedAPIs,
                                     Set<String> gatewaysToRemove, Set<String> synapseLabelsToRemove,
                                     Set<String> platformGatewayIds) throws APIManagementException {
+        if (log.isInfoEnabled()) {
+            log.info("Undeploying API Product: " + apiProduct.getId().getName() + " version: "
+                    + apiProduct.getId().getVersion() + " from gateways");
+        }
         String apiProductUuid = apiProduct.getUuid();
         APIProductIdentifier apiProductIdentifier = apiProduct.getId();
         try {

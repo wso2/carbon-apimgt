@@ -113,6 +113,10 @@ public class DeploymentsApiServiceImpl implements DeploymentsApiService {
         if (gateway == null) {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid api-key").build();
         }
+        String gatewayName = resolveGatewayName(gateway);
+        if (StringUtils.isBlank(gatewayName)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Gateway name not resolved").build();
+        }
         if (batchDeploymentsRequest == null || batchDeploymentsRequest.getDeploymentIds() == null
                 || batchDeploymentsRequest.getDeploymentIds().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).entity("deploymentIds required").build();
@@ -129,6 +133,12 @@ public class DeploymentsApiServiceImpl implements DeploymentsApiService {
         List<DeploymentTarGzBuilder.DeploymentEntry> entries = new ArrayList<>();
         for (String deploymentId : batchDeploymentsRequest.getDeploymentIds()) {
             if (StringUtils.isBlank(deploymentId)) {
+                continue;
+            }
+            if (!dao.isDeploymentOnGateway(gatewayName, deploymentId)) {
+                if (log.isWarnEnabled()) {
+                    log.warn("Batch request: deployment " + deploymentId + " is not on gateway " + gatewayName + "; skipping");
+                }
                 continue;
             }
             String apiUuid = dao.getApiUuidByRevisionUuid(deploymentId);
@@ -152,8 +162,10 @@ public class DeploymentsApiServiceImpl implements DeploymentsApiService {
             throw new APIManagementException("Failed to build deployment archive", e);
         }
 
+        // Payload is uncompressed TAR; GZIPOutInterceptor (if applied) adds Content-Encoding: gzip.
+        // Use application/x-tar so type matches uncompressed content; filename hints .tar.gz when gzip is applied.
         return Response.ok(tarBytes)
-                .type("application/x-tar+gzip")
+                .type("application/x-tar")
                 .header("Content-Disposition", "attachment; filename=\"deployments.tar.gz\"")
                 .build();
     }

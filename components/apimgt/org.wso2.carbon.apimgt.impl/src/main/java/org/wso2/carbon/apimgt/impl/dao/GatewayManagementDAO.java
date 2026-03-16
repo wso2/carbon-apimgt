@@ -127,9 +127,16 @@ public class GatewayManagementDAO {
             }
             return null;
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving organization for gateway ID: " + gatewayId);
+        }
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(
-                     SQLConstants.GatewayManagementSQLConstants.SELECT_ORGANIZATION_BY_GATEWAY_UUID_SQL)) {
+                     (connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData().getDriverName().contains("Microsoft"))
+                             ? SQLConstants.GatewayManagementSQLConstants.SELECT_ORGANIZATION_BY_GATEWAY_UUID_MSSQL
+                             : (connection.getMetaData().getDriverName().contains("MySQL") || connection.getMetaData().getDriverName().contains("H2"))
+                             ? SQLConstants.GatewayManagementSQLConstants.SELECT_ORGANIZATION_BY_GATEWAY_UUID_MYSQL
+                             : SQLConstants.GatewayManagementSQLConstants.SELECT_ORGANIZATION_BY_GATEWAY_UUID)) {
             ps.setString(1, gatewayId);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? rs.getString("ORGANIZATION") : null;
@@ -155,6 +162,9 @@ public class GatewayManagementDAO {
     public void insertGatewayInstance(Connection connection, String gatewayId, String organization,
                                       List<String> envLabels, Timestamp lastUpdated, byte[] gwProperties)
             throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Inserting gateway instance with ID: " + gatewayId + " for organization: " + organization);
+        }
         try {
             try (PreparedStatement ps1 = connection.prepareStatement(
                     SQLConstants.GatewayManagementSQLConstants.INSERT_GATEWAY_INSTANCE_SQL);

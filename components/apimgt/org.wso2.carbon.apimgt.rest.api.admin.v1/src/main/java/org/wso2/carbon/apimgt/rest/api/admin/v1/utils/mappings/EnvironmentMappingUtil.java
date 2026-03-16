@@ -83,7 +83,7 @@ public class EnvironmentMappingUtil {
      * traditional gateway environments.
      *
      * @param gateway       PlatformGateway from AM_PLATFORM_GATEWAY
-     * @param gatewayType   gateway type constant (e.g. api-platform)
+     * @param gatewayType   gateway type constant (e.g. Platform)
      * @return EnvironmentDTO suitable for deploy-target list
      */
     public static EnvironmentDTO fromPlatformGatewayToEnvDTO(PlatformGateway gateway, String gatewayType,

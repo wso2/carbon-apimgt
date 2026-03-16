@@ -51,20 +51,11 @@ public class PlatformGatewayDeploymentDispatcherListener implements ServletConte
     private static final long CLEANUP_INTERVAL_HOURS = 6;
     /** Push pending events to connected gateways every 2 minutes. */
     private static final long PUSH_PENDING_INTERVAL_MINUTES = 2;
+    /** Max wait for scheduler shutdown on context destroy (seconds). */
+    private static final long SHUTDOWN_AWAIT_SECONDS = 10L;
 
-    private static final ScheduledExecutorService CLEANUP_SCHEDULER =
-            Executors.newScheduledThreadPool(1, r -> {
-                Thread t = new Thread(r, "platform-gw-event-cleanup");
-                t.setDaemon(true);
-                return t;
-            });
-    private static final ScheduledExecutorService PUSH_SCHEDULER =
-            Executors.newScheduledThreadPool(1, r -> {
-                Thread t = new Thread(r, "platform-gw-push-pending");
-                t.setDaemon(true);
-                return t;
-            });
-
+    private ScheduledExecutorService cleanupScheduler;
+    private ScheduledExecutorService pushScheduler;
     private volatile ScheduledFuture<?> cleanupFuture;
     private volatile ScheduledFuture<?> pushPendingFuture;
 
@@ -77,6 +68,16 @@ public class PlatformGatewayDeploymentDispatcherListener implements ServletConte
             if (log.isInfoEnabled()) {
                 log.info("Platform gateway deployment dispatcher and API key event service registered (WebSocket push enabled)");
             }
+            cleanupScheduler = Executors.newScheduledThreadPool(1, r -> {
+                Thread t = new Thread(r, "platform-gw-event-cleanup");
+                t.setDaemon(true);
+                return t;
+            });
+            pushScheduler = Executors.newScheduledThreadPool(1, r -> {
+                Thread t = new Thread(r, "platform-gw-push-pending");
+                t.setDaemon(true);
+                return t;
+            });
             scheduleEventTableCleanup();
             schedulePushPendingToConnectedGateways();
         } catch (Exception e) {
@@ -90,7 +91,7 @@ public class PlatformGatewayDeploymentDispatcherListener implements ServletConte
         if (eventService == null) {
             return;
         }
-        cleanupFuture = CLEANUP_SCHEDULER.scheduleAtFixedRate(
+        cleanupFuture = cleanupScheduler.scheduleAtFixedRate(
                 () -> {
                     try {
                         int deleted = eventService.cleanupDeliveredEventsOlderThan(CLEANUP_RETENTION_MS);
@@ -121,7 +122,7 @@ public class PlatformGatewayDeploymentDispatcherListener implements ServletConte
         if (eventService == null) {
             return;
         }
-        pushPendingFuture = PUSH_SCHEDULER.scheduleAtFixedRate(
+        pushPendingFuture = pushScheduler.scheduleAtFixedRate(
                 () -> {
                     try {
                         pushPendingEventsToConnectedGateways(eventService);
@@ -180,6 +181,10 @@ public class PlatformGatewayDeploymentDispatcherListener implements ServletConte
             pushPendingFuture.cancel(false);
             pushPendingFuture = null;
         }
+        shutdownScheduler(cleanupScheduler, "cleanup");
+        cleanupScheduler = null;
+        shutdownScheduler(pushScheduler, "push-pending");
+        pushScheduler = null;
         try {
             ServiceReferenceHolder.getInstance().setPlatformGatewayDeploymentDispatcher(null);
             ServiceReferenceHolder.getInstance().setPlatformGatewayAPIKeyEventService(null);
@@ -189,6 +194,27 @@ public class PlatformGatewayDeploymentDispatcherListener implements ServletConte
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
                 log.debug("Error unregistering platform gateway services", e);
+            }
+        }
+    }
+
+    private void shutdownScheduler(ScheduledExecutorService scheduler, String name) {
+        if (scheduler == null) {
+            return;
+        }
+        scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(SHUTDOWN_AWAIT_SECONDS, TimeUnit.SECONDS)) {
+                scheduler.shutdownNow();
+                if (log.isDebugEnabled()) {
+                    log.debug("Platform gateway " + name + " scheduler did not terminate in time, forced shutdown");
+                }
+            }
+        } catch (InterruptedException e) {
+            scheduler.shutdownNow();
+            Thread.currentThread().interrupt();
+            if (log.isDebugEnabled()) {
+                log.debug("Platform gateway " + name + " scheduler shutdown interrupted", e);
             }
         }
     }

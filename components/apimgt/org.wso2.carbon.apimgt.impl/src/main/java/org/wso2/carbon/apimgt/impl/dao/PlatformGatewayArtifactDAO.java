@@ -60,7 +60,11 @@ public class PlatformGatewayArtifactDAO {
     public String getRevisionUuidByApiAndGatewayName(String apiId, String gatewayName)
             throws APIManagementException {
         if (apiId == null || gatewayName == null) {
+            log.warn("Cannot resolve revision UUID - apiId or gatewayName is null");
             return null;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Resolving revision UUID for API: " + apiId + ", gateway: " + gatewayName);
         }
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(
@@ -116,10 +120,15 @@ public class PlatformGatewayArtifactDAO {
     public void saveRevisionArtifact(String apiId, String revisionId, String yamlContent)
             throws APIManagementException {
         if (apiId == null || revisionId == null) {
+            log.error("Cannot save revision artifact - API ID and revision ID are required");
             throw new APIManagementException("API ID and revision ID are required");
         }
         if (yamlContent == null) {
+            log.error("Cannot save revision artifact - YAML content is required for API: " + apiId);
             throw new APIManagementException("YAML content is required");
+        }
+        if (log.isInfoEnabled()) {
+            log.info("Saving revision artifact for API: " + apiId + ", revision: " + revisionId);
         }
         Timestamp now = new Timestamp(System.currentTimeMillis());
         byte[] artifactBytes = yamlContent.getBytes(java.nio.charset.StandardCharsets.UTF_8);
@@ -214,6 +223,32 @@ public class PlatformGatewayArtifactDAO {
         } catch (SQLException e) {
             log.error("Error listing deployments for gateway " + gatewayName, e);
             throw new APIManagementException("Error listing deployments for platform gateway", e);
+        }
+    }
+
+    /**
+     * Check whether the given revision (deployment) is deployed to the given gateway.
+     * Used to authorize batch artifact requests: only return artifacts for deployments on this gateway.
+     *
+     * @param gatewayName env/gateway name (NAME in AM_DEPLOYMENT_REVISION_MAPPING)
+     * @param revisionUuid REVISION_UUID (deployment ID)
+     * @return true if a row exists for (gatewayName, revisionUuid), false otherwise
+     */
+    public boolean isDeploymentOnGateway(String gatewayName, String revisionUuid) throws APIManagementException {
+        if (gatewayName == null || revisionUuid == null) {
+            return false;
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(
+                     SQLConstants.PlatformGatewayArtifactSQLConstants.SELECT_DEPLOYMENT_ON_GATEWAY_EXISTS)) {
+            ps.setString(1, gatewayName.trim());
+            ps.setString(2, revisionUuid.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            log.error("Error checking deployment on gateway " + gatewayName + " revision " + revisionUuid, e);
+            throw new APIManagementException("Error checking deployment authorization", e);
         }
     }
 

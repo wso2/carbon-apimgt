@@ -2277,7 +2277,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Returns true if the API uses Platform Gateway (gateway type api-platform).
+     * Returns true if the API uses Platform Gateway (gateway type Platform).
      * For such APIs, policies may come from an external source and are not stored in AM; we skip local policy lookup when saving.
      */
     private static boolean isPlatformGatewayApi(API api) {
@@ -7362,6 +7362,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 dedupedDeployments.add(d);
             }
         }
+        if (log.isInfoEnabled()) {
+            log.info("Processing API revision deployment for API: " + apiId + ", revision: " + apiRevisionUUID
+                    + ", deployments count: " + dedupedDeployments.size());
+        }
 
         if (!isInitiatedFromGateway) {
             handlePendingDeployments(apiId, apiRevisionUUID, dedupedDeployments);
@@ -7653,6 +7657,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String yaml = org.wso2.carbon.apimgt.impl.utils.PlatformGatewayAPIYamlConverter
                     .toPlatformGatewayYaml(apiAtRevision, organization, environment);
             artifactService.saveRevisionArtifact(apiId, revisionUUID, yaml);
+            if (log.isInfoEnabled()) {
+                log.info("Saved platform revision artifact for API: " + apiId + ", revision: " + revisionUUID);
+            }
             if (log.isDebugEnabled()) {
                 log.debug("Saved platform revision artifact for API " + apiId + " revision " + revisionUUID);
             }

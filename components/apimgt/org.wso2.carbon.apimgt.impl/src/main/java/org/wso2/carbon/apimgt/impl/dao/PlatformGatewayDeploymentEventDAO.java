@@ -55,6 +55,10 @@ public class PlatformGatewayDeploymentEventDAO {
      */
     public void insertEvent(String gatewayId, String apiId, String revisionUuid, String eventType, String payload)
             throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Inserting deployment event for gateway: " + gatewayId + ", API: " + apiId + ", event type: "
+                    + eventType);
+        }
         if (gatewayId == null || apiId == null || eventType == null || payload == null) {
             throw new APIManagementException("gatewayId, apiId, eventType and payload are required");
         }
@@ -77,8 +81,11 @@ public class PlatformGatewayDeploymentEventDAO {
         }
     }
 
+    /** Claim lease duration: claims older than this are considered expired and can be re-claimed (ms). */
+    private static final long CLAIM_LEASE_DURATION_MS = 60_000L;
+
     /**
-     * Get pending events for a gateway (DELIVERED_AT IS NULL) ordered by CREATED_AT.
+     * Get pending events for a gateway (DELIVERED_AT IS NULL and not actively claimed, or claim expired) ordered by CREATED_AT.
      * Returns list of (id, payload).
      */
     public List<DeploymentEventRecord> getPendingEventsForGateway(String gatewayId) throws APIManagementException {
@@ -86,10 +93,12 @@ public class PlatformGatewayDeploymentEventDAO {
             return Collections.emptyList();
         }
         List<DeploymentEventRecord> list = new ArrayList<>();
+        java.sql.Timestamp leaseExpiry = new Timestamp(System.currentTimeMillis() - CLAIM_LEASE_DURATION_MS);
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(
                      SQLConstants.PlatformGatewayDeploymentEventSQLConstants.SELECT_PENDING_FOR_GATEWAY)) {
             ps.setString(1, gatewayId.trim());
+            ps.setTimestamp(2, leaseExpiry);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     String id = rs.getString("ID");
@@ -130,24 +139,39 @@ public class PlatformGatewayDeploymentEventDAO {
     }
 
     /**
-     * Get pending events for the gateway and mark them as delivered in one transaction,
-     * so another node cannot deliver the same events (used on gateway connect).
+     * Claim pending events for the gateway (set CLAIMED_AT/CLAIMED_BY) so another node cannot process them.
+     * Caller must send over WebSocket and then call {@link #markDelivered(List)} for successfully sent IDs.
+     * Does not set DELIVERED_AT; delivery is acknowledged only after markDelivered.
      *
-     * @return list of (id, payload) for the events that were marked delivered
+     * @return list of (id, payload) for the events that were claimed
      */
     public List<DeploymentEventRecord> getAndMarkDeliveredPendingEventsForGateway(String gatewayId)
             throws APIManagementException {
         if (gatewayId == null || gatewayId.trim().isEmpty()) {
             return Collections.emptyList();
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Claiming pending events for gateway: " + gatewayId);
+        }
+        String claimId = UUID.randomUUID().toString();
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        Timestamp leaseExpiry = new Timestamp(System.currentTimeMillis() - CLAIM_LEASE_DURATION_MS);
         Connection connection = null;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
+            try (PreparedStatement ps = connection.prepareStatement(
+                    SQLConstants.PlatformGatewayDeploymentEventSQLConstants.UPDATE_CLAIM_PENDING_FOR_GATEWAY)) {
+                ps.setTimestamp(1, now);
+                ps.setString(2, claimId);
+                ps.setString(3, gatewayId.trim());
+                ps.setTimestamp(4, leaseExpiry);
+                ps.executeUpdate();
+            }
             List<DeploymentEventRecord> list = new ArrayList<>();
             try (PreparedStatement ps = connection.prepareStatement(
-                    SQLConstants.PlatformGatewayDeploymentEventSQLConstants.SELECT_PENDING_FOR_GATEWAY)) {
-                ps.setString(1, gatewayId.trim());
+                    SQLConstants.PlatformGatewayDeploymentEventSQLConstants.SELECT_CLAIMED_BY_BATCH)) {
+                ps.setString(1, claimId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         String id = rs.getString("ID");
@@ -156,22 +180,6 @@ public class PlatformGatewayDeploymentEventDAO {
                             list.add(new DeploymentEventRecord(id, payload));
                         }
                     }
-                }
-            }
-            if (!list.isEmpty()) {
-                Timestamp now = new Timestamp(System.currentTimeMillis());
-                List<String> ids = new ArrayList<>(list.size());
-                for (DeploymentEventRecord r : list) {
-                    ids.add(r.getId());
-                }
-                String placeholders = String.join(",", Collections.nCopies(ids.size(), "?"));
-                String sql = "UPDATE AM_GW_PLATFORM_DEPLOYMENT_EVENT SET DELIVERED_AT = ? WHERE ID IN (" + placeholders + ")";
-                try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                    ps.setTimestamp(1, now);
-                    for (int i = 0; i < ids.size(); i++) {
-                        ps.setString(i + 2, ids.get(i));
-                    }
-                    ps.executeUpdate();
                 }
             }
             connection.commit();
@@ -184,7 +192,7 @@ public class PlatformGatewayDeploymentEventDAO {
                     log.warn("Rollback failed: " + ex.getMessage());
                 }
             }
-            log.error("Error get-and-mark delivered for gateway " + gatewayId, e);
+            log.error("Error claiming pending events for gateway " + gatewayId, e);
             throw new APIManagementException("Error getting pending deployment events", e);
         } finally {
             if (connection != null) {

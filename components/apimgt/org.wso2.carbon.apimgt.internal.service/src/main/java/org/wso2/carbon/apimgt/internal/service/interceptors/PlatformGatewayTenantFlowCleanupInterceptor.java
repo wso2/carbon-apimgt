@@ -44,6 +44,8 @@ public class PlatformGatewayTenantFlowCleanupInterceptor extends AbstractPhaseIn
             PrivilegedCarbonContext.endTenantFlow();
         } finally {
             message.remove(PlatformGatewayApiKeyAuthInterceptor.MESSAGE_PROPERTY_TENANT_FLOW_STARTED);
+            PlatformGatewayApiKeyAuthInterceptor.CONNECT_WITH_TOKEN_AUTH.remove();
+            PlatformGatewayApiKeyAuthInterceptor.CONNECT_WITH_TOKEN_MATCHED_ENTRY.remove();
         }
     }
 }

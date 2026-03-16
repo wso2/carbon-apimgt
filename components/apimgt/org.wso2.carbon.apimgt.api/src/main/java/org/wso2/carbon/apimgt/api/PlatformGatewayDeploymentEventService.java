@@ -59,11 +59,12 @@ public interface PlatformGatewayDeploymentEventService {
     void markDelivered(List<String> eventIds) throws APIManagementException;
 
     /**
-     * Get pending events for the gateway and mark them as delivered in one transaction.
-     * Call when gateway connects; send each payload over WebSocket then they are already marked.
+     * Claim pending events for the gateway (reserves them for this caller; does not set DELIVERED_AT).
+     * Call when gateway connects; send each payload over WebSocket, then call {@link #markDelivered(List)}
+     * with the IDs of successfully sent events. Delivery is acknowledged only after markDelivered.
      *
      * @param gatewayId gateway UUID
-     * @return list of records (id, payload) that were pending and are now marked delivered
+     * @return list of records (id, payload) that were claimed for sending
      */
     List<PlatformGatewayDeploymentEventRecord> getAndMarkDeliveredPendingEventsForGateway(String gatewayId)
             throws APIManagementException;

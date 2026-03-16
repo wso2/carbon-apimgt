@@ -1693,6 +1693,9 @@ public class API implements Serializable {
     }
 
     public void setHubPolicies(List<OperationPolicy> hubPolicies) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting hub policies for API, count: " + (hubPolicies != null ? hubPolicies.size() : 0));
+        }
         this.hubPolicies = hubPolicies;
     }
 

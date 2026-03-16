@@ -171,7 +171,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
 
     /**
      * Get list of gateway environments (non–platform-gateway only).
-     * Returns environments from config and DB excluding api-platform type.
+     * Returns environments from config and DB excluding Platform gateway type.
      * Platform gateways are loaded via GET /gateways; the UI should call both endpoints and combine as needed.
      *
      * @param messageContext message context

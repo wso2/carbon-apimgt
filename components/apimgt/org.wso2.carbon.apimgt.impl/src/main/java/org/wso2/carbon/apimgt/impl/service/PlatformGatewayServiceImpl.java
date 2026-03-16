@@ -27,14 +27,18 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayMode;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
 import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayDeploymentDispatcher;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig;
+import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 
+import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -138,7 +142,57 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         vhostObj.setHttpPort(VHost.DEFAULT_HTTP_PORT);
         vhostObj.setHttpsPort(httpsPort);
         env.setVhosts(Collections.singletonList(vhostObj));
+        setDefaultVisibilityPublic(env);
         return env;
+    }
+
+    /**
+     * Build an Environment from a single base URL (http or https). URL must already be validated (e.g. via ConnectGatewayConfig.setUrl).
+     * Sets host and the port from the URL; the other port uses default (80/443). WS/WSS hosts set to same host.
+     */
+    private static Environment toEnvironmentFromUrl(String gatewayId, String name, String displayName,
+                                                    String description, String url) {
+        URI u = URI.create(url);
+        String host = u.getHost();
+        int port = u.getPort() != -1 ? u.getPort() : ("https".equalsIgnoreCase(u.getScheme()) ? VHost.DEFAULT_HTTPS_PORT : VHost.DEFAULT_HTTP_PORT);
+        boolean isHttps = "https".equalsIgnoreCase(u.getScheme());
+        String httpContext = u.getPath() != null && !u.getPath().isEmpty() && !"/".equals(u.getPath()) ? u.getPath() : "";
+
+        VHost vhostObj = new VHost();
+        vhostObj.setHost(host);
+        vhostObj.setWsHost(host);
+        vhostObj.setWssHost(host);
+        vhostObj.setHttpContext(httpContext);
+        if (isHttps) {
+            vhostObj.setHttpsPort(port);
+            vhostObj.setHttpPort(VHost.DEFAULT_HTTP_PORT);
+        } else {
+            vhostObj.setHttpPort(port);
+            vhostObj.setHttpsPort(VHost.DEFAULT_HTTPS_PORT);
+        }
+        vhostObj.setWsPort(VHost.DEFAULT_WS_PORT);
+        vhostObj.setWssPort(VHost.DEFAULT_WSS_PORT);
+
+        Environment env = new Environment();
+        env.setUuid(gatewayId);
+        env.setName(name);
+        env.setDisplayName(StringUtils.isNotBlank(displayName) ? displayName : name);
+        env.setDescription(description);
+        env.setType(APIConstants.GATEWAY_ENV_TYPE_HYBRID);
+        env.setProvider(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
+        env.setGatewayType(APIConstants.WSO2_API_PLATFORM_GATEWAY);
+        env.setMode(GatewayMode.WRITE_ONLY.getMode());
+        env.setVhosts(Collections.singletonList(vhostObj));
+        setDefaultVisibilityPublic(env);
+        return env;
+    }
+
+    /** Default visibility to PUBLIC (user can change later from Admin UI: Public, By roles, etc.). */
+    private static void setDefaultVisibilityPublic(Environment env) {
+        env.setVisibility(APIConstants.PERMISSION_NOT_RESTRICTED);
+        GatewayVisibilityPermissionConfigurationDTO perms = new GatewayVisibilityPermissionConfigurationDTO();
+        perms.setPermissionType(APIConstants.PERMISSION_NOT_RESTRICTED);
+        env.setPermissions(perms);
     }
 
     @Override
@@ -280,7 +334,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
     }
 
     /**
-     * Map Environment (AM_GATEWAY_ENVIRONMENT with GATEWAY_TYPE=api-platform) to API model.
+     * Map Environment (AM_GATEWAY_ENVIRONMENT with GATEWAY_TYPE=Platform) to API model.
      * Reads isActive, properties, createdAt, updatedAt from additionalProperties.
      */
     private static PlatformGateway envToApiModel(Environment env) {
@@ -358,5 +412,100 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         api.setCreatedAt(g.createdAt != null ? new Date(g.createdAt.getTime()) : null);
         api.setUpdatedAt(g.updatedAt != null ? new Date(g.updatedAt.getTime()) : null);
         return api;
+    }
+
+    public static boolean ensurePlatformGatewayFromConnectToken(PlatformGatewayConnectConfig config,
+            String gatewayId, ConnectGatewayConfig entry) {
+        if (config == null || entry == null || StringUtils.isBlank(entry.getRegistrationToken())) {
+            return false;
+        }
+        String orgId = APIConstants.GatewayNotificationConfigurationConstants.WSO2_ALL_TENANTS;
+        String registrationToken = entry.getRegistrationToken();
+        String name = StringUtils.isNotBlank(entry.getName()) ? entry.getName() : gatewayId;
+        String displayNameOverride = entry.getDisplayName();
+        String descriptionOverride = entry.getDescription();
+        String urlOverride = entry.getUrl();
+        if (StringUtils.isBlank(gatewayId) || StringUtils.isBlank(registrationToken)) {
+            return false;
+        }
+        String registrationTokenForUse = registrationToken;
+        // If config name is set and already used by a different gateway, use gatewayId as name to avoid conflict
+        if (StringUtils.isNotBlank(entry.getName())) {
+            try {
+                Environment existingByName = new APIAdminImpl().getAllEnvironments(orgId).stream()
+                        .filter(e -> APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(e.getGatewayType())
+                                && entry.getName().equals(e.getName()))
+                        .findFirst()
+                        .orElse(null);
+                if (existingByName != null && !gatewayId.equals(existingByName.getUuid())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Connect with token: name '" + adoptName + "' already exists; using gateway_id as name");
+                    }
+                    name = gatewayId;
+                }
+            } catch (APIManagementException e) {
+                // ignore, proceed with requested name
+            }
+        }
+        if (!registrationTokenForUse.contains(PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Connect with token skipped: registration_token must be in format tokenId.plainToken");
+            }
+            return false;
+        }
+        int sep = registrationTokenForUse.indexOf(PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR);
+        String tokenId = registrationTokenForUse.substring(0, sep);
+        String plainToken = registrationTokenForUse.substring(sep + 1);
+        if (StringUtils.isBlank(tokenId) || StringUtils.isBlank(plainToken)) {
+            return false;
+        }
+        try {
+            PlatformGatewayDAO dao = PlatformGatewayDAO.getInstance();
+            if (dao.getActiveTokenById(tokenId) != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Connect with token: gateway already exists for gateway_id=" + gatewayId);
+                }
+                return false;
+            }
+            String tokenHash = PlatformGatewayTokenUtil.hashToken(plainToken);
+            APIAdminImpl apiAdmin = new APIAdminImpl();
+            Environment existing = null;
+            try {
+                existing = ApiMgtDAO.getInstance().getEnvironmentByUuid(gatewayId);
+            } catch (APIManagementException e) {
+                // ignore
+            }
+            String displayName = StringUtils.isNotBlank(displayNameOverride) ? displayNameOverride : name;
+            String description = StringUtils.isNotBlank(descriptionOverride) ? descriptionOverride : "";
+            String vhostForDao = StringUtils.isNotBlank(urlOverride) ? urlOverride : (StringUtils.isNotBlank(vhostOverride) ? vhostOverride : "default");
+            if (existing == null) {
+                Environment env = StringUtils.isNotBlank(urlOverride)
+                        ? toEnvironmentFromUrl(gatewayId, name, displayName, description, urlOverride)
+                        : toEnvironment(gatewayId, name, displayName, description, StringUtils.isNotBlank(vhostOverride) ? vhostOverride : "default");
+                apiAdmin.addEnvironment(orgId, env);
+            }
+            Timestamp now = Timestamp.from(Instant.now());
+            PlatformGatewayDAO.PlatformGateway gateway = new PlatformGatewayDAO.PlatformGateway(
+                    gatewayId, orgId, name, displayName, description, vhostForDao,
+                    null, false, now, now);
+            dao.createGatewayWithTokenAndGatewayInstance(gateway, tokenId, tokenHash,
+                    Collections.singletonList(name));
+            if (log.isInfoEnabled()) {
+                log.info("Platform gateway connected with token: gateway_id=" + gatewayId + ", name=" + name);
+            }
+            return true;
+        } catch (NoSuchAlgorithmException | APIManagementException e) {
+            if (log.isWarnEnabled()) {
+                log.warn("Connect with token failed for gateway_id=" + gatewayId + ": " + e.getMessage(), e);
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Startup: gateway_id and organization_id are not asked from user; gateway is always created on first REGISTER.
+     */
+    public static void ensurePlatformGatewayFromConfigOnStartup(PlatformGatewayConnectConfig config) {
+        // No startup creation; gateway is registered on first REGISTER with registration_token.
     }
 }

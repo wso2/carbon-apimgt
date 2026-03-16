@@ -5313,14 +5313,18 @@ public class SQLConstants {
         public static final String DELETE_OLD_GATEWAYS_SQL = "DELETE FROM AM_GW_INSTANCES WHERE LAST_UPDATED < ?";
         // Exclude platform gateways (they are not heartbeat-based; they stay until deleted; stored in AM_GATEWAY_ENVIRONMENT)
         public static final String DELETE_OLD_GATEWAYS_EXCLUDE_PLATFORM_SQL =
-                "DELETE FROM AM_GW_INSTANCES WHERE LAST_UPDATED < ? AND GATEWAY_UUID NOT IN (SELECT UUID FROM AM_GATEWAY_ENVIRONMENT WHERE GATEWAY_TYPE = 'api-platform')";
+                "DELETE FROM AM_GW_INSTANCES WHERE LAST_UPDATED < ? AND GATEWAY_UUID NOT IN (SELECT UUID FROM AM_GATEWAY_ENVIRONMENT WHERE GATEWAY_TYPE = '" + APIConstants.WSO2_API_PLATFORM_GATEWAY + "')";
         public static final String INSERT_GATEWAY_INSTANCE_SQL =
                 "INSERT INTO AM_GW_INSTANCES (GATEWAY_UUID, ORGANIZATION, LAST_UPDATED, GW_PROPERTIES) VALUES (?, ?, ?, ?) ";
         public static final String SELECT_GATEWAY_SQL =
                 "SELECT 1 FROM AM_GW_INSTANCES WHERE GATEWAY_UUID=? AND (ORGANIZATION=? OR ORGANIZATION='WSO2-ALL-TENANTS')";
         /** Resolve organization from gateway UUID (e.g. when gateway does not send tenantDomain). Prefer specific org over WSO2-ALL-TENANTS. */
-        public static final String SELECT_ORGANIZATION_BY_GATEWAY_UUID_SQL =
+        public static final String SELECT_ORGANIZATION_BY_GATEWAY_UUID =
+                "SELECT ORGANIZATION FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ? ORDER BY CASE WHEN ORGANIZATION = 'WSO2-ALL-TENANTS' THEN 1 ELSE 0 END, ORGANIZATION FETCH NEXT 1 ROWS ONLY";
+        public static final String SELECT_ORGANIZATION_BY_GATEWAY_UUID_MYSQL =
                 "SELECT ORGANIZATION FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ? ORDER BY CASE WHEN ORGANIZATION = 'WSO2-ALL-TENANTS' THEN 1 ELSE 0 END, ORGANIZATION LIMIT 1";
+        public static final String SELECT_ORGANIZATION_BY_GATEWAY_UUID_MSSQL =
+                "SELECT TOP 1 ORGANIZATION FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ? ORDER BY CASE WHEN ORGANIZATION = 'WSO2-ALL-TENANTS' THEN 1 ELSE 0 END, ORGANIZATION";
         public static final String SELECT_DEPLOYMENT_SQL =
                 "SELECT 1 FROM AM_GW_REVISION_DEPLOYMENT grd INNER JOIN AM_GW_INSTANCES gwi ON grd.GATEWAY_ID = gwi"
                         + ".GATEWAY_ID WHERE gwi.GATEWAY_UUID = ? AND grd.API_ID = ?";
@@ -5358,12 +5362,12 @@ public class SQLConstants {
         /** Single-row lookup by token hash (deterministic SHA-256(plainToken)). Joins to AM_GATEWAY_ENVIRONMENT (platform gateway = env). */
         public static final String SELECT_ACTIVE_TOKEN_BY_HASH_SQL =
                 "SELECT t.ID, t.GATEWAY_ID, t.TOKEN_HASH, e.UUID AS GATEWAY_UUID, e.ORGANIZATION AS ORGANIZATION_ID, e.NAME AS GATEWAY_NAME " +
-                        "FROM AM_GATEWAY_TOKEN t INNER JOIN AM_GATEWAY_ENVIRONMENT e ON t.GATEWAY_ID = e.UUID AND e.GATEWAY_TYPE = 'api-platform' " +
+                        "FROM AM_GATEWAY_TOKEN t INNER JOIN AM_GATEWAY_ENVIRONMENT e ON t.GATEWAY_ID = e.UUID AND e.GATEWAY_TYPE = '" + APIConstants.WSO2_API_PLATFORM_GATEWAY + "' " +
                         "WHERE t.TOKEN_HASH = ? AND t.STATUS = 'active'";
         /** Single-row lookup by token ID (for combined format tokenId.plainToken). */
         public static final String SELECT_ACTIVE_TOKEN_BY_ID_SQL =
                 "SELECT t.ID, t.GATEWAY_ID, t.TOKEN_HASH, e.UUID AS GATEWAY_UUID, e.ORGANIZATION AS ORGANIZATION_ID, e.NAME AS GATEWAY_NAME " +
-                        "FROM AM_GATEWAY_TOKEN t INNER JOIN AM_GATEWAY_ENVIRONMENT e ON t.GATEWAY_ID = e.UUID AND e.GATEWAY_TYPE = 'api-platform' " +
+                        "FROM AM_GATEWAY_TOKEN t INNER JOIN AM_GATEWAY_ENVIRONMENT e ON t.GATEWAY_ID = e.UUID AND e.GATEWAY_TYPE = '" + APIConstants.WSO2_API_PLATFORM_GATEWAY + "' " +
                         "WHERE t.ID = ? AND t.STATUS = 'active'";
         /** Revoke all active tokens for a gateway (used before regenerating a new token). */
         public static final String REVOKE_TOKENS_BY_GATEWAY_ID_SQL =
@@ -5373,12 +5377,12 @@ public class SQLConstants {
                 "DELETE FROM AM_GATEWAY_TOKEN WHERE GATEWAY_ID = ?";
         /** Check if a platform gateway (AM_GATEWAY_ENVIRONMENT) exists by name and organization. */
         public static final String CHECK_PLATFORM_GATEWAY_EXISTS_BY_NAME_AND_ORG_SQL =
-                "SELECT 1 FROM AM_GATEWAY_ENVIRONMENT WHERE NAME = ? AND ORGANIZATION = ? AND GATEWAY_TYPE = 'api-platform'";
+                "SELECT 1 FROM AM_GATEWAY_ENVIRONMENT WHERE NAME = ? AND ORGANIZATION = ? AND GATEWAY_TYPE = '" + APIConstants.WSO2_API_PLATFORM_GATEWAY + "'";
         /** UUIDs of platform gateways (env) that have a row in AM_GW_INSTANCES (for GET /environments). */
         public static final String SELECT_PLATFORM_GATEWAY_UUIDS_WITH_INSTANCE_SQL =
                 "SELECT DISTINCT e.UUID FROM AM_GATEWAY_ENVIRONMENT e " +
                         "INNER JOIN AM_GW_INSTANCES i ON i.GATEWAY_UUID = e.UUID AND i.ORGANIZATION = e.ORGANIZATION " +
-                        "WHERE e.ORGANIZATION = ? AND e.GATEWAY_TYPE = 'api-platform' " +
+                        "WHERE e.ORGANIZATION = ? AND e.GATEWAY_TYPE = '" + APIConstants.WSO2_API_PLATFORM_GATEWAY + "' " +
                         "AND EXISTS (SELECT 1 FROM AM_GW_INSTANCE_ENV_MAPPING m WHERE m.GATEWAY_ID = i.GATEWAY_ID)";
     }
 
@@ -5387,9 +5391,9 @@ public class SQLConstants {
         /** Delete revision deployment records for this gateway (AM_GW_REVISION_DEPLOYMENT joined via AM_GW_INSTANCES). */
         public static final String DELETE_AM_GW_REVISION_DEPLOYMENT_BY_GATEWAY_UUID_SQL =
                 "DELETE FROM AM_GW_REVISION_DEPLOYMENT WHERE GATEWAY_ID IN (SELECT GATEWAY_ID FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ? AND ORGANIZATION = ?)";
-        /** Delete revision mapping by environment name (platform gateway env name = gateway name). */
+        /** Delete revision mapping only for this gateway's environment (scope by UUID + ORGANIZATION to avoid cross-org deletes). */
         public static final String DELETE_AM_DEPLOYMENT_REVISION_MAPPING_BY_ENV_NAME_SQL =
-                "DELETE FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ?";
+                "DELETE FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME IN (SELECT NAME FROM AM_GATEWAY_ENVIRONMENT WHERE UUID = ? AND ORGANIZATION = ?)";
         /** Delete gateway instance env mapping for this gateway. */
         public static final String DELETE_AM_GW_INSTANCE_ENV_MAPPING_BY_GATEWAY_UUID_SQL =
                 "DELETE FROM AM_GW_INSTANCE_ENV_MAPPING WHERE GATEWAY_ID IN (SELECT GATEWAY_ID FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ? AND ORGANIZATION = ?)";
@@ -5419,14 +5423,26 @@ public class SQLConstants {
         /** Resolve REVISION_UUID to API_UUID for batch lookup. */
         public static final String SELECT_API_UUID_BY_REVISION_UUID =
                 "SELECT API_UUID FROM AM_REVISION WHERE REVISION_UUID = ?";
+        /** Check if a revision is deployed to the given gateway (NAME = gateway env name). For batch authz. */
+        public static final String SELECT_DEPLOYMENT_ON_GATEWAY_EXISTS =
+                "SELECT 1 FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ? AND REVISION_UUID = ?";
     }
 
     /** SQL for AM_GW_PLATFORM_DEPLOYMENT_EVENT (multi-CP WebSocket sync: persist then push on connect). */
     public static class PlatformGatewayDeploymentEventSQLConstants {
         public static final String INSERT_EVENT =
                 "INSERT INTO AM_GW_PLATFORM_DEPLOYMENT_EVENT (ID, GATEWAY_ID, API_ID, REVISION_UUID, EVENT_TYPE, PAYLOAD, CREATED_AT) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        /** Pending = not delivered and (not claimed or claim expired). Parameter 2 = lease expiry threshold (CLAIMED_AT < ?). */
         public static final String SELECT_PENDING_FOR_GATEWAY =
-                "SELECT ID, PAYLOAD FROM AM_GW_PLATFORM_DEPLOYMENT_EVENT WHERE GATEWAY_ID = ? AND DELIVERED_AT IS NULL ORDER BY CREATED_AT";
+                "SELECT ID, PAYLOAD FROM AM_GW_PLATFORM_DEPLOYMENT_EVENT WHERE GATEWAY_ID = ? AND DELIVERED_AT IS NULL "
+                        + "AND (CLAIMED_AT IS NULL OR CLAIMED_AT < ?) ORDER BY CREATED_AT";
+        /** Atomically claim rows: set CLAIMED_AT and CLAIMED_BY for unclaimed or expired rows. Params: claimId, now, gatewayId, leaseExpiryThreshold. */
+        public static final String UPDATE_CLAIM_PENDING_FOR_GATEWAY =
+                "UPDATE AM_GW_PLATFORM_DEPLOYMENT_EVENT SET CLAIMED_AT = ?, CLAIMED_BY = ? WHERE GATEWAY_ID = ? AND DELIVERED_AT IS NULL "
+                        + "AND (CLAIMED_AT IS NULL OR CLAIMED_AT < ?)";
+        /** Select rows claimed by this batch (after UPDATE_CLAIM). Params: claimId. */
+        public static final String SELECT_CLAIMED_BY_BATCH =
+                "SELECT ID, PAYLOAD FROM AM_GW_PLATFORM_DEPLOYMENT_EVENT WHERE CLAIMED_BY = ? ORDER BY CREATED_AT";
         public static final String UPDATE_MARK_DELIVERED =
                 "UPDATE AM_GW_PLATFORM_DEPLOYMENT_EVENT SET DELIVERED_AT = ? WHERE ID = ?";
         /** Delete delivered events older than the given timestamp to prevent unbounded table growth. */

@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import org.wso2.carbon.apimgt.internal.service.dto.PlatformGatewaySubscriptionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.ApisApiService;
 import org.wso2.carbon.apimgt.internal.service.impl.ApisApiServiceImpl;
@@ -67,6 +68,20 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
     public Response apisApiIdGet(@ApiParam(value = "API UUID.",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "application/zip for API Platform gateway format; application/json for APIList." , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
         return delegate.apisApiIdGet(apiId, accept, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/subscriptions")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "List subscriptions for an API (Platform Gateway format)", notes = "Returns subscriptions for the given API UUID in the format expected by the API Platform gateway (array of subscription objects). Used when the gateway is connected to on-prem APIM for bulk sync. Authenticated via api-key header. ", response = PlatformGatewaySubscriptionDTO.class, responseContainer = "List", tags={ "Subscription Validation",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "List of subscriptions for the API.", response = PlatformGatewaySubscriptionDTO.class, responseContainer = "List"),
+        @ApiResponse(code = 401, message = "Invalid or missing api-key.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "API not found.", response = ErrorDTO.class),
+        @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
+    public Response apisApiIdSubscriptionsGet(@ApiParam(value = "API UUID.",required=true) @PathParam("apiId") String apiId,  @NotNull  @ApiParam(value = "Platform gateway registration token." ,required=true)@HeaderParam("api-key") String apiKey) throws APIManagementException{
+        return delegate.apisApiIdSubscriptionsGet(apiId, apiKey, securityContext);
     }
 
     @GET

@@ -24,10 +24,14 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
 import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Utility class for gateway management operations.
@@ -46,7 +50,7 @@ public class GatewayManagementUtils {
      */
     public static String validateGatewayStatus(Timestamp lastUpdated) {
         if (lastUpdated == null) {
-            return APIConstants.GatewayNotification.STATUS_EXPIRED;
+            return APIConstants.GatewayNotificationConfigurationConstants.STATUS_EXPIRED;
         }
         try {
             GatewayNotificationConfiguration config = ServiceReferenceHolder.getInstance()
@@ -55,11 +59,11 @@ public class GatewayManagementUtils {
             long expireTimeThreshold = currentTime - (config.getGatewayCleanupConfiguration().getExpireTimeSeconds() * 1000L);
 
             return lastUpdated.getTime() >= expireTimeThreshold
-                    ? APIConstants.GatewayNotification.STATUS_ACTIVE
-                    : APIConstants.GatewayNotification.STATUS_EXPIRED;
+                    ? APIConstants.GatewayNotificationConfigurationConstants.STATUS_ACTIVE
+                    : APIConstants.GatewayNotificationConfigurationConstants.STATUS_EXPIRED;
         } catch (Exception e) {
             log.warn("Error validating gateway status, assuming expired", e);
-            return APIConstants.GatewayNotification.STATUS_EXPIRED;
+            return APIConstants.GatewayNotificationConfigurationConstants.STATUS_EXPIRED;
         }
     }
 
@@ -91,6 +95,62 @@ public class GatewayManagementUtils {
             String errorMessage = "Unexpected error during gateway cleanup: " + e.getMessage();
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, e);
+        }
+    }
+
+    /**
+     * Validates connect-with-token config on startup. Fails server startup with clear errors if mandatory
+     * fields are missing or invalid. Gateways are created on first REGISTER, not at startup.
+     */
+    public static void performPlatformGatewayConnectFromConfigIfConfigured() {
+        try {
+            PlatformGatewayConnectConfig config = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration().getPlatformGatewayConnectConfig();
+            if (config == null) {
+                return;
+            }
+            List<org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig> connectGateways = config.getConnectGateways();
+            if (connectGateways == null || connectGateways.isEmpty()) {
+                return;
+            }
+            String sep = PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR;
+            List<String> errors = new ArrayList<>();
+            int index = 0;
+            for (org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig entry : connectGateways) {
+                if (entry == null) {
+                    continue;
+                }
+                index++;
+                String token = entry.getRegistrationToken();
+                if (org.apache.commons.lang3.StringUtils.isBlank(token)) {
+                    continue;
+                }
+                String prefix = "[[apim.platform_gateway.connect]] entry " + index + ": ";
+                if (org.apache.commons.lang3.StringUtils.isBlank(entry.getUrl())) {
+                    errors.add(prefix + "mandatory 'url' is missing (base URL where the gateway will be accessible, e.g. https://host:8243)");
+                }
+                int idx = token.indexOf(sep);
+                if (idx <= 0 || idx >= token.length() - 1) {
+                    errors.add(prefix + "invalid registration_token format (expected tokenId" + sep + "plainToken)");
+                }
+            }
+            if (!errors.isEmpty()) {
+                for (String err : errors) {
+                    log.error(err);
+                }
+                throw new IllegalArgumentException(
+                        "Platform gateway connect config validation failed at server startup. " +
+                        "Fix the following and restart: " + String.join("; ", errors));
+            }
+            if (log.isInfoEnabled()) {
+                log.info("Connect-with-token configured for " + connectGateways.size() + " gateway(s); they can register on first REGISTER.");
+            }
+            PlatformGatewayServiceImpl.ensurePlatformGatewayFromConfigOnStartup(config);
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Platform gateway connect config failed at startup: " + e.getMessage(), e);
+            throw new IllegalStateException("Platform gateway connect config failed at startup: " + e.getMessage(), e);
         }
     }
 }

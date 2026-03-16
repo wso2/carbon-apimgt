@@ -16,6 +16,7 @@ import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import org.wso2.carbon.apimgt.internal.service.dto.PlatformGatewaySubscriptionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
 
 import java.util.List;
@@ -29,6 +30,7 @@ import javax.ws.rs.core.SecurityContext;
 public interface ApisApiService {
       public Response apisApiIdGatewayDeploymentsPost(String apiId, String apiKey, Map<String, Object> requestBody, String deploymentId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdGet(String apiId, String accept, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdSubscriptionsGet(String apiId, String apiKey, MessageContext messageContext) throws APIManagementException;
       public Response apisGet(String xWSO2Tenant, String apiId, String context, String version, String gatewayLabel, Boolean expand, String accept, MessageContext messageContext) throws APIManagementException;
       public Response deployedAPIRevision(List<DeployedAPIRevisionDTO> deployedAPIRevisionDTOList, MessageContext messageContext) throws APIManagementException;
       public Response unDeployedAPIRevision(UnDeployedAPIRevisionDTO unDeployedAPIRevisionDTO, MessageContext messageContext) throws APIManagementException;

@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -150,7 +151,8 @@ public class GatewayConnectEndpoint {
 
     /**
      * Push pending deploy/undeploy/delete events for this gateway (multi-CP sync).
-     * Events were already marked delivered by getAndMarkDeliveredPendingEventsForGateway; we send each payload.
+     * Uses getPendingEventsForGateway + send + markDelivered so events are only marked delivered
+     * after successful send; if the WebSocket drops mid-send, remaining events stay pending for next connect.
      */
     private static void sendPendingDeploymentEvents(Session session, String gatewayId) {
         PlatformGatewayDeploymentEventService eventService =
@@ -159,20 +161,28 @@ public class GatewayConnectEndpoint {
             return;
         }
         try {
-            List<PlatformGatewayDeploymentEventRecord> events =
-                    eventService.getAndMarkDeliveredPendingEventsForGateway(gatewayId);
+            List<PlatformGatewayDeploymentEventRecord> events = eventService.getPendingEventsForGateway(gatewayId);
+            List<String> idsToMark = new ArrayList<>(events.size());
             for (PlatformGatewayDeploymentEventRecord event : events) {
+                if (!session.isOpen()) {
+                    break;
+                }
                 try {
-                    if (session.isOpen()) {
-                        session.getBasicRemote().sendText(event.getPayload());
+                    session.getBasicRemote().sendText(event.getPayload());
+                    if (event.getId() != null) {
+                        idsToMark.add(event.getId());
                     }
                 } catch (IOException e) {
                     if (log.isWarnEnabled()) {
                         log.warn("Failed to send pending deployment event to gateway " + gatewayId + ": "
                                 + e.getMessage());
                     }
-                    // Continue with remaining events; already marked delivered so we don't retry
+                    // Do not mark this event delivered; it stays pending for next connect
+                    break;
                 }
+            }
+            if (!idsToMark.isEmpty()) {
+                eventService.markDelivered(idsToMark);
             }
         } catch (APIManagementException e) {
             if (log.isWarnEnabled()) {

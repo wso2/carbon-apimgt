@@ -46,6 +46,7 @@ public final class DeploymentTarGzBuilder {
     public static byte[] buildTar(List<DeploymentEntry> entries) throws IOException {
         ByteArrayOutputStream tarOut = new ByteArrayOutputStream();
         byte[] buffer = new byte[TAR_BLOCK_SIZE];
+        final byte[] zeroBlock = new byte[TAR_BLOCK_SIZE];
 
         for (DeploymentEntry e : entries) {
             if (e.getContent() == null) {
@@ -55,8 +56,9 @@ public final class DeploymentTarGzBuilder {
             byte[] content = e.getContent().getBytes(StandardCharsets.UTF_8);
             writeTarEntry(tarOut, buffer, fileName, content);
         }
-        tarOut.write(buffer, 0, TAR_BLOCK_SIZE);
-        tarOut.write(buffer, 0, TAR_BLOCK_SIZE);
+        // TAR end-of-archive: two 512-byte zero blocks (buffer may still hold last entry header)
+        tarOut.write(zeroBlock, 0, TAR_BLOCK_SIZE);
+        tarOut.write(zeroBlock, 0, TAR_BLOCK_SIZE);
         return tarOut.toByteArray();
     }
 

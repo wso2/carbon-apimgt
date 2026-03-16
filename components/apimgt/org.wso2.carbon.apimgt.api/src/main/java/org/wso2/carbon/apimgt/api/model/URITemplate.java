@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONValue;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
@@ -27,6 +29,7 @@ import java.util.*;
 
 public class URITemplate implements Serializable{
 
+    private static final Log log = LogFactory.getLog(URITemplate.class);
     private static final long serialVersionUID = 1L;
 
     private String uriTemplate;
@@ -506,6 +509,9 @@ public class URITemplate implements Serializable{
 
     public void setHubPolicies(List<OperationPolicy> hubPolicies) {
         this.hubPolicies = hubPolicies != null ? hubPolicies : new ArrayList<>();
+        if (log.isDebugEnabled()) {
+            log.debug("Hub policies updated for URI template. Policy count: " + this.hubPolicies.size());
+        }
     }
 
     public String getDescription() {

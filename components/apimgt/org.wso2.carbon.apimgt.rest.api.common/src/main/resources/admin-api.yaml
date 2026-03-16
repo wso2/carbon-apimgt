@@ -2302,6 +2302,7 @@ paths:
   ######################################################
   /gateways:
     get:
+      operationId: gatewaysGet
       tags:
         - Platform Gateways
       summary: Get all platform gateways
@@ -2326,6 +2327,7 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v4/gateways"'
     post:
+      operationId: gatewaysPost
       tags:
         - Platform Gateways
       summary: Register a platform gateway
@@ -2364,6 +2366,7 @@ paths:
 
   /gateways/{gatewayId}/regenerate-token:
     post:
+      operationId: gatewaysGatewayIdRegenerateTokenPost
       tags:
         - Platform Gateways
       summary: Regenerate registration token for a platform gateway
@@ -2401,6 +2404,7 @@ paths:
 
   /gateways/{gatewayId}:
     put:
+      operationId: gatewaysGatewayIdPut
       tags:
         - Platform Gateways
       summary: Update a platform gateway
@@ -2436,6 +2440,7 @@ paths:
         - OAuth2Security:
             - apim:admin
     delete:
+      operationId: gatewaysGatewayIdDelete
       tags:
         - Platform Gateways
       summary: Delete a platform gateway
@@ -5844,7 +5849,7 @@ components:
         status:
           type: string
           readOnly: true
-          description: For platform gateway environments (gatewayType api-platform), connection status to the control plane (Active or Inactive).
+          description: For platform gateway environments (gatewayType Platform), connection status to the control plane (Active or Inactive).
           example: Active
           default: Active
           enum:
@@ -5934,11 +5939,7 @@ components:
           maxLength: 1023
           description: Optional description
         vhost:
-          type: string
-          maxLength: 255
-          minLength: 1
-          description: Virtual host (domain name) for the gateway
-          example: mg.wso2.com
+          $ref: '#/components/schemas/VHost'
         properties:
           type: object
           additionalProperties: true
@@ -5985,10 +5986,7 @@ components:
           maxLength: 64
           description: Gateway identifier (immutable; must match existing). Required for PUT full representation.
         vhost:
-          type: string
-          maxLength: 255
-          minLength: 1
-          description: Virtual host (immutable; must match existing). Required for PUT full representation.
+          $ref: '#/components/schemas/VHost'
         displayName:
           type: string
           minLength: 1
@@ -6068,11 +6066,6 @@ components:
           type: string
           format: date-time
           readOnly: true
-      readOnly:
-        - id
-        - isActive
-        - createdAt
-        - updatedAt
     GatewayResponseWithToken:
       title: Gateway Response With Token
       description: Platform gateway response including the one-time registration token (POST create or regenerate-token).
@@ -6085,11 +6078,6 @@ components:
               description: |
                 Registration token (returned only once on create or regenerate). Use as api-key when connecting
                 the gateway to the control plane WebSocket. Store e.g. as GATEWAY_REGISTRATION_TOKEN.
-      readOnly:
-        - id
-        - isActive
-        - createdAt
-        - updatedAt
     GatewayList:
       title: Gateway List
       type: object

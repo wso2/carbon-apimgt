@@ -626,6 +626,30 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiKeyMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         sendAPIKeyInfoEvent(apiKeyHash,null, api, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(),
                 validityPeriod), keyType, keyName, props);
+
+        // Notify connected platform gateways about new API-bound API key (opaque) creation
+        PlatformGatewayAPIKeyEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+        if (eventService != null) {
+            try {
+                String keyNameForGateway = keyName.toLowerCase(java.util.Locale.ROOT);
+                eventService.broadcastAPIKeyCreated(
+                        api.getUUID(),
+                        apiKey,
+                        keyNameForGateway,
+                        "*",
+                        null,
+                        null,
+                        null,
+                        null,
+                        keyNameForGateway,
+                        userName);
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed to broadcast apikey.created to platform gateways: " + e.getMessage());
+                }
+            }
+        }
         return apiKey;
     }
 
@@ -4174,6 +4198,24 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
         apiKeyMgtDAO.revokeAPIKeyViaUser(keyUUID, username);
         revocationRequestPublisher.publishRevocationEvents(apiKeyInfo.getApiKeyHash(), properties);
+
+        // Notify connected platform gateways about opaque API key revocation when API UUID and key name are known
+        if (StringUtils.isNotBlank(apiKeyInfo.getApiUUId()) && StringUtils.isNotBlank(apiKeyInfo.getKeyName())) {
+            PlatformGatewayAPIKeyEventService eventService =
+                    ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+            if (eventService != null) {
+                try {
+                    eventService.broadcastAPIKeyRevoked(
+                            apiKeyInfo.getApiUUId(),
+                            apiKeyInfo.getKeyName().toLowerCase(java.util.Locale.ROOT),
+                            apiKeyInfo.getAuthUser());
+                } catch (Exception e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Failed to broadcast apikey.revoked to platform gateways: " + e.getMessage());
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -4325,6 +4367,30 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         regeneratedApiKeyInfo.setValidityPeriod(apiKeyInfo.getValidityPeriod());
         sendAPIKeyInfoEvent(apiKeyHash, application, api, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(),
                         apiKeyInfo.getValidityPeriod()), apiKeyInfo.getKeyType(), apiKeyInfo.getKeyName(), props);
+
+        // Notify connected platform gateways about regenerated API-bound API key
+        PlatformGatewayAPIKeyEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+        if (eventService != null) {
+            try {
+                String keyNameForGateway = apiKeyInfo.getKeyName().toLowerCase(java.util.Locale.ROOT);
+                eventService.broadcastAPIKeyCreated(
+                        apiUUId,
+                        apiKey,
+                        keyNameForGateway,
+                        "*",
+                        null,
+                        null,
+                        null,
+                        null,
+                        keyNameForGateway,
+                        username);
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed to broadcast regenerated apikey.created to platform gateways: " + e.getMessage());
+                }
+            }
+        }
         return regeneratedApiKeyInfo;
     }
 

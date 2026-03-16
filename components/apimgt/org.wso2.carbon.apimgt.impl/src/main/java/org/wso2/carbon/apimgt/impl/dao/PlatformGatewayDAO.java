@@ -34,7 +34,7 @@ import java.util.List;
 
 /**
  * DAO for platform gateway tokens (AM_GATEWAY_TOKEN) and instance registration (AM_GW_INSTANCES).
- * Platform gateway metadata is stored in AM_GATEWAY_ENVIRONMENT (GATEWAY_TYPE='api-platform').
+ * Platform gateway metadata is stored in AM_GATEWAY_ENVIRONMENT (GATEWAY_TYPE='Platform').
  */
 public class PlatformGatewayDAO {
 
@@ -102,6 +102,9 @@ public class PlatformGatewayDAO {
      */
     public void createToken(Connection connection, String tokenId, String gatewayId, String tokenHash,
                             Timestamp createdAt) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Creating platform gateway token for gateway: " + gatewayId);
+        }
         try (PreparedStatement ps = connection.prepareStatement(
                 SQLConstants.PlatformGatewaySQLConstants.INSERT_TOKEN_SQL)) {
             ps.setString(1, tokenId);
@@ -128,6 +131,9 @@ public class PlatformGatewayDAO {
                 GatewayManagementDAO.getInstance().insertGatewayInstance(connection, gateway.id, gateway.organizationId,
                         envLabels, gateway.createdAt, new byte[0]);
                 connection.commit();
+                if (log.isInfoEnabled()) {
+                    log.info("Successfully created platform gateway with token for gateway: " + gateway.name);
+                }
             } catch (APIManagementException e) {
                 connection.rollback();
                 throw e;
@@ -141,7 +147,7 @@ public class PlatformGatewayDAO {
     }
 
     /**
-     * UUIDs of platform gateways (AM_GATEWAY_ENVIRONMENT with GATEWAY_TYPE='api-platform') that have a row in AM_GW_INSTANCES.
+     * UUIDs of platform gateways (AM_GATEWAY_ENVIRONMENT with GATEWAY_TYPE='Platform') that have a row in AM_GW_INSTANCES.
      */
     public List<String> getPlatformGatewayUuidsWithInstance(String organizationId) throws APIManagementException {
         List<String> uuids = new ArrayList<>();
@@ -277,10 +283,11 @@ public class PlatformGatewayDAO {
                     ps.setString(2, organizationId);
                     ps.executeUpdate();
                 }
-                // 2. AM_DEPLOYMENT_REVISION_MAPPING by env name (= gateway name)
+                // 2. AM_DEPLOYMENT_REVISION_MAPPING for this gateway's env only (scoped by gateway UUID + org to avoid cross-org deletes)
                 try (PreparedStatement ps = connection.prepareStatement(
                         SQLConstants.PlatformGatewayDeletionSQLConstants.DELETE_AM_DEPLOYMENT_REVISION_MAPPING_BY_ENV_NAME_SQL)) {
-                    ps.setString(1, gatewayName);
+                    ps.setString(1, gatewayId);
+                    ps.setString(2, organizationId);
                     ps.executeUpdate();
                 }
                 // 3. AM_GW_INSTANCE_ENV_MAPPING
