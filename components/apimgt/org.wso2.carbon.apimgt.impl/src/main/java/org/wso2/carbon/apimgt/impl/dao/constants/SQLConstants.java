@@ -3976,8 +3976,21 @@ public class SQLConstants {
                     "JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
                     "WHERE KM.API_UUID = ? AND K.STATUS = 'ACTIVE'";
     public static final String GET_API_KEY_DETAILS_FROM_KEY_UUID_SQL =
-            "SELECT NAME, API_KEY_HASH, KEY_TYPE, API_KEY_PROPERTIES, AUTHZ_USER, VALIDITY_PERIOD, LAST_USED FROM " +
-                    "AM_API_KEY WHERE API_KEY_UUID = ? AND STATUS = 'ACTIVE'";
+            "SELECT K.API_KEY_UUID, K.NAME, K.API_KEY_HASH, K.KEY_TYPE, K.API_KEY_PROPERTIES, K.AUTHZ_USER, K.VALIDITY_PERIOD, K.LAST_USED " +
+                    "FROM AM_API_KEY K WHERE K.API_KEY_UUID = ? AND K.STATUS = 'ACTIVE' " +
+                    "AND ( EXISTS ( " +
+                    "        SELECT 1 FROM AM_API_KEY_APPLICATION_MAPPING AKAM " +
+                    "        JOIN AM_APPLICATION A " +
+                    "        ON AKAM.APPLICATION_UUID = A.UUID " +
+                    "        WHERE AKAM.API_KEY_UUID = K.API_KEY_UUID " +
+                    "        AND A.ORGANIZATION = ? " +
+                    "    ) OR EXISTS ( " +
+                    "        SELECT 1 FROM AM_API_KEY_API_MAPPING AKAP " +
+                    "        JOIN AM_API API " +
+                    "        ON AKAP.API_UUID = API.API_UUID " +
+                    "        WHERE AKAP.API_KEY_UUID = K.API_KEY_UUID " +
+                    "        AND API.ORGANIZATION = ? " +
+                    "    ) )";
     public static final String GET_API_API_KEY_DETAILS_FROM_KEY_UUID_SQL =
             "SELECT AM.APPLICATION_UUID, K.NAME, K.API_KEY_HASH, K.KEY_TYPE, K.API_KEY_PROPERTIES, K.AUTHZ_USER, K.VALIDITY_PERIOD, K.LAST_USED " +
                     "FROM AM_API_KEY K " +

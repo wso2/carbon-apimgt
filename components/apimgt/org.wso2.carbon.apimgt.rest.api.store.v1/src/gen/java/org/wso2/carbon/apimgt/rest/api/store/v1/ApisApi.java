@@ -454,7 +454,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/api-keys/dissociate")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Remove an Association for the API Key", notes = "Remove an association a self contained API Key for the API specified by the key name ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Remove an Association for the API Key", notes = "Remove an association a self contained API Key for the API specified by the key UUID ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
             @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
@@ -627,7 +627,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/api-keys/regenerate")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Regenerate API Key", notes = "Regenerate a self contained API Key for the API specified by the key name ", response = APIKeyDTO.class, authorizations = {
+    @ApiOperation(value = "Regenerate API Key", notes = "Regenerate a self contained API Key for the API specified by the key UUID ", response = APIKeyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
             @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),
@@ -647,7 +647,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/api-keys/revoke")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Revoke API Key", notes = "Revoke a self contained API Key for the API specified by the key name ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Revoke API Key", notes = "Revoke a self contained API Key for the API specified by the key UUID ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
             @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications"),

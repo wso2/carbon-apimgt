@@ -106,6 +106,17 @@ public class PublisherCommonUtilsTest {
     }
     
     @Test
+    public void testWebhookApisAreClassifiedAsAsyncAcrossHelpers() {
+
+        APIDTO webhookApiDto = new APIDTO();
+        webhookApiDto.setType(APIDTO.TypeEnum.WEBHOOK);
+
+        Assert.assertTrue(PublisherCommonUtils.isStreamingAPI(webhookApiDto));
+        Assert.assertTrue(PublisherCommonUtils.isAsyncAPIType(APIDTO.TypeEnum.WEBHOOK));
+        Assert.assertTrue(PublisherCommonUtils.isAsyncAPIType(APIConstants.APITransportType.WEBHOOK.toString()));
+    }
+
+    @Test
     public void testChangeApiOrApiProductLifecycleToInvalidState() throws Exception {
 
         APIProvider apiProvider = Mockito.mock(APIProvider.class);

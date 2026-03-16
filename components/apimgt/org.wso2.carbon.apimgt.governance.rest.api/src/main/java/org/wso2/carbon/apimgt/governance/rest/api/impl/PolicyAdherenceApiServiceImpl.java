@@ -123,6 +123,9 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
                     infoDTO.setName(artifactInfo.getName());
                     infoDTO.setVersion(artifactInfo.getVersion());
                     infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
+                    infoDTO.setExtendedType(ArtifactInfoDTO.ExtendedTypeEnum.valueOf(String.valueOf(
+                            APIMGovernanceUtil.getExtendedArtifactTypeForArtifact(artifactInfo.getArtifactRefId(),
+                                    artifactType))));
 
                     artifactComplianceForPolicyDTO.setInfo(infoDTO);
 

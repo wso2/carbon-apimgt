@@ -98,6 +98,7 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
             log.debug("Unsubscribe from JMS Events...");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
         }
+        APIKeyUsageListener.shutdown();
     }
 
     @Override
@@ -107,5 +108,6 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
             log.debug("Unsubscribe from JMS Events...");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
         }
+        APIKeyUsageListener.shutdown();
     }
 }

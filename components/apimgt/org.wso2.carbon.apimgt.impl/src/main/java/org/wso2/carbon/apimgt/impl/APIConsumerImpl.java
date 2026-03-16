@@ -127,15 +127,7 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.*;
-import org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionApprovalWorkflowExecutor;
-import org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationSimpleWorkflowExecutor;
-import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils;
+import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
@@ -1289,6 +1281,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setApplicationId(application.getId());
                 workflowDTO.setSubscriber(userId);
 
+                String workflowDescription = String.format(
+                        "Approve API %s - %s subscription creation request from subscriber - %s for the application - %s",
+                        workflowDTO.getApiName(),
+                        workflowDTO.getApiVersion(),
+                        workflowDTO.getSubscriber(),
+                        workflowDTO.getApplicationName()
+                );
+                workflowDTO.setWorkflowDescription(workflowDescription);
+
                 Tier tier = null;
                 Set<Tier> policies = Collections.emptySet();
                 if (!isApiProduct) {
@@ -1482,6 +1483,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setApplicationId(application.getId());
                 workflowDTO.setSubscriber(userId);
 
+                String workflowDescription = String.format(
+                        "Approve API %s - %s subscription update request from subscriber - %s for the application - %s",
+                        workflowDTO.getApiName(),
+                        workflowDTO.getApiVersion(),
+                        workflowDTO.getSubscriber(),
+                        workflowDTO.getApplicationName()
+                );
+                workflowDTO.setWorkflowDescription(workflowDescription);
+
                 Tier tier = null;
                 Set<Tier> policies = Collections.emptySet();
                 if (!isApiProduct) {
@@ -1652,6 +1662,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             } else {
                 workflowDTO = (SubscriptionWorkflowDTO) apiMgtDAO.retrieveWorkflow(workflowExtRef);
 
+                // clear inherited properties from the subscription creation workflow to avoid using outdated values if the subscription or application was updated.
+                if (workflowDTO.getProperties() != null) {
+                    workflowDTO.getProperties().clear();
+                }
+
                 // set tiername to the workflowDTO only when workflows are enabled
                 SubscribedAPI subscription = apiMgtDAO
                         .getSubscriptionById(Integer.parseInt(workflowDTO.getWorkflowReference()));
@@ -1746,6 +1761,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
             workflowDTO.setCreatedTime(System.currentTimeMillis());
             workflowDTO.setExternalWorkflowReference(removeSubscriptionWFExecutor.generateUUID());
+
+            String workflowDescription = String.format(
+                    "Approve API %s - %s subscription delete request from subscriber - %s for the application - %s",
+                    workflowDTO.getApiName(),
+                    workflowDTO.getApiVersion(),
+                    workflowDTO.getSubscriber(),
+                    workflowDTO.getApplicationName()
+            );
+            workflowDTO.setWorkflowDescription(workflowDescription);
 
             Tier tier = null;
             if (api != null) {
@@ -2092,6 +2116,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appWFDto.setTenantId(tenantId);
             appWFDto.setUserName(userId);
             appWFDto.setCreatedTime(System.currentTimeMillis());
+
+            String workflowDescription = String.format(
+                    "Approve application %s creation request from application creator - %s with throttling tier - %s",
+                    appWFDto.getApplication().getName(),
+                    appWFDto.getUserName(),
+                    appWFDto.getApplication().getTier()
+            );
+            appWFDto.setWorkflowDescription(workflowDescription);
+
             appCreationWFExecutor.execute(appWFDto);
         } catch (WorkflowException e) {
             //If the workflow execution fails, roll back transaction by removing the application entry.
@@ -2317,6 +2350,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appWFDto.setTenantId(tenantId);
             appWFDto.setUserName(existingApp.getOwner());
             appWFDto.setCreatedTime(System.currentTimeMillis());
+
+            String workflowDescription = String.format(
+                    "Approve update request for application '%s' submitted by user: %s",
+                    appWFDto.getExistingApplication().getName(),
+                    appWFDto.getUserName()
+            );
+            appWFDto.setWorkflowDescription(workflowDescription);
+
             workflowResponse = updateApplicationWFExecutor.execute(appWFDto);
 
         } catch (WorkflowException e) {
@@ -2484,7 +2525,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setWorkflowReference(String.valueOf(applicationId));
             workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
             workflowDTO.setCallbackUrl(removeApplicationWFExecutor.getCallbackURL());
-            workflowDTO.setUserName(this.username);
+            workflowDTO.setUserName(application.getSubscriber().getName());
             workflowDTO.setTenantDomain(tenantDomain);
             workflowDTO.setTenantId(tenantId);
 
@@ -2493,6 +2534,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setCreatedTime(System.currentTimeMillis());
             workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
             workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
+
+            String workflowDescription = String.format(
+                    "Approve application %s delete request from application creator - %s with throttling tier - %s",
+                    workflowDTO.getApplication().getName(),
+                    workflowDTO.getUserName(),
+                    workflowDTO.getApplication().getTier()
+            );
+            workflowDTO.setWorkflowDescription(workflowDescription);
 
             if (!(removeApplicationWFExecutor instanceof ApplicationDeletionApprovalWorkflowExecutor)) {
                 cleanupPendingTasksForApplicationDeletion(applicationId);
@@ -2922,6 +2971,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             appRegWFDto.setAppInfoDTO(request);
             appRegWFDto.setDomainList(allowedDomains);
 
+            String workflowDescription = String.format(
+                    "Approve request to create %s keys for %s from application creator - %s with throttling tier - %s",
+                    appRegWFDto.getKeyType(),
+                    appRegWFDto.getApplication().getName(),
+                    appRegWFDto.getUserName(),
+                    appRegWFDto.getApplication().getTier()
+            );
+            appRegWFDto.setWorkflowDescription(workflowDescription);
             appRegWFDto.setKeyDetails(appKeysDto);
             appRegistrationWorkflow.execute(appRegWFDto);
 
@@ -3996,9 +4053,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
-        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUID);
-        if (apiKeyInfo == null) {
-            throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUID);
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUID, tenantDomain);
+        if (apiKeyInfo == null || apiKeyInfo.getKeyUUID() == null) {
+            throw new APIMgtResourceNotFoundException("Active API key not found for UUID: " + keyUUID);
         }
         apiKeyMgtDAO.revokeAPIKey(keyUUID, tenantDomain);
         revocationRequestPublisher.publishRevocationEvents(apiKeyInfo.getApiKeyHash(), properties);
@@ -4019,7 +4076,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                        String username) throws APIManagementException {
 
         // Load existing metadata before revocation (revocation may remove/alter it)
-        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUId);
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUId, tenantDomain);
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId);
         }
@@ -5788,6 +5845,5 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public API getAPIWithoutPermissionCheck(String apiId, String organization)
             throws APIManagementException {
         return (getAPIorAPIProductByUUIDWithoutPermissionCheck(apiId, organization)).getApi();
-
     }
 }

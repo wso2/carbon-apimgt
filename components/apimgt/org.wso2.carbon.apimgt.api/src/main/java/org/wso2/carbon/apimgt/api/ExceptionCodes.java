@@ -448,6 +448,14 @@ public enum ExceptionCodes implements ErrorHandler {
     DEDICATED_GATEWAY_DETAILS_NOT_FOUND(900999, "Dedicated gateway details not found for the API", 404, "Dedicated " +
             "gateway details not found for the API"),
 
+    //Thumbnail image processing related codes
+    THUMBNAIL_IMAGE_EMPTY(901003, "Thumbnail image is empty", 400,
+            "The provided thumbnail image is empty"),
+    THUMBNAIL_IMAGE_EXCEEDS_MAX_SIZE(901001, "Thumbnail image exceeds maximum allowed size", 400,
+            "Thumbnail image exceeds maximum allowed size of 1MB"),
+    THUMBNAIL_IMAGE_EXCEEDS_MAX_DIMENSIONS(901002, "Thumbnail dimensions exceed maximum allowed limits", 400,
+            "Thumbnail dimensions exceed maximum allowed limits"),
+
     //Comments related Codes
     NEED_COMMENT_MODERATOR_PERMISSION(901100, "Comment moderator permission needed", 403,
             "This user is not a comment moderator"),
