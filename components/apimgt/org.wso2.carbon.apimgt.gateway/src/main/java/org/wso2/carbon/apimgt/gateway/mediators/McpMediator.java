@@ -22,6 +22,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.Gson;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
@@ -110,8 +112,10 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             if (StringUtils.equals(subType, APIConstants.API_SUBTYPE_SERVER_PROXY) &&
                     !StringUtils.equals(APIConstants.MCP.METHOD_TOOL_LIST, mcpMethod)) {
                 // For server proxy APIs, we do not handle MCP requests
-                log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
-                        matchedAPI.getVersion());
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
+                            matchedAPI.getVersion());
+                }
                 return true;
             }
             if (path.startsWith(APIMgtGatewayConstants.MCP_RESOURCE) && httpMethod.equals(APIConstants.HTTP_POST)) {
@@ -128,9 +132,12 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             }
         } else if (OUT_FLOW.equals(mcpDirection)) {
             if (StringUtils.equals(subType, APIConstants.API_SUBTYPE_SERVER_PROXY)) {
-                // For server proxy APIs, we do not handle MCP requests
-                log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
-                        matchedAPI.getVersion());
+                // For server proxy APIs, we only handle error details extraction
+                handleServerProxyBackendResponse(messageContext);
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
+                            matchedAPI.getVersion());
+                }
                 return true;
             }
 
@@ -367,6 +374,74 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             }
         }
         return allScopes;
+    }
+
+    /**
+     * Extracts and sets MCP error details from the backend response for server proxy APIs.
+     *
+     * @param messageContext The Synapse message context
+     */
+    private void handleServerProxyBackendResponse(MessageContext messageContext) {
+        try {
+            org.apache.axis2.context.MessageContext axis2MessageContext =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            RelayUtils.buildMessage(axis2MessageContext);
+            String responseBody;
+            // Check for JSON payload
+            if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
+                responseBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
+            } else {
+                // Extract text from SOAP envelope's first element
+                SOAPEnvelope envelope = axis2MessageContext.getEnvelope();
+                if (envelope != null && envelope.getBody() != null) {
+                    envelope.buildWithAttachments();
+                    OMElement firstElement = envelope.getBody().getFirstElement();
+                    responseBody = firstElement != null ? firstElement.getText() : null;
+                } else {
+                    responseBody = null;
+                }
+            }
+            if (responseBody != null && !responseBody.trim().isEmpty()) {
+                // Extract JSON from SSE format if present
+                String jsonResponse = extractDataFromSSE(responseBody);
+                setMCPErrorDetails(messageContext, jsonResponse);
+            }
+        } catch (IOException | XMLStreamException e) {
+            log.warn("Failed to build message from axis2 message context", e);
+        } catch (Exception e) {
+            log.warn("Failed to extract error details from server proxy backend response", e);
+        }
+    }
+
+    /**
+     * Extracts JSON data from Server-Sent Events (SSE) format.
+     * Prioritizes data: lines containing error information.
+     *
+     * @param responseBody The response body (potentially SSE formatted)
+     * @return Extracted JSON string or original response if not SSE
+     */
+    private String extractDataFromSSE(String responseBody) {
+        if (StringUtils.isBlank(responseBody) || !responseBody.contains("data:")) {
+            return responseBody;
+        }
+
+        String firstPayload = null;
+        for (String line : responseBody.split("\\R")) {
+            if (line.startsWith("data:")) {
+                String payload = line.substring(5).trim();
+                if (!payload.isEmpty()) {
+                    // If this line contains "error", return immediately
+                    if (payload.contains(APIMgtGatewayConstants.ERROR)) {
+                        return payload;
+                    }
+                    // Otherwise, use the first non-empty payload as fallback
+                    if (firstPayload == null) {
+                        firstPayload = payload;
+                    }
+                }
+            }
+        }
+        return firstPayload != null ? firstPayload : responseBody;
     }
 
     /**
