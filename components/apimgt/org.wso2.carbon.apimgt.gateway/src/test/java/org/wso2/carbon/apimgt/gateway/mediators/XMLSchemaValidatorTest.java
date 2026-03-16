@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 /**
  * This is the test case for {@link XMLSchemaValidator}
@@ -83,7 +82,7 @@ public class XMLSchemaValidatorTest {
         log.info("Running the test case to Configure the schema properties.");
         XMLConfig xmlConfig = new XMLConfig();
         xmlConfig.setDtdEnabled(false);
-        xmlConfig.setExternalEntitiesEnabled(true);
+        xmlConfig.setExternalEntitiesEnabled(false);
         xmlConfig.setMaxAttributeLength(5);
         xmlConfig.setMaxAttributeCount(5);
         xmlConfig.setMaxChildrenPerElement(5);
@@ -95,7 +94,7 @@ public class XMLSchemaValidatorTest {
         xmlConfig.setEntityExpansionLimit(5);
 
         XMLConfig testConfig;
-        Mockito.when(apiManagerConfiguration.isEnableSecureXMLProcessing()).thenReturn(false);
+        Mockito.when(apiManagerConfiguration.isEnableSecureXMLProcessing()).thenReturn(true);
         Mockito.when(messageContext.getProperty(ThreatProtectorConstants.DTD_ENABLED)).thenReturn("false");
         Mockito.when(messageContext.getProperty(ThreatProtectorConstants.EXTERNAL_ENTITIES_ENABLED)).thenReturn("true");
         Mockito.when(messageContext.getProperty(ThreatProtectorConstants.MAX_ELEMENT_COUNT)).thenReturn("5");
@@ -140,14 +139,12 @@ public class XMLSchemaValidatorTest {
         Mockito.when((messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 
         XMLSchemaValidator xmlSchemaValidator = new XMLSchemaValidator();
-        // Simulate secure XML processing being enabled as this happens only within mediate
-        xmlSchemaValidator.isSecureXMLProcessingEnabled = true;
         XMLConfig testConfig = xmlSchemaValidator.configureSchemaProperties(messageContext);
 
-        // Verify that DTD and external entities are disabled despite message context enabling them
-        assertFalse("DTD should be disabled when secure XML processing is enabled", testConfig.isDtdEnabled());
-        assertFalse("External entities should be disabled when secure XML processing is enabled",
-                testConfig.isExternalEntitiesEnabled());
+    // Verify that DTD and external entities are forced disabled
+    assertEquals("DTD must be disabled when secure XML processing is enabled", false, testConfig.isDtdEnabled());
+    assertEquals("External entities must be disabled when secure XML processing is enabled",
+        false, testConfig.isExternalEntitiesEnabled());
         // Verify other properties are set correctly
         assertEquals(5, testConfig.getMaxElementCount());
         assertEquals(5, testConfig.getMaxAttributeLength());
