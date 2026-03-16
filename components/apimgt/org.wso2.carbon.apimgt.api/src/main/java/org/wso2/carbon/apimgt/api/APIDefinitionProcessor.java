@@ -78,7 +78,6 @@ public interface APIDefinitionProcessor {
 
     /**
      * Returns the filename for the definition in the export zip.
-     *
      * @return The filename (e.g., "swagger.yaml", "asyncapi.yaml").
      */
     String getDefinitionFileName();
