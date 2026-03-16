@@ -22,7 +22,7 @@ public class APIKey {
     private String mappingId;
     private String consumerKey;
     private String consumerSecret;
-    private List<String> additionalConsumerSecrets;
+    private List<ConsumerSecretInfo> consumerSecrets;
     private String accessToken;
     private String type;
     private String tokenScope;
@@ -62,12 +62,12 @@ public class APIKey {
         this.consumerSecret = consumerSecret;
     }
 
-    public List<String> getAdditionalConsumerSecrets() {
-        return additionalConsumerSecrets; 
+    public List<ConsumerSecretInfo> getConsumerSecrets() {
+        return consumerSecrets;
     }
 
-    public void setAdditionalConsumerSecrets(List<String> additionalConsumerSecrets) {
-        this.additionalConsumerSecrets = additionalConsumerSecrets;
+    public void setConsumerSecrets(List<ConsumerSecretInfo> consumerSecrets) {
+        this.consumerSecrets = consumerSecrets;
     }
 
     public String getAccessToken() {

@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDTO;
 import javax.validation.constraints.*;
 
 
@@ -27,7 +28,7 @@ public class ApplicationKeyDTO   {
     private String keyManager = null;
     private String consumerKey = null;
     private String consumerSecret = null;
-    private List<String> additionalConsumerSecrets = new ArrayList<String>();
+    private List<ConsumerSecretDTO> consumerSecrets = new ArrayList<ConsumerSecretDTO>();
     private List<String> supportedGrantTypes = new ArrayList<String>();
     private String callbackUrl = null;
     private String keyState = null;
@@ -172,21 +173,22 @@ return null;
   }
 
   /**
-   * List of other consumer secrets of the application (if exist)
+   * List of all consumer secrets of the application
    **/
-  public ApplicationKeyDTO additionalConsumerSecrets(List<String> additionalConsumerSecrets) {
-    this.additionalConsumerSecrets = additionalConsumerSecrets;
+  public ApplicationKeyDTO consumerSecrets(List<ConsumerSecretDTO> consumerSecrets) {
+    this.consumerSecrets = consumerSecrets;
     return this;
   }
 
   
-  @ApiModelProperty(example = "[\"TIDlOFkpzB7WjufO3OJUhy1fsvAa\",\"1234567890abcdef1234567890abcdef\"]", value = "List of other consumer secrets of the application (if exist)")
-  @JsonProperty("additionalConsumerSecrets")
-  public List<String> getAdditionalConsumerSecrets() {
-    return additionalConsumerSecrets;
+  @ApiModelProperty(value = "List of all consumer secrets of the application")
+      @Valid
+  @JsonProperty("consumerSecrets")
+  public List<ConsumerSecretDTO> getConsumerSecrets() {
+    return consumerSecrets;
   }
-  public void setAdditionalConsumerSecrets(List<String> additionalConsumerSecrets) {
-    this.additionalConsumerSecrets = additionalConsumerSecrets;
+  public void setConsumerSecrets(List<ConsumerSecretDTO> consumerSecrets) {
+    this.consumerSecrets = consumerSecrets;
   }
 
   /**
@@ -348,7 +350,7 @@ return null;
         Objects.equals(keyManager, applicationKey.keyManager) &&
         Objects.equals(consumerKey, applicationKey.consumerKey) &&
         Objects.equals(consumerSecret, applicationKey.consumerSecret) &&
-        Objects.equals(additionalConsumerSecrets, applicationKey.additionalConsumerSecrets) &&
+        Objects.equals(consumerSecrets, applicationKey.consumerSecrets) &&
         Objects.equals(supportedGrantTypes, applicationKey.supportedGrantTypes) &&
         Objects.equals(callbackUrl, applicationKey.callbackUrl) &&
         Objects.equals(keyState, applicationKey.keyState) &&
@@ -361,7 +363,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyMappingId, keyManager, consumerKey, consumerSecret, additionalConsumerSecrets, supportedGrantTypes, callbackUrl, keyState, keyType, mode, groupId, token, additionalProperties);
+    return Objects.hash(keyMappingId, keyManager, consumerKey, consumerSecret, consumerSecrets, supportedGrantTypes, callbackUrl, keyState, keyType, mode, groupId, token, additionalProperties);
   }
 
   @Override
@@ -373,7 +375,7 @@ return null;
     sb.append("    keyManager: ").append(toIndentedString(keyManager)).append("\n");
     sb.append("    consumerKey: ").append(toIndentedString(consumerKey)).append("\n");
     sb.append("    consumerSecret: ").append(toIndentedString(consumerSecret)).append("\n");
-    sb.append("    additionalConsumerSecrets: ").append(toIndentedString(additionalConsumerSecrets)).append("\n");
+    sb.append("    consumerSecrets: ").append(toIndentedString(consumerSecrets)).append("\n");
     sb.append("    supportedGrantTypes: ").append(toIndentedString(supportedGrantTypes)).append("\n");
     sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
     sb.append("    keyState: ").append(toIndentedString(keyState)).append("\n");
