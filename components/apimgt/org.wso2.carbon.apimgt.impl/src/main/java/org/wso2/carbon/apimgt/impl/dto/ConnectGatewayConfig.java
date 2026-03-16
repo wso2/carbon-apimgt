@@ -21,8 +21,8 @@ package org.wso2.carbon.apimgt.impl.dto;
 import java.net.URI;
 
 /**
- * One connect-with-token config: one self-hosted platform gateway (registration_token + optional name, display_name, url, etc.).
- * Used when multiple gateways are configured via [[apim.platform_gateway.connect]].
+ * One connect-with-token config: one self-hosted Universal Gateway (registration_token + optional name, display_name, url, etc.).
+ * Used when multiple gateways are configured via [[apim.universal_gateway.connect]].
  * {@code url} is required: the base URL where the gateway will be accessible (e.g. https://gw.example.com:8243); validated on set.
  */
 public class ConnectGatewayConfig {
@@ -74,7 +74,7 @@ public class ConnectGatewayConfig {
 
     /**
      * Sets the base URL; validates format (http/https, non-empty host). Null or blank clears the field.
-     * For [[apim.platform_gateway.connect]] entries, url is required and validated when config is loaded.
+     * For [[apim.universal_gateway.connect]] entries, url is required and validated when config is loaded.
      *
      * @throws IllegalArgumentException if url is non-blank and malformed (e.g. invalid scheme, missing host)
      */
@@ -95,7 +95,7 @@ public class ConnectGatewayConfig {
             }
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    "Invalid URL in apim.platform_gateway.connect: \"" + url + "\" - " + e.getMessage(), e);
+                    "Invalid URL in apim.universal_gateway.connect: \"" + url + "\" - " + e.getMessage(), e);
         }
         this.url = trimmed;
     }

@@ -89,7 +89,7 @@ public class NotifyGatewayApiServiceImpl implements NotifyGatewayApiService {
             ConnectGatewayConfig matchedEntry = PlatformGatewayApiKeyAuthInterceptor.CONNECT_WITH_TOKEN_MATCHED_ENTRY.get();
             if (matchedEntry != null) {
                 org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig connectConfig = ServiceReferenceHolder.getInstance()
-                        .getAPIManagerConfiguration().getPlatformGatewayConnectConfig();
+                        .getAPIManagerConfigurationService().getAPIManagerConfiguration().getPlatformGatewayConnectConfig();
                 if (connectConfig != null) {
                     PlatformGatewayServiceImpl.ensurePlatformGatewayFromConnectToken(connectConfig, gatewayId, matchedEntry);
                 }

@@ -2095,10 +2095,10 @@
           </GatewayCleanup>
       </GatewayNotificationConfiguration>
 
-      {% if apim.platform_gateway.connect is defined and apim.platform_gateway.connect | length > 0 %}
+      {% if apim.universal_gateway.connect is defined and apim.universal_gateway.connect | length > 0 %}
       <PlatformGatewayConnectConfiguration>
           <ConnectGateways>
-          {% for c in apim.platform_gateway.connect %}
+          {% for c in apim.universal_gateway.connect %}
             <Connect>
                 <RegistrationToken>{{ c.registration_token }}</RegistrationToken>
                 {% if c.name is defined and c.name %}<Name>{{ c.name }}</Name>{% endif %}

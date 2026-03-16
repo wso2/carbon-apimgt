@@ -3560,7 +3560,7 @@ public class APIManagerConfiguration {
     }
 
     /**
-     * Connect-with-token config ([[apim.platform_gateway.connect]]). Use this for the connect flow only;
+     * Connect-with-token config ([[apim.universal_gateway.connect]]). Use this for the connect flow only;
      * notification/heartbeat code should use {@link #getGatewayNotificationConfiguration()}.
      */
     public PlatformGatewayConnectConfig getPlatformGatewayConnectConfig() {

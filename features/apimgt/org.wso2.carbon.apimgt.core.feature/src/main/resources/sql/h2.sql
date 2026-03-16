@@ -2869,7 +2869,7 @@ CREATE TABLE IF NOT EXISTS AM_GW_REVISION_DEPLOYMENT (
 
 -- Platform Gateway registration (API Platform / self-hosted gateway with registration token)
 -- PROPERTIES: JSON object stored as CLOB; aligned with API Platform gateway response.
--- Platform gateway metadata is in AM_GATEWAY_ENVIRONMENT (GATEWAY_TYPE='Platform'); tokens reference env UUID.
+-- Platform gateway metadata is in AM_GATEWAY_ENVIRONMENT (GATEWAY_TYPE='Universal'); tokens reference env UUID.
 CREATE TABLE IF NOT EXISTS AM_GATEWAY_TOKEN (
     ID VARCHAR(255) NOT NULL,
     GATEWAY_ID VARCHAR(45) NOT NULL,

@@ -125,7 +125,7 @@ public class GatewayManagementUtils {
                 if (org.apache.commons.lang3.StringUtils.isBlank(token)) {
                     continue;
                 }
-                String prefix = "[[apim.platform_gateway.connect]] entry " + index + ": ";
+                String prefix = "[[apim.universal_gateway.connect]] entry " + index + ": ";
                 if (org.apache.commons.lang3.StringUtils.isBlank(entry.getUrl())) {
                     errors.add(prefix + "mandatory 'url' is missing (base URL where the gateway will be accessible, e.g. https://host:8243)");
                 }

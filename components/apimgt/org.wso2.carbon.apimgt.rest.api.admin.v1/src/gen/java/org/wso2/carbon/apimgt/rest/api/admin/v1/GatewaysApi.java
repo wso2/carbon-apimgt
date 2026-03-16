@@ -53,8 +53,8 @@ GatewaysApiService delegate = new GatewaysApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Gateway and all references removed.", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 409, message = "Conflict. Cannot delete gateway while API revisions are deployed to it.", response = ErrorDTO.class) })
-    public Response gatewaysGatewayIdDelete(@ApiParam(value = "Gateway UUID",required=true) @PathParam("gatewayId") String gatewayId) throws APIManagementException{
-        return delegate.gatewaysGatewayIdDelete(gatewayId, securityContext);
+    public Response deletePlatformGateway(@ApiParam(value = "Gateway UUID",required=true) @PathParam("gatewayId") String gatewayId) throws APIManagementException{
+        return delegate.deletePlatformGateway(gatewayId, securityContext);
     }
 
     @PUT
@@ -70,8 +70,8 @@ GatewaysApiService delegate = new GatewaysApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Updated platform gateway in the response body.", response = PlatformGatewayResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response gatewaysGatewayIdPut(@ApiParam(value = "Gateway UUID",required=true) @PathParam("gatewayId") String gatewayId, @ApiParam(value = "" ,required=true) UpdatePlatformGatewayRequestDTO updatePlatformGatewayRequestDTO) throws APIManagementException{
-        return delegate.gatewaysGatewayIdPut(gatewayId, updatePlatformGatewayRequestDTO, securityContext);
+    public Response updatePlatformGateway(@ApiParam(value = "Gateway UUID",required=true) @PathParam("gatewayId") String gatewayId, @ApiParam(value = "" ,required=true) UpdatePlatformGatewayRequestDTO updatePlatformGatewayRequestDTO) throws APIManagementException{
+        return delegate.updatePlatformGateway(gatewayId, updatePlatformGatewayRequestDTO, securityContext);
     }
 
     @POST
@@ -87,8 +87,8 @@ GatewaysApiService delegate = new GatewaysApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Gateway and new registration token (returned once) in the response body. ", response = GatewayResponseWithTokenDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response gatewaysGatewayIdRegenerateTokenPost(@ApiParam(value = "Gateway UUID",required=true) @PathParam("gatewayId") String gatewayId) throws APIManagementException{
-        return delegate.gatewaysGatewayIdRegenerateTokenPost(gatewayId, securityContext);
+    public Response regeneratePlatformGatewayToken(@ApiParam(value = "Gateway UUID",required=true) @PathParam("gatewayId") String gatewayId) throws APIManagementException{
+        return delegate.regeneratePlatformGatewayToken(gatewayId, securityContext);
     }
 
     @GET
@@ -103,8 +103,8 @@ GatewaysApiService delegate = new GatewaysApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of platform gateways returned (without registration tokens). ", response = GatewayListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response gatewaysGet() throws APIManagementException{
-        return delegate.gatewaysGet(securityContext);
+    public Response getPlatformGateways() throws APIManagementException{
+        return delegate.getPlatformGateways(securityContext);
     }
 
     @POST
@@ -121,7 +121,7 @@ GatewaysApiService delegate = new GatewaysApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class) })
-    public Response gatewaysPost(@ApiParam(value = "" ,required=true) CreatePlatformGatewayRequestDTO createPlatformGatewayRequestDTO) throws APIManagementException{
-        return delegate.gatewaysPost(createPlatformGatewayRequestDTO, securityContext);
+    public Response createPlatformGateway(@ApiParam(value = "" ,required=true) CreatePlatformGatewayRequestDTO createPlatformGatewayRequestDTO) throws APIManagementException{
+        return delegate.createPlatformGateway(createPlatformGatewayRequestDTO, securityContext);
     }
 }

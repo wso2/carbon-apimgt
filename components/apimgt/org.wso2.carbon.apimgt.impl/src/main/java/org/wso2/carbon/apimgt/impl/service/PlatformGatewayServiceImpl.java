@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.impl.service;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PlatformGatewayService;
@@ -55,6 +57,7 @@ import java.util.stream.Collectors;
  */
 public class PlatformGatewayServiceImpl implements PlatformGatewayService {
 
+    private static final Log log = LogFactory.getLog(PlatformGatewayServiceImpl.class);
     private static final PlatformGatewayServiceImpl INSTANCE = new PlatformGatewayServiceImpl();
 
     public static PlatformGatewayServiceImpl getInstance() {

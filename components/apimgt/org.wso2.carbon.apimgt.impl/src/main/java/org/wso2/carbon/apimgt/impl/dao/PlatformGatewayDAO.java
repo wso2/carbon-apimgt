@@ -34,7 +34,7 @@ import java.util.List;
 
 /**
  * DAO for platform gateway tokens (AM_GATEWAY_TOKEN) and instance registration (AM_GW_INSTANCES).
- * Platform gateway metadata is stored in AM_GATEWAY_ENVIRONMENT (GATEWAY_TYPE='Platform').
+ * Platform gateway metadata is stored in AM_GATEWAY_ENVIRONMENT (GATEWAY_TYPE='Universal').
  */
 public class PlatformGatewayDAO {
 
@@ -147,7 +147,7 @@ public class PlatformGatewayDAO {
     }
 
     /**
-     * UUIDs of platform gateways (AM_GATEWAY_ENVIRONMENT with GATEWAY_TYPE='Platform') that have a row in AM_GW_INSTANCES.
+     * UUIDs of platform gateways (AM_GATEWAY_ENVIRONMENT with GATEWAY_TYPE='Universal') that have a row in AM_GW_INSTANCES.
      */
     public List<String> getPlatformGatewayUuidsWithInstance(String organizationId) throws APIManagementException {
         List<String> uuids = new ArrayList<>();

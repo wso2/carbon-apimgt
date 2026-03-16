@@ -4365,7 +4365,7 @@ CREATE TABLE AM_GW_REVISION_DEPLOYMENT (
 )
 /
 
--- Platform gateway metadata is in AM_GATEWAY_ENVIRONMENT (GATEWAY_TYPE='Platform'); tokens reference env UUID.
+-- Platform gateway metadata is in AM_GATEWAY_ENVIRONMENT (GATEWAY_TYPE='Universal'); tokens reference env UUID.
 CREATE TABLE AM_GATEWAY_TOKEN (
     ID VARCHAR2(255) NOT NULL,
     GATEWAY_ID VARCHAR2(45) NOT NULL,

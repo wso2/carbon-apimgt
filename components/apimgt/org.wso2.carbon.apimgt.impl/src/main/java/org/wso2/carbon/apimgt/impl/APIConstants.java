@@ -3557,6 +3557,12 @@ public final class APIConstants {
         public static final String ENVIRONMENT_SPECIFIC_API_PROPERTY_KEY_NAME = "apis";
     }
 
+    public static class GatewayNotificationConfigurationConstants {
+        public static final String WSO2_ALL_TENANTS = "WSO2-ALL-TENANTS";
+        public static final String STATUS_ACTIVE = "ACTIVE";
+        public static final String STATUS_EXPIRED = "EXPIRED";
+    }
+
     public static class OrganizationDeletion {
         public static final String API_RETRIEVER = "APIRetriever";
         public static final String API_DB_DATA_REMOVER = "APIDataRemover";
@@ -3650,12 +3656,11 @@ public final class APIConstants {
     public static final String DEFAULT_POLICY_VERSION = "v1";
     public static final String POLICY_FILENAME_INVALID_CHARS_REGEX = "[\\/:*?\"<>|]";
 
-
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
     public static final String EXTERNAL_GATEWAY_VENDOR = "external";
     public static final String WSO2_APK_GATEWAY = "wso2/apk";
     public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
-    public static final String WSO2_API_PLATFORM_GATEWAY = "api-platform";
+    public static final String WSO2_API_PLATFORM_GATEWAY = "Universal";
     public static final String EXTERNAL_AWS_GATEWAY = "AWS";
     public static final List<String> API_TYPES = Arrays.asList("rest", "soap", "graphql", "ws", "wh", "sse", "ai", "mcp");
     public static final String SOLACE = "solace";

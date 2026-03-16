@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Config for the platform gateway connect feature ([[apim.platform_gateway.connect]]).
+ * Config for the Universal Gateway connect feature ([[apim.universal_gateway.connect]]).
  * Separate from {@link GatewayNotificationConfiguration} so existing notification/heartbeat
  * code is unchanged. Used only by the connect-with-token flow.
  */
