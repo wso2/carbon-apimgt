@@ -97,7 +97,7 @@ public class CommonAPIUtilTestCase {
                         connectionRequestTimeout)
                 // proxyProtocol here is https (due to existing limitation)
                 .withProxy(proxyHost, proxyServer.getPort(), proxyUsername, "random", proxyProtocol,
-                        new String[]{"localhost"})
+                        new String[]{"localhost"}, new String[]{})
                 .build();
         HttpClient clientForNonProxyHost = null;
         clientForNonProxyHost = CommonAPIUtil.getHttpClient("https", nonProxyHostBasedProxyConfig, sslContext);
@@ -111,10 +111,9 @@ public class CommonAPIUtilTestCase {
 
         // Given the proxy configuration, checks if the call is successfully routed via the proxy server.
         HttpClientConfigurationDTO configuration = builder
-                .withConnectionParams(connectionLimit, maximumConnectionsPerRoute, connectionTimeout,
-                        connectionRequestTimeout)
-                .withProxy(proxyHost, proxyServer.getPort(), proxyUsername, proxyPassword, proxyProtocol, nonProxyHosts)
-                .build();
+                .withConnectionParams(connectionLimit, maximumConnectionsPerRoute, connectionTimeout)
+                .withProxy(proxyHost, proxyServer.getPort(), proxyUsername, proxyPassword, proxyProtocol, nonProxyHosts,
+                        new String[] {}).build();
 
         HttpClient client = null;
         client = CommonAPIUtil.getHttpClient("https", configuration, sslContext);
@@ -131,10 +130,9 @@ public class CommonAPIUtilTestCase {
 
         // Given the proxy configuration with wrong credentials, checks if the call fails at the proxy server.
         HttpClientConfigurationDTO configWithWrongProxyCredentials = builder
-                .withConnectionParams(connectionLimit, maximumConnectionsPerRoute, connectionTimeout,
-                        connectionRequestTimeout)
-                .withProxy(proxyHost, proxyServer.getPort(), proxyUsername, "random", proxyProtocol, nonProxyHosts)
-                .build();
+                .withConnectionParams(connectionLimit, maximumConnectionsPerRoute, connectionTimeout)
+                .withProxy(proxyHost, proxyServer.getPort(), proxyUsername, "random", proxyProtocol,
+                        nonProxyHosts, new String[] {}).build();
         HttpClient clientWithWrongProxyCreds = null;
         clientWithWrongProxyCreds = CommonAPIUtil.getHttpClient("https", configWithWrongProxyCredentials, sslContext);
         Assert.assertNotNull(clientWithWrongProxyCreds);

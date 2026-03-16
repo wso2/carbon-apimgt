@@ -1058,9 +1058,10 @@ public class APIManagerComponent {
             String proxyUsername = configuration.getFirstProperty(APIConstants.PROXY_USERNAME);
             String proxyPassword = configuration.getFirstProperty(APIConstants.PROXY_PASSWORD);
             String[] nonProxyHosts = getNonProxyHostsListByNonProxyHostsStringConfiguration(configuration);
+            String[] targetProxyHosts = getTargetProxyHostsListByTargetProxyHostsStringConfiguration(configuration);
             String proxyProtocol = configuration.getFirstProperty(APIConstants.PROXY_PROTOCOL);
             builder = builder.withProxy(proxyHost, proxyPort, proxyUsername, proxyPassword, proxyProtocol,
-                    nonProxyHosts);
+                    nonProxyHosts, targetProxyHosts);
         }
 
         String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
@@ -1130,6 +1131,11 @@ public class APIManagerComponent {
     String[] getNonProxyHostsListByNonProxyHostsStringConfiguration(APIManagerConfiguration config) {
         String nonProxyHostsString = config.getFirstProperty(APIConstants.NON_PROXY_HOSTS);
         return nonProxyHostsString != null ? nonProxyHostsString.split("\\|") : null;
+    }
+
+    String[] getTargetProxyHostsListByTargetProxyHostsStringConfiguration(APIManagerConfiguration config) {
+        String targetProxyHostsString = config.getFirstProperty(APIConstants.TARGET_PROXY_HOSTS);
+        return targetProxyHostsString != null ? targetProxyHostsString.split("\\|") : null;
     }
 
     @Reference(
