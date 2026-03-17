@@ -23,7 +23,12 @@ import org.wso2.carbon.apimgt.api.model.ApplicationKeyManagerInfo;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 

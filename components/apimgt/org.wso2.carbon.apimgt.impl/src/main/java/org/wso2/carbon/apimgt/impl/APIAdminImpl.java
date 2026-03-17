@@ -395,7 +395,6 @@ public class APIAdminImpl implements APIAdmin {
     /**
      * @inheritDoc
      **/
-    @Deprecated
     public Application[] getApplicationsWithPagination(String user, String owner, int tenantId, int limit,
                                                        int offset, String applicationName, String sortBy,
                                                        String sortOrder) throws APIManagementException {
@@ -403,7 +402,6 @@ public class APIAdminImpl implements APIAdmin {
         return apiMgtDAO.getApplicationsWithPaginationAndKMs(user, owner, tenantId, limit, offset, sortBy, sortOrder,
                 applicationName);
     }
-
 
     /**
      * Get count of the applications for the tenantId.

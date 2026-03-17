@@ -339,5 +339,4 @@ public class Application {
     public void setSubOrganization(String subOrganization) {
         this.subOrganization = subOrganization;
     }
-
 }
