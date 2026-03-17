@@ -706,7 +706,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (expiresInObj instanceof Integer) {
             clientSecretRequest.setExpiresIn((Integer) expiresInObj);
         }
-        if (consumerSecretRequest.getClientSecret() != null) {
+        if (consumerSecretRequest.getClientSecret() != null
+                && StringUtils.isNotBlank(consumerSecretRequest.getClientSecret())) {
             clientSecretRequest.setClientSecret(consumerSecretRequest.getClientSecret());
         }
         try {

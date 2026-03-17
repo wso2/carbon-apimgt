@@ -364,7 +364,7 @@ public class ImportUtils {
         if (expiresAtSecs > 0) {
             long expiresIn = expiresAtSecs - (System.currentTimeMillis() / 1000);
             if (expiresIn > 0) {
-                return (int) expiresIn;
+                return expiresIn > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) expiresIn;
             }
         }
         return null;
@@ -399,7 +399,8 @@ public class ImportUtils {
             jsonParamObj.addProperty(APIConstants.JSON_CLIENT_ID, applicationKeyDTO.getConsumerKey());
             if (hasMultipleSecrets) {
                 // Use the first secret as the latest secret during registration.
-                String latestSecretValue = consumerSecrets.get(0).getSecretValue();
+                ConsumerSecretDTO latestSecret = consumerSecrets.get(0);
+                String latestSecretValue = latestSecret != null ? latestSecret.getSecretValue() : null;
                 if (!StringUtils.isEmpty(latestSecretValue)) {
                     byte[] bytes = Base64.decodeBase64(latestSecretValue);
                     jsonParamObj.addProperty(APIConstants.JSON_CLIENT_SECRET, new String(bytes, StandardCharsets.UTF_8));
