@@ -4941,17 +4941,6 @@ public final class APIUtil {
     }
 
     /**
-     * Disable skipping of secret masking for the current thread (re-enable masking).
-     * This should be called to restore normal masking behavior.
-     */
-    public static void disableSkipSecretMasking() {
-        skipSecretMasking.set(Boolean.FALSE);
-        if (log.isDebugEnabled()) {
-            log.debug("Secret masking enabled");
-        }
-    }
-
-    /**
      * Clear the skip secret masking ThreadLocal variable to prevent memory leaks.
      * This should be called in a finally block after the operation is complete.
      */
