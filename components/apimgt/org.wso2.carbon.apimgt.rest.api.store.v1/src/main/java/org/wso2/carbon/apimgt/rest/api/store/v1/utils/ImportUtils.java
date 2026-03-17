@@ -53,6 +53,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -362,7 +363,7 @@ public class ImportUtils {
     private static Integer convertExpiresAtToExpiresIn(long expiresAtSecs) {
 
         if (expiresAtSecs > 0) {
-            long expiresIn = expiresAtSecs - (System.currentTimeMillis() / 1000);
+            long expiresIn = expiresAtSecs - Instant.now().getEpochSecond();
             if (expiresIn > 0) {
                 return expiresIn > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) expiresIn;
             }
