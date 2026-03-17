@@ -78,7 +78,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         if (nameExists) {
             throw new APIManagementException(
                     String.format("A platform gateway with name '%s' already exists in the organization", name),
-                    ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS);
+                    ExceptionCodes.UNIVERSAL_GATEWAY_NAME_ALREADY_EXISTS);
         }
 
         String gatewayId = UUID.randomUUID().toString();
@@ -220,8 +220,19 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
 
     @Override
     public List<PlatformGateway> listGatewaysByOrganization(String organizationId) throws APIManagementException {
-        return new APIAdminImpl().getAllEnvironments(organizationId).stream()
+        APIAdminImpl apiAdmin = new APIAdminImpl();
+        java.util.stream.Stream<Environment> orgEnvs =
+                apiAdmin.getAllEnvironments(organizationId).stream();
+        // Include gateways under WSO2-ALL-TENANTS so connect-with-token gateways show in the UI
+        String allTenantsOrg = APIConstants.GatewayNotificationConfigurationConstants.WSO2_ALL_TENANTS;
+        java.util.stream.Stream<Environment> allTenantsEnvs =
+                allTenantsOrg.equals(organizationId)
+                        ? java.util.stream.Stream.empty()
+                        : apiAdmin.getAllEnvironments(allTenantsOrg).stream();
+        return java.util.stream.Stream.concat(orgEnvs, allTenantsEnvs)
                 .filter(e -> APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(e.getGatewayType()))
+                .collect(Collectors.toMap(Environment::getUuid, e -> e, (a, b) -> a))
+                .values().stream()
                 .map(PlatformGatewayServiceImpl::envToApiModel)
                 .collect(Collectors.toList());
     }
@@ -259,11 +270,11 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         PlatformGateway existing = getGatewayById(gatewayId);
         if (existing == null) {
             throw new APIManagementException("Platform gateway not found: " + gatewayId,
-                    ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
+                    ExceptionCodes.UNIVERSAL_GATEWAY_NOT_FOUND);
         }
         if (!organizationId.equals(existing.getOrganizationId())) {
             throw new APIManagementException("Platform gateway not found in organization: " + gatewayId,
-                    ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
+                    ExceptionCodes.UNIVERSAL_GATEWAY_NOT_FOUND);
         }
 
         String tokenId = PlatformGatewayTokenUtil.generateTokenId();
@@ -287,7 +298,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         Environment env = ApiMgtDAO.getInstance().getEnvironment(organizationId, gatewayId);
         if (env == null || !APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType())) {
             throw new APIManagementException("Platform gateway not found: " + gatewayId,
-                    ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
+                    ExceptionCodes.UNIVERSAL_GATEWAY_NOT_FOUND);
         }
         if (ApiMgtDAO.getInstance().hasExistingAPIRevisions(gatewayId, organizationId)) {
             throw new APIManagementException(
@@ -311,7 +322,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         Environment env = ApiMgtDAO.getInstance().getEnvironment(organizationId, gatewayId);
         if (env == null || !APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(env.getGatewayType())) {
             throw new APIManagementException("Platform gateway not found: " + gatewayId,
-                    ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
+                    ExceptionCodes.UNIVERSAL_GATEWAY_NOT_FOUND);
         }
         if (displayName != null) {
             env.setDisplayName(displayName);

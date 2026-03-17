@@ -106,6 +106,7 @@ return null;
     }
     private StatusEnum status = StatusEnum.ACTIVE;
     private URI vhost = null;
+    private String universalGatewayVersion = null;
 
   /**
    **/
@@ -389,6 +390,24 @@ return null;
     this.vhost = vhost;
   }
 
+  /**
+   * Universal Gateway version from config (e.g. \&quot;0.9.0\&quot;). Set for deploy targets so UI can show quick-start version; from apim.universal_gateway.version.
+   **/
+  public EnvironmentDTO universalGatewayVersion(String universalGatewayVersion) {
+    this.universalGatewayVersion = universalGatewayVersion;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "0.9.0", value = "Universal Gateway version from config (e.g. \"0.9.0\"). Set for deploy targets so UI can show quick-start version; from apim.universal_gateway.version.")
+  @JsonProperty("universalGatewayVersion")
+  public String getUniversalGatewayVersion() {
+    return universalGatewayVersion;
+  }
+  public void setUniversalGatewayVersion(String universalGatewayVersion) {
+    this.universalGatewayVersion = universalGatewayVersion;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -414,12 +433,13 @@ return null;
         Objects.equals(additionalProperties, environment.additionalProperties) &&
         Objects.equals(permissions, environment.permissions) &&
         Objects.equals(status, environment.status) &&
-        Objects.equals(vhost, environment.vhost);
+        Objects.equals(vhost, environment.vhost) &&
+        Objects.equals(universalGatewayVersion, environment.universalGatewayVersion);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, provider, type, gatewayType, description, isReadOnly, mode, apiDiscoveryScheduledWindow, vhosts, endpointURIs, additionalProperties, permissions, status, vhost);
+    return Objects.hash(id, name, displayName, provider, type, gatewayType, description, isReadOnly, mode, apiDiscoveryScheduledWindow, vhosts, endpointURIs, additionalProperties, permissions, status, vhost, universalGatewayVersion);
   }
 
   @Override
@@ -443,6 +463,7 @@ return null;
     sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
+    sb.append("    universalGatewayVersion: ").append(toIndentedString(universalGatewayVersion)).append("\n");
     sb.append("}");
     return sb.toString();
   }

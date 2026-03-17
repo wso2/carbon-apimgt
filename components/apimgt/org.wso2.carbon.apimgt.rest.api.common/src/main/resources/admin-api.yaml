@@ -5861,6 +5861,11 @@ components:
           readOnly: true
           description: For platform gateway environments, the gateway URL (e.g. https://host:9443). Same as Platform Gateways API; only set when this environment represents a platform gateway.
           example: https://mg.wso2.com
+        universalGatewayVersion:
+          type: string
+          readOnly: true
+          description: Universal Gateway version from config (e.g. "0.9.0"). Set for deploy targets so UI can show quick-start version; from apim.universal_gateway.version.
+          example: "0.9.0"
     EnvironmentList:
       title: Environment List
       type: object

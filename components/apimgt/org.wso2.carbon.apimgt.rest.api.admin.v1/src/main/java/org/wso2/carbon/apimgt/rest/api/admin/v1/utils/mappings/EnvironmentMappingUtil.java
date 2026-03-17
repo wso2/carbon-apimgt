@@ -21,6 +21,8 @@ import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDT
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdditionalPropertyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
@@ -74,6 +76,7 @@ public class EnvironmentMappingUtil {
         envDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO
                 (env.getAdditionalProperties()));
         envDTO.setPermissions(mapPermissionsToDTO(env.getPermissions()));
+        envDTO.setUniversalGatewayVersion(resolveUniversalGatewayVersion());
         return envDTO;
     }
 
@@ -83,7 +86,7 @@ public class EnvironmentMappingUtil {
      * traditional gateway environments.
      *
      * @param gateway       PlatformGateway from AM_PLATFORM_GATEWAY
-     * @param gatewayType   gateway type constant (e.g. Platform)
+     * @param gatewayType   gateway type constant (e.g. Universal)
      * @return EnvironmentDTO suitable for deploy-target list
      */
     public static EnvironmentDTO fromPlatformGatewayToEnvDTO(PlatformGateway gateway, String gatewayType,
@@ -134,7 +137,21 @@ public class EnvironmentMappingUtil {
         envDTO.setStatus(Boolean.TRUE.equals(gateway.isActive())
                 ? EnvironmentDTO.StatusEnum.ACTIVE
                 : EnvironmentDTO.StatusEnum.INACTIVE);
+        envDTO.setUniversalGatewayVersion(resolveUniversalGatewayVersion());
         return envDTO;
+    }
+
+    /**
+     * Resolve Universal Gateway version from config (apim.universal_gateway.version in api-manager.xml).
+     */
+    private static String resolveUniversalGatewayVersion() {
+        PlatformGatewayConnectConfig config = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getPlatformGatewayConnectConfig();
+        if (config == null) {
+            return null;
+        }
+        String global = config.getUniversalGatewayVersion();
+        return (global != null && !global.isEmpty()) ? global : null;
     }
 
     /**

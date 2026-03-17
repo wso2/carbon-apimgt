@@ -61,14 +61,15 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
     public static final ThreadLocal<ConnectGatewayConfig> CONNECT_WITH_TOKEN_MATCHED_ENTRY = new ThreadLocal<>();
 
     /**
-     * Path prefixes for which platform gateway api-key auth is allowed. Requests to other paths
-     * are not authenticated by this interceptor (no route filtering would expose all endpoints).
+     * Path segments for which platform gateway api-key auth is allowed (no leading slash; matched
+     * as path.endsWith("/" + segment) or path.contains("/" + segment + "/")). Requests to other
+     * paths are not authenticated by this interceptor.
      */
-    private static final String[] PLATFORM_GATEWAY_ALLOWED_PATH_PREFIXES = {
-            "/apis",
-            "/api-keys",
-            "/subscription-plans",
-            "/notify-gateway"
+    private static final String[] PLATFORM_GATEWAY_ALLOWED_PATH_SEGMENTS = {
+            "apis",
+            "api-keys",
+            "subscription-plans",
+            "notify-gateway"
     };
 
     public PlatformGatewayApiKeyAuthInterceptor() {
@@ -203,8 +204,8 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
         if (path == null) {
             return false;
         }
-        for (String prefix : PLATFORM_GATEWAY_ALLOWED_PATH_PREFIXES) {
-            if (path.endsWith("/" + prefix) || path.contains("/" + prefix + "/")) {
+        for (String segment : PLATFORM_GATEWAY_ALLOWED_PATH_SEGMENTS) {
+            if (path.endsWith("/" + segment) || path.contains("/" + segment + "/")) {
                 return true;
             }
         }

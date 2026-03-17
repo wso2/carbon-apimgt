@@ -39,7 +39,7 @@ public interface PlatformGatewayService {
      * @param vhost           vhost
      * @param propertiesJson  optional JSON string for custom properties
      * @return created gateway and registration token (returned only once)
-     * @throws APIManagementException if validation fails or name already exists (use ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS for 409)
+     * @throws APIManagementException if validation fails or name already exists (use ExceptionCodes.UNIVERSAL_GATEWAY_NAME_ALREADY_EXISTS for 409)
      */
     PlatformGatewayRegistrationResult createGateway(String organizationId, String name, String displayName,
                                               String description, String vhost, String propertiesJson)
@@ -118,7 +118,7 @@ public interface PlatformGatewayService {
      * @param description    new description, or null to keep existing
      * @param propertiesJson new properties JSON string, or null to keep existing
      * @return the updated platform gateway
-     * @throws APIManagementException if gateway not found or not in organization (use ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND for 404)
+     * @throws APIManagementException if gateway not found or not in organization (use ExceptionCodes.UNIVERSAL_GATEWAY_NOT_FOUND for 404)
      */
     PlatformGateway updateGateway(String organizationId, String gatewayId, String displayName,
                                   String description, String propertiesJson)

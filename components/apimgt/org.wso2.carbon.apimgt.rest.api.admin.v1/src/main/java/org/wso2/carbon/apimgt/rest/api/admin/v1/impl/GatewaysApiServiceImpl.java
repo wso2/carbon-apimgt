@@ -72,7 +72,7 @@ import java.util.stream.Collectors;
  * without schema changes:
  * <ul>
  *   <li><b>AM_GATEWAY_ENVIRONMENT</b> – one row per platform gateway (UUID=gatewayId, NAME, DISPLAY_NAME,
- *       DESCRIPTION, GATEWAY_TYPE='Platform', CONFIGURATION=JSON with organization, isActive, createdAt,
+ *       DESCRIPTION, GATEWAY_TYPE='Universal', CONFIGURATION=JSON with organization, isActive, createdAt,
  *       updatedAt, properties).</li>
  *   <li><b>AM_GW_VHOST</b> – one row per env (GATEWAY_ENV_ID, HOST, HTTP_PORT, HTTPS_PORT, ...). Host and port
  *       come from parsed vhost URL; updated in {@link #updateDynamicEnvironmentForPlatformGateway} after create.</li>
@@ -112,8 +112,12 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (StringUtils.isBlank(gatewayUrl)) {
             return null;
         }
+        String normalized = gatewayUrl.trim();
+        if (!normalized.contains("://")) {
+            normalized = "https://" + normalized;
+        }
         try {
-            URL url = new URL(gatewayUrl.trim());
+            URL url = new URL(normalized);
             String host = url.getHost();
             if (host == null || host.isEmpty()) {
                 return null;
@@ -125,7 +129,9 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
             return new ParsedGatewayUrl(host, port);
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
-                log.debug("Invalid vhost URL: " + gatewayUrl, e);
+                log.debug("Invalid vhost URL: [" + gatewayUrl + "]", e);
+            } else if (log.isWarnEnabled()) {
+                log.warn("Invalid vhost URL: [" + gatewayUrl + "] - " + e.getMessage());
             }
             return null;
         }
@@ -193,8 +199,8 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                 .anyMatch(gw -> StringUtils.equals(gw.getName(), gatewayName));
         if (gatewayExists) {
             throw new APIManagementException(
-                    String.format(ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS.getErrorDescription(), gatewayName),
-                    ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS);
+                    String.format(ExceptionCodes.UNIVERSAL_GATEWAY_NAME_ALREADY_EXISTS.getErrorDescription(), gatewayName),
+                    ExceptionCodes.UNIVERSAL_GATEWAY_NAME_ALREADY_EXISTS);
         }
 
         // Also check if a non-platform environment with this name exists
@@ -204,8 +210,8 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                 .anyMatch(env -> StringUtils.equals(env.getName(), gatewayName));
         if (envExists) {
             throw new APIManagementException(
-                    String.format(ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS.getErrorDescription(), gatewayName),
-                    ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS);
+                    String.format(ExceptionCodes.UNIVERSAL_GATEWAY_NAME_ALREADY_EXISTS.getErrorDescription(), gatewayName),
+                    ExceptionCodes.UNIVERSAL_GATEWAY_NAME_ALREADY_EXISTS);
         }
     }
 
@@ -413,7 +419,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         PlatformGateway existing = service.getGatewayById(gatewayId);
         if (existing == null) {
             throw new APIManagementException("Platform gateway not found: " + gatewayId,
-                    ExceptionCodes.PLATFORM_GATEWAY_NOT_FOUND);
+                    ExceptionCodes.UNIVERSAL_GATEWAY_NOT_FOUND);
         }
         if (!Objects.equals(body.getName(), existing.getName())) {
             throw RestApiUtil.buildBadRequestException("name in body must match existing gateway (immutable)");
@@ -507,9 +513,13 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (body.getVhost() == null || StringUtils.isBlank(body.getVhost().toString())) {
             throw RestApiUtil.buildBadRequestException("vhost is required");
         }
-        ParsedGatewayUrl parsed = parseGatewayUrl(body.getVhost().toString());
+        String vhostStr = body.getVhost().toString();
+        ParsedGatewayUrl parsed = parseGatewayUrl(vhostStr);
         if (parsed == null) {
-            throw RestApiUtil.buildBadRequestException("vhost must be a valid URL");
+            if (log.isWarnEnabled()) {
+                log.warn("vhost validation failed for value: [" + vhostStr + "] (length=" + (vhostStr != null ? vhostStr.length() : 0) + ")");
+            }
+            throw RestApiUtil.buildBadRequestException("vhost must be a valid URL (e.g. https://host:port); got: " + (vhostStr != null && vhostStr.length() <= 100 ? vhostStr : "<invalid or too long>"));
         }
         if (parsed.host.length() > 255) {
             throw RestApiUtil.buildBadRequestException("vhost host must be at most 255 characters");
@@ -533,8 +543,12 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (body.getVhost() == null || StringUtils.isBlank(body.getVhost().toString())) {
             throw RestApiUtil.buildBadRequestException("vhost is required (PUT full representation)");
         }
-        if (parseGatewayUrl(body.getVhost().toString()) == null) {
-            throw RestApiUtil.buildBadRequestException("vhost must be a valid URL");
+        String vhostStr = body.getVhost().toString();
+        if (parseGatewayUrl(vhostStr) == null) {
+            if (log.isWarnEnabled()) {
+                log.warn("vhost validation failed on update for value: [" + vhostStr + "]");
+            }
+            throw RestApiUtil.buildBadRequestException("vhost must be a valid URL (e.g. https://host:port); got: " + (vhostStr != null && vhostStr.length() <= 100 ? vhostStr : "<invalid or too long>"));
         }
         if (StringUtils.isBlank(body.getDisplayName())) {
             throw RestApiUtil.buildBadRequestException("displayName is required");
