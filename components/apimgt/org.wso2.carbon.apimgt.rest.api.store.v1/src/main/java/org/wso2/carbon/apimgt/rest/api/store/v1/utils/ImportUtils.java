@@ -394,17 +394,25 @@ public class ImportUtils {
            User cannot provide clientSecret only
          */
         List<ConsumerSecretDTO> consumerSecrets = applicationKeyDTO.getConsumerSecrets();
-        boolean hasMultipleSecrets = consumerSecrets != null && !consumerSecrets.isEmpty();
+        String secretDescription = null;
+        Integer secretExpiresIn = null;
         if (!StringUtils.isEmpty(applicationKeyDTO.getConsumerKey())) {
             jsonParamObj.addProperty(APIConstants.JSON_CLIENT_ID, applicationKeyDTO.getConsumerKey());
-            if (hasMultipleSecrets) {
-                // Use the first secret as the latest secret during registration.
-                ConsumerSecretDTO latestSecret = consumerSecrets.get(0);
-                String latestSecretValue = latestSecret != null ? latestSecret.getSecretValue() : null;
+            if (APIUtil.isMultipleClientSecretsEnabled()) {
+                ConsumerSecretDTO consumerSecret = consumerSecrets.get(0);
+                String latestSecretValue = consumerSecret != null ? consumerSecret.getSecretValue() : null;
                 if (!StringUtils.isEmpty(latestSecretValue)) {
                     byte[] bytes = Base64.decodeBase64(latestSecretValue);
                     jsonParamObj.addProperty(APIConstants.JSON_CLIENT_SECRET, new String(bytes, StandardCharsets.UTF_8));
                 }
+                secretDescription = consumerSecret != null
+                        && consumerSecret.getAdditionalProperties() != null
+                        ? (String) consumerSecret.getAdditionalProperties().get(ApplicationConstants.SECRET_DESCRIPTION)
+                        : null;
+                Number expiresAt = consumerSecret != null && consumerSecret.getAdditionalProperties() != null
+                        ? (Number) consumerSecret.getAdditionalProperties().get(ApplicationConstants.SECRET_EXPIRES_AT)
+                        : null;
+                secretExpiresIn = expiresAt != null ? convertExpiresAtToExpiresIn(expiresAt.longValue()) : null;
             } else if (!StringUtils.isEmpty(applicationKeyDTO.getConsumerSecret())) {
                 byte[] bytes = Base64.decodeBase64(applicationKeyDTO.getConsumerSecret());
                 jsonParamObj.addProperty(APIConstants.JSON_CLIENT_SECRET, new String(bytes, StandardCharsets.UTF_8));
@@ -429,6 +437,13 @@ public class ImportUtils {
                     jsonObject.addProperty(key, jsonObject.get(key).toString());
                 }
             }
+            if (!StringUtils.isEmpty(secretDescription)) {
+                jsonObject.addProperty(APIConstants.KeyManager.CLIENT_SECRET_DESCRIPTION, secretDescription);
+            }
+            if (secretExpiresIn != null) {
+                jsonObject.addProperty(APIConstants.KeyManager.CLIENT_SECRET_EXPIRES_IN,
+                        String.valueOf(secretExpiresIn));
+            }
             jsonParamObj.addProperty(APIConstants.JSON_ADDITIONAL_PROPERTIES, jsonObject.toString());
         }
         String jsonParams = jsonParamObj.toString();
@@ -445,10 +460,11 @@ public class ImportUtils {
                     applicationKeyDTO.getKeyManager());
         }
 
-        // Re-Hydrate Key Manager with given client secrets.
-        if (hasMultipleSecrets) {
+        // Re-Hydrate Key Manager with other client secrets.
+        if (APIUtil.isMultipleClientSecretsEnabled()) {
             String consumerKey = applicationKeyDTO.getConsumerKey();
-            for (ConsumerSecretDTO secretDTO : consumerSecrets) {
+            // skiping the first secret as it is already added/updated above
+            for (ConsumerSecretDTO secretDTO : consumerSecrets.subList(1, consumerSecrets.size())) {
                 ConsumerSecretRequest consumerSecretRequest = new ConsumerSecretRequest();
                 consumerSecretRequest.setClientId(consumerKey);
                 if (secretDTO.getAdditionalProperties() != null) {
