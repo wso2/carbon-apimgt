@@ -483,9 +483,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiId, organization)) {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
                 } else {
-                        List<APIKeyInfo> apiKeyList = apiConsumer.getApiApiKeys(apiId);
-                        List<APIAPIKeyInfoDTO> apiKeyInfoDTOList = ApplicationKeyMappingUtil.formApiApiKeyListToDTOList(apiKeyList);
-                        return Response.ok().entity(apiKeyInfoDTOList).build();
+                    String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                    List<APIKeyInfo> apiKeyList = apiConsumer.getApiApiKeys(apiId, tenantDomain);
+                    List<APIAPIKeyInfoDTO> apiKeyInfoDTOList = ApplicationKeyMappingUtil.formApiApiKeyListToDTOList(apiKeyList);
+                    return Response.ok().entity(apiKeyInfoDTOList).build();
                 }
             }
         } catch (APIManagementException e) {
