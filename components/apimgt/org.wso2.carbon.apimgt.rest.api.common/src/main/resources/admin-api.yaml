@@ -5855,6 +5855,12 @@ components:
           enum:
             - Active
             - Inactive
+        vhost:
+          type: string
+          format: uri
+          readOnly: true
+          description: For platform gateway environments, the gateway URL (e.g. https://host:9443). Same as Platform Gateways API; only set when this environment represents a platform gateway.
+          example: https://mg.wso2.com
     EnvironmentList:
       title: Environment List
       type: object
@@ -5914,7 +5920,7 @@ components:
             - JWT
     CreatePlatformGatewayRequest:
       title: Create Platform Gateway Request
-      description: Request body for creating a platform gateway (name pattern, optional properties).
+      description: Request body for creating a platform gateway (name, displayName, vhost as URL, optional properties). Same property name as platform API; type is URL.
       required:
         - name
         - displayName
@@ -5939,7 +5945,10 @@ components:
           maxLength: 1023
           description: Optional description
         vhost:
-          $ref: '#/components/schemas/VHost'
+          type: string
+          format: uri
+          description: Gateway URL (e.g. https://mg.example.com:9443). Same name as platform API; type is URL. Server persists host internally.
+          example: https://mg.wso2.com
         properties:
           type: object
           additionalProperties: true
@@ -5971,8 +5980,7 @@ components:
       title: Update Platform Gateway Request
       description: |
         Request body for PUT /gateways/{gatewayId}. Per PUT semantics, send the full resource
-        representation. Name and vhost are immutable (server validates they match the existing
-        gateway); all other fields are applied.
+        representation. Name and vhost are immutable (server validates they match the existing gateway).
       required:
         - name
         - displayName
@@ -5986,7 +5994,10 @@ components:
           maxLength: 64
           description: Gateway identifier (immutable; must match existing). Required for PUT full representation.
         vhost:
-          $ref: '#/components/schemas/VHost'
+          type: string
+          format: uri
+          description: Gateway URL (immutable; must match existing). Same name as platform API; type is URL. Example https://mg.wso2.com
+          example: https://mg.wso2.com
         displayName:
           type: string
           minLength: 1
@@ -6036,6 +6047,9 @@ components:
           description: Custom key-value properties
         vhost:
           type: string
+          format: uri
+          readOnly: true
+          description: Gateway URL (e.g. https://host or https://host:9443). Same name as platform API; type is URL.
         isActive:
           type: boolean
           readOnly: true

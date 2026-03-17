@@ -112,6 +112,10 @@ public class EnvironmentMappingUtil {
         }
         envDTO.setVhosts(vhosts);
         envDTO.setEndpointURIs(new ArrayList<>());
+        // Gateway URL for platform gateways (same shape as Platform Gateways API vhost)
+        if (gateway.getVhost() != null && !gateway.getVhost().isEmpty()) {
+            envDTO.setVhost(java.net.URI.create("https://" + gateway.getVhost().trim()));
+        }
 
         // Include platform gateway metadata in additionalProperties for UI consumption
         List<AdditionalPropertyDTO> additionalProps = new ArrayList<>();

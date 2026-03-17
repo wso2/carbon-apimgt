@@ -4,15 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CreatePlatformGatewayRequestPermissionsDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
 import javax.validation.constraints.*;
 
 /**
- * Request body for creating a platform gateway (name pattern, optional properties).
+ * Request body for creating a platform gateway (name, displayName, vhost as URL, optional properties). Same property name as platform API; type is URL.
  **/
 
 import io.swagger.annotations.*;
@@ -24,14 +24,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Request body for creating a platform gateway (name pattern, optional properties).")
+@ApiModel(description = "Request body for creating a platform gateway (name, displayName, vhost as URL, optional properties). Same property name as platform API; type is URL.")
 
 public class CreatePlatformGatewayRequestDTO   {
   
     private String name = null;
     private String displayName = null;
     private String description = null;
-    private VHostDTO vhost = null;
+    private URI vhost = null;
     private Map<String, Object> properties = new HashMap<String, Object>();
     private CreatePlatformGatewayRequestPermissionsDTO permissions = null;
 
@@ -92,21 +92,21 @@ public class CreatePlatformGatewayRequestDTO   {
   }
 
   /**
+   * Gateway URL (e.g. https://mg.example.com:9443). Same name as platform API; type is URL. Server persists host internally.
    **/
-  public CreatePlatformGatewayRequestDTO vhost(VHostDTO vhost) {
+  public CreatePlatformGatewayRequestDTO vhost(URI vhost) {
     this.vhost = vhost;
     return this;
   }
 
   
-  @ApiModelProperty(required = true, value = "")
-      @Valid
+  @ApiModelProperty(example = "https://mg.wso2.com", required = true, value = "Gateway URL (e.g. https://mg.example.com:9443). Same name as platform API; type is URL. Server persists host internally.")
   @JsonProperty("vhost")
   @NotNull
-  public VHostDTO getVhost() {
+  public URI getVhost() {
     return vhost;
   }
-  public void setVhost(VHostDTO vhost) {
+  public void setVhost(URI vhost) {
     this.vhost = vhost;
   }
 

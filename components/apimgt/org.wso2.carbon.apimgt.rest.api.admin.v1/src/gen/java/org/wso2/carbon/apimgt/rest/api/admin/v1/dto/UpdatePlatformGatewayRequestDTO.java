@@ -4,15 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.UpdatePlatformGatewayRequestPermissionsDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
 import javax.validation.constraints.*;
 
 /**
- * Request body for PUT /gateways/{gatewayId}. Per PUT semantics, send the full resource representation. Name and vhost are immutable (server validates they match the existing gateway); all other fields are applied. 
+ * Request body for PUT /gateways/{gatewayId}. Per PUT semantics, send the full resource representation. Name and vhost are immutable (server validates they match the existing gateway). 
  **/
 
 import io.swagger.annotations.*;
@@ -24,12 +24,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Request body for PUT /gateways/{gatewayId}. Per PUT semantics, send the full resource representation. Name and vhost are immutable (server validates they match the existing gateway); all other fields are applied. ")
+@ApiModel(description = "Request body for PUT /gateways/{gatewayId}. Per PUT semantics, send the full resource representation. Name and vhost are immutable (server validates they match the existing gateway). ")
 
 public class UpdatePlatformGatewayRequestDTO   {
   
     private String name = null;
-    private VHostDTO vhost = null;
+    private URI vhost = null;
     private String displayName = null;
     private String description = null;
     private Map<String, Object> properties = new HashMap<String, Object>();
@@ -55,21 +55,21 @@ public class UpdatePlatformGatewayRequestDTO   {
   }
 
   /**
+   * Gateway URL (immutable; must match existing). Same name as platform API; type is URL. Example https://mg.wso2.com
    **/
-  public UpdatePlatformGatewayRequestDTO vhost(VHostDTO vhost) {
+  public UpdatePlatformGatewayRequestDTO vhost(URI vhost) {
     this.vhost = vhost;
     return this;
   }
 
   
-  @ApiModelProperty(required = true, value = "")
-      @Valid
+  @ApiModelProperty(example = "https://mg.wso2.com", required = true, value = "Gateway URL (immutable; must match existing). Same name as platform API; type is URL. Example https://mg.wso2.com")
   @JsonProperty("vhost")
   @NotNull
-  public VHostDTO getVhost() {
+  public URI getVhost() {
     return vhost;
   }
-  public void setVhost(VHostDTO vhost) {
+  public void setVhost(URI vhost) {
     this.vhost = vhost;
   }
 

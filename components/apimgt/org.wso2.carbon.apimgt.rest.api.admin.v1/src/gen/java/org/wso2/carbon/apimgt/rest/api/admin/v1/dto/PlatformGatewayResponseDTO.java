@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class PlatformGatewayResponseDTO   {
     private String displayName = null;
     private String description = null;
     private Map<String, Object> properties = new HashMap<String, Object>();
-    private String vhost = null;
+    private URI vhost = null;
     private Boolean isActive = null;
     private PlatformGatewayResponsePermissionsDTO permissions = null;
     private java.util.Date createdAt = null;
@@ -126,19 +127,20 @@ public class PlatformGatewayResponseDTO   {
   }
 
   /**
+   * Gateway URL (e.g. https://host or https://host:9443). Same name as platform API; type is URL.
    **/
-  public PlatformGatewayResponseDTO vhost(String vhost) {
+  public PlatformGatewayResponseDTO vhost(URI vhost) {
     this.vhost = vhost;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Gateway URL (e.g. https://host or https://host:9443). Same name as platform API; type is URL.")
   @JsonProperty("vhost")
-  public String getVhost() {
+  public URI getVhost() {
     return vhost;
   }
-  public void setVhost(String vhost) {
+  public void setVhost(URI vhost) {
     this.vhost = vhost;
   }
 

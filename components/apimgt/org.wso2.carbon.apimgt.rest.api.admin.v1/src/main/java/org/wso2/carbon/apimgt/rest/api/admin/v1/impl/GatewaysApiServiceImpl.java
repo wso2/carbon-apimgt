@@ -45,7 +45,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.PlatformGatewayResponsePermi
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayResponseWithTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.UpdatePlatformGatewayRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.UpdatePlatformGatewayRequestPermissionsDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -68,6 +67,19 @@ import java.util.stream.Collectors;
 
 /**
  * Implementation of Platform Gateways Admin API (register/list self-hosted gateways with registration token).
+ * <p>
+ * Persistence: request {@code vhost} (gateway URL) is parsed to host and port. These are stored in existing DB tables
+ * without schema changes:
+ * <ul>
+ *   <li><b>AM_GATEWAY_ENVIRONMENT</b> – one row per platform gateway (UUID=gatewayId, NAME, DISPLAY_NAME,
+ *       DESCRIPTION, GATEWAY_TYPE='Platform', CONFIGURATION=JSON with organization, isActive, createdAt,
+ *       updatedAt, properties).</li>
+ *   <li><b>AM_GW_VHOST</b> – one row per env (GATEWAY_ENV_ID, HOST, HTTP_PORT, HTTPS_PORT, ...). Host and port
+ *       come from parsed vhost URL; updated in {@link #updateDynamicEnvironmentForPlatformGateway} after create.</li>
+ *   <li><b>AM_GATEWAY_TOKEN</b> / <b>AM_GW_INSTANCES</b> – token and instance registration for the gateway.</li>
+ * </ul>
+ * On read, gateway list/get loads from Environment (AM_GATEWAY_ENVIRONMENT + AM_GW_VHOST); response
+ * {@code vhost} is derived from the first VHost's host (and default https). Same property name as platform API; type is URL.
  */
 public class GatewaysApiServiceImpl implements GatewaysApiService {
 
@@ -80,6 +92,57 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
 
     private static final String GATEWAY_PROPERTIES_SECTION = "gatewayController";
     private static final String GATEWAY_PROP_BASE_URL = "baseUrl";
+
+    private static final int DEFAULT_HTTPS_PORT = 443;
+
+    /**
+     * Parse gateway URL (e.g. https://mg.example.com:9443) to host and port. DB stores host only.
+     */
+    private static class ParsedGatewayUrl {
+        final String host;
+        final int port;
+
+        ParsedGatewayUrl(String host, int port) {
+            this.host = host;
+            this.port = port;
+        }
+    }
+
+    private static ParsedGatewayUrl parseGatewayUrl(String gatewayUrl) {
+        if (StringUtils.isBlank(gatewayUrl)) {
+            return null;
+        }
+        try {
+            URL url = new URL(gatewayUrl.trim());
+            String host = url.getHost();
+            if (host == null || host.isEmpty()) {
+                return null;
+            }
+            int port = url.getPort();
+            if (port <= 0) {
+                port = url.getDefaultPort() > 0 ? url.getDefaultPort() : DEFAULT_HTTPS_PORT;
+            }
+            return new ParsedGatewayUrl(host, port);
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Invalid vhost URL: " + gatewayUrl, e);
+            }
+            return null;
+        }
+    }
+
+    /** Build gateway URL from stored host (DB stores host only). */
+    private static String toGatewayUrl(String host) {
+        if (StringUtils.isBlank(host)) {
+            return null;
+        }
+        return "https://" + host.trim();
+    }
+
+    /** VHost in request DTOs is URI; convert to string for parsing. */
+    private static String vhostString(URI uri) {
+        return uri != null ? uri.toString() : null;
+    }
 
     @Override
     public Response createPlatformGateway(CreatePlatformGatewayRequestDTO body, MessageContext messageContext)
@@ -94,17 +157,17 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         PlatformGatewayService service =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
         String propertiesJson = serializeProperties(body.getProperties());
-        String vhostHost = body.getVhost() != null ? body.getVhost().getHost() : null;
+        String host = resolveHostFromGatewayUrl(vhostString(body.getVhost()), body.getProperties());
         CreatePlatformGatewayResult result = service.createGateway(
                 organization,
                 body.getName(),
                 body.getDisplayName(),
                 body.getDescription(),
-                vhostHost,
+                host,
                 propertiesJson);
         PlatformGateway gateway = result.getGateway();
         GatewayVisibilityPermissionConfigurationDTO visibility = buildGatewayVisibility(body);
-        // Update the environment created by PlatformGatewayServiceImpl with vhosts, permissions, and additional properties
+        // Update the environment with VHost (from vhost URL), permissions, and additional properties
         updateDynamicEnvironmentForPlatformGateway(organization, body, gateway.getId());
         GatewayResponseWithTokenDTO dto = toDTOWithToken(gateway, result.getRegistrationToken(), visibility);
         try {
@@ -147,7 +210,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
     }
 
     /**
-     * Update the environment created by PlatformGatewayServiceImpl with vhosts, permissions, and additional properties.
+     * Update the environment created by PlatformGatewayServiceImpl with VHost (from vhost URL), permissions, and additional properties.
      */
     private void updateDynamicEnvironmentForPlatformGateway(String organization, CreatePlatformGatewayRequestDTO body,
                                                             String platformGatewayId)
@@ -167,7 +230,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         existingEnvironment.setAdditionalProperties(environmentAdditionalProperties);
 
         List<VHost> vHosts = new ArrayList<>();
-        vHosts.add(buildVHost(body));
+        vHosts.add(buildVHostFromCreateBody(body));
         existingEnvironment.setVhosts(vHosts);
 
         // Persist permissions so GET /environments and GET /environments/{id} return them for this platform gateway
@@ -176,16 +239,49 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         apiAdmin.updateEnvironment(organization, existingEnvironment);
     }
 
-    private VHost buildVHost(CreatePlatformGatewayRequestDTO body) {
+    /**
+     * Resolve host from vhost URL or, as fallback, from properties.gatewayController.baseUrl.
+     */
+    private String resolveHostFromGatewayUrl(String gatewayUrl, Map<String, Object> properties) {
+        if (StringUtils.isNotBlank(gatewayUrl)) {
+            ParsedGatewayUrl parsed = parseGatewayUrl(gatewayUrl);
+            if (parsed != null) {
+                return parsed.host;
+            }
+        }
+        if (properties != null) {
+            Object controller = properties.get(GATEWAY_PROPERTIES_SECTION);
+            if (controller instanceof Map) {
+                Object baseUrl = ((Map<?, ?>) controller).get(GATEWAY_PROP_BASE_URL);
+                if (baseUrl instanceof String && StringUtils.isNotBlank((String) baseUrl)) {
+                    try {
+                        return new URL((String) baseUrl).getHost();
+                    } catch (Exception ignored) {
+                        // ignore
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
+    /**
+     * Build VHost for environment from create body vhost URL (and optional properties.baseUrl fallback).
+     */
+    private VHost buildVHostFromCreateBody(CreatePlatformGatewayRequestDTO body) {
         VHost vHost = new VHost();
-        VHostDTO vhostDto = body.getVhost();
-        String host = vhostDto != null ? vhostDto.getHost() : null;
-        int httpsPort = (vhostDto != null && vhostDto.getHttpsPort() != null && vhostDto.getHttpsPort() > 0)
-                ? vhostDto.getHttpsPort() : VHost.DEFAULT_HTTPS_PORT;
-        int httpPort = (vhostDto != null && vhostDto.getHttpPort() != null && vhostDto.getHttpPort() > 0)
-                ? vhostDto.getHttpPort() : VHost.DEFAULT_HTTP_PORT;
-        if (body.getProperties() != null) {
+        String host = null;
+        int httpsPort = VHost.DEFAULT_HTTPS_PORT;
+        int httpPort = VHost.DEFAULT_HTTP_PORT;
+
+        if (StringUtils.isNotBlank(vhostString(body.getVhost()))) {
+            ParsedGatewayUrl parsed = parseGatewayUrl(vhostString(body.getVhost()));
+            if (parsed != null) {
+                host = parsed.host;
+                httpsPort = parsed.port;
+            }
+        }
+        if (host == null && body.getProperties() != null) {
             Object controller = body.getProperties().get(GATEWAY_PROPERTIES_SECTION);
             if (controller instanceof Map) {
                 Object baseUrl = ((Map<?, ?>) controller).get(GATEWAY_PROP_BASE_URL);
@@ -199,7 +295,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                         }
                         httpPort = VHost.DEFAULT_HTTP_PORT;
                     } catch (Exception ignored) {
-                        // Fallback to request vhost/default ports.
+                        // fallback
                     }
                 }
             }
@@ -322,8 +418,11 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (!Objects.equals(body.getName(), existing.getName())) {
             throw RestApiUtil.buildBadRequestException("name in body must match existing gateway (immutable)");
         }
-        String bodyVhostHost = body.getVhost() != null ? body.getVhost().getHost() : null;
-        if (!Objects.equals(bodyVhostHost, existing.getVhost())) {
+        String bodyHost = resolveHostFromGatewayUrl(vhostString(body.getVhost()), body.getProperties());
+        if (bodyHost == null || bodyHost.isEmpty()) {
+            throw RestApiUtil.buildBadRequestException("vhost is required for PUT");
+        }
+        if (!Objects.equals(bodyHost, existing.getVhost())) {
             throw RestApiUtil.buildBadRequestException("vhost in body must match existing gateway (immutable)");
         }
         if (log.isInfoEnabled()) {
@@ -405,11 +504,15 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (body.getDisplayName().length() > 128) {
             throw RestApiUtil.buildBadRequestException("displayName must be at most 128 characters");
         }
-        if (body.getVhost() == null || StringUtils.isBlank(body.getVhost().getHost())) {
-            throw RestApiUtil.buildBadRequestException("vhost is required (VHost object with host)");
+        if (body.getVhost() == null || StringUtils.isBlank(body.getVhost().toString())) {
+            throw RestApiUtil.buildBadRequestException("vhost is required");
         }
-        if (body.getVhost().getHost().length() > 255) {
-            throw RestApiUtil.buildBadRequestException("vhost must be at most 255 characters");
+        ParsedGatewayUrl parsed = parseGatewayUrl(body.getVhost().toString());
+        if (parsed == null) {
+            throw RestApiUtil.buildBadRequestException("vhost must be a valid URL");
+        }
+        if (parsed.host.length() > 255) {
+            throw RestApiUtil.buildBadRequestException("vhost host must be at most 255 characters");
         }
         if (StringUtils.isNotBlank(body.getDescription()) && body.getDescription().length() > 1023) {
             throw RestApiUtil.buildBadRequestException("description must be at most 1023 characters");
@@ -427,8 +530,11 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (StringUtils.isBlank(body.getName())) {
             throw RestApiUtil.buildBadRequestException("name is required (PUT full representation)");
         }
-        if (body.getVhost() == null || StringUtils.isBlank(body.getVhost().getHost())) {
+        if (body.getVhost() == null || StringUtils.isBlank(body.getVhost().toString())) {
             throw RestApiUtil.buildBadRequestException("vhost is required (PUT full representation)");
+        }
+        if (parseGatewayUrl(body.getVhost().toString()) == null) {
+            throw RestApiUtil.buildBadRequestException("vhost must be a valid URL");
         }
         if (StringUtils.isBlank(body.getDisplayName())) {
             throw RestApiUtil.buildBadRequestException("displayName is required");
@@ -516,7 +622,8 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         dto.setDisplayName(g.getDisplayName());
         dto.setDescription(g.getDescription());
         dto.setProperties(deserializeProperties(g.getProperties()));
-        dto.setVhost(g.getVhost());
+        String url = toGatewayUrl(g.getVhost());
+        dto.setVhost(url != null ? URI.create(url) : null);
         dto.setIsActive(g.isActive());
         dto.setPermissions(mapPermissionsToDTO(permissions));
         dto.setCreatedAt(g.getCreatedAt());
@@ -533,7 +640,8 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         dto.setDisplayName(g.getDisplayName());
         dto.setDescription(g.getDescription());
         dto.setProperties(deserializeProperties(g.getProperties()));
-        dto.setVhost(g.getVhost());
+        String urlWithToken = toGatewayUrl(g.getVhost());
+        dto.setVhost(urlWithToken != null ? URI.create(urlWithToken) : null);
         dto.setIsActive(g.isActive());
         dto.setPermissions(mapPermissionsToDTO(permissions));
         dto.setCreatedAt(g.getCreatedAt());

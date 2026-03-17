@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdditionalPropertyDTO;
@@ -104,6 +105,7 @@ return null;
         }
     }
     private StatusEnum status = StatusEnum.ACTIVE;
+    private URI vhost = null;
 
   /**
    **/
@@ -369,6 +371,24 @@ return null;
     this.status = status;
   }
 
+  /**
+   * For platform gateway environments, the gateway URL (e.g. https://host:9443). Same as Platform Gateways API; only set when this environment represents a platform gateway.
+   **/
+  public EnvironmentDTO vhost(URI vhost) {
+    this.vhost = vhost;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://mg.wso2.com", value = "For platform gateway environments, the gateway URL (e.g. https://host:9443). Same as Platform Gateways API; only set when this environment represents a platform gateway.")
+  @JsonProperty("vhost")
+  public URI getVhost() {
+    return vhost;
+  }
+  public void setVhost(URI vhost) {
+    this.vhost = vhost;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -393,12 +413,13 @@ return null;
         Objects.equals(endpointURIs, environment.endpointURIs) &&
         Objects.equals(additionalProperties, environment.additionalProperties) &&
         Objects.equals(permissions, environment.permissions) &&
-        Objects.equals(status, environment.status);
+        Objects.equals(status, environment.status) &&
+        Objects.equals(vhost, environment.vhost);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, provider, type, gatewayType, description, isReadOnly, mode, apiDiscoveryScheduledWindow, vhosts, endpointURIs, additionalProperties, permissions, status);
+    return Objects.hash(id, name, displayName, provider, type, gatewayType, description, isReadOnly, mode, apiDiscoveryScheduledWindow, vhosts, endpointURIs, additionalProperties, permissions, status, vhost);
   }
 
   @Override
@@ -421,6 +442,7 @@ return null;
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
     sb.append("}");
     return sb.toString();
   }
