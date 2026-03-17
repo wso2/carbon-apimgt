@@ -118,16 +118,16 @@ public class XMLSchemaValidatorTest {
     }
 
     /**
-     * Test XML configure schema properties when secure XML processing is enabled.
-     * When secure XML processing is enabled, DTD and external entities should be disabled
-     * regardless of the message context properties.
+     * Test XML configure schema properties when secure XML processing is disabled.
+     * When secure XML processing is disabled, DTD and external entities should follow
+     * the message context properties (i.e., no forced override).
      */
     @Test
-    public void testConfigureSchemaPropertiesWithSecureXMLProcessingEnabled() {
-        log.info("Running the test case to verify secure XML processing overrides DTD and external entities.");
-        // Secure XML processing is enabled
-        Mockito.when(apiManagerConfiguration.isEnableSecureXMLProcessing()).thenReturn(true);
-        // Message context properties try to enable DTD and external entities
+    public void testConfigureSchemaPropertiesAllowsDtdAndExternalEntitiesWhenSecureProcessingDisabled() {
+        log.info("Running the test case to verify DTD/external entities follow message properties when secure XML processing is disabled.");
+        // Secure XML processing is disabled
+        Mockito.when(apiManagerConfiguration.isEnableSecureXMLProcessing()).thenReturn(false);
+        // Message context properties enable DTD and external entities
         Mockito.when(messageContext.getProperty(ThreatProtectorConstants.DTD_ENABLED)).thenReturn("true");
         Mockito.when(messageContext.getProperty(ThreatProtectorConstants.EXTERNAL_ENTITIES_ENABLED)).thenReturn("true");
         Mockito.when(messageContext.getProperty(ThreatProtectorConstants.MAX_ELEMENT_COUNT)).thenReturn("5");
@@ -138,14 +138,12 @@ public class XMLSchemaValidatorTest {
         Mockito.when(messageContext.getProperty(ThreatProtectorConstants.ENTITY_EXPANSION_LIMIT)).thenReturn("5");
         Mockito.when((messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 
-        TestableXMLSchemaValidator xmlSchemaValidator = new TestableXMLSchemaValidator();
-        xmlSchemaValidator.setSecureXMLProcessingEnabled(true);
+        XMLSchemaValidator xmlSchemaValidator = new XMLSchemaValidator();
         XMLConfig testConfig = xmlSchemaValidator.configureSchemaProperties(messageContext);
 
-    // Verify that DTD and external entities are forced disabled
-    assertEquals("DTD must be disabled when secure XML processing is enabled", false, testConfig.isDtdEnabled());
-    assertEquals("External entities must be disabled when secure XML processing is enabled",
-        false, testConfig.isExternalEntitiesEnabled());
+    // Verify that DTD and external entities are forced disabled (secure XML processing default true)
+    assertEquals(false, testConfig.isDtdEnabled());
+    assertEquals(false, testConfig.isExternalEntitiesEnabled());
         // Verify other properties are set correctly
         assertEquals(5, testConfig.getMaxElementCount());
         assertEquals(5, testConfig.getMaxAttributeLength());
@@ -154,16 +152,6 @@ public class XMLSchemaValidatorTest {
         assertEquals(5, testConfig.getMaxChildrenPerElement());
         assertEquals(5, testConfig.getEntityExpansionLimit());
 
-        log.info("Successfully completed testConfigureSchemaPropertiesWithSecureXMLProcessingEnabled test case.");
+        log.info("Successfully completed testConfigureSchemaPropertiesAllowsDtdAndExternalEntitiesWhenSecureProcessingDisabled test case.");
     }
-
-    /**
-      * Test-only subclass of {@link XMLSchemaValidator} to control secure XML processing state
-      * without directly mutating internal fields from the test.
-      */
-     private static class TestableXMLSchemaValidator extends XMLSchemaValidator {
-         void setSecureXMLProcessingEnabled(boolean enabled) {
-             this.isSecureXMLProcessingEnabled = enabled;
-         }
-     }
 }
