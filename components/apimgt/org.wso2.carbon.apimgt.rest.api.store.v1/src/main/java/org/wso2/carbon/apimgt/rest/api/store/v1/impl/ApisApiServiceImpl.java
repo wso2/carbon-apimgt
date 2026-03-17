@@ -484,7 +484,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
                 } else {
                     String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                    List<APIKeyInfo> apiKeyList = apiConsumer.getApiApiKeys(apiId, tenantDomain);
+                    List<APIKeyInfo> apiKeyList = apiConsumer.getApiApiKeys(apiId, tenantDomain, RestApiCommonUtil.getLoggedInUsername());
                     List<APIAPIKeyInfoDTO> apiKeyInfoDTOList = ApplicationKeyMappingUtil.formApiApiKeyListToDTOList(apiKeyList);
                     return Response.ok().entity(apiKeyInfoDTOList).build();
                 }

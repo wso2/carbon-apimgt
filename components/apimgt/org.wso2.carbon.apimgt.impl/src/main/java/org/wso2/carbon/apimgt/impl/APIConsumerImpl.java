@@ -720,14 +720,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param applicationId Application Id of the application.
      * @param keyType Key type of the api keys
      * @param tenantDomain Tenant domain
+     * @param username Username
      * @return
      * @throws APIManagementException
      */
     @Override
-    public List<APIKeyInfo> getApiKeys(String applicationId, String keyType, String tenantDomain) throws APIManagementException {
+    public List<APIKeyInfo> getApiKeys(String applicationId, String keyType, String tenantDomain, String username) throws APIManagementException {
         List<APIKeyInfo> apiKeyInfoList;
         try {
-            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeys(applicationId, keyType, tenantDomain);
+            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeys(applicationId, keyType, tenantDomain, username);
         } catch (APIManagementException e) {
                 throw new APIManagementException("Error while getting the api keys for the application: "
                         + applicationId, e);
@@ -741,14 +742,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param applicationId Application Id of the application.
      * @param keyType Key type of the api keys
      * @param tenantDomain Tenant domain
+     * @param username Username
      * @return A List of api keys.
      * @throws APIManagementException This is the custom exception class for API management.
      */
-    public List<APIKeyInfo> getApiKeyAssociations(String applicationId, String keyType, String tenantDomain)
+    public List<APIKeyInfo> getApiKeyAssociations(String applicationId, String keyType, String tenantDomain, String username)
             throws APIManagementException {
         List<APIKeyInfo> apiKeyInfoList;
         try {
-            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeyAssociations(applicationId, keyType, tenantDomain);
+            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeyAssociations(applicationId, keyType, tenantDomain, username);
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while getting the api key associations for the application: "
                     + applicationId, e);
@@ -762,18 +764,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param applicationId Application Id of the application.
      * @param keyType Key type of the api keys
      * @param tenantDomain Tenant domain
+     * @param username Username
      * @return A List of apis with api keys.
      * @throws APIManagementException This is the custom exception class for API management.
      */
     @Override
-    public List<APIKeyInfo> getApisWithApiKeys(String applicationId, String keyType, String tenantDomain)
+    public List<APIKeyInfo> getApisWithApiKeys(String applicationId, String keyType, String tenantDomain, String username)
             throws APIManagementException {
         List<APIKeyInfo> apiKeyInfoList;
         try {
             if (APIUtil.isSubscriptionValidationDisablingAllowed(tenantDomain)) {
                 //ToDo: Get APIs for the logged-in user
             }
-            apiKeyInfoList = apiKeyMgtDAO.getSubscribedAPIsWithAPIKeys(applicationId, keyType, tenantDomain);
+            apiKeyInfoList = apiKeyMgtDAO.getSubscribedAPIsWithAPIKeys(applicationId, keyType, tenantDomain, username);
 
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while getting the APIs with api keys for the application: "
@@ -787,14 +790,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      * @param apiId API Id of the API.
      * @param tenantDomain Tenant domain
+     * @param username Username
      * @return A List of api keys.
      * @throws APIManagementException This is the custom exception class for API management.
      */
     @Override
-    public List<APIKeyInfo> getApiApiKeys(String apiId, String tenantDomain) throws APIManagementException {
+    public List<APIKeyInfo> getApiApiKeys(String apiId, String tenantDomain, String username) throws APIManagementException {
         List<APIKeyInfo> apiKeyInfoList;
         try {
-            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeys(apiId, tenantDomain);
+            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeys(apiId, tenantDomain, username);
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while getting the api keys for the API: "
                     + apiId, e);

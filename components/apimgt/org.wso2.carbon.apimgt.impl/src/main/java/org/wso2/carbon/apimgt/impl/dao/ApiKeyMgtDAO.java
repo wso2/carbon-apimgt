@@ -125,10 +125,11 @@ public class ApiKeyMgtDAO {
      * @param applicationUUID Application UUID
      * @param keyType Key type of the api keys
      * @param tenantDomain Tenant domain
+     * @param username Username
      * @return Returns a list of api keys
      * @throws APIManagementException
      */
-    public List<APIKeyInfo> getAPIKeys(String applicationUUID, String keyType, String tenantDomain) throws APIManagementException {
+    public List<APIKeyInfo> getAPIKeys(String applicationUUID, String keyType, String tenantDomain, String username) throws APIManagementException {
 
         List<APIKeyInfo> apiKeyInfoList = new ArrayList<APIKeyInfo>();
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -137,7 +138,8 @@ public class ApiKeyMgtDAO {
             try (PreparedStatement ps = conn.prepareStatement(getApiKeysSql)) {
                 ps.setString(1, applicationUUID);
                 ps.setString(2, keyType);
-                ps.setString(3, tenantDomain);
+                ps.setString(3, username);
+                ps.setString(4, tenantDomain);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         APIKeyInfo keyInfo = new APIKeyInfo();
@@ -166,10 +168,12 @@ public class ApiKeyMgtDAO {
      * @param applicationUUID Application UUID
      * @param keyType Key type of the api keys
      * @param tenantDomain Tenant domain
+     * @param username Username
      * @return Returns a list of api keys
      * @throws APIManagementException
      */
-    public List<APIKeyInfo> getAPIKeyAssociations(String applicationUUID, String keyType, String tenantDomain) throws APIManagementException {
+    public List<APIKeyInfo> getAPIKeyAssociations(String applicationUUID, String keyType, String tenantDomain, String username)
+            throws APIManagementException {
 
         List<APIKeyInfo> apiKeyInfoList = new ArrayList<APIKeyInfo>();
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -178,8 +182,9 @@ public class ApiKeyMgtDAO {
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
                 ps.setString(1, applicationUUID);
                 ps.setString(2, keyType);
-                ps.setString(3, tenantDomain);
+                ps.setString(3, username);
                 ps.setString(4, tenantDomain);
+                ps.setString(5, tenantDomain);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         APIKeyInfo keyInfo = new APIKeyInfo();
@@ -210,10 +215,11 @@ public class ApiKeyMgtDAO {
      *
      * @param apiUUID API UUID
      * @param tenantDomain Tenant domain
+     * @param username Username
      * @return Returns a list of api keys
      * @throws APIManagementException
      */
-    public List<APIKeyInfo> getAPIKeys(String apiUUID, String tenantDomain) throws APIManagementException {
+    public List<APIKeyInfo> getAPIKeys(String apiUUID, String tenantDomain, String username) throws APIManagementException {
 
         List<APIKeyInfo> apiKeyInfoList = new ArrayList<APIKeyInfo>();
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -221,8 +227,9 @@ public class ApiKeyMgtDAO {
             String sqlQuery = SQLConstants.GET_API_API_KEY_SQL;
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
                 ps.setString(1, apiUUID);
-                ps.setString(2, tenantDomain);
+                ps.setString(2, username);
                 ps.setString(3, tenantDomain);
+                ps.setString(4, tenantDomain);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         APIKeyInfo keyInfo = new APIKeyInfo();
@@ -255,10 +262,12 @@ public class ApiKeyMgtDAO {
      *
      * @param applicationUUID Application UUID
      * @param keyType Key type of the api keys
+     * @param tenantDomain Tenant domain
+     * @param username Username
      * @return Returns a list of APIs with api keys
      * @throws APIManagementException
      */
-    public List<APIKeyInfo> getSubscribedAPIsWithAPIKeys(String applicationUUID, String keyType, String tenantDomain) throws APIManagementException {
+    public List<APIKeyInfo> getSubscribedAPIsWithAPIKeys(String applicationUUID, String keyType, String tenantDomain, String username) throws APIManagementException {
 
         List<APIKeyInfo> apiKeyInfoList = new ArrayList<APIKeyInfo>();
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -267,8 +276,9 @@ public class ApiKeyMgtDAO {
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
                 ps.setString(1, applicationUUID);
                 ps.setString(2, keyType);
-                ps.setString(3, tenantDomain);
+                ps.setString(3, username);
                 ps.setString(4, tenantDomain);
+                ps.setString(5, tenantDomain);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         APIKeyInfo keyInfo = new APIKeyInfo();
