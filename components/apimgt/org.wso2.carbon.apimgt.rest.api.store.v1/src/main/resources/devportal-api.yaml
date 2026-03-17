@@ -6756,9 +6756,8 @@ components:
           example: TIDlOFkpzB7WjufO3OJUhy1fsvAa
         consumerSecrets:
           type: array
-          description: List of all consumer secrets of the application
+          description: A list of all consumer secrets of the application
             When multiple consumer secrets are enabled
-          readOnly: true
           items:
             $ref: '#/components/schemas/ConsumerSecret'
         supportedGrantTypes:

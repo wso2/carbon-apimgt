@@ -173,7 +173,7 @@ return null;
   }
 
   /**
-   * List of all consumer secrets of the application When multiple consumer secrets are enabled
+   * A list of all consumer secrets of the application When multiple consumer secrets are enabled
    **/
   public ApplicationKeyDTO consumerSecrets(List<ConsumerSecretDTO> consumerSecrets) {
     this.consumerSecrets = consumerSecrets;
@@ -181,7 +181,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "List of all consumer secrets of the application When multiple consumer secrets are enabled")
+  @ApiModelProperty(value = "A list of all consumer secrets of the application When multiple consumer secrets are enabled")
       @Valid
   @JsonProperty("consumerSecrets")
   public List<ConsumerSecretDTO> getConsumerSecrets() {
