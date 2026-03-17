@@ -139,11 +139,12 @@ public class XMLSchemaValidatorTest {
         Mockito.when((messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 
         XMLSchemaValidator xmlSchemaValidator = new XMLSchemaValidator();
+        xmlSchemaValidator.isSecureXMLProcessingEnabled = false;
         XMLConfig testConfig = xmlSchemaValidator.configureSchemaProperties(messageContext);
 
-    // Verify that DTD and external entities are forced disabled (secure XML processing default true)
-    assertEquals(false, testConfig.isDtdEnabled());
-    assertEquals(false, testConfig.isExternalEntitiesEnabled());
+        // Since secure XML processing is disabled, DTD and external entities should follow message properties.
+        assertEquals(true, testConfig.isDtdEnabled());
+        assertEquals(true, testConfig.isExternalEntitiesEnabled());
         // Verify other properties are set correctly
         assertEquals(5, testConfig.getMaxElementCount());
         assertEquals(5, testConfig.getMaxAttributeLength());
