@@ -165,10 +165,11 @@ public class ApiKeyMgtDAO {
      *
      * @param applicationUUID Application UUID
      * @param keyType Key type of the api keys
+     * @param tenantDomain Tenant domain
      * @return Returns a list of api keys
      * @throws APIManagementException
      */
-    public List<APIKeyInfo> getAPIKeyAssociations(String applicationUUID, String keyType) throws APIManagementException {
+    public List<APIKeyInfo> getAPIKeyAssociations(String applicationUUID, String keyType, String tenantDomain) throws APIManagementException {
 
         List<APIKeyInfo> apiKeyInfoList = new ArrayList<APIKeyInfo>();
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -177,6 +178,8 @@ public class ApiKeyMgtDAO {
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
                 ps.setString(1, applicationUUID);
                 ps.setString(2, keyType);
+                ps.setString(3, tenantDomain);
+                ps.setString(4, tenantDomain);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         APIKeyInfo keyInfo = new APIKeyInfo();
@@ -191,6 +194,7 @@ public class ApiKeyMgtDAO {
                         keyInfo.setApplicationId(applicationUUID);
                         keyInfo.setKeyType(keyType);
                         keyInfo.setApiUUId(rs.getString("API_UUID"));
+                        keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
                         apiKeyInfoList.add(keyInfo);
                     }
                 }
@@ -254,7 +258,7 @@ public class ApiKeyMgtDAO {
      * @return Returns a list of APIs with api keys
      * @throws APIManagementException
      */
-    public List<APIKeyInfo> getSubscribedAPIsWithAPIKeys(String applicationUUID, String keyType) throws APIManagementException {
+    public List<APIKeyInfo> getSubscribedAPIsWithAPIKeys(String applicationUUID, String keyType, String tenantDomain) throws APIManagementException {
 
         List<APIKeyInfo> apiKeyInfoList = new ArrayList<APIKeyInfo>();
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -263,6 +267,8 @@ public class ApiKeyMgtDAO {
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
                 ps.setString(1, applicationUUID);
                 ps.setString(2, keyType);
+                ps.setString(3, tenantDomain);
+                ps.setString(4, tenantDomain);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         APIKeyInfo keyInfo = new APIKeyInfo();
@@ -270,6 +276,7 @@ public class ApiKeyMgtDAO {
                         keyInfo.setKeyName(rs.getString("NAME"));
                         keyInfo.setApiUUId(rs.getString("API_UUID"));
                         keyInfo.setApiName(rs.getString("API_NAME"));
+                        keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
                         keyInfo.setApplicationId(applicationUUID);
                         keyInfo.setKeyType(keyType);
                         apiKeyInfoList.add(keyInfo);
@@ -425,6 +432,7 @@ public class ApiKeyMgtDAO {
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
                         keyInfo.setApiUUId(apiUUId);
                         keyInfo.setKeyType(rs.getString("KEY_TYPE"));
+                        keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
                         keyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
                         keyInfo.setApplicationId(rs.getString("APPLICATION_UUID"));
                     }
@@ -441,10 +449,11 @@ public class ApiKeyMgtDAO {
      *
      * @param appUUId Application UUID
      * @param keyUUId UUId of the api key
+     * @param tenantDomain Tenant domain
      * @return APIKeyInfo
      * @throws APIManagementException
      */
-    public APIKeyInfo getAPIKeyDetailsByKeyUUIDAndAppUUID(String appUUId, String keyUUId) throws APIManagementException {
+    public APIKeyInfo getAPIKeyDetailsByKeyUUIDAndAppUUID(String appUUId, String keyUUId, String tenantDomain) throws APIManagementException {
 
         APIKeyInfo apiKeyInfo = new APIKeyInfo();
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -452,9 +461,12 @@ public class ApiKeyMgtDAO {
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
                 ps.setString(1, appUUId);
                 ps.setString(2, keyUUId);
+                ps.setString(3, tenantDomain);
+                ps.setString(4, tenantDomain);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         apiKeyInfo.setApiUUId(rs.getString("API_UUID"));
+                        apiKeyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
                         apiKeyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         apiKeyInfo.setKeyName(rs.getString("NAME"));
                         apiKeyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
@@ -473,9 +485,10 @@ public class ApiKeyMgtDAO {
      *
      * @param appUUId UUId of the Application
      * @param keyUUId API key UUId
+     * @param tenantDomain Tenant domain
      * @throws APIManagementException
      */
-    public void removeAssociationOfAPIKeyViaApp(String appUUId, String keyUUId) throws APIManagementException {
+    public void removeAssociationOfAPIKeyViaApp(String appUUId, String keyUUId, String tenantDomain) throws APIManagementException {
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
@@ -483,6 +496,7 @@ public class ApiKeyMgtDAO {
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
                 ps.setString(1, appUUId);
                 ps.setString(2, keyUUId);
+                ps.setString(3, tenantDomain);
                 ps.executeUpdate();
                 conn.commit();
             }
@@ -497,10 +511,11 @@ public class ApiKeyMgtDAO {
      * @param apiUUId API UUID
      * @param appUUId Application UUID
      * @param keyUUId UUID of the api key
+     * @param tenantDomain Tenant domain
      * @return APIKeyInfo
      * @throws APIManagementException
      */
-    public APIKeyInfo getKeyDetailsForAssociation(String apiUUId, String appUUId, String keyUUId) throws APIManagementException {
+    public APIKeyInfo getKeyDetailsForAssociation(String apiUUId, String appUUId, String keyUUId, String tenantDomain) throws APIManagementException {
 
         APIKeyInfo apiKeyInfo = new APIKeyInfo();
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -509,12 +524,15 @@ public class ApiKeyMgtDAO {
                 ps.setString(1, appUUId);
                 ps.setString(2, apiUUId);
                 ps.setString(3, keyUUId);
+                ps.setString(4, tenantDomain);
+                ps.setString(5, tenantDomain);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         apiKeyInfo.setApiName(rs.getString("API_NAME"));
                         apiKeyInfo.setApplicationName(rs.getString("APPLICATION_NAME"));
                         apiKeyInfo.setKeyName(rs.getString("NAME"));
                         apiKeyInfo.setKeyType(rs.getString("KEY_TYPE"));
+                        apiKeyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
                         apiKeyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
                         apiKeyInfo.setAppId(rs.getInt("APPLICATION_ID"));
                     }
@@ -554,10 +572,11 @@ public class ApiKeyMgtDAO {
      *
      * @param apiUUId API UUID
      * @param keyUUId UUID of the api key
+     * @param tenantDomain Tenant domain
      * @return APIKeyInfo
      * @throws APIManagementException
      */
-    public APIKeyInfo getKeyTypeByAPIUUIDAndKeyName(String apiUUId, String keyUUId) throws APIManagementException {
+    public APIKeyInfo getKeyTypeByAPIUUIDAndKeyName(String apiUUId, String keyUUId, String tenantDomain) throws APIManagementException {
 
         APIKeyInfo apiKeyInfo = new APIKeyInfo();
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -565,11 +584,14 @@ public class ApiKeyMgtDAO {
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
                 ps.setString(1, apiUUId);
                 ps.setString(2, keyUUId);
+                ps.setString(3, tenantDomain);
+                ps.setString(4, tenantDomain);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         apiKeyInfo.setKeyName(rs.getString("NAME"));
                         apiKeyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         apiKeyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
+                        apiKeyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
                     }
                 }
             }
@@ -583,15 +605,17 @@ public class ApiKeyMgtDAO {
      * Remove association of an api key provided by the key name
      *
      * @param keyUUId API key UUId
+     * @param tenantDomain Tenant domain
      * @throws APIManagementException
      */
-    public void removeAssociationOfAPIKey(String keyUUId) throws APIManagementException {
+    public void removeAssociationOfAPIKey(String keyUUId, String tenantDomain) throws APIManagementException {
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
             String sqlQuery = SQLConstants.REMOVE_API_KEY_ASSOCIATION_SQL;
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
                 ps.setString(1, keyUUId);
+                ps.setString(2, tenantDomain);
                 ps.executeUpdate();
                 conn.commit();
             }

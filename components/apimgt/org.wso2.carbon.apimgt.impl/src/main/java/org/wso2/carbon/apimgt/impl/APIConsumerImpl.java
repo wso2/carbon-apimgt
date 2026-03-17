@@ -740,14 +740,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      * @param applicationId Application Id of the application.
      * @param keyType Key type of the api keys
+     * @param tenantDomain Tenant domain
      * @return A List of api keys.
      * @throws APIManagementException This is the custom exception class for API management.
      */
-    public List<APIKeyInfo> getApiKeyAssociations(String applicationId, String keyType)
+    public List<APIKeyInfo> getApiKeyAssociations(String applicationId, String keyType, String tenantDomain)
             throws APIManagementException {
         List<APIKeyInfo> apiKeyInfoList;
         try {
-            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeyAssociations(applicationId, keyType);
+            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeyAssociations(applicationId, keyType, tenantDomain);
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while getting the api key associations for the application: "
                     + applicationId, e);
@@ -760,18 +761,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      * @param applicationId Application Id of the application.
      * @param keyType Key type of the api keys
+     * @param tenantDomain Tenant domain
      * @return A List of apis with api keys.
      * @throws APIManagementException This is the custom exception class for API management.
      */
     @Override
-    public List<APIKeyInfo> getApisWithApiKeys(String applicationId, String keyType)
+    public List<APIKeyInfo> getApisWithApiKeys(String applicationId, String keyType, String tenantDomain)
             throws APIManagementException {
         List<APIKeyInfo> apiKeyInfoList;
         try {
             if (APIUtil.isSubscriptionValidationDisablingAllowed(tenantDomain)) {
                 //ToDo: Get APIs for the logged-in user
             }
-            apiKeyInfoList = apiKeyMgtDAO.getSubscribedAPIsWithAPIKeys(applicationId, keyType);
+            apiKeyInfoList = apiKeyMgtDAO.getSubscribedAPIsWithAPIKeys(applicationId, keyType, tenantDomain);
 
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while getting the APIs with api keys for the application: "
@@ -4042,7 +4044,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @throws APIManagementException
      */
     @Override
-    public void revokeApiKey(String keyUUID, String tenantDomain)
+    public void revokeApiKey(String keyUUID, String tenantDomain, String username)
             throws APIManagementException {
 
         RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
@@ -4058,6 +4060,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUID, tenantDomain);
         if (apiKeyInfo == null || apiKeyInfo.getKeyUUID() == null) {
             throw new APIMgtResourceNotFoundException("Active API key not found for UUID: " + keyUUID);
+        }
+        if (!username.equals(apiKeyInfo.getAuthUser())) {
+            throw new APIMgtAuthorizationFailedException("User is not authorized to revoke the API key for UUID: " + keyUUID);
         }
         apiKeyMgtDAO.revokeAPIKey(keyUUID, tenantDomain);
         revocationRequestPublisher.publishRevocationEvents(apiKeyInfo.getApiKeyHash(), properties);
@@ -4082,8 +4087,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId);
         }
+        if (!username.equals(apiKeyInfo.getAuthUser())) {
+            throw new APIMgtAuthorizationFailedException("User is not authorized to regenerate the API key for UUID: " + keyUUId);
+        }
         // Revoke the existing key
-        revokeApiKey(keyUUId, tenantDomain);
+        revokeApiKey(keyUUId, tenantDomain, username);
         // Generate a new key with the same name and other additional properties
         APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
         apiKeyInfoDTO.setKeyName(apiKeyInfo.getKeyName());
@@ -4153,8 +4161,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId);
         }
+        if (!username.equals(apiKeyInfo.getAuthUser())) {
+            throw new APIMgtAuthorizationFailedException("User is not authorized to regenerate the API key for UUID: " + keyUUId);
+        }
         // Revoke the existing key
-        revokeApiKey(keyUUId, tenantDomain);
+        revokeApiKey(keyUUId, tenantDomain, username);
         // Generate a new key with the same name and other additional properties
         APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
         apiKeyInfoDTO.setKeyName(apiKeyInfo.getKeyName());
@@ -4216,14 +4227,19 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @param apiUUId        API UUId of the API
      * @param keyUUId        UUId of API key
      * @param appUUId        UUId of the Application
+     * @param tenantDomain   Tenant domain
+     * @param username       Username
      * @throws APIManagementException This is the custom exception class for API management.
      */
     @Override
-    public APIKeyInfo createAssociationToApp(String apiUUId, String keyUUId, String appUUId)
+    public APIKeyInfo createAssociationToApp(String apiUUId, String keyUUId, String appUUId, String tenantDomain, String username)
             throws APIManagementException {
-        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getKeyDetailsForAssociation(apiUUId, appUUId, keyUUId);
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getKeyDetailsForAssociation(apiUUId, appUUId, keyUUId, tenantDomain);
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId);
+        }
+        if (!username.equals(apiKeyInfo.getAuthUser())) {
+            throw new APIMgtAuthorizationFailedException("User is not authorized to create association of the API key for UUID: " + keyUUId);
         }
         apiKeyMgtDAO.createAssociationToApiKey(keyUUId, appUUId);
         sendAPIKeyAssociationInfoEvent(apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
@@ -4237,14 +4253,19 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * Remove association of an opaque api key
      * @param appUUId UUId of the Application
      * @param keyUUId Api key UUId
+     * @param tenantDomain   Tenant domain
+     * @param username       Username
      * @throws APIManagementException
      */
-    public void removeApiKeyAssociationViaApp(String appUUId, String keyUUId) throws APIManagementException {
-        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKeyDetailsByKeyUUIDAndAppUUID(appUUId, keyUUId);
+    public void removeApiKeyAssociationViaApp(String appUUId, String keyUUId, String tenantDomain, String username) throws APIManagementException {
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKeyDetailsByKeyUUIDAndAppUUID(appUUId, keyUUId, tenantDomain);
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for name: " + keyUUId);
         }
-        apiKeyMgtDAO.removeAssociationOfAPIKeyViaApp(appUUId, keyUUId);
+        if (!username.equals(apiKeyInfo.getAuthUser())) {
+            throw new APIMgtAuthorizationFailedException("User is not authorized to remove association of the API key for UUID: " + keyUUId);
+        }
+        apiKeyMgtDAO.removeAssociationOfAPIKeyViaApp(appUUId, keyUUId, tenantDomain);
         sendAPIKeyAssociationInfoEvent(apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
                 apiKeyInfo.getApiUUId(), appUUId, apiKeyInfo.getAppId(), "REMOVE_ASSOCIATION");
     }
@@ -4253,14 +4274,19 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * Remove association of an opaque api key
      * @param apiUUId UUId of the API
      * @param keyUUId Api key UUId
+     * @param tenantDomain TenantDomain
+     * @param username User name
      * @throws APIManagementException
      */
-    public void removeApiKeyAssociation(String apiUUId, String keyUUId) throws APIManagementException {
-        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, keyUUId);
+    public void removeApiKeyAssociation(String apiUUId, String keyUUId, String tenantDomain, String username) throws APIManagementException {
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, keyUUId, tenantDomain);
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId);
         }
-        apiKeyMgtDAO.removeAssociationOfAPIKey(keyUUId);
+        if (!username.equals(apiKeyInfo.getAuthUser())) {
+            throw new APIMgtAuthorizationFailedException("User is not authorized to remove association of the API key for UUID: " + keyUUId);
+        }
+        apiKeyMgtDAO.removeAssociationOfAPIKey(keyUUId, tenantDomain);
         sendAPIKeyAssociationInfoEvent(apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(), apiUUId,
                 null, 0, "REMOVE_ASSOCIATION");
     }
