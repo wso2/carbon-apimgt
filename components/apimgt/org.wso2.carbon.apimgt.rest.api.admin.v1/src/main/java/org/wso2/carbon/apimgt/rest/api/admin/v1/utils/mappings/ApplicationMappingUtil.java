@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationKeyManagerInfo;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -102,16 +103,19 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setName(application.getName());
         applicationInfoDTO.setGroupId(application.getGroupId());
         applicationInfoDTO.setOwner(application.getOwner());
-        applicationInfoDTO.setCreatedTime(application.getCreatedTime());
         if (StringUtils.isNotEmpty(application.getTokenType()) && !APIConstants.DEFAULT_TOKEN_TYPE
                 .equals(application.getTokenType())) {
             applicationInfoDTO.setTokenType(ApplicationInfoDTO.TokenTypeEnum.valueOf(application.getTokenType()));
         }
-        List<KeyManagerInfoDTO> keyManagers = new ArrayList<>();
-        for (KeyManagerConfiguration config : application.getKeyManagers()) {
-            keyManagers.add(fromKeyManagerConfigurationToInfoDTO(config));
+        // Only if it's ApplicationKeyManagerInfo
+        if (application instanceof ApplicationKeyManagerInfo) {
+            ApplicationKeyManagerInfo appKeyManagerInfo = (ApplicationKeyManagerInfo) application;
+            List<KeyManagerInfoDTO> keyManagers = new ArrayList<>();
+            for (KeyManagerConfiguration config : appKeyManagerInfo.getKeyManagers()) {
+                keyManagers.add(fromKeyManagerConfigurationToInfoDTO(config));
+            }
+            applicationInfoDTO.setKeyManagers(keyManagers);
         }
-        applicationInfoDTO.setKeyManagers(keyManagers);
         return applicationInfoDTO;
     }
 
