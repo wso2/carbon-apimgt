@@ -406,13 +406,15 @@ public class ImportUtils {
                     byte[] bytes = Base64.decodeBase64(latestSecretValue);
                     jsonParamObj.addProperty(APIConstants.JSON_CLIENT_SECRET, new String(bytes, StandardCharsets.UTF_8));
                 }
-                secretDescription = consumerSecret != null
-                        && consumerSecret.getAdditionalProperties() != null
-                        ? (String) consumerSecret.getAdditionalProperties().get(ApplicationConstants.SECRET_DESCRIPTION)
+                Object secretDescriptionObj = consumerSecret != null && consumerSecret.getAdditionalProperties() != null
+                        ? consumerSecret.getAdditionalProperties().get(ApplicationConstants.SECRET_DESCRIPTION)
                         : null;
-                Number expiresAt = consumerSecret != null && consumerSecret.getAdditionalProperties() != null
-                        ? (Number) consumerSecret.getAdditionalProperties().get(ApplicationConstants.SECRET_EXPIRES_AT)
+                secretDescription = secretDescriptionObj instanceof String ? (String) secretDescriptionObj : null;
+
+                Object expiresAtObj = consumerSecret != null && consumerSecret.getAdditionalProperties() != null
+                        ? consumerSecret.getAdditionalProperties().get(ApplicationConstants.SECRET_EXPIRES_AT)
                         : null;
+                Number expiresAt = expiresAtObj instanceof Number ? (Number) expiresAtObj : null;
                 secretExpiresIn = expiresAt != null ? convertExpiresAtToExpiresIn(expiresAt.longValue()) : null;
             } else if (!StringUtils.isEmpty(applicationKeyDTO.getConsumerSecret())) {
                 byte[] bytes = Base64.decodeBase64(applicationKeyDTO.getConsumerSecret());

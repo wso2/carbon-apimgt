@@ -4908,9 +4908,6 @@ public final class APIUtil {
     public static String maskSecret(String secret) {
 
         if (skipSecretMasking.get()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Skipping secret masking");
-            }
             return secret;
         }
         boolean isHashingEnabled = OAuthServerConfiguration.getInstance().isClientSecretHashEnabled();
@@ -4935,9 +4932,6 @@ public final class APIUtil {
      */
     public static void enableSkipSecretMasking() {
         skipSecretMasking.set(Boolean.TRUE);
-        if (log.isDebugEnabled()) {
-            log.debug("Secret masking disabled");
-        }
     }
 
     /**
@@ -4946,9 +4940,6 @@ public final class APIUtil {
      */
     public static void clearSkipSecretMasking() {
         skipSecretMasking.remove();
-        if (log.isDebugEnabled()) {
-            log.debug("Cleared skip secret masking flag");
-        }
     }
 
     private static String generateMask(int length) {
