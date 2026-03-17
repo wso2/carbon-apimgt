@@ -462,7 +462,6 @@ public class ApiKeyMgtDAO {
                 ps.setString(1, appUUId);
                 ps.setString(2, keyUUId);
                 ps.setString(3, tenantDomain);
-                ps.setString(4, tenantDomain);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         apiKeyInfo.setApiUUId(rs.getString("API_UUID"));

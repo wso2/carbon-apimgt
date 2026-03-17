@@ -880,6 +880,7 @@ public interface APIConsumer extends APIManager {
      *
      * @param keyUUId Api key UUID
      * @param tenantDomain Tenant domain
+     * @param username User name
      * @throws APIManagementException
      */
     void revokeApiKey(String keyUUId, String tenantDomain, String username) throws APIManagementException;
