@@ -398,7 +398,7 @@ public class ImportUtils {
         Integer secretExpiresIn = null;
         if (!StringUtils.isEmpty(applicationKeyDTO.getConsumerKey())) {
             jsonParamObj.addProperty(APIConstants.JSON_CLIENT_ID, applicationKeyDTO.getConsumerKey());
-            if (APIUtil.isMultipleClientSecretsEnabled()) {
+            if (APIUtil.isMultipleClientSecretsEnabled() && consumerSecrets != null && !consumerSecrets.isEmpty()) {
                 ConsumerSecretDTO consumerSecret = consumerSecrets.get(0);
                 String latestSecretValue = consumerSecret != null ? consumerSecret.getSecretValue() : null;
                 if (!StringUtils.isEmpty(latestSecretValue)) {
@@ -461,7 +461,7 @@ public class ImportUtils {
         }
 
         // Re-Hydrate Key Manager with other client secrets.
-        if (APIUtil.isMultipleClientSecretsEnabled()) {
+        if (APIUtil.isMultipleClientSecretsEnabled() && consumerSecrets != null && consumerSecrets.size() > 1) {
             String consumerKey = applicationKeyDTO.getConsumerKey();
             // skiping the first secret as it is already added/updated above
             for (ConsumerSecretDTO secretDTO : consumerSecrets.subList(1, consumerSecrets.size())) {
