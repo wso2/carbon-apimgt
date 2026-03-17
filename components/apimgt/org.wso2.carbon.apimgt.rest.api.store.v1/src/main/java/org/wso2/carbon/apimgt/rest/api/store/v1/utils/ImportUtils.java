@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretRequest;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -44,6 +45,7 @@ import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ConsumerSecretDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.models.ExportedSubscribedAPI;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -52,6 +54,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -351,6 +354,23 @@ public class ImportUtils {
     }
 
     /**
+     * Convert an absolute expiry epoch-seconds value to a relative {@code expiresIn} seconds value.
+     *
+     * @param expiresAtSecs absolute expiry time in epoch seconds
+     * @return remaining seconds until expiry, or {@code null} if already expired or no expiry
+     */
+    private static Integer convertExpiresAtToExpiresIn(long expiresAtSecs) {
+
+        if (expiresAtSecs > 0) {
+            long expiresIn = expiresAtSecs - (System.currentTimeMillis() / 1000);
+            if (expiresIn > 0) {
+                return (int) expiresIn;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Adds a key to a given Application
      *
      * @param username          User for import application
@@ -373,12 +393,20 @@ public class ImportUtils {
            User can provide clientId only or both clientId and clientSecret
            User cannot provide clientSecret only
          */
+        List<ConsumerSecretDTO> consumerSecrets = applicationKeyDTO.getConsumerSecrets();
+        boolean hasMultipleSecrets = consumerSecrets != null && !consumerSecrets.isEmpty();
         if (!StringUtils.isEmpty(applicationKeyDTO.getConsumerKey())) {
             jsonParamObj.addProperty(APIConstants.JSON_CLIENT_ID, applicationKeyDTO.getConsumerKey());
-            if (!StringUtils.isEmpty(applicationKeyDTO.getConsumerSecret())) {
+            if (hasMultipleSecrets) {
+                // Use the first secret as the latest secret during registration.
+                String latestSecretValue = consumerSecrets.get(0).getSecretValue();
+                if (!StringUtils.isEmpty(latestSecretValue)) {
+                    byte[] bytes = Base64.decodeBase64(latestSecretValue);
+                    jsonParamObj.addProperty(APIConstants.JSON_CLIENT_SECRET, new String(bytes, StandardCharsets.UTF_8));
+                }
+            } else if (!StringUtils.isEmpty(applicationKeyDTO.getConsumerSecret())) {
                 byte[] bytes = Base64.decodeBase64(applicationKeyDTO.getConsumerSecret());
-                String consumerSecret = new String(bytes, StandardCharsets.UTF_8);
-                jsonParamObj.addProperty(APIConstants.JSON_CLIENT_SECRET, consumerSecret);
+                jsonParamObj.addProperty(APIConstants.JSON_CLIENT_SECRET, new String(bytes, StandardCharsets.UTF_8));
             }
         }
         if (!StringUtils.isEmpty(applicationKeyDTO.getCallbackUrl())) {
@@ -414,6 +442,35 @@ public class ImportUtils {
             apiConsumer.updateAuthClient(username, application, applicationKeyDTO.getKeyType().toString(),
                     applicationKeyDTO.getCallbackUrl(), null, null, null, application.getGroupId(), jsonParams,
                     applicationKeyDTO.getKeyManager());
+        }
+
+        // Re-Hydrate Key Manager with given client secrets.
+        if (hasMultipleSecrets) {
+            String consumerKey = applicationKeyDTO.getConsumerKey();
+            for (ConsumerSecretDTO secretDTO : consumerSecrets) {
+                ConsumerSecretRequest consumerSecretRequest = new ConsumerSecretRequest();
+                consumerSecretRequest.setClientId(consumerKey);
+                if (secretDTO.getAdditionalProperties() != null) {
+                    Map<String, Object> additionalProps = new HashMap<>(secretDTO.getAdditionalProperties());
+                    Object expiresAtObj = additionalProps.remove(ApplicationConstants.SECRET_EXPIRES_AT);
+                    if (expiresAtObj instanceof Number) {
+                        Integer expiresIn = convertExpiresAtToExpiresIn(((Number) expiresAtObj).longValue());
+                        if (expiresIn != null) {
+                            additionalProps.put(ApplicationConstants.SECRET_EXPIRES_IN, expiresIn);
+                        }
+                    }
+                    consumerSecretRequest.putAll(additionalProps);
+                }
+                if (!StringUtils.isEmpty(secretDTO.getSecretValue())) {
+                    byte[] decodedBytes = Base64.decodeBase64(secretDTO.getSecretValue());
+                    consumerSecretRequest.setClientSecret(new String(decodedBytes, StandardCharsets.UTF_8));
+                }
+                try {
+                    apiConsumer.generateConsumerSecret(applicationKeyDTO.getKeyManager(), consumerSecretRequest);
+                } catch (Exception e) {
+                    log.error("Failed to restore client secret for application key: " + consumerKey, e);
+                }
+            }
         }
     }
 }
