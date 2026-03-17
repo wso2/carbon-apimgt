@@ -314,8 +314,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 if (applicationDTO.getKeys().size() > 0) {
                     for (ApplicationKeyDTO applicationKeyDTO : applicationDTO.getKeys()) {
                         if (applicationKeyDTO.getConsumerKey() != null && !applicationKeyDTO.getConsumerKey()
-                                .isEmpty() && (applicationKeyDTO.getConsumerSecret() == null || applicationKeyDTO.getConsumerSecret()
-                                .isEmpty())) {
+                                .isEmpty()
+                                && (applicationKeyDTO.getConsumerSecrets() != null && !applicationKeyDTO.getConsumerSecrets().isEmpty()
+                                        || applicationKeyDTO.getConsumerSecret() != null && !applicationKeyDTO.getConsumerSecret().isEmpty())) {
                             if (!availableTypes.contains(applicationKeyDTO.getKeyType().value())) {
                                 ImportUtils.addApplicationKey(ownerId, importedApplication, applicationKeyDTO,
                                         apiConsumer, false);
