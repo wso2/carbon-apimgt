@@ -103,6 +103,7 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setName(application.getName());
         applicationInfoDTO.setGroupId(application.getGroupId());
         applicationInfoDTO.setOwner(application.getOwner());
+        applicationInfoDTO.setCreatedTime(application.getCreatedTime());
         if (StringUtils.isNotEmpty(application.getTokenType()) && !APIConstants.DEFAULT_TOKEN_TYPE
                 .equals(application.getTokenType())) {
             applicationInfoDTO.setTokenType(ApplicationInfoDTO.TokenTypeEnum.valueOf(application.getTokenType()));
