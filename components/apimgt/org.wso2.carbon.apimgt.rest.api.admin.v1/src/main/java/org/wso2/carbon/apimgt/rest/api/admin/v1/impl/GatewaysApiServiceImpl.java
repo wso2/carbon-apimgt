@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
-import org.wso2.carbon.apimgt.api.model.CreatePlatformGatewayResult;
+import org.wso2.carbon.apimgt.api.model.PlatformGatewayRegistrationResult;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -158,7 +158,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
         String propertiesJson = serializeProperties(body.getProperties());
         String host = resolveHostFromGatewayUrl(vhostString(body.getVhost()), body.getProperties());
-        CreatePlatformGatewayResult result = service.createGateway(
+        PlatformGatewayRegistrationResult result = service.createGateway(
                 organization,
                 body.getName(),
                 body.getDisplayName(),
@@ -468,7 +468,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         PlatformGatewayService service =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
-        CreatePlatformGatewayResult result =
+        PlatformGatewayRegistrationResult result =
                 service.regenerateGatewayToken(organization, gatewayId);
         PlatformGateway gateway = result.getGateway();
 

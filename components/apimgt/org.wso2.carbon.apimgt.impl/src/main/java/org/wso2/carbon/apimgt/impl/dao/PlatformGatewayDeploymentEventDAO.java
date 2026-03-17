@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -72,7 +73,7 @@ public class PlatformGatewayDeploymentEventDAO {
             ps.setString(3, apiId.trim());
             ps.setString(4, revisionUuid != null ? revisionUuid.trim() : null);
             ps.setString(5, eventType.trim());
-            ps.setString(6, payload);
+            ps.setBytes(6, payload.getBytes(StandardCharsets.UTF_8));
             ps.setTimestamp(7, now);
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -102,7 +103,8 @@ public class PlatformGatewayDeploymentEventDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     String id = rs.getString("ID");
-                    String payload = rs.getString("PAYLOAD");
+                    byte[] payloadBytes = rs.getBytes("PAYLOAD");
+                    String payload = payloadBytes != null ? new String(payloadBytes, StandardCharsets.UTF_8) : null;
                     if (id != null && payload != null) {
                         list.add(new DeploymentEventRecord(id, payload));
                     }
@@ -175,7 +177,8 @@ public class PlatformGatewayDeploymentEventDAO {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         String id = rs.getString("ID");
-                        String payload = rs.getString("PAYLOAD");
+                        byte[] payloadBytes = rs.getBytes("PAYLOAD");
+                        String payload = payloadBytes != null ? new String(payloadBytes, StandardCharsets.UTF_8) : null;
                         if (id != null && payload != null) {
                             list.add(new DeploymentEventRecord(id, payload));
                         }

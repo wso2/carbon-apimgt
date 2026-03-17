@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PlatformGatewayService;
-import org.wso2.carbon.apimgt.api.model.CreatePlatformGatewayResult;
+import org.wso2.carbon.apimgt.api.model.PlatformGatewayRegistrationResult;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayMode;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
@@ -68,7 +68,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
     }
 
     @Override
-    public CreatePlatformGatewayResult createGateway(String organizationId, String name, String displayName,
+    public PlatformGatewayRegistrationResult createGateway(String organizationId, String name, String displayName,
                                                      String description, String vhost, String propertiesJson)
             throws APIManagementException {
         APIAdminImpl apiAdmin = new APIAdminImpl();
@@ -111,7 +111,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
                     Collections.singletonList(name));
 
             String registrationToken = tokenId + PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR + plainToken;
-            return new CreatePlatformGatewayResult(envToApiModel(env), registrationToken);
+            return new PlatformGatewayRegistrationResult(envToApiModel(env), registrationToken);
         } catch (APIManagementException e) {
             try {
                 apiAdmin.deleteEnvironment(organizationId, gatewayId);
@@ -254,7 +254,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
     }
 
     @Override
-    public CreatePlatformGatewayResult regenerateGatewayToken(String organizationId, String gatewayId)
+    public PlatformGatewayRegistrationResult regenerateGatewayToken(String organizationId, String gatewayId)
             throws APIManagementException {
         PlatformGateway existing = getGatewayById(gatewayId);
         if (existing == null) {
@@ -279,7 +279,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
         PlatformGatewayDAO.getInstance().regenerateToken(gatewayId, tokenId, tokenHash, now);
 
         String registrationToken = tokenId + PlatformGatewayTokenUtil.COMBINED_TOKEN_SEPARATOR + plainToken;
-        return new CreatePlatformGatewayResult(existing, registrationToken);
+        return new PlatformGatewayRegistrationResult(existing, registrationToken);
     }
 
     @Override

@@ -19,14 +19,14 @@
 package org.wso2.carbon.apimgt.api.model;
 
 /**
- * Result of creating a platform gateway, including the one-time registration token.
+ * Result of platform gateway registration, including the gateway and one-time registration token.
  */
-public class CreatePlatformGatewayResult {
+public class PlatformGatewayRegistrationResult {
 
     private final PlatformGateway gateway;
     private final String registrationToken;
 
-    public CreatePlatformGatewayResult(PlatformGateway gateway, String registrationToken) {
+    public PlatformGatewayRegistrationResult(PlatformGateway gateway, String registrationToken) {
         this.gateway = gateway;
         this.registrationToken = registrationToken;
     }

@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.api;
 
-import org.wso2.carbon.apimgt.api.model.CreatePlatformGatewayResult;
+import org.wso2.carbon.apimgt.api.model.PlatformGatewayRegistrationResult;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 
 import java.util.List;
@@ -41,7 +41,7 @@ public interface PlatformGatewayService {
      * @return created gateway and registration token (returned only once)
      * @throws APIManagementException if validation fails or name already exists (use ExceptionCodes.PLATFORM_GATEWAY_NAME_ALREADY_EXISTS for 409)
      */
-    CreatePlatformGatewayResult createGateway(String organizationId, String name, String displayName,
+    PlatformGatewayRegistrationResult createGateway(String organizationId, String name, String displayName,
                                               String description, String vhost, String propertiesJson)
             throws APIManagementException;
 
@@ -94,7 +94,7 @@ public interface PlatformGatewayService {
      * @return the gateway with the new registration token (returned only once)
      * @throws APIManagementException if gateway not found or on database error
      */
-    CreatePlatformGatewayResult regenerateGatewayToken(String organizationId, String gatewayId)
+    PlatformGatewayRegistrationResult regenerateGatewayToken(String organizationId, String gatewayId)
             throws APIManagementException;
 
     /**
