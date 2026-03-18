@@ -991,7 +991,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                             String tokenIdentifier = payload.getString(APIConstants.JwtTokenConstants.JWT_ID);
                                             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
                                             // Resolve apiId/keyName so platform gateways can be notified (6-arg revoke broadcasts)
-                                            List<APIKeyInfo> appKeys = apiConsumer.getApiKeys(applicationId, keyType, tenantDomain);
+                                            List<APIKeyInfo> appKeys = apiConsumer.getApiKeys(applicationId, keyType, tenantDomain, username);
                                             APIKeyInfo keyInfo = (appKeys != null) ? appKeys.stream()
                                                     .filter(k -> tokenIdentifier.equals(k.getKeyUUID()))
                                                     .findFirst().orElse(null) : null;
