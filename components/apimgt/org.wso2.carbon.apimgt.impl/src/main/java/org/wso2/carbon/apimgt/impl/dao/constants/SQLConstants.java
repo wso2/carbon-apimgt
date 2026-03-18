@@ -1181,6 +1181,15 @@ public class SQLConstants {
             " WHERE " +
             "   UUID = ? ";
 
+    public static final String UPDATE_APPLICATION_TOKEN_TYPE =
+            "UPDATE AM_APPLICATION " +
+                    " SET " +
+                    "   TOKEN_TYPE = ?, " +
+                    "   UPDATED_BY = ?, " +
+                    "   UPDATED_TIME = ? " +
+                    " WHERE " +
+                    "   UUID = ? ";
+
         public static final String GET_APPLICATIONS_COUNNT_CASESENSITVE_WITHGROUPID = "SELECT " +
                 "   count(*) count " +
                 " FROM" +
@@ -1285,6 +1294,14 @@ public class SQLConstants {
                     "WHERE MAP.KEY_MANAGER = ? " +
                     "AND MAP.KEY_MANAGER = KM.UUID " +
                     "AND APP.APPLICATION_ID = MAP.APPLICATION_ID";
+
+    public static final String GET_KEY_MANAGERS_OF_APPLICATION =
+            "SELECT DISTINCT KM.NAME, KM.DISPLAY_NAME, KM.TYPE, KM.ORGANIZATION, " +
+                    "KM.TOKEN_TYPE " +
+                    "FROM AM_APPLICATION_KEY_MAPPING MAP, AM_KEY_MANAGER KM, AM_APPLICATION APP " +
+                    "WHERE APP.APPLICATION_ID = ? " +
+                    "AND APP.APPLICATION_ID = MAP.APPLICATION_ID " +
+                    "AND MAP.KEY_MANAGER = KM.UUID";
 
     public static final String REMOVE_APPLICATION_FROM_SUBSCRIPTIONS_SQL =
             "DELETE FROM AM_SUBSCRIPTION WHERE APPLICATION_ID = ?";

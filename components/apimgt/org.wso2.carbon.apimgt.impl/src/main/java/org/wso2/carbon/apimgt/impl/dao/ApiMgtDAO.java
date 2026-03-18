@@ -49,7 +49,7 @@ import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
@@ -63,6 +63,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
+import org.wso2.carbon.apimgt.api.model.ApplicationKeyManagerInfo;
 import org.wso2.carbon.apimgt.api.model.Backend;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
@@ -4154,6 +4155,42 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Upgrades the token type of the given application to JWT.
+     * @param username    the username performing the upgrade
+     * @param application the application to be updated
+     * @return {@code true} if the token type was successfully updated
+     * @throws APIManagementException if an error occurs while updating the token type
+     */
+    public boolean upgradeApplicationTokenType(String username, Application application) throws APIManagementException {
+
+        boolean isAppUpdated = false;
+
+        String sqlQuery = SQLConstants.UPDATE_APPLICATION_TOKEN_TYPE;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            try {
+                connection.setAutoCommit(false);
+                prepStmt.setString(1, APIConstants.JWT);
+                prepStmt.setString(2, username);
+                prepStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+                prepStmt.setString(4, application.getUUID());
+                prepStmt.executeUpdate();
+                connection.commit();
+                isAppUpdated = true;
+            } catch (SQLException ex) {
+                connection.rollback();
+                handleException(
+                        "Error when updating application token type to JWT for application " + application.getName(),
+                        ex);
+            }
+        } catch (SQLException e) {
+            handleException(
+                    "Error when updating application token type to JWT for application " + application.getName(), e);
+        }
+        return isAppUpdated;
+    }
+
+    /**
      * #TODO later we might need to use only this method.
      *
      * @param subscriber   The subscriber.
@@ -4518,12 +4555,14 @@ public class ApiMgtDAO {
                 Subscriber subscriber = new Subscriber(subscriberName);
                 application = new Application(applicationName, subscriber);
                 application.setName(applicationName);
+                application.setCreatedTime(rs.getString("APP_CREATED_TIME"));
                 application.setId(rs.getInt("APPLICATION_ID"));
                 application.setUUID(rs.getString("UUID"));
                 application.setGroupId(rs.getString("GROUP_ID"));
                 subscriber.setTenantId(rs.getInt("TENANT_ID"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setTokenType(rs.getString("TOKEN_TYPE"));
                 application.setOwner(subscriberName);
                 applicationList.add(application);
             }
@@ -4534,6 +4573,105 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return applications;
+    }
+
+    public Application[] getApplicationsWithPaginationAndKMs(String user, String owner, int tenantId, int limit,
+            int offset, String sortBy, String sortOrder, String appName)
+            throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        String sqlQuery = null;
+        List<Application> applicationList = new ArrayList<>();
+        sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_BY_TENANT_ID");
+        Application[] applications = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String driverName = connection.getMetaData().getDriverName();
+            if (driverName.contains("Oracle")) {
+                limit = offset + limit;
+            }
+            if (!"desc".equalsIgnoreCase(sortOrder)) {
+                sortOrder = "asc";
+            }
+            sqlQuery = sqlQuery.replace("$1", sortBy);
+            sqlQuery = sqlQuery.replace("$2", sortOrder);
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setInt(1, tenantId);
+
+            if (owner.isEmpty() && appName.isEmpty()) {
+                owner = "%";
+                appName = "%";
+            } else {
+                if (!owner.isEmpty()) {
+                    owner = "%" + owner + "%";
+                }
+                if (!appName.isEmpty()) {
+                    appName = "%" + appName + "%";
+                }
+            }
+
+            prepStmt.setString(2, owner);
+            prepStmt.setString(3, appName);
+
+            prepStmt.setInt(4, offset);
+            prepStmt.setInt(5, limit);
+            rs = prepStmt.executeQuery();
+            ApplicationKeyManagerInfo application;
+            while (rs.next()) {
+                String applicationName = rs.getString("NAME");
+                String subscriberName = rs.getString("CREATED_BY");
+                Subscriber subscriber = new Subscriber(subscriberName);
+                application = new ApplicationKeyManagerInfo(applicationName, subscriber);
+                application.setName(applicationName);
+                application.setCreatedTime(rs.getString("APP_CREATED_TIME"));
+                application.setId(rs.getInt("APPLICATION_ID"));
+                application.setUUID(rs.getString("UUID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
+                subscriber.setTenantId(rs.getInt("TENANT_ID"));
+                subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setTokenType(rs.getString("TOKEN_TYPE"));
+                application.setOwner(subscriberName);
+                List<KeyManagerConfiguration> keyManagers =
+                        getKeyManagersOfApplication(connection, application.getId());
+                application.setKeyManagers(keyManagers);
+                applicationList.add(application);
+            }
+            applications = applicationList.toArray(new Application[applicationList.size()]);
+        } catch (SQLException e) {
+            handleException("Error while obtaining details of the Application for tenant id : " + tenantId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return applications;
+    }
+
+    private List<KeyManagerConfiguration> getKeyManagersOfApplication(Connection connection, int applicationId)
+            throws APIManagementException {
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        List<KeyManagerConfiguration> keyManagers = new ArrayList<>();
+        try {
+            ps = connection.prepareStatement(SQLConstants.GET_KEY_MANAGERS_OF_APPLICATION);
+            ps.setInt(1, applicationId);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                KeyManagerConfiguration kmConfig = new KeyManagerConfiguration();
+                kmConfig.setName(rs.getString("NAME"));
+                kmConfig.setType(rs.getString("TYPE"));
+                kmConfig.setTenantDomain(rs.getString("ORGANIZATION"));
+                keyManagers.add(kmConfig);
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while obtaining key manager details of the Application : " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, rs);
+        }
+        return keyManagers;
     }
 
     public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication) throws

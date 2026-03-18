@@ -459,6 +459,16 @@ public interface APIConsumer extends APIManager {
     boolean updateApplicationOwner(String newUserId , String organization, Application application ) throws APIManagementException;
 
     /**
+     * Upgrades the token type for the specified application in the given organization.
+     *
+     * @param application  the application to upgrade
+     * @return true if the upgrade was successful, false otherwise
+     * @throws APIManagementException if the upgrade fails
+     */
+    boolean upgradeApplicationTokenType(String username, Application application)
+            throws APIManagementException;
+
+    /**
      * Returns a list of applications for a given subscriber
      *
      * @param subscriber   Subscriber
