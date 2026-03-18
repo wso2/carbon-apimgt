@@ -516,9 +516,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
             log.info("Platform gateway connected with token: gateway_id=" + gatewayId + ", name=" + name);
             return true;
         } catch (NoSuchAlgorithmException | APIManagementException e) {
-            if (log.isWarnEnabled()) {
-                log.warn("Connect with token failed for gateway_id=" + gatewayId + ": " + e.getMessage(), e);
-            }
+            log.warn("Connect with token failed for gateway_id=" + gatewayId + ": " + e.getMessage(), e);
             return false;
         }
     }

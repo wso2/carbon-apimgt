@@ -250,10 +250,8 @@ public class GatewayConnectEndpoint {
                         idsToMark.add(event.getId());
                     }
                 } catch (IOException e) {
-                    if (log.isWarnEnabled()) {
-                        log.warn("Failed to send pending deployment event to gateway " + gatewayId + ": "
-                                + e.getMessage());
-                    }
+                    log.warn("Failed to send pending deployment event to gateway " + gatewayId + ": "
+                            + e.getMessage());
                     // Do not mark this event delivered; it stays pending for next connect
                     break;
                 }
@@ -262,9 +260,7 @@ public class GatewayConnectEndpoint {
                 eventService.markDelivered(idsToMark);
             }
         } catch (APIManagementException e) {
-            if (log.isWarnEnabled()) {
-                log.warn("Failed to get pending deployment events for gateway " + gatewayId + ": " + e.getMessage());
-            }
+            log.warn("Failed to get pending deployment events for gateway " + gatewayId + ": " + e.getMessage());
         }
     }
 
@@ -327,9 +323,7 @@ public class GatewayConnectEndpoint {
         try {
             session.getBasicRemote().sendText(json);
         } catch (IOException e) {
-            if (log.isWarnEnabled()) {
-                log.warn("Failed to send connection.ack: gatewayId=" + gatewayId + ", error=" + e.getMessage());
-            }
+            log.warn("Failed to send connection.ack: gatewayId=" + gatewayId + ", error=" + e.getMessage());
         }
     }
 
@@ -348,9 +342,7 @@ public class GatewayConnectEndpoint {
             }
             return;
         }
-        if (log.isWarnEnabled()) {
-            log.warn("Gateway WebSocket error: " + error.getMessage(), error);
-        }
+        log.warn("Gateway WebSocket error: " + error.getMessage(), error);
     }
 
     private static boolean isConnectionClosedError(Throwable t) {

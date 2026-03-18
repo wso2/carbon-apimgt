@@ -159,6 +159,7 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -586,6 +587,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiKeyMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         sendAPIKeyInfoEvent(apiKeyHash, application, null, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(), validityPeriod),
                 application.getKeyType(), keyName, props);
+        broadcastApplicationScopedOpaqueApiKeyCreatedToPlatformGateways(application, apiKey, keyName, validityPeriod,
+                apiKeyInfoDTO.getCreatedTime(), userName);
         return apiKey;
     }
 
@@ -627,26 +630,37 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         sendAPIKeyInfoEvent(apiKeyHash,null, api, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(),
                 validityPeriod), keyType, keyName, props);
 
-        // Notify connected platform gateways about new API-bound API key (opaque) creation
+        // Notify connected platform gateways. Use apikey.updated so the platform upserts (create if missing, update if exists).
         PlatformGatewayAPIKeyEventService eventService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
         if (eventService != null) {
             try {
+                String apiIdForGateway = PlatformGatewayAPIYamlConverter.getPlatformGatewayHandleForAPI(api);
+                if (apiIdForGateway == null) {
+                    apiIdForGateway = api.getUUID();
+                }
                 String keyNameForGateway = keyName.toLowerCase(java.util.Locale.ROOT);
-                eventService.broadcastAPIKeyCreated(
-                        api.getUUID(),
+                String expiresAtIso = null;
+                if (validityPeriod > 0) {
+                    long expMs = calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(), validityPeriod);
+                    if (expMs > 0) {
+                        expiresAtIso = java.time.Instant.ofEpochMilli(expMs).toString();
+                    }
+                }
+                eventService.broadcastAPIKeyUpdated(
+                        apiIdForGateway,
+                        keyNameForGateway,
                         apiKey,
-                        keyNameForGateway,
+                        null,
                         "*",
-                        null,
-                        null,
-                        null,
-                        null,
                         keyNameForGateway,
+                        expiresAtIso,
+                        null,
+                        null,
                         userName);
             } catch (Exception e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Failed to broadcast apikey.created to platform gateways: " + e.getMessage());
+                    log.debug("Failed to broadcast apikey to platform gateways: " + e.getMessage());
                 }
             }
         }
@@ -4199,20 +4213,27 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         apiKeyMgtDAO.revokeAPIKeyViaUser(keyUUID, username);
         revocationRequestPublisher.publishRevocationEvents(apiKeyInfo.getApiKeyHash(), properties);
 
-        // Notify connected platform gateways about opaque API key revocation when API UUID and key name are known
-        if (StringUtils.isNotBlank(apiKeyInfo.getApiUUId()) && StringUtils.isNotBlank(apiKeyInfo.getKeyName())) {
-            PlatformGatewayAPIKeyEventService eventService =
-                    ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
-            if (eventService != null) {
-                try {
+        // Notify connected platform gateways (platform expects handle = metadata.name, not API UUID)
+        PlatformGatewayAPIKeyEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+        if (eventService != null && StringUtils.isNotBlank(apiKeyInfo.getKeyName())) {
+            try {
+                String keyNameGw = apiKeyInfo.getKeyName().toLowerCase(java.util.Locale.ROOT);
+                if (StringUtils.isNotBlank(apiKeyInfo.getApiUUId())) {
+                    API apiForHandle = getLightweightAPIByUUID(apiKeyInfo.getApiUUId(), tenantDomain);
+                    String handle = apiForHandle != null
+                            ? PlatformGatewayAPIYamlConverter.getPlatformGatewayHandleForAPI(apiForHandle) : null;
+                    String apiIdForRevoke = handle != null ? handle : apiKeyInfo.getApiUUId();
                     eventService.broadcastAPIKeyRevoked(
-                            apiKeyInfo.getApiUUId(),
-                            apiKeyInfo.getKeyName().toLowerCase(java.util.Locale.ROOT),
-                            apiKeyInfo.getAuthUser());
-                } catch (Exception e) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Failed to broadcast apikey.revoked to platform gateways: " + e.getMessage());
-                    }
+                            apiIdForRevoke, keyNameGw, apiKeyInfo.getAuthUser());
+                } else if (StringUtils.isNotBlank(apiKeyInfo.getApplicationId())) {
+                    Application app = apiMgtDAO.getApplicationByUUID(apiKeyInfo.getApplicationId());
+                    broadcastApplicationScopedOpaqueApiKeyRevokedToPlatformGateways(app, keyNameGw,
+                            apiKeyInfo.getAuthUser(), eventService);
+                }
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed to broadcast apikey.revoked to platform gateways: " + e.getMessage());
                 }
             }
         }
@@ -4282,6 +4303,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         sendAPIKeyInfoEvent(apiKeyHash, apiMgtDAO.getApplicationByUUID(applicationId),
                 null, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(), apiKeyInfo.getValidityPeriod()), keyType,
                 apiKeyInfo.getKeyName(), props);
+        Application appForBroadcast = apiMgtDAO.getApplicationByUUID(applicationId);
+        broadcastApplicationScopedOpaqueApiKeyUpdatedToPlatformGateways(appForBroadcast, apiKey,
+                apiKeyInfo.getKeyName(), apiKeyInfo.getValidityPeriod(), apiKeyInfoDTO.getCreatedTime(), username);
         return regeneratedApiKeyInfo;
     }
 
@@ -4297,6 +4321,158 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
         return isCaseInsensitiveComparisons ? StringUtils.equalsIgnoreCase(requester, owner) : StringUtils.equals(requester, owner);
+    }
+
+    /**
+     * Resolves application for subscription lookup (DevPortal may pass lightweight application without DB id).
+     */
+    private Application resolveApplicationForSubscriptionLookup(Application application) throws APIManagementException {
+
+        if (application == null) {
+            return null;
+        }
+        if (application.getId() == 0 && StringUtils.isNotBlank(application.getUUID())) {
+            return apiMgtDAO.getApplicationByUUID(application.getUUID());
+        }
+        return application;
+    }
+
+    /**
+     * Platform gateway handles (metadata.name) for APIs this application is subscribed to.
+     * Used so we send the same handle the platform gateway stores (from our YAML), not API UUID.
+     */
+    private Set<String> getSubscribedPlatformGatewayHandles(Application application)
+            throws APIManagementException {
+
+        Application app = resolveApplicationForSubscriptionLookup(application);
+        if (app == null || app.getId() == 0) {
+            return Collections.emptySet();
+        }
+        Set<SubscribedAPI> subs = apiMgtDAO.getSubscribedAPIsByApplication(app);
+        Set<String> handles = new LinkedHashSet<>();
+        for (SubscribedAPI sub : subs) {
+            String st = sub.getSubStatus();
+            if (!APIConstants.SubscriptionStatus.UNBLOCKED.equals(st)
+                    && !APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(st)) {
+                continue;
+            }
+            String apiUuid = sub.getAPIUUId();
+            if (StringUtils.isBlank(apiUuid)) {
+                continue;
+            }
+            String org = sub.getOrganization();
+            try {
+                API api = getLightweightAPIByUUID(apiUuid, org != null ? org : "");
+                String handle = api != null ? PlatformGatewayAPIYamlConverter.getPlatformGatewayHandleForAPI(api) : null;
+                if (StringUtils.isNotBlank(handle)) {
+                    handles.add(handle);
+                }
+            } catch (APIManagementException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Could not resolve platform handle for API " + apiUuid + ": " + e.getMessage());
+                }
+            }
+        }
+        return handles;
+    }
+
+    /**
+     * Application-level opaque keys are valid for subscribed APIs. Use apikey.updated so the platform
+     * upserts (create if missing, update if same name already exists).
+     */
+    private void broadcastApplicationScopedOpaqueApiKeyCreatedToPlatformGateways(Application application, String apiKey,
+            String keyName, long validityPeriod, long createdTimeMillis, String userName) {
+
+        PlatformGatewayAPIKeyEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+        if (eventService == null || StringUtils.isBlank(keyName)) {
+            return;
+        }
+        try {
+            Set<String> handles = getSubscribedPlatformGatewayHandles(application);
+            if (handles.isEmpty()) {
+                return;
+            }
+            String keyNameForGateway = keyName.toLowerCase(java.util.Locale.ROOT);
+            String expiresAtIso = null;
+            if (validityPeriod > 0) {
+                long expMs = calculateExpiresAt(createdTimeMillis, validityPeriod);
+                if (expMs > 0) {
+                    expiresAtIso = Instant.ofEpochMilli(expMs).toString();
+                }
+            }
+            for (String handle : handles) {
+                eventService.broadcastAPIKeyUpdated(handle, keyNameForGateway, apiKey, null, "*",
+                        keyNameForGateway, expiresAtIso, null, null, userName);
+            }
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to broadcast application-scoped apikey to platform gateways: "
+                        + e.getMessage());
+            }
+        }
+    }
+
+    private void broadcastApplicationScopedOpaqueApiKeyRevokedToPlatformGateways(Application application,
+            String keyNameGateway, String userId, PlatformGatewayAPIKeyEventService eventService)
+            throws APIManagementException {
+
+        if (application == null || StringUtils.isBlank(keyNameGateway)) {
+            return;
+        }
+        Set<String> handles = getSubscribedPlatformGatewayHandles(application);
+        for (String handle : handles) {
+            eventService.broadcastAPIKeyRevoked(handle, keyNameGateway, userId);
+        }
+    }
+
+    /**
+     * Application-level key regenerate: same key name, new value. Send apikey.updated per handle
+     * so the platform gateway updates in place (avoids "name already exists" on create).
+     */
+    private void broadcastApplicationScopedOpaqueApiKeyUpdatedToPlatformGateways(Application application, String apiKey,
+            String keyName, long validityPeriod, long createdTimeMillis, String userName) {
+
+        PlatformGatewayAPIKeyEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+        if (eventService == null || StringUtils.isBlank(keyName)) {
+            return;
+        }
+        try {
+            Set<String> handles = getSubscribedPlatformGatewayHandles(application);
+            if (handles.isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping platform gateway apikey.updated for application key: no eligible subscribed APIs.");
+                }
+                return;
+            }
+            String keyNameForGateway = keyName.toLowerCase(java.util.Locale.ROOT);
+            String expiresAtIso = null;
+            if (validityPeriod > 0) {
+                long expMs = calculateExpiresAt(createdTimeMillis, validityPeriod);
+                if (expMs > 0) {
+                    expiresAtIso = Instant.ofEpochMilli(expMs).toString();
+                }
+            }
+            for (String handle : handles) {
+                eventService.broadcastAPIKeyUpdated(
+                        handle,
+                        keyNameForGateway,
+                        apiKey,
+                        null,
+                        "*",
+                        keyNameForGateway,
+                        expiresAtIso,
+                        null,
+                        null,
+                        userName);
+            }
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to broadcast application-scoped apikey.updated to platform gateways: "
+                        + e.getMessage());
+            }
+        }
     }
 
     /**
@@ -4368,26 +4544,37 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         sendAPIKeyInfoEvent(apiKeyHash, application, api, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(),
                         apiKeyInfo.getValidityPeriod()), apiKeyInfo.getKeyType(), apiKeyInfo.getKeyName(), props);
 
-        // Notify connected platform gateways about regenerated API-bound API key
+        // Regenerate = same key name, new value: send apikey.updated so platform updates in place (avoids "name already exists")
         PlatformGatewayAPIKeyEventService eventService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
-        if (eventService != null) {
+        if (eventService != null && api != null) {
             try {
+                String apiIdForGateway = PlatformGatewayAPIYamlConverter.getPlatformGatewayHandleForAPI(api);
+                if (apiIdForGateway == null) {
+                    apiIdForGateway = apiUUId;
+                }
                 String keyNameForGateway = apiKeyInfo.getKeyName().toLowerCase(java.util.Locale.ROOT);
-                eventService.broadcastAPIKeyCreated(
-                        apiUUId,
+                String expiresAtIso = null;
+                if (apiKeyInfo.getValidityPeriod() > 0) {
+                    long expMs = calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(), apiKeyInfo.getValidityPeriod());
+                    if (expMs > 0) {
+                        expiresAtIso = Instant.ofEpochMilli(expMs).toString();
+                    }
+                }
+                eventService.broadcastAPIKeyUpdated(
+                        apiIdForGateway,
+                        keyNameForGateway,
                         apiKey,
-                        keyNameForGateway,
+                        null,
                         "*",
-                        null,
-                        null,
-                        null,
-                        null,
                         keyNameForGateway,
+                        expiresAtIso,
+                        null,
+                        null,
                         username);
             } catch (Exception e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Failed to broadcast regenerated apikey.created to platform gateways: " + e.getMessage());
+                    log.debug("Failed to broadcast apikey.updated to platform gateways: " + e.getMessage());
                 }
             }
         }

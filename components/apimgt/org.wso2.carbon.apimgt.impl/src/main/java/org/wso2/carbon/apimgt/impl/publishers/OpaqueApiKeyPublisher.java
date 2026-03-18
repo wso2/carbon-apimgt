@@ -252,10 +252,8 @@ public class OpaqueApiKeyPublisher {
         if (opaqueApiKeyNotifier != null) {
             String apiKeyHash = properties.getProperty(APIConstants.NotificationEvent.API_KEY_HASH);
             String keyName = properties.getProperty(APIConstants.NotificationEvent.KEY_NAME);
-            if (log.isInfoEnabled()) {
-                log.info("Publishing opaque apikey.info to realtime. keyName=" + keyName
-                        + ", apiKeyHash=" + apiKeyHash);
-            }
+            log.info("Publishing opaque apikey.info to realtime. keyName=" + keyName
+                    + ", apiKeyHash=" + apiKeyHash);
             opaqueApiKeyNotifier.sendApiKeyInfoOnRealtime(properties);
         } else {
             String apiKeyHash = properties.getProperty(APIConstants.NotificationEvent.API_KEY_HASH);
@@ -282,10 +280,8 @@ public class OpaqueApiKeyPublisher {
         if (opaqueApiKeyNotifier != null) {
             String keyName = properties.getProperty(APIConstants.NotificationEvent.KEY_NAME);
             String apiKeyHash = properties.getProperty(APIConstants.NotificationEvent.API_KEY_HASH);
-            if (log.isInfoEnabled()) {
-                log.info("Publishing opaque apikey.association to realtime. keyName=" + keyName
-                        + ", apiKeyHash=" + apiKeyHash);
-            }
+            log.info("Publishing opaque apikey.association to realtime. keyName=" + keyName
+                    + ", apiKeyHash=" + apiKeyHash);
             opaqueApiKeyNotifier.sendApiKeyAssociationInfoOnRealtime(properties);
         } else {
             String keyName = properties.getProperty(APIConstants.NotificationEvent.KEY_NAME);

@@ -85,7 +85,7 @@ public class GatewayManagementUtils {
             GatewayManagementDAO gatewayManagementDAO = GatewayManagementDAO.getInstance();
             int deletedCount = gatewayManagementDAO.deleteOldGatewayRecords(retentionTimestamp);
             
-            if (log.isInfoEnabled() && (deletedCount > 0)) {
+            if (deletedCount > 0) {
                 log.info("Gateway cleanup completed - Deleted: " + deletedCount);
             }
         } catch (APIManagementException e) {

@@ -96,6 +96,24 @@ public final class PlatformGatewayAPIYamlConverter {
     }
 
     /**
+     * Returns the platform gateway handle (metadata.name) for the given API.
+     * This is the same value the platform gateway stores when it deploys the API from our YAML;
+     * use it as apiId when sending apikey.created / apikey.revoked so the gateway can resolve config by handle.
+     *
+     * @param api on-prem API (id and displayName/version used)
+     * @return handle string (URL-safe, 3-63 chars), or null if api is null
+     */
+    public static String getPlatformGatewayHandleForAPI(API api) {
+        if (api == null) {
+            return null;
+        }
+        String displayName = sanitizeDisplayName(
+                api.getDisplayName() != null ? api.getDisplayName() : (api.getId() != null ? api.getId().getApiName() : null));
+        String version = normalizeVersion(api.getId() != null ? api.getId().getVersion() : null);
+        return toMetadataName(displayName, version);
+    }
+
+    /**
      * Builds context from the API's context template and version. Uses version as-is in path (e.g. 1.0.0).
      * Replaces {version} in the template with the actual version. Invocation path: e.g. /demo/1.0.0/
      */

@@ -130,7 +130,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
                 log.debug("Invalid vhost URL: [" + gatewayUrl + "]", e);
-            } else if (log.isWarnEnabled()) {
+            } else {
                 log.warn("Invalid vhost URL: [" + gatewayUrl + "] - " + e.getMessage());
             }
             return null;
@@ -512,9 +512,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         String vhostStr = body.getVhost().toString();
         ParsedGatewayUrl parsed = parseGatewayUrl(vhostStr);
         if (parsed == null) {
-            if (log.isWarnEnabled()) {
-                log.warn("vhost validation failed for value: [" + vhostStr + "] (length=" + (vhostStr != null ? vhostStr.length() : 0) + ")");
-            }
+            log.warn("vhost validation failed for value: [" + vhostStr + "] (length=" + (vhostStr != null ? vhostStr.length() : 0) + ")");
             throw RestApiUtil.buildBadRequestException("vhost must be a valid URL (e.g. https://host:port); got: " + (vhostStr != null && vhostStr.length() <= 100 ? vhostStr : "<invalid or too long>"));
         }
         if (parsed.host.length() > 255) {
@@ -541,9 +539,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         }
         String vhostStr = body.getVhost().toString();
         if (parseGatewayUrl(vhostStr) == null) {
-            if (log.isWarnEnabled()) {
-                log.warn("vhost validation failed on update for value: [" + vhostStr + "]");
-            }
+            log.warn("vhost validation failed on update for value: [" + vhostStr + "]");
             throw RestApiUtil.buildBadRequestException("vhost must be a valid URL (e.g. https://host:port); got: " + (vhostStr != null && vhostStr.length() <= 100 ? vhostStr : "<invalid or too long>"));
         }
         if (StringUtils.isBlank(body.getDisplayName())) {

@@ -97,9 +97,7 @@ public class PlatformGatewayDeploymentDispatcherListener implements ServletConte
                             log.info("Platform gateway deployment event cleanup: deleted " + deleted + " delivered row(s)");
                         }
                     } catch (Exception e) {
-                        if (log.isWarnEnabled()) {
-                            log.warn("Platform gateway deployment event cleanup failed: " + e.getMessage());
-                        }
+                        log.warn("Platform gateway deployment event cleanup failed: " + e.getMessage());
                     }
                 },
                 CLEANUP_INTERVAL_HOURS,
@@ -125,9 +123,7 @@ public class PlatformGatewayDeploymentDispatcherListener implements ServletConte
                     try {
                         pushPendingEventsToConnectedGateways(eventService);
                     } catch (Exception e) {
-                        if (log.isWarnEnabled()) {
-                            log.warn("Push pending deployment events failed: " + e.getMessage());
-                        }
+                        log.warn("Push pending deployment events failed: " + e.getMessage());
                     }
                 },
                 PUSH_PENDING_INTERVAL_MINUTES,
@@ -162,9 +158,7 @@ public class PlatformGatewayDeploymentDispatcherListener implements ServletConte
                     }
                 }
             } catch (Exception e) {
-                if (log.isWarnEnabled()) {
-                    log.warn("Failed to push pending events for gateway " + gatewayId + ": " + e.getMessage());
-                }
+                log.warn("Failed to push pending events for gateway " + gatewayId + ": " + e.getMessage());
             }
         }
     }
