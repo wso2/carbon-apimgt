@@ -236,6 +236,7 @@ public class APIMgtGatewayConstants {
     public static final String MCP_WELL_KNOWN_RESOURCE = "/.well-known/oauth-protected-resource";
     public static final String MCP_AUTH_CLAIM = "MCP_AUTHENTICATED";
     public static final Long MCP_AUTH_TOKEN_EXPIRATION_TIME = 6000L;
+    public static final String MCP_API_ELECTED_RESOURCE = "MCP_API_ELECTED_RESOURCE";
     public static final String MCP_ANALYTICS = "mcpAnalytics";
     public static final String MCP_SESSION_ID = "sessionId";
     public static final String MCP_CAPABILITY = "capability";
