@@ -230,7 +230,13 @@ public class EnvironmentMappingUtil {
         env.setUuid(envDTO.getId());
         env.setName(envDTO.getName());
         env.setType(envDTO.getType());
-        env.setDisplayName(envDTO.getDisplayName());
+        // Backward compatibility: displayName is optional for gateway environments.
+        // If it's missing, default it to the environment `name` to avoid DB/validation failures.
+        String displayName = envDTO.getDisplayName();
+        if (displayName == null || displayName.trim().isEmpty()) {
+            displayName = envDTO.getName();
+        }
+        env.setDisplayName(displayName);
         env.setDescription(envDTO.getDescription());
         env.setProvider(envDTO.getProvider());
         env.setGatewayType(envDTO.getGatewayType());
