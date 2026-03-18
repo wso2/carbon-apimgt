@@ -131,9 +131,7 @@ public class PlatformGatewayDAO {
                 GatewayManagementDAO.getInstance().insertGatewayInstance(connection, gateway.id, gateway.organizationId,
                         envLabels, gateway.createdAt, new byte[0]);
                 connection.commit();
-                if (log.isInfoEnabled()) {
-                    log.info("Successfully created platform gateway with token for gateway: " + gateway.name);
-                }
+                log.info("Successfully created platform gateway with token for gateway: " + gateway.name);
             } catch (APIManagementException e) {
                 connection.rollback();
                 throw e;

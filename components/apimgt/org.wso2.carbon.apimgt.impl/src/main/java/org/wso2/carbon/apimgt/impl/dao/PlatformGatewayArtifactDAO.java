@@ -127,9 +127,7 @@ public class PlatformGatewayArtifactDAO {
             log.error("Cannot save revision artifact - YAML content is required for API: " + apiId);
             throw new APIManagementException("YAML content is required");
         }
-        if (log.isInfoEnabled()) {
-            log.info("Saving revision artifact for API: " + apiId + ", revision: " + revisionId);
-        }
+        log.info("Saving revision artifact for API: " + apiId + ", revision: " + revisionId);
         Timestamp now = new Timestamp(System.currentTimeMillis());
         byte[] artifactBytes = yamlContent.getBytes(java.nio.charset.StandardCharsets.UTF_8);
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {

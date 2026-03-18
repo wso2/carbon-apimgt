@@ -69,7 +69,8 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
             "apis",
             "api-keys",
             "subscription-plans",
-            "notify-gateway"
+            "notify-gateway",
+            "notify-api-deployment-status"
     };
 
     public PlatformGatewayApiKeyAuthInterceptor() {
@@ -196,15 +197,20 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
      * This prevents api-key header from authenticating requests to other servlet endpoints.
      */
     private static boolean isPlatformGatewayAllowedPath(Message message) {
-        Object req = message.get("http.request");
-        if (!(req instanceof HttpServletRequest)) {
-            return false;
+        // CXF may or may not expose the servlet request via "http.request" (depends on transport/container).
+        // Prefer CXF's PATH_INFO first, then fall back to servlet request if available.
+        String path = (String) message.get(Message.PATH_INFO);
+        if (StringUtils.isBlank(path)) {
+            Object req = message.get("http.request");
+            if (req instanceof HttpServletRequest) {
+                path = ((HttpServletRequest) req).getRequestURI();
+            }
         }
-        String path = ((HttpServletRequest) req).getRequestURI();
-        if (path == null) {
+        if (StringUtils.isBlank(path)) {
             return false;
         }
         for (String segment : PLATFORM_GATEWAY_ALLOWED_PATH_SEGMENTS) {
+            // Match ".../<segment>" or ".../<segment>/..."
             if (path.endsWith("/" + segment) || path.contains("/" + segment + "/")) {
                 return true;
             }

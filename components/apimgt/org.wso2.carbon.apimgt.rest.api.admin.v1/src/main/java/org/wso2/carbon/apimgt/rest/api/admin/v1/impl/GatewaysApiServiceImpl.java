@@ -156,9 +156,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         validateCreateBody(body);
         validateGatewayNameAvailability(organization, body.getName());
-        if (log.isInfoEnabled()) {
-            log.info("Creating new platform gateway with name: " + body.getName());
-        }
+        log.info("Creating new platform gateway with name: " + body.getName());
 
         PlatformGatewayService service =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
@@ -431,9 +429,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (!Objects.equals(bodyHost, existing.getVhost())) {
             throw RestApiUtil.buildBadRequestException("vhost in body must match existing gateway (immutable)");
         }
-        if (log.isInfoEnabled()) {
-            log.info("Updating platform gateway: " + gatewayId);
-        }
+        log.info("Updating platform gateway: " + gatewayId);
         String displayName = body.getDisplayName();
         String description = body.getDescription();
         String propertiesJson = serializeProperties(body.getProperties());

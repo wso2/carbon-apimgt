@@ -142,9 +142,7 @@ public class GatewayManagementUtils {
                         "Platform gateway connect config validation failed at server startup. " +
                         "Fix the following and restart: " + String.join("; ", errors));
             }
-            if (log.isInfoEnabled()) {
-                log.info("Connect-with-token configured for " + connectGateways.size() + " gateway(s); they can register on first REGISTER.");
-            }
+            log.info("Connect-with-token configured for " + connectGateways.size() + " gateway(s); they can register on first REGISTER.");
             PlatformGatewayServiceImpl.ensurePlatformGatewayFromConfigOnStartup(config);
         } catch (IllegalArgumentException e) {
             throw e;

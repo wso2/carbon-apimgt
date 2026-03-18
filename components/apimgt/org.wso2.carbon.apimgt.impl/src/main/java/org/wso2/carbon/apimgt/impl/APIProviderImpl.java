@@ -2648,10 +2648,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         environmentsToRemove.removeAll(environmentsToAdd);
         DeploymentTargets targets = DeploymentModeResolver.resolve(api.getOrganization(), environmentsToRemove);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        if (log.isInfoEnabled()) {
-            log.info("Undeploying API: " + api.getId().getApiName() + " from " + environmentsToRemove.size()
-                    + " environments");
-        }
+        log.info("Undeploying API: " + api.getId().getApiName() + " from " + environmentsToRemove.size()
+                + " environments");
         gatewayManager.unDeployFromGateway(api, api.getOrganization(), targets.getSynapseLabels(), onDeleteOrRetire,
                 targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds());
         if (log.isDebugEnabled()) {
@@ -7362,10 +7360,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 dedupedDeployments.add(d);
             }
         }
-        if (log.isInfoEnabled()) {
-            log.info("Processing API revision deployment for API: " + apiId + ", revision: " + apiRevisionUUID
-                    + ", deployments count: " + dedupedDeployments.size());
-        }
+        log.info("Processing API revision deployment for API: " + apiId + ", revision: " + apiRevisionUUID
+                + ", deployments count: " + dedupedDeployments.size());
 
         if (!isInitiatedFromGateway) {
             handlePendingDeployments(apiId, apiRevisionUUID, dedupedDeployments);
@@ -7585,10 +7581,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 targetEnvironments, gatewayVhosts, deploymentsToRemove);
                 try {
                     DeploymentTargets targets = DeploymentModeResolver.resolve(organization, targetEnvironments);
-                    if (log.isInfoEnabled()) {
-                        log.info("Deploying API revision: " + revisionUUID + " to " + targetEnvironments.size()
-                                + " environments");
-                    }
+                    log.info("Deploying API revision: " + revisionUUID + " to " + targetEnvironments.size()
+                            + " environments");
                     gatewayManager.deployToGateway(api, organization, targets.getSynapseLabels(),
                             targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds(),
                             revisionUUID);
@@ -7657,9 +7651,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String yaml = org.wso2.carbon.apimgt.impl.utils.PlatformGatewayAPIYamlConverter
                     .toPlatformGatewayYaml(apiAtRevision, organization, environment);
             artifactService.saveRevisionArtifact(apiId, revisionUUID, yaml);
-            if (log.isInfoEnabled()) {
-                log.info("Saved platform revision artifact for API: " + apiId + ", revision: " + revisionUUID);
-            }
             if (log.isDebugEnabled()) {
                 log.debug("Saved platform revision artifact for API " + apiId + " revision " + revisionUUID);
             }

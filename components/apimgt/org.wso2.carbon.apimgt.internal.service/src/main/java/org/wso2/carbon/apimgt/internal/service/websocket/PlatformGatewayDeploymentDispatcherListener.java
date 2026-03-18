@@ -65,9 +65,7 @@ public class PlatformGatewayDeploymentDispatcherListener implements ServletConte
             WebSocketPlatformGatewayDeploymentDispatcher dispatcher = new WebSocketPlatformGatewayDeploymentDispatcher();
             ServiceReferenceHolder.getInstance().setPlatformGatewayDeploymentDispatcher(dispatcher);
             ServiceReferenceHolder.getInstance().setPlatformGatewayAPIKeyEventService(new PlatformGatewayAPIKeyEventServiceImpl());
-            if (log.isInfoEnabled()) {
-                log.info("Platform gateway deployment dispatcher and API key event service registered (WebSocket push enabled)");
-            }
+            log.info("Platform gateway deployment dispatcher and API key event service registered (WebSocket push enabled)");
             cleanupScheduler = Executors.newScheduledThreadPool(1, r -> {
                 Thread t = new Thread(r, "platform-gw-event-cleanup");
                 t.setDaemon(true);
@@ -95,7 +93,7 @@ public class PlatformGatewayDeploymentDispatcherListener implements ServletConte
                 () -> {
                     try {
                         int deleted = eventService.cleanupDeliveredEventsOlderThan(CLEANUP_RETENTION_MS);
-                        if (deleted > 0 && log.isInfoEnabled()) {
+                        if (deleted > 0) {
                             log.info("Platform gateway deployment event cleanup: deleted " + deleted + " delivered row(s)");
                         }
                     } catch (Exception e) {

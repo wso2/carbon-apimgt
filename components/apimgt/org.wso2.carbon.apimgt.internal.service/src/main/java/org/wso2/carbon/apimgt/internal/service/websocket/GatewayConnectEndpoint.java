@@ -43,6 +43,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
@@ -87,8 +88,19 @@ public class GatewayConnectEndpoint {
      */
     private static final String HEARTBEAT_FUTURE_PROPERTY = "heartbeatFuture";
 
+    /**
+     * Session user property key for the deployment-event polling scheduled future (cancel on close).
+     */
+    private static final String DEPLOYMENT_POLL_FUTURE_PROPERTY = "deploymentPollFuture";
+
     /** Interval for server-to-client WebSocket PING (client timeout is 35s). */
     private static final long HEARTBEAT_INTERVAL_MS = 15_000;
+
+    /**
+     * Poll interval for pushing newly persisted multi-CP deployment events to the gateway
+     * while the WebSocket session stays open (update "immediately", no reconnect needed).
+     */
+    private static final long DEPLOYMENT_EVENT_POLL_INTERVAL_MS = 2_000;
 
     /** Reusable empty payload for PING (avoids allocating a new ByteBuffer every interval). */
     private static final ByteBuffer EMPTY_PING_PAYLOAD = ByteBuffer.allocate(0);
@@ -97,6 +109,14 @@ public class GatewayConnectEndpoint {
     private static final ScheduledExecutorService HEARTBEAT_SCHEDULER =
             Executors.newScheduledThreadPool(2, r -> {
                 Thread t = new Thread(r, "gateway-ws-heartbeat");
+                t.setDaemon(true);
+                return t;
+            });
+
+    /** Dedicated scheduler for multi-CP deployment event polling/push (bounded thread count). */
+    private static final ScheduledExecutorService DEPLOYMENT_EVENT_POLL_SCHEDULER =
+            Executors.newScheduledThreadPool(1, r -> {
+                Thread t = new Thread(r, "gateway-ws-deployment-poll");
                 t.setDaemon(true);
                 return t;
             });
@@ -198,11 +218,12 @@ public class GatewayConnectEndpoint {
 
         sendPendingDeploymentEvents(session, gateway.id);
 
+        // Push any events persisted by other CP nodes while this gateway stays connected.
+        startDeploymentEventPolling(session, gateway.id);
+
         startHeartbeat(session);
 
-        if (log.isInfoEnabled()) {
-            log.info("Gateway WebSocket connection established: gatewayId=" + gateway.id + " name=" + gateway.name);
-        }
+        log.info("Gateway WebSocket connection established: gatewayId=" + gateway.id + " name=" + gateway.name);
     }
 
     /**
@@ -245,6 +266,29 @@ public class GatewayConnectEndpoint {
                 log.warn("Failed to get pending deployment events for gateway " + gatewayId + ": " + e.getMessage());
             }
         }
+    }
+
+    /**
+     * Poll for pending deployment events periodically and push them over the existing WS session.
+     * This enables "immediate update without reconnect" in a multi-CP setup where events are persisted
+     * by one CP while the gateway is connected to another.
+     */
+    private static void startDeploymentEventPolling(Session session, String gatewayId) {
+        AtomicBoolean inFlight = new AtomicBoolean(false);
+        ScheduledFuture<?> future = DEPLOYMENT_EVENT_POLL_SCHEDULER.scheduleAtFixedRate(() -> {
+            if (!session.isOpen()) {
+                return;
+            }
+            if (!inFlight.compareAndSet(false, true)) {
+                return; // Skip if previous poll is still running
+            }
+            try {
+                sendPendingDeploymentEvents(session, gatewayId);
+            } finally {
+                inFlight.set(false);
+            }
+        }, DEPLOYMENT_EVENT_POLL_INTERVAL_MS, DEPLOYMENT_EVENT_POLL_INTERVAL_MS, TimeUnit.MILLISECONDS);
+        session.getUserProperties().put(DEPLOYMENT_POLL_FUTURE_PROPERTY, future);
     }
 
     /**
@@ -326,6 +370,10 @@ public class GatewayConnectEndpoint {
         if (futureObj instanceof ScheduledFuture) {
             ((ScheduledFuture<?>) futureObj).cancel(false);
         }
+        Object pollFutureObj = session.getUserProperties().get(DEPLOYMENT_POLL_FUTURE_PROPERTY);
+        if (pollFutureObj instanceof ScheduledFuture) {
+            ((ScheduledFuture<?>) pollFutureObj).cancel(false);
+        }
         PlatformGatewayDAO.PlatformGateway gateway =
                 (PlatformGatewayDAO.PlatformGateway) session.getUserProperties().get(GATEWAY_PROPERTY);
         if (gateway != null) {
@@ -339,10 +387,8 @@ public class GatewayConnectEndpoint {
                             + e.getMessage());
                 }
             }
-            if (log.isInfoEnabled()) {
-                log.info("Gateway WebSocket connection closed: gatewayId=" + gateway.id + " closeCode="
-                        + reason.getCloseCode().getCode());
-            }
+            log.info("Gateway WebSocket connection closed: gatewayId=" + gateway.id + " closeCode="
+                    + reason.getCloseCode().getCode());
         }
     }
 

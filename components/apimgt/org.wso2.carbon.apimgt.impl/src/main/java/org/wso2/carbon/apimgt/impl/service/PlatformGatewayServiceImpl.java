@@ -513,9 +513,7 @@ public class PlatformGatewayServiceImpl implements PlatformGatewayService {
                     null, false, now, now);
             dao.createGatewayWithTokenAndGatewayInstance(gateway, tokenId, tokenHash,
                     Collections.singletonList(name));
-            if (log.isInfoEnabled()) {
-                log.info("Platform gateway connected with token: gateway_id=" + gatewayId + ", name=" + name);
-            }
+            log.info("Platform gateway connected with token: gateway_id=" + gatewayId + ", name=" + name);
             return true;
         } catch (NoSuchAlgorithmException | APIManagementException e) {
             if (log.isWarnEnabled()) {
