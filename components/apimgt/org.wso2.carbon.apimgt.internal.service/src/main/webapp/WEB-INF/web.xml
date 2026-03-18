@@ -68,7 +68,7 @@
                 org.wso2.carbon.apimgt.internal.service.NotifyGatewayApi,
                 org.wso2.carbon.apimgt.internal.service.NotifyApiDeploymentStatusApi,
                 org.wso2.carbon.apimgt.internal.service.ApiKeysApi,
-                org.wso2.carbon.apimgt.internal.service.DeploymentsApi
+                org.wso2.carbon.apimgt.internal.service.DeploymentsApi,
                 org.wso2.carbon.apimgt.internal.service.GatewayWellKnownApi
             </param-value>
         </init-param>
