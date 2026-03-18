@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretInfo;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
@@ -47,6 +48,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil.createDirectory;
 
@@ -141,6 +143,26 @@ public class ExportUtils {
                     // Encode the consumer secret and set it
                     apiKey.setConsumerSecret(new String(
                             Base64.encodeBase64(apiKey.getConsumerSecret().getBytes(Charset.defaultCharset()))));
+                    if (APIUtil.isMultipleClientSecretsEnabled()) {
+                        try {
+                            List<ConsumerSecretInfo> consumerSecrets = apiConsumer.retrieveConsumerSecrets(
+                                    apiKey.getConsumerKey(), apiKey.getKeyManager());
+                            List<ConsumerSecretInfo> encodedConsumerSecrets = consumerSecrets.stream()
+                                    .map(secret -> {
+                                        ConsumerSecretInfo encoded = new ConsumerSecretInfo();
+                                        encoded.setSecretId(secret.getSecretId());
+                                        encoded.setClientSecret(new String(Base64.encodeBase64(
+                                                secret.getClientSecret().getBytes(Charset.defaultCharset()))));
+                                        encoded.setParameters(secret.getParameters());
+                                        return encoded;
+                                    })
+                                    .collect(Collectors.toList());
+                            apiKey.setConsumerSecrets(encodedConsumerSecrets);
+                        } catch (APIManagementException e) {
+                            log.warn("Failed to retrieve consumer secrets for consumerKey: " +
+                                    apiKey.getConsumerKey() + ", keyManager: " + apiKey.getKeyManager(), e);
+                        }
+                    }
                 } else {
                     // Set an empty string when ConsumerSecret is not available
                     apiKey.setConsumerSecret("");

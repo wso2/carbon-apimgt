@@ -706,6 +706,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (expiresInObj instanceof Integer) {
             clientSecretRequest.setExpiresIn((Integer) expiresInObj);
         }
+        if (StringUtils.isNotBlank(consumerSecretRequest.getClientSecret())) {
+            clientSecretRequest.setClientSecret(consumerSecretRequest.getClientSecret());
+        }
         try {
             clientSecret = dcrClient.generateNewApplicationSecret(encodedClientId, clientSecretRequest);
             if (log.isDebugEnabled()) {

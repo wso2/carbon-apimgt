@@ -397,6 +397,8 @@ public final class APIUtil {
     private static final int CONSUMER_SECRET_MASK_LENGTH = 16;
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
+    private static final ThreadLocal<Boolean> skipSecretMasking = ThreadLocal.withInitial(() -> Boolean.FALSE);
+
     private APIUtil() {
 
     }
@@ -4905,6 +4907,9 @@ public final class APIUtil {
 
     public static String maskSecret(String secret) {
 
+        if (skipSecretMasking.get()) {
+            return secret;
+        }
         boolean isHashingEnabled = OAuthServerConfiguration.getInstance().isClientSecretHashEnabled();
         if (log.isDebugEnabled()) {
             log.debug("Masking secret. Client Secret Hashing enabled: " + isHashingEnabled);
@@ -4919,6 +4924,22 @@ public final class APIUtil {
         int maskedPartLength = Math.max(CONSUMER_SECRET_MASK_LENGTH - visibleChars, 0);
         String visiblePart = secret.substring(0, visibleChars);
         return visiblePart + generateMask(maskedPartLength);
+    }
+
+    /**
+     * Enable skipping of secret masking for the current thread.
+     * This should be used in scenarios like application export where the actual secrets need to be retrieved.
+     */
+    public static void enableSkipSecretMasking() {
+        skipSecretMasking.set(Boolean.TRUE);
+    }
+
+    /**
+     * Clear the skip secret masking ThreadLocal variable to prevent memory leaks.
+     * This should be called in a finally block after the operation is complete.
+     */
+    public static void clearSkipSecretMasking() {
+        skipSecretMasking.remove();
     }
 
     private static String generateMask(int length) {
