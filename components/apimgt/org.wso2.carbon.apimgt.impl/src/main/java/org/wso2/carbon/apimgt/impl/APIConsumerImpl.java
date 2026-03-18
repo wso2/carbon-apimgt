@@ -719,14 +719,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * Returns a list of API keys
      * @param applicationId Application Id of the application.
      * @param keyType Key type of the api keys
+     * @param tenantDomain Tenant domain
      * @return
      * @throws APIManagementException
      */
     @Override
-    public List<APIKeyInfo> getApiKeys(String applicationId, String keyType) throws APIManagementException {
+    public List<APIKeyInfo> getApiKeys(String applicationId, String keyType, String tenantDomain) throws APIManagementException {
         List<APIKeyInfo> apiKeyInfoList;
         try {
-            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeys(applicationId, keyType);
+            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeys(applicationId, keyType, tenantDomain);
         } catch (APIManagementException e) {
                 throw new APIManagementException("Error while getting the api keys for the application: "
                         + applicationId, e);
@@ -783,14 +784,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * Returns a list of api keys for a given API.
      *
      * @param apiId API Id of the API.
+     * @param tenantDomain Tenant domain
      * @return A List of api keys.
      * @throws APIManagementException This is the custom exception class for API management.
      */
     @Override
-    public List<APIKeyInfo> getApiApiKeys(String apiId) throws APIManagementException {
+    public List<APIKeyInfo> getApiApiKeys(String apiId, String tenantDomain) throws APIManagementException {
         List<APIKeyInfo> apiKeyInfoList;
         try {
-            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeys(apiId);
+            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeys(apiId, tenantDomain);
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while getting the api keys for the API: "
                     + apiId, e);
@@ -4053,9 +4055,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
-        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUID);
-        if (apiKeyInfo == null) {
-            throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUID);
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUID, tenantDomain);
+        if (apiKeyInfo == null || apiKeyInfo.getKeyUUID() == null) {
+            throw new APIMgtResourceNotFoundException("Active API key not found for UUID: " + keyUUID);
         }
         apiKeyMgtDAO.revokeAPIKey(keyUUID, tenantDomain);
         revocationRequestPublisher.publishRevocationEvents(apiKeyInfo.getApiKeyHash(), properties);
@@ -4076,7 +4078,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                        String username) throws APIManagementException {
 
         // Load existing metadata before revocation (revocation may remove/alter it)
-        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUId);
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUId, tenantDomain);
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId);
         }
@@ -4147,7 +4149,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                           String username)
             throws APIManagementException {
         // Load existing metadata before revocation (revocation may remove/alter it)
-        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIAPIKey(apiUUId, keyUUId);
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIAPIKey(apiUUId, keyUUId, tenantDomain);
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId);
         }

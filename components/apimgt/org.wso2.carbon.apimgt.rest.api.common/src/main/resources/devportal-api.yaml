@@ -1483,7 +1483,7 @@ paths:
         - APIKeys
       summary: Regenerate API Key
       description: |
-        Regenerate a self contained API Key for the API specified by the key name
+        Regenerate a self contained API Key for the API specified by the key UUID
       operationId: regenerateAPIBoundAPIKey
       parameters:
         - $ref: '#/components/parameters/apiId'
@@ -1563,7 +1563,7 @@ paths:
         - APIKeys
       summary: Revoke API Key
       description: |
-        Revoke a self contained API Key for the API specified by the key name
+        Revoke a self contained API Key for the API specified by the key UUID
       operationId: revokeAPIBoundAPIKey
       parameters:
         - $ref: '#/components/parameters/apiId'
@@ -1648,7 +1648,7 @@ paths:
         - APIKeys
       summary: Remove an Association for the API Key
       description: |
-        Remove an association a self contained API Key for the API specified by the key name
+        Remove an association a self contained API Key for the API specified by the key UUID
       operationId: dissociateAPIKey
       parameters:
         - $ref: '#/components/parameters/apiId'
@@ -3691,7 +3691,7 @@ paths:
         - APIKeys
       summary: Regenerate API Key
       description: |
-        Regenerate a self contained API Key for the application specified by the key name
+        Regenerate a self contained API Key for the application specified by the key UUID
       operationId: regenerateAppBoundAPIKey
       parameters:
         - $ref: '#/components/parameters/applicationId'

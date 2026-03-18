@@ -111,7 +111,9 @@ public final class EncryptionKeyGenerator {
             }
             lines.add(ENCRYPTION_SECTION);
             lines.add(toKeyLine(key));
-            writeFileContent(securedDeploymentTomlPath, joinLines(lines, newline));
+            String updatedContent = joinLines(lines, newline);
+            writeFileContent(securedDeploymentTomlPath, updatedContent);
+            verifyPersistedContent(securedDeploymentTomlPath, updatedContent);
             logGeneratedKeyMessage(securedDeploymentTomlPath.toString());
             return EXIT_SUCCESS_GENERATED;
         } catch (IOException e) {
@@ -204,6 +206,21 @@ public final class EncryptionKeyGenerator {
             } catch (IOException ignored) {
                 // Ignore cleanup failure to avoid masking a prior move exception.
             }
+        }
+    }
+
+    /**
+     * Verifies the target file contains the expected content after a write operation.
+     *
+     * @param file target file path
+     * @param expectedContent expected content after write
+     * @throws IOException if verification fails
+     */
+    private static void verifyPersistedContent(Path file, String expectedContent) throws IOException {
+
+        String persistedContent = readFileContent(file);
+        if (!expectedContent.equals(persistedContent)) {
+            throw new IOException("deployment.toml content verification failed after write: " + file);
         }
     }
 

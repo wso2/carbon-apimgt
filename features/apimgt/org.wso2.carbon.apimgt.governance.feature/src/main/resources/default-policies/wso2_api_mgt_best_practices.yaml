@@ -15,3 +15,4 @@ governableStates:
 rulesetNames:
   - WSO2 REST API Design Guidelines
   - WSO2 API Management Guidelines
+  - WSO2 MCP Server Management Guidelines

@@ -842,7 +842,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     if (!isValidKeyType) {
                         RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
                     } else {
-                        List<APIKeyInfo> apiKeyList = apiConsumer.getApiKeys(applicationId, keyType);
+                        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                        List<APIKeyInfo> apiKeyList = apiConsumer.getApiKeys(applicationId, keyType, tenantDomain);
                         List<APIKeyInfoDTO> apiKeyInfoDTOList = ApplicationKeyMappingUtil.formApiKeyListToDTOList(apiKeyList);
                         return Response.ok().entity(apiKeyInfoDTOList).build();
                     }

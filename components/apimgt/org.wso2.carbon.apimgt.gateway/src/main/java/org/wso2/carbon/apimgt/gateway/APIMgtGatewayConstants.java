@@ -239,6 +239,8 @@ public class APIMgtGatewayConstants {
     public static final String MCP_ANALYTICS = "mcpAnalytics";
     public static final String MCP_SESSION_ID = "sessionId";
     public static final String MCP_CAPABILITY = "capability";
+    public static final String TOOL = "TOOL";
+    public static final String MCP_TOOL_CALL = "tools/call";
     public static final String MCP_CAPABILITY_NAME = "capabilityName";
     public static final String MCP_CLIENT_INFO = "clientInfo";
     public static final String MCP_REQUESTED_PROTOCOL_VERSION = "requestedProtocolVersion";

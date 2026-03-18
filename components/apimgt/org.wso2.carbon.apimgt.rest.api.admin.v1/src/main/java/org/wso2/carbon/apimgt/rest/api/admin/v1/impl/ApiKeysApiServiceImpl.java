@@ -38,7 +38,7 @@ import java.util.List;
 public class ApiKeysApiServiceImpl implements ApiKeysApiService {
 
     /**
-     * Delete an api key provided by the display name
+     * Delete an api key provided by the key UUID
      *
      * @param messageContext Message context
      * @return API key deletion response
