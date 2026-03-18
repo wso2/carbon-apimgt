@@ -158,54 +158,47 @@ public class PlatformGatewayDeploymentEventDAO {
         String claimId = UUID.randomUUID().toString();
         Timestamp now = new Timestamp(System.currentTimeMillis());
         Timestamp leaseExpiry = new Timestamp(System.currentTimeMillis() - CLAIM_LEASE_DURATION_MS);
-        Connection connection = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            try (PreparedStatement ps = connection.prepareStatement(
-                    SQLConstants.PlatformGatewayDeploymentEventSQLConstants.UPDATE_CLAIM_PENDING_FOR_GATEWAY)) {
-                ps.setTimestamp(1, now);
-                ps.setString(2, claimId);
-                ps.setString(3, gatewayId.trim());
-                ps.setTimestamp(4, leaseExpiry);
-                ps.executeUpdate();
-            }
-            List<DeploymentEventRecord> list = new ArrayList<>();
-            try (PreparedStatement ps = connection.prepareStatement(
-                    SQLConstants.PlatformGatewayDeploymentEventSQLConstants.SELECT_CLAIMED_BY_BATCH)) {
-                ps.setString(1, claimId);
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        String id = rs.getString("ID");
-                        byte[] payloadBytes = rs.getBytes("PAYLOAD");
-                        String payload = payloadBytes != null ? new String(payloadBytes, StandardCharsets.UTF_8) : null;
-                        if (id != null && payload != null) {
-                            list.add(new DeploymentEventRecord(id, payload));
+            try {
+                try (PreparedStatement ps = connection.prepareStatement(
+                        SQLConstants.PlatformGatewayDeploymentEventSQLConstants.UPDATE_CLAIM_PENDING_FOR_GATEWAY)) {
+                    ps.setTimestamp(1, now);
+                    ps.setString(2, claimId);
+                    ps.setString(3, gatewayId.trim());
+                    ps.setTimestamp(4, leaseExpiry);
+                    ps.executeUpdate();
+                }
+                List<DeploymentEventRecord> list = new ArrayList<>();
+                try (PreparedStatement ps = connection.prepareStatement(
+                        SQLConstants.PlatformGatewayDeploymentEventSQLConstants.SELECT_CLAIMED_BY_BATCH)) {
+                    ps.setString(1, claimId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        while (rs.next()) {
+                            String id = rs.getString("ID");
+                            byte[] payloadBytes = rs.getBytes("PAYLOAD");
+                            String payload = payloadBytes != null
+                                    ? new String(payloadBytes, StandardCharsets.UTF_8) : null;
+                            if (id != null && payload != null) {
+                                list.add(new DeploymentEventRecord(id, payload));
+                            }
                         }
                     }
                 }
-            }
-            connection.commit();
-            return list;
-        } catch (SQLException e) {
-            if (connection != null) {
+                connection.commit();
+                return list;
+            } catch (SQLException e) {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
                     log.warn("Rollback failed: " + ex.getMessage());
                 }
+                log.error("Error claiming pending events for gateway " + gatewayId, e);
+                throw new APIManagementException("Error getting pending deployment events", e);
             }
+        } catch (SQLException e) {
             log.error("Error claiming pending events for gateway " + gatewayId, e);
             throw new APIManagementException("Error getting pending deployment events", e);
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.setAutoCommit(true);
-                    connection.close();
-                } catch (SQLException e) {
-                    log.warn("Error closing connection: " + e.getMessage());
-                }
-            }
         }
     }
 
