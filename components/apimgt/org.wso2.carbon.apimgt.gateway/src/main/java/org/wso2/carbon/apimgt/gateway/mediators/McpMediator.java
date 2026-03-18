@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.MCPPayloadGenerator;
 import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -75,6 +76,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
     private static final String OUT_FLOW = "OUT";
     private static final Pattern validHostHeaderPattern =
             Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
+    private Boolean buildResponseMessage = null;
 
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
@@ -382,34 +384,49 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
      * @param messageContext The Synapse message context
      */
     private void handleServerProxyBackendResponse(MessageContext messageContext) {
-        try {
-            org.apache.axis2.context.MessageContext axis2MessageContext =
-                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            RelayUtils.buildMessage(axis2MessageContext);
-            String responseBody;
-            // Check for JSON payload
-            if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
-                responseBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
+        if (buildResponseMessage == null) {
+            Map<String,String> configs = APIManagerConfiguration.getAnalyticsProperties();
+            if (configs.containsKey(
+                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.BUILD_RESPONSE_MESSAGE_CONFIG)) {
+                buildResponseMessage = Boolean.parseBoolean(configs.get(
+                        org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.BUILD_RESPONSE_MESSAGE_CONFIG));
             } else {
-                // Extract text from SOAP envelope's first element
-                SOAPEnvelope envelope = axis2MessageContext.getEnvelope();
-                if (envelope != null && envelope.getBody() != null) {
-                    envelope.buildWithAttachments();
-                    OMElement firstElement = envelope.getBody().getFirstElement();
-                    responseBody = firstElement != null ? firstElement.getText() : null;
+                buildResponseMessage = false;
+            }
+        }
+        if (buildResponseMessage) {
+            if (log.isDebugEnabled()) {
+                log.debug("Building response message from axis2 message context for analytics extraction.");
+            }
+            try {
+                org.apache.axis2.context.MessageContext axis2MessageContext =
+                        ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                RelayUtils.buildMessage(axis2MessageContext);
+                String responseBody;
+                // Check for JSON payload
+                if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
+                    responseBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
                 } else {
-                    responseBody = null;
+                    // Extract text from SOAP envelope's first element
+                    SOAPEnvelope envelope = axis2MessageContext.getEnvelope();
+                    if (envelope != null && envelope.getBody() != null) {
+                        envelope.buildWithAttachments();
+                        OMElement firstElement = envelope.getBody().getFirstElement();
+                        responseBody = firstElement != null ? firstElement.getText() : null;
+                    } else {
+                        responseBody = null;
+                    }
                 }
+                if (responseBody != null && !responseBody.trim().isEmpty()) {
+                    // Extract JSON from SSE format if present
+                    String jsonResponse = extractDataFromSSE(responseBody);
+                    setMCPErrorDetails(messageContext, jsonResponse);
+                }
+            } catch (IOException | XMLStreamException e) {
+                log.warn("Failed to build message from axis2 message context", e);
+            } catch (Exception e) {
+                log.warn("Failed to extract error details from server proxy backend response", e);
             }
-            if (responseBody != null && !responseBody.trim().isEmpty()) {
-                // Extract JSON from SSE format if present
-                String jsonResponse = extractDataFromSSE(responseBody);
-                setMCPErrorDetails(messageContext, jsonResponse);
-            }
-        } catch (IOException | XMLStreamException e) {
-            log.warn("Failed to build message from axis2 message context", e);
-        } catch (Exception e) {
-            log.warn("Failed to extract error details from server proxy backend response", e);
         }
     }
 
