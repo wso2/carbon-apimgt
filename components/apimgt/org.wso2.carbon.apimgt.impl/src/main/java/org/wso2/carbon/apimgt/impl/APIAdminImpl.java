@@ -1401,22 +1401,6 @@ public class APIAdminImpl implements APIAdmin {
         try {
             //Parse the message body and extract the content in XML form
             DocumentBuilderFactory factory = APIUtil.getSecuredDocumentBuilder();
-
-            factory.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.DISALLOW_DOCTYPE_DECL_FEATURE,
-                    true);
-
-            // Enable secure processing
-            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-
-            // Enable namespace awareness
-            factory.setNamespaceAware(true);
-
-            // Disable external entities to prevent XXE attacks
-            factory.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE,
-                    false);
-            factory.setFeature(Constants.SAX_FEATURE_PREFIX +
-                    Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE, false);
-
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(new InputSource(new StringReader(messageBody)));
             Node bodyContentNode = document.getFirstChild().getFirstChild();
@@ -1425,7 +1409,6 @@ public class APIAdminImpl implements APIAdmin {
             if (bodyContentNode != null) {
                 StringWriter writer = new StringWriter();
                 Transformer transformer = TransformerFactory.newInstance().newTransformer();
-                transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
                 transformer.transform(new DOMSource(bodyContentNode), new StreamResult(writer));
                 String output = writer.toString();
                 content = output.substring(output.indexOf("?>") + 2); //remove <?xml version="1.0" encoding="UTF-8"?>

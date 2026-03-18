@@ -49,11 +49,8 @@ public class OpenAPI30SchemaProcessor implements SchemaProcessor {
             if (schema instanceof ArraySchema) {
                 OASParserUtil.processArraySchema(schema, context);
             } else if (schema instanceof MapSchema) {
-                Object additionalProperties = schema.getAdditionalProperties();
-                if (additionalProperties instanceof Schema) {
-                    extractReferenceFromSchema((Schema<?>) additionalProperties, context);
-                }
-                // If additionalProperties is a boolean, no schema reference extraction is needed
+                Schema<?> additionalPropertiesSchema = (Schema<?>) schema.getAdditionalProperties();
+                extractReferenceFromSchema(additionalPropertiesSchema, context);
             } else if (schema instanceof ComposedSchema) {
                 processComposedSchemas((ComposedSchema) schema, references, context);
             } else if (schema instanceof ObjectSchema) {

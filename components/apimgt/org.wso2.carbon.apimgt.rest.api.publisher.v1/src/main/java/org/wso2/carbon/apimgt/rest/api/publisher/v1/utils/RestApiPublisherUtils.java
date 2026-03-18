@@ -117,6 +117,7 @@ public class RestApiPublisherUtils {
             RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, log);
         }
 
+        InputStream docInputStream = null;
         try {
             ContentDisposition contentDisposition = fileDetails.getContentDisposition();
             String filename = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
@@ -130,21 +131,18 @@ public class RestApiPublisherUtils {
             //APIIdentifier apiIdentifier = APIMappingUtil
             //        .getAPIIdentifierFromUUID(apiId, tenantDomain);
 
-            Path resolvedPath = resolveFilePath(docFile.getAbsolutePath(), filename);
-
-            RestApiUtil.transferFile(inputStream, resolvedPath.getFileName().toString(), resolvedPath.getParent().toString());
-            byte[] fileBytes = FileUtils.readFileToByteArray(new File(resolvedPath.toString()));
-            String mediaType = detectAndValidateMediaType(fileBytes, filename);
-            try (InputStream uploadStream = new ByteArrayInputStream(fileBytes)) {
-                PublisherCommonUtils.addDocumentationContentForFile(uploadStream, mediaType, filename, apiProvider,
-                        apiId, documentId, organization);
-            }
+            RestApiUtil.transferFile(inputStream, filename, docFile.getAbsolutePath());
+            docInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + filename);
+            String mediaType = fileDetails.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
+            mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
+            PublisherCommonUtils
+                    .addDocumentationContentForFile(docInputStream, mediaType, filename, apiProvider, apiId,
+                            documentId, organization);
+            docFile.deleteOnExit();
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
-        } catch (IOException e) {
-            RestApiUtil.handleInternalServerError("Error processing file upload for document: " + documentId, e, log);
         } finally {
-            FileUtils.deleteQuietly(docFile);
+            IOUtils.closeQuietly(docInputStream);
         }
     }
 
@@ -207,6 +205,7 @@ public class RestApiPublisherUtils {
             RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, log);
         }
 
+        InputStream docInputStream = null;
         try {
             ContentDisposition contentDisposition = fileDetails.getContentDisposition();
             String filename = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
@@ -219,21 +218,18 @@ public class RestApiPublisherUtils {
             //APIProductIdentifier productIdentifier = APIMappingUtil
             //        .getAPIProductIdentifierFromUUID(productId, tenantDomain);
 
-            Path resolvedPath = resolveFilePath(docFile.getAbsolutePath(), filename);
-
-            RestApiUtil.transferFile(inputStream, resolvedPath.getFileName().toString(), resolvedPath.getParent().toString());
-            byte[] fileBytes = FileUtils.readFileToByteArray(new File(resolvedPath.toString()));
-            String mediaType = detectAndValidateMediaType(fileBytes, filename);
-            try (InputStream uploadStream = new ByteArrayInputStream(fileBytes)) {
-                PublisherCommonUtils.addDocumentationContentForFile(uploadStream, mediaType, filename, apiProvider,
-                        productId, documentId, organization);
-            }
+            RestApiUtil.transferFile(inputStream, filename, docFile.getAbsolutePath());
+            docInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + filename);
+            String mediaType = fileDetails.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
+            mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
+            PublisherCommonUtils
+                    .addDocumentationContentForFile(docInputStream, mediaType, filename, apiProvider, productId,
+                            documentId, organization);
+            docFile.deleteOnExit();
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
-        } catch (IOException e) {
-            RestApiUtil.handleInternalServerError("Error processing file upload for document: " + documentId, e, log);
         } finally {
-            FileUtils.deleteQuietly(docFile);
+            IOUtils.closeQuietly(docInputStream);
         }
     }
 
@@ -380,51 +376,6 @@ public class RestApiPublisherUtils {
     }
 
     /**
-     * Detects the MIME type of a file based on its byte content and validates whether the file extension matches the
-     * detected MIME type.
-     *
-     * @param fileBytes the byte content of the file to validate
-     * @param filename  the name of the file, used to extract the extension for validation
-     * @return the detected MIME type as a string if the extension matches the MIME type
-     * @throws APIManagementException if the fileBytes or filename is null, or if the MIME type detection or validation fails
-     */
-    public static String detectAndValidateMediaType(byte[] fileBytes, String filename) throws APIManagementException {
-        if (fileBytes == null || filename == null) {
-            throw new APIManagementException(ExceptionCodes.INVALID_MEDIA_TYPE_VALIDATION);
-        }
-
-        String detectedMimeType;
-        try (InputStream mimeDetectStream = new ByteArrayInputStream(fileBytes)) {
-            Tika tika = new Tika();
-            detectedMimeType = tika.detect(mimeDetectStream, filename);
-        } catch (Exception e) {
-            throw new APIManagementException("Error detecting media type", e,
-                    ExceptionCodes.INVALID_MEDIA_TYPE_VALIDATION);
-        }
-
-        int lastDot = filename.lastIndexOf('.');
-        String fileExtension = (lastDot == -1) ? "" : filename.substring(lastDot).toLowerCase();
-
-        boolean extensionMatches;
-        MimeType mimeType;
-        try {
-            mimeType = MimeTypes.getDefaultMimeTypes().forName(detectedMimeType);
-        } catch (MimeTypeException e) {
-            throw new APIManagementException("Error resolving expected extension", e,
-                    ExceptionCodes.from(ExceptionCodes.INVALID_MEDIA_TYPE_VALIDATION, fileExtension, detectedMimeType));
-        }
-        Set<String> validExtensions = new HashSet<>(mimeType.getExtensions());
-        extensionMatches = validExtensions.stream().anyMatch(ext -> ext.equalsIgnoreCase(fileExtension));
-
-        if (!extensionMatches) {
-            throw new APIManagementException(
-                    ExceptionCodes.from(ExceptionCodes.INVALID_MEDIA_TYPE_VALIDATION, fileExtension, detectedMimeType));
-        }
-
-        return detectedMimeType;
-    }
-
-    /**
      * This method will validate the given input stream for the allowed Media Types
      *
      * @param fileInputStream stream containing the thumbnail data of which the content has to be validated
@@ -505,50 +456,6 @@ public class RestApiPublisherUtils {
                             + "image/png, image/gif and image/svg+xml", log);
         }
         return fileMediaType;
-    }
-
-    /**
-     * Resolves an untrusted user-specified path against the base directory.
-     * Paths that try to escape the base directory are rejected.
-     * @param baseDirPathString the absolute path of the base directory that all
-     *                     user-specified paths should be within
-     * @param userPathString  the untrusted path provided by the user
-     * @return Resolved Path
-     * @throws APIManagementException if resolution fails.
-     */
-    private static Path resolveFilePath(final String baseDirPathString,
-                                        final String userPathString) throws APIManagementException {
-        Path baseDirPath = Paths.get(baseDirPathString);
-        Path userPath = Paths.get(userPathString);
-        if (!baseDirPath.isAbsolute()) {
-            throw new APIManagementException("Invalid base path provided." +
-                    " Base path must be absolute. Base Path: " + baseDirPath);
-        }
-
-        if (userPath.isAbsolute()){
-            throw new APIManagementException("Invalid user path provided." +
-                    " User path should not be absolute. User Path: " + userPath);
-        }
-
-        /*
-         * Combines the absolute base directory path and the user-specified relative path.
-         * Then, normalizes the path to handle any ".." elements in the userPath.
-         * For example, if the baseDirPath is "/foo/bar/baz" and userPath is "../attack",
-         * the resulting resolvedPath will be "/foo/bar/attack".
-         */
-        final Path resolvedPath = baseDirPath.resolve(userPath).normalize();
-
-        /*
-         * Verifies that the resolved path is still within the expected base directory.
-         * If the resolved path does not start with the base directory path,
-         * it indicates an attempt to escape the intended directory structure.
-         */
-        if (!resolvedPath.startsWith(baseDirPath.normalize())) {
-            throw new APIManagementException("Error resolving path. The user path attempts" +
-                    " to escape the base directory.");
-        }
-
-        return resolvedPath;
     }
 
     /**

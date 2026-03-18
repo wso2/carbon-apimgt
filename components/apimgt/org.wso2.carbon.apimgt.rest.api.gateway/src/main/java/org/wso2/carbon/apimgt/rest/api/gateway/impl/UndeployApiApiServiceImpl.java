@@ -37,7 +37,7 @@ public class UndeployApiApiServiceImpl implements UndeployApiApiService {
     private boolean debugEnabled = log.isDebugEnabled();
 
     public Response undeployAPI(String apiName, String version, String tenantDomain,
-                                    MessageContext messageContext) throws APIManagementException {
+                                    MessageContext messageContext) {
 
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
@@ -51,15 +51,9 @@ public class UndeployApiApiServiceImpl implements UndeployApiApiService {
             deployResponseDTO.setJsonPayload(apiName + " Undeployed from the gateway");
             return Response.ok().entity(deployResponseDTO).build();
         } catch (ArtifactSynchronizerException e) {
-            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 404) {
-                String errorMessage = "API not found in the storage: " + apiName + "-" + version +
-                        " for tenant domain: " + tenantDomain;
-                throw new APIManagementException(errorMessage, e);
-            } else {
-                String errorMessage = "Error in fetching artifacts from storage";
-                log.error(errorMessage, e);
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            String errorMessage = "Error in fetching artifacts from storage";
+            log.error(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

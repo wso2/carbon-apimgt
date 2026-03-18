@@ -35,7 +35,7 @@ public class RedeployApiApiServiceImpl implements RedeployApiApiService {
     private boolean debugEnabled = log.isDebugEnabled();
 
     public Response redployAPI(String apiName, String version, String tenantDomain,
-                                    MessageContext messageContext) throws APIManagementException {
+                                    MessageContext messageContext) {
 
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
@@ -49,15 +49,9 @@ public class RedeployApiApiServiceImpl implements RedeployApiApiService {
             responseDTO.setJsonPayload(apiName + " redeployed from the gateway");
             return Response.ok().entity(responseDTO).build();
         } catch (ArtifactSynchronizerException e) {
-            if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() == 404) {
-                String errorMessage = "API not found in the storage: " + apiName + "-" + version +
-                        " for tenant domain: " + tenantDomain;
-                throw new APIManagementException(errorMessage, e);
-            } else {
-                String errorMessage = "Error in fetching artifacts from storage";
-                log.error(errorMessage, e);
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            String errorMessage = "Error in fetching artifacts from storage";
+            log.error(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
