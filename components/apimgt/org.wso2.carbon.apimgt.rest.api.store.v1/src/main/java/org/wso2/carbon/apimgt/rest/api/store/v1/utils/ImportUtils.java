@@ -465,10 +465,13 @@ public class ImportUtils {
             // Track already-seen secret values to skip duplicates before sending to IS.
             Set<String> seenSecretValues = new HashSet<>();
             // Mark 1st secret as seen to skip it as it is already added above
-            seenSecretValues.add(consumerSecrets.get(0).getSecretValue());
+            ConsumerSecretDTO firstSecret = consumerSecrets.get(0);
+            if (firstSecret != null && !StringUtils.isEmpty(firstSecret.getSecretValue())) {
+                seenSecretValues.add(firstSecret.getSecretValue());
+            }
             // Continue from the 2nd secret onwards
             for (ConsumerSecretDTO secretDTO : consumerSecrets.subList(1, consumerSecrets.size())) {
-                if (StringUtils.isEmpty(secretDTO.getSecretValue())
+                if (secretDTO == null || StringUtils.isEmpty(secretDTO.getSecretValue())
                         || !seenSecretValues.add(secretDTO.getSecretValue())) {
                     continue;
                 }
