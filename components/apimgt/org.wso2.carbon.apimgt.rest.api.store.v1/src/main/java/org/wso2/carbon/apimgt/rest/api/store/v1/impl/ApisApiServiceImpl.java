@@ -483,8 +483,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiId, organization)) {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
                 } else {
-                    String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                    List<APIKeyInfo> apiKeyList = apiConsumer.getApiApiKeys(apiId, tenantDomain);
+                    List<APIKeyInfo> apiKeyList = apiConsumer.getApiApiKeys(apiId, RestApiCommonUtil.getLoggedInUsername());
                     List<APIAPIKeyInfoDTO> apiKeyInfoDTOList = ApplicationKeyMappingUtil.formApiApiKeyListToDTOList(apiKeyList);
                     return Response.ok().entity(apiKeyInfoDTOList).build();
                 }
@@ -517,7 +516,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiUUId, organization)) {
                         RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiUUId, log);
                     } else {
-                        APIKeyInfo apiKeyInfo = apiConsumer.createAssociationToApp(apiUUId, keyUUID, body.getApplicationUUID());
+                        APIKeyInfo apiKeyInfo = apiConsumer.createAssociationToApp(apiUUId, keyUUID, body.getApplicationUUID(),
+                                RestApiCommonUtil.getLoggedInUserTenantDomain(), username);
                         APIKeyAssociationDTO apiKeyAssociationDTO =
                                 ApplicationKeyMappingUtil.formApiAssociationToDTO(api.getDisplayName(),
                                 apiKeyInfo.getApplicationName(), apiKeyInfo.getKeyName());
@@ -555,7 +555,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
                     } else {
                         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                        apiConsumer.revokeApiKey(keyUUID, tenantDomain);
+                        apiConsumer.revokeApiKey(keyUUID, tenantDomain, RestApiCommonUtil.getLoggedInUsername());
                         return Response.ok().build();
                     }
                 }
@@ -589,7 +589,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiUUId, organization)) {
                         RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiUUId, log);
                     } else {
-                        apiConsumer.removeApiKeyAssociation(apiUUId, keyUUID);
+                        apiConsumer.removeApiKeyAssociation(apiUUId, keyUUID, RestApiCommonUtil.getLoggedInUserTenantDomain(),
+                                RestApiCommonUtil.getLoggedInUsername());
                         return Response.ok().build();
                     }
                 }

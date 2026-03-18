@@ -723,7 +723,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     if (body != null && body.getKeyUUID() != null) {
                         keyUUId = body.getKeyUUID();
                     }
-                    APIKeyInfo apikeyInfo = apiConsumer.createAssociationToApp(apiUUId, keyUUId, applicationUUId);
+                    APIKeyInfo apikeyInfo = apiConsumer.createAssociationToApp(apiUUId, keyUUId, applicationUUId,
+                            RestApiCommonUtil.getLoggedInUserTenantDomain(), userName);
                     APIKeyAssociationDTO apiKeyAssociationDTO = ApplicationKeyMappingUtil.formApiAssociationToDTO(
                             apikeyInfo.getApiName(),
                             application.getName(), apikeyInfo.getKeyName());
@@ -755,7 +756,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     if (!isValidKeyType) {
                         RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
                     } else {
-                        List<APIKeyInfo> apiKeyAssociationsList = apiConsumer.getApiKeyAssociations(applicationId, keyType);
+                        List<APIKeyInfo> apiKeyAssociationsList = apiConsumer.getApiKeyAssociations(applicationId, keyType,
+                                RestApiCommonUtil.getLoggedInUserTenantDomain(), userName);
                         List<APIKeyAssociationInfoDTO> apiKeyAssociationInfoDTOList =
                                 ApplicationKeyMappingUtil.formApiKeyAssociationListToDTOList(apiKeyAssociationsList);
                         return Response.ok().entity(apiKeyAssociationInfoDTOList).build();
@@ -843,7 +845,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
                     } else {
                         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                        List<APIKeyInfo> apiKeyList = apiConsumer.getApiKeys(applicationId, keyType, tenantDomain);
+                        List<APIKeyInfo> apiKeyList = apiConsumer.getApiKeys(applicationId, keyType, tenantDomain, userName);
                         List<APIKeyInfoDTO> apiKeyInfoDTOList = ApplicationKeyMappingUtil.formApiKeyListToDTOList(apiKeyList);
                         return Response.ok().entity(apiKeyInfoDTOList).build();
                     }
@@ -880,7 +882,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     } else {
                         RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
                     }
-                    apiConsumer.removeApiKeyAssociationViaApp(applicationId, keyUUID);
+                    apiConsumer.removeApiKeyAssociationViaApp(applicationId, keyUUID, RestApiCommonUtil.getLoggedInUserTenantDomain(), userName);
                     return Response.ok().build();
                 }
             }
@@ -1020,7 +1022,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                     "or SANDBOX", log);
                         } else {
                             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                            apiConsumer.revokeApiKey(keyUUID, tenantDomain);
+                            apiConsumer.revokeApiKey(keyUUID, tenantDomain, RestApiCommonUtil.getLoggedInUsername());
                             return Response.ok().build();
                         }
                     } else {
@@ -1083,7 +1085,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     if (!isValidKeyType) {
                         RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
                     } else {
-                        List<APIKeyInfo> apiKeyList = apiConsumer.getApisWithApiKeys(applicationId, keyType);
+                        List<APIKeyInfo> apiKeyList = apiConsumer.getApisWithApiKeys(applicationId, keyType,
+                                RestApiCommonUtil.getLoggedInUserTenantDomain(), userName);
                         List<APIWithKeyInfoDTO> apiApiKeyInfoDTOList = ApplicationKeyMappingUtil.
                                 formApiWithApiKeyListToDTOList(apiKeyList);
                         return Response.ok().entity(apiApiKeyInfoDTOList).build();
