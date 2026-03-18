@@ -667,6 +667,13 @@ public class APIManagerConfiguration {
                 solaceConfig.setEnabled(true);
                 solaceConfig.setSolaceApimApiEndpoint(solaceApimApiEndpoint.getText());
                 solaceConfig.setSolaceToken(solaceToken.getText());
+            } else if (APIConstants.MEDIATION_CONFIG.equals(localName)) {
+                OMElement enableSecureXMLProcessingElement = element.getFirstChildWithName(
+                        new QName(APIConstants.ENABLE_SECURE_XML_PROCESSING));
+                if (enableSecureXMLProcessingElement != null) {
+                    String key = getKey(nameStack) + "." + APIConstants.ENABLE_SECURE_XML_PROCESSING;
+                    addToConfiguration(key, enableSecureXMLProcessingElement.getText());
+                }
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
                 String value = MiscellaneousUtil.resolve(element, secretResolver);
@@ -3187,6 +3194,18 @@ public class APIManagerConfiguration {
     public void setHashingAlgorithm(String hashingAlgorithm) {
 
         this.hashingAlgorithm = hashingAlgorithm;
+    }
+
+    /**
+     * Returns whether secure XML processing is enabled for policies.
+     *
+     * @return true if secure XML processing is enabled, false otherwise.
+     */
+    public boolean isEnableSecureXMLProcessing() {
+
+        String value = getFirstProperty(APIConstants.MEDIATION_CONFIG + "."
+                + APIConstants.ENABLE_SECURE_XML_PROCESSING);
+        return Boolean.parseBoolean(value);
     }
 
     public void setApiChatConfiguration(OMElement omElement){
