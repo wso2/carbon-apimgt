@@ -700,13 +700,12 @@ public interface APIConsumer extends APIManager {
     /**
      * Returns a list of api keys for a given API.
      *
-     * @param apiId API Id of the API.
-     * @param tenantDomain Tenant Domain
+     * @param apiId API Id of the API
      * @param username Username
-     * @return A List of api keys.
+     * @return A List of api keys
      * @throws APIManagementException This is the custom exception class for API management.
      */
-    List<APIKeyInfo> getApiApiKeys(String apiId, String tenantDomain, String username)
+    List<APIKeyInfo> getApiApiKeys(String apiId, String username)
             throws APIManagementException;
 
     /**
