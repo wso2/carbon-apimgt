@@ -283,7 +283,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String yaml = artifactService.getStoredRevisionArtifact(apiId, revisionUuid);
         if (yaml == null) {
             if (log.isDebugEnabled()) {
-                log.debug("No stored artifact for API " + apiId + " revision " + revisionUuid);
+                log.debug("No platform gateway artifact for API " + apiId + " revision " + revisionUuid);
             }
             return Response.status(Response.Status.NOT_FOUND).build();
         }
