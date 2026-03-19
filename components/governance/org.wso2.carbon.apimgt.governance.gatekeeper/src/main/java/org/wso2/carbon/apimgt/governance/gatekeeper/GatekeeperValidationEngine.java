@@ -256,10 +256,10 @@ public class GatekeeperValidationEngine implements ValidationEngine {
             }
 
             if (rulesMap != null) {
+                boolean mainRuleUpdated = false;
                 for (Map.Entry<String, Object> entry : rulesMap.entrySet()) {
-                    // Skip the main dedup rule if it matches - we already added it above
-                    if (DEDUPLICATION_RULE_NAME.equals(entry.getKey())) {
-                        // Update the main rule description/severity from the YAML config
+                    // Update main dedup rule from the first rule entry in YAML
+                    if (!mainRuleUpdated) {
                         if (entry.getValue() instanceof Map) {
                             Map<String, Object> ruleConfig = (Map<String, Object>) entry.getValue();
                             if (ruleConfig.containsKey("description")) {
@@ -270,6 +270,7 @@ public class GatekeeperValidationEngine implements ValidationEngine {
                                         RuleSeverity.fromString((String) ruleConfig.get("severity")));
                             }
                         }
+                        mainRuleUpdated = true;
                         continue;
                     }
 
@@ -926,8 +927,12 @@ public class GatekeeperValidationEngine implements ValidationEngine {
                     }
                 }
 
-                if (rulesMap != null && rulesMap.containsKey(DEDUPLICATION_RULE_NAME)) {
+                if (rulesMap != null) {
+                    // Try specific rule name first, then fallback to first rule entry
                     Object ruleObj = rulesMap.get(DEDUPLICATION_RULE_NAME);
+                    if (ruleObj == null && !rulesMap.isEmpty()) {
+                        ruleObj = rulesMap.values().iterator().next();
+                    }
                     if (ruleObj instanceof Map) {
                         Map<String, Object> ruleConfig = (Map<String, Object>) ruleObj;
                         if (ruleConfig.containsKey("message")) {
@@ -965,8 +970,12 @@ public class GatekeeperValidationEngine implements ValidationEngine {
                     }
                 }
 
-                if (rulesMap != null && rulesMap.containsKey(DEDUPLICATION_RULE_NAME)) {
+                if (rulesMap != null) {
+                    // Try specific rule name first, then fallback to first rule entry
                     Object ruleObj = rulesMap.get(DEDUPLICATION_RULE_NAME);
+                    if (ruleObj == null && !rulesMap.isEmpty()) {
+                        ruleObj = rulesMap.values().iterator().next();
+                    }
                     if (ruleObj instanceof Map) {
                         Map<String, Object> ruleConfig = (Map<String, Object>) ruleObj;
                         if (ruleConfig.containsKey("severity")) {
