@@ -2093,6 +2093,34 @@
               <ExpireTimeSeconds>{{apim.gateway_notification.cleanup.expiry_time}}</ExpireTimeSeconds>
               <DataRetentionPeriodSeconds>{{apim.gateway_notification.cleanup.data_retention_period}}</DataRetentionPeriodSeconds>
           </GatewayCleanup>
+          {% if (apim.universal_gateway.version is defined and apim.universal_gateway.version) or (apim.universal_gateway.connect is defined and apim.universal_gateway.connect | length > 0) %}
+          <PlatformGatewayConnectConfiguration>
+              {% if apim.universal_gateway.version is defined and apim.universal_gateway.version %}
+              <UniversalGatewayVersion>{{ apim.universal_gateway.version }}</UniversalGatewayVersion>
+              {% endif %}
+              {% if apim.universal_gateway.connect is defined and apim.universal_gateway.connect | length > 0 %}
+              <ConnectGateways>
+              {% for c in apim.universal_gateway.connect %}
+                <Connect>
+                    <RegistrationToken>{{ c.registration_token }}</RegistrationToken>
+                    {% if c.name is defined and c.name %}
+                    <Name>{{ c.name }}</Name>
+                    {% endif %}
+                    {% if c.display_name is defined and c.display_name %}
+                    <DisplayName>{{ c.display_name }}</DisplayName>
+                    {% endif %}
+                    {% if c.description is defined and c.description %}
+                    <Description>{{ c.description }}</Description>
+                    {% endif %}
+                    {% if c.url is defined and c.url %}
+                    <Url>{{ c.url }}</Url>
+                    {% endif %}
+                </Connect>
+              {% endfor %}
+              </ConnectGateways>
+              {% endif %}
+          </PlatformGatewayConnectConfiguration>
+          {% endif %}
       </GatewayNotificationConfiguration>
 
       <!-- SynapseArtifactGenerator thread pool configuration -->

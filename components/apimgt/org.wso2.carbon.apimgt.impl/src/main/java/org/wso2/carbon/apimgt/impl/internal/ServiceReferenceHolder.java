@@ -18,6 +18,9 @@ package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
+import org.wso2.carbon.apimgt.api.PlatformGatewayArtifactService;
+import org.wso2.carbon.apimgt.api.PlatformGatewayDeploymentEventService;
+import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
@@ -31,6 +34,11 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigServiceImpl;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayArtifactServiceImpl;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayDeploymentEventServiceImpl;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEventService;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayDeploymentDispatcher;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
@@ -86,6 +94,12 @@ public class ServiceReferenceHolder {
     private OpaqueAPIKeyNotifier opaqueApiKeyNotifier;
 
     private Map<String, LLMProviderService> llmProviderServiceMap = new HashMap();
+
+    /** Optional dispatcher for platform gateway deploy/undeploy; when null, platform notifier no-ops. */
+    private PlatformGatewayDeploymentDispatcher platformGatewayDeploymentDispatcher;
+
+    /** Optional service to broadcast API key lifecycle events to connected platform gateways. */
+    private PlatformGatewayAPIKeyEventService platformGatewayAPIKeyEventService;
 
     private ServiceReferenceHolder() {
 
@@ -239,6 +253,22 @@ public class ServiceReferenceHolder {
     public Map<String, List<Notifier>> getNotifiersMap() {
 
         return notifiersMap;
+    }
+
+    public PlatformGatewayDeploymentDispatcher getPlatformGatewayDeploymentDispatcher() {
+        return platformGatewayDeploymentDispatcher;
+    }
+
+    public void setPlatformGatewayDeploymentDispatcher(PlatformGatewayDeploymentDispatcher platformGatewayDeploymentDispatcher) {
+        this.platformGatewayDeploymentDispatcher = platformGatewayDeploymentDispatcher;
+    }
+
+    public PlatformGatewayAPIKeyEventService getPlatformGatewayAPIKeyEventService() {
+        return platformGatewayAPIKeyEventService;
+    }
+
+    public void setPlatformGatewayAPIKeyEventService(PlatformGatewayAPIKeyEventService platformGatewayAPIKeyEventService) {
+        this.platformGatewayAPIKeyEventService = platformGatewayAPIKeyEventService;
     }
 
     public ArtifactSaver getArtifactSaver() {
@@ -434,5 +464,18 @@ public class ServiceReferenceHolder {
 
     public void setOpaqueApiKeyNotifier(OpaqueAPIKeyNotifier opaqueApiKeyNotifier) {
         this.opaqueApiKeyNotifier = opaqueApiKeyNotifier;
+    }
+
+    public PlatformGatewayService getPlatformGatewayService() {
+
+        return PlatformGatewayServiceImpl.getInstance();
+    }
+
+    public PlatformGatewayArtifactService getPlatformGatewayArtifactService() {
+        return PlatformGatewayArtifactServiceImpl.getInstance();
+    }
+
+    public PlatformGatewayDeploymentEventService getPlatformGatewayDeploymentEventService() {
+        return PlatformGatewayDeploymentEventServiceImpl.getInstance();
     }
 }

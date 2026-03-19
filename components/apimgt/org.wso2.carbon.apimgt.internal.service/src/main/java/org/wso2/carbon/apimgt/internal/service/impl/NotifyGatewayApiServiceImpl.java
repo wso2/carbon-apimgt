@@ -19,15 +19,18 @@
 package org.wso2.carbon.apimgt.internal.service.impl;
 
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
+import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 import org.wso2.carbon.apimgt.impl.utils.GatewayManagementUtils;
+import org.wso2.carbon.apimgt.internal.service.interceptors.PlatformGatewayApiKeyAuthInterceptor;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.internal.service.NotifyGatewayApiService;
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
@@ -43,7 +46,6 @@ import javax.ws.rs.core.Response;
 public class NotifyGatewayApiServiceImpl implements NotifyGatewayApiService {
 
     private static final Log log = LogFactory.getLog(NotifyGatewayApiServiceImpl.class);
-    private GatewayNotificationConfiguration configuration;
     private GatewayManagementDAO gatewayManagementDAO;
 
     /**
@@ -79,6 +81,19 @@ public class NotifyGatewayApiServiceImpl implements NotifyGatewayApiService {
         if (organizations == null || organizations.isEmpty()) {
             organizations = new ArrayList<>();
             organizations.add(APIConstants.GatewayNotification.WSO2_ALL_TENANTS);
+        }
+
+        // Connect with existing token: create platform gateway on first REGISTER when token matches a connect config
+        if (Boolean.TRUE.equals(PlatformGatewayApiKeyAuthInterceptor.CONNECT_WITH_TOKEN_AUTH.get())
+                && StringUtils.isNotBlank(gatewayId)) {
+            ConnectGatewayConfig matchedEntry = PlatformGatewayApiKeyAuthInterceptor.CONNECT_WITH_TOKEN_MATCHED_ENTRY.get();
+            if (matchedEntry != null) {
+                org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig connectConfig = ServiceReferenceHolder.getInstance()
+                        .getAPIManagerConfigurationService().getAPIManagerConfiguration().getPlatformGatewayConnectConfig();
+                if (connectConfig != null) {
+                    PlatformGatewayServiceImpl.ensurePlatformGatewayFromConnectToken(connectConfig, gatewayId, matchedEntry);
+                }
+            }
         }
 
         NotifyGatewayStatusResponseDTO responseDTO = new NotifyGatewayStatusResponseDTO();

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdditionalPropertyDTO;
@@ -72,6 +73,40 @@ return null;
     private List<GatewayEnvironmentProtocolURIDTO> endpointURIs = new ArrayList<GatewayEnvironmentProtocolURIDTO>();
     private List<AdditionalPropertyDTO> additionalProperties = new ArrayList<AdditionalPropertyDTO>();
     private EnvironmentPermissionsDTO permissions = null;
+
+    @XmlType(name="StatusEnum")
+    @XmlEnum(String.class)
+    public enum StatusEnum {
+        ACTIVE("Active"),
+        INACTIVE("Inactive");
+        private String value;
+
+        StatusEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static StatusEnum fromValue(String v) {
+            for (StatusEnum b : StatusEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private StatusEnum status = StatusEnum.ACTIVE;
+    private URI vhost = null;
+    private String universalGatewayVersion = null;
 
   /**
    **/
@@ -319,6 +354,60 @@ return null;
     this.permissions = permissions;
   }
 
+  /**
+   * For platform gateway environments (gatewayType Universal), connection status to the control plane (Active or Inactive).
+   **/
+  public EnvironmentDTO status(StatusEnum status) {
+    this.status = status;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Active", value = "For platform gateway environments (gatewayType Universal), connection status to the control plane (Active or Inactive).")
+  @JsonProperty("status")
+  public StatusEnum getStatus() {
+    return status;
+  }
+  public void setStatus(StatusEnum status) {
+    this.status = status;
+  }
+
+  /**
+   * For platform gateway environments, the gateway URL (e.g. https://host:9443). Same as Platform Gateways API; only set when this environment represents a platform gateway.
+   **/
+  public EnvironmentDTO vhost(URI vhost) {
+    this.vhost = vhost;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://mg.wso2.com", value = "For platform gateway environments, the gateway URL (e.g. https://host:9443). Same as Platform Gateways API; only set when this environment represents a platform gateway.")
+  @JsonProperty("vhost")
+  public URI getVhost() {
+    return vhost;
+  }
+  public void setVhost(URI vhost) {
+    this.vhost = vhost;
+  }
+
+  /**
+   * Universal Gateway version from config (e.g. \&quot;0.9.0\&quot;). Set for deploy targets so UI can show quick-start version; from apim.universal_gateway.version.
+   **/
+  public EnvironmentDTO universalGatewayVersion(String universalGatewayVersion) {
+    this.universalGatewayVersion = universalGatewayVersion;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "0.9.0", value = "Universal Gateway version from config (e.g. \"0.9.0\"). Set for deploy targets so UI can show quick-start version; from apim.universal_gateway.version.")
+  @JsonProperty("universalGatewayVersion")
+  public String getUniversalGatewayVersion() {
+    return universalGatewayVersion;
+  }
+  public void setUniversalGatewayVersion(String universalGatewayVersion) {
+    this.universalGatewayVersion = universalGatewayVersion;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -342,12 +431,15 @@ return null;
         Objects.equals(vhosts, environment.vhosts) &&
         Objects.equals(endpointURIs, environment.endpointURIs) &&
         Objects.equals(additionalProperties, environment.additionalProperties) &&
-        Objects.equals(permissions, environment.permissions);
+        Objects.equals(permissions, environment.permissions) &&
+        Objects.equals(status, environment.status) &&
+        Objects.equals(vhost, environment.vhost) &&
+        Objects.equals(universalGatewayVersion, environment.universalGatewayVersion);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, provider, type, gatewayType, description, isReadOnly, mode, apiDiscoveryScheduledWindow, vhosts, endpointURIs, additionalProperties, permissions);
+    return Objects.hash(id, name, displayName, provider, type, gatewayType, description, isReadOnly, mode, apiDiscoveryScheduledWindow, vhosts, endpointURIs, additionalProperties, permissions, status, vhost, universalGatewayVersion);
   }
 
   @Override
@@ -369,6 +461,9 @@ return null;
     sb.append("    endpointURIs: ").append(toIndentedString(endpointURIs)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
+    sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
+    sb.append("    universalGatewayVersion: ").append(toIndentedString(universalGatewayVersion)).append("\n");
     sb.append("}");
     return sb.toString();
   }
