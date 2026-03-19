@@ -7596,6 +7596,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             deploymentFailures.addAll(environments);
                         }
                     } else {
+                        log.error("Failed to deploy API revision " + revisionUUID + " for API " + apiId + ": "
+                                + e.getMessage(), e);
                         throw e;
                     }
                 }

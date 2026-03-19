@@ -250,10 +250,14 @@ public class OpaqueApiKeyPublisher {
         }
 
         if (opaqueApiKeyNotifier != null) {
-            log.info("Publishing opaque apikey.info to realtime");
+            if (log.isDebugEnabled()) {
+                log.debug("Publishing opaque apikey.info to realtime");
+            }
             opaqueApiKeyNotifier.sendApiKeyInfoOnRealtime(properties);
         } else {
-            log.warn("OpaqueApiKeyNotifier is not available; skipping opaque apikey.info broadcast");
+            if (log.isDebugEnabled()) {
+                log.debug("OpaqueApiKeyNotifier is not available; skipping opaque apikey.info broadcast");
+            }
         }
     }
 
@@ -272,10 +276,14 @@ public class OpaqueApiKeyPublisher {
         }
 
         if (opaqueApiKeyNotifier != null) {
-            log.info("Publishing opaque apikey.association to realtime");
+            if (log.isDebugEnabled()) {
+                log.debug("Publishing opaque apikey.association to realtime");
+            }
             opaqueApiKeyNotifier.sendApiKeyAssociationInfoOnRealtime(properties);
         } else {
-            log.warn("OpaqueApiKeyNotifier is not available; skipping opaque apikey.association broadcast");
+            if (log.isDebugEnabled()) {
+                log.debug("OpaqueApiKeyNotifier is not available; skipping opaque apikey.association broadcast");
+            }
         }
     }
 }

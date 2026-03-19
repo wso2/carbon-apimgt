@@ -16,6 +16,9 @@
 
 package org.wso2.carbon.apimgt.impl.gateway;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -35,6 +38,8 @@ import java.util.Map;
  * no top-level {@code type} (platform gateway wire messages always include {@code type} at the root).</p>
  */
 public final class PlatformGatewayEventEnvelopeUtil {
+
+    private static final Log log = LogFactory.getLog(PlatformGatewayEventEnvelopeUtil.class);
 
     public static final String JSON_KEY_METADATA = "metadata";
     public static final String JSON_KEY_MESSAGE = "message";
@@ -56,6 +61,10 @@ public final class PlatformGatewayEventEnvelopeUtil {
     public static String wrapForStorage(String gatewayWireJson, Map<String, ?> metadata) {
         if (gatewayWireJson == null) {
             throw new IllegalArgumentException("gatewayWireJson is required");
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Wrapping gateway wire JSON for storage; metadata entry count: "
+                    + (metadata == null ? 0 : metadata.size()));
         }
         JsonObject root = new JsonObject();
         addMetadataIfAny(root, metadata);

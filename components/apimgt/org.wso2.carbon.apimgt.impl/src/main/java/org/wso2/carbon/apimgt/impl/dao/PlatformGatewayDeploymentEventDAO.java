@@ -74,6 +74,9 @@ public class PlatformGatewayDeploymentEventDAO {
             ps.setBytes(4, payload.getBytes(StandardCharsets.UTF_8));
             ps.setTimestamp(5, now);
             ps.executeUpdate();
+            if (log.isDebugEnabled()) {
+                log.debug("Inserted platform gateway event id=" + id + " for gateway: " + gatewayId);
+            }
         } catch (SQLException e) {
             log.error("Error inserting platform gateway event for gateway " + gatewayId, e);
             throw new APIManagementException("Error inserting platform gateway event", e);
@@ -189,7 +192,7 @@ public class PlatformGatewayDeploymentEventDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    log.warn("Rollback failed: " + ex.getMessage());
+                    log.error("Rollback failed while claiming pending events: " + ex.getMessage(), ex);
                 }
                 log.error("Error claiming pending events for gateway " + gatewayId, e);
                 throw new APIManagementException("Error getting pending deployment events", e);

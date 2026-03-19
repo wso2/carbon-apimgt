@@ -71,7 +71,7 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
                             PlatformGatewayEventEnvelopeUtil.wrapForStorage(message,
                                     deploymentEventMetadata(apiId, revisionUuid)));
                 } catch (Exception e) {
-                    log.warn("Failed to persist deploy event for gateway " + gatewayId + ": " + e.getMessage());
+                    log.error("Failed to persist deploy event for gateway " + gatewayId + ": " + e.getMessage(), e);
                 }
             }
             registry.sendToGateways(Collections.singleton(gatewayId), message);
@@ -96,7 +96,7 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
                             PlatformGatewayEventEnvelopeUtil.wrapForStorage(message,
                                     deploymentEventMetadata(apiId, revisionUuid)));
                 } catch (Exception e) {
-                    log.warn("Failed to persist undeploy event for gateway " + gatewayId + ": " + e.getMessage());
+                    log.error("Failed to persist undeploy event for gateway " + gatewayId + ": " + e.getMessage(), e);
                 }
             }
             registry.sendToGateways(Collections.singleton(gatewayId), message);
@@ -127,7 +127,7 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
                             PlatformGatewayEventEnvelopeUtil.wrapForStorage(message,
                                     deploymentEventMetadata(apiId, revisionUuid)));
                 } catch (Exception e) {
-                    log.warn("Failed to persist delete event for gateway " + gatewayId + ": " + e.getMessage());
+                    log.error("Failed to persist delete event for gateway " + gatewayId + ": " + e.getMessage(), e);
                 }
             }
             registry.sendToGateways(Collections.singleton(gatewayId), message);

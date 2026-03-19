@@ -52,7 +52,7 @@ public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
     @Override
     @MethodStats
     public void handleMessage(Message message) throws Fault {
-        String path = (String) message.get(Message.PATH_INFO);
+        String path = StringUtils.defaultString((String) message.get(Message.PATH_INFO));
         String httpMethod = (String) message.get(Message.HTTP_REQUEST_METHOD);
         String internalWebAppPath = APIConstants.INTERNAL_WEB_APP_EP;
         if (StringUtils.startsWith(internalWebAppPath, "/")) {
@@ -62,6 +62,9 @@ public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 && (StringUtils.endsWith(path, "/internal/gateway/.well-known")
                 || StringUtils.endsWith(path, "/" + internalWebAppPath + "/.well-known"));
         if (isGatewayWellKnown && StringUtils.equalsIgnoreCase(httpMethod, "GET")) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Allowing gateway well-known discovery without authentication");
+            }
             // Allow gateway well-known discovery without auth challenge.
             message.put(RestApiConstants.AUTHENTICATION_REQUIRED, false);
             message.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME,

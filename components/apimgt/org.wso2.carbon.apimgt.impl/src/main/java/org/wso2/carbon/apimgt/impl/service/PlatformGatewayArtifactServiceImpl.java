@@ -72,9 +72,15 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
      */
     private static String buildPlatformGatewayYamlOnTheFly(String apiId, String revisionId)
             throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Building platform gateway YAML on the fly for apiId=" + apiId + ", revisionId=" + revisionId);
+        }
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         APIRevision revision = apiMgtDAO.getRevisionByRevisionUUID(revisionId);
         if (revision == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("No API revision found for revisionUUID: " + revisionId);
+            }
             return null;
         }
         if (!apiId.equals(revision.getApiUUID())) {

@@ -636,6 +636,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (eventService != null) {
             try {
                 String apiIdForGateway = api.getUUID();
+                if (log.isDebugEnabled()) {
+                    log.debug("Broadcasting API-bound opaque API key update to platform gateways for API: "
+                            + apiIdForGateway);
+                }
                 String keyNameForGateway = keyName.toLowerCase(java.util.Locale.ROOT);
                 String expiresAtIso = null;
                 if (validityPeriod > 0) {
@@ -4376,6 +4380,10 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         try {
             Set<String> apiIds = getSubscribedPlatformGatewayApiIds(application);
             if (apiIds.isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping application-scoped platform gateway API key broadcast: no subscribed APIs for "
+                            + "application " + application.getName());
+                }
                 return;
             }
             String keyNameForGateway = keyName.toLowerCase(java.util.Locale.ROOT);

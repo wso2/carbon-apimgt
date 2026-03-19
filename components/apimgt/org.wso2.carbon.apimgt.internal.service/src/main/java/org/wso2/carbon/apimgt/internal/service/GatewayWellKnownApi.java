@@ -112,6 +112,9 @@ public class GatewayWellKnownApi {
         if (basePath.startsWith("/")) {
             basePath = basePath.substring(1);
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Gateway discovery gatewayPath base: " + basePath);
+        }
         return basePath;
     }
 }

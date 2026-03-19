@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.impl.service;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.PlatformGatewayDeploymentEventService;
 import org.wso2.carbon.apimgt.api.model.PlatformGatewayDeploymentEventRecord;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDeploymentEventDAO;
 import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayEventEnvelopeUtil;
 
@@ -44,12 +46,18 @@ public class PlatformGatewayDeploymentEventServiceImpl implements PlatformGatewa
 
     @Override
     public void persistEvent(String gatewayId, String eventType, String payload) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Persisting platform gateway event for gateway: " + gatewayId + ", eventType: " + eventType);
+        }
         PlatformGatewayDeploymentEventDAO.getInstance().insertEvent(gatewayId, eventType, payload);
     }
 
     @Override
     public List<PlatformGatewayDeploymentEventRecord> getPendingEventsForGateway(String gatewayId)
             throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving pending platform gateway events for gateway: " + gatewayId);
+        }
         List<PlatformGatewayDeploymentEventDAO.DeploymentEventRecord> daoList =
                 PlatformGatewayDeploymentEventDAO.getInstance().getPendingEventsForGateway(gatewayId);
         List<PlatformGatewayDeploymentEventRecord> result = new ArrayList<>(daoList.size());
