@@ -5864,8 +5864,8 @@ components:
         universalGatewayVersion:
           type: string
           readOnly: true
-          description: Universal Gateway version from config (e.g. "0.9.0"). Set for deploy targets so UI can show quick-start version; from apim.universal_gateway.version.
-          example: "0.9.0"
+          description: Universal Gateway version from config (e.g. "0.11.0"). Set for deploy targets so UI can show quick-start version; from apim.universal_gateway.version.
+          example: "0.11.0"
     EnvironmentList:
       title: Environment List
       type: object
@@ -6688,8 +6688,8 @@ components:
           default: false
         universalGatewayVersion:
           type: string
-          description: Universal Gateway version for quick-start guide (e.g. "0.9.0")
-          example: "0.9.0"
+          description: Universal Gateway version for quick-start guide (e.g. "0.11.0")
+          example: "0.11.0"
     ScopeList:
       title: Scope Role Mapping List
       type: object

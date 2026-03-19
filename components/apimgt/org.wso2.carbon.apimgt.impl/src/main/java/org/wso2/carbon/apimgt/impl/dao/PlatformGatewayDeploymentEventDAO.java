@@ -112,8 +112,8 @@ public class PlatformGatewayDeploymentEventDAO {
                 }
             }
         } catch (SQLException e) {
-            log.error("Error getting pending deployment events for gateway " + gatewayId, e);
-            throw new APIManagementException("Error getting pending deployment events", e);
+            log.error("Error getting pending platform gateway events for gateway " + gatewayId, e);
+            throw new APIManagementException("Error getting pending platform gateway events", e);
         }
         return list;
     }
@@ -136,8 +136,8 @@ public class PlatformGatewayDeploymentEventDAO {
             }
             ps.executeUpdate();
         } catch (SQLException e) {
-            log.error("Error marking deployment events as delivered: " + e.getMessage(), e);
-            throw new APIManagementException("Error marking deployment events as delivered", e);
+            log.error("Error marking platform gateway events as delivered: " + e.getMessage(), e);
+            throw new APIManagementException("Error marking platform gateway events as delivered", e);
         }
     }
 
@@ -194,12 +194,12 @@ public class PlatformGatewayDeploymentEventDAO {
                 } catch (SQLException ex) {
                     log.error("Rollback failed while claiming pending events: " + ex.getMessage(), ex);
                 }
-                log.error("Error claiming pending events for gateway " + gatewayId, e);
-                throw new APIManagementException("Error getting pending deployment events", e);
+                log.error("Error claiming pending platform gateway events for gateway " + gatewayId, e);
+                throw new APIManagementException("Error getting pending platform gateway events", e);
             }
         } catch (SQLException e) {
-            log.error("Error claiming pending events for gateway " + gatewayId, e);
-            throw new APIManagementException("Error getting pending deployment events", e);
+            log.error("Error claiming pending platform gateway events for gateway " + gatewayId, e);
+            throw new APIManagementException("Error getting pending platform gateway events", e);
         }
     }
 
@@ -219,8 +219,8 @@ public class PlatformGatewayDeploymentEventDAO {
             ps.setTimestamp(1, before);
             return ps.executeUpdate();
         } catch (SQLException e) {
-            log.error("Error deleting old delivered deployment events: " + e.getMessage(), e);
-            throw new APIManagementException("Error deleting old delivered events", e);
+            log.error("Error deleting old delivered platform gateway events: " + e.getMessage(), e);
+            throw new APIManagementException("Error deleting old delivered platform gateway events", e);
         }
     }
 

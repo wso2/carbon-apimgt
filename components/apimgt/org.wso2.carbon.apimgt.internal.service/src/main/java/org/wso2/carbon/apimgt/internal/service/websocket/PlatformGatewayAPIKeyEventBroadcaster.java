@@ -77,7 +77,9 @@ public class PlatformGatewayAPIKeyEventBroadcaster {
         StringBuilder payload = new StringBuilder();
         payload.append("\"apiId\":\"").append(escapeJson(apiId)).append("\"");
         payload.append(",\"apiKey\":\"").append(escapeJson(apiKey)).append("\"");
-        payload.append(",\"apiKeyHashes\":\"").append(escapeJson(apiKeyHashes)).append("\"");
+        if (apiKeyHashes != null && !apiKeyHashes.isEmpty()) {
+            payload.append(",\"apiKeyHashes\":").append(apiKeyHashes);
+        }
         payload.append(",\"maskedApiKey\":\"").append(escapeJson(maskedApiKey)).append("\"");
         payload.append(",\"name\":\"").append(escapeJson(name)).append("\"");
         if (externalRefId != null && !externalRefId.isEmpty()) {
@@ -127,7 +129,9 @@ public class PlatformGatewayAPIKeyEventBroadcaster {
         payload.append("\"apiId\":\"").append(escapeJson(apiId)).append("\"");
         payload.append(",\"keyName\":\"").append(escapeJson(keyName)).append("\"");
         payload.append(",\"apiKey\":\"").append(escapeJson(apiKey)).append("\"");
-        payload.append(",\"apiKeyHashes\":\"").append(escapeJson(apiKeyHashes)).append("\"");
+        if (apiKeyHashes != null && !apiKeyHashes.isEmpty()) {
+            payload.append(",\"apiKeyHashes\":").append(apiKeyHashes);
+        }
         payload.append(",\"maskedApiKey\":\"").append(escapeJson(maskedApiKey)).append("\"");
         payload.append(",\"externalRefId\":\"").append(escapeJson(externalRefIdSafe)).append("\"");
         payload.append(",\"operations\":\"").append(escapeJson(operationsSafe)).append("\"");

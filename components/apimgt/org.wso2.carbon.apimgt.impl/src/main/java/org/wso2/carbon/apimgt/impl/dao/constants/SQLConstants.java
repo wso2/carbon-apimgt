@@ -5445,6 +5445,12 @@ public class SQLConstants {
                 "SELECT ID, PAYLOAD FROM AM_GW_PLATFORM_EVENT WHERE CLAIMED_BY = ? ORDER BY CREATED_AT";
         public static final String UPDATE_MARK_DELIVERED =
                 "UPDATE AM_GW_PLATFORM_EVENT SET DELIVERED_AT = ? WHERE ID = ?";
+        /**
+         * Mark multiple events delivered. Format with {@link String#format(String, Object...)} using a
+         * comma-separated {@code ?} list for the IN clause (one per id). Bind order: DELIVERED_AT, then ids.
+         */
+        public static final String UPDATE_MARK_DELIVERED_IN =
+                "UPDATE AM_GW_PLATFORM_EVENT SET DELIVERED_AT = ? WHERE ID IN (%s)";
         /** Delete delivered events older than the given timestamp to prevent unbounded table growth. */
         public static final String DELETE_DELIVERED_EVENTS_OLDER_THAN =
                 "DELETE FROM AM_GW_PLATFORM_EVENT WHERE DELIVERED_AT IS NOT NULL AND DELIVERED_AT < ?";
