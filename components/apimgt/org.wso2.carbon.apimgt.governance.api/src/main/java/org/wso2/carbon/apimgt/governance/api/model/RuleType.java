@@ -29,6 +29,9 @@ public enum RuleType {
     API_DOCUMENTATION;
 
     public static RuleType fromString(String ruleTypeString) {
+        if (ruleTypeString == null || ruleTypeString.equalsIgnoreCase("null")) {
+            return null;
+        }
         try {
             return RuleType.valueOf(ruleTypeString.toUpperCase(Locale.ENGLISH));
         } catch (IllegalArgumentException e) {

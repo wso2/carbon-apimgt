@@ -349,6 +349,10 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
     public String getVersion(String apiId, String organization) throws APIMGovernanceException {
         try {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                log.warn("API not found for UUID: " + apiId + ". It may have been deleted.");
+                return null;
+            }
             return apiIdentifier.getVersion();
         } catch (APIManagementException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_INFO, e,
@@ -370,6 +374,10 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
             APIProvider apiProvider = APIManagerFactory.getInstance()
                     .getAPIProvider(RestApiCommonUtil.getLoggedInUsername());
             API api = apiProvider.getAPIbyUUID(apiId, organization);
+            if (api == null) {
+                log.warn("API not found for UUID: " + apiId + ". It may have been deleted.");
+                return null;
+            }
             String techOwner = api.getTechnicalOwnerEmail();
             String apiOwner = api.getApiOwner();
             return techOwner != null ? techOwner : apiOwner;
@@ -441,6 +449,12 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
                 }
                 String tenantAdminUsername = RestApiCommonUtil.getLoggedInUsername();
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+                if (apiIdentifier == null) {
+                    throw new APIMGovernanceException(
+                            APIMGovExceptionCodes.ERROR_WHILE_GETTING_APIM_PROJECT,
+                            new Exception("API not found: " + apiId),
+                            apiId, organization);
+                }
 
                 APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(tenantAdminUsername);
                 if (revisionId != null) {

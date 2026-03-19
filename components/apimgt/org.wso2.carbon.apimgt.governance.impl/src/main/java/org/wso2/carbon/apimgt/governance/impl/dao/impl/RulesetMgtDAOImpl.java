@@ -96,7 +96,8 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     prepStmt.setString(2, ruleset.getName());
                     prepStmt.setString(3, ruleset.getDescription());
                     prepStmt.setString(4, String.valueOf(ruleset.getRuleCategory()));
-                    prepStmt.setString(5, String.valueOf(ruleset.getRuleType()));
+                    prepStmt.setString(5, ruleset.getRuleType() != null
+                            ? ruleset.getRuleType().name() : RuleType.API_DEFINITION.name());
                     prepStmt.setString(6, String.valueOf(ruleset.getArtifactType()));
                     prepStmt.setString(7, ruleset.getDocumentationLink());
                     prepStmt.setString(8, ruleset.getProvider());
@@ -147,7 +148,9 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     prepStmt.setString(1, ruleset.getName());
                     prepStmt.setString(2, ruleset.getDescription());
                     prepStmt.setString(3, String.valueOf(ruleset.getRuleCategory()));
-                    prepStmt.setString(4, String.valueOf(ruleset.getRuleType()));
+                    prepStmt.setString(4, ruleset.getRuleType() != null
+                            ? ruleset.getRuleType().name()
+                            : RuleType.API_DEFINITION.name());
                     prepStmt.setString(5, String.valueOf(ruleset.getArtifactType()));
                     prepStmt.setString(6, ruleset.getDocumentationLink());
                     prepStmt.setString(7, ruleset.getProvider());
