@@ -768,6 +768,10 @@
                 </AllowedURI>
             {% endfor %}
          {% endif %}
+            <AllowedURI>
+                <URI>/internal/gateway/.well-known</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
              <AllowedURI>
                 <URI>/api/am/devportal/{version}/tenants</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>

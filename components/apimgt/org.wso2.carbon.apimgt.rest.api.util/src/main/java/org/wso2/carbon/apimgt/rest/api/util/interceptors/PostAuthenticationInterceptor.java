@@ -45,7 +45,8 @@ public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
     /**
      * Handles the incoming message after post authentication. Validate the authentication scheme of the incoming request
-     * based on the properties set by previous interceptors. If non of the authentication scheme is set, return a 401
+     * based on the properties set by previous interceptors. If none of the accepted authentication schemes is set,
+     * return a 401
      * unauthenticated response.
      * 
      * @param inMessage cxf incoming message
@@ -63,7 +64,7 @@ public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 && !StringUtils.equals(authScheme, RestApiConstants.BASIC_AUTHENTICATION)
                 && !StringUtils.equals(authScheme, RestApiConstants.JWT_AUTHENTICATION)
                 && !StringUtils.equals(authScheme, RestApiConstants.PLATFORM_GATEWAY_API_KEY)) {
-            log.error("Authentication failed: expected Opaque, Basic, JWT, or Platform Gateway API Key");
+            log.error("Authentication failed: expected Opaque, JWT, Basic, or Platform Gateway API Key");
             throw new AuthenticationException("Unauthenticated request");
         }
     }

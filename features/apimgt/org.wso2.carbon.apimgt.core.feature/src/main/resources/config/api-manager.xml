@@ -438,6 +438,10 @@
         <!--Configure white-listed URIs of REST API. Accessing white-listed URIs does not require credentials (does not require Authorization header). -->
         <AllowedURIs>
             <AllowedURI>
+                <URI>/internal/gateway/.well-known</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/publisher/{version}/swagger.json</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
