@@ -33,6 +33,7 @@ public class SettingsDTO   {
     private Boolean analyticsEnabled = null;
     private Boolean transactionCounterEnable = null;
     private Boolean isGatewayNotificationEnabled = false;
+    private String universalGatewayVersion = null;
 
   /**
    **/
@@ -193,6 +194,24 @@ public class SettingsDTO   {
     this.isGatewayNotificationEnabled = isGatewayNotificationEnabled;
   }
 
+  /**
+   * Universal Gateway version for quick-start guide (e.g. \&quot;0.9.0\&quot;)
+   **/
+  public SettingsDTO universalGatewayVersion(String universalGatewayVersion) {
+    this.universalGatewayVersion = universalGatewayVersion;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "0.9.0", value = "Universal Gateway version for quick-start guide (e.g. \"0.9.0\")")
+  @JsonProperty("universalGatewayVersion")
+  public String getUniversalGatewayVersion() {
+    return universalGatewayVersion;
+  }
+  public void setUniversalGatewayVersion(String universalGatewayVersion) {
+    this.universalGatewayVersion = universalGatewayVersion;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -211,12 +230,13 @@ public class SettingsDTO   {
         Objects.equals(gatewayConfiguration, settings.gatewayConfiguration) &&
         Objects.equals(analyticsEnabled, settings.analyticsEnabled) &&
         Objects.equals(transactionCounterEnable, settings.transactionCounterEnable) &&
-        Objects.equals(isGatewayNotificationEnabled, settings.isGatewayNotificationEnabled);
+        Objects.equals(isGatewayNotificationEnabled, settings.isGatewayNotificationEnabled) &&
+        Objects.equals(universalGatewayVersion, settings.universalGatewayVersion);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable, isGatewayNotificationEnabled);
+    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable, isGatewayNotificationEnabled, universalGatewayVersion);
   }
 
   @Override
@@ -233,6 +253,7 @@ public class SettingsDTO   {
     sb.append("    analyticsEnabled: ").append(toIndentedString(analyticsEnabled)).append("\n");
     sb.append("    transactionCounterEnable: ").append(toIndentedString(transactionCounterEnable)).append("\n");
     sb.append("    isGatewayNotificationEnabled: ").append(toIndentedString(isGatewayNotificationEnabled)).append("\n");
+    sb.append("    universalGatewayVersion: ").append(toIndentedString(universalGatewayVersion)).append("\n");
     sb.append("}");
     return sb.toString();
   }
