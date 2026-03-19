@@ -19,18 +19,27 @@
 package org.wso2.carbon.apimgt.impl.service;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.PlatformGatewayArtifactService;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.PlatformGatewayArtifactValidationResult;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayArtifactDAO;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayAPIYamlConverter;
+import org.wso2.carbon.context.CarbonContext;
 
 /**
- * Implementation of platform gateway artifact service. Uses {@link PlatformGatewayArtifactDAO}
- * for revision-scoped storage in AM_GW_API_ARTIFACTS and {@link PlatformGatewayAPIYamlConverter} for conversion.
+ * Implementation of platform gateway artifact service. Builds platform api.yaml on demand via
+ * {@link PlatformGatewayAPIYamlConverter} (no AM_GW_API_ARTIFACTS read path).
  */
 public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifactService {
+
+    private static final Log log = LogFactory.getLog(PlatformGatewayArtifactServiceImpl.class);
 
     private static final PlatformGatewayArtifactServiceImpl INSTANCE = new PlatformGatewayArtifactServiceImpl();
 
@@ -55,7 +64,48 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
         if (StringUtils.isBlank(apiId) || StringUtils.isBlank(revisionId)) {
             return null;
         }
-        return PlatformGatewayArtifactDAO.getInstance().getRevisionArtifact(apiId.trim(), revisionId.trim());
+        return buildPlatformGatewayYamlOnTheFly(apiId.trim(), revisionId.trim());
+    }
+
+    /**
+     * Load API at the given revision and convert to platform YAML.
+     */
+    private static String buildPlatformGatewayYamlOnTheFly(String apiId, String revisionId)
+            throws APIManagementException {
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        APIRevision revision = apiMgtDAO.getRevisionByRevisionUUID(revisionId);
+        if (revision == null) {
+            return null;
+        }
+        if (!apiId.equals(revision.getApiUUID())) {
+            if (log.isDebugEnabled()) {
+                log.debug("API UUID does not match revision " + revisionId + " owner API");
+            }
+            return null;
+        }
+        String organization = apiMgtDAO.getOrganizationByAPIUUID(revision.getApiUUID());
+        if (StringUtils.isBlank(organization)) {
+            return null;
+        }
+        APIProvider provider = APIManagerFactory.getInstance().getAPIProvider(resolveProviderUsername(organization));
+        API api = provider.getAPIbyUUID(revision.getApiUUID(), organization);
+        api.setRevisionedApiId(revision.getRevisionUUID());
+        api.setRevisionId(revision.getId());
+        api.setUuid(apiId);
+        api.getId().setUuid(apiId);
+        return PlatformGatewayAPIYamlConverter.toPlatformGatewayYaml(api, organization, "default");
+    }
+
+    /**
+     * Prefer {@link CarbonContext} username (set by platform-gateway api-key flow on the request thread);
+     * otherwise {@code admin@} + API organization for {@link APIProvider#getAPIbyUUID}.
+     */
+    private static String resolveProviderUsername(String organization) {
+        String ctxUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        if (StringUtils.isNotBlank(ctxUser)) {
+            return ctxUser;
+        }
+        return "admin@" + organization;
     }
 
     @Override
@@ -66,8 +116,7 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
         if (yamlContent == null || yamlContent.trim().isEmpty()) {
             throw new APIManagementException("YAML content is required");
         }
-        PlatformGatewayArtifactDAO.getInstance().saveRevisionArtifact(apiId.trim(), revisionId.trim(),
-                yamlContent.trim());
+        // Platform gateway artifacts are generated on fetch; AM_GW_API_ARTIFACTS is not populated on deploy.
     }
 
     @Override

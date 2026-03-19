@@ -22,9 +22,8 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.PlatformGatewayArtifactValidationResult;
 
 /**
- * Service for API Platform Gateway artifact handling: revision-scoped store/retrieve in AM_GW_API_ARTIFACTS,
- * convert internal API to platform format and validate.
- * Follows the pattern: deploy → save revision artifact; callback → resolve revision, return stored artifact.
+ * Service for API Platform Gateway artifact handling: resolve revision for gateway, build platform api.yaml on
+ * demand, convert/validate for UI.
  */
 public interface PlatformGatewayArtifactService {
 
@@ -38,20 +37,16 @@ public interface PlatformGatewayArtifactService {
     String getRevisionUuidByApiAndGatewayName(String apiId, String gatewayName) throws APIManagementException;
 
     /**
-     * Get stored revision artifact (platform api.yaml) from AM_GW_API_ARTIFACTS.
+     * Build platform api.yaml for a revision from the API model (generated on demand).
      *
      * @param apiId      API UUID
      * @param revisionId REVISION_UUID
-     * @return stored YAML content, or null if not found
+     * @return YAML content, or null if not found / cannot build
      */
     String getStoredRevisionArtifact(String apiId, String revisionId) throws APIManagementException;
 
     /**
-     * Save platform revision artifact (api.yaml) to AM_GW_API_ARTIFACTS. Call when deploy occurs.
-     *
-     * @param apiId       API UUID
-     * @param revisionId  REVISION_UUID
-     * @param yamlContent platform-format api.yaml content
+     * No longer persists to AM_GW_API_ARTIFACTS; retained for API compatibility. Arguments are still validated.
      */
     void saveRevisionArtifact(String apiId, String revisionId, String yamlContent) throws APIManagementException;
 

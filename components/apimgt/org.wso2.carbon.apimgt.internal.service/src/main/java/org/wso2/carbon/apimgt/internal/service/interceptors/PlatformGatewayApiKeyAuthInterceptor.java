@@ -70,7 +70,8 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
             "api-keys",
             "subscription-plans",
             "notify-gateway",
-            "notify-api-deployment-status"
+            "notify-api-deployment-status",
+            "deployments"
     };
 
     public PlatformGatewayApiKeyAuthInterceptor() {
