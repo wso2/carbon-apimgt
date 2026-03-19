@@ -90,6 +90,19 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
         APIProvider provider = APIManagerFactory.getInstance().getAPIProvider(resolveProviderUsername(organization));
         // Load by revision UUID so populateAPIInformation resolves revision-scoped URI templates/policies.
         API api = provider.getAPIbyUUID(revisionId, organization);
+        if (api == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("getAPIbyUUID returned null for revision UUID " + revisionId + ", organization "
+                        + organization);
+            }
+            return null;
+        }
+        if (api.getId() == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Loaded API has no identifier for revision UUID " + revisionId);
+            }
+            return null;
+        }
         api.setRevisionedApiId(revision.getRevisionUUID());
         api.setRevisionId(revision.getId());
         api.setUuid(apiId);
