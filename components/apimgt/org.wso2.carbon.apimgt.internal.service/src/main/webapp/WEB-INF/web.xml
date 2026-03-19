@@ -47,6 +47,7 @@
                 org.wso2.carbon.apimgt.internal.service.ApplicationsApi,
                 org.wso2.carbon.apimgt.internal.service.SubscriptionsApi,
                 org.wso2.carbon.apimgt.internal.service.SubscriptionPoliciesApi,
+                org.wso2.carbon.apimgt.internal.service.SubscriptionPlansApi,
                 org.wso2.carbon.apimgt.internal.service.KeymanagersApi,
                 org.wso2.carbon.apimgt.internal.service.ApiPoliciesApi,
                 org.wso2.carbon.apimgt.internal.service.NotifyApi,

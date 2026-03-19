@@ -59,10 +59,10 @@ public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
             return;
         }
         String authScheme = (String) inMessage.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME);
-        // Check if the request has one of the accepted auth schemes: Opaque, JWT, Basic, or Platform Gateway API Key.
+        // Check if the request has one of the accepted auth schemes: Opaque, Basic, JWT, or Platform Gateway API Key.
         if (!StringUtils.equals(authScheme, RestApiConstants.OPAQUE_AUTHENTICATION)
-                && !StringUtils.equals(authScheme, RestApiConstants.JWT_AUTHENTICATION)
                 && !StringUtils.equals(authScheme, RestApiConstants.BASIC_AUTHENTICATION)
+                && !StringUtils.equals(authScheme, RestApiConstants.JWT_AUTHENTICATION)
                 && !StringUtils.equals(authScheme, RestApiConstants.PLATFORM_GATEWAY_API_KEY)) {
             log.error("Authentication failed: expected Opaque, JWT, Basic, or Platform Gateway API Key");
             throw new AuthenticationException("Unauthenticated request");
