@@ -88,7 +88,8 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
             return null;
         }
         APIProvider provider = APIManagerFactory.getInstance().getAPIProvider(resolveProviderUsername(organization));
-        API api = provider.getAPIbyUUID(revision.getApiUUID(), organization);
+        // Load by revision UUID so populateAPIInformation resolves revision-scoped URI templates/policies.
+        API api = provider.getAPIbyUUID(revisionId, organization);
         api.setRevisionedApiId(revision.getRevisionUUID());
         api.setRevisionId(revision.getId());
         api.setUuid(apiId);
@@ -97,15 +98,15 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
     }
 
     /**
-     * Prefer {@link CarbonContext} username (set by platform-gateway api-key flow on the request thread);
-     * otherwise {@code admin@} + API organization for {@link APIProvider#getAPIbyUUID}.
+     * Uses {@link CarbonContext} username set on the request thread by auth interceptors.
      */
-    private static String resolveProviderUsername(String organization) {
+    private static String resolveProviderUsername(String organization) throws APIManagementException {
         String ctxUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
         if (StringUtils.isNotBlank(ctxUser)) {
             return ctxUser;
         }
-        return "admin@" + organization;
+        throw new APIManagementException("Unable to resolve provider username from request context for organization: "
+                + organization);
     }
 
     @Override
