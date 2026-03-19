@@ -297,8 +297,9 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
         } catch (WorkflowException we) {
             throw we;
         } catch (ClassNotFoundException cnfe) {
-            log.debug("[GOVERNANCE-WORKFLOW] GatekeeperService not available in classpath. "
-                    + "Skipping governance check for API " + apiUuid);
+            log.warn("[GOVERNANCE-WORKFLOW] GatekeeperService not available in classpath. "
+                    + "Skipping governance check for API " + apiUuid
+                    + ". Class: " + cnfe.getMessage());
         } catch (Exception e) {
             // Fail-open: don't block transition if governance check fails unexpectedly
             log.warn("[GOVERNANCE-WORKFLOW] Governance check failed for API " + apiUuid
@@ -406,8 +407,8 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
                     + apiUuid + ": " + reason);
 
         } catch (ClassNotFoundException cnfe) {
-            log.debug("[GOVERNANCE-WORKFLOW] Governance service not available. "
-                    + "Cannot persist violation.");
+            log.warn("[GOVERNANCE-WORKFLOW] Governance service not available. "
+                    + "Cannot persist violation. Class: " + cnfe.getMessage());
         } catch (Exception e) {
             log.warn("[GOVERNANCE-WORKFLOW] Failed to persist governance violation for API "
                     + apiUuid + ": " + e.getMessage());
@@ -417,6 +418,8 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
     /**
      * Trigger asynchronous governance compliance evaluation after lifecycle change.
      * This records violations (e.g., "deprecated without successor") in GOV_RULE_VIOLATION.
+     * Only triggered for Published→Deprecated transitions; Deprecated→Retired transitions
+     * skip this check because the lifecycle violation should already exist from deprecation.
      */
     private void triggerComplianceEvaluation(WorkflowDTO workflowDTO) {
         try {
@@ -429,10 +432,10 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
                 action = ((APIStateWorkflowDTO) workflowDTO).getApiLCAction();
             }
 
-            // Only trigger for Deprecate/Retire actions
+            // Only trigger for Deprecate (Published→Deprecated) transitions.
+            // Retire transitions skip this — the violation should already exist from deprecation.
             if (apiUuid == null || action == null
-                    || (!"Deprecate".equalsIgnoreCase(action)
-                    && !"Retire".equalsIgnoreCase(action))) {
+                    || !"Deprecate".equalsIgnoreCase(action)) {
                 return;
             }
 
@@ -463,11 +466,11 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
                     + apiUuid + " (action: " + action + ")");
 
         } catch (ClassNotFoundException cnfe) {
-            log.debug("[GOVERNANCE-WORKFLOW] Governance service not available. "
-                    + "Skipping compliance evaluation.");
+            log.warn("[GOVERNANCE-WORKFLOW] Governance service not available in classpath. "
+                    + "Skipping compliance evaluation. Class: " + cnfe.getMessage());
         } catch (Exception e) {
             log.warn("[GOVERNANCE-WORKFLOW] Failed to trigger compliance evaluation: "
-                    + e.getMessage());
+                    + e.getMessage(), e);
         }
     }
 

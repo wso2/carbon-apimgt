@@ -312,6 +312,7 @@ public class GatekeeperService {
             String matchedApiVersion = null;
             String matchedApiCreatedTime = null;
             String matchedApiProvider = null;
+            String matchedApiStatus = null;
             try {
                 String adminUsername = getAdminUsername(organization);
                 APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(adminUsername);
@@ -322,6 +323,7 @@ public class GatekeeperService {
                         matchedApiVersion = matchedApi.getId().getVersion();
                         matchedApiCreatedTime = matchedApi.getCreatedTime();
                         matchedApiProvider = matchedApi.getId().getProviderName();
+                        matchedApiStatus = matchedApi.getStatus();
                     }
                 }
             } catch (Exception e) {
@@ -340,6 +342,22 @@ public class GatekeeperService {
                 } catch (Exception cleanupEx) {
                     log.debug("Could not clean up stale MinHash for " + similar.getApiUuid()
                             + ": " + cleanupEx.getMessage());
+                }
+                continue;
+            }
+
+            // Lifecycle-status filter: APIs that are DEPRECATED or RETIRED are no longer active
+            // and should not be reported as duplicate targets. They are effectively "done" and
+            // new APIs should not be flagged for resembling them.
+            // NOTE: This filter is SKIPPED when skipFirstInRule=true (deprecation guide mode)
+            // because the deprecation guide specifically needs to find successors among all APIs.
+            if (!skipFirstInRule && matchedApiStatus != null
+                    && ("DEPRECATED".equalsIgnoreCase(matchedApiStatus)
+                    || "RETIRED".equalsIgnoreCase(matchedApiStatus))) {
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("Lifecycle-status filter: Skipping match %s -> %s "
+                                    + "(matched API '%s' is %s)",
+                            apiUuid, similar.getApiUuid(), matchedApiName, matchedApiStatus));
                 }
                 continue;
             }
