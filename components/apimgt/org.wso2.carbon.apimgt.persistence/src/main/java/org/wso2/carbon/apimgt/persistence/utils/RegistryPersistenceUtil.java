@@ -2149,16 +2149,28 @@ public class RegistryPersistenceUtil {
      */
     public static String extractProvider(String apiPath, String apiName, Registry registry)
             throws APIPersistenceException {
+        if (apiPath == null || StringUtils.isBlank(apiName)) {
+            throw new APIPersistenceException("API path cannot be null or empty");
+        }
         if (isRevisionPath(apiPath)) {
             String apiId = extractApiIdFromRevisionPath(apiPath);
             try {
                 String currentApiPath = GovernanceUtils.getArtifactPath(registry, apiId);
+                if (currentApiPath == null) {
+                    throw new APIPersistenceException("Unable to find current API path for revision: " + apiPath);
+                }
                 return extractProvider(currentApiPath, apiName);
             } catch (GovernanceException e) {
                 throw new APIPersistenceException("Error retrieving current API path for revision: " + apiPath, e);
+            } catch (IndexOutOfBoundsException e) {
+                throw new APIPersistenceException("Invalid API path format for revision: " + apiPath, e);
             }
         }
-        return extractProvider(apiPath, apiName);
+        try {
+            return extractProvider(apiPath, apiName);
+        } catch (IndexOutOfBoundsException e) {
+            throw new APIPersistenceException("Invalid API path format for current: " + apiPath, e);
+        }
     }
 
     /**
