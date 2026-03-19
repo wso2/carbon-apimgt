@@ -282,8 +282,10 @@ public class ComplianceAPIUtil {
         RulesetValidationResultWithoutRulesDTO rulesetDTO = new RulesetValidationResultWithoutRulesDTO();
         rulesetDTO.setId(ruleset.getId());
         rulesetDTO.setName(ruleset.getName());
-        rulesetDTO.setRuleType(RulesetValidationResultWithoutRulesDTO
-                .RuleTypeEnum.fromValue(ruleset.getRuleType().name()));
+        if (ruleset.getRuleType() != null) {
+            rulesetDTO.setRuleType(RulesetValidationResultWithoutRulesDTO
+                    .RuleTypeEnum.fromValue(ruleset.getRuleType().name()));
+        }
 
         // If the ruleset has not been evaluated, set the ruleset validation status to unapplied
         if (!isRulesetEvaluated) {
