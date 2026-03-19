@@ -19,8 +19,8 @@
 package org.wso2.carbon.apimgt.api.model;
 
 /**
- * A pending platform gateway deployment event (id + full WebSocket message payload).
- * Returned by {@link org.wso2.carbon.apimgt.api.PlatformGatewayDeploymentEventService#getAndMarkDeliveredPendingEventsForGateway}.
+ * A pending platform gateway event: id plus wire-format JSON to send to the gateway ({@code message} extracted
+ * when {@code PAYLOAD} was stored as {@code { metadata?, message }} in {@code AM_GW_PLATFORM_EVENT}).
  */
 public class PlatformGatewayDeploymentEventRecord {
 

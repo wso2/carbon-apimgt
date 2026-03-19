@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.PlatformGatewayDeploymentEventService;
 import org.wso2.carbon.apimgt.api.model.PlatformGatewayDeploymentEventRecord;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDeploymentEventDAO;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayEventEnvelopeUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,10 +43,8 @@ public class PlatformGatewayDeploymentEventServiceImpl implements PlatformGatewa
     }
 
     @Override
-    public void persistEvent(String gatewayId, String apiId, String revisionUuid, String eventType, String payload)
-            throws APIManagementException {
-        PlatformGatewayDeploymentEventDAO.getInstance().insertEvent(
-                gatewayId, apiId, revisionUuid, eventType, payload);
+    public void persistEvent(String gatewayId, String eventType, String payload) throws APIManagementException {
+        PlatformGatewayDeploymentEventDAO.getInstance().insertEvent(gatewayId, eventType, payload);
     }
 
     @Override
@@ -55,7 +54,8 @@ public class PlatformGatewayDeploymentEventServiceImpl implements PlatformGatewa
                 PlatformGatewayDeploymentEventDAO.getInstance().getPendingEventsForGateway(gatewayId);
         List<PlatformGatewayDeploymentEventRecord> result = new ArrayList<>(daoList.size());
         for (PlatformGatewayDeploymentEventDAO.DeploymentEventRecord r : daoList) {
-            result.add(new PlatformGatewayDeploymentEventRecord(r.getId(), r.getPayload()));
+            result.add(new PlatformGatewayDeploymentEventRecord(r.getId(),
+                    PlatformGatewayEventEnvelopeUtil.toWirePayload(r.getPayload())));
         }
         return result;
     }
@@ -75,7 +75,8 @@ public class PlatformGatewayDeploymentEventServiceImpl implements PlatformGatewa
                 PlatformGatewayDeploymentEventDAO.getInstance().getAndMarkDeliveredPendingEventsForGateway(gatewayId);
         List<PlatformGatewayDeploymentEventRecord> result = new ArrayList<>(daoList.size());
         for (PlatformGatewayDeploymentEventDAO.DeploymentEventRecord r : daoList) {
-            result.add(new PlatformGatewayDeploymentEventRecord(r.getId(), r.getPayload()));
+            result.add(new PlatformGatewayDeploymentEventRecord(r.getId(),
+                    PlatformGatewayEventEnvelopeUtil.toWirePayload(r.getPayload())));
         }
         return result;
     }
