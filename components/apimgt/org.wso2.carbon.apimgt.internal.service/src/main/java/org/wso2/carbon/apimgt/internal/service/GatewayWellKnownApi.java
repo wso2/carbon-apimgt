@@ -48,11 +48,6 @@ public class GatewayWellKnownApi {
     private static final Log log = LogFactory.getLog(GatewayWellKnownApi.class);
 
     /**
-     * WebSocket path segment appended to the internal web app endpoint.
-     */
-    private static final String WS_PATH_SEGMENT = "/ws";
-
-    /**
      * Control plane type identifier.
      */
     private static final String CONTROL_PLANE_TYPE = "APIM";
@@ -117,6 +112,6 @@ public class GatewayWellKnownApi {
         if (basePath.startsWith("/")) {
             basePath = basePath.substring(1);
         }
-        return basePath + WS_PATH_SEGMENT;
+        return basePath;
     }
 }
