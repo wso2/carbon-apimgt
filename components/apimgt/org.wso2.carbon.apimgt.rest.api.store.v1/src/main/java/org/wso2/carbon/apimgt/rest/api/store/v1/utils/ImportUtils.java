@@ -56,6 +56,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -466,8 +467,19 @@ public class ImportUtils {
         // Re-Hydrate Key Manager with other client secrets.
         if (APIUtil.isMultipleClientSecretsEnabled() && consumerSecrets != null && consumerSecrets.size() > 1) {
             String consumerKey = applicationKeyDTO.getConsumerKey();
-            // skiping the first secret as it is already added/updated above
+            // Track already-seen secret values to skip duplicates before sending to IS.
+            Set<String> seenSecretValues = new HashSet<>();
+            // Mark 1st secret as seen to skip it as it is already added above
+            ConsumerSecretDTO firstSecret = consumerSecrets.get(0);
+            if (firstSecret != null && !StringUtils.isEmpty(firstSecret.getSecretValue())) {
+                seenSecretValues.add(firstSecret.getSecretValue());
+            }
+            // Continue from the 2nd secret onwards
             for (ConsumerSecretDTO secretDTO : consumerSecrets.subList(1, consumerSecrets.size())) {
+                if (secretDTO == null || StringUtils.isEmpty(secretDTO.getSecretValue())
+                        || !seenSecretValues.add(secretDTO.getSecretValue())) {
+                    continue;
+                }
                 ConsumerSecretRequest consumerSecretRequest = new ConsumerSecretRequest();
                 consumerSecretRequest.setClientId(consumerKey);
                 if (secretDTO.getAdditionalProperties() != null) {
@@ -481,10 +493,8 @@ public class ImportUtils {
                     }
                     consumerSecretRequest.putAll(additionalProps);
                 }
-                if (!StringUtils.isEmpty(secretDTO.getSecretValue())) {
-                    byte[] decodedBytes = Base64.decodeBase64(secretDTO.getSecretValue());
-                    consumerSecretRequest.setClientSecret(new String(decodedBytes, StandardCharsets.UTF_8));
-                }
+                byte[] decodedBytes = Base64.decodeBase64(secretDTO.getSecretValue());
+                consumerSecretRequest.setClientSecret(new String(decodedBytes, StandardCharsets.UTF_8));
                 try {
                     apiConsumer.generateConsumerSecret(applicationKeyDTO.getKeyManager(), consumerSecretRequest);
                 } catch (Exception e) {
