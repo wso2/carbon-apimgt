@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration.DeploymentAcknowledgementConfiguration;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.OpaqueAPIKeyNotifier;
 
@@ -238,8 +239,25 @@ public class OpaqueApiKeyPublisher {
      */
     public void publishApiKeyInfoEvents(Properties properties) {
 
+        if (properties == null) {
+            return;
+        }
+
+        // The notifier service activation order can vary during startup.
+        // If the singleton was initialized before the notifier component activated, the cached reference can be null.
+        if (opaqueApiKeyNotifier == null) {
+            opaqueApiKeyNotifier = ServiceReferenceHolder.getInstance().getOpaqueApiKeyNotifier();
+        }
+
         if (opaqueApiKeyNotifier != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Publishing opaque apikey.info to realtime");
+            }
             opaqueApiKeyNotifier.sendApiKeyInfoOnRealtime(properties);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("OpaqueApiKeyNotifier is not available; skipping opaque apikey.info broadcast");
+            }
         }
     }
 
@@ -249,8 +267,23 @@ public class OpaqueApiKeyPublisher {
      */
     public void publishApiKeyAssociationInfoEvents(Properties properties) {
 
+        if (properties == null) {
+            return;
+        }
+
+        if (opaqueApiKeyNotifier == null) {
+            opaqueApiKeyNotifier = ServiceReferenceHolder.getInstance().getOpaqueApiKeyNotifier();
+        }
+
         if (opaqueApiKeyNotifier != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Publishing opaque apikey.association to realtime");
+            }
             opaqueApiKeyNotifier.sendApiKeyAssociationInfoOnRealtime(properties);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("OpaqueApiKeyNotifier is not available; skipping opaque apikey.association broadcast");
+            }
         }
     }
 }

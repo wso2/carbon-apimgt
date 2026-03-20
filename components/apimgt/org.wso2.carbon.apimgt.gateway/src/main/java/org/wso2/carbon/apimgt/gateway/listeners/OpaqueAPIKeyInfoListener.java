@@ -41,7 +41,6 @@ public class OpaqueAPIKeyInfoListener implements MessageListener {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public void onMessage(Message message) {
-
         if (log.isDebugEnabled()) {
             log.debug("Opaque API Key Info JMS message received");
         }
