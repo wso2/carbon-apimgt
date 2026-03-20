@@ -1339,7 +1339,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         .forEach(validKeyManagers::add);
             }
         }
-        if (validKeyManagers.isEmpty()) {
+        if (validKeyManagers.isEmpty() && !api.isInitiatedFromGateway()) {
             throw new APIManagementException(
                     "API must have at least one valid and enabled key manager configured",
                     ExceptionCodes.KEY_MANAGER_NOT_FOUND);
@@ -2626,6 +2626,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         existingAPI.setOrganization(organization);
         APIIdentifier existingAPIId = existingAPI.getId();
         String existingAPISwaggerDefinition = existingAPI.getSwaggerDefinition();
+        String existingAPIAsyncApiDefinition = existingAPI.getAsyncApiDefinition();
         String existingAPICreatedTime = existingAPI.getCreatedTime();
         String existingAPIStatus = existingAPI.getStatus();
         boolean isExsitingAPIdefaultVersion = existingAPI.isDefaultVersion();
@@ -2648,7 +2649,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<OperationPolicy> apiLevelPolicies = extractAndDropAPILevelPoliciesFromAPI(existingAPI);
         updateMCPServerBackends(existingAPI, existingApiId, organization);
         //update swagger definition with version
-        APIUtil.updateAPISwaggerWithVersion(existingAPI);
+        if (existingAPI.isAsync()) {
+            APIUtil.updateAPIAsyncAPISpecWithVersion(existingAPI);
+        } else {
+            APIUtil.updateAPISwaggerWithVersion(existingAPI);
+        }
         API newAPI = addAPI(existingAPI);
         String newAPIId = newAPI.getUuid();
         cloneAPIPoliciesForNewAPIVersion(existingApiId, newAPI, operationPoliciesMap, apiLevelPolicies);
@@ -2664,8 +2669,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     addDocumentationContent(newAPIId, newDoc.getId(), organization, content);
                 }
             }
-        }
-
+        } 
         // copy endpoints and endpoint mappings
         List<APIEndpointInfo> existingEndpointList = getAllAPIEndpointsByUUID(existingApiId, organization);
         addAPIEndpoints(newAPIId, existingEndpointList, organization);
@@ -2706,6 +2710,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         existingAPI.setContext(existingContext);
         existingAPI.setCreatedTime(existingAPICreatedTime);
         existingAPI.setSwaggerDefinition(existingAPISwaggerDefinition);
+        existingAPI.setAsyncApiDefinition(existingAPIAsyncApiDefinition);
         // update existing api with the original timestamp
         existingAPI.setVersionTimestamp(existingVersionTimestamp);
         if (isDefaultVersion) {
@@ -2719,9 +2724,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while updating API details", e);
         }
-        return getAPIbyUUID(newAPIId, organization);
+        return getAPIbyUUID(newAPIId, organization);   
     }
-
+        
     /**
      * Create a new API Product version from an existing API Product
      *
