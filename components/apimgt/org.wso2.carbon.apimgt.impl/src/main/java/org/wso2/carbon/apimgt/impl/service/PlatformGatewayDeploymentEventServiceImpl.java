@@ -34,6 +34,8 @@ import java.util.List;
  */
 public class PlatformGatewayDeploymentEventServiceImpl implements PlatformGatewayDeploymentEventService {
 
+    private static final Log log = LogFactory.getLog(PlatformGatewayDeploymentEventServiceImpl.class);
+
     private static final PlatformGatewayDeploymentEventServiceImpl INSTANCE =
             new PlatformGatewayDeploymentEventServiceImpl();
 

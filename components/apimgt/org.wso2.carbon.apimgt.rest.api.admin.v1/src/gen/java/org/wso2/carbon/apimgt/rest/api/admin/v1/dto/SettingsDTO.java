@@ -195,7 +195,7 @@ public class SettingsDTO   {
   }
 
   /**
-   * Universal Gateway version for quick-start guide (e.g. \&quot;0.9.0\&quot;)
+   * Universal Gateway version for quick-start guide (e.g. \&quot;0.11.0\&quot;)
    **/
   public SettingsDTO universalGatewayVersion(String universalGatewayVersion) {
     this.universalGatewayVersion = universalGatewayVersion;
@@ -203,7 +203,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(example = "0.9.0", value = "Universal Gateway version for quick-start guide (e.g. \"0.9.0\")")
+  @ApiModelProperty(example = "0.11.0", value = "Universal Gateway version for quick-start guide (e.g. \"0.11.0\")")
   @JsonProperty("universalGatewayVersion")
   public String getUniversalGatewayVersion() {
     return universalGatewayVersion;

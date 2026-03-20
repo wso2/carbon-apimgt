@@ -391,7 +391,7 @@ return null;
   }
 
   /**
-   * Universal Gateway version from config (e.g. \&quot;0.9.0\&quot;). Set for deploy targets so UI can show quick-start version; from apim.universal_gateway.version.
+   * Universal Gateway version from config (e.g. \&quot;0.11.0\&quot;). Set for deploy targets so UI can show quick-start version; from apim.universal_gateway.version.
    **/
   public EnvironmentDTO universalGatewayVersion(String universalGatewayVersion) {
     this.universalGatewayVersion = universalGatewayVersion;
@@ -399,7 +399,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "0.9.0", value = "Universal Gateway version from config (e.g. \"0.9.0\"). Set for deploy targets so UI can show quick-start version; from apim.universal_gateway.version.")
+  @ApiModelProperty(example = "0.11.0", value = "Universal Gateway version from config (e.g. \"0.11.0\"). Set for deploy targets so UI can show quick-start version; from apim.universal_gateway.version.")
   @JsonProperty("universalGatewayVersion")
   public String getUniversalGatewayVersion() {
     return universalGatewayVersion;
