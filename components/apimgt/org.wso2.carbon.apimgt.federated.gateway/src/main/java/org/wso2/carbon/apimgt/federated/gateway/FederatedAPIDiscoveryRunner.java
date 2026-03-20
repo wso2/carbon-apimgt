@@ -212,6 +212,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     continue;
                 }
                 APIDTO apidto = fromAPItoDTO(discoveredAPI.getApi());
+                applyDiscoveredSecurityToDto(apidto, discoveredAPI.getApi());
                 if (apidto.getPolicies() == null || apidto.getPolicies().isEmpty()) {
                     apidto.setPolicies(Collections.singletonList(DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
                 }
@@ -526,5 +527,36 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
             log.debug("Retrieving reference object for API ID: " + apiResult.getId());
         }
         return APIUtil.getApiExternalApiMappingReferenceByApiId(apiResult.getId(), environment.getUuid());
+    }
+
+    /**
+     * Applies discovered security settings from the API model to the APIDTO.
+     * This ensures that security schemes and API key header configurations discovered
+     * from the external gateway are properly propagated to the DTO for import.
+     *
+     * @param apiDto        The APIDTO to update.
+     * @param discoveredApi The discovered API containing security information.
+     */
+    private void applyDiscoveredSecurityToDto(APIDTO apiDto, API discoveredApi) {
+        if (apiDto == null || discoveredApi == null) {
+            return;
+        }
+
+        String discoveredSecurity = discoveredApi.getApiSecurity();
+        if (StringUtils.isNotBlank(discoveredSecurity)) {
+            List<String> securitySchemes = new ArrayList<>();
+            for (String scheme : discoveredSecurity.split(",")) {
+                if (StringUtils.isNotBlank(scheme)) {
+                    securitySchemes.add(scheme.trim());
+                }
+            }
+            apiDto.setSecurityScheme(securitySchemes);
+        }
+
+        if (StringUtils.isNotBlank(discoveredApi.getApiKeyHeader())) {
+            apiDto.setApiKeyHeader(discoveredApi.getApiKeyHeader());
+        } else {
+            apiDto.setApiKeyHeader(null);
+        }
     }
 }

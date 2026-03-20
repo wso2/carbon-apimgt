@@ -545,8 +545,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateResourceThrottlingTiers(api, tenantDomain);
-        validateKeyManagers(api);
-        validateKeyManagerScopes(api, tenantDomain);
+        // Skip key manager and scope validations for external gateway vendors.
+        // Federated APIs imported via FederatedAPIDiscovery come with keyManagers null,
+        // causing import failures. External gateway vendors manage their own key managers and scopes.
+        if (!APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(api.getGatewayVendor())) {
+            validateKeyManagers(api);
+            validateKeyManagerScopes(api, tenantDomain);
+        }
         // Validate and process API level and operation level policies
         validateAndProcessAPIPolicyParameters(api, null, tenantDomain);
         String apiName = api.getId().getApiName();
@@ -1028,13 +1033,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Validate Transports
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
-        validateKeyManagers(api, existingAPI.getKeyManagers());
+        // Skip key manager and scope validations for external gateway vendors.
+        // Federated APIs imported via FederatedAPIDiscovery come with keyManagers null,
+        // causing update failures. External gateway vendors manage their own key managers and scopes.
+        if (!APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(api.getGatewayVendor())) {
+            validateKeyManagers(api, existingAPI.getKeyManagers());
+        }
 
         if (api.getAdditionalProperties() != null) {
             checkIfAdditionalPropertyValuesAreNullOrEmpty(new ApiTypeWrapper(api));
         }
 
-        validateKeyManagerScopes(api, tenantDomain);
+        if (!APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(api.getGatewayVendor())) {
+            validateKeyManagerScopes(api, tenantDomain);
+        }
         // Validate and process API level and operation level policies
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
