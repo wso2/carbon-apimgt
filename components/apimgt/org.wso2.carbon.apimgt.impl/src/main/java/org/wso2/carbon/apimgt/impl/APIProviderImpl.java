@@ -7586,11 +7586,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     gatewayManager.deployToGateway(api, organization, targets.getSynapseLabels(),
                             targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds(),
                             revisionUUID);
-                    // Save platform revision artifact when deploying to platform gateways (for GET /apis/{apiId} zip).
-                    if (StringUtils.isNotBlank(revisionUUID) && targets.getPlatformGatewayIds() != null
-                            && !targets.getPlatformGatewayIds().isEmpty()) {
-                        savePlatformRevisionArtifactForDeploy(apiId, revisionUUID, organization, targetEnvironments);
-                    }
                 } catch (RuntimeException e) {
                     if (e instanceof FaultyGatewayDeploymentException) {
                         Set<String> environments = ((FaultyGatewayDeploymentException) e).getEnvironments();
@@ -7601,6 +7596,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             deploymentFailures.addAll(environments);
                         }
                     } else {
+                        log.error("Failed to deploy API revision " + revisionUUID + " for API " + apiId + ": "
+                                + e.getMessage(), e);
                         throw e;
                     }
                 }
@@ -7615,48 +7612,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         } catch (APIManagementException e) {
             throw e;
-        }
-    }
-
-    /**
-     * Save platform revision artifact (api.yaml) to AM_GW_API_ARTIFACTS when deploying to platform gateways.
-     * Called after deployToGateway so the gateway can later fetch the artifact via GET /apis/{apiId} (Accept: zip).
-     */
-    private void savePlatformRevisionArtifactForDeploy(String apiId, String revisionUUID, String organization,
-                                                       Set<String> targetEnvironments) {
-        PlatformGatewayArtifactService artifactService =
-                ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
-        if (artifactService == null) {
-            return;
-        }
-        try {
-            APIRevision apiRevision = getAPIRevision(revisionUUID);
-            if (apiRevision == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Cannot save platform artifact: revision not found for " + revisionUUID);
-                }
-                return;
-            }
-            API apiAtRevision = getAPIbyUUID(apiId, apiRevision, organization);
-            if (apiAtRevision == null) {
-                return;
-            }
-            String environment = "default";
-            if (targetEnvironments != null && !targetEnvironments.isEmpty()) {
-                environment = targetEnvironments.iterator().next();
-            }
-            if (StringUtils.isBlank(environment)) {
-                environment = "default";
-            }
-            String yaml = org.wso2.carbon.apimgt.impl.utils.PlatformGatewayAPIYamlConverter
-                    .toPlatformGatewayYaml(apiAtRevision, organization, environment);
-            artifactService.saveRevisionArtifact(apiId, revisionUUID, yaml);
-            if (log.isDebugEnabled()) {
-                log.debug("Saved platform revision artifact for API " + apiId + " revision " + revisionUUID);
-            }
-        } catch (APIManagementException e) {
-            log.warn("Failed to save platform revision artifact for API " + apiId + " revision " + revisionUUID
-                    + ": " + e.getMessage(), e);
         }
     }
 

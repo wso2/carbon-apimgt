@@ -26,11 +26,14 @@ import org.wso2.carbon.apimgt.api.PlatformGatewayDeploymentEventService;
 import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayDeploymentDispatcher;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayEventEnvelopeUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -64,9 +67,11 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
             String message = buildDeployMessage(event, vhost);
             if (eventService != null) {
                 try {
-                    eventService.persistEvent(gatewayId, apiId, revisionUuid, "api.deployed", message);
+                    eventService.persistEvent(gatewayId, "api.deployed",
+                            PlatformGatewayEventEnvelopeUtil.wrapForStorage(message,
+                                    deploymentEventMetadata(apiId, revisionUuid)));
                 } catch (Exception e) {
-                    log.warn("Failed to persist deploy event for gateway " + gatewayId + ": " + e.getMessage());
+                    log.error("Failed to persist deploy event for gateway " + gatewayId + ": " + e.getMessage(), e);
                 }
             }
             registry.sendToGateways(Collections.singleton(gatewayId), message);
@@ -87,9 +92,11 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
             String message = buildUndeployMessage(event, vhost);
             if (eventService != null) {
                 try {
-                    eventService.persistEvent(gatewayId, apiId, revisionUuid, "api.undeployed", message);
+                    eventService.persistEvent(gatewayId, "api.undeployed",
+                            PlatformGatewayEventEnvelopeUtil.wrapForStorage(message,
+                                    deploymentEventMetadata(apiId, revisionUuid)));
                 } catch (Exception e) {
-                    log.warn("Failed to persist undeploy event for gateway " + gatewayId + ": " + e.getMessage());
+                    log.error("Failed to persist undeploy event for gateway " + gatewayId + ": " + e.getMessage(), e);
                 }
             }
             registry.sendToGateways(Collections.singleton(gatewayId), message);
@@ -116,9 +123,11 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
             String message = buildDeleteMessage(event, vhost);
             if (eventService != null) {
                 try {
-                    eventService.persistEvent(gatewayId, apiId, revisionUuid, "api.deleted", message);
+                    eventService.persistEvent(gatewayId, "api.deleted",
+                            PlatformGatewayEventEnvelopeUtil.wrapForStorage(message,
+                                    deploymentEventMetadata(apiId, revisionUuid)));
                 } catch (Exception e) {
-                    log.warn("Failed to persist delete event for gateway " + gatewayId + ": " + e.getMessage());
+                    log.error("Failed to persist delete event for gateway " + gatewayId + ": " + e.getMessage(), e);
                 }
             }
             registry.sendToGateways(Collections.singleton(gatewayId), message);
@@ -155,6 +164,20 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
             }
         }
         return "";
+    }
+
+    /**
+     * Arbitrary key/value pairs persisted in the envelope {@code metadata} object (not sent on the WebSocket wire).
+     */
+    private static Map<String, String> deploymentEventMetadata(String apiId, String revisionUuid) {
+        Map<String, String> meta = new LinkedHashMap<>(2);
+        if (StringUtils.isNotBlank(apiId)) {
+            meta.put("apiId", apiId.trim());
+        }
+        if (StringUtils.isNotBlank(revisionUuid)) {
+            meta.put("revisionUuid", revisionUuid.trim());
+        }
+        return meta;
     }
 
     private static String escapeJson(String s) {

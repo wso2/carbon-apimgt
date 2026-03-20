@@ -5428,25 +5428,31 @@ public class SQLConstants {
                 "SELECT 1 FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ? AND REVISION_UUID = ?";
     }
 
-    /** SQL for AM_GW_PLATFORM_DEPLOYMENT_EVENT (multi-CP WebSocket sync: persist then push on connect). */
+    /** SQL for AM_GW_PLATFORM_EVENT (multi-CP WebSocket sync: persist then push on connect). */
     public static class PlatformGatewayDeploymentEventSQLConstants {
         public static final String INSERT_EVENT =
-                "INSERT INTO AM_GW_PLATFORM_DEPLOYMENT_EVENT (ID, GATEWAY_ID, API_ID, REVISION_UUID, EVENT_TYPE, PAYLOAD, CREATED_AT) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                "INSERT INTO AM_GW_PLATFORM_EVENT (ID, GATEWAY_ID, EVENT_TYPE, PAYLOAD, CREATED_AT) VALUES (?, ?, ?, ?, ?)";
         /** Pending = not delivered and (not claimed or claim expired). Parameter 2 = lease expiry threshold (CLAIMED_AT < ?). */
         public static final String SELECT_PENDING_FOR_GATEWAY =
-                "SELECT ID, PAYLOAD FROM AM_GW_PLATFORM_DEPLOYMENT_EVENT WHERE GATEWAY_ID = ? AND DELIVERED_AT IS NULL "
+                "SELECT ID, PAYLOAD FROM AM_GW_PLATFORM_EVENT WHERE GATEWAY_ID = ? AND DELIVERED_AT IS NULL "
                         + "AND (CLAIMED_AT IS NULL OR CLAIMED_AT < ?) ORDER BY CREATED_AT";
         /** Atomically claim rows: set CLAIMED_AT and CLAIMED_BY for unclaimed or expired rows. Params: claimId, now, gatewayId, leaseExpiryThreshold. */
         public static final String UPDATE_CLAIM_PENDING_FOR_GATEWAY =
-                "UPDATE AM_GW_PLATFORM_DEPLOYMENT_EVENT SET CLAIMED_AT = ?, CLAIMED_BY = ? WHERE GATEWAY_ID = ? AND DELIVERED_AT IS NULL "
+                "UPDATE AM_GW_PLATFORM_EVENT SET CLAIMED_AT = ?, CLAIMED_BY = ? WHERE GATEWAY_ID = ? AND DELIVERED_AT IS NULL "
                         + "AND (CLAIMED_AT IS NULL OR CLAIMED_AT < ?)";
         /** Select rows claimed by this batch (after UPDATE_CLAIM). Params: claimId. */
         public static final String SELECT_CLAIMED_BY_BATCH =
-                "SELECT ID, PAYLOAD FROM AM_GW_PLATFORM_DEPLOYMENT_EVENT WHERE CLAIMED_BY = ? ORDER BY CREATED_AT";
+                "SELECT ID, PAYLOAD FROM AM_GW_PLATFORM_EVENT WHERE CLAIMED_BY = ? ORDER BY CREATED_AT";
         public static final String UPDATE_MARK_DELIVERED =
-                "UPDATE AM_GW_PLATFORM_DEPLOYMENT_EVENT SET DELIVERED_AT = ? WHERE ID = ?";
+                "UPDATE AM_GW_PLATFORM_EVENT SET DELIVERED_AT = ? WHERE ID = ?";
+        /**
+         * Mark multiple events delivered. Format with {@link String#format(String, Object...)} using a
+         * comma-separated {@code ?} list for the IN clause (one per id). Bind order: DELIVERED_AT, then ids.
+         */
+        public static final String UPDATE_MARK_DELIVERED_IN =
+                "UPDATE AM_GW_PLATFORM_EVENT SET DELIVERED_AT = ? WHERE ID IN (%s)";
         /** Delete delivered events older than the given timestamp to prevent unbounded table growth. */
         public static final String DELETE_DELIVERED_EVENTS_OLDER_THAN =
-                "DELETE FROM AM_GW_PLATFORM_DEPLOYMENT_EVENT WHERE DELIVERED_AT IS NOT NULL AND DELIVERED_AT < ?";
+                "DELETE FROM AM_GW_PLATFORM_EVENT WHERE DELIVERED_AT IS NOT NULL AND DELIVERED_AT < ?";
     }
 }

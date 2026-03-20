@@ -272,5 +272,5 @@
   "apim.synapse_artifact_generator.thread_pool.keep_alive_time_ms": "60000",
   "apim.synapse_artifact_generator.thread_pool.queue_capacity": "50",
   "apim.certificate_manager.events_enabled": true,
-  "apim.universal_gateway.version": "0.9.0"
+  "apim.universal_gateway.version": "0.11.0"
 }

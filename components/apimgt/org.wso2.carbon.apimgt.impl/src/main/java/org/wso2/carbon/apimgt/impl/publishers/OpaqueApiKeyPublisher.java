@@ -250,16 +250,14 @@ public class OpaqueApiKeyPublisher {
         }
 
         if (opaqueApiKeyNotifier != null) {
-            String apiKeyHash = properties.getProperty(APIConstants.NotificationEvent.API_KEY_HASH);
-            String keyName = properties.getProperty(APIConstants.NotificationEvent.KEY_NAME);
-            log.info("Publishing opaque apikey.info to realtime. keyName=" + keyName
-                    + ", apiKeyHash=" + apiKeyHash);
+            if (log.isDebugEnabled()) {
+                log.debug("Publishing opaque apikey.info to realtime");
+            }
             opaqueApiKeyNotifier.sendApiKeyInfoOnRealtime(properties);
         } else {
-            String apiKeyHash = properties.getProperty(APIConstants.NotificationEvent.API_KEY_HASH);
-            String keyName = properties.getProperty(APIConstants.NotificationEvent.KEY_NAME);
-            log.warn("OpaqueApiKeyNotifier is not available; skipping opaque apikey.info broadcast. keyName="
-                    + keyName + ", apiKeyHash=" + apiKeyHash);
+            if (log.isDebugEnabled()) {
+                log.debug("OpaqueApiKeyNotifier is not available; skipping opaque apikey.info broadcast");
+            }
         }
     }
 
@@ -278,16 +276,14 @@ public class OpaqueApiKeyPublisher {
         }
 
         if (opaqueApiKeyNotifier != null) {
-            String keyName = properties.getProperty(APIConstants.NotificationEvent.KEY_NAME);
-            String apiKeyHash = properties.getProperty(APIConstants.NotificationEvent.API_KEY_HASH);
-            log.info("Publishing opaque apikey.association to realtime. keyName=" + keyName
-                    + ", apiKeyHash=" + apiKeyHash);
+            if (log.isDebugEnabled()) {
+                log.debug("Publishing opaque apikey.association to realtime");
+            }
             opaqueApiKeyNotifier.sendApiKeyAssociationInfoOnRealtime(properties);
         } else {
-            String keyName = properties.getProperty(APIConstants.NotificationEvent.KEY_NAME);
-            String apiKeyHash = properties.getProperty(APIConstants.NotificationEvent.API_KEY_HASH);
-            log.warn("OpaqueApiKeyNotifier is not available; skipping opaque apikey.association broadcast. keyName="
-                    + keyName + ", apiKeyHash=" + apiKeyHash);
+            if (log.isDebugEnabled()) {
+                log.debug("OpaqueApiKeyNotifier is not available; skipping opaque apikey.association broadcast");
+            }
         }
     }
 }

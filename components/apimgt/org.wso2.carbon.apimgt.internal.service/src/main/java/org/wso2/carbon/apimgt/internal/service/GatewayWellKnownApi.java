@@ -35,22 +35,17 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Discovery endpoint for platform gateway WebSocket connection details.
+ * Discovery endpoint for platform gateway connection details.
  * <p>
- * This endpoint provides the necessary configuration for platform gateways
- * to discover the WebSocket path for connecting to the control plane.
- * The response includes the gateway path and control plane metadata.
+ * {@code gatewayPath} is the internal REST API base path (no {@code /ws} suffix), e.g. {@code internal/data/v1}.
+ * The Universal Gateway client appends {@code /ws} when opening WebSocket connections. Control plane metadata
+ * is included for client diagnostics.
  */
 @Path("/.well-known")
 @Api(value = "Gateway Well-Known", tags = {"Gateway Discovery"})
 public class GatewayWellKnownApi {
 
     private static final Log log = LogFactory.getLog(GatewayWellKnownApi.class);
-
-    /**
-     * WebSocket path segment appended to the internal web app endpoint.
-     */
-    private static final String WS_PATH_SEGMENT = "/ws";
 
     /**
      * Control plane type identifier.
@@ -69,16 +64,16 @@ public class GatewayWellKnownApi {
     private static final String FIELD_VERSION = "version";
 
     /**
-     * Returns the gateway discovery information including the WebSocket path
-     * and control plane metadata.
+     * Returns gateway discovery: {@code gatewayPath} (REST base, no {@code /ws}) and control plane metadata.
      *
-     * @return Response containing gateway path and control plane information
+     * @return JSON with {@code gatewayPath} and {@code controlPlane}
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             value = "Get gateway discovery information",
-            notes = "Returns the WebSocket path for gateway connection and control plane metadata",
+            notes = "Returns the internal REST base path (gatewayPath) for gateway connection; clients append /ws "
+                    + "for WebSocket registration. Includes control plane metadata.",
             response = Map.class
     )
     @ApiResponses(value = {
@@ -105,10 +100,10 @@ public class GatewayWellKnownApi {
     }
 
     /**
-     * Builds the full gateway WebSocket path by combining the internal web app
-     * endpoint with the WebSocket path segment.
+     * Builds {@code gatewayPath}: internal web app base path without a leading slash and without a {@code /ws}
+     * suffix (Universal Gateway adds {@code /ws} when dialing WebSockets).
      *
-     * @return the complete gateway path (e.g., "internal/data/v1/ws")
+     * @return base path (e.g. {@code internal/data/v1})
      */
     private String buildGatewayPath() {
 
@@ -117,6 +112,9 @@ public class GatewayWellKnownApi {
         if (basePath.startsWith("/")) {
             basePath = basePath.substring(1);
         }
-        return basePath + WS_PATH_SEGMENT;
+        if (log.isDebugEnabled()) {
+            log.debug("Gateway discovery gatewayPath base: " + basePath);
+        }
+        return basePath;
     }
 }

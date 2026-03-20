@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.internal.service.websocket;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
@@ -68,10 +71,16 @@ public class PlatformGatewayAPIKeyEventBroadcaster {
         String timestamp = Instant.now().toString();
         String correlationId = UUID.randomUUID().toString();
         String userIdSafe = userId != null ? userId : "";
+        String apiKeyHashes = buildApiKeyHashesJson(apiKey);
+        String maskedApiKey = maskApiKey(apiKey);
 
         StringBuilder payload = new StringBuilder();
         payload.append("\"apiId\":\"").append(escapeJson(apiId)).append("\"");
         payload.append(",\"apiKey\":\"").append(escapeJson(apiKey)).append("\"");
+        if (apiKeyHashes != null && !apiKeyHashes.isEmpty()) {
+            payload.append(",\"apiKeyHashes\":").append(apiKeyHashes);
+        }
+        payload.append(",\"maskedApiKey\":\"").append(escapeJson(maskedApiKey)).append("\"");
         payload.append(",\"name\":\"").append(escapeJson(name)).append("\"");
         if (externalRefId != null && !externalRefId.isEmpty()) {
             payload.append(",\"externalRefId\":\"").append(escapeJson(externalRefId)).append("\"");
@@ -113,11 +122,17 @@ public class PlatformGatewayAPIKeyEventBroadcaster {
         String userIdSafe = userId != null ? userId : "";
         String externalRefIdSafe = externalRefId != null ? externalRefId : "";
         String operationsSafe = operations != null ? operations : "";
+        String apiKeyHashes = buildApiKeyHashesJson(apiKey);
+        String maskedApiKey = maskApiKey(apiKey);
 
         StringBuilder payload = new StringBuilder();
         payload.append("\"apiId\":\"").append(escapeJson(apiId)).append("\"");
         payload.append(",\"keyName\":\"").append(escapeJson(keyName)).append("\"");
         payload.append(",\"apiKey\":\"").append(escapeJson(apiKey)).append("\"");
+        if (apiKeyHashes != null && !apiKeyHashes.isEmpty()) {
+            payload.append(",\"apiKeyHashes\":").append(apiKeyHashes);
+        }
+        payload.append(",\"maskedApiKey\":\"").append(escapeJson(maskedApiKey)).append("\"");
         payload.append(",\"externalRefId\":\"").append(escapeJson(externalRefIdSafe)).append("\"");
         payload.append(",\"operations\":\"").append(escapeJson(operationsSafe)).append("\"");
         if (expiresAt != null && !expiresAt.isEmpty()) {
@@ -211,5 +226,41 @@ public class PlatformGatewayAPIKeyEventBroadcaster {
             }
         }
         return sb.toString();
+    }
+
+    private static String buildApiKeyHashesJson(String apiKey) {
+        if (apiKey == null) {
+            return "";
+        }
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(apiKey.getBytes(StandardCharsets.UTF_8));
+            return "{\"sha256\":\"" + toHex(hash) + "\"}";
+        } catch (NoSuchAlgorithmException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to compute sha256 hash for api key event payload: " + e.getMessage());
+            }
+            return "";
+        }
+    }
+
+    private static String toHex(byte[] data) {
+        if (data == null) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(data.length * 2);
+        for (byte b : data) {
+            sb.append(String.format("%02x", b & 0xff));
+        }
+        return sb.toString();
+    }
+
+    private static String maskApiKey(String apiKey) {
+        if (apiKey == null || apiKey.isEmpty()) {
+            return "";
+        }
+        int keep = Math.min(4, apiKey.length());
+        String suffix = apiKey.substring(apiKey.length() - keep);
+        return "****" + suffix;
     }
 }

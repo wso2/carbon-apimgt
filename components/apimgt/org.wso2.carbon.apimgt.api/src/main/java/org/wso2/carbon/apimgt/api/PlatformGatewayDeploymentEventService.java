@@ -23,30 +23,29 @@ import org.wso2.carbon.apimgt.api.model.PlatformGatewayDeploymentEventRecord;
 import java.util.List;
 
 /**
- * Service for platform gateway deployment events (AM_GW_PLATFORM_DEPLOYMENT_EVENT).
- * Used for multi-CP WebSocket sync: persist deploy/undeploy/delete per gateway;
- * on gateway connect, get pending events and mark delivered after sending.
+ * Service for platform gateway events (AM_GW_PLATFORM_EVENT).
+ * Used for multi-CP WebSocket sync: persist events per gateway; on gateway connect, get pending events
+ * and mark delivered after sending. Pending records returned to callers contain wire JSON for the gateway
+ * (envelope stripped when applicable).
  */
 public interface PlatformGatewayDeploymentEventService {
 
     /**
-     * Persist one deployment event for the given gateway (full WebSocket message as payload).
+     * Persist one event for the given gateway. {@code payload} is the stored blob (typically
+     * {@code { metadata?, message }} for the gateway wire JSON inside {@code message}, or legacy raw wire JSON).
      *
-     * @param gatewayId    target gateway UUID
-     * @param apiId       API UUID
-     * @param revisionUuid revision/deployment ID (may be null for api.deleted)
-     * @param eventType   e.g. api.deployed, api.undeployed, api.deleted
-     * @param payload     full WebSocket message JSON (sent as-is on push-on-connect)
+     * @param gatewayId target gateway UUID
+     * @param eventType e.g. api.deployed, api.undeployed, api.deleted, or other event kinds
+     * @param payload   UTF-8 JSON string (envelope or raw wire message)
      */
-    void persistEvent(String gatewayId, String apiId, String revisionUuid, String eventType, String payload)
-            throws APIManagementException;
+    void persistEvent(String gatewayId, String eventType, String payload) throws APIManagementException;
 
     /**
      * Get pending events for the gateway (DELIVERED_AT IS NULL). Does not mark as delivered.
      * Used by the scheduler to push to already-connected gateways; caller must send then call markDelivered.
      *
      * @param gatewayId gateway UUID
-     * @return list of records (id, payload)
+     * @return list of records (id, payload) where payload is wire JSON for the gateway
      */
     List<PlatformGatewayDeploymentEventRecord> getPendingEventsForGateway(String gatewayId)
             throws APIManagementException;
@@ -64,7 +63,7 @@ public interface PlatformGatewayDeploymentEventService {
      * with the IDs of successfully sent events. Delivery is acknowledged only after markDelivered.
      *
      * @param gatewayId gateway UUID
-     * @return list of records (id, payload) that were claimed for sending
+     * @return list of records (id, payload) that were claimed for sending (payload is wire JSON for the gateway)
      */
     List<PlatformGatewayDeploymentEventRecord> getAndMarkDeliveredPendingEventsForGateway(String gatewayId)
             throws APIManagementException;

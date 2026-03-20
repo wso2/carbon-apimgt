@@ -36,8 +36,8 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * DAO for AM_GW_PLATFORM_DEPLOYMENT_EVENT: persist deploy/undeploy/delete events per gateway
- * for multi-CP WebSocket sync; pending events are sent when a gateway connects (push-on-connect).
+ * DAO for AM_GW_PLATFORM_EVENT: persist platform gateway events per gateway for multi-CP WebSocket sync;
+ * pending events are sent when a gateway connects (push-on-connect).
  */
 public class PlatformGatewayDeploymentEventDAO {
 
@@ -52,16 +52,16 @@ public class PlatformGatewayDeploymentEventDAO {
     }
 
     /**
-     * Insert one deployment event row (ID = new UUID, CREATED_AT = now, DELIVERED_AT = NULL).
+     * Insert one event row (ID = new UUID, CREATED_AT = now, DELIVERED_AT = NULL).
+     * {@code payload} is the stored form (envelope JSON or legacy raw wire JSON).
      */
-    public void insertEvent(String gatewayId, String apiId, String revisionUuid, String eventType, String payload)
+    public void insertEvent(String gatewayId, String eventType, String payload)
             throws APIManagementException {
         if (log.isDebugEnabled()) {
-            log.debug("Inserting deployment event for gateway: " + gatewayId + ", API: " + apiId + ", event type: "
-                    + eventType);
+            log.debug("Inserting platform gateway event for gateway: " + gatewayId + ", event type: " + eventType);
         }
-        if (gatewayId == null || apiId == null || eventType == null || payload == null) {
-            throw new APIManagementException("gatewayId, apiId, eventType and payload are required");
+        if (gatewayId == null || eventType == null || payload == null) {
+            throw new APIManagementException("gatewayId, eventType and payload are required");
         }
         String id = UUID.randomUUID().toString();
         Timestamp now = new Timestamp(System.currentTimeMillis());
@@ -70,15 +70,16 @@ public class PlatformGatewayDeploymentEventDAO {
                      SQLConstants.PlatformGatewayDeploymentEventSQLConstants.INSERT_EVENT)) {
             ps.setString(1, id);
             ps.setString(2, gatewayId.trim());
-            ps.setString(3, apiId.trim());
-            ps.setString(4, revisionUuid != null ? revisionUuid.trim() : null);
-            ps.setString(5, eventType.trim());
-            ps.setBytes(6, payload.getBytes(StandardCharsets.UTF_8));
-            ps.setTimestamp(7, now);
+            ps.setString(3, eventType.trim());
+            ps.setBytes(4, payload.getBytes(StandardCharsets.UTF_8));
+            ps.setTimestamp(5, now);
             ps.executeUpdate();
+            if (log.isDebugEnabled()) {
+                log.debug("Inserted platform gateway event id=" + id + " for gateway: " + gatewayId);
+            }
         } catch (SQLException e) {
-            log.error("Error inserting platform gateway deployment event for gateway " + gatewayId + " api " + apiId, e);
-            throw new APIManagementException("Error inserting deployment event", e);
+            log.error("Error inserting platform gateway event for gateway " + gatewayId, e);
+            throw new APIManagementException("Error inserting platform gateway event", e);
         }
     }
 
@@ -111,8 +112,8 @@ public class PlatformGatewayDeploymentEventDAO {
                 }
             }
         } catch (SQLException e) {
-            log.error("Error getting pending deployment events for gateway " + gatewayId, e);
-            throw new APIManagementException("Error getting pending deployment events", e);
+            log.error("Error getting pending platform gateway events for gateway " + gatewayId, e);
+            throw new APIManagementException("Error getting pending platform gateway events", e);
         }
         return list;
     }
@@ -126,7 +127,7 @@ public class PlatformGatewayDeploymentEventDAO {
         }
         Timestamp now = new Timestamp(System.currentTimeMillis());
         String placeholders = String.join(",", Collections.nCopies(eventIds.size(), "?"));
-        String sql = "UPDATE AM_GW_PLATFORM_DEPLOYMENT_EVENT SET DELIVERED_AT = ? WHERE ID IN (" + placeholders + ")";
+        String sql = "UPDATE AM_GW_PLATFORM_EVENT SET DELIVERED_AT = ? WHERE ID IN (" + placeholders + ")";
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setTimestamp(1, now);
@@ -135,8 +136,8 @@ public class PlatformGatewayDeploymentEventDAO {
             }
             ps.executeUpdate();
         } catch (SQLException e) {
-            log.error("Error marking deployment events as delivered: " + e.getMessage(), e);
-            throw new APIManagementException("Error marking deployment events as delivered", e);
+            log.error("Error marking platform gateway events as delivered: " + e.getMessage(), e);
+            throw new APIManagementException("Error marking platform gateway events as delivered", e);
         }
     }
 
@@ -191,14 +192,14 @@ public class PlatformGatewayDeploymentEventDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException ex) {
-                    log.warn("Rollback failed: " + ex.getMessage());
+                    log.error("Rollback failed while claiming pending events: " + ex.getMessage(), ex);
                 }
-                log.error("Error claiming pending events for gateway " + gatewayId, e);
-                throw new APIManagementException("Error getting pending deployment events", e);
+                log.error("Error claiming pending platform gateway events for gateway " + gatewayId, e);
+                throw new APIManagementException("Error getting pending platform gateway events", e);
             }
         } catch (SQLException e) {
-            log.error("Error claiming pending events for gateway " + gatewayId, e);
-            throw new APIManagementException("Error getting pending deployment events", e);
+            log.error("Error claiming pending platform gateway events for gateway " + gatewayId, e);
+            throw new APIManagementException("Error getting pending platform gateway events", e);
         }
     }
 
@@ -218,8 +219,8 @@ public class PlatformGatewayDeploymentEventDAO {
             ps.setTimestamp(1, before);
             return ps.executeUpdate();
         } catch (SQLException e) {
-            log.error("Error deleting old delivered deployment events: " + e.getMessage(), e);
-            throw new APIManagementException("Error deleting old delivered events", e);
+            log.error("Error deleting old delivered platform gateway events: " + e.getMessage(), e);
+            throw new APIManagementException("Error deleting old delivered platform gateway events", e);
         }
     }
 

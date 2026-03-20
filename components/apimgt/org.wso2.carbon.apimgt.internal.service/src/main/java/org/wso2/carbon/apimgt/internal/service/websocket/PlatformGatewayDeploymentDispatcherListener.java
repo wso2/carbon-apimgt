@@ -104,7 +104,7 @@ public class PlatformGatewayDeploymentDispatcherListener implements ServletConte
                 CLEANUP_INTERVAL_HOURS,
                 TimeUnit.HOURS);
         if (log.isDebugEnabled()) {
-            log.debug("Scheduled AM_GW_PLATFORM_DEPLOYMENT_EVENT cleanup every " + CLEANUP_INTERVAL_HOURS + " hours");
+            log.debug("Scheduled AM_GW_PLATFORM_EVENT cleanup every " + CLEANUP_INTERVAL_HOURS + " hours");
         }
     }
 

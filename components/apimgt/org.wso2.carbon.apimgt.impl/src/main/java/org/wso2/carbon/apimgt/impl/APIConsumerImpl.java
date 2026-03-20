@@ -635,9 +635,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
         if (eventService != null) {
             try {
-                String apiIdForGateway = PlatformGatewayAPIYamlConverter.getPlatformGatewayHandleForAPI(api);
-                if (apiIdForGateway == null) {
-                    apiIdForGateway = api.getUUID();
+                String apiIdForGateway = api.getUUID();
+                if (log.isDebugEnabled()) {
+                    log.debug("Broadcasting API-bound opaque API key update to platform gateways for API: "
+                            + apiIdForGateway);
                 }
                 String keyNameForGateway = keyName.toLowerCase(java.util.Locale.ROOT);
                 String expiresAtIso = null;
@@ -4338,10 +4339,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
 
     /**
-     * Platform gateway handles (metadata.name) for APIs this application is subscribed to.
-     * Used so we send the same handle the platform gateway stores (from our YAML), not API UUID.
+     * Platform gateway API IDs (artifact UUIDs) for APIs this application is subscribed to.
      */
-    private Set<String> getSubscribedPlatformGatewayHandles(Application application)
+    private Set<String> getSubscribedPlatformGatewayApiIds(Application application)
             throws APIManagementException {
 
         Application app = resolveApplicationForSubscriptionLookup(application);
@@ -4349,7 +4349,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             return Collections.emptySet();
         }
         Set<SubscribedAPI> subs = apiMgtDAO.getSubscribedAPIsByApplication(app);
-        Set<String> handles = new LinkedHashSet<>();
+        Set<String> apiIds = new LinkedHashSet<>();
         for (SubscribedAPI sub : subs) {
             String st = sub.getSubStatus();
             if (!APIConstants.SubscriptionStatus.UNBLOCKED.equals(st)
@@ -4360,20 +4360,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             if (StringUtils.isBlank(apiUuid)) {
                 continue;
             }
-            String org = sub.getOrganization();
-            try {
-                API api = getLightweightAPIByUUID(apiUuid, org != null ? org : "");
-                String handle = api != null ? PlatformGatewayAPIYamlConverter.getPlatformGatewayHandleForAPI(api) : null;
-                if (StringUtils.isNotBlank(handle)) {
-                    handles.add(handle);
-                }
-            } catch (APIManagementException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Could not resolve platform handle for API " + apiUuid + ": " + e.getMessage());
-                }
-            }
+            apiIds.add(apiUuid);
         }
-        return handles;
+        return apiIds;
     }
 
     /**
@@ -4389,8 +4378,12 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             return;
         }
         try {
-            Set<String> handles = getSubscribedPlatformGatewayHandles(application);
-            if (handles.isEmpty()) {
+            Set<String> apiIds = getSubscribedPlatformGatewayApiIds(application);
+            if (apiIds.isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping application-scoped platform gateway API key broadcast: no subscribed APIs for "
+                            + "application " + application.getName());
+                }
                 return;
             }
             String keyNameForGateway = keyName.toLowerCase(java.util.Locale.ROOT);
@@ -4401,8 +4394,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     expiresAtIso = Instant.ofEpochMilli(expMs).toString();
                 }
             }
-            for (String handle : handles) {
-                eventService.broadcastAPIKeyUpdated(handle, keyNameForGateway, apiKey, null, "*",
+            for (String apiId : apiIds) {
+                eventService.broadcastAPIKeyUpdated(apiId, keyNameForGateway, apiKey, null, "*",
                         keyNameForGateway, expiresAtIso, null, null, userName);
             }
         } catch (Exception e) {
@@ -4420,14 +4413,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         if (application == null || StringUtils.isBlank(keyNameGateway)) {
             return;
         }
-        Set<String> handles = getSubscribedPlatformGatewayHandles(application);
-        for (String handle : handles) {
-            eventService.broadcastAPIKeyRevoked(handle, keyNameGateway, userId);
+        Set<String> apiIds = getSubscribedPlatformGatewayApiIds(application);
+        for (String apiId : apiIds) {
+            eventService.broadcastAPIKeyRevoked(apiId, keyNameGateway, userId);
         }
     }
 
     /**
-     * Application-level key regenerate: same key name, new value. Send apikey.updated per handle
+     * Application-level key regenerate: same key name, new value. Send apikey.updated per API ID
      * so the platform gateway updates in place (avoids "name already exists" on create).
      */
     private void broadcastApplicationScopedOpaqueApiKeyUpdatedToPlatformGateways(Application application, String apiKey,
@@ -4439,8 +4432,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             return;
         }
         try {
-            Set<String> handles = getSubscribedPlatformGatewayHandles(application);
-            if (handles.isEmpty()) {
+            Set<String> apiIds = getSubscribedPlatformGatewayApiIds(application);
+            if (apiIds.isEmpty()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Skipping platform gateway apikey.updated for application key: no eligible subscribed APIs.");
                 }
@@ -4454,9 +4447,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     expiresAtIso = Instant.ofEpochMilli(expMs).toString();
                 }
             }
-            for (String handle : handles) {
+            for (String apiId : apiIds) {
                 eventService.broadcastAPIKeyUpdated(
-                        handle,
+                        apiId,
                         keyNameForGateway,
                         apiKey,
                         null,
