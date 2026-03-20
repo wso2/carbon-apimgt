@@ -35,11 +35,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.yaml.snakeyaml.LoaderOptions;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -261,14 +265,38 @@ public class CommonUtil {
      */
     public static String jsonToYaml(String json) throws IOException {
 
+        Integer yamlCodePointLimit = getOasParserOptions().getYamlCodePointLimit();
+        YAMLFactory yamlFactory;
+        if (yamlCodePointLimit != null && yamlCodePointLimit > 0) {
+            LoaderOptions options = new LoaderOptions();
+            options.setCodePointLimit(yamlCodePointLimit);
+            yamlFactory = YAMLFactory.builder().loaderOptions(options).build();
+        } else {
+            yamlFactory = new YAMLFactory();
+        }
         ObjectMapper yamlReader = new ObjectMapper(
-                new YAMLFactory().enable(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER));
+                yamlFactory.enable(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER));
         JsonNode jsonNodeTree = yamlReader.readTree(json);
         YAMLMapper yamlMapper = new YAMLMapper().disable(YAMLGenerator.Feature.SPLIT_LINES)
                 .enable(YAMLGenerator.Feature.INDENT_ARRAYS).disable(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE)
                 .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER).enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
                 .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS);
         return yamlMapper.writeValueAsString(jsonNodeTree);
+    }
+
+    /**
+     * Retrieves the OASParserOptions from the APIM dependency configuration.
+     *
+     * @return the configured OASParserOptions, or a default instance if the configuration service is not available
+     */
+    public static OASParserOptions getOasParserOptions() {
+
+        APIMDependencyConfigurationService service = ServiceReferenceHolder.getInstance()
+                .getAPIMDependencyConfigurationService();
+        if (service == null || service.getAPIMDependencyConfigurations() == null) {
+            return new OASParserOptions();
+        }
+        return service.getAPIMDependencyConfigurations().getOasParserOptions();
     }
 
     /**
