@@ -833,7 +833,9 @@ public class RestApiCommonUtil {
 
         String apiSwagger = apiProvider.getOpenAPIDefinition(uuid, api.getOrganization());
         APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
-        return parser.getOASDefinitionForPublisher(api, apiSwagger);
+        return parser.getOASDefinitionForPublisher(api, apiSwagger,
+                ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                        .getAPIMDependencyConfigurations().getOasParserOptions());
     }
 
     /**
