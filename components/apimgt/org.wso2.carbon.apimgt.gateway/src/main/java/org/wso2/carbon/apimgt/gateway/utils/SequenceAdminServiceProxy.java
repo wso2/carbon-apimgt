@@ -101,7 +101,11 @@ public class SequenceAdminServiceProxy {
             }
 
         } catch (Exception e) {
-            throw new AxisFault("Error while retriving the sequence", e);
+            String errorMessage = "Error while retrieving the sequence: ";
+            if (e.getCause() != null && e.getCause().getMessage() != null) {
+                errorMessage = errorMessage + e.getCause().getMessage();
+            }
+            throw new AxisFault(errorMessage, e);
         }
     }
 
