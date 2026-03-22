@@ -3047,6 +3047,9 @@ public final class APIConstants {
 
     public static final String DEFAULT_SCOPE_TYPE = "OAUTH2";
     public static final String DEFAULT_BINDING_TYPE = "DEFAULT";
+    public static final String COOKIE = "cookie";
+    public static final String BINDING_REF = "binding_ref";
+    public static final String BINDING_TYPE = "binding_type";
 
     public static class TokenIssuer {
 
