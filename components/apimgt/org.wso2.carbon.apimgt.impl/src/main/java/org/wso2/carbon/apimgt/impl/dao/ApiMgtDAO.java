@@ -15953,6 +15953,13 @@ public class ApiMgtDAO {
                     } catch (IOException e) {
                         log.error("Error while converting configurations in " + uuid, e);
                     }
+                    if (additionalProperties == null) {
+                        additionalProperties = new HashMap<>();
+                    }
+                    additionalProperties.put("organization", tenantDomain);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding organization '" + tenantDomain + "' to environment '" + uuid + "'.");
+                    }
 
                     Environment env = new Environment();
                     env.setId(id);
@@ -16095,6 +16102,10 @@ public class ApiMgtDAO {
                     } catch (IOException e) {
                         log.error("Error while converting configurations in " + uuid, e);
                     }
+                    if (additionalProperties == null) {
+                        additionalProperties = new HashMap<>();
+                    }
+                    additionalProperties.put("organization", tenantDomain);
 
                     env = new Environment();
                     env.setId(id);
@@ -16118,6 +16129,78 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Returns the Environment for the given UUID (any organization). Used when only the gateway/env UUID is known
+     * (e.g. platform gateway get by id).
+     *
+     * @param uuid UUID of the environment
+     * @return Gateway environment with given UUID, or null if not found
+     */
+    public Environment getEnvironmentByUuid(String uuid) throws APIManagementException {
+        if (StringUtils.isBlank(uuid)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Environment UUID is blank, returning null.");
+            }
+            return null;
+        }
+        Environment env = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_BY_UUID_SQL)) {
+            prepStmt.setString(1, uuid);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    Integer id = rs.getInt("ID");
+                    String name = rs.getString("NAME");
+                    String displayName = rs.getString("DISPLAY_NAME");
+                    String description = rs.getString("DESCRIPTION");
+                    String provider = rs.getString("PROVIDER");
+                    String gatewayType = rs.getString("GATEWAY_TYPE");
+                    String organization = rs.getString("ORGANIZATION");
+                    String mode = rs.getString("ENV_MODE");
+                    if (StringUtils.isEmpty(mode)) {
+                        mode = GatewayMode.WRITE_ONLY.getMode();
+                    }
+                    int scheduledTime = rs.getInt("SCHEDULED_TIME");
+                    if (rs.wasNull()) {
+                        scheduledTime = 0;
+                    }
+                    Map<String, String> additionalProperties = new HashMap<>();
+                    try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
+                        if (configuration != null) {
+                            String configurationContent = IOUtils.toString(configuration);
+                            additionalProperties = new Gson().fromJson(configurationContent, Map.class);
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while converting configurations in " + uuid, e);
+                    }
+                    if (additionalProperties == null) {
+                        additionalProperties = new HashMap<>();
+                    }
+                    additionalProperties.put("organization", organization);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding organization '" + organization + "' to environment '" + uuid + "'.");
+                    }
+                    env = new Environment();
+                    env.setId(id);
+                    env.setUuid(uuid);
+                    env.setName(name);
+                    env.setDisplayName(displayName);
+                    env.setDescription(description);
+                    env.setProvider(provider);
+                    env.setGatewayType(gatewayType);
+                    env.setMode(mode);
+                    env.setApiDiscoveryScheduledWindow(scheduledTime);
+                    env.setVhosts(getVhostGatewayEnvironments(connection, id));
+                    env.setPermissions(getGatewayVisibilityPermissions(uuid));
+                    env.setAdditionalProperties(additionalProperties);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Environment by UUID: " + uuid, e);
+        }
+        return env;
+    }
+
+    /**
      * Add an Environment
      *
      * @param tenantDomain tenant domain
@@ -16127,7 +16210,8 @@ public class ApiMgtDAO {
      */
     public Environment addEnvironment(String tenantDomain, Environment environment) throws APIManagementException {
 
-        String uuid = UUID.randomUUID().toString();
+        // Use provided UUID when set (e.g. platform gateways use gateway id as environment UUID); otherwise generate.
+        String uuid = StringUtils.isNotBlank(environment.getUuid()) ? environment.getUuid() : UUID.randomUUID().toString();
         environment.setUuid(uuid);
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
@@ -22674,8 +22758,9 @@ public class ApiMgtDAO {
 
             // Handle API level policy mapping addition for new API version
             if (extractedAPILevelPolicies != null && extractedAPILevelPolicies.size() != 0) {
+                boolean isPlatformGatewayApi = APIConstants.WSO2_API_PLATFORM_GATEWAY.equals(newAPI.getGatewayType());
                 addAPILevelPolicies(extractedAPILevelPolicies, newAPI.getUuid(), null,
-                        newAPI.getOrganization(), connection);
+                        newAPI.getOrganization(), connection, isPlatformGatewayApi);
             }
 
         } catch (SQLException e) {
@@ -24397,6 +24482,8 @@ public class ApiMgtDAO {
             query = SQLConstants.OperationPolicyConstants.GET_OPERATION_POLICIES_OF_API_SQL;
             currentApiUuid = uuid;
         }
+        Map<Integer, List<OperationPolicy>> opPoliciesMap = new HashMap<>();
+        Map<Integer, List<OperationPolicy>> hubPoliciesMap = new HashMap<>();
         try (PreparedStatement ps = connection.prepareStatement(query)) {
             int apiId = getAPIID(currentApiUuid, connection);
             ps.setInt(1, apiId);
@@ -24406,14 +24493,23 @@ public class ApiMgtDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     int uriTemplateId = rs.getInt("URL_MAPPING_ID");
-
                     URITemplate uriTemplate = uriTemplates.get(uriTemplateId);
                     if (uriTemplate != null) {
                         OperationPolicy operationPolicy = populateOperationPolicyWithRS(rs);
-                        uriTemplate.addOperationPolicy(operationPolicy);
+                        if (APIConstants.OPERATION_SEQUENCE_TYPE_HUB.equals(operationPolicy.getDirection())) {
+                            hubPoliciesMap.computeIfAbsent(uriTemplateId, k -> new ArrayList<>()).add(operationPolicy);
+                        } else {
+                            opPoliciesMap.computeIfAbsent(uriTemplateId, k -> new ArrayList<>()).add(operationPolicy);
+                        }
                     }
                 }
             }
+        }
+        for (Map.Entry<Integer, URITemplate> e : uriTemplates.entrySet()) {
+            Integer id = e.getKey();
+            URITemplate t = e.getValue();
+            t.setOperationPolicies(opPoliciesMap.getOrDefault(id, new ArrayList<>()));
+            t.setHubPolicies(hubPoliciesMap.getOrDefault(id, new ArrayList<>()));
         }
     }
 
@@ -24526,7 +24622,8 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Clone a common policy to the API
+     * Clone a common policy to the API.
+     * For non-Platform-Gateway APIs, throws if the common policy does not exist.
      *
      * @param commonPolicyId The policy ID that needs to be cloned
      * @param clonedPolicyId If needed, we can assign the policyId for the coloned policy. This will be an
@@ -24534,9 +24631,28 @@ public class ApiMgtDAO {
      * @param apiUUID        The API uuid which the cloned policy will be assigned to
      * @return cloned policyID
      * @throws APIManagementException
-     **/
+     */
     private String cloneCommonPolicyToAPI(Connection connection, String commonPolicyId, String clonedPolicyId,
                                           String apiUUID) throws APIManagementException, SQLException {
+        return cloneCommonPolicyToAPI(connection, commonPolicyId, clonedPolicyId, apiUUID, null, false);
+    }
+
+    /**
+     * Clone a common policy to the API. When the policy does not exist in the common store and the API is
+     * a Platform Gateway API, creates a placeholder API-specific policy so that external (e.g. Policy Hub)
+     * policy references can be stored.
+     *
+     * @param commonPolicyId       The policy ID that needs to be cloned (e.g. name::version)
+     * @param clonedPolicyId       API-specific policy UUID to use
+     * @param apiUUID              The API uuid which the cloned policy will be assigned to
+     * @param tenantDomain         Tenant/organization (required when isPlatformGatewayApi is true and policy is missing)
+     * @param isPlatformGatewayApi When true, create a placeholder if the common policy does not exist
+     * @return cloned policyID
+     * @throws APIManagementException
+     */
+    private String cloneCommonPolicyToAPI(Connection connection, String commonPolicyId, String clonedPolicyId,
+                                          String apiUUID, String tenantDomain, boolean isPlatformGatewayApi)
+            throws APIManagementException, SQLException {
         OperationPolicyData policyData = getOperationPolicyByPolicyID(connection, commonPolicyId, true);
         if (policyData != null) {
             if (log.isDebugEnabled()) {
@@ -24545,10 +24661,50 @@ public class ApiMgtDAO {
             }
             // If we are taking a clone from common policy, common policy's Id is used as the CLONED_POLICY_ID.
             return addAPISpecificOperationPolicy(connection, policyData, apiUUID, null, clonedPolicyId, commonPolicyId);
-        } else {
-            throw new APIManagementException("Cannot clone common policy with ID " + commonPolicyId
-                    + " as it does not exists.");
         }
+        if (isPlatformGatewayApi && tenantDomain != null) {
+            // External policy (e.g. from Policy Hub) not stored in AM; create placeholder so mapping is valid.
+            if (log.isDebugEnabled()) {
+                log.debug("Creating placeholder API-specific policy for external policy " + commonPolicyId
+                        + " (Platform Gateway API " + apiUUID + ")");
+            }
+            OperationPolicyData placeholder = createPlaceholderPolicyDataForExternalPolicy(commonPolicyId,
+                    clonedPolicyId, tenantDomain);
+            return addAPISpecificOperationPolicy(connection, placeholder, apiUUID, null, clonedPolicyId, commonPolicyId);
+        }
+        throw new APIManagementException("Cannot clone common policy with ID " + commonPolicyId
+                + " as it does not exists.");
+    }
+
+    /**
+     * Builds minimal OperationPolicyData for an external policy (e.g. Policy Hub) that is not in the common store.
+     * Policy ID format is expected to be "name::version".
+     */
+    private OperationPolicyData createPlaceholderPolicyDataForExternalPolicy(String commonPolicyId,
+                                                                              String clonedPolicyId,
+                                                                              String organization) {
+        String name = commonPolicyId;
+        String version = "1.0";
+        int colonIdx = commonPolicyId.indexOf("::");
+        if (colonIdx > 0) {
+            name = commonPolicyId.substring(0, colonIdx);
+            version = commonPolicyId.substring(colonIdx + 2);
+        }
+        OperationPolicySpecification spec = new OperationPolicySpecification();
+        spec.setName(name);
+        spec.setVersion(version);
+        spec.setDisplayName(name);
+        spec.setDescription("External policy reference (e.g. Policy Hub)");
+        spec.setApplicableFlows(new ArrayList<>());
+        spec.setSupportedGateways(new ArrayList<>(Collections.singletonList(APIConstants.WSO2_API_PLATFORM_GATEWAY)));
+        spec.setSupportedApiTypes(new ArrayList<>());
+        spec.setCategory(OperationPolicySpecification.PolicyCategory.Mediation);
+        OperationPolicyData data = new OperationPolicyData();
+        data.setPolicyId(clonedPolicyId);
+        data.setOrganization(organization);
+        data.setSpecification(spec);
+        data.setMd5Hash("");
+        return data;
     }
 
     /**
@@ -25548,11 +25704,22 @@ public class ApiMgtDAO {
      */
     public void addAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate, List<OperationPolicy> apiPolicies,
                                       String tenantDomain) throws APIManagementException {
+        addAPIPoliciesMapping(apiUUID, uriTemplate, apiPolicies, null, tenantDomain, false);
+    }
 
+    public void addAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate, List<OperationPolicy> apiPolicies,
+                                      String tenantDomain, boolean isPlatformGatewayApi) throws APIManagementException {
+        addAPIPoliciesMapping(apiUUID, uriTemplate, apiPolicies, null, tenantDomain, isPlatformGatewayApi);
+    }
+
+    public void addAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate, List<OperationPolicy> apiPolicies,
+                                      List<OperationPolicy> apiHubPolicies, String tenantDomain,
+                                      boolean isPlatformGatewayApi) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                addAPIPoliciesMapping(apiUUID, uriTemplate, apiPolicies, tenantDomain, connection);
+                addAPIPoliciesMapping(apiUUID, uriTemplate, apiPolicies, apiHubPolicies, tenantDomain, connection,
+                        isPlatformGatewayApi);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -25561,21 +25728,24 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while adding API policy mapping for : " + apiUUID, e);
         }
-
     }
 
     /**
      * This method will add API level and Operation level policy mapping to the database.
      *
-     * @param apiUUID      API UUID
-     * @param uriTemplate  Set of URI Templates
-     * @param apiPolicies  List of API policies
-     * @param tenantDomain Tenant domain
-     * @param connection   DB connection
+     * @param apiUUID              API UUID
+     * @param uriTemplate          Set of URI Templates
+     * @param apiPolicies          List of API policies
+     * @param apiHubPolicies       API-level Policy Hub policies (stored with direction 'hub'; may be null)
+     * @param tenantDomain         Tenant domain
+     * @param connection           DB connection
+     * @param isPlatformGatewayApi When true, create placeholders for external policies that are not in the common store
      * @throws APIManagementException if failed to add policy mapping to the database
      */
     private void addAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate, List<OperationPolicy> apiPolicies,
-                                       String tenantDomain, Connection connection) throws APIManagementException {
+                                       List<OperationPolicy> apiHubPolicies, String tenantDomain,
+                                       Connection connection, boolean isPlatformGatewayApi)
+            throws APIManagementException {
 
         try (PreparedStatement apiLevelPolicyMappingStatement = connection
                     .prepareStatement(SQLConstants.OperationPolicyConstants.ADD_API_POLICY_MAPPING);
@@ -25625,6 +25795,33 @@ public class ApiMgtDAO {
                         operationPolicyMappingStatement.addBatch();
                     }
                 }
+                // Handle operation-level Policy Hub policies (direction 'hub'; no direction in UI, flow inside policy)
+                if (template.getHubPolicies() != null) {
+                    for (OperationPolicy policy : template.getHubPolicies()) {
+                        handlePolicyCloning(policy, apiUUID, tenantDomain, connection, updatedPoliciesMap,
+                                usedClonedPolicies, toBeClonedPolicyDetails);
+                        Gson gson = new Gson();
+                        String paramJSON = gson.toJson(policy.getParameters());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Adding operation hub policy " + policy.getPolicyName() + " for API "
+                                    + apiUUID + " to URL mapping Id " + template.getId());
+                        }
+                        operationPolicyMappingStatement.setString(1, updatedPoliciesMap.get(policy.getPolicyId()));
+                        operationPolicyMappingStatement.setString(2, APIConstants.OPERATION_SEQUENCE_TYPE_HUB);
+                        try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                            operationPolicyMappingStatement.setBinaryStream(3, paramInputStream, paramJSON.length());
+                        } catch (IOException e) {
+                            log.error("Error creating or reading InputStream for operation hub policy");
+                            throw new APIManagementException("Error processing operation hub policy parameters for policy ID: " +
+                                    policy.getPolicyId(), e);
+                        }
+                        operationPolicyMappingStatement.setInt(4, policy.getOrder());
+                        operationPolicyMappingStatement.setString(5, apiUUID);
+                        operationPolicyMappingStatement.setString(6, template.getUriTemplate());
+                        operationPolicyMappingStatement.setString(7, template.getHTTPVerb());
+                        operationPolicyMappingStatement.addBatch();
+                    }
+                }
             }
 
             // Handle API policies
@@ -25658,9 +25855,35 @@ public class ApiMgtDAO {
                 }
             }
 
+            // Handle API-level Policy Hub policies (direction 'hub'; no direction in UI, flow inside policy)
+            if (apiHubPolicies != null && !apiHubPolicies.isEmpty()) {
+                for (OperationPolicy policy : apiHubPolicies) {
+                    handlePolicyCloning(policy, apiUUID, tenantDomain, connection, updatedPoliciesMap,
+                            usedClonedPolicies, toBeClonedPolicyDetails);
+                    Gson gson = new Gson();
+                    String paramJSON = gson.toJson(policy.getParameters());
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding API level hub policy " + policy.getPolicyName() + " for API " + apiUUID);
+                    }
+                    apiLevelPolicyMappingStatement.setString(1, apiUUID);
+                    apiLevelPolicyMappingStatement.setString(2, null);
+                    apiLevelPolicyMappingStatement.setString(3, updatedPoliciesMap.get(policy.getPolicyId()));
+                    apiLevelPolicyMappingStatement.setString(4, APIConstants.OPERATION_SEQUENCE_TYPE_HUB);
+                    try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                        apiLevelPolicyMappingStatement.setBinaryStream(5, paramInputStream, paramJSON.length());
+                    } catch (IOException e) {
+                        log.error("Error creating or reading InputStream for API hub policy");
+                        throw new APIManagementException("Error processing API hub policy parameters for policy ID: " +
+                                policy.getPolicyId(), e);
+                    }
+                    apiLevelPolicyMappingStatement.setInt(6, policy.getOrder());
+                    apiLevelPolicyMappingStatement.addBatch();
+                }
+            }
+
             for (ClonePolicyMetadataDTO toBeClonedPolicyData : toBeClonedPolicyDetails) {
                 cloneCommonPolicyToAPI(connection, toBeClonedPolicyData.getCurrentPolicyUUID(),
-                        toBeClonedPolicyData.getClonedPolicyUUID(), apiUUID);
+                        toBeClonedPolicyData.getClonedPolicyUUID(), apiUUID, tenantDomain, isPlatformGatewayApi);
             }
 
             operationPolicyMappingStatement.executeBatch();
@@ -25682,6 +25905,18 @@ public class ApiMgtDAO {
      */
     public void updateAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate,
                                          List<OperationPolicy> apiLevelPolicies, String tenantDomain) throws APIManagementException {
+        updateAPIPoliciesMapping(apiUUID, uriTemplate, apiLevelPolicies, null, tenantDomain, false);
+    }
+
+    public void updateAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate,
+                                         List<OperationPolicy> apiLevelPolicies, String tenantDomain,
+                                         boolean isPlatformGatewayApi) throws APIManagementException {
+        updateAPIPoliciesMapping(apiUUID, uriTemplate, apiLevelPolicies, null, tenantDomain, isPlatformGatewayApi);
+    }
+
+    public void updateAPIPoliciesMapping(String apiUUID, Set<URITemplate> uriTemplate,
+                                         List<OperationPolicy> apiLevelPolicies, List<OperationPolicy> apiHubPolicies,
+                                         String tenantDomain, boolean isPlatformGatewayApi) throws APIManagementException {
         // No need to delete the Operation policy mapping as they will be removed from the db when the url template
         // rows are deleted.
         String deleteOldAPILevelMappingsQuery = SQLConstants.OperationPolicyConstants.DELETE_API_POLICY_MAPPING;
@@ -25691,7 +25926,8 @@ public class ApiMgtDAO {
                 prepStmt.setString(1, apiUUID);
                 prepStmt.execute();
 
-                addAPIPoliciesMapping(apiUUID, uriTemplate, apiLevelPolicies, tenantDomain, connection);
+                addAPIPoliciesMapping(apiUUID, uriTemplate, apiLevelPolicies, apiHubPolicies, tenantDomain, connection,
+                        isPlatformGatewayApi);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -25822,10 +26058,15 @@ public class ApiMgtDAO {
      */
     public void addAPILevelPolicies(List<OperationPolicy> policies, String apiUUID, String revisionUUID,
                                     String tenantDomain) throws APIManagementException {
+        addAPILevelPolicies(policies, apiUUID, revisionUUID, tenantDomain, false);
+    }
+
+    public void addAPILevelPolicies(List<OperationPolicy> policies, String apiUUID, String revisionUUID,
+                                    String tenantDomain, boolean isPlatformGatewayApi) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                addAPILevelPolicies(policies, apiUUID, revisionUUID, tenantDomain, connection);
+                addAPILevelPolicies(policies, apiUUID, revisionUUID, tenantDomain, connection, isPlatformGatewayApi);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -25839,16 +26080,18 @@ public class ApiMgtDAO {
     /**
      * This method will add API level policy mappings using the provided database connection.
      *
-     * @param policies     List of API policies
-     * @param apiUUID      API UUID
-     * @param revisionUUID API revision UUID
-     * @param tenantDomain Tenant domain
-     * @param connection   Database connection
+     * @param policies             List of API policies
+     * @param apiUUID               API UUID
+     * @param revisionUUID          API revision UUID
+     * @param tenantDomain          Tenant domain
+     * @param connection            Database connection
+     * @param isPlatformGatewayApi  When true, create placeholders for external policies that are not in the common store
      * @throws APIManagementException if failed to add policy mapping
      * @throws SQLException           if an SQL error occurs while adding policy mapping
      */
     private void addAPILevelPolicies(List<OperationPolicy> policies, String apiUUID, String revisionUUID,
-                                     String tenantDomain, Connection connection) throws APIManagementException, SQLException {
+                                     String tenantDomain, Connection connection, boolean isPlatformGatewayApi)
+            throws APIManagementException, SQLException {
         Map<String, String> updatedPoliciesMap = new HashMap<>();
         Set<String> usedClonedPolicies = new HashSet<String>();
         List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails = new ArrayList<>();
@@ -25883,7 +26126,7 @@ public class ApiMgtDAO {
             }
             for (ClonePolicyMetadataDTO toBeClonedPolicyData : toBeClonedPolicyDetails) {
                 cloneCommonPolicyToAPI(connection, toBeClonedPolicyData.getCurrentPolicyUUID(),
-                        toBeClonedPolicyData.getClonedPolicyUUID(), apiUUID);
+                        toBeClonedPolicyData.getClonedPolicyUUID(), apiUUID, tenantDomain, isPlatformGatewayApi);
             }
             statement.executeBatch();
             connection.commit();
@@ -25993,13 +26236,67 @@ public class ApiMgtDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     OperationPolicy operationPolicy = populateOperationPolicyWithRS(rs);
-                    policyList.add(operationPolicy);
+                    // Exclude Policy Hub policies; they are loaded via getAPIHubPolicyMapping
+                    if (!APIConstants.OPERATION_SEQUENCE_TYPE_HUB.equals(operationPolicy.getDirection())) {
+                        policyList.add(operationPolicy);
+                    }
                 }
             }
         } catch (SQLException e) {
             handleException("Error while getting API level policy mapping of API " + apiUUID, e);
         }
         return policyList;
+    }
+
+    /**
+     * Get API-level Policy Hub policies for the given API/revision.
+     * Policy Hub policies are stored with direction 'hub' (no direction in UI; flow inside policy).
+     */
+    public List<OperationPolicy> getAPIHubPolicyMapping(String apiUUID, String revisionUUID)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            return getAPIHubPolicyMapping(apiUUID, revisionUUID, connection);
+        } catch (SQLException e) {
+            handleException("Error while getting API level hub policy mapping of API " + apiUUID, e);
+        }
+        return new ArrayList<>();
+    }
+
+    private List<OperationPolicy> getAPIHubPolicyMapping(String apiUUID, String revisionUUID, Connection connection)
+            throws APIManagementException {
+        String query;
+        List<OperationPolicy> hubPolicyList = new ArrayList<>();
+        boolean isRevision = false;
+        if (revisionUUID == null) {
+            APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(apiUUID);
+            if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                apiUUID = apiRevision.getApiUUID();
+                revisionUUID = apiRevision.getRevisionUUID();
+            }
+        }
+        if (revisionUUID != null) {
+            query = SQLConstants.OperationPolicyConstants.GET_API_POLICIES_FOR_API_REVISION_SQL;
+            isRevision = true;
+        } else {
+            query = SQLConstants.OperationPolicyConstants.GET_API_POLICIES_OF_API_SQL;
+        }
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setString(1, apiUUID);
+            if (isRevision) {
+                ps.setString(2, revisionUUID);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    OperationPolicy operationPolicy = populateOperationPolicyWithRS(rs);
+                    if (APIConstants.OPERATION_SEQUENCE_TYPE_HUB.equals(operationPolicy.getDirection())) {
+                        hubPolicyList.add(operationPolicy);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while getting API level hub policy mapping of API " + apiUUID, e);
+        }
+        return hubPolicyList;
     }
 
     private void revisionCustomBackend(APIRevision apiRevision, Connection connection)
@@ -26116,6 +26413,31 @@ public class ApiMgtDAO {
                         operationPolicyMappingStatement.addBatch();
                     }
                 }
+                // Operation-level Policy Hub policies
+                if (urlMapping.getHubPolicies() != null) {
+                    for (OperationPolicy policy : urlMapping.getHubPolicies()) {
+                        handlePolicyCloningWhenRevisioning(policy, apiRevision.getApiUUID(),
+                                apiRevision.getRevisionUUID(), clonedPolicyMap, toBeClonedPolicyDetails);
+                        Gson gson = new Gson();
+                        String paramJSON = gson.toJson(policy.getParameters());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Adding operation hub policy " + policy.getPolicyName() + " for API revision "
+                                    + apiRevision.getRevisionUUID());
+                        }
+                        operationPolicyMappingStatement.setInt(1, urlMapping.getId());
+                        operationPolicyMappingStatement.setString(2, clonedPolicyMap.get(policy.getPolicyId()));
+                        operationPolicyMappingStatement.setString(3, APIConstants.OPERATION_SEQUENCE_TYPE_HUB);
+                        try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                            operationPolicyMappingStatement.setBinaryStream(4, paramInputStream, paramJSON.length());
+                        } catch (IOException e) {
+                            log.error("Error creating or reading InputStream for operation hub policy");
+                            throw new APIManagementException("Error processing operation hub policy parameters for policy ID: " +
+                                    policy.getPolicyId(), e);
+                        }
+                        operationPolicyMappingStatement.setInt(5, policy.getOrder());
+                        operationPolicyMappingStatement.addBatch();
+                    }
+                }
             }
 
             // API level policies
@@ -26141,6 +26463,32 @@ public class ApiMgtDAO {
                 } catch (IOException e) {
                     log.error("Error creating or reading InputStream for API policy");
                     throw new APIManagementException("Error processing API policy parameters for policy ID: " +
+                            policy.getPolicyId(), e);
+                }
+                apiLevelPolicyMappingStatement.setInt(6, policy.getOrder());
+                apiLevelPolicyMappingStatement.addBatch();
+            }
+
+            // API-level Policy Hub policies
+            List<OperationPolicy> apiHubPolicies = getAPIHubPolicyMapping(apiRevision.getApiUUID(), null, connection);
+            for (OperationPolicy policy : apiHubPolicies) {
+                handlePolicyCloningWhenRevisioning(policy, apiRevision.getApiUUID(), apiRevision.getRevisionUUID(),
+                        clonedPolicyMap, toBeClonedPolicyDetails);
+                Gson gson = new Gson();
+                String paramJSON = gson.toJson(policy.getParameters());
+                if (log.isDebugEnabled()) {
+                    log.debug("Adding API level hub policy " + policy.getPolicyName() + " for API revision "
+                            + apiRevision.getRevisionUUID());
+                }
+                apiLevelPolicyMappingStatement.setString(1, apiRevision.getApiUUID());
+                apiLevelPolicyMappingStatement.setString(2, apiRevision.getRevisionUUID());
+                apiLevelPolicyMappingStatement.setString(3, clonedPolicyMap.get(policy.getPolicyId()));
+                apiLevelPolicyMappingStatement.setString(4, APIConstants.OPERATION_SEQUENCE_TYPE_HUB);
+                try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                    apiLevelPolicyMappingStatement.setBinaryStream(5, paramInputStream, paramJSON.length());
+                } catch (IOException e) {
+                    log.error("Error creating or reading InputStream for API hub policy");
+                    throw new APIManagementException("Error processing API hub policy parameters for policy ID: " +
                             policy.getPolicyId(), e);
                 }
                 apiLevelPolicyMappingStatement.setInt(6, policy.getOrder());
@@ -26277,6 +26625,36 @@ public class ApiMgtDAO {
                         operationPolicyMappingStatement.addBatch();
                     }
                 }
+                // Operation-level Policy Hub policies
+                if (urlMapping.getHubPolicies() != null) {
+                    for (OperationPolicy policy : urlMapping.getHubPolicies()) {
+                        if (!restoredPolicyMap.keySet().contains(policy.getPolicyName())) {
+                            String restoredPolicyId = restoreOperationPolicyRevision(connection,
+                                    apiRevision.getApiUUID(), policy.getPolicyId(), apiRevision.getId(),
+                                    tenantDomain, false);
+                            restoredPolicyMap.put(policy.getPolicyName(), restoredPolicyId);
+                            usedClonedPolicies.add(restoredPolicyId);
+                        }
+                        Gson gson = new Gson();
+                        String paramJSON = gson.toJson(policy.getParameters());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Restored operation hub policy " + policy.getPolicyName()
+                                    + " from API revision " + apiRevision.getRevisionUUID());
+                        }
+                        operationPolicyMappingStatement.setInt(1, urlMapping.getId());
+                        operationPolicyMappingStatement.setString(2, restoredPolicyMap.get(policy.getPolicyName()));
+                        operationPolicyMappingStatement.setString(3, APIConstants.OPERATION_SEQUENCE_TYPE_HUB);
+                        try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                            operationPolicyMappingStatement.setBinaryStream(4, paramInputStream, paramJSON.length());
+                        } catch (IOException e) {
+                            log.error("Error creating or reading InputStream for operation hub policy");
+                            throw new APIManagementException("Error processing operation hub policy parameters for policy ID: " +
+                                    policy.getPolicyId(), e);
+                        }
+                        operationPolicyMappingStatement.setInt(5, policy.getOrder());
+                        operationPolicyMappingStatement.addBatch();
+                    }
+                }
             }
 
             // API level policies
@@ -26313,6 +26691,38 @@ public class ApiMgtDAO {
                             policy.getPolicyId(), e);
                 }
 
+                apiLevelPolicyMappingStatement.setInt(6, policy.getOrder());
+                apiLevelPolicyMappingStatement.addBatch();
+            }
+
+            // API-level Policy Hub policies
+            List<OperationPolicy> apiHubPolicies = getAPIHubPolicyMapping(apiRevision.getApiUUID(),
+                    apiRevision.getRevisionUUID(), connection);
+            for (OperationPolicy policy : apiHubPolicies) {
+                if (!restoredPolicyMap.keySet().contains(policy.getPolicyName())) {
+                    String restoredPolicyId = restoreOperationPolicyRevision(connection,
+                            apiRevision.getApiUUID(), policy.getPolicyId(), apiRevision.getId(),
+                            tenantDomain, false);
+                    restoredPolicyMap.put(policy.getPolicyName(), restoredPolicyId);
+                    usedClonedPolicies.add(restoredPolicyId);
+                }
+                Gson gson = new Gson();
+                String paramJSON = gson.toJson(policy.getParameters());
+                if (log.isDebugEnabled()) {
+                    log.debug("Restored API level hub policy " + policy.getPolicyName() + " from API revision "
+                            + apiRevision.getRevisionUUID());
+                }
+                apiLevelPolicyMappingStatement.setString(1, apiRevision.getApiUUID());
+                apiLevelPolicyMappingStatement.setString(2, null);
+                apiLevelPolicyMappingStatement.setString(3, restoredPolicyMap.get(policy.getPolicyName()));
+                apiLevelPolicyMappingStatement.setString(4, APIConstants.OPERATION_SEQUENCE_TYPE_HUB);
+                try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                    apiLevelPolicyMappingStatement.setBinaryStream(5, paramInputStream, paramJSON.length());
+                } catch (IOException e) {
+                    log.error("Error creating or reading InputStream for API hub policy");
+                    throw new APIManagementException("Error processing API hub policy parameters for policy ID: " +
+                            policy.getPolicyId(), e);
+                }
                 apiLevelPolicyMappingStatement.setInt(6, policy.getOrder());
                 apiLevelPolicyMappingStatement.addBatch();
             }

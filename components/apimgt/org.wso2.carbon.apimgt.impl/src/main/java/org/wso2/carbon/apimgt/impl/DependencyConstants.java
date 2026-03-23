@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.impl;
  */
 public class DependencyConstants {
 
-    public static final String DEPENDENCY_PROPERTIES_FILE = "dependency.properties";
+    public static final String DEPENDENCY_PROPERTIES_FILE =  "dependency.properties";
 
     public static final String SWAGGER_PARSER = "swaggerparser.";
     public static final String SNAKE_YAML = "snakeyaml.";

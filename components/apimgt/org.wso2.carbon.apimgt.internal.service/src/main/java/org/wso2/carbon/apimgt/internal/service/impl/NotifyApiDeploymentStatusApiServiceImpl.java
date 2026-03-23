@@ -66,6 +66,15 @@ public class NotifyApiDeploymentStatusApiServiceImpl implements NotifyApiDeploym
                 String gatewayId = acknowledgment.getGatewayId();
                 String apiId = acknowledgment.getApiId();
                 String tenantDomain = acknowledgment.getTenantDomain();
+                // Resolve organization from gateway when not sent (e.g. platform gateway uses api-key only, no org in payload)
+                if (tenantDomain == null || tenantDomain.isEmpty()) {
+                    tenantDomain = dao.getOrganizationByGatewayId(gatewayId);
+                }
+                if (tenantDomain == null || tenantDomain.isEmpty()) {
+                    log.error("Gateway not found or organization not resolved: " + gatewayId + " for acknowledgment: "
+                            + acknowledgment);
+                    continue;
+                }
                 String status = acknowledgment.getDeploymentStatus().toString();
                 long timeStamp = acknowledgment.getTimeStamp();
                 String action = acknowledgment.getAction().toString();

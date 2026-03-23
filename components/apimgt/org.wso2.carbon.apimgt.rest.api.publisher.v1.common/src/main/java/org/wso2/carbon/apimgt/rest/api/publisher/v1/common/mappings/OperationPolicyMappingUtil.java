@@ -370,11 +370,13 @@ public class OperationPolicyMappingUtil {
 
     /**
      * Builds a list of {@link OperationPolicy} from the provided request, response, and fault lists.
+     * Hub policies (Policy Hub) are not merged here; they remain a separate property on the DTO
+     * and are not persisted to AM_API_OPERATION_POLICY_MAPPING (Option B).
      *
      * @param request  the list of request operation policies
      * @param response the list of response operation policies
      * @param fault    the list of fault operation policies
-     * @return a list of OperationPolicy objects
+     * @return a list of OperationPolicy objects (request/response/fault only)
      */
     private static List<OperationPolicy> buildOperationPolicies(
             List<OperationPolicyDTO> request,

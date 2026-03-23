@@ -2563,6 +2563,7 @@ public final class APIConstants {
         public static final String LABELS = "Labels";
         public static final String APPLICATIONS = "Applications";
         public static final String GATEWAY_ENVIRONMENTS = "GatewayEnvironments";
+        public static final String PLATFORM_GATEWAY = "PlatformGateway";
         public static final String ROLES_FOR_SCOPE = "RolesForScope";
         public static final String ROLES_FOR_SCOPE_INFO = "User updated roles for a scope";
         public static final String SYSTEM_SCOPE_ROLE_ALIASES = "SystemScopesRoleAliases";
@@ -3556,6 +3557,12 @@ public final class APIConstants {
         public static final String ENVIRONMENT_SPECIFIC_API_PROPERTY_KEY_NAME = "apis";
     }
 
+    public static class GatewayNotificationConfigurationConstants {
+        public static final String WSO2_ALL_TENANTS = "WSO2-ALL-TENANTS";
+        public static final String STATUS_ACTIVE = "ACTIVE";
+        public static final String STATUS_EXPIRED = "EXPIRED";
+    }
+
     public static class OrganizationDeletion {
         public static final String API_RETRIEVER = "APIRetriever";
         public static final String API_DB_DATA_REMOVER = "APIDataRemover";
@@ -3626,6 +3633,12 @@ public final class APIConstants {
     public static final String OPERATION_SEQUENCE_TYPE_REQUEST = "request";
     public static final String OPERATION_SEQUENCE_TYPE_RESPONSE = "response";
     public static final String OPERATION_SEQUENCE_TYPE_FAULT = "fault";
+    /**
+     * Policy Hub policies have no direction in the UI (flow is handled inside the policy).
+     * We persist them with direction "hub" in AM_API_POLICY_MAPPING / AM_API_OPERATION_POLICY_MAPPING
+     * so they can be loaded into apiHubPolicies / operationHubPolicies separately from request/response/fault.
+     */
+    public static final String OPERATION_SEQUENCE_TYPE_HUB = "hub";
     public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION = ".j2";
     public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION_XML = ".xml";
     public static final String CC_POLICY_DEFINITION_EXTENSION = ".gotmpl";
@@ -3643,11 +3656,11 @@ public final class APIConstants {
     public static final String DEFAULT_POLICY_VERSION = "v1";
     public static final String POLICY_FILENAME_INVALID_CHARS_REGEX = "[\\/:*?\"<>|]";
 
-
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
     public static final String EXTERNAL_GATEWAY_VENDOR = "external";
     public static final String WSO2_APK_GATEWAY = "wso2/apk";
     public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
+    public static final String WSO2_API_PLATFORM_GATEWAY = "Universal";
     public static final String EXTERNAL_AWS_GATEWAY = "AWS";
     public static final List<String> API_TYPES = Arrays.asList("rest", "soap", "graphql", "ws", "wh", "sse", "ai", "mcp");
     public static final String SOLACE = "solace";
@@ -3936,6 +3949,15 @@ public final class APIConstants {
         public static final String DATA_RETENTION_PERIOD_SECONDS = "DataRetentionPeriodSeconds";
         public static final String CLEANUP_INTERVAL_SECONDS = "CleanupIntervalSeconds";
         public static final int DEFAULT_CLEANUP_STARTUP_DELAY = 60;
+
+        public static final String PLATFORM_GATEWAY_CONNECT_CONFIGURATION = "PlatformGatewayConnectConfiguration";
+        public static final String CONNECT_GATEWAYS = "ConnectGateways";
+        public static final String CONNECT = "Connect";
+        public static final String REGISTRATION_TOKEN = "RegistrationToken";
+        public static final String CONNECT_NAME = "Name";
+        public static final String CONNECT_DISPLAY_NAME = "DisplayName";
+        public static final String CONNECT_DESCRIPTION = "Description";
+        public static final String CONNECT_URL = "Url";
 
         public enum GatewayRegistrationResponse {
             NOT_RESPONDED,

@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDTO;
 import javax.validation.constraints.*;
 
 
@@ -36,6 +37,7 @@ public class APIOperationsDTO   {
     private String payloadSchema = null;
     private String uriMapping = null;
     private APIOperationPoliciesDTO operationPolicies = null;
+    private List<OperationPolicyDTO> operationHubPolicies = new ArrayList<OperationPolicyDTO>();
 
   /**
    **/
@@ -259,6 +261,25 @@ public class APIOperationsDTO   {
     this.operationPolicies = operationPolicies;
   }
 
+  /**
+   * Policy Hub policies at resource/operation level (sibling to operationPolicies).
+   **/
+  public APIOperationsDTO operationHubPolicies(List<OperationPolicyDTO> operationHubPolicies) {
+    this.operationHubPolicies = operationHubPolicies;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Policy Hub policies at resource/operation level (sibling to operationPolicies).")
+      @Valid
+  @JsonProperty("operationHubPolicies")
+  public List<OperationPolicyDTO> getOperationHubPolicies() {
+    return operationHubPolicies;
+  }
+  public void setOperationHubPolicies(List<OperationPolicyDTO> operationHubPolicies) {
+    this.operationHubPolicies = operationHubPolicies;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -281,12 +302,13 @@ public class APIOperationsDTO   {
         Objects.equals(amznResourceContentEncode, apIOperations.amznResourceContentEncode) &&
         Objects.equals(payloadSchema, apIOperations.payloadSchema) &&
         Objects.equals(uriMapping, apIOperations.uriMapping) &&
-        Objects.equals(operationPolicies, apIOperations.operationPolicies);
+        Objects.equals(operationPolicies, apIOperations.operationPolicies) &&
+        Objects.equals(operationHubPolicies, apIOperations.operationHubPolicies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds, amznResourceName, amznResourceTimeout, amznResourceContentEncode, payloadSchema, uriMapping, operationPolicies);
+    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds, amznResourceName, amznResourceTimeout, amznResourceContentEncode, payloadSchema, uriMapping, operationPolicies, operationHubPolicies);
   }
 
   @Override
@@ -307,6 +329,7 @@ public class APIOperationsDTO   {
     sb.append("    payloadSchema: ").append(toIndentedString(payloadSchema)).append("\n");
     sb.append("    uriMapping: ").append(toIndentedString(uriMapping)).append("\n");
     sb.append("    operationPolicies: ").append(toIndentedString(operationPolicies)).append("\n");
+    sb.append("    operationHubPolicies: ").append(toIndentedString(operationHubPolicies)).append("\n");
     sb.append("}");
     return sb.toString();
   }

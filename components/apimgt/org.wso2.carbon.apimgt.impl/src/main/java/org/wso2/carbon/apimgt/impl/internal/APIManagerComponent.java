@@ -67,7 +67,6 @@ import org.wso2.carbon.apimgt.impl.DependencyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
-import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
@@ -92,6 +91,7 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
+import org.wso2.carbon.apimgt.impl.utils.GatewayManagementUtils;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -204,6 +204,10 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new ApplicationRegistrationNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new PolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new DeployAPIInGatewayNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new PlatformGatewayDeployNotifier(), null);
+            if (log.isDebugEnabled()) {
+                log.debug("Registered PlatformGatewayDeployNotifier service");
+            }
             bundleContext.registerService(Notifier.class.getName(), new ScopesNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CertificateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new GoogleAnalyticsNotifier(), null);
@@ -230,6 +234,7 @@ public class APIManagerComponent {
                     null);
             APIMgtDBUtil.initialize();
             APIUtil.init();
+            GatewayManagementUtils.performPlatformGatewayConnectFromConfigIfConfigured();
             String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
             if (migrationEnabled == null) {
                 CommonConfigDeployer configDeployer = new CommonConfigDeployer();
