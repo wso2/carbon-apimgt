@@ -294,6 +294,7 @@ public class CommonUtil {
         APIMDependencyConfigurationService service = ServiceReferenceHolder.getInstance()
                 .getAPIMDependencyConfigurationService();
         if (service == null || service.getAPIMDependencyConfigurations() == null) {
+            log.debug("APIM dependency configuration service not available, using default OAS parser options");
             return new OASParserOptions();
         }
         return service.getAPIMDependencyConfigurations().getOasParserOptions();

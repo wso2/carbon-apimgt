@@ -708,22 +708,6 @@ public class OAS3Parser extends APIDefinition {
         return generateAPIDefinition(swaggerData, openAPI);
     }
 
-    /**
-     * This method generates API definition using the given api's URI templates and the swagger with parser options.
-     *
-     * @param swaggerData api
-     * @param swagger     swagger definition
-     * @param options OASParserOptions
-     * @return API definition in string format
-     * @throws APIManagementException if error occurred when generating API Definition
-     */
-    @Override
-    public String generateAPIDefinition(SwaggerData swaggerData, String swagger, OASParserOptions options)
-            throws APIManagementException {
-        OpenAPI openAPI = getOpenAPI(swagger, options);
-        return generateAPIDefinition(swaggerData, openAPI);
-    }
-
     @Override
     public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
             throws APIManagementException {
@@ -1101,22 +1085,6 @@ public class OAS3Parser extends APIDefinition {
     public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData)
             throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(oasDefinition);
-        removePublisherSpecificInfo(openAPI);
-        return generateAPIDefinition(swaggerData, openAPI);
-    }
-
-    /**
-     * Populate definition with wso2 APIM specific information
-     *
-     * @param oasDefinition OAS definition
-     * @param swaggerData   API related Swagger data
-     * @return Generated OAS definition
-     * @throws APIManagementException If an error occurred
-     */
-    @Override
-    public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData, OASParserOptions options)
-            throws APIManagementException {
-        OpenAPI openAPI = getOpenAPI(oasDefinition, options);
         removePublisherSpecificInfo(openAPI);
         return generateAPIDefinition(swaggerData, openAPI);
     }
