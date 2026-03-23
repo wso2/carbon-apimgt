@@ -61,6 +61,7 @@ public class APIMgtGatewayConstants {
     public static final String DUMMY_ENDPOINT_ADDRESS = "dummy_endpoint_address";
     public static final String CUSTOM_PROPERTY = "customProperty";
     public static final String RESOURCE_PATTERN = "^/.+?/.+?([/?].+)$";
+    public static final String AUTHENTICATORS_CHALLENGE_STRING = "API:authenticators_challenge_string";
 
     public static final String METHOD_NOT_FOUND_ERROR_MSG = "Method not allowed for given API resource";
     public static final String RESOURCE_NOT_FOUND_ERROR_MSG = "No matching resource found for given API Request";
