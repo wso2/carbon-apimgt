@@ -1033,10 +1033,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Validate Transports
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
+        String effectiveGatewayVendor = StringUtils.isNotBlank(api.getGatewayVendor()) ? api.getGatewayVendor()
+                : existingAPI.getGatewayVendor();
+        boolean shouldValidateKeyManagers = !APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(effectiveGatewayVendor);
         // Skip key manager and scope validations for external gateway vendors.
         // Federated APIs imported via FederatedAPIDiscovery come with keyManagers null,
         // causing update failures. External gateway vendors manage their own key managers and scopes.
-        if (!APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(api.getGatewayVendor())) {
+        if (shouldValidateKeyManagers) {
             validateKeyManagers(api, existingAPI.getKeyManagers());
         }
 
@@ -1044,7 +1047,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             checkIfAdditionalPropertyValuesAreNullOrEmpty(new ApiTypeWrapper(api));
         }
 
-        if (!APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(api.getGatewayVendor())) {
+        if (shouldValidateKeyManagers) {
             validateKeyManagerScopes(api, tenantDomain);
         }
         // Validate and process API level and operation level policies
