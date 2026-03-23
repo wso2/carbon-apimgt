@@ -527,5 +527,4 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
         }
         return APIUtil.getApiExternalApiMappingReferenceByApiId(apiResult.getId(), environment.getUuid());
     }
-
 }
