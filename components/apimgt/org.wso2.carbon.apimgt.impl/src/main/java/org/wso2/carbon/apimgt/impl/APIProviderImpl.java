@@ -545,10 +545,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateResourceThrottlingTiers(api, tenantDomain);
+        String normalizedGatewayVendor = APIUtil.setGatewayVendorBeforeInsertion(
+                api.getGatewayVendor(), api.getGatewayType());
+        boolean shouldValidateKeyManagers = !APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(
+                APIUtil.handleGatewayVendorRetrieval(normalizedGatewayVendor));
         // Skip key manager and scope validations for external gateway vendors.
         // Federated APIs imported via FederatedAPIDiscovery come with keyManagers null,
         // causing import failures. External gateway vendors manage their own key managers and scopes.
-        if (!APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(api.getGatewayVendor())) {
+        if (shouldValidateKeyManagers) {
             validateKeyManagers(api);
             validateKeyManagerScopes(api, tenantDomain);
         }
@@ -581,8 +585,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // For Choreo-Connect gateway, gateway vendor type in the DB will be "wso2/choreo-connect".
         // This value is determined considering the gateway type comes with the request.
-        api.setGatewayVendor(APIUtil.setGatewayVendorBeforeInsertion(
-                api.getGatewayVendor(), api.getGatewayType()));
+        api.setGatewayVendor(normalizedGatewayVendor);
         try {
             PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(api.getOrganization()),
                     APIMapper.INSTANCE.toPublisherApi(api));
