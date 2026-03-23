@@ -127,6 +127,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadInfoD
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
@@ -320,6 +321,10 @@ public class APIMappingUtil {
             List<OperationPolicy> policyList = OperationPolicyMappingUtil.fromDTOToAPIOperationPoliciesList(
                     dto.getApiPolicies());
             model.setApiPolicies(policyList);
+        }
+        // API-level Policy Hub policies (sibling to apiPolicies; Option B)
+        if (dto.getApiHubPolicies() != null && !dto.getApiHubPolicies().isEmpty()) {
+            model.setHubPolicies(OperationPolicyMappingUtil.fromDTOListToOperationPolicyList(dto.getApiHubPolicies()));
         }
 
         // wsUriMapping
@@ -1868,6 +1873,15 @@ public class APIMappingUtil {
             dto.setApiPolicies(OperationPolicyMappingUtil.fromOperationPolicyListToDTO(model.getApiPolicies(),
                     model.getUuid(), preserveCredentials));
         }
+        // API-level Policy Hub policies (sibling; Option B)
+        if (model.getHubPolicies() != null && !model.getHubPolicies().isEmpty()) {
+            List<OperationPolicyDTO> hubDtoList = new ArrayList<>();
+            for (OperationPolicy p : model.getHubPolicies()) {
+                hubDtoList.add(OperationPolicyMappingUtil.fromOperationPolicyToDTO(p, model.getUuid(),
+                        preserveCredentials));
+            }
+            dto.setApiHubPolicies(hubDtoList);
+        }
         String subscriptionAvailability = model.getSubscriptionAvailability();
         if (subscriptionAvailability != null) {
             dto.setSubscriptionAvailability(mapSubscriptionAvailabilityFromAPItoDTO(subscriptionAvailability));
@@ -2964,7 +2978,8 @@ public class APIMappingUtil {
                 isHttpVerbDefined = true;
                 String authType = mapOASToInternalAuthType(operation.getAuthType());
                 setCommonTemplateFields(template, uriTempVal, httpVerb, authType,
-                        operation.getThrottlingPolicy(), operation.getOperationPolicies());
+                        operation.getThrottlingPolicy(), operation.getOperationPolicies(),
+                        operation.getOperationHubPolicies());
 
                 uriTemplates.add(template);
             } else {
@@ -3056,7 +3071,7 @@ public class APIMappingUtil {
 
             String authType = mapOASToInternalAuthType(operation.getAuthType());
             setCommonTemplateFields(template, uriTempVal, verb, authType,
-                    operation.getThrottlingPolicy(), operation.getOperationPolicies());
+                    operation.getThrottlingPolicy(), operation.getOperationPolicies(), null);
 
             template.setSchemaDefinition(operation.getSchemaDefinition());
             template.setDescription(operation.getDescription());
@@ -3110,11 +3125,13 @@ public class APIMappingUtil {
      * @param httpVerb            the HTTP verb (method)
      * @param authType            the authentication type
      * @param throttlingPolicy    the throttling policy
-     * @param operationPolicies   the operation policies DTO
+     * @param operationPolicies   the operation policies DTO (request/response/fault)
+     * @param operationHubPolicies Policy Hub policies at resource level (sibling; may be null)
      */
     private static void setCommonTemplateFields(URITemplate template, String uriTemplate, String httpVerb,
                                                 String authType, String throttlingPolicy,
-                                                APIOperationPoliciesDTO operationPolicies) {
+                                                APIOperationPoliciesDTO operationPolicies,
+                                                List<OperationPolicyDTO> operationHubPolicies) {
 
         template.setThrottlingTier(throttlingPolicy);
         template.setThrottlingTiers(throttlingPolicy);
@@ -3127,6 +3144,9 @@ public class APIMappingUtil {
         if (operationPolicies != null) {
             template.setOperationPolicies(
                     OperationPolicyMappingUtil.fromDTOToAPIOperationPoliciesList(operationPolicies));
+        }
+        if (operationHubPolicies != null && !operationHubPolicies.isEmpty()) {
+            template.setHubPolicies(OperationPolicyMappingUtil.fromDTOListToOperationPolicyList(operationHubPolicies));
         }
     }
 
@@ -3649,8 +3669,9 @@ public class APIMappingUtil {
 
         for (APIOperationsDTO operationsDTO : apiOperationsDTO) {
             String key = operationsDTO.getTarget() + ":" + operationsDTO.getVerb();
-            if (uriTemplateMap.get(key) != null) {
-                List<OperationPolicy> operationPolicies = uriTemplateMap.get(key).getOperationPolicies();
+            URITemplate uriTemplate = uriTemplateMap.get(key);
+            if (uriTemplate != null) {
+                List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
                 if (operationPolicies != null && !operationPolicies.isEmpty()) {
                     if (log.isDebugEnabled()) {
                         log.debug("Found " + operationPolicies.size() + " operation policies for " + key);
@@ -3658,6 +3679,14 @@ public class APIMappingUtil {
                     operationsDTO.setOperationPolicies(
                             OperationPolicyMappingUtil.fromOperationPolicyListToDTO(operationPolicies, api.getUuid(),
                                     preserveCredentials));
+                }
+                if (uriTemplate.getHubPolicies() != null && !uriTemplate.getHubPolicies().isEmpty()) {
+                    List<OperationPolicyDTO> hubDtoList = new ArrayList<>();
+                    for (OperationPolicy p : uriTemplate.getHubPolicies()) {
+                        hubDtoList.add(OperationPolicyMappingUtil.fromOperationPolicyToDTO(p, api.getUuid(),
+                                preserveCredentials));
+                    }
+                    operationsDTO.setOperationHubPolicies(hubDtoList);
                 }
             }
         }
@@ -3725,6 +3754,13 @@ public class APIMappingUtil {
         dto.setScopes(extractScopes(uriTemplate));
         dto.setOperationPolicies(OperationPolicyMappingUtil
                 .fromOperationPolicyListToDTO(uriTemplate.getOperationPolicies(), apiUuid, preserveCredentials));
+        if (uriTemplate.getHubPolicies() != null && !uriTemplate.getHubPolicies().isEmpty()) {
+            List<OperationPolicyDTO> hubDtoList = new ArrayList<>();
+            for (OperationPolicy p : uriTemplate.getHubPolicies()) {
+                hubDtoList.add(OperationPolicyMappingUtil.fromOperationPolicyToDTO(p, apiUuid, preserveCredentials));
+            }
+            dto.setOperationHubPolicies(hubDtoList);
+        }
         dto.setThrottlingPolicy(uriTemplate.getThrottlingTier());
         List<String> usedProductIds = extractUsedProductIds(uriTemplate);
         if (!usedProductIds.isEmpty()) {
@@ -4356,6 +4392,11 @@ public class APIMappingUtil {
                 template.setUriTemplate(resourceItem.getTarget());
                 template.setOperationPolicies(OperationPolicyMappingUtil
                         .fromDTOToAPIOperationPoliciesList(resourceItem.getOperationPolicies()));
+                if (resourceItem.getOperationHubPolicies() != null
+                        && !resourceItem.getOperationHubPolicies().isEmpty()) {
+                    template.setHubPolicies(OperationPolicyMappingUtil.fromDTOListToOperationPolicyList(
+                            resourceItem.getOperationHubPolicies()));
+                }
 
                 APIProductResource resource = new APIProductResource();
                 resource.setApiId(res.getApiId());

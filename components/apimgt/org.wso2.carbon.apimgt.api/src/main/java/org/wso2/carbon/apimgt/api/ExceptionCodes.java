@@ -181,6 +181,10 @@ public enum ExceptionCodes implements ErrorHandler {
             "Cannot delete the environment with UUID %s as active gateway policy deployment exist"),
     GATEWAY_ENVIRONMENT_API_REVISIONS_EXIST(900515, "API Revisions Deployed to Gateway Environment Exist", 409,
             "Cannot delete the environment with UUID %s as API revisions are deployed to it"),
+    UNIVERSAL_GATEWAY_NAME_ALREADY_EXISTS(900518, "Universal gateway name already exists", 409,
+            "A universal gateway with name '%s' already exists in the organization"),
+    UNIVERSAL_GATEWAY_NOT_FOUND(900519, "Universal gateway not found", 404,
+            "Universal gateway not found"),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -447,6 +451,14 @@ public enum ExceptionCodes implements ErrorHandler {
             "Invalid gateway label is provided"),
     DEDICATED_GATEWAY_DETAILS_NOT_FOUND(900999, "Dedicated gateway details not found for the API", 404, "Dedicated " +
             "gateway details not found for the API"),
+
+    //Thumbnail image processing related codes
+    THUMBNAIL_IMAGE_EMPTY(901003, "Thumbnail image is empty", 400,
+            "The provided thumbnail image is empty"),
+    THUMBNAIL_IMAGE_EXCEEDS_MAX_SIZE(901001, "Thumbnail image exceeds maximum allowed size", 400,
+            "Thumbnail image exceeds maximum allowed size of 1MB"),
+    THUMBNAIL_IMAGE_EXCEEDS_MAX_DIMENSIONS(901002, "Thumbnail dimensions exceed maximum allowed limits", 400,
+            "Thumbnail dimensions exceed maximum allowed limits"),
 
     //Comments related Codes
     NEED_COMMENT_MODERATOR_PERMISSION(901100, "Comment moderator permission needed", 403,

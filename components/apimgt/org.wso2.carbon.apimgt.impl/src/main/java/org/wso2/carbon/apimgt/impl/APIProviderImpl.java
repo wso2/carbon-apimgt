@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.FaultyGatewayDeploymentException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
+import org.wso2.carbon.apimgt.api.PlatformGatewayArtifactService;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
@@ -128,6 +129,8 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.gateway.DeploymentModeResolver;
+import org.wso2.carbon.apimgt.impl.gateway.DeploymentModeResolver.DeploymentTargets;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRevisionWorkflowDTO;
@@ -703,7 +706,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Validate and process API level and operation level policies
         validateAndProcessAPIPolicyParameters(api, null, tenantDomain);
         // Add API level and operation level policies
-        apiMgtDAO.addAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain);
+        apiMgtDAO.addAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(),
+                api.getHubPolicies(), tenantDomain, isPlatformGatewayApi(api));
     }
 
     /**
@@ -1242,7 +1246,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Validate and process API level and operation level policies
         validateAndProcessAPIPolicyParameters(api, existingApi, tenantDomain);
         // Update API level and operation level policies
-        apiMgtDAO.updateAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(), tenantDomain);
+        apiMgtDAO.updateAPIPoliciesMapping(api.getUuid(), api.getUriTemplates(), api.getApiPolicies(),
+                api.getHubPolicies(), tenantDomain, isPlatformGatewayApi(api));
     }
 
     @Override
@@ -1952,7 +1957,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         if (policyUpdated && updatePolicyMapping) {
-            apiMgtDAO.addAPILevelPolicies(api.getApiPolicies(), api.getUuid(), null, tenantDomain);
+            apiMgtDAO.addAPILevelPolicies(api.getApiPolicies(), api.getUuid(), null, tenantDomain,
+                    isPlatformGatewayApi(api));
         }
     }
 
@@ -2161,7 +2167,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
 
                     OperationPolicySpecification policySpecification = policyData.getSpecification();
-                    if (validateAppliedPolicyWithSpecification(policySpecification, policy, api.getType())) {
+                    if (validateAppliedPolicyWithSpecification(policySpecification, policy, api.getType(),
+                            isPlatformGatewayApi(api))) {
                         processSecretPolicyParameters(policySpecification, policy, existingPoliciesList);
                         validatedPolicies.add(policy);
                     }
@@ -2193,13 +2200,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                         OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
                         String apiType = (api != null) ? api.getType() : null;
-                        if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, apiType)) {
+                        if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, apiType,
+                                isPlatformGatewayApi(api))) {
                             processSecretPolicyParameters(commonPolicySpec, policy, existingPoliciesList);
                             validatedPolicies.add(policy);
                         }
                     } else {
-                        throw new APIManagementException("Selected policy " + policyId + " is not found.",
-                                ExceptionCodes.INVALID_OPERATION_POLICY);
+                        // Platform Gateway: policies may come from external source and are not in AM
+                        if (isPlatformGatewayApi(api)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Accepting policy " + policyId + " for Platform Gateway API (no local validation)");
+                            }
+                            validatedPolicies.add(policy);
+                        } else {
+                            throw new APIManagementException("Selected policy " + policyId + " is not found.",
+                                    ExceptionCodes.INVALID_OPERATION_POLICY);
+                        }
                     }
                 }
             } else {
@@ -2214,7 +2230,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 + policy.getPolicyName() + ". Validating the policy");
                     }
                     OperationPolicySpecification policySpecification = policyData.getSpecification();
-                    if (validateAppliedPolicyWithSpecification(policySpecification, policy, api.getType())) {
+                    if (validateAppliedPolicyWithSpecification(policySpecification, policy, api.getType(),
+                            isPlatformGatewayApi(api))) {
                         policy.setPolicyId(policyData.getPolicyId());
                         processSecretPolicyParameters(policySpecification, policy, existingPoliciesList);
                         validatedPolicies.add(policy);
@@ -2234,15 +2251,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                         OperationPolicySpecification commonPolicySpec = commonPolicyData.getSpecification();
                         String apiType = (api != null) ? api.getType() : null;
-                        if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, apiType)) {
+                        if (validateAppliedPolicyWithSpecification(commonPolicySpec, policy, apiType,
+                                isPlatformGatewayApi(api))) {
                             policy.setPolicyId(commonPolicyData.getPolicyId());
                             processSecretPolicyParameters(commonPolicySpec, policy, existingPoliciesList);
                             validatedPolicies.add(policy);
                         }
                     } else {
-                        log.error("Selected policy " + policy.getPolicyName() + " is not found");
-                        throw new APIManagementException("Selected policy " + policy.getPolicyName() + " is not found.",
-                                ExceptionCodes.INVALID_OPERATION_POLICY);
+                        // Platform Gateway: policies may come from external source and are not in AM
+                        if (isPlatformGatewayApi(api)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Accepting policy " + policy.getPolicyName() + " for Platform Gateway API (no local validation)");
+                            }
+                            validatedPolicies.add(policy);
+                        } else {
+                            log.error("Selected policy " + policy.getPolicyName() + " is not found");
+                            throw new APIManagementException("Selected policy " + policy.getPolicyName() + " is not found.",
+                                    ExceptionCodes.INVALID_OPERATION_POLICY);
+                        }
                     }
                 }
             }
@@ -2250,26 +2276,49 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return validatedPolicies;
     }
 
+    /**
+     * Returns true if the API uses Platform Gateway (gateway type Platform).
+     * For such APIs, policies may come from an external source and are not stored in AM; we skip local policy lookup when saving.
+     */
+    private static boolean isPlatformGatewayApi(API api) {
+        return api != null && api.getGatewayType() != null
+                && APIConstants.WSO2_API_PLATFORM_GATEWAY.equalsIgnoreCase(api.getGatewayType());
+    }
+
 
     @Override
     public boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification,
                                                           OperationPolicy appliedPolicy, String apiType)
             throws APIManagementException {
+        return validateAppliedPolicyWithSpecification(policySpecification, appliedPolicy, apiType, false);
+    }
 
-        //Validate the policy applied direction
-        if (!policySpecification.getApplicableFlows().contains(appliedPolicy.getDirection())) {
-            throw new APIManagementException(policySpecification.getName() + " cannot be used in the "
-                    + appliedPolicy.getDirection() + " flow.",
-                    ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
-        }
+    /**
+     * Validates applied policy against its specification. For Platform Gateway APIs, skips flow and API-type
+     * checks so that policies from Policy Hub (or external source) can be used in request/response flows;
+     * the platform gateway enforces flow semantics.
+     */
+    private boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification,
+                                                           OperationPolicy appliedPolicy, String apiType,
+                                                           boolean isPlatformGatewayApi) throws APIManagementException {
 
-        //Validate the API type. Skip the validation if the API type is null (global policy scenarios)
-        if (apiType != null) {
-            boolean isApiTypeValid = isApiTypeValid(policySpecification.getSupportedApiTypes(), apiType);
-            if (!isApiTypeValid) {
-                throw new APIManagementException(policySpecification.getName() + " cannot be used for the "
-                        + apiType + " API type.",
+        if (!isPlatformGatewayApi) {
+            //Validate the policy applied direction
+            if (policySpecification.getApplicableFlows() == null
+                    || !policySpecification.getApplicableFlows().contains(appliedPolicy.getDirection())) {
+                throw new APIManagementException(policySpecification.getName() + " cannot be used in the "
+                        + appliedPolicy.getDirection() + " flow.",
                         ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
+            }
+
+            //Validate the API type. Skip the validation if the API type is null (global policy scenarios)
+            if (apiType != null) {
+                boolean isApiTypeValid = isApiTypeValid(policySpecification.getSupportedApiTypes(), apiType);
+                if (!isApiTypeValid) {
+                    throw new APIManagementException(policySpecification.getName() + " cannot be used for the "
+                            + apiType + " API type.",
+                            ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
+                }
             }
         }
 
@@ -2597,8 +2646,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
         }
         environmentsToRemove.removeAll(environmentsToAdd);
+        DeploymentTargets targets = DeploymentModeResolver.resolve(api.getOrganization(), environmentsToRemove);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        gatewayManager.unDeployFromGateway(api, tenantDomain, environmentsToRemove, onDeleteOrRetire);
+        log.info("Undeploying API: " + api.getId().getApiName() + " from " + environmentsToRemove.size()
+                + " environments");
+        gatewayManager.unDeployFromGateway(api, api.getOrganization(), targets.getSynapseLabels(), onDeleteOrRetire,
+                targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds());
         if (log.isDebugEnabled()) {
             log.debug("Removing API: " + api.getId().getApiName() + " from gateways. onDeleteOrRetire: " +
                     onDeleteOrRetire);
@@ -3145,6 +3198,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
+        try {
+            PlatformGatewayArtifactService artifactService =
+                    ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
+            if (artifactService != null) {
+                artifactService.deleteAllRevisionArtifactsForApi(apiUuid);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to delete platform revision artifacts for API " + apiUuid + ": " + e.getMessage(), e);
+        }
         try {
             GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(apiUuid);
             log.debug("API " + apiUuid + " on organization " + organization +
@@ -3818,7 +3880,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIDefinition parser = new OAS3Parser();
         SwaggerData swaggerData = new SwaggerData(apiProduct);
         String apiProductSwagger = parser.generateAPIDefinition(swaggerData);
-        apiProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping, apiProductSwagger);
+        apiProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping,
+                apiProductSwagger, ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                        .getAPIMDependencyConfigurations().getOasParserOptions());
         saveSwaggerDefinition(productId, apiProductSwagger, orgId);
         apiProduct.setDefinition(apiProductSwagger);
     }
@@ -3830,9 +3894,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIDefinition parser = new OAS3Parser();
         SwaggerData updatedData = new SwaggerData(apiProduct);
         String existingProductSwagger = getOpenAPIDefinition(productId, orgId);
-        String updatedProductSwagger = parser.generateAPIDefinition(updatedData, existingProductSwagger);
+        String updatedProductSwagger = parser.generateAPIDefinition(updatedData, existingProductSwagger,
+                ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                        .getAPIMDependencyConfigurations().getOasParserOptions());
         updatedProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping,
-                updatedProductSwagger);
+                updatedProductSwagger, ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                        .getAPIMDependencyConfigurations().getOasParserOptions());
         saveSwaggerDefinition(productId, updatedProductSwagger, orgId);
         apiProduct.setDefinition(updatedProductSwagger);
     }
@@ -4035,8 +4102,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         stateWorkflowDTO.setWorkflowReference(Integer.toString(apiOrApiProductId));
         stateWorkflowDTO.setInvoker(this.username);
         stateWorkflowDTO.setApiUUID(uuid);
-        String workflowDescription = "Pending lifecycle state change action: " + action;
+
+        String workflowDescription = String.format(
+                "Approval request for %s state change action %s from %s state for the %s %s : %s by %s",
+                apiType,
+                stateWorkflowDTO.getApiLCAction(),
+                stateWorkflowDTO.getApiCurrentState(),
+                apiType,
+                stateWorkflowDTO.getApiName(),
+                stateWorkflowDTO.getApiVersion(),
+                stateWorkflowDTO.getApiProvider()
+        );
         stateWorkflowDTO.setWorkflowDescription(workflowDescription);
+
         return stateWorkflowDTO;
     }
 
@@ -5008,7 +5086,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
         }
         environmentsToRemove.removeAll(gatewaysToAdd);
-        gatewayManager.unDeployFromGateway(apiProduct, tenantDomain, associatedAPIs, environmentsToRemove);
+        String organization = apiProduct.getOrganization() != null ? apiProduct.getOrganization() : tenantDomain;
+        DeploymentTargets targets = DeploymentModeResolver.resolve(organization, environmentsToRemove);
+        gatewayManager.unDeployFromGateway(apiProduct, tenantDomain, associatedAPIs, environmentsToRemove,
+                targets.getSynapseLabels(),
+                targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds());
     }
 
     protected int getTenantId(String tenantDomain) throws UserStoreException {
@@ -5585,8 +5667,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             int updatedURITemplateId = apiResources.get(productResourceKey).getId();
             uriTemplate.setId(updatedURITemplateId);
         }
-
-        apiMgtDAO.addAPIProductResourceMappings(productResources, organization, null);
+        apiMgtDAO.updateAPIProductResourceMappings(productResources, organization);
     }
 
     /**
@@ -6295,6 +6376,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<OperationPolicy> apiPolicyMapping = apiMgtDAO.getAPIPolicyMapping(api.getUuid(), null);
         if (!apiPolicyMapping.isEmpty()) {
             api.setApiPolicies(apiPolicyMapping);
+        }
+        List<OperationPolicy> apiHubPolicyMapping = apiMgtDAO.getAPIHubPolicyMapping(api.getUuid(), null);
+        if (!apiHubPolicyMapping.isEmpty()) {
+            api.setHubPolicies(apiHubPolicyMapping);
         }
     }
 
@@ -7271,13 +7356,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.getId().setUuid(apiId);
         api.setOrganization(organization);
 
+        // Deduplicate by deployment name to avoid unique constraint violations when input contains duplicates
+        List<APIRevisionDeployment> dedupedDeployments = new ArrayList<>();
+        Set<String> seenDeployments = new HashSet<>();
+        for (APIRevisionDeployment d : apiRevisionDeployments) {
+            String depName = d != null ? d.getDeployment() : null;
+            if (depName != null && seenDeployments.add(depName)) {
+                dedupedDeployments.add(d);
+            }
+        }
+        log.info("Processing API revision deployment for API: " + apiId + ", revision: " + apiRevisionUUID
+                + ", deployments count: " + dedupedDeployments.size());
+
         if (!isInitiatedFromGateway) {
-            handlePendingDeployments(apiId, apiRevisionUUID, apiRevisionDeployments);
+            handlePendingDeployments(apiId, apiRevisionUUID, dedupedDeployments);
         }
 
-        apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, apiRevisionDeployments);
+        apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, dedupedDeployments);
 
-        for (APIRevisionDeployment deployment : apiRevisionDeployments) {
+        for (APIRevisionDeployment deployment : dedupedDeployments) {
             if (!isInitiatedFromGateway) {
                 apiMgtDAO.updateAPIRevisionDeploymentStatus(apiRevisionUUID,
                         APIConstants.APIRevisionStatus.API_REVISION_CREATED, deployment.getDeployment());
@@ -7372,6 +7469,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             workflowDTO.setApiProvider(apiIdentifier.getProviderName());
             workflowDTO.setEnvironment(deployment.getDeployment());
             workflowDTO.setRevisionId(String.valueOf(revisionId));
+            workflowDTO.setInvoker(this.username);
+
+            String workflowDescription = String.format(
+                    "Approve revision %s deployment request from the user %s for the environment %s of the API %s",
+                    workflowDTO.getRevisionId(),
+                    workflowDTO.getUserName(),
+                    workflowDTO.getEnvironment(),
+                    workflowDTO.getApiName()
+            );
+            workflowDTO.setWorkflowDescription(workflowDescription);
 
             executor.execute(workflowDTO);
 
@@ -7478,7 +7585,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         .addAndRemovePublishedGatewayLabels(apiId, revisionUUID,
                                 targetEnvironments, gatewayVhosts, deploymentsToRemove);
                 try {
-                    gatewayManager.deployToGateway(api, organization, targetEnvironments);
+                    DeploymentTargets targets = DeploymentModeResolver.resolve(organization, targetEnvironments);
+                    log.info("Deploying API revision: " + revisionUUID + " to " + targetEnvironments.size()
+                            + " environments");
+                    gatewayManager.deployToGateway(api, organization, targets.getSynapseLabels(),
+                            targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds(),
+                            revisionUUID);
                 } catch (RuntimeException e) {
                     if (e instanceof FaultyGatewayDeploymentException) {
                         Set<String> environments = ((FaultyGatewayDeploymentException) e).getEnvironments();
@@ -7489,6 +7601,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             deploymentFailures.addAll(environments);
                         }
                     } else {
+                        log.error("Failed to deploy API revision " + revisionUUID + " for API " + apiId + ": "
+                                + e.getMessage(), e);
                         throw e;
                     }
                 }
@@ -7968,7 +8082,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
 
         if (environmentsToAdd.size() > 0) {
-            gatewayManager.deployToGateway(product, tenantDomain, environmentsToAdd);
+            String org = product.getOrganization() != null ? product.getOrganization() : tenantDomain;
+            DeploymentTargets targets = DeploymentModeResolver.resolve(org, environmentsToAdd);
+            gatewayManager.deployToGateway(product, tenantDomain, targets.getSynapseLabels(),
+                    targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds());
         }
 
         String publishedDefaultVersion = getPublishedDefaultVersion(apiProductIdentifier);

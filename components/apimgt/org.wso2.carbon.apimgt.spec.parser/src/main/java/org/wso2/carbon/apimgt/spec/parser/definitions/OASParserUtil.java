@@ -83,6 +83,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.spec.parser.definitions.mixin.License31Mixin;
@@ -244,14 +245,48 @@ public class OASParserUtil {
         }
     }
 
-    public static String updateAPIProductSwaggerOperations(Map<API, List<APIProductResource>> apiToProductResourceMapping,
-                                                           String destinationSwagger)
+    /**
+     * Update the operations of the destination swagger with the operations from source swaggger(s) based on the mapping
+     * provided.
+     *
+     * @param apiToProductResourceMapping Mapping between source APIs and API Product resources
+     * @param destinationSwagger          Destination swagger to be updated
+     * @return Updated destination swagger
+     * @throws APIManagementException If error occurred while updating the swagger
+     */
+    public static String updateAPIProductSwaggerOperations(
+            Map<API, List<APIProductResource>> apiToProductResourceMapping, String destinationSwagger)
             throws APIManagementException {
+        return updateAPIProductSwaggerOperationsCore(apiToProductResourceMapping, destinationSwagger, null);
+    }
+
+    /**
+     * Update the operations of the destination swagger with the operations from source swaggger(s) based on the mapping
+     * provided.
+     *
+     * @param apiToProductResourceMapping Mapping between source APIs and API Product resources
+     * @param destinationSwagger          Destination swagger to be updated
+     * @param options                     OAS parser options
+     * @return Updated destination swagger
+     * @throws APIManagementException If error occurred while updating the swagger
+     */
+    public static String updateAPIProductSwaggerOperations(
+            Map<API, List<APIProductResource>> apiToProductResourceMapping, String destinationSwagger, OASParserOptions options)
+            throws APIManagementException {
+        return updateAPIProductSwaggerOperationsCore(apiToProductResourceMapping, destinationSwagger, options);
+    }
+
+    private static String updateAPIProductSwaggerOperationsCore(
+            Map<API, List<APIProductResource>> apiToProductResourceMapping, String destinationSwagger, OASParserOptions options)
+            throws APIManagementException {
+
         SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(destinationSwagger);
         OpenAPI destOpenAPI;
 
         if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
-            destOpenAPI = ((OAS3Parser) oas3Parser).getOpenAPI(destinationSwagger);
+            destOpenAPI = (options != null) ?
+                    ((OAS3Parser) oas3Parser).getOpenAPI(destinationSwagger, options) :
+                    ((OAS3Parser) oas3Parser).getOpenAPI(destinationSwagger);
         } else {
             String errorMessage = "Cannot update destination swagger because it is not in OpenAPI format";
             throw new APIManagementException(errorMessage, ExceptionCodes.NOT_IN_OPEN_API_FORMAT);
@@ -259,7 +294,11 @@ public class OASParserUtil {
 
         SwaggerUpdateContext context = new SwaggerUpdateContext();
 
-        extractRelevantSourceData(apiToProductResourceMapping, context);
+        if (options != null) {
+            extractRelevantSourceData(apiToProductResourceMapping, context, options);
+        } else {
+            extractRelevantSourceData(apiToProductResourceMapping, context);
+        }
 
         // Update paths
         destOpenAPI.setPaths(context.getPaths());
@@ -502,45 +541,65 @@ public class OASParserUtil {
 
             if (sourceSwaggerVersion == SwaggerVersion.OPEN_API) {
                 OpenAPI srcOpenAPI = ((OAS3Parser) oas3Parser).getOpenAPI(sourceSwagger);
-
-                Set<Components> aggregatedComponents = context.getAggregatedComponents();
-                Components components = srcOpenAPI.getComponents();
-
-                if (components != null) {
-                    aggregatedComponents.add(components);
-                }
-
-                Set<Scope> allScopes = oas3Parser.getScopes(sourceSwagger);
-
-                Paths srcPaths = srcOpenAPI.getPaths();
-                List<APIProductResource> apiProductResources = mappingEntry.getValue();
-
-                for (APIProductResource apiProductResource : apiProductResources) {
-                    URITemplate uriTemplate = apiProductResource.getUriTemplate();
-                    PathItem srcPathItem = srcPaths.get(uriTemplate.getUriTemplate());
-                    readPathsAndScopes(srcPathItem, uriTemplate, allScopes, context);
-                }
+                handleOpenAPI(srcOpenAPI, sourceSwagger, mappingEntry, context);
             } else if (sourceSwaggerVersion == SwaggerVersion.SWAGGER) {
                 Swagger srcSwagger = ((OAS2Parser) oas2Parser).getSwagger(sourceSwagger);
-
-                Set<Components> aggregatedComponents = context.getAggregatedComponents();
-                Components components = swaggerConverter.readContents(sourceSwagger, null, null).
-                        getOpenAPI().getComponents();
-
-                if (components != null) {
-                    aggregatedComponents.add(components);
-                }
-
-                Set<Scope> allScopes = oas2Parser.getScopes(sourceSwagger);
-                Map<String, Path> srcPaths = srcSwagger.getPaths();
-                List<APIProductResource> apiProductResources = mappingEntry.getValue();
-
-                for (APIProductResource apiProductResource : apiProductResources) {
-                    URITemplate uriTemplate = apiProductResource.getUriTemplate();
-                    Path srcPath = srcPaths.get(uriTemplate.getUriTemplate());
-                    readPathsAndScopes(swaggerConverter.convert(srcPath), uriTemplate, allScopes, context);
-                }
+                handleSwagger(srcSwagger, sourceSwagger, mappingEntry, context);
             }
+        }
+    }
+
+    private static void extractRelevantSourceData(Map<API, List<APIProductResource>> apiToProductResourceMapping,
+            SwaggerUpdateContext context, OASParserOptions options) throws APIManagementException {
+
+        for (Map.Entry<API, List<APIProductResource>> mappingEntry : apiToProductResourceMapping.entrySet()) {
+            String sourceSwagger = mappingEntry.getKey().getSwaggerDefinition();
+            SwaggerVersion sourceSwaggerVersion = getSwaggerVersion(sourceSwagger);
+            if (sourceSwaggerVersion == SwaggerVersion.OPEN_API) {
+                OpenAPI srcOpenAPI = ((OAS3Parser) oas3Parser).getOpenAPI(sourceSwagger, options);
+                handleOpenAPI(srcOpenAPI, sourceSwagger, mappingEntry, context);
+            } else if (sourceSwaggerVersion == SwaggerVersion.SWAGGER) {
+                Swagger srcSwagger = ((OAS2Parser) oas2Parser).getSwagger(sourceSwagger);
+                handleSwagger(srcSwagger, sourceSwagger, mappingEntry, context);
+            }
+        }
+    }
+
+    private static void handleOpenAPI(OpenAPI srcOpenAPI, String sourceSwagger,
+            Map.Entry<API, List<APIProductResource>> mappingEntry, SwaggerUpdateContext context)
+            throws APIManagementException {
+
+        Set<Components> aggregatedComponents = context.getAggregatedComponents();
+        Components components = srcOpenAPI.getComponents();
+        if (components != null) {
+            aggregatedComponents.add(components);
+        }
+        Set<Scope> allScopes = oas3Parser.getScopes(sourceSwagger);
+        Paths srcPaths = srcOpenAPI.getPaths();
+        List<APIProductResource> apiProductResources = mappingEntry.getValue();
+        for (APIProductResource apiProductResource : apiProductResources) {
+            URITemplate uriTemplate = apiProductResource.getUriTemplate();
+            PathItem srcPathItem = srcPaths.get(uriTemplate.getUriTemplate());
+            readPathsAndScopes(srcPathItem, uriTemplate, allScopes, context);
+        }
+    }
+
+    private static void handleSwagger(Swagger srcSwagger, String sourceSwagger,
+            Map.Entry<API, List<APIProductResource>> mappingEntry, SwaggerUpdateContext context)
+            throws APIManagementException {
+
+        Set<Components> aggregatedComponents = context.getAggregatedComponents();
+        Components components = swaggerConverter.readContents(sourceSwagger, null, null).getOpenAPI().getComponents();
+        if (components != null) {
+            aggregatedComponents.add(components);
+        }
+        Set<Scope> allScopes = oas2Parser.getScopes(sourceSwagger);
+        Map<String, Path> srcPaths = srcSwagger.getPaths();
+        List<APIProductResource> apiProductResources = mappingEntry.getValue();
+        for (APIProductResource apiProductResource : apiProductResources) {
+            URITemplate uriTemplate = apiProductResource.getUriTemplate();
+            Path srcPath = srcPaths.get(uriTemplate.getUriTemplate());
+            readPathsAndScopes(swaggerConverter.convert(srcPath), uriTemplate, allScopes, context);
         }
     }
 
@@ -1528,6 +1587,21 @@ public class OASParserUtil {
         //Process mgw disable security extension
         swaggerContent = apiDefinition.processDisableSecurityExtension(swaggerContent);
         return apiDefinition.processOtherSchemeScopes(swaggerContent);
+    }
+
+    /**
+     * Preprocessing of scopes schemes to support multiple schemes other than 'default' type
+     * This method will change the given definition
+     *
+     * @param swaggerContent String
+     * @param options OASParserOptions
+     * @return swagger definition as String
+     */
+    public static String preProcess(String swaggerContent, OASParserOptions options) throws APIManagementException {
+        APIDefinition apiDefinition = getOASParser(swaggerContent);
+        swaggerContent = apiDefinition.injectMgwThrottlingExtensionsToDefault(swaggerContent, options);
+        swaggerContent = apiDefinition.processDisableSecurityExtension(swaggerContent, options);
+        return apiDefinition.processOtherSchemeScopes(swaggerContent, options);
     }
 
     /**

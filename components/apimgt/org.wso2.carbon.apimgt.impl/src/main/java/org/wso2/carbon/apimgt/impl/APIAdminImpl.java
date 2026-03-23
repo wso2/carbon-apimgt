@@ -267,14 +267,18 @@ public class APIAdminImpl implements APIAdmin {
         // name is the UUID of environments configured in api-manager.xml
         Environment env = APIUtil.getReadOnlyEnvironments().get(uuid);
         if (env == null) {
-            env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
-            if (env == null) {
-                String errorMessage = String.format("Failed to retrieve Environment with UUID %s. " +
-                                "Environment not found", uuid);
-                throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
-                        ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid))
-                );
+            if (log.isDebugEnabled()) {
+                log.debug("Environment with UUID " + uuid + " not found in read-only cache, checking database");
             }
+            env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
+        }
+        if (env == null) {
+            log.error("Failed to retrieve Environment with UUID " + uuid + " for tenant domain " + tenantDomain);
+            String errorMessage = String.format("Failed to retrieve Environment with UUID %s. " +
+                            "Environment not found", uuid);
+            throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
+                    ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid))
+            );
         }
         return env;
     }
@@ -383,6 +387,12 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public void revokeAPIKey(String keyUUId, String tenantDomain) throws APIManagementException {
 
+        // Load existing metadata before revocation (revocation may remove/alter it)
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKeyForTenant(keyUUId, tenantDomain);
+        if (apiKeyInfo.getKeyUUID() == null) {
+            throw new APIMgtResourceNotFoundException("Active API key not found for UUID: " + keyUUId);
+        }
+        log.info("Revoking API key with UUID: " + keyUUId + " for tenant: " + tenantDomain);
         apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
     }
 
@@ -393,7 +403,7 @@ public class APIAdminImpl implements APIAdmin {
                                                        int offset, String applicationName, String sortBy,
                                                        String sortOrder) throws APIManagementException {
 
-        return apiMgtDAO.getApplicationsWithPagination(user, owner, tenantId, limit, offset, sortBy, sortOrder,
+        return apiMgtDAO.getApplicationsWithPaginationAndKMs(user, owner, tenantId, limit, offset, sortBy, sortOrder,
                 applicationName);
     }
 

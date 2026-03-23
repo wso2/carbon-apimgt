@@ -114,6 +114,7 @@ import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEventService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
@@ -127,15 +128,7 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.*;
-import org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionApprovalWorkflowExecutor;
-import org.wso2.carbon.apimgt.impl.workflow.ApplicationRegistrationSimpleWorkflowExecutor;
-import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils;
+import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
@@ -166,6 +159,7 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -593,6 +587,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiKeyMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         sendAPIKeyInfoEvent(apiKeyHash, application, null, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(), validityPeriod),
                 application.getKeyType(), keyName, props);
+        broadcastApplicationScopedOpaqueApiKeyCreatedToPlatformGateways(application, apiKey, keyName, validityPeriod,
+                apiKeyInfoDTO.getCreatedTime(), userName);
         return apiKey;
     }
 
@@ -633,6 +629,42 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiKeyMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
         sendAPIKeyInfoEvent(apiKeyHash,null, api, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(),
                 validityPeriod), keyType, keyName, props);
+
+        // Notify connected platform gateways. Use apikey.updated so the platform upserts (create if missing, update if exists).
+        PlatformGatewayAPIKeyEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+        if (eventService != null) {
+            try {
+                String apiIdForGateway = api.getUUID();
+                if (log.isDebugEnabled()) {
+                    log.debug("Broadcasting API-bound opaque API key update to platform gateways for API: "
+                            + apiIdForGateway);
+                }
+                String keyNameForGateway = keyName.toLowerCase(java.util.Locale.ROOT);
+                String expiresAtIso = null;
+                if (validityPeriod > 0) {
+                    long expMs = calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(), validityPeriod);
+                    if (expMs > 0) {
+                        expiresAtIso = java.time.Instant.ofEpochMilli(expMs).toString();
+                    }
+                }
+                eventService.broadcastAPIKeyUpdated(
+                        apiIdForGateway,
+                        keyNameForGateway,
+                        apiKey,
+                        null,
+                        "*",
+                        keyNameForGateway,
+                        expiresAtIso,
+                        null,
+                        null,
+                        userName);
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed to broadcast apikey to platform gateways: " + e.getMessage());
+                }
+            }
+        }
         return apiKey;
     }
 
@@ -727,14 +759,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * Returns a list of API keys
      * @param applicationId Application Id of the application.
      * @param keyType Key type of the api keys
+     * @param tenantDomain Tenant domain
+     * @param username Username
      * @return
      * @throws APIManagementException
      */
     @Override
-    public List<APIKeyInfo> getApiKeys(String applicationId, String keyType) throws APIManagementException {
+    public List<APIKeyInfo> getApiKeys(String applicationId, String keyType, String tenantDomain, String username) throws APIManagementException {
         List<APIKeyInfo> apiKeyInfoList;
         try {
-            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeys(applicationId, keyType);
+            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeys(applicationId, keyType, tenantDomain, username);
         } catch (APIManagementException e) {
                 throw new APIManagementException("Error while getting the api keys for the application: "
                         + applicationId, e);
@@ -747,14 +781,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      * @param applicationId Application Id of the application.
      * @param keyType Key type of the api keys
+     * @param tenantDomain Tenant domain
+     * @param username Username
      * @return A List of api keys.
      * @throws APIManagementException This is the custom exception class for API management.
      */
-    public List<APIKeyInfo> getApiKeyAssociations(String applicationId, String keyType)
+    public List<APIKeyInfo> getApiKeyAssociations(String applicationId, String keyType, String tenantDomain, String username)
             throws APIManagementException {
         List<APIKeyInfo> apiKeyInfoList;
         try {
-            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeyAssociations(applicationId, keyType);
+            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeyAssociations(applicationId, keyType, tenantDomain, username);
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while getting the api key associations for the application: "
                     + applicationId, e);
@@ -767,18 +803,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      * @param applicationId Application Id of the application.
      * @param keyType Key type of the api keys
+     * @param tenantDomain Tenant domain
+     * @param username Username
      * @return A List of apis with api keys.
      * @throws APIManagementException This is the custom exception class for API management.
      */
     @Override
-    public List<APIKeyInfo> getApisWithApiKeys(String applicationId, String keyType)
+    public List<APIKeyInfo> getApisWithApiKeys(String applicationId, String keyType, String tenantDomain, String username)
             throws APIManagementException {
         List<APIKeyInfo> apiKeyInfoList;
         try {
             if (APIUtil.isSubscriptionValidationDisablingAllowed(tenantDomain)) {
                 //ToDo: Get APIs for the logged-in user
             }
-            apiKeyInfoList = apiKeyMgtDAO.getSubscribedAPIsWithAPIKeys(applicationId, keyType);
+            apiKeyInfoList = apiKeyMgtDAO.getSubscribedAPIsWithAPIKeys(applicationId, keyType, tenantDomain, username);
 
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while getting the APIs with api keys for the application: "
@@ -790,15 +828,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     /**
      * Returns a list of api keys for a given API.
      *
-     * @param apiId API Id of the API.
-     * @return A List of api keys.
+     * @param apiId API Id of the API
+     * @param username Username
+     * @return A List of api keys
      * @throws APIManagementException This is the custom exception class for API management.
      */
     @Override
-    public List<APIKeyInfo> getApiApiKeys(String apiId) throws APIManagementException {
+    public List<APIKeyInfo> getApiApiKeys(String apiId, String username) throws APIManagementException {
         List<APIKeyInfo> apiKeyInfoList;
         try {
-            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeys(apiId);
+            apiKeyInfoList  = apiKeyMgtDAO.getAPIKeys(apiId, username);
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while getting the api keys for the API: "
                     + apiId, e);
@@ -1289,6 +1328,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setApplicationId(application.getId());
                 workflowDTO.setSubscriber(userId);
 
+                String workflowDescription = String.format(
+                        "Approve API %s - %s subscription creation request from subscriber - %s for the application - %s",
+                        workflowDTO.getApiName(),
+                        workflowDTO.getApiVersion(),
+                        workflowDTO.getSubscriber(),
+                        workflowDTO.getApplicationName()
+                );
+                workflowDTO.setWorkflowDescription(workflowDescription);
+
                 Tier tier = null;
                 Set<Tier> policies = Collections.emptySet();
                 if (!isApiProduct) {
@@ -1482,6 +1530,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setApplicationId(application.getId());
                 workflowDTO.setSubscriber(userId);
 
+                String workflowDescription = String.format(
+                        "Approve API %s - %s subscription update request from subscriber - %s for the application - %s",
+                        workflowDTO.getApiName(),
+                        workflowDTO.getApiVersion(),
+                        workflowDTO.getSubscriber(),
+                        workflowDTO.getApplicationName()
+                );
+                workflowDTO.setWorkflowDescription(workflowDescription);
+
                 Tier tier = null;
                 Set<Tier> policies = Collections.emptySet();
                 if (!isApiProduct) {
@@ -1652,6 +1709,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             } else {
                 workflowDTO = (SubscriptionWorkflowDTO) apiMgtDAO.retrieveWorkflow(workflowExtRef);
 
+                // clear inherited properties from the subscription creation workflow to avoid using outdated values if the subscription or application was updated.
+                if (workflowDTO.getProperties() != null) {
+                    workflowDTO.getProperties().clear();
+                }
+
                 // set tiername to the workflowDTO only when workflows are enabled
                 SubscribedAPI subscription = apiMgtDAO
                         .getSubscriptionById(Integer.parseInt(workflowDTO.getWorkflowReference()));
@@ -1746,6 +1808,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
             workflowDTO.setCreatedTime(System.currentTimeMillis());
             workflowDTO.setExternalWorkflowReference(removeSubscriptionWFExecutor.generateUUID());
+
+            String workflowDescription = String.format(
+                    "Approve API %s - %s subscription delete request from subscriber - %s for the application - %s",
+                    workflowDTO.getApiName(),
+                    workflowDTO.getApiVersion(),
+                    workflowDTO.getSubscriber(),
+                    workflowDTO.getApplicationName()
+            );
+            workflowDTO.setWorkflowDescription(workflowDescription);
 
             Tier tier = null;
             if (api != null) {
@@ -2092,6 +2163,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appWFDto.setTenantId(tenantId);
             appWFDto.setUserName(userId);
             appWFDto.setCreatedTime(System.currentTimeMillis());
+
+            String workflowDescription = String.format(
+                    "Approve application %s creation request from application creator - %s with throttling tier - %s",
+                    appWFDto.getApplication().getName(),
+                    appWFDto.getUserName(),
+                    appWFDto.getApplication().getTier()
+            );
+            appWFDto.setWorkflowDescription(workflowDescription);
+
             appCreationWFExecutor.execute(appWFDto);
         } catch (WorkflowException e) {
             //If the workflow execution fails, roll back transaction by removing the application entry.
@@ -2317,6 +2397,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appWFDto.setTenantId(tenantId);
             appWFDto.setUserName(existingApp.getOwner());
             appWFDto.setCreatedTime(System.currentTimeMillis());
+
+            String workflowDescription = String.format(
+                    "Approve update request for application '%s' submitted by user: %s",
+                    appWFDto.getExistingApplication().getName(),
+                    appWFDto.getUserName()
+            );
+            appWFDto.setWorkflowDescription(workflowDescription);
+
             workflowResponse = updateApplicationWFExecutor.execute(appWFDto);
 
         } catch (WorkflowException e) {
@@ -2484,7 +2572,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setWorkflowReference(String.valueOf(applicationId));
             workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
             workflowDTO.setCallbackUrl(removeApplicationWFExecutor.getCallbackURL());
-            workflowDTO.setUserName(this.username);
+            workflowDTO.setUserName(application.getSubscriber().getName());
             workflowDTO.setTenantDomain(tenantDomain);
             workflowDTO.setTenantId(tenantId);
 
@@ -2493,6 +2581,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setCreatedTime(System.currentTimeMillis());
             workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
             workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
+
+            String workflowDescription = String.format(
+                    "Approve application %s delete request from application creator - %s with throttling tier - %s",
+                    workflowDTO.getApplication().getName(),
+                    workflowDTO.getUserName(),
+                    workflowDTO.getApplication().getTier()
+            );
+            workflowDTO.setWorkflowDescription(workflowDescription);
 
             if (!(removeApplicationWFExecutor instanceof ApplicationDeletionApprovalWorkflowExecutor)) {
                 cleanupPendingTasksForApplicationDeletion(applicationId);
@@ -2922,6 +3018,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             appRegWFDto.setAppInfoDTO(request);
             appRegWFDto.setDomainList(allowedDomains);
 
+            String workflowDescription = String.format(
+                    "Approve request to create %s keys for %s from application creator - %s with throttling tier - %s",
+                    appRegWFDto.getKeyType(),
+                    appRegWFDto.getApplication().getName(),
+                    appRegWFDto.getUserName(),
+                    appRegWFDto.getApplication().getTier()
+            );
+            appRegWFDto.setWorkflowDescription(workflowDescription);
             appRegWFDto.setKeyDetails(appKeysDto);
             appRegistrationWorkflow.execute(appRegWFDto);
 
@@ -3525,6 +3629,87 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         return isAppUpdated;
     }
 
+    /**
+     * This method upgrades the token type of the given application to JWT
+     *
+     * @param username the name of the user upgrading the application
+     * @param application  the application to upgrade
+     * @return the status of the upgrade operation
+     * @throws APIManagementException when there is an error during the token type upgrade
+     */
+    public boolean upgradeApplicationTokenType(String username, Application application)
+            throws APIManagementException {
+
+        boolean isAppUpdated;
+        String consumerKey;
+        String owner = application.getSubscriber().getName();
+        String ownerTenantDomain = MultitenantUtils.getTenantDomain(owner);
+        for (APIKey apiKey : application.getKeys()) {
+            KeyManager keyManager = KeyManagerHolder.getTenantKeyManagerInstance(ownerTenantDomain,
+                    apiKey.getKeyManager());
+            if (keyManager != null && keyManager.getKeyManagerConfiguration() != null &&
+                    !(APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(
+                    keyManager.getKeyManagerConfiguration()
+                            .getName()) && (APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(
+                    keyManager.getKeyManagerConfiguration()
+                            .getType()) || APIConstants.KeyManager.WSO2_IS_KEY_MANAGER_TYPE.equals(
+                    keyManager.getKeyManagerConfiguration().getType())))) {
+                // Prevent updating the OAuth app token type in the case of other key managers rather than Resident KM.
+                continue;
+            }
+            // Retrieving OAuth application information for specific consumer key
+            if (keyManager != null && !APIConstants.OAuthAppMode.MAPPED.name()
+                    .equalsIgnoreCase(apiKey.getCreateMode())) {
+                consumerKey = apiKey.getConsumerKey();
+                try {
+                    OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                    if (oAuthApplicationInfo == null) {
+                        log.warn("Skipping token type upgrade for consumer key " + consumerKey
+                                        + " as OAuth application info is unavailable.");
+                        continue;
+                    }
+                    Object oauthClientName = oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME);
+                    if (oauthClientName != null) {
+                        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(
+                                oauthClientName.toString(), consumerKey, oAuthApplicationInfo.getCallBackURL(), null,
+                                null, APIConstants.JWT, this.tenantDomain, apiKey.getKeyManager());
+                        oauthAppRequest.getOAuthApplicationInfo()
+                                .addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, owner);
+                        oauthAppRequest.getOAuthApplicationInfo()
+                                .addParameter(ApplicationConstants.APP_KEY_TYPE, apiKey.getType());
+                        oauthAppRequest.getOAuthApplicationInfo()
+                                .putAllAppAttributes(application.getApplicationAttributes());
+                        oauthAppRequest.getOAuthApplicationInfo().setApplicationUUID(application.getUUID());
+                        // Updating the token type of the OAuth application
+                        OAuthApplicationInfo updatedAppInfo = keyManager.updateApplication(oauthAppRequest);
+                        audit.info(
+                                "Successfully updated the token type of the application "
+                                        + updatedAppInfo.getClientName());
+                    } else {
+                        log.warn("Skipping token type upgrade for consumer key " + consumerKey
+                                        + " as OAuth client name is unavailable.");
+                    }
+                } catch (APIManagementException e) {
+                    log.warn(
+                            "Failed to upgrade token type for consumer key " + consumerKey + " of application "
+                                    + application.getUUID(), e);
+                }
+            }
+        }
+        // Update TOKEN_TYPE column in API-M DB
+        isAppUpdated = apiMgtDAO.upgradeApplicationTokenType(username, application);
+
+        if (isAppUpdated) {
+            String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+            ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
+                    tenantDomain, application.getId(), application.getUUID(), application.getName(), APIConstants.JWT,
+                    application.getTier(), application.getGroupId(), application.getApplicationAttributes(), owner);
+            APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        }
+        return isAppUpdated;
+    }
+
     public JSONObject resumeWorkflow(Object[] args) {
 
         JSONObject row = new JSONObject();
@@ -3956,7 +4141,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         return getOpenAPIDefinitionForDeployment(api, environmentName, kmId);
     }
 
+    @Override
     public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
+        revokeAPIKey(apiKey, expiryTime, tenantDomain, null, null, null);
+    }
+
+    @Override
+    public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain, String apiId, String keyName,
+                             String userId) throws APIManagementException {
 
         RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
         Properties properties = new Properties();
@@ -3973,6 +4165,21 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 apiKey, APIConstants.API_KEY_AUTH_TYPE,
                 expiryTime, tenantId);
         revocationRequestPublisher.publishRevocationEvents(apiKey, properties);
+
+        // Notify connected platform gateways when apiId and keyName are known (e.g. opaque key revoke)
+        if (StringUtils.isNotBlank(apiId) && StringUtils.isNotBlank(keyName)) {
+            PlatformGatewayAPIKeyEventService eventService =
+                    ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+            if (eventService != null) {
+                try {
+                    eventService.broadcastAPIKeyRevoked(apiId, keyName, userId);
+                } catch (Exception e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Failed to broadcast apikey.revoked to platform gateways: " + e.getMessage());
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -3980,10 +4187,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      *
      * @param keyUUID Api key UUID
      * @param tenantDomain Tenant domain
+     * @param username User name
      * @throws APIManagementException
      */
     @Override
-    public void revokeApiKey(String keyUUID, String tenantDomain)
+    public void revokeApiKey(String keyUUID, String tenantDomain, String username)
             throws APIManagementException {
 
         RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
@@ -3996,12 +4204,40 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
         properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
-        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUID);
-        if (apiKeyInfo == null) {
-            throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUID);
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUID, username);
+        if (apiKeyInfo == null || apiKeyInfo.getKeyUUID() == null) {
+            throw new APIMgtResourceNotFoundException("Active API key not found for UUID: " + keyUUID);
         }
-        apiKeyMgtDAO.revokeAPIKey(keyUUID, tenantDomain);
+        if (!isAuthorizedApiKeyUser(username, apiKeyInfo.getAuthUser())) {
+            throw new APIMgtAuthorizationFailedException("User is not authorized to revoke the API key for UUID: " + keyUUID);
+        }
+        apiKeyMgtDAO.revokeAPIKeyViaUser(keyUUID, username);
         revocationRequestPublisher.publishRevocationEvents(apiKeyInfo.getApiKeyHash(), properties);
+
+        // Notify connected platform gateways (platform expects handle = metadata.name, not API UUID)
+        PlatformGatewayAPIKeyEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+        if (eventService != null && StringUtils.isNotBlank(apiKeyInfo.getKeyName())) {
+            try {
+                String keyNameGw = apiKeyInfo.getKeyName().toLowerCase(java.util.Locale.ROOT);
+                if (StringUtils.isNotBlank(apiKeyInfo.getApiUUId())) {
+                    API apiForHandle = getLightweightAPIByUUID(apiKeyInfo.getApiUUId(), tenantDomain);
+                    String handle = apiForHandle != null
+                            ? PlatformGatewayAPIYamlConverter.getPlatformGatewayHandleForAPI(apiForHandle) : null;
+                    String apiIdForRevoke = handle != null ? handle : apiKeyInfo.getApiUUId();
+                    eventService.broadcastAPIKeyRevoked(
+                            apiIdForRevoke, keyNameGw, apiKeyInfo.getAuthUser());
+                } else if (StringUtils.isNotBlank(apiKeyInfo.getApplicationId())) {
+                    Application app = apiMgtDAO.getApplicationByUUID(apiKeyInfo.getApplicationId());
+                    broadcastApplicationScopedOpaqueApiKeyRevokedToPlatformGateways(app, keyNameGw,
+                            apiKeyInfo.getAuthUser(), eventService);
+                }
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed to broadcast apikey.revoked to platform gateways: " + e.getMessage());
+                }
+            }
+        }
     }
 
     /**
@@ -4019,12 +4255,15 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                        String username) throws APIManagementException {
 
         // Load existing metadata before revocation (revocation may remove/alter it)
-        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUId);
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUId, username);
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId);
         }
+        if (!isAuthorizedApiKeyUser(username, apiKeyInfo.getAuthUser())) {
+            throw new APIMgtAuthorizationFailedException("User is not authorized to regenerate the API key for UUID: " + keyUUId);
+        }
         // Revoke the existing key
-        revokeApiKey(keyUUId, tenantDomain);
+        revokeApiKey(keyUUId, tenantDomain, username);
         // Generate a new key with the same name and other additional properties
         APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
         apiKeyInfoDTO.setKeyName(apiKeyInfo.getKeyName());
@@ -4065,6 +4304,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         sendAPIKeyInfoEvent(apiKeyHash, apiMgtDAO.getApplicationByUUID(applicationId),
                 null, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(), apiKeyInfo.getValidityPeriod()), keyType,
                 apiKeyInfo.getKeyName(), props);
+        Application appForBroadcast = apiMgtDAO.getApplicationByUUID(applicationId);
+        broadcastApplicationScopedOpaqueApiKeyUpdatedToPlatformGateways(appForBroadcast, apiKey,
+                apiKeyInfo.getKeyName(), apiKeyInfo.getValidityPeriod(), apiKeyInfoDTO.getCreatedTime(), username);
         return regeneratedApiKeyInfo;
     }
 
@@ -4074,6 +4316,156 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
         long expiresAt = createdTime + (validityPeriodSeconds * 1000L); // Convert to ms
         return expiresAt;
+    }
+
+    private boolean isAuthorizedApiKeyUser(String requester, String owner) {
+        boolean isCaseInsensitiveComparisons = Boolean.parseBoolean(
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS));
+        return isCaseInsensitiveComparisons ? StringUtils.equalsIgnoreCase(requester, owner) : StringUtils.equals(requester, owner);
+    }
+
+    /**
+     * Resolves application for subscription lookup (DevPortal may pass lightweight application without DB id).
+     */
+    private Application resolveApplicationForSubscriptionLookup(Application application) throws APIManagementException {
+
+        if (application == null) {
+            return null;
+        }
+        if (application.getId() == 0 && StringUtils.isNotBlank(application.getUUID())) {
+            return apiMgtDAO.getApplicationByUUID(application.getUUID());
+        }
+        return application;
+    }
+
+    /**
+     * Platform gateway API IDs (artifact UUIDs) for APIs this application is subscribed to.
+     */
+    private Set<String> getSubscribedPlatformGatewayApiIds(Application application)
+            throws APIManagementException {
+
+        Application app = resolveApplicationForSubscriptionLookup(application);
+        if (app == null || app.getId() == 0) {
+            return Collections.emptySet();
+        }
+        Set<SubscribedAPI> subs = apiMgtDAO.getSubscribedAPIsByApplication(app);
+        Set<String> apiIds = new LinkedHashSet<>();
+        for (SubscribedAPI sub : subs) {
+            String st = sub.getSubStatus();
+            if (!APIConstants.SubscriptionStatus.UNBLOCKED.equals(st)
+                    && !APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(st)) {
+                continue;
+            }
+            String apiUuid = sub.getAPIUUId();
+            if (StringUtils.isBlank(apiUuid)) {
+                continue;
+            }
+            apiIds.add(apiUuid);
+        }
+        return apiIds;
+    }
+
+    /**
+     * Application-level opaque keys are valid for subscribed APIs. Use apikey.updated so the platform
+     * upserts (create if missing, update if same name already exists).
+     */
+    private void broadcastApplicationScopedOpaqueApiKeyCreatedToPlatformGateways(Application application, String apiKey,
+            String keyName, long validityPeriod, long createdTimeMillis, String userName) {
+
+        PlatformGatewayAPIKeyEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+        if (eventService == null || StringUtils.isBlank(keyName)) {
+            return;
+        }
+        try {
+            Set<String> apiIds = getSubscribedPlatformGatewayApiIds(application);
+            if (apiIds.isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping application-scoped platform gateway API key broadcast: no subscribed APIs for "
+                            + "application " + application.getName());
+                }
+                return;
+            }
+            String keyNameForGateway = keyName.toLowerCase(java.util.Locale.ROOT);
+            String expiresAtIso = null;
+            if (validityPeriod > 0) {
+                long expMs = calculateExpiresAt(createdTimeMillis, validityPeriod);
+                if (expMs > 0) {
+                    expiresAtIso = Instant.ofEpochMilli(expMs).toString();
+                }
+            }
+            for (String apiId : apiIds) {
+                eventService.broadcastAPIKeyUpdated(apiId, keyNameForGateway, apiKey, null, "*",
+                        keyNameForGateway, expiresAtIso, null, null, userName);
+            }
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to broadcast application-scoped apikey to platform gateways: "
+                        + e.getMessage());
+            }
+        }
+    }
+
+    private void broadcastApplicationScopedOpaqueApiKeyRevokedToPlatformGateways(Application application,
+            String keyNameGateway, String userId, PlatformGatewayAPIKeyEventService eventService)
+            throws APIManagementException {
+
+        if (application == null || StringUtils.isBlank(keyNameGateway)) {
+            return;
+        }
+        Set<String> apiIds = getSubscribedPlatformGatewayApiIds(application);
+        for (String apiId : apiIds) {
+            eventService.broadcastAPIKeyRevoked(apiId, keyNameGateway, userId);
+        }
+    }
+
+    /**
+     * Application-level key regenerate: same key name, new value. Send apikey.updated per API ID
+     * so the platform gateway updates in place (avoids "name already exists" on create).
+     */
+    private void broadcastApplicationScopedOpaqueApiKeyUpdatedToPlatformGateways(Application application, String apiKey,
+            String keyName, long validityPeriod, long createdTimeMillis, String userName) {
+
+        PlatformGatewayAPIKeyEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+        if (eventService == null || StringUtils.isBlank(keyName)) {
+            return;
+        }
+        try {
+            Set<String> apiIds = getSubscribedPlatformGatewayApiIds(application);
+            if (apiIds.isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping platform gateway apikey.updated for application key: no eligible subscribed APIs.");
+                }
+                return;
+            }
+            String keyNameForGateway = keyName.toLowerCase(java.util.Locale.ROOT);
+            String expiresAtIso = null;
+            if (validityPeriod > 0) {
+                long expMs = calculateExpiresAt(createdTimeMillis, validityPeriod);
+                if (expMs > 0) {
+                    expiresAtIso = Instant.ofEpochMilli(expMs).toString();
+                }
+            }
+            for (String apiId : apiIds) {
+                eventService.broadcastAPIKeyUpdated(
+                        apiId,
+                        keyNameForGateway,
+                        apiKey,
+                        null,
+                        "*",
+                        keyNameForGateway,
+                        expiresAtIso,
+                        null,
+                        null,
+                        userName);
+            }
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to broadcast application-scoped apikey.updated to platform gateways: "
+                        + e.getMessage());
+            }
+        }
     }
 
     /**
@@ -4090,12 +4482,15 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                           String username)
             throws APIManagementException {
         // Load existing metadata before revocation (revocation may remove/alter it)
-        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIAPIKey(apiUUId, keyUUId);
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIAPIKey(apiUUId, keyUUId, username);
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId);
         }
+        if (!isAuthorizedApiKeyUser(username, apiKeyInfo.getAuthUser())) {
+            throw new APIMgtAuthorizationFailedException("User is not authorized to regenerate the API key for UUID: " + keyUUId);
+        }
         // Revoke the existing key
-        revokeApiKey(keyUUId, tenantDomain);
+        revokeApiKey(keyUUId, tenantDomain, username);
         // Generate a new key with the same name and other additional properties
         APIKeyDTO apiKeyInfoDTO = new APIKeyDTO();
         apiKeyInfoDTO.setKeyName(apiKeyInfo.getKeyName());
@@ -4141,6 +4536,41 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         regeneratedApiKeyInfo.setValidityPeriod(apiKeyInfo.getValidityPeriod());
         sendAPIKeyInfoEvent(apiKeyHash, application, api, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(),
                         apiKeyInfo.getValidityPeriod()), apiKeyInfo.getKeyType(), apiKeyInfo.getKeyName(), props);
+
+        // Regenerate = same key name, new value: send apikey.updated so platform updates in place (avoids "name already exists")
+        PlatformGatewayAPIKeyEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+        if (eventService != null && api != null) {
+            try {
+                String apiIdForGateway = PlatformGatewayAPIYamlConverter.getPlatformGatewayHandleForAPI(api);
+                if (apiIdForGateway == null) {
+                    apiIdForGateway = apiUUId;
+                }
+                String keyNameForGateway = apiKeyInfo.getKeyName().toLowerCase(java.util.Locale.ROOT);
+                String expiresAtIso = null;
+                if (apiKeyInfo.getValidityPeriod() > 0) {
+                    long expMs = calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(), apiKeyInfo.getValidityPeriod());
+                    if (expMs > 0) {
+                        expiresAtIso = Instant.ofEpochMilli(expMs).toString();
+                    }
+                }
+                eventService.broadcastAPIKeyUpdated(
+                        apiIdForGateway,
+                        keyNameForGateway,
+                        apiKey,
+                        null,
+                        "*",
+                        keyNameForGateway,
+                        expiresAtIso,
+                        null,
+                        null,
+                        username);
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed to broadcast apikey.updated to platform gateways: " + e.getMessage());
+                }
+            }
+        }
         return regeneratedApiKeyInfo;
     }
 
@@ -4157,17 +4587,22 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @param apiUUId        API UUId of the API
      * @param keyUUId        UUId of API key
      * @param appUUId        UUId of the Application
+     * @param tenantDomain   Tenant domain
+     * @param username       Username
      * @throws APIManagementException This is the custom exception class for API management.
      */
     @Override
-    public APIKeyInfo createAssociationToApp(String apiUUId, String keyUUId, String appUUId)
+    public APIKeyInfo createAssociationToApp(String apiUUId, String keyUUId, String appUUId, String tenantDomain, String username)
             throws APIManagementException {
-        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getKeyDetailsForAssociation(apiUUId, appUUId, keyUUId);
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getKeyDetailsForAssociation(apiUUId, appUUId, keyUUId, username);
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId);
         }
+        if (!isAuthorizedApiKeyUser(username, apiKeyInfo.getAuthUser())) {
+            throw new APIMgtAuthorizationFailedException("User is not authorized to create association of the API key for UUID: " + keyUUId);
+        }
         apiKeyMgtDAO.createAssociationToApiKey(keyUUId, appUUId);
-        sendAPIKeyAssociationInfoEvent(apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
+        sendAPIKeyAssociationInfoEvent(tenantDomain, apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
                 apiUUId, appUUId, apiKeyInfo.getAppId(), "CREATE_ASSOCIATION");
         Application application = apiMgtDAO.getApplicationByUUID(appUUId);
         apiKeyInfo.setApplicationName(application.getName());
@@ -4178,15 +4613,20 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * Remove association of an opaque api key
      * @param appUUId UUId of the Application
      * @param keyUUId Api key UUId
+     * @param tenantDomain   Tenant domain
+     * @param username       Username
      * @throws APIManagementException
      */
-    public void removeApiKeyAssociationViaApp(String appUUId, String keyUUId) throws APIManagementException {
-        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKeyDetailsByKeyUUIDAndAppUUID(appUUId, keyUUId);
+    public void removeApiKeyAssociationViaApp(String appUUId, String keyUUId, String tenantDomain, String username) throws APIManagementException {
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKeyDetailsByKeyUUIDAndAppUUID(appUUId, keyUUId, username);
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
-            throw new APIMgtResourceNotFoundException("API key not found for name: " + keyUUId);
+            throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId);
         }
-        apiKeyMgtDAO.removeAssociationOfAPIKeyViaApp(appUUId, keyUUId);
-        sendAPIKeyAssociationInfoEvent(apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
+        if (!isAuthorizedApiKeyUser(username, apiKeyInfo.getAuthUser())) {
+            throw new APIMgtAuthorizationFailedException("User is not authorized to remove association of the API key for UUID: " + keyUUId);
+        }
+        apiKeyMgtDAO.removeAssociationOfAPIKeyViaApp(appUUId, keyUUId, tenantDomain);
+        sendAPIKeyAssociationInfoEvent(tenantDomain, apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(),
                 apiKeyInfo.getApiUUId(), appUUId, apiKeyInfo.getAppId(), "REMOVE_ASSOCIATION");
     }
 
@@ -4194,19 +4634,24 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * Remove association of an opaque api key
      * @param apiUUId UUId of the API
      * @param keyUUId Api key UUId
+     * @param tenantDomain TenantDomain
+     * @param username User name
      * @throws APIManagementException
      */
-    public void removeApiKeyAssociation(String apiUUId, String keyUUId) throws APIManagementException {
-        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, keyUUId);
+    public void removeApiKeyAssociation(String apiUUId, String keyUUId, String tenantDomain, String username) throws APIManagementException {
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getKeyTypeByAPIUUIDAndKeyName(apiUUId, keyUUId, username);
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId);
         }
-        apiKeyMgtDAO.removeAssociationOfAPIKey(keyUUId);
-        sendAPIKeyAssociationInfoEvent(apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(), apiUUId,
+        if (!isAuthorizedApiKeyUser(username, apiKeyInfo.getAuthUser())) {
+            throw new APIMgtAuthorizationFailedException("User is not authorized to remove association of the API key for UUID: " + keyUUId);
+        }
+        apiKeyMgtDAO.removeAssociationOfAPIKey(keyUUId, tenantDomain);
+        sendAPIKeyAssociationInfoEvent(tenantDomain, apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType(), apiKeyInfo.getApiKeyHash(), apiUUId,
                 null, 0, "REMOVE_ASSOCIATION");
     }
 
-    private void sendAPIKeyAssociationInfoEvent(String keyName, String keyType, String apiKeyHash, String apiUUId,
+    private void sendAPIKeyAssociationInfoEvent(String tenantDomain, String keyName, String keyType, String apiKeyHash, String apiUUId,
                                                 String appUUId, int appId, String type) throws APIManagementException {
         OpaqueApiKeyPublisher apiKeyInfoPublisher = OpaqueApiKeyPublisher.getInstance();
         Properties properties = new Properties();
@@ -4253,7 +4698,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         hostsWithSchemes = getHostWithSchemeMappingForEnvironment(api, apiTenantDomain, environmentName);
 
-        Environment environment = APIUtil.getEnvironments().get(environmentName);
+        String organization = StringUtils.isNotBlank(api.getOrganization()) ? api.getOrganization() : apiTenantDomain;
+        Environment environment = APIUtil.getEnvironments(organization).get(environmentName);
+        if (environment == null) {
+            throw new APIMgtResourceNotFoundException("Gateway environment '" + environmentName + "' not found");
+        }
         GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
                 .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
         KeyManagerConfigurationDTO keyManagerConfigurationDTO = null;
@@ -4282,7 +4731,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         } else {
             api.setContext(getBasePath(apiTenantDomain, api.getContext()));
         }
-        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, keyManagerConfigurationDTO);
+        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, keyManagerConfigurationDTO,
+                ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                        .getAPIMDependencyConfigurations().getOasParserOptions());
         return updatedDefinition;
     }
 
@@ -5788,6 +6239,5 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public API getAPIWithoutPermissionCheck(String apiId, String organization)
             throws APIManagementException {
         return (getAPIorAPIProductByUUIDWithoutPermissionCheck(apiId, organization)).getApi();
-
     }
 }

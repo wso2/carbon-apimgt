@@ -22,7 +22,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +50,7 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.MCPPayloadGenerator;
 import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -74,6 +76,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
     private static final String OUT_FLOW = "OUT";
     private static final Pattern validHostHeaderPattern =
             Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
+    private Boolean buildResponseMessage = null;
 
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
@@ -171,9 +174,12 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             }
         } else if (OUT_FLOW.equals(mcpDirection)) {
             if (StringUtils.equals(subType, APIConstants.API_SUBTYPE_SERVER_PROXY)) {
-                // For server proxy APIs, we do not handle MCP requests
-                log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
-                        matchedAPI.getVersion());
+                // For server proxy APIs, we only handle error details extraction
+                handleServerProxyBackendResponse(messageContext);
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
+                            matchedAPI.getVersion());
+                }
                 return true;
             }
 
@@ -410,6 +416,89 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             }
         }
         return allScopes;
+    }
+
+    /**
+     * Extracts and sets MCP error details from the backend response for server proxy APIs.
+     *
+     * @param messageContext The Synapse message context
+     */
+    private void handleServerProxyBackendResponse(MessageContext messageContext) {
+        if (buildResponseMessage == null) {
+            Map<String,String> configs = APIManagerConfiguration.getAnalyticsProperties();
+            if (configs.containsKey(
+                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.BUILD_RESPONSE_MESSAGE_CONFIG)) {
+                buildResponseMessage = Boolean.parseBoolean(configs.get(
+                        org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.BUILD_RESPONSE_MESSAGE_CONFIG));
+            } else {
+                buildResponseMessage = false;
+            }
+        }
+        if (buildResponseMessage) {
+            if (log.isDebugEnabled()) {
+                log.debug("Building response message from axis2 message context for analytics extraction.");
+            }
+            try {
+                org.apache.axis2.context.MessageContext axis2MessageContext =
+                        ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                RelayUtils.buildMessage(axis2MessageContext);
+                String responseBody;
+                // Check for JSON payload
+                if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
+                    responseBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
+                } else {
+                    // Extract text from SOAP envelope's first element
+                    SOAPEnvelope envelope = axis2MessageContext.getEnvelope();
+                    if (envelope != null && envelope.getBody() != null) {
+                        envelope.buildWithAttachments();
+                        OMElement firstElement = envelope.getBody().getFirstElement();
+                        responseBody = firstElement != null ? firstElement.getText() : null;
+                    } else {
+                        responseBody = null;
+                    }
+                }
+                if (responseBody != null && !responseBody.trim().isEmpty()) {
+                    // Extract JSON from SSE format if present
+                    String jsonResponse = extractDataFromSSE(responseBody);
+                    setMCPErrorDetails(messageContext, jsonResponse);
+                }
+            } catch (IOException | XMLStreamException e) {
+                log.warn("Failed to build message from axis2 message context", e);
+            } catch (Exception e) {
+                log.warn("Failed to extract error details from server proxy backend response", e);
+            }
+        }
+    }
+
+    /**
+     * Extracts JSON data from Server-Sent Events (SSE) format.
+     * Prioritizes data: lines containing error information.
+     *
+     * @param responseBody The response body (potentially SSE formatted)
+     * @return Extracted JSON string or original response if not SSE
+     */
+    private String extractDataFromSSE(String responseBody) {
+        if (StringUtils.isBlank(responseBody) || !responseBody.contains("data:")) {
+            return responseBody;
+        }
+
+        String firstPayload = null;
+        for (String line : responseBody.split("\\R")) {
+            if (line.startsWith("data:")) {
+                String payload = line.substring(5).trim();
+                if (!payload.isEmpty()) {
+                    // If this line contains "error", return immediately
+                    if (payload.contains(APIMgtGatewayConstants.ERROR)) {
+                        return payload;
+                    }
+                    // Otherwise, use the first non-empty payload as fallback
+                    if (firstPayload == null) {
+                        firstPayload = payload;
+                    }
+                }
+            }
+        }
+        return firstPayload != null ? firstPayload : responseBody;
     }
 
     /**

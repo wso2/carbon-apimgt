@@ -896,7 +896,9 @@ public class PublisherCommonUtils {
                     .getOpenAPIDefinition(apiToUpdate.getUuid(), originalAPI.getOrganization());
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
-            String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
+            String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition,
+                    ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                            .getAPIMDependencyConfigurations().getOasParserOptions());
             apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition, originalAPI.getOrganization());
             if (!isGraphql) {
                 Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(newDefinition);
@@ -2451,21 +2453,15 @@ public class PublisherCommonUtils {
             apiToAdd.setVisibleOrganizations(organization);
         }
 
-        boolean isNotMCPServer = !APIConstants.API_TYPE_MCP.equals(apiToAdd.getType());
-
-        if (isNotMCPServer) {
-            Map<String, String> complianceResult = checkGovernanceComplianceSync(
-                    apiToAdd.getUuid(), APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
-            if (!complianceResult.isEmpty()
-                    && !Boolean.parseBoolean(complianceResult.get(GOVERNANCE_COMPLIANCE_KEY))) {
-                throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
-            }
+        Map<String, String> complianceResult = checkGovernanceComplianceSync(
+                apiToAdd.getUuid(), APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
+        if (!complianceResult.isEmpty()
+                && !Boolean.parseBoolean(complianceResult.get(GOVERNANCE_COMPLIANCE_KEY))) {
+            throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
         apiProvider.addAPI(apiToAdd);
-        if (isNotMCPServer) {
-            checkGovernanceComplianceAsync(apiToAdd.getUuid(),
-                    APIMGovernableState.API_CREATE, ArtifactType.API, organization);
-        }
+        checkGovernanceComplianceAsync(apiToAdd.getUuid(),
+                APIMGovernableState.API_CREATE, ArtifactType.API, organization);
         // Remove parentOrgTiers from OrganizationTiers list
         Set<OrganizationTiers> updatedOrganizationTiers = apiToAdd.getAvailableTiersForOrganizations();
         if (updatedOrganizationTiers != null) {
@@ -3206,7 +3202,9 @@ public class PublisherCommonUtils {
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organization); // TODO see why we need to get it
         //instead of passing same
-        return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
+        return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger,
+                ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                        .getAPIMDependencyConfigurations().getOasParserOptions());
     }
 
     /**
@@ -3228,9 +3226,13 @@ public class PublisherCommonUtils {
 
         String apiDefinition = response.getJsonContent();
         if (isServiceAPI) {
-            apiDefinition = oasParser.copyVendorExtensions(existingAPI.getSwaggerDefinition(), apiDefinition);
+            apiDefinition = oasParser.copyVendorExtensions(existingAPI.getSwaggerDefinition(), apiDefinition,
+                    ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                            .getAPIMDependencyConfigurations().getOasParserOptions());
         } else {
-            apiDefinition = OASParserUtil.preProcess(apiDefinition);
+            apiDefinition = OASParserUtil.preProcess(apiDefinition,
+                    ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                            .getAPIMDependencyConfigurations().getOasParserOptions());
         }
         if (APIConstants.API_TYPE_SOAPTOREST.equals(existingAPI.getType()) && genSoapToRestSequence) {
             List<SOAPToRestSequence> sequenceList = SequenceGenerator.generateSequencesFromSwagger(apiDefinition);
@@ -3379,7 +3381,9 @@ public class PublisherCommonUtils {
         PublisherCommonUtils.validateScopes(existingAPI);
         APIUtil.validateAndUpdateURITemplates(existingAPI, APIUtil.getInternalOrganizationId(organization));
         SwaggerData swaggerData = new SwaggerData(existingAPI);
-        String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
+        String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData,
+                ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                        .getAPIMDependencyConfigurations().getOasParserOptions());
 
         //Validate API with Federated Gateway before persisting to registry
         APIUtil.validateApiWithFederatedGateway(existingAPI);

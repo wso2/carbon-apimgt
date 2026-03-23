@@ -69,6 +69,7 @@ public class SettingsMappingUtil {
         identityProviderDTO.setExternal(APIUtil.getIdentityProviderConfig() != null);
         settingsDTO.setIdentityProvider(identityProviderDTO);
         settingsDTO.setIsAnonymousModeEnabled(anonymousEnabled);
+        settingsDTO.setIsLegacyApiKeysEnabled(APIUtil.isLegacyApiKeysEnabled());
         settingsDTO.setOrgAccessControlEnabled(APIUtil.isOrganizationAccessControlEnabled());
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();

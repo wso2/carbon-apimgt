@@ -82,6 +82,7 @@ import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
 import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -263,6 +264,7 @@ public class APIManagerConfiguration {
 
     private JSONArray customProperties = new JSONArray();
     private GatewayNotificationConfiguration gatewayNotificationConfiguration = new GatewayNotificationConfiguration();
+    private PlatformGatewayConnectConfig platformGatewayConnectConfig = new PlatformGatewayConnectConfig();
 
     /**
      * Returns the configuration of the Identity Provider.
@@ -667,6 +669,13 @@ public class APIManagerConfiguration {
                 solaceConfig.setEnabled(true);
                 solaceConfig.setSolaceApimApiEndpoint(solaceApimApiEndpoint.getText());
                 solaceConfig.setSolaceToken(solaceToken.getText());
+            } else if (APIConstants.MEDIATION_CONFIG.equals(localName)) {
+                OMElement enableSecureXMLProcessingElement = element.getFirstChildWithName(
+                        new QName(APIConstants.ENABLE_SECURE_XML_PROCESSING));
+                if (enableSecureXMLProcessingElement != null) {
+                    String key = getKey(nameStack) + "." + APIConstants.ENABLE_SECURE_XML_PROCESSING;
+                    addToConfiguration(key, enableSecureXMLProcessingElement.getText());
+                }
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
                 String value = MiscellaneousUtil.resolve(element, secretResolver);
@@ -3189,6 +3198,18 @@ public class APIManagerConfiguration {
         this.hashingAlgorithm = hashingAlgorithm;
     }
 
+    /**
+     * Returns whether secure XML processing is enabled for policies.
+     *
+     * @return true if secure XML processing is enabled, false otherwise.
+     */
+    public boolean isEnableSecureXMLProcessing() {
+
+        String value = getFirstProperty(APIConstants.MEDIATION_CONFIG + "."
+                + APIConstants.ENABLE_SECURE_XML_PROCESSING);
+        return Boolean.parseBoolean(value);
+    }
+
     public void setApiChatConfiguration(OMElement omElement){
         OMElement apiChatEnableElement =
                 omElement.getFirstChildWithName(new QName(APIConstants.AI.ENABLED));
@@ -3480,10 +3501,75 @@ public class APIManagerConfiguration {
                         Integer.parseInt(retentionElem.getText()));
             }
         }
+
+        // New: platform gateway connect-with-token configuration (separate element)
+        OMElement pgConnectElem = omElement.getFirstChildWithName(
+                new QName(APIConstants.GatewayNotification.PLATFORM_GATEWAY_CONNECT_CONFIGURATION));
+        if (pgConnectElem != null) {
+            List<org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig> connectGateways = new ArrayList<>();
+            OMElement globalVersionEl = pgConnectElem.getFirstChildWithName(new QName("UniversalGatewayVersion"));
+            if (globalVersionEl != null && globalVersionEl.getText() != null
+                    && !globalVersionEl.getText().trim().isEmpty()) {
+                platformGatewayConnectConfig.setUniversalGatewayVersion(globalVersionEl.getText().trim());
+            }
+            OMElement connectGatewaysElem = pgConnectElem.getFirstChildWithName(
+                    new QName(APIConstants.GatewayNotification.CONNECT_GATEWAYS));
+            if (connectGatewaysElem != null) {
+                Iterator<?> connectIt = connectGatewaysElem.getChildrenWithName(
+                        new QName(APIConstants.GatewayNotification.CONNECT));
+                while (connectIt != null && connectIt.hasNext()) {
+                    OMElement connectElem = (OMElement) connectIt.next();
+                    if (connectElem == null) {
+                        continue;
+                    }
+                    org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig entry =
+                            new org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig();
+                    OMElement rt = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.REGISTRATION_TOKEN));
+                    if (rt != null && rt.getText() != null && !rt.getText().trim().isEmpty()) {
+                        entry.setRegistrationToken(rt.getText().trim());
+                    }
+                    OMElement nameEl = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.CONNECT_NAME));
+                    if (nameEl != null && nameEl.getText() != null) {
+                        entry.setName(nameEl.getText().trim());
+                    }
+                    OMElement displayEl = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.CONNECT_DISPLAY_NAME));
+                    if (displayEl != null && displayEl.getText() != null) {
+                        entry.setDisplayName(displayEl.getText().trim());
+                    }
+                    OMElement descEl = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.CONNECT_DESCRIPTION));
+                    if (descEl != null && descEl.getText() != null) {
+                        entry.setDescription(descEl.getText().trim());
+                    }
+                    OMElement urlEl = connectElem.getFirstChildWithName(
+                            new QName(APIConstants.GatewayNotification.CONNECT_URL));
+                    if (urlEl != null && urlEl.getText() != null && !urlEl.getText().trim().isEmpty()) {
+                        entry.setUrl(urlEl.getText().trim());
+                    }
+                    if (!entry.getRegistrationToken().isEmpty()) {
+                        connectGateways.add(entry);
+                    }
+                }
+            }
+            if (!connectGateways.isEmpty()) {
+                platformGatewayConnectConfig.setConnectGateways(connectGateways);
+            }
+        }
     }
 
     public GatewayNotificationConfiguration getGatewayNotificationConfiguration() {
         return gatewayNotificationConfiguration;
+    }
+
+    /**
+     * Connect-with-token config ([[apim.universal_gateway.connect]]). Use this for the connect flow only;
+     * notification/heartbeat code should use {@link #getGatewayNotificationConfiguration()}.
+     */
+    public PlatformGatewayConnectConfig getPlatformGatewayConnectConfig() {
+        return platformGatewayConnectConfig;
     }
 
     /**

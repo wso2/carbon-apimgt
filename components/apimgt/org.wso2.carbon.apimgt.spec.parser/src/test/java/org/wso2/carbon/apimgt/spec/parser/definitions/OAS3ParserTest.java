@@ -19,6 +19,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
@@ -480,6 +481,52 @@ public class OAS3ParserTest extends OASTestBase {
                         + File.separator + "devportal" + File.separator + "oas3_with_apikey_response.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionExpected, response);
+    }
+
+    @Test
+    public void testMultipartAPIWithoutExplicitStyleAndExplode() throws Exception {
+
+        String oasDefinition = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
+                        + File.separator + "oas3_app_multipart_input.json"),
+                "UTF-8");
+        String expectedWithExplicitStyle = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
+                        + File.separator + "oas3_app_withoutExplicitStyle.json"),
+                "UTF-8");
+
+        OASParserOptions options = new OASParserOptions();
+        options.setExplicitStyleAndExplode(Boolean.toString(false));
+
+        API api = Mockito.mock(API.class);
+        when(api.getApiSecurity()).thenReturn("oauth2");
+
+        APIDefinition parser = OASParserUtil.getOASParser(oasDefinition);
+        String response = parser.getOASDefinitionForPublisher(api, oasDefinition, options);
+        Assert.assertEquals(expectedWithExplicitStyle, response);
+    }
+
+    @Test
+    public void testMultipartAPIWithExplicitStyleAndExplode() throws Exception {
+
+        String oasDefinition = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
+                        + File.separator + "oas3_app_multipart_input.json"),
+                "UTF-8");
+        String expectedWithExplicitStyle = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
+                        + File.separator + "oas3_app_withExplicitStyle.json"),
+                "UTF-8");
+
+        OASParserOptions options = new OASParserOptions();
+        options.setExplicitStyleAndExplode(Boolean.toString(true));
+
+        API api = Mockito.mock(API.class);
+        when(api.getApiSecurity()).thenReturn("oauth2");
+
+        APIDefinition parser = OASParserUtil.getOASParser(oasDefinition);
+        String response = parser.getOASDefinitionForPublisher(api, oasDefinition, options);
+        Assert.assertEquals(expectedWithExplicitStyle, response);
     }
 
     private Set<Scope> getAPITestScopes() {

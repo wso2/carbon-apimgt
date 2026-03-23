@@ -473,8 +473,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 // If the existing token type is not available, preserve the existing value by sending null
                 return null;
             } else if (APIConstants.TOKEN_TYPE_JWT.equals(infoInRequest.getTokenType()) &&
-                    (APIConstants.DEFAULT_TOKEN_TYPE.equals(existingTokenType)
-                            || APIConstants.TOKEN_TYPE_OAUTH.equals(existingTokenType))) {
+                    (APIConstants.DEFAULT_TOKEN_TYPE.equalsIgnoreCase(existingTokenType)
+                            || APIConstants.TOKEN_TYPE_OAUTH.equals(existingTokenType)
+                            || APIConstants.TOKEN_TYPE_DEFAULT.equals(existingTokenType))) {
                 // requested token type is JWT and existing token type is either default or oauth then allow to change
                 // the token type to JWT
                 return APIConstants.TOKEN_TYPE_JWT;
@@ -705,6 +706,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 consumerSecretRequest.getParameter(ApplicationConstants.SECRET_EXPIRES_IN);
         if (expiresInObj instanceof Integer) {
             clientSecretRequest.setExpiresIn((Integer) expiresInObj);
+        }
+        if (StringUtils.isNotBlank(consumerSecretRequest.getClientSecret())) {
+            clientSecretRequest.setClientSecret(consumerSecretRequest.getClientSecret());
         }
         try {
             clientSecret = dcrClient.generateNewApplicationSecret(encodedClientId, clientSecretRequest);
