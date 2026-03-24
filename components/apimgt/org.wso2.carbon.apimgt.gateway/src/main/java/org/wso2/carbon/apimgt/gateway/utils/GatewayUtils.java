@@ -2025,15 +2025,6 @@ public class GatewayUtils {
         sendFault(messageContext, status);
     }
 
-    /**
-     * Backward compatible overload kept for callers that don't pass the API type.
-     */
-    public static void handleAuthFailure(org.apache.synapse.MessageContext messageContext, APISecurityException e,
-                                         String authorizationHeader, String apiKeyHeader,
-                                         String authenticatorsChallengeString) {
-        handleAuthFailure(messageContext, e, authorizationHeader, apiKeyHeader, authenticatorsChallengeString, null);
-    }
-
     protected static void sendFault(org.apache.synapse.MessageContext messageContext, int status) {
         Utils.sendFault(messageContext, status);
     }
