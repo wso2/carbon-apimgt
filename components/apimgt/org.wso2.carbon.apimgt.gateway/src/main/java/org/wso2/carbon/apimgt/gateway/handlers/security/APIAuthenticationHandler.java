@@ -465,6 +465,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     log.debug("Skipping authentication for MCP request"
                             + ", method: " + messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
                 }
+                log.info("Processing MCP no-auth request for method: " + messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
                 handleNoAuthentication(messageContext);
                 setAPIParametersToMessageContext(messageContext);
                 return ExtensionListenerUtil.postProcessRequest(messageContext, type);
@@ -726,6 +727,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         try {
             // If this is an MCP API, try to add DCR resource metadata to WWW-Authenticate header
             if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(this.apiType) && this.apiUUID != null) {
+                log.info("Adding DCR resource metadata to WWW-Authenticate header for MCP API: " + this.apiUUID);
                 org.apache.axis2.context.MessageContext axis2MC =
                         ((Axis2MessageContext) messageContext).getAxis2MessageContext();
                 @SuppressWarnings("unchecked")

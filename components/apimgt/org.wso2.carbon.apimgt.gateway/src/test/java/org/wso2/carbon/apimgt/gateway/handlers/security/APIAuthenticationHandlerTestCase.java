@@ -67,6 +67,8 @@ import java.util.TreeMap;
         DataHolder.class, org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.class})
 public class APIAuthenticationHandlerTestCase {
 
+    private static final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(APIAuthenticationHandlerTestCase.class);
+
     private Timer.Context context;
     private SynapseEnvironment synapseEnvironment;
     private MessageContext messageContext;
@@ -268,6 +270,7 @@ public class APIAuthenticationHandlerTestCase {
 
         TreeMap transportHeaders = new TreeMap();
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
+        log.info("Testing MCP no-auth request handling");
 
         Assert.assertTrue(apiAuthenticationHandler.handleRequest(messageContext));
         Mockito.verify(messageContext).setProperty(APIMgtGatewayConstants.API_TYPE, APIConstants.API_TYPE_MCP);
@@ -280,6 +283,8 @@ public class APIAuthenticationHandlerTestCase {
         String apiUUID = "1234-5678";
         apiAuthenticationHandler.setApiUUID(apiUUID);
         apiAuthenticationHandler.init(synapseEnvironment);
+
+        log.info("Testing MCP auth failure handling with DCR endpoint");
 
         PowerMockito.mockStatic(DataHolder.class);
         DataHolder dataHolder = Mockito.mock(DataHolder.class);

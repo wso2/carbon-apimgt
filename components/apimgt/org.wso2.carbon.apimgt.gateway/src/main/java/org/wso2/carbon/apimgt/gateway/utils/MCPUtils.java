@@ -66,6 +66,7 @@ public class MCPUtils {
      * @throws McpException if the request is invalid
      */
     public static boolean validateRequest(McpRequest request) throws McpException {
+        log.debug("Validating MCP request");
         String jsonRpcVersion = request.getJsonRpcVersion();
         if (StringUtils.isEmpty(jsonRpcVersion)) {
             throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
@@ -150,6 +151,10 @@ public class MCPUtils {
                 throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
                         APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing or empty protocolVersion field");
             }
+            log.debug("Protocol version validation successful: {}" + protocolVersion);
+        } else {
+            throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
+                    APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing params field");
         }
     }
 

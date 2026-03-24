@@ -162,7 +162,11 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
 
                 method = request.getMethod();
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_METHOD, method);
-                messageContext.setProperty(MCP_HTTP_METHOD, method);
+                Object incomingHttpMethod = messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
+                Object incomingResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
+                messageContext.setProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY, incomingHttpMethod);
+                messageContext.setProperty(APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE_KEY, incomingResource);
+                log.info("MCP request received with method: " + method);
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY, request);
                 if (headers != null) {
                     messageContext.setProperty(APIMgtGatewayConstants.MCP_SESSION_ID_KEY,
@@ -204,6 +208,7 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                             messageContext.setProperty(MCP_HTTP_METHOD, backendOperation.getVerb());
                             messageContext.setProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY, backendOperation.getVerb());
                             messageContext.setProperty(APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE_KEY, backendOperation.getTarget());
+                            log.debug("Backend operation mapped - method: " + backendOperation.getVerb() + ", target: " + backendOperation.getTarget());
                         }
                     }
                 } else if (StringUtils.equals(method, APIConstants.MCP.METHOD_INITIALIZE)) {
