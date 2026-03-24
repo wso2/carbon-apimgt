@@ -77,7 +77,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.cache.Cache;
 
-import static org.wso2.carbon.apimgt.impl.APIConstants.MCP_HTTP_METHOD;
 
 /**
  * A Validator class to validate JWT tokens in an API request.
@@ -173,6 +172,7 @@ public class JWTValidator {
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
 
         String apiType = (String) synCtx.getProperty(APIMgtGatewayConstants.API_TYPE);
+        if (APIConstants.API_TYPE_MCP.equals(apiType)) {
             Object mcpMethodProperty = synCtx.getProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY);
             if (mcpMethodProperty != null) {
                 httpMethod = mcpMethodProperty.toString();

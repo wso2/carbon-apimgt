@@ -71,7 +71,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
@@ -2006,13 +2005,9 @@ public class GatewayUtils {
                         headers.put(HttpHeaders.WWW_AUTHENTICATE, wwwAuthenticate);
                     }
                 } else {
-                    headers.put(HttpHeaders.WWW_AUTHENTICATE, APIAuthenticationHandler.getAuthenticatorsChallengeString() +
+                    headers.put(HttpHeaders.WWW_AUTHENTICATE, authenticatorsChallengeString +
                             " error=\"invalid_token\"" +
                             ", error_description=\"The provided token is invalid\"");
-                    }
-                } else {
-                    headers.put(HttpHeaders.WWW_AUTHENTICATE,
-                            authenticatorsChallengeString + " error=\"invalid_token\"" + ", error_description=\"The provided token is invalid\"");
                 }
                 axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
             }
@@ -2028,6 +2023,15 @@ public class GatewayUtils {
         }
 
         sendFault(messageContext, status);
+    }
+
+    /**
+     * Backward compatible overload kept for callers that don't pass the API type.
+     */
+    public static void handleAuthFailure(org.apache.synapse.MessageContext messageContext, APISecurityException e,
+                                         String authorizationHeader, String apiKeyHeader,
+                                         String authenticatorsChallengeString) {
+        handleAuthFailure(messageContext, e, authorizationHeader, apiKeyHeader, authenticatorsChallengeString, null);
     }
 
     protected static void sendFault(org.apache.synapse.MessageContext messageContext, int status) {
