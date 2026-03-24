@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -51,6 +52,10 @@ public class WebsocketWSClient {
 			return apiKeyValidationService.validateKeyForHandshake(context, apiVersion, apiKey, tenantDomain,
 					keyManagers);
 		} catch (Exception e) {
+			if (ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage().equalsIgnoreCase(e.getMessage())) {
+				throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+						ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage(), e);
+			}
 			throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
 			                               "Error while accessing backend services for API key validation", e);
 		}

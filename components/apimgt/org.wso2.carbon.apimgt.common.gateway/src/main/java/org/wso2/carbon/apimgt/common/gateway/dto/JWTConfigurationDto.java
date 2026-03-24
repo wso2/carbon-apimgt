@@ -56,6 +56,7 @@ public class JWTConfigurationDto {
     public void setUseKid(boolean useKid) {
         this.useKid = useKid;
     }
+    private boolean continueOnClaimRetrievalFailure = true;
 
     public JWTConfigurationDto(JWTConfigurationDto jwtConfigurationDto) {
 
@@ -70,6 +71,7 @@ public class JWTConfigurationDto {
         this.tokenIssuerDtoMap = jwtConfigurationDto.tokenIssuerDtoMap;
         this.jwtExcludedClaims = jwtConfigurationDto.jwtExcludedClaims;
         this.ttl = jwtConfigurationDto.ttl;
+        this.continueOnClaimRetrievalFailure = jwtConfigurationDto.continueOnClaimRetrievalFailure;
     }
 
     public JWTConfigurationDto() {
@@ -218,4 +220,14 @@ public class JWTConfigurationDto {
     public void setEncodeX5tWithoutPadding(boolean encodeX5tWithoutPadding) {
         isEncodeX5tWithoutPadding = encodeX5tWithoutPadding;
     }
+    public boolean isContinueOnClaimRetrievalFailure() {
+
+        return continueOnClaimRetrievalFailure;
+    }
+
+    public void setContinueOnClaimRetrievalFailure(boolean continueOnClaimRetrievalFailure) {
+
+        this.continueOnClaimRetrievalFailure = continueOnClaimRetrievalFailure;
+    }
+
 }

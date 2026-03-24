@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -55,6 +56,10 @@ public class APIKeyValidatorClient {
                             matchingResource, httpVerb, tenantDomain, keyManagers);
         } catch (APIKeyMgtException | APIManagementException e) {
             log.error("Error while retrieving data from datastore", e);
+            if (ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage().equalsIgnoreCase(e.getMessage())) {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage(), e);
+            }
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error while retrieving data from datastore", e);
         }

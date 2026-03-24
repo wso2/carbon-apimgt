@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.keymgt.handlers;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -143,6 +144,9 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
             return true;
 
         } catch (APIManagementException e) {
+            if (ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.equals(e.getErrorHandler())) {
+                throw new APIKeyMgtException(ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage(), e);
+            }
             log.error("Error occurred while generating JWT. ", e);
         }
 

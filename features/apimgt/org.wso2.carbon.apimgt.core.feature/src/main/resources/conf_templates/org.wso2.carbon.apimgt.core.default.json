@@ -38,6 +38,7 @@
   "apim.jwt.claims_extractor_impl": "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever",
   "apim.jwt.gateway_generator.impl":"org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl",
   "apim.jwt.encode_x5t_without_padding": false,
+  "apim.jwt.continue_on_claim_retrieval_failure": true,
   "apim.jwt.enable_tenant_based_signing": false,
   "apim.jwt.gateway_generator.enable_claim_retrieval": false,
   "apim.hashing.hashing_algorithm": "SHA-256",

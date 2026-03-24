@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
@@ -53,6 +54,9 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
             return client.getAPIKeyData(context, apiVersion, apiKey, requiredAuthenticationLevel,
                     matchingResource, httpVerb, tenantDomain, keyManagers);
         } catch (APISecurityException ex) {
+            if (ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage().equalsIgnoreCase(ex.getMessage())) {
+                throw ex;
+            }
             throw new APISecurityException(ex.getErrorCode(),
                     "Resource forbidden", ex);
         } catch (Exception e) {

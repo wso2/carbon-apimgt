@@ -603,7 +603,8 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,
             "Invalid Endpoint Security credentials. %s", false),
     INVALID_TENANT_CONFIG(902001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
-
+    BACKEND_JWT_GENERATION_FAILED(900426, "Backend JWT Generation Failed", 401,
+            "Error while generating Backend JWT"),
     //Operation Policies related error codes
     INVALID_OPERATION_POLICY(902005, "Cannot find the selected api policy", 400,
             "Selected api policy is not found"),

@@ -27,6 +27,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.common.gateway.constants.GraphQLConstants;
@@ -400,6 +401,10 @@ public class JWTValidator {
                                 }
                             } catch (APIManagementException e) {
                                 log.error("Error while generating MCP upstream token", e);
+                                if (ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.equals(e.getErrorHandler())) {
+                                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                            ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage(), e);
+                                }
                                 throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                                         APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
                             }
@@ -444,7 +449,8 @@ public class JWTValidator {
      * @param matchedAPI    API used to extract referenced APIs
      * @return populated {@link JwtTokenInfoDTO}
      */
-    private JwtTokenInfoDTO getJwtTokenInfoDTO(SignedJWTInfo signedJWTInfo, JWTInfoDto jwtInfoDto, API matchedAPI) {
+    private JwtTokenInfoDTO getJwtTokenInfoDTO(SignedJWTInfo signedJWTInfo, JWTInfoDto jwtInfoDto, API matchedAPI)
+            throws APIManagementException {
 
         if (log.isDebugEnabled()) {
             log.debug("Creating MCP upstream token for API with context: " + jwtInfoDto.getApiContext()
@@ -609,6 +615,12 @@ public class JWTValidator {
                     log.error("Error while Generating Backend JWT", e);
                     throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                             APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+                } catch (APIManagementException e) {
+                    log.error("Error while including user store claims", e);
+                    if (ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.equals(e.getErrorHandler())) {
+                        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage(), e);
+                    }
                 }
             }
         } else {
@@ -619,12 +631,18 @@ public class JWTValidator {
                 log.error("Error while Generating Backend JWT", e);
                 throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                         APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+            } catch (APIManagementException e) {
+                log.error("Error while including user store claims", e);
+                if (ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.equals(e.getErrorHandler())) {
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                            ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage(), e);
+                }
             }
         }
         return endUserToken;
     }
 
-    private void includeUserStoreClaimsIntoClaims(JWTInfoDto jwtInfoDto) {
+    private void includeUserStoreClaimsIntoClaims(JWTInfoDto jwtInfoDto) throws APIManagementException {
 
         JWTInfoDto localJWTInfoDto = new JWTInfoDto(jwtInfoDto);
         Map<String, String> userClaimsFromKeyManager = getUserClaimsFromKeyManager(localJWTInfoDto);
@@ -1063,7 +1081,7 @@ public class JWTValidator {
 
         return CacheProvider.getGatewayJWTTokenCache();
     }
-    private Map<String, String> getUserClaimsFromKeyManager(JWTInfoDto jwtInfoDto) {
+    private Map<String, String> getUserClaimsFromKeyManager(JWTInfoDto jwtInfoDto) throws APIManagementException {
 
         if (jwtConfigurationDto.isEnableUserClaimRetrievalFromUserStore()) {
             String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -1085,7 +1103,12 @@ public class JWTValidator {
                     try {
                         return keyManagerInstance.getUserClaims(jwtInfoDto.getEndUser(), properties);
                     } catch (APIManagementException e) {
-                        log.error("Error while retrieving User claims from Key Manager ", e);
+                        if (jwtConfigurationDto.isContinueOnClaimRetrievalFailure()) {
+                            log.error("Error while retrieving User claims from Key Manager ", e);
+                        } else {
+                            throw new APIManagementException("Error while getting user info", e,
+                                    ExceptionCodes.BACKEND_JWT_GENERATION_FAILED);
+                        }
                     }
                 }
             }

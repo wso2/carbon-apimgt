@@ -2206,6 +2206,13 @@ public class APIManagerConfiguration {
                             "Defaulting to false.");
                 }
             }
+            OMElement continueOnClaimRetrievalFailureElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.CONTINUE_ON_CLAIM_RETRIEVAL_FAILURE));
+            if (continueOnClaimRetrievalFailureElement != null && StringUtils.isNotBlank(
+                    continueOnClaimRetrievalFailureElement.getText())) {
+                jwtConfigurationDto.setContinueOnClaimRetrievalFailure(
+                        Boolean.parseBoolean(continueOnClaimRetrievalFailureElement.getText()));
+            }
             OMElement enableTenantBaseSigningElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_TENANT_BASE_SIGNING));
             if (enableTenantBaseSigningElement != null) {
