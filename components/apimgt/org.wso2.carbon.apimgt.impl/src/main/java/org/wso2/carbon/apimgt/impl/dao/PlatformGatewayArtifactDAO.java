@@ -34,9 +34,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * DAO for platform gateway revision-scoped artifact storage using AM_GW_API_ARTIFACTS.
+ * DAO for platform gateway revision-scoped artifact storage using a dedicated platform cache table.
  * Resolution (apiId, gateway name) → REVISION_UUID uses AM_DEPLOYMENT_REVISION_MAPPING and AM_REVISION (main DB).
- * Artifact read/write uses AM_GW_API_ARTIFACTS (artifact synchronizer DB).
+ * Artifact read/write uses AM_GW_PLATFORM_API_ARTIFACTS (artifact synchronizer DB).
  */
 public class PlatformGatewayArtifactDAO {
 
@@ -81,7 +81,7 @@ public class PlatformGatewayArtifactDAO {
     }
 
     /**
-     * Get stored revision artifact (YAML) from AM_GW_API_ARTIFACTS.
+     * Get stored revision artifact (YAML) from the dedicated platform cache table.
      *
      * @param apiId         API ID (UUID)
      * @param revisionId    REVISION_UUID
@@ -110,7 +110,7 @@ public class PlatformGatewayArtifactDAO {
     }
 
     /**
-     * Save or replace platform revision artifact in AM_GW_API_ARTIFACTS.
+     * Save or replace platform revision artifact in the dedicated platform cache table.
      * INSERT or UPDATE one row (API_ID, REVISION_ID, ARTIFACT). Uses artifact synchronizer connection.
      *
      * @param apiId         API ID (UUID)
@@ -131,14 +131,16 @@ public class PlatformGatewayArtifactDAO {
         Timestamp now = new Timestamp(System.currentTimeMillis());
         byte[] artifactBytes = yamlContent.getBytes(java.nio.charset.StandardCharsets.UTF_8);
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
-            try (PreparedStatement ps = connection.prepareStatement(SQLConstants.UPDATE_API_ARTIFACT)) {
+            try (PreparedStatement ps = connection.prepareStatement(
+                    SQLConstants.PlatformGatewayArtifactSQLConstants.UPDATE_REVISION_ARTIFACT_SQL)) {
                 ps.setBytes(1, artifactBytes);
                 ps.setTimestamp(2, now);
                 ps.setString(3, apiId.trim());
                 ps.setString(4, revisionId.trim());
                 int updated = ps.executeUpdate();
                 if (updated == 0) {
-                    try (PreparedStatement insertPs = connection.prepareStatement(SQLConstants.ADD_GW_API_ARTIFACT)) {
+                    try (PreparedStatement insertPs = connection.prepareStatement(
+                            SQLConstants.PlatformGatewayArtifactSQLConstants.INSERT_REVISION_ARTIFACT_SQL)) {
                         insertPs.setBytes(1, artifactBytes);
                         insertPs.setTimestamp(2, now);
                         insertPs.setString(3, apiId.trim());
@@ -162,7 +164,7 @@ public class PlatformGatewayArtifactDAO {
         }
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement ps = connection.prepareStatement(
-                     SQLConstants.DELETE_FROM_AM_GW_API_ARTIFACTS_WHERE_API_ID_AND_REVISION_ID)) {
+                     SQLConstants.PlatformGatewayArtifactSQLConstants.DELETE_REVISION_ARTIFACT_SQL)) {
             ps.setString(1, apiId.trim());
             ps.setString(2, revisionId.trim());
             ps.executeUpdate();
@@ -173,7 +175,7 @@ public class PlatformGatewayArtifactDAO {
     }
 
     /**
-     * Delete all artifact rows for an API from AM_GW_API_ARTIFACTS (e.g. on API delete).
+     * Delete all artifact rows for an API from the dedicated platform cache table (e.g. on API delete).
      */
     public void deleteAllRevisionArtifactsForApi(String apiId) throws APIManagementException {
         if (apiId == null) {
@@ -181,7 +183,7 @@ public class PlatformGatewayArtifactDAO {
         }
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement ps = connection.prepareStatement(
-                     SQLConstants.DELETE_FROM_AM_GW_API_ARTIFACTS_BY_API_ID)) {
+                     SQLConstants.PlatformGatewayArtifactSQLConstants.DELETE_REVISION_ARTIFACTS_BY_API_SQL)) {
             ps.setString(1, apiId.trim());
             ps.executeUpdate();
         } catch (SQLException e) {

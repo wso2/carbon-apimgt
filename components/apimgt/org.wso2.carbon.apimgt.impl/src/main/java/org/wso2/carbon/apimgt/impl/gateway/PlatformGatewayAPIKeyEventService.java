@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.impl.gateway;
 
 /**
- * Service to broadcast API key lifecycle events to connected platform gateways via WebSocket.
+ * Service to broadcast API key lifecycle events to platform gateways via WebSocket.
  * When an opaque API key is created, updated, or revoked (e.g. from DevPortal/Admin or internal API),
  * call the corresponding method so connected API Platform gateways can update their key cache.
  * <p>
@@ -29,9 +29,11 @@ package org.wso2.carbon.apimgt.impl.gateway;
 public interface PlatformGatewayAPIKeyEventService {
 
     /**
-     * Broadcast apikey.created to all connected platform gateways.
+     * Broadcast apikey.created to platform gateways in the given organization.
      *
+     * @param organizationId    organization id used to resolve target platform gateways (required)
      * @param apiId             API UUID (required)
+     * @param keyUuid           Optional control-plane API key UUID
      * @param apiKey            Plain text API key (required)
      * @param name              URL-safe key identifier, 3-63 chars (required)
      * @param operations        Comma-separated or wildcard (required)
@@ -42,14 +44,16 @@ public interface PlatformGatewayAPIKeyEventService {
      * @param displayName       Optional display name
      * @param userId            Optional user id
      */
-    void broadcastAPIKeyCreated(String apiId, String apiKey, String name, String operations,
-                                String externalRefId, String expiresAt, Integer expiresInDuration,
+    void broadcastAPIKeyCreated(String organizationId, String apiId, String keyUuid, String apiKey, String name,
+                                String operations, String externalRefId, String expiresAt, Integer expiresInDuration,
                                 String expiresInUnit, String displayName, String userId);
 
     /**
-     * Broadcast apikey.updated to all connected platform gateways.
+     * Broadcast apikey.updated to platform gateways in the given organization.
      *
+     * @param organizationId    organization id used to resolve target platform gateways (required)
      * @param apiId             API UUID (required)
+     * @param keyUuid           Optional control-plane API key UUID
      * @param keyName           Key name (required)
      * @param apiKey            Plain text API key (required)
      * @param externalRefId     Optional
@@ -60,16 +64,17 @@ public interface PlatformGatewayAPIKeyEventService {
      * @param expiresInUnit     Optional
      * @param userId            Optional
      */
-    void broadcastAPIKeyUpdated(String apiId, String keyName, String apiKey, String externalRefId,
-                                String operations, String displayName, String expiresAt,
+    void broadcastAPIKeyUpdated(String organizationId, String apiId, String keyUuid, String keyName, String apiKey,
+                                String externalRefId, String operations, String displayName, String expiresAt,
                                 Integer expiresInDuration, String expiresInUnit, String userId);
 
     /**
-     * Broadcast apikey.revoked to all connected platform gateways.
+     * Broadcast apikey.revoked to platform gateways in the given organization.
      *
+     * @param organizationId organization id used to resolve target platform gateways (required)
      * @param apiId   API UUID (required)
      * @param keyName Key name (required)
      * @param userId Optional user id
      */
-    void broadcastAPIKeyRevoked(String apiId, String keyName, String userId);
+    void broadcastAPIKeyRevoked(String organizationId, String apiId, String keyName, String userId);
 }

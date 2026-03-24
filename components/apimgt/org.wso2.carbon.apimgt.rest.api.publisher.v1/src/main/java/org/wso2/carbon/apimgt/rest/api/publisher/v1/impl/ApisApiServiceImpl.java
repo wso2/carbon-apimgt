@@ -3922,7 +3922,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
         if (eventService != null) {
             try {
-                eventService.broadcastAPIKeyCreated(apiId, token, "internal", "*",
+                eventService.broadcastAPIKeyCreated(organization, apiId, null, token, "internal", "*",
                         null, null, null, null, null, userName);
                 log.info("Broadcast apikey.created to platform gateways for apiId=" + apiId);
             } catch (Exception e) {

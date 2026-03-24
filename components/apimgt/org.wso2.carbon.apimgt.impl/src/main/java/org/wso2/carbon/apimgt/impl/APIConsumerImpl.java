@@ -630,14 +630,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         sendAPIKeyInfoEvent(apiKeyHash,null, api, calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(),
                 validityPeriod), keyType, keyName, props);
 
-        // Notify connected platform gateways. Use apikey.updated so the platform upserts (create if missing, update if exists).
+        // Notify platform gateways about the newly created API-bound opaque API key.
         PlatformGatewayAPIKeyEventService eventService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
         if (eventService != null) {
             try {
                 String apiIdForGateway = api.getUUID();
                 if (log.isDebugEnabled()) {
-                    log.debug("Broadcasting API-bound opaque API key update to platform gateways for API: "
+                    log.debug("Broadcasting API-bound opaque API key create to platform gateways for API: "
                             + apiIdForGateway);
                 }
                 String keyNameForGateway = keyName.toLowerCase(java.util.Locale.ROOT);
@@ -648,16 +648,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         expiresAtIso = java.time.Instant.ofEpochMilli(expMs).toString();
                     }
                 }
-                eventService.broadcastAPIKeyUpdated(
+                eventService.broadcastAPIKeyCreated(
+                        api.getOrganization(),
                         apiIdForGateway,
-                        keyNameForGateway,
+                        apiKeyInfoDTO.getKeyId(),
                         apiKey,
-                        null,
-                        "*",
                         keyNameForGateway,
+                        "*",
+                        null,
                         expiresAtIso,
                         null,
                         null,
+                        keyNameForGateway,
                         userName);
             } catch (Exception e) {
                 if (log.isDebugEnabled()) {
@@ -4172,7 +4174,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
             if (eventService != null) {
                 try {
-                    eventService.broadcastAPIKeyRevoked(apiId, keyName, userId);
+                    APIInfo apiInfo = getAPIInfoByUUID(apiId);
+                    String organization = apiInfo != null ? apiInfo.getOrganization() : null;
+                    if (StringUtils.isNotBlank(organization)) {
+                        eventService.broadcastAPIKeyRevoked(organization, apiId, keyName, userId);
+                    }
                 } catch (Exception e) {
                     if (log.isDebugEnabled()) {
                         log.debug("Failed to broadcast apikey.revoked to platform gateways: " + e.getMessage());
@@ -4222,11 +4228,12 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 String keyNameGw = apiKeyInfo.getKeyName().toLowerCase(java.util.Locale.ROOT);
                 if (StringUtils.isNotBlank(apiKeyInfo.getApiUUId())) {
                     API apiForHandle = getLightweightAPIByUUID(apiKeyInfo.getApiUUId(), tenantDomain);
-                    String handle = apiForHandle != null
-                            ? PlatformGatewayAPIYamlConverter.getPlatformGatewayHandleForAPI(apiForHandle) : null;
-                    String apiIdForRevoke = handle != null ? handle : apiKeyInfo.getApiUUId();
-                    eventService.broadcastAPIKeyRevoked(
-                            apiIdForRevoke, keyNameGw, apiKeyInfo.getAuthUser());
+                    String apiIdForRevoke = apiForHandle != null ? apiForHandle.getUUID() : apiKeyInfo.getApiUUId();
+                    String organization = resolveOrganizationForPlatformGatewayEvents(null, apiForHandle);
+                    if (StringUtils.isNotBlank(organization)) {
+                        eventService.broadcastAPIKeyRevoked(
+                                organization, apiIdForRevoke, keyNameGw, apiKeyInfo.getAuthUser());
+                    }
                 } else if (StringUtils.isNotBlank(apiKeyInfo.getApplicationId())) {
                     Application app = apiMgtDAO.getApplicationByUUID(apiKeyInfo.getApplicationId());
                     broadcastApplicationScopedOpaqueApiKeyRevokedToPlatformGateways(app, keyNameGw,
@@ -4366,8 +4373,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
 
     /**
-     * Application-level opaque keys are valid for subscribed APIs. Use apikey.updated so the platform
-     * upserts (create if missing, update if same name already exists).
+     * Application-level opaque keys are valid for subscribed APIs.
      */
     private void broadcastApplicationScopedOpaqueApiKeyCreatedToPlatformGateways(Application application, String apiKey,
             String keyName, long validityPeriod, long createdTimeMillis, String userName) {
@@ -4386,6 +4392,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 }
                 return;
             }
+            String organization = resolveOrganizationForPlatformGatewayEvents(application, null);
+            if (StringUtils.isBlank(organization)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping application-scoped platform gateway API key broadcast: organization could "
+                            + "not be resolved for application " + application.getName());
+                }
+                return;
+            }
             String keyNameForGateway = keyName.toLowerCase(java.util.Locale.ROOT);
             String expiresAtIso = null;
             if (validityPeriod > 0) {
@@ -4395,8 +4409,19 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 }
             }
             for (String apiId : apiIds) {
-                eventService.broadcastAPIKeyUpdated(apiId, keyNameForGateway, apiKey, null, "*",
-                        keyNameForGateway, expiresAtIso, null, null, userName);
+                eventService.broadcastAPIKeyCreated(
+                        organization,
+                        apiId,
+                        null,
+                        apiKey,
+                        keyNameForGateway,
+                        "*",
+                        null,
+                        expiresAtIso,
+                        null,
+                        null,
+                        keyNameForGateway,
+                        userName);
             }
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
@@ -4413,9 +4438,17 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         if (application == null || StringUtils.isBlank(keyNameGateway)) {
             return;
         }
+        String organization = resolveOrganizationForPlatformGatewayEvents(application, null);
+        if (StringUtils.isBlank(organization)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping application-scoped platform gateway API key revoke: organization could not be "
+                        + "resolved for application " + application.getName());
+            }
+            return;
+        }
         Set<String> apiIds = getSubscribedPlatformGatewayApiIds(application);
         for (String apiId : apiIds) {
-            eventService.broadcastAPIKeyRevoked(apiId, keyNameGateway, userId);
+            eventService.broadcastAPIKeyRevoked(organization, apiId, keyNameGateway, userId);
         }
     }
 
@@ -4439,6 +4472,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 }
                 return;
             }
+            String organization = resolveOrganizationForPlatformGatewayEvents(application, null);
+            if (StringUtils.isBlank(organization)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping application-scoped platform gateway apikey.updated: organization could not "
+                            + "be resolved for application " + application.getName());
+                }
+                return;
+            }
             String keyNameForGateway = keyName.toLowerCase(java.util.Locale.ROOT);
             String expiresAtIso = null;
             if (validityPeriod > 0) {
@@ -4449,7 +4490,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
             for (String apiId : apiIds) {
                 eventService.broadcastAPIKeyUpdated(
+                        organization,
                         apiId,
+                        null,
                         keyNameForGateway,
                         apiKey,
                         null,
@@ -4542,9 +4585,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
         if (eventService != null && api != null) {
             try {
-                String apiIdForGateway = PlatformGatewayAPIYamlConverter.getPlatformGatewayHandleForAPI(api);
-                if (apiIdForGateway == null) {
-                    apiIdForGateway = apiUUId;
+                String apiIdForGateway = api.getUUID() != null ? api.getUUID() : apiUUId;
+                String resolvedOrganization = resolveOrganizationForPlatformGatewayEvents(application, api);
+                if (StringUtils.isBlank(resolvedOrganization)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Skipping API-bound platform gateway apikey.updated: organization could not be "
+                                + "resolved for API " + apiIdForGateway);
+                    }
+                    return regeneratedApiKeyInfo;
                 }
                 String keyNameForGateway = apiKeyInfo.getKeyName().toLowerCase(java.util.Locale.ROOT);
                 String expiresAtIso = null;
@@ -4555,7 +4603,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     }
                 }
                 eventService.broadcastAPIKeyUpdated(
+                        resolvedOrganization,
                         apiIdForGateway,
+                        apiKeyInfoDTO.getKeyId(),
                         keyNameForGateway,
                         apiKey,
                         null,
@@ -5003,6 +5053,16 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         } catch (RuntimeException e) {
             return null;
         }
+    }
+
+    private String resolveOrganizationForPlatformGatewayEvents(Application application, API api) {
+        if (application != null && StringUtils.isNotBlank(application.getOrganization())) {
+            return application.getOrganization();
+        }
+        if (api != null && StringUtils.isNotBlank(api.getOrganization())) {
+            return api.getOrganization();
+        }
+        return null;
     }
 
     private String getBasePath(String apiTenantDomain, String basePath) throws APIManagementException {

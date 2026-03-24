@@ -558,6 +558,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         //Validate Transports
         validateAndSetTransports(api);
+        // For Platform Gateway APIs, derive apiSecurity from hub policies
+        deriveApiSecurityFromHubPolicies(api);
         validateAndSetAPISecurity(api);
 
         if (api.getAdditionalProperties() != null) {
@@ -1027,6 +1029,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         //Validate Transports
         validateAndSetTransports(api);
+        // For Platform Gateway APIs, derive apiSecurity from hub policies
+        deriveApiSecurityFromHubPolicies(api);
         validateAndSetAPISecurity(api);
         validateKeyManagers(api, existingAPI.getKeyManagers());
 
@@ -1094,6 +1098,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         //Validate Transports
         validateAndSetTransports(api);
+        // For Platform Gateway APIs, derive apiSecurity from hub policies
+        deriveApiSecurityFromHubPolicies(api);
         validateAndSetAPISecurity(api);
         try {
             api.setCreatedTime(existingAPI.getCreatedTime());
@@ -2285,6 +2291,84 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 && APIConstants.WSO2_API_PLATFORM_GATEWAY.equalsIgnoreCase(api.getGatewayType());
     }
 
+    /**
+     * For Platform Gateway APIs, derives apiSecurity from hub policies at both API-level and operation-level.
+     * This ensures DevPortal functionalities work correctly by populating apiSecurity from the
+     * attached authentication policies.
+     * Maps: api-key-auth → api_key, basic-auth → basic_auth, jwt-auth → oauth2
+     *
+     * @param api The API object to process
+     */
+    private void deriveApiSecurityFromHubPolicies(API api) {
+        if (!isPlatformGatewayApi(api)) {
+            return;
+        }
+
+        Set<String> securitySchemes = new LinkedHashSet<>();
+        boolean hasApiKeyPolicy = false;
+        boolean hasJwtPolicy = false;
+
+        // Collect from API-level hub policies
+        List<OperationPolicy> apiLevelPolicies = api.getHubPolicies();
+        if (apiLevelPolicies != null) {
+            for (OperationPolicy policy : apiLevelPolicies) {
+                String policyName = policy.getPolicyName();
+                collectSecuritySchemeFromPolicy(policyName, securitySchemes);
+                if ("api-key-auth".equalsIgnoreCase(policyName)) {
+                    hasApiKeyPolicy = true;
+                } else if ("jwt-auth".equalsIgnoreCase(policyName)) {
+                    hasJwtPolicy = true;
+                }
+            }
+        }
+
+        // Collect from operation-level (URITemplate) hub policies
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        if (uriTemplates != null) {
+            for (URITemplate template : uriTemplates) {
+                List<OperationPolicy> opPolicies = template.getHubPolicies();
+                if (opPolicies != null) {
+                    for (OperationPolicy policy : opPolicies) {
+                        String policyName = policy.getPolicyName();
+                        collectSecuritySchemeFromPolicy(policyName, securitySchemes);
+                        if ("api-key-auth".equalsIgnoreCase(policyName)) {
+                            hasApiKeyPolicy = true;
+                        } else if ("jwt-auth".equalsIgnoreCase(policyName)) {
+                            hasJwtPolicy = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Set derived apiSecurity if any auth policies found
+        if (!securitySchemes.isEmpty()) {
+            api.setApiSecurity(String.join(",", securitySchemes));
+
+            if (hasApiKeyPolicy && api.getApiKeyHeader() == null) {
+                api.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+            }
+            if (hasJwtPolicy && api.getAuthorizationHeader() == null) {
+                api.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
+            }
+        }
+    }
+
+    /**
+     * Maps hub policy name to API security scheme and adds to the collection.
+     *
+     * @param policyName      The hub policy name
+     * @param securitySchemes The set to add the mapped security scheme to
+     */
+    private void collectSecuritySchemeFromPolicy(String policyName, Set<String> securitySchemes) {
+        if ("api-key-auth".equalsIgnoreCase(policyName)) {
+            securitySchemes.add(APIConstants.API_SECURITY_API_KEY);
+        } else if ("basic-auth".equalsIgnoreCase(policyName)) {
+            securitySchemes.add(APIConstants.API_SECURITY_BASIC_AUTH);
+        } else if ("jwt-auth".equalsIgnoreCase(policyName)) {
+            securitySchemes.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+        }
+    }
 
     @Override
     public boolean validateAppliedPolicyWithSpecification(OperationPolicySpecification policySpecification,
@@ -7586,11 +7670,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 targetEnvironments, gatewayVhosts, deploymentsToRemove);
                 try {
                     DeploymentTargets targets = DeploymentModeResolver.resolve(organization, targetEnvironments);
+                    if (!targets.getPlatformGatewayIds().isEmpty()) {
+                        warmPlatformRevisionArtifactCache(apiId, revisionUUID);
+                    }
                     log.info("Deploying API revision: " + revisionUUID + " to " + targetEnvironments.size()
                             + " environments");
                     gatewayManager.deployToGateway(api, organization, targets.getSynapseLabels(),
                             targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds(),
                             revisionUUID);
+                    logPlatformGatewayDeploymentAudit(api, revisionUUID, targets.getPlatformGatewayIds(),
+                            targetEnvironments, APIConstants.AuditLogConstants.DEPLOY);
                 } catch (RuntimeException e) {
                     if (e instanceof FaultyGatewayDeploymentException) {
                         Set<String> environments = ((FaultyGatewayDeploymentException) e).getEnvironments();
@@ -7850,11 +7939,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (WorkflowException ex) {
             log.warn("Unable to delete Revision Deployment Workflow for revision: " + apiRevisionId, ex);
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Undeploying API revision: " + apiRevision.getRevisionUUID() + " from gateways on delete/retire");
-        }
         try {
+            DeploymentTargets targets = DeploymentModeResolver.resolve(organization, environmentsToRemove);
             removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet(), onDeleteOrRetire);
+            logPlatformGatewayDeploymentAudit(api, apiRevisionId, targets.getPlatformGatewayIds(),
+                    environmentsToRemove, APIConstants.AuditLogConstants.UNDEPLOY);
         } catch (RuntimeException e) {
             if (e instanceof FaultyGatewayDeploymentException) {
                 Set<String> environments = ((FaultyGatewayDeploymentException) e).getEnvironments();
@@ -7976,6 +8065,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.deleteAllAPIMetadataRevision(apiId, apiRevisionId);
         apiMgtDAO.deleteAPIPrimaryEndpointMappingsByRevision(apiId, apiRevisionId);
         apiMgtDAO.deleteAIConfigurationRevision(apiRevision.getRevisionUUID());
+        PlatformGatewayArtifactService artifactService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
+        if (artifactService != null) {
+            artifactService.deleteRevisionArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+        }
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {
             try {
@@ -8038,6 +8132,36 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
         }
         return revisionUUID;
+    }
+
+    private void warmPlatformRevisionArtifactCache(String apiId, String revisionUUID) throws APIManagementException {
+        PlatformGatewayArtifactService artifactService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
+        if (artifactService == null || StringUtils.isBlank(apiId) || StringUtils.isBlank(revisionUUID)) {
+            return;
+        }
+        artifactService.getStoredRevisionArtifact(apiId, revisionUUID);
+    }
+
+    private void logPlatformGatewayDeploymentAudit(API api, String revisionUUID, Set<String> platformGatewayIds,
+                                                   Set<String> environments, String action) {
+        if (api == null || platformGatewayIds == null || platformGatewayIds.isEmpty()) {
+            return;
+        }
+        JSONObject apiLogObject = new JSONObject();
+        apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+        apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+        apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+        apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+        apiLogObject.put(APIConstants.AuditLogConstants.API_ID, api.getUuid());
+        if (StringUtils.isNotBlank(revisionUUID)) {
+            apiLogObject.put("revisionId", revisionUUID);
+        }
+        apiLogObject.put("platformGatewayIds", new ArrayList<>(platformGatewayIds));
+        if (environments != null && !environments.isEmpty()) {
+            apiLogObject.put("environments", new ArrayList<>(environments));
+        }
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(), action, this.username);
     }
 
     @Override

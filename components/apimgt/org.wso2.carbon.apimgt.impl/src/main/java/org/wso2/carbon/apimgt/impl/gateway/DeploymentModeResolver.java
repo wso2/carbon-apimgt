@@ -97,11 +97,6 @@ public final class DeploymentModeResolver {
             }
             synapseLabels.add(trimmed);
         }
-
-        if (log.isDebugEnabled()) {
-            log.debug("Resolved " + synapseLabels.size() + " Synapse labels and " + platformGatewayIds.size()
-                    + " platform gateway IDs for organization: " + organization);
-        }
         return new DeploymentTargets(synapseLabels, platformGatewayIds);
     }
 

@@ -16211,7 +16211,12 @@ public class ApiMgtDAO {
     public Environment addEnvironment(String tenantDomain, Environment environment) throws APIManagementException {
 
         // Use provided UUID when set (e.g. platform gateways use gateway id as environment UUID); otherwise generate.
-        String uuid = StringUtils.isNotBlank(environment.getUuid()) ? environment.getUuid() : UUID.randomUUID().toString();
+        String uuid;
+        if (environment.getGatewayType().equals(APIConstants.WSO2_API_PLATFORM_GATEWAY)) {
+            uuid = StringUtils.isNotBlank(environment.getUuid()) ? environment.getUuid() : UUID.randomUUID().toString();
+        } else {
+            uuid = UUID.randomUUID().toString();
+        }
         environment.setUuid(uuid);
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {

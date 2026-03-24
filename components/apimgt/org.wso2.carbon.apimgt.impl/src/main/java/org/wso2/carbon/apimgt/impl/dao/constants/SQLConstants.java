@@ -5402,16 +5402,27 @@ public class SQLConstants {
                 "DELETE FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ? AND ORGANIZATION = ?";
     }
 
-    /** SQL for platform gateway revision-scoped artifact (AM_GW_API_ARTIFACTS) and revision resolution. */
+    /** SQL for platform gateway revision-scoped artifact cache and revision resolution. */
     public static class PlatformGatewayArtifactSQLConstants {
+        public static final String PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE = "AM_GW_PLATFORM_API_ARTIFACTS";
         /** Resolve (apiId, gateway name) to REVISION_UUID via AM_DEPLOYMENT_REVISION_MAPPING join AM_REVISION. */
         public static final String SELECT_REVISION_UUID_BY_API_AND_GATEWAY_NAME =
                 "SELECT drm.REVISION_UUID FROM AM_DEPLOYMENT_REVISION_MAPPING drm "
                         + "INNER JOIN AM_REVISION r ON drm.REVISION_UUID = r.REVISION_UUID "
                         + "WHERE r.API_UUID = ? AND drm.NAME = ?";
-        /** Get platform revision artifact (YAML bytes) from AM_GW_API_ARTIFACTS. */
+        /** Get platform revision artifact (YAML bytes) from the dedicated platform cache table. */
         public static final String SELECT_REVISION_ARTIFACT_SQL =
-                "SELECT ARTIFACT FROM AM_GW_API_ARTIFACTS WHERE API_ID = ? AND REVISION_ID = ?";
+                "SELECT ARTIFACT FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE + " WHERE API_ID = ? AND REVISION_ID = ?";
+        public static final String UPDATE_REVISION_ARTIFACT_SQL =
+                "UPDATE " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE + " SET ARTIFACT = ?, TIME_STAMP = ? "
+                        + "WHERE API_ID = ? AND REVISION_ID = ?";
+        public static final String INSERT_REVISION_ARTIFACT_SQL =
+                "INSERT INTO " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE
+                        + " (ARTIFACT, TIME_STAMP, API_ID, REVISION_ID) VALUES (?, ?, ?, ?)";
+        public static final String DELETE_REVISION_ARTIFACT_SQL =
+                "DELETE FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE + " WHERE API_ID = ? AND REVISION_ID = ?";
+        public static final String DELETE_REVISION_ARTIFACTS_BY_API_SQL =
+                "DELETE FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE + " WHERE API_ID = ?";
         /** List all deployments (API_UUID, REVISION_UUID, DEPLOYED_TIME) for a gateway by name. */
         public static final String SELECT_DEPLOYMENTS_BY_GATEWAY_NAME =
                 "SELECT r.API_UUID, drm.REVISION_UUID, drm.DEPLOYED_TIME FROM AM_DEPLOYMENT_REVISION_MAPPING drm "

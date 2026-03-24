@@ -22,8 +22,8 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.PlatformGatewayArtifactValidationResult;
 
 /**
- * Service for API Platform Gateway artifact handling: resolve revision for gateway, build platform api.yaml on
- * demand, convert/validate for UI.
+ * Service for API Platform Gateway artifact handling: resolve revision for gateway, read/write cached revision
+ * artifacts in the dedicated platform cache table, and convert/validate for UI.
  */
 public interface PlatformGatewayArtifactService {
 
@@ -37,7 +37,7 @@ public interface PlatformGatewayArtifactService {
     String getRevisionUuidByApiAndGatewayName(String apiId, String gatewayName) throws APIManagementException;
 
     /**
-     * Build platform api.yaml for a revision from the API model (generated on demand).
+     * Get platform api.yaml for a revision from the cache, or build and store it on cache miss.
      *
      * @param apiId      API UUID
      * @param revisionId REVISION_UUID
@@ -46,7 +46,7 @@ public interface PlatformGatewayArtifactService {
     String getStoredRevisionArtifact(String apiId, String revisionId) throws APIManagementException;
 
     /**
-     * No longer persists to AM_GW_API_ARTIFACTS; retained for API compatibility. Arguments are still validated.
+     * Save or replace a cached revision artifact row in the dedicated platform cache table.
      */
     void saveRevisionArtifact(String apiId, String revisionId, String yamlContent) throws APIManagementException;
 
@@ -56,7 +56,7 @@ public interface PlatformGatewayArtifactService {
     void deleteRevisionArtifact(String apiId, String revisionId) throws APIManagementException;
 
     /**
-     * Delete all artifact rows for an API from AM_GW_API_ARTIFACTS. Call on API delete.
+     * Delete all artifact rows for an API from the dedicated platform cache table. Call on API delete.
      *
      * @param apiId API UUID
      */

@@ -21,10 +21,7 @@ package org.wso2.carbon.apimgt.internal.service.websocket;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.PlatformGatewayDeploymentEventService;
-import org.wso2.carbon.apimgt.api.PlatformGatewayService;
-import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayDeploymentDispatcher;
 import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayEventEnvelopeUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -40,7 +37,7 @@ import java.util.Set;
  * Pushes deploy/undeploy events to connected platform gateways via WebSocket.
  * Message format is aligned with API Platform (api-platform gateway-controller) so the same
  * gateway binary can work with on-prem APIM: type "api.deployed" / "api.undeployed" / "api.deleted"
- * with nested payload (apiId, deploymentId, vhost, etc.) and timestamp, correlationId.
+ * with nested payload and timestamp, correlationId.
  * api.undeployed = revision undeployed (config preserved). api.deleted = API removed from publisher (config removed).
  */
 public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGatewayDeploymentDispatcher {
@@ -51,20 +48,13 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
     public void dispatchDeploy(DeployAPIInGatewayEvent event, Set<String> platformGatewayIds) {
         log.info("Dispatching API deploy event for API: " + event.getName() + " to " + platformGatewayIds.size()
                 + " platform gateways");
-        if (log.isDebugEnabled()) {
-            log.debug("Dispatching deploy to " + platformGatewayIds.size() + " platform gateway(s): apiId="
-                    + event.getUuid());
-        }
         PlatformGatewaySessionRegistry registry = PlatformGatewaySessionRegistry.getInstance();
-        PlatformGatewayService platformGatewayService =
-                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
         PlatformGatewayDeploymentEventService eventService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayDeploymentEventService();
         String apiId = event.getUuid();
         String revisionUuid = event.getEventId();
         for (String gatewayId : platformGatewayIds) {
-            String vhost = resolveVhost(platformGatewayService, gatewayId);
-            String message = buildDeployMessage(event, vhost);
+            String message = buildDeployMessage(event);
             if (eventService != null) {
                 try {
                     eventService.persistEvent(gatewayId, "api.deployed",
@@ -81,15 +71,12 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
     @Override
     public void dispatchUndeploy(DeployAPIInGatewayEvent event, Set<String> platformGatewayIds) {
         PlatformGatewaySessionRegistry registry = PlatformGatewaySessionRegistry.getInstance();
-        PlatformGatewayService platformGatewayService =
-                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
         PlatformGatewayDeploymentEventService eventService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayDeploymentEventService();
         String apiId = event.getUuid();
         String revisionUuid = event.getEventId();
         for (String gatewayId : platformGatewayIds) {
-            String vhost = resolveVhost(platformGatewayService, gatewayId);
-            String message = buildUndeployMessage(event, vhost);
+            String message = buildUndeployMessage(event);
             if (eventService != null) {
                 try {
                     eventService.persistEvent(gatewayId, "api.undeployed",
@@ -107,20 +94,13 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
     public void dispatchDelete(DeployAPIInGatewayEvent event, Set<String> platformGatewayIds) {
         log.info("Dispatching API delete event for API: " + event.getName() + " to " + platformGatewayIds.size()
                 + " platform gateways");
-        if (log.isDebugEnabled()) {
-            log.debug("Dispatching delete to " + platformGatewayIds.size() + " platform gateway(s): apiId="
-                    + event.getUuid());
-        }
         PlatformGatewaySessionRegistry registry = PlatformGatewaySessionRegistry.getInstance();
-        PlatformGatewayService platformGatewayService =
-                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
         PlatformGatewayDeploymentEventService eventService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayDeploymentEventService();
         String apiId = event.getUuid();
         String revisionUuid = event.getEventId();
         for (String gatewayId : platformGatewayIds) {
-            String vhost = resolveVhost(platformGatewayService, gatewayId);
-            String message = buildDeleteMessage(event, vhost);
+            String message = buildDeleteMessage(event);
             if (eventService != null) {
                 try {
                     eventService.persistEvent(gatewayId, "api.deleted",
@@ -144,26 +124,6 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
         }
         // Force-close the session; gateway will see connection close and log "Connection lost" (no new message type)
         PlatformGatewaySessionRegistry.getInstance().closeAndUnregister(gatewayId);
-    }
-
-    /**
-     * Resolve vhost for the given gateway from platform gateway config; empty string if not available.
-     */
-    private static String resolveVhost(PlatformGatewayService platformGatewayService, String gatewayId) {
-        if (platformGatewayService == null || StringUtils.isBlank(gatewayId)) {
-            return "";
-        }
-        try {
-            PlatformGateway gateway = platformGatewayService.getGatewayById(gatewayId);
-            if (gateway != null && StringUtils.isNotBlank(gateway.getVhost())) {
-                return gateway.getVhost().trim();
-            }
-        } catch (APIManagementException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Could not resolve vhost for gateway " + gatewayId + ", using empty: " + e.getMessage());
-            }
-        }
-        return "";
     }
 
     /**
@@ -206,45 +166,44 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
     }
 
     /**
-     * Build message in API Platform format: type "api.deployed", payload { apiId, deploymentId, vhost },
-     * timestamp, correlationId. Gateway uses apiId to fetch API definition and deploy.
-     * vhost is from the target platform gateway config so the gateway-controller can route correctly.
+     * Build message in the exact API Platform gateway-controller format:
+     * type "api.deployed", payload { apiId, deploymentId, performedAt }, timestamp, correlationId.
      */
-    private static String buildDeployMessage(DeployAPIInGatewayEvent event, String vhost) {
+    private static String buildDeployMessage(DeployAPIInGatewayEvent event) {
         String timestamp = Instant.now().toString();
         String apiId = escapeJson(event.getUuid());
         String deploymentId = escapeJson(event.getEventId());
-        String vhostEscaped = escapeJson(vhost != null ? vhost : "");
+        String performedAt = escapeJson(timestamp);
         return "{\"type\":\"api.deployed\",\"payload\":{\"apiId\":\"" + apiId + "\",\"deploymentId\":\""
-                + deploymentId + "\",\"vhost\":\"" + vhostEscaped + "\"},\"timestamp\":\"" + escapeJson(timestamp)
+                + deploymentId + "\",\"performedAt\":\"" + performedAt + "\"},\"timestamp\":\""
+                + escapeJson(timestamp)
                 + "\",\"correlationId\":\"" + escapeJson(event.getEventId()) + "\"}";
     }
 
     /**
-     * Build message in API Platform format: type "api.undeployed", payload { apiId, deploymentId, vhost },
-     * timestamp, correlationId. Uses deploymentId to mirror deploy message format.
-     * vhost is from the target platform gateway config so the gateway-controller can route correctly.
+     * Build message in the exact API Platform gateway-controller format:
+     * type "api.undeployed", payload { apiId, deploymentId, performedAt }, timestamp, correlationId.
      */
-    private static String buildUndeployMessage(DeployAPIInGatewayEvent event, String vhost) {
+    private static String buildUndeployMessage(DeployAPIInGatewayEvent event) {
         String timestamp = Instant.now().toString();
         String apiId = escapeJson(event.getUuid());
         String deploymentId = escapeJson(event.getEventId());
-        String vhostEscaped = escapeJson(vhost != null ? vhost : "");
+        String performedAt = escapeJson(timestamp);
         return "{\"type\":\"api.undeployed\",\"payload\":{\"apiId\":\"" + apiId + "\",\"deploymentId\":\""
-                + deploymentId + "\",\"vhost\":\"" + vhostEscaped + "\"},\"timestamp\":\"" + escapeJson(timestamp)
+                + deploymentId + "\",\"performedAt\":\"" + performedAt + "\"},\"timestamp\":\""
+                + escapeJson(timestamp)
                 + "\",\"correlationId\":\"" + escapeJson(event.getEventId()) + "\"}";
     }
 
     /**
-     * Build message in API Platform format: type "api.deleted", payload { apiId, vhost },
-     * timestamp, correlationId. Gateway performs full removal of config so same name+version can be reused.
+     * Build message in the exact API Platform gateway-controller format:
+     * type "api.deleted", payload { apiId }, timestamp, correlationId.
      */
-    private static String buildDeleteMessage(DeployAPIInGatewayEvent event, String vhost) {
+    private static String buildDeleteMessage(DeployAPIInGatewayEvent event) {
         String timestamp = Instant.now().toString();
         String apiId = escapeJson(event.getUuid());
-        String vhostEscaped = escapeJson(vhost != null ? vhost : "");
         String correlationId = escapeJson(event.getEventId());
-        return "{\"type\":\"api.deleted\",\"payload\":{\"apiId\":\"" + apiId + "\",\"vhost\":\"" + vhostEscaped
+        return "{\"type\":\"api.deleted\",\"payload\":{\"apiId\":\"" + apiId
                 + "\"},\"timestamp\":\"" + escapeJson(timestamp) + "\",\"correlationId\":\"" + correlationId + "\"}";
     }
 }

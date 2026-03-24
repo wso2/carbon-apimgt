@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.PlatformGatewayService;
@@ -173,6 +174,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         GatewayVisibilityPermissionConfigurationDTO visibility = buildGatewayVisibility(body);
         // Update the environment with VHost (from vhost URL), permissions, and additional properties
         updateDynamicEnvironmentForPlatformGateway(organization, body, gateway.getId());
+        logPlatformGatewayAudit(gateway, APIConstants.AuditLogConstants.CREATED);
         GatewayResponseWithTokenDTO dto = toDTOWithToken(gateway, result.getRegistrationToken(), visibility);
         try {
             URI location = new URI(RestApiConstants.RESOURCE_PATH_PLATFORM_GATEWAYS + "/" + gateway.getId());
@@ -447,6 +449,7 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (env != null) {
             permissions = env.getPermissions();
         }
+        logPlatformGatewayAudit(gateway, APIConstants.AuditLogConstants.UPDATED);
         return Response.ok().entity(toDTO(gateway, permissions)).build();
     }
 
@@ -457,9 +460,16 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         PlatformGatewayService service =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        PlatformGateway existing = service.getGatewayById(gatewayId);
         service.deleteGateway(organization, gatewayId);
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.PLATFORM_GATEWAY, "{'id':'" + gatewayId + "'}",
-                APIConstants.AuditLogConstants.DELETED, RestApiCommonUtil.getLoggedInUsername());
+        if (existing != null) {
+            logPlatformGatewayAudit(existing, APIConstants.AuditLogConstants.DELETED);
+        } else {
+            JSONObject info = new JSONObject();
+            info.put("id", gatewayId);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.PLATFORM_GATEWAY, info.toString(),
+                    APIConstants.AuditLogConstants.DELETED, RestApiCommonUtil.getLoggedInUsername());
+        }
         return Response.ok().build();
     }
 
@@ -481,8 +491,29 @@ public class GatewaysApiServiceImpl implements GatewaysApiService {
         if (env != null) {
             permissions = env.getPermissions();
         }
+        logPlatformGatewayAudit(gateway, APIConstants.AuditLogConstants.UPDATED);
 
         return Response.ok().entity(toDTOWithToken(gateway, result.getRegistrationToken(), permissions)).build();
+    }
+
+    private void logPlatformGatewayAudit(PlatformGateway gateway, String action) {
+        if (gateway == null) {
+            return;
+        }
+        JSONObject info = new JSONObject();
+        info.put("id", gateway.getId());
+        info.put(APIConstants.AuditLogConstants.NAME, gateway.getName());
+        if (StringUtils.isNotBlank(gateway.getDisplayName())) {
+            info.put("displayName", gateway.getDisplayName());
+        }
+        if (StringUtils.isNotBlank(gateway.getDescription())) {
+            info.put("description", gateway.getDescription());
+        }
+        if (StringUtils.isNotBlank(gateway.getVhost())) {
+            info.put("vhost", gateway.getVhost());
+        }
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.PLATFORM_GATEWAY, info.toString(),
+                action, RestApiCommonUtil.getLoggedInUsername());
     }
 
     private void validateCreateBody(CreatePlatformGatewayRequestDTO body) throws APIManagementException {

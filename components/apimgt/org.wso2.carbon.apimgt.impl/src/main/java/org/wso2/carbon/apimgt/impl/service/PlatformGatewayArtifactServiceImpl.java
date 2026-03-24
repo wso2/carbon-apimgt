@@ -34,8 +34,9 @@ import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayAPIYamlConverter;
 import org.wso2.carbon.context.CarbonContext;
 
 /**
- * Implementation of platform gateway artifact service. Builds platform api.yaml on demand via
- * {@link PlatformGatewayAPIYamlConverter} (no AM_GW_API_ARTIFACTS read path).
+ * Implementation of platform gateway artifact service. Uses a dedicated platform artifact cache table as a
+ * read-through cache and falls back to building platform api.yaml via
+ * {@link PlatformGatewayAPIYamlConverter} on cache miss.
  */
 public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifactService {
 
@@ -55,6 +56,10 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
         if (StringUtils.isBlank(apiId) || StringUtils.isBlank(gatewayName)) {
             return null;
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Resolving platform gateway revision mapping for API " + apiId + " and gateway '"
+                    + gatewayName + "'");
+        }
         return PlatformGatewayArtifactDAO.getInstance().getRevisionUuidByApiAndGatewayName(apiId.trim(),
                 gatewayName.trim());
     }
@@ -64,7 +69,31 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
         if (StringUtils.isBlank(apiId) || StringUtils.isBlank(revisionId)) {
             return null;
         }
-        return buildPlatformGatewayYamlOnTheFly(apiId.trim(), revisionId.trim());
+        String trimmedApiId = apiId.trim();
+        String trimmedRevisionId = revisionId.trim();
+        if (log.isDebugEnabled()) {
+            log.debug("Fetching platform gateway artifact for API " + trimmedApiId + " revision " + trimmedRevisionId);
+        }
+        PlatformGatewayArtifactDAO artifactDAO = PlatformGatewayArtifactDAO.getInstance();
+        String storedArtifact = artifactDAO.getRevisionArtifact(trimmedApiId, trimmedRevisionId);
+        if (StringUtils.isNotBlank(storedArtifact)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Serving cached platform gateway artifact for API " + trimmedApiId + " revision "
+                        + trimmedRevisionId);
+            }
+            return storedArtifact;
+        }
+
+        String generatedArtifact = buildPlatformGatewayYamlOnTheFly(trimmedApiId, trimmedRevisionId);
+        if (StringUtils.isBlank(generatedArtifact)) {
+            return generatedArtifact;
+        }
+        artifactDAO.saveRevisionArtifact(trimmedApiId, trimmedRevisionId, generatedArtifact);
+        if (log.isDebugEnabled()) {
+            log.debug("Cached generated platform gateway artifact for API " + trimmedApiId + " revision "
+                    + trimmedRevisionId);
+        }
+        return generatedArtifact;
     }
 
     /**
@@ -113,6 +142,10 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
         api.setRevisionId(revision.getId());
         api.setUuid(apiId);
         api.getId().setUuid(apiId);
+        if (log.isDebugEnabled()) {
+            log.debug("Converting API " + apiId + " revision " + revisionId + " to platform gateway YAML for "
+                    + "organization " + organization);
+        }
         return PlatformGatewayAPIYamlConverter.toPlatformGatewayYaml(api, organization, "default");
     }
 
@@ -136,7 +169,7 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
         if (yamlContent == null || yamlContent.trim().isEmpty()) {
             throw new APIManagementException("YAML content is required");
         }
-        // Platform gateway artifacts are generated on fetch; AM_GW_API_ARTIFACTS is not populated on deploy.
+        PlatformGatewayArtifactDAO.getInstance().saveRevisionArtifact(apiId.trim(), revisionId.trim(), yamlContent);
     }
 
     @Override
