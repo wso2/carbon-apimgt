@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.impl;
 
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
@@ -31,6 +32,7 @@ import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulesetMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -67,8 +69,8 @@ public class RulesetManager {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();
-
-        validationEngine.validateRulesetContent(ruleset);
+        OASParserOptions parserOptions = CommonUtil.getOasParserOptions();
+        validationEngine.validateRulesetContent(ruleset, parserOptions);
         List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
 
         if (rules.isEmpty()) {
@@ -144,7 +146,8 @@ public class RulesetManager {
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();
 
-        validationEngine.validateRulesetContent(ruleset);
+        OASParserOptions parserOptions = CommonUtil.getOasParserOptions();
+        validationEngine.validateRulesetContent(ruleset, parserOptions);
         List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
 
         if (rules.isEmpty()) {

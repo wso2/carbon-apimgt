@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.api;
 
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
@@ -41,6 +42,18 @@ public interface ValidationEngine {
     void validateRulesetContent(Ruleset ruleset) throws APIMGovernanceException;
 
     /**
+     * Check if a ruleset is valid using the provided parser options.
+     *
+     * @param ruleset       Ruleset
+     * @param parserOptions OpenAPI parser options
+     * @throws APIMGovernanceException If an error occurs while validating the ruleset
+     */
+    default void validateRulesetContent(Ruleset ruleset, OASParserOptions parserOptions)
+            throws APIMGovernanceException {
+        validateRulesetContent(ruleset);
+    }
+
+    /**
      * Extract rules from a ruleset
      *
      * @param ruleset Ruleset
@@ -57,5 +70,20 @@ public interface ValidationEngine {
      * @return List of rule violations
      * @throws APIMGovernanceException If an error occurs while validating the target
      */
+    @Deprecated
     List<RuleViolation> validate(String target, Ruleset ruleset) throws APIMGovernanceException;
+
+    /**
+     * Validate a target against a ruleset
+     *
+     * @param target        Target to be validated
+     * @param ruleset       Ruleset
+     * @param parserOptions OpenAPI parser options
+     * @return List of rule violations
+     * @throws APIMGovernanceException If an error occurs while validating the target
+     */
+    default List<RuleViolation> validate(String target, Ruleset ruleset, OASParserOptions parserOptions)
+            throws APIMGovernanceException {
+        return validate(target, ruleset);
+    }
 }

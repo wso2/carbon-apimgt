@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.governance.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
@@ -47,6 +48,7 @@ import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulesetMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -500,6 +502,7 @@ public class ComplianceManager {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
+        OASParserOptions parserOptions = CommonUtil.getOasParserOptions();
 
         ArtifactComplianceInfo artifactComplianceInfo = new ArtifactComplianceInfo();
 
@@ -562,7 +565,7 @@ public class ComplianceManager {
 
                     // Send target content and ruleset for validation
                     List<RuleViolation> ruleViolations = validationEngine.validate(
-                            contentToValidate, ruleset);
+                            contentToValidate, ruleset, parserOptions);
                     AuditLogger.log("Sync Eval Request", "Successfully evaluated artifact %s in organization %s " +
                             "against ruleset %s", artifactRefId, organization, ruleset.getId());
 
@@ -617,6 +620,7 @@ public class ComplianceManager {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
+        OASParserOptions parserOptions = CommonUtil.getOasParserOptions();
         ArtifactComplianceDryRunInfo artifactComplianceDryRunInfo = new ArtifactComplianceDryRunInfo();
 
         // If artifact content is not provided dry run is not possible
@@ -656,7 +660,7 @@ public class ComplianceManager {
 
                     // Send target content and ruleset for validation
                     List<RuleViolation> ruleViolations = validationEngine.validate(
-                            contentToValidate, ruleset);
+                            contentToValidate, ruleset, parserOptions);
                     AuditLogger.log("Dry Run Eval Request", "Successfully evaluated artifact in organization %s " +
                             "against ruleset %s", organization, ruleset.getId());
 

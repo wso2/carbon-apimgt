@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.governance.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
@@ -35,6 +36,7 @@ import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
 import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -285,6 +287,7 @@ public class ComplianceEvaluationScheduler {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
+        OASParserOptions parserOptions = CommonUtil.getOasParserOptions();
 
         // Validate the artifact against each ruleset
         List<Ruleset> rulesets = GovernancePolicyMgtDAOImpl.getInstance()
@@ -312,7 +315,7 @@ public class ComplianceEvaluationScheduler {
                 }
 
                 // Send target content and ruleset for validation
-                List<RuleViolation> violations = validationEngine.validate(contentToValidate, ruleset);
+                List<RuleViolation> violations = validationEngine.validate(contentToValidate, ruleset, parserOptions);
                 AuditLogger.log("Async Eval Request", "Validated artifact %s " +
                                 "in organization %s against ruleset %s", artifactRefId,
                         organization, ruleset.getId());
