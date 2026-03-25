@@ -260,7 +260,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         String resourceURL = serverURL + contextPath + APIMgtGatewayConstants.MCP_RESOURCE;
         oAuthProtectedResourceDTO.setResource(resourceURL);
 
-        if (APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManagers.get(0))) {
+        if (!keyManagers.isEmpty() && APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManagers.get(0))) {
             Map<String, KeyManagerDto> keyManagerMap =
                     KeyManagerHolder.getTenantKeyManagers(matchedAPI.getOrganization());
             if (keyManagerMap.size() > 1) {
@@ -268,7 +268,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             } else {
                 oAuthProtectedResourceDTO.addAuthorizationServer(keyManagerMap.values().iterator().next().getIssuer());
             }
-        } else if (!skipAuthServersAttribute) {
+        } else if (!skipAuthServersAttribute && !keyManagers.isEmpty()) {
             KeyManagerDto keyManager =
                     KeyManagerHolder.getKeyManagerByName(matchedAPI.getOrganization(), keyManagers.get(0));
             if (keyManager != null) {
