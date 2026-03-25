@@ -70,7 +70,6 @@ public interface ValidationEngine {
      * @return List of rule violations
      * @throws APIMGovernanceException If an error occurs while validating the target
      */
-    @Deprecated
     List<RuleViolation> validate(String target, Ruleset ruleset) throws APIMGovernanceException;
 
     /**
