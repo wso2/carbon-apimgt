@@ -58,7 +58,7 @@ public class APIKeyValidatorClient {
             log.error("Error while retrieving data from datastore", e);
             if (ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage().equalsIgnoreCase(e.getMessage())) {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage(), e);
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, e);
             }
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error while retrieving data from datastore", e);

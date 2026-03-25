@@ -229,7 +229,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
                 try {
                     Map<String, String> tempClaims = keymanager.getUserClaims(username, properties);
                     if (log.isDebugEnabled()) {
-                        log.debug("Retrieved claims :" + tempClaims);
+                        log.debug("Retrieved " + tempClaims.size() + " claims from key manager");
                     }
                     if (tempClaims != null) {
                         return tempClaims;
@@ -238,8 +238,8 @@ public class JWTGenerator extends AbstractJWTGenerator {
                     if (jwtConfigurationDto.isContinueOnClaimRetrievalFailure()) {
                         throw e;
                     } else {
-                        throw new APIManagementException("Error while getting user info", e,
-                                ExceptionCodes.BACKEND_JWT_GENERATION_FAILED);
+                        throw new APIManagementException(ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage(),
+                                e, ExceptionCodes.BACKEND_JWT_GENERATION_FAILED);
                     }
                 }
             }

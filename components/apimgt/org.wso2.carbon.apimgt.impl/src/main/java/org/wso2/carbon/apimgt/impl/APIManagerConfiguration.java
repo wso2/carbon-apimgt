@@ -2208,10 +2208,15 @@ public class APIManagerConfiguration {
             }
             OMElement continueOnClaimRetrievalFailureElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.CONTINUE_ON_CLAIM_RETRIEVAL_FAILURE));
-            if (continueOnClaimRetrievalFailureElement != null && StringUtils.isNotBlank(
-                    continueOnClaimRetrievalFailureElement.getText())) {
-                jwtConfigurationDto.setContinueOnClaimRetrievalFailure(
-                        Boolean.parseBoolean(continueOnClaimRetrievalFailureElement.getText()));
+            if (continueOnClaimRetrievalFailureElement != null
+                    && StringUtils.isNotBlank(continueOnClaimRetrievalFailureElement.getText())) {
+                boolean continueOnClaimRetrievalFailure = Boolean.parseBoolean(
+                        continueOnClaimRetrievalFailureElement.getText());
+                jwtConfigurationDto.setContinueOnClaimRetrievalFailure(continueOnClaimRetrievalFailure);
+                if (log.isDebugEnabled()) {
+                    log.debug("JWT configuration - Continue on claim retrieval failure set to: "
+                            + continueOnClaimRetrievalFailure);
+                }
             }
             OMElement enableTenantBaseSigningElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_TENANT_BASE_SIGNING));

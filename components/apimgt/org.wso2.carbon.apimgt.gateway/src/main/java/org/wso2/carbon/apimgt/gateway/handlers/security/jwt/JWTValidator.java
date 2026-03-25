@@ -403,7 +403,7 @@ public class JWTValidator {
                                 log.error("Error while generating MCP upstream token", e);
                                 if (ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.equals(e.getErrorHandler())) {
                                     throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                            ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage(), e);
+                                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, e);
                                 }
                                 throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                                         APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
@@ -619,7 +619,7 @@ public class JWTValidator {
                     log.error("Error while including user store claims", e);
                     if (ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.equals(e.getErrorHandler())) {
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage(), e);
+                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, e);
                     }
                 }
             }
@@ -635,7 +635,7 @@ public class JWTValidator {
                 log.error("Error while including user store claims", e);
                 if (ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.equals(e.getErrorHandler())) {
                     throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                            ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage(), e);
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, e);
                 }
             }
         }
@@ -1106,7 +1106,8 @@ public class JWTValidator {
                         if (jwtConfigurationDto.isContinueOnClaimRetrievalFailure()) {
                             log.error("Error while retrieving User claims from Key Manager ", e);
                         } else {
-                            throw new APIManagementException("Error while getting user info", e,
+                            throw new APIManagementException(
+                                    ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage(), e,
                                     ExceptionCodes.BACKEND_JWT_GENERATION_FAILED);
                         }
                     }

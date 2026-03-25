@@ -48,6 +48,7 @@ public class JWTConfigurationDto {
 
     private boolean useKid;
     private boolean isEncodeX5tWithoutPadding;
+    private boolean continueOnClaimRetrievalFailure = true;
 
     public boolean useKid() {
         return useKid;
@@ -56,7 +57,6 @@ public class JWTConfigurationDto {
     public void setUseKid(boolean useKid) {
         this.useKid = useKid;
     }
-    private boolean continueOnClaimRetrievalFailure = true;
 
     public JWTConfigurationDto(JWTConfigurationDto jwtConfigurationDto) {
 

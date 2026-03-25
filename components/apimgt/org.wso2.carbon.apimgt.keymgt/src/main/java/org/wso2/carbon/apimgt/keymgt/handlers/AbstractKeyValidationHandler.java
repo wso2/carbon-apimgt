@@ -144,10 +144,10 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
             return true;
 
         } catch (APIManagementException e) {
+            log.error("Error occurred while generating JWT. ", e);
             if (ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.equals(e.getErrorHandler())) {
                 throw new APIKeyMgtException(ExceptionCodes.BACKEND_JWT_GENERATION_FAILED.getErrorMessage(), e);
             }
-            log.error("Error occurred while generating JWT. ", e);
         }
 
         return false;
