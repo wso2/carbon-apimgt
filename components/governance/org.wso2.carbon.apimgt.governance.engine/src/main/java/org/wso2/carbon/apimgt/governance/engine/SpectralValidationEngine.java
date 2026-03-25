@@ -25,10 +25,10 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
-import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceOptions;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
@@ -72,18 +72,19 @@ public class SpectralValidationEngine implements ValidationEngine {
     /**
      * Check if a ruleset is valid using the provided parser options.
      *
-     * @param ruleset       Ruleset
-     * @param parserOptions OpenAPI parser options
+     * @param ruleset           Ruleset
+     * @param governanceOptions Governance options
      * @throws APIMGovernanceException If an error occurs while validating the ruleset
      */
     @Override
-    public void validateRulesetContent(Ruleset ruleset, OASParserOptions parserOptions) throws APIMGovernanceException {
+    public void validateRulesetContent(Ruleset ruleset, APIMGovernanceOptions governanceOptions)
+            throws APIMGovernanceException {
         RulesetContent content = ruleset.getRulesetContent();
         String rulesetContentString = new String(content.getContent(),
                 StandardCharsets.UTF_8);
         String jsonString;
         try {
-            jsonString = Validator.validateRuleset(rulesetContentString, getValidationOptions(parserOptions));
+            jsonString = Validator.validateRuleset(rulesetContentString, getValidationOptions(governanceOptions));
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(jsonString);
             boolean passed = rootNode.path("passed").asBoolean();
@@ -100,10 +101,10 @@ public class SpectralValidationEngine implements ValidationEngine {
         }
     }
 
-    private ValidationOptions getValidationOptions(OASParserOptions parserOptions) {
+    private ValidationOptions getValidationOptions(APIMGovernanceOptions governanceOptions) {
         ValidationOptions validationOptions = ValidationOptions.defaults();
-        if (parserOptions != null) {
-            validationOptions.setYamlCodePointLimit(parserOptions.getYamlCodePointLimit());
+        if (governanceOptions != null) {
+            validationOptions.setYamlCodePointLimit(governanceOptions.getYamlCodePointLimit());
         }
         return validationOptions;
     }
@@ -188,14 +189,14 @@ public class SpectralValidationEngine implements ValidationEngine {
     /**
      * Validate a target against a ruleset
      *
-     * @param target        Target to be validated
-     * @param ruleset       Ruleset
-     * @param parserOptions OpenAPI parser options
+     * @param target            Target to be validated
+     * @param ruleset           Ruleset
+     * @param governanceOptions Governance options
      * @return List of rule violations
      * @throws APIMGovernanceException If an error occurs while validating the target
      */
     @Override
-    public List<RuleViolation> validate(String target, Ruleset ruleset, OASParserOptions parserOptions)
+    public List<RuleViolation> validate(String target, Ruleset ruleset, APIMGovernanceOptions governanceOptions)
             throws APIMGovernanceException {
 
         try {
@@ -204,7 +205,7 @@ public class SpectralValidationEngine implements ValidationEngine {
                     StandardCharsets.UTF_8);
 
             String resultJson = Validator.validateDocument(target, rulesetContentString,
-                    getValidationOptions(parserOptions));
+                    getValidationOptions(governanceOptions));
             if (log.isDebugEnabled()) {
                 log.debug("Validation success for target: " + target);
             }
