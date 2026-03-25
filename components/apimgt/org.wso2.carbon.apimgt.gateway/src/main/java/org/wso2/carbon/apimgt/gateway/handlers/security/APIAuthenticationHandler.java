@@ -485,6 +485,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 if (!isAuthenticatorsInitialized) {
                     initializeAuthenticators();
                 }
+                messageContext.setProperty(APIMgtGatewayConstants.AUTHENTICATORS_CHALLENGE_STRING, getAuthenticatorsChallengeString());
                 if (!isOauthParamsInitialized) {
                     initOAuthParams();
                 }
@@ -731,105 +732,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     }
 
     private void handleAuthFailure(MessageContext messageContext, APISecurityException e) {
-        messageContext.setProperty(SynapseConstants.ERROR_CODE, e.getErrorCode());
-        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE,
-                APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
-        messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION, e);
-
-        Mediator sequence = messageContext.getSequence(APISecurityConstants.API_AUTH_FAILURE_HANDLER);
-
-        //Setting error description which will be available to the handler
-        String errorDetail = APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage());
-        // if custom auth header is configured, the error message should specify its name instead of default value
-        if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_CREDENTIALS) {
-            errorDetail =
-                    APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()) + "'"
-                            + authorizationHeader + " : Bearer ACCESS_TOKEN' or '" + authorizationHeader +
-                            " : Basic ACCESS_TOKEN' or '" + apiKeyHeader + " : API_KEY'";
-        }
-        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDetail);
-
-        // By default we send a 401 response back
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-        // This property need to be set to avoid sending the content in pass-through pipe (request message)
-        // as the response.
-        axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
-        try {
-            RelayUtils.consumeAndDiscardMessage(axis2MC);
-        } catch (AxisFault axisFault) {
-            //In case of an error it is logged and the process is continued because we're setting a fault message in the payload.
-            log.error("Error occurred while consuming and discarding the message", axisFault);
-        }
-        axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/soap+xml");
-        int status;
-        if (e.getErrorCode() == APISecurityConstants.API_AUTH_GENERAL_ERROR ||
-                e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF) {
-            status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
-        } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_INCORRECT_API_RESOURCE ||
-                e.getErrorCode() == APISecurityConstants.API_AUTH_FORBIDDEN ||
-                e.getErrorCode() == APISecurityConstants.API_OAUTH_INVALID_AUDIENCES ||
-                e.getErrorCode() == APISecurityConstants.INVALID_SCOPE) {
-            status = HttpStatus.SC_FORBIDDEN;
-        } else {
-            status = HttpStatus.SC_UNAUTHORIZED;
-            Map<String, String> headers =
-                    (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            if (headers != null) {
-                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
-                    String contextPath = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
-                    if (StringUtils.isEmpty(contextPath)) {
-                        headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
-                                " error=\"invalid_token\"" +
-                                ", error_description=\"The provided token is invalid\"");
-                    } else {
-                        // Derive the outward facing host and port from host header
-                        String hostHeader = headers.get(APIMgtGatewayConstants.HOST);
-
-                        if (StringUtils.isBlank(hostHeader) || !validHostHeaderPattern.matcher(hostHeader).matches()) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Missing or malformed host header in request.Extracting host header " +
-                                        "from config.");
-                            }
-                            hostHeader = APIUtil.getHostAddress();
-                        }
-
-                        String gwURL = MCPUtils.getGatewayServerURL(hostHeader, contextPath);
-                        if (StringUtils.isEmpty(gwURL)) {
-                            headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
-                                    " error=\"invalid_token\"" +
-                                    ", error_description=\"The provided token is invalid\"");
-                        } else {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Constructed gateway URL for resource metadata: " + gwURL);
-                            }
-
-                            String resourceMetadata = gwURL + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
-                            headers.put(HttpHeaders.WWW_AUTHENTICATE, "Bearer resource_metadata=" +
-                                    "\"" + resourceMetadata + "\","
-                                    + " error=\"invalid_token\","
-                                    + " error_description=\"Access token is missing or expired\"");
-                        }
-                    }
-                } else {
-                    headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
-                            " error=\"invalid_token\"" +
-                            ", error_description=\"The provided token is invalid\"");
-                }
-                axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
-            }
-        }
-
-        messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE, status);
-
-        // Invoke the custom error handler specified by the user
-        if (sequence != null && !sequence.mediate(messageContext)) {
-            // If needed user should be able to prevent the rest of the fault handling
-            // logic from getting executed
-            return;
-        }
-
-        sendFault(messageContext, status);
+        GatewayUtils.handleAuthFailure(messageContext, e, this.authorizationHeader, this.apiKeyHeader,
+                getAuthenticatorsChallengeString(), apiType);
     }
 
     protected void sendFault(MessageContext messageContext, int status) {

@@ -1852,6 +1852,7 @@ public final class APIConstants {
     public static final String HTTP_CLIENT_MAX_TOTAL = "HttpClient.MaxTotal";
     public static final String HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE = "HttpClient.DefaultMaxPerRoute";
     public static final String HTTP_CLIENT_CONNECTION_TIMEOUT = "HttpClient.ConnectionTimeout";
+    public static final String HTTP_CLIENT_CONNECTION_REQUEST_TIMEOUT = "HttpClient.ConnectionRequestTimeout";
 
     public static final String PROXY_ENABLE = "ProxyConfig.Enable";
     public static final String PROXY_HOST = "ProxyConfig.Host";
@@ -3047,6 +3048,9 @@ public final class APIConstants {
 
     public static final String DEFAULT_SCOPE_TYPE = "OAUTH2";
     public static final String DEFAULT_BINDING_TYPE = "DEFAULT";
+    public static final String COOKIE = "cookie";
+    public static final String BINDING_REF = "binding_ref";
+    public static final String BINDING_TYPE = "binding_type";
 
     public static class TokenIssuer {
 
