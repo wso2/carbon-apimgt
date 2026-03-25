@@ -375,6 +375,24 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                 }
             }
         }
+        // Determine key managers for this API
+        if (api.getUuid() != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Determining key managers for API with UUID: " + api.getUuid());
+            }
+            List<String> keyManagers = DataHolder.getInstance().getKeyManagersFromUUID(api.getUuid());
+
+        if (keyManagers != null && !keyManagers.isEmpty()) {
+            if (APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManagers.get(0))
+                        || keyManagers.contains(APIConstants.KeyManager.DEFAULT_KEY_MANAGER)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding default scope for API with UUID: " + api.getUuid());
+                    }
+                    allScopes.add("default");
+                }
+            }
+        }
+
         return allScopes;
     }
 

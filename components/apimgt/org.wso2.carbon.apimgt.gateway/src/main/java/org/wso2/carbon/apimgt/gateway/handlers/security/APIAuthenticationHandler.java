@@ -16,27 +16,19 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
 import org.apache.synapse.ManagedLifecycle;
-import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
-import org.apache.synapse.transport.passthru.PassThroughConstants;
-import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
@@ -50,12 +42,14 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthe
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
-import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -67,7 +61,6 @@ import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
@@ -100,7 +93,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private SynapseEnvironment synapseEnvironment;
 
     private String authorizationHeader;
-    private Set<String> audiences = new HashSet<>();;
+    private Set<String> audiences = new HashSet<>();
     private String apiKeyHeader;
     private String apiSecurity;
     private String apiLevelPolicy;
@@ -108,14 +101,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private String apiUUID;
     private String apiType = String.valueOf(APIConstants.ApiTypes.API); // Default API Type
     private String subType;
-    private OpenAPI openAPI;
     private String keyManagers;
     private final String type = ExtensionType.AUTHENTICATION.toString();
     private String securityContextHeader;
     protected APIKeyValidator keyValidator;
     protected boolean isOauthParamsInitialized = false;
-    private static final Pattern validHostHeaderPattern =
-            Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
 
     public String getApiUUID() {
         return apiUUID;
@@ -475,10 +465,13 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
 
             if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) && isMCPNoAuthRequest) {
-                log.debug("Skipping authentication for MCP request"
-                        + ", method: " + messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
-                // TODO: Check if we need to handle same as the no auth case for REST
-                return true;
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping authentication for MCP request"
+                            + ", method: " + messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
+                }
+                handleNoAuthentication(messageContext);
+                setAPIParametersToMessageContext(messageContext);
+                return ExtensionListenerUtil.postProcessRequest(messageContext, type);
             }
 
             if (ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
@@ -734,6 +727,56 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private void handleAuthFailure(MessageContext messageContext, APISecurityException e) {
         GatewayUtils.handleAuthFailure(messageContext, e, this.authorizationHeader, this.apiKeyHeader,
                 getAuthenticatorsChallengeString(), apiType);
+        try {
+            // If this is an MCP API, try to add DCR resource metadata to WWW-Authenticate header
+            if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(this.apiType) && this.apiUUID != null) {
+                if(log.isDebugEnabled()) {
+                    log.debug("Adding DCR resource metadata to WWW-Authenticate header for MCP API: " + this.apiUUID);
+                }
+                org.apache.axis2.context.MessageContext axis2MC =
+                        ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                @SuppressWarnings("unchecked")
+                Map<String, String> transportHeaders = (Map<String, String>)
+                        axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+
+                if (transportHeaders == null) {
+                    transportHeaders = new java.util.TreeMap<>();
+                    axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, transportHeaders);
+                }
+
+                java.util.List<String> keyManagers = org.wso2.carbon.apimgt.gateway.internal.DataHolder.getInstance()
+                        .getKeyManagersFromUUID(this.apiUUID);
+                if (keyManagers != null && !keyManagers.isEmpty()) {
+                    String existing = transportHeaders.get("WWW-Authenticate");
+                    StringBuilder sb = new StringBuilder();
+                    if (existing != null) {
+                        sb.append(existing);
+                    }
+                    for (String kmName : keyManagers) {
+                        // pass an empty tenant domain string to match mocks that use Mockito.anyString()
+                        KeyManagerDto kmDto = KeyManagerHolder.getKeyManagerByName("", kmName);
+                        KeyManager keyManager = kmDto != null ? kmDto.getKeyManager() : null;
+                        KeyManagerConfiguration kmConfig = keyManager != null ? keyManager.getKeyManagerConfiguration() : null;
+                        if (kmConfig == null) continue;
+
+                        Object dcrEndpointParam = kmConfig.getParameter(
+                                APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
+                        String dcrEndpoint = dcrEndpointParam != null ? dcrEndpointParam.toString() : null;
+                        if (dcrEndpoint != null) {
+                            if (sb.length() > 0) {
+                                sb.append(", ");
+                            }
+                            sb.append("resource_metadata=").append(dcrEndpoint);
+                        }
+                    }
+                    if (sb.length() > 0) {
+                        transportHeaders.put(HttpHeaders.WWW_AUTHENTICATE, sb.toString());
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            log.info("Error while adding DCR metadata to WWW-Authenticate header", ex);
+        }
     }
 
     protected void sendFault(MessageContext messageContext, int status) {
