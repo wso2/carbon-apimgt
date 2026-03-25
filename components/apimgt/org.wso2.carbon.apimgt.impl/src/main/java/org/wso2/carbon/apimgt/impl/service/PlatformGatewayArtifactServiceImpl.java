@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.model.PlatformGatewayArtifactValidationResult;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayArtifactDAO;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayConstants;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayAPIYamlConverter;
 import org.wso2.carbon.context.CarbonContext;
 
@@ -146,7 +147,8 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
             log.debug("Converting API " + apiId + " revision " + revisionId + " to platform gateway YAML for "
                     + "organization " + organization);
         }
-        return PlatformGatewayAPIYamlConverter.toPlatformGatewayYaml(api, organization, "default");
+        return PlatformGatewayAPIYamlConverter.toPlatformGatewayYaml(api, organization,
+                PlatformGatewayConstants.DEFAULT_ENVIRONMENT);
     }
 
     /**
@@ -197,7 +199,7 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
             result.addInvalidField("api");
             return result;
         }
-        String env = StringUtils.isNotBlank(environment) ? environment : "default";
+        String env = StringUtils.isNotBlank(environment) ? environment : PlatformGatewayConstants.DEFAULT_ENVIRONMENT;
         String org = StringUtils.isNotBlank(organization) ? organization : "";
 
         try {

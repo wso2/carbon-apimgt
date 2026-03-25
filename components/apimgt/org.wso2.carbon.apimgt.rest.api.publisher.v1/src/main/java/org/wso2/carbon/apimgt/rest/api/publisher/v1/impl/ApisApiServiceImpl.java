@@ -64,6 +64,8 @@ import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayConstants;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEvents;
 import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.OperationPoliciesApiServiceImplUtils;
@@ -3922,8 +3924,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
         if (eventService != null) {
             try {
-                eventService.broadcastAPIKeyCreated(organization, apiId, null, token, "internal", "*",
-                        null, null, null, null, null, userName);
+                eventService.broadcastAPIKeyCreated(
+                        new PlatformGatewayAPIKeyEvents.Created(organization, apiId, token,
+                                PlatformGatewayConstants.INTERNAL_API_KEY_NAME)
+                                .withUserId(userName));
                 log.info("Broadcast apikey.created to platform gateways for apiId=" + apiId);
             } catch (Exception e) {
                 log.warn("Failed to broadcast apikey.created to platform gateways: " + e.getMessage(), e);

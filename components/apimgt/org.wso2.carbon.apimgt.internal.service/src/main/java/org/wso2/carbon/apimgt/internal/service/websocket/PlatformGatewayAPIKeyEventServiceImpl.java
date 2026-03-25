@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.internal.service.websocket;
 
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEvents;
 import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEventService;
 
 /**
@@ -28,28 +29,17 @@ import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEventService;
 public class PlatformGatewayAPIKeyEventServiceImpl implements PlatformGatewayAPIKeyEventService {
 
     @Override
-    public void broadcastAPIKeyCreated(String organizationId, String apiId, String keyUuid, String apiKey,
-                                      String name, String operations, String externalRefId, String expiresAt,
-                                      Integer expiresInDuration,
-                                      String expiresInUnit, String displayName, String userId) {
-        PlatformGatewayAPIKeyEventBroadcaster.getInstance().broadcastAPIKeyCreated(
-                organizationId, apiId, keyUuid, apiKey, name, operations, externalRefId, expiresAt, expiresInDuration,
-                expiresInUnit, displayName, userId);
+    public void broadcastAPIKeyCreated(PlatformGatewayAPIKeyEvents.Created event) {
+        PlatformGatewayAPIKeyEventBroadcaster.getInstance().broadcastAPIKeyCreated(event);
     }
 
     @Override
-    public void broadcastAPIKeyUpdated(String organizationId, String apiId, String keyUuid, String keyName,
-                                      String apiKey, String externalRefId, String operations, String displayName,
-                                      String expiresAt,
-                                      Integer expiresInDuration, String expiresInUnit, String userId) {
-        PlatformGatewayAPIKeyEventBroadcaster.getInstance().broadcastAPIKeyUpdated(
-                organizationId, apiId, keyUuid, keyName, apiKey, externalRefId, operations, displayName, expiresAt,
-                expiresInDuration, expiresInUnit, userId);
+    public void broadcastAPIKeyUpdated(PlatformGatewayAPIKeyEvents.Updated event) {
+        PlatformGatewayAPIKeyEventBroadcaster.getInstance().broadcastAPIKeyUpdated(event);
     }
 
     @Override
-    public void broadcastAPIKeyRevoked(String organizationId, String apiId, String keyName, String userId) {
-        PlatformGatewayAPIKeyEventBroadcaster.getInstance().broadcastAPIKeyRevoked(
-                organizationId, apiId, keyName, userId);
+    public void broadcastAPIKeyRevoked(PlatformGatewayAPIKeyEvents.Revoked event) {
+        PlatformGatewayAPIKeyEventBroadcaster.getInstance().broadcastAPIKeyRevoked(event);
     }
 }

@@ -57,7 +57,7 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
             String message = buildDeployMessage(event);
             if (eventService != null) {
                 try {
-                    eventService.persistEvent(gatewayId, "api.deployed",
+                    eventService.persistEvent(gatewayId, PlatformGatewayWebSocketConstants.EVENT_API_DEPLOYED,
                             PlatformGatewayEventEnvelopeUtil.wrapForStorage(message,
                                     deploymentEventMetadata(apiId, revisionUuid)));
                 } catch (Exception e) {
@@ -79,7 +79,7 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
             String message = buildUndeployMessage(event);
             if (eventService != null) {
                 try {
-                    eventService.persistEvent(gatewayId, "api.undeployed",
+                    eventService.persistEvent(gatewayId, PlatformGatewayWebSocketConstants.EVENT_API_UNDEPLOYED,
                             PlatformGatewayEventEnvelopeUtil.wrapForStorage(message,
                                     deploymentEventMetadata(apiId, revisionUuid)));
                 } catch (Exception e) {
@@ -103,7 +103,7 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
             String message = buildDeleteMessage(event);
             if (eventService != null) {
                 try {
-                    eventService.persistEvent(gatewayId, "api.deleted",
+                    eventService.persistEvent(gatewayId, PlatformGatewayWebSocketConstants.EVENT_API_DELETED,
                             PlatformGatewayEventEnvelopeUtil.wrapForStorage(message,
                                     deploymentEventMetadata(apiId, revisionUuid)));
                 } catch (Exception e) {
@@ -140,44 +140,18 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
         return meta;
     }
 
-    private static String escapeJson(String s) {
-        if (s == null) return "";
-        StringBuilder sb = new StringBuilder(s.length() * 2);
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            switch (c) {
-                case '\\': sb.append("\\\\"); break;
-                case '"': sb.append("\\\""); break;
-                case '\n': sb.append("\\n"); break;
-                case '\r': sb.append("\\r"); break;
-                case '\t': sb.append("\\t"); break;
-                case '\b': sb.append("\\b"); break;
-                case '\f': sb.append("\\f"); break;
-                default:
-                    if (c <= 0x1F) {
-                        sb.append(String.format("\\u%04x", (int) c));
-                    } else {
-                        sb.append(c);
-                    }
-                    break;
-            }
-        }
-        return sb.toString();
-    }
-
     /**
      * Build message in the exact API Platform gateway-controller format:
      * type "api.deployed", payload { apiId, deploymentId, performedAt }, timestamp, correlationId.
      */
     private static String buildDeployMessage(DeployAPIInGatewayEvent event) {
         String timestamp = Instant.now().toString();
-        String apiId = escapeJson(event.getUuid());
-        String deploymentId = escapeJson(event.getEventId());
-        String performedAt = escapeJson(timestamp);
-        return "{\"type\":\"api.deployed\",\"payload\":{\"apiId\":\"" + apiId + "\",\"deploymentId\":\""
-                + deploymentId + "\",\"performedAt\":\"" + performedAt + "\"},\"timestamp\":\""
-                + escapeJson(timestamp)
-                + "\",\"correlationId\":\"" + escapeJson(event.getEventId()) + "\"}";
+        PlatformGatewayWebSocketModels.ApiDeploymentPayload payload =
+                new PlatformGatewayWebSocketModels.ApiDeploymentPayload(event.getUuid(), event.getEventId(), timestamp);
+        return PlatformGatewayWebSocketJsonUtil.toJson(
+                new PlatformGatewayWebSocketModels.EventEnvelope<>(
+                        PlatformGatewayWebSocketConstants.EVENT_API_DEPLOYED, payload, timestamp,
+                        event.getEventId(), null));
     }
 
     /**
@@ -186,13 +160,12 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
      */
     private static String buildUndeployMessage(DeployAPIInGatewayEvent event) {
         String timestamp = Instant.now().toString();
-        String apiId = escapeJson(event.getUuid());
-        String deploymentId = escapeJson(event.getEventId());
-        String performedAt = escapeJson(timestamp);
-        return "{\"type\":\"api.undeployed\",\"payload\":{\"apiId\":\"" + apiId + "\",\"deploymentId\":\""
-                + deploymentId + "\",\"performedAt\":\"" + performedAt + "\"},\"timestamp\":\""
-                + escapeJson(timestamp)
-                + "\",\"correlationId\":\"" + escapeJson(event.getEventId()) + "\"}";
+        PlatformGatewayWebSocketModels.ApiDeploymentPayload payload =
+                new PlatformGatewayWebSocketModels.ApiDeploymentPayload(event.getUuid(), event.getEventId(), timestamp);
+        return PlatformGatewayWebSocketJsonUtil.toJson(
+                new PlatformGatewayWebSocketModels.EventEnvelope<>(
+                        PlatformGatewayWebSocketConstants.EVENT_API_UNDEPLOYED, payload, timestamp,
+                        event.getEventId(), null));
     }
 
     /**
@@ -201,9 +174,11 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
      */
     private static String buildDeleteMessage(DeployAPIInGatewayEvent event) {
         String timestamp = Instant.now().toString();
-        String apiId = escapeJson(event.getUuid());
-        String correlationId = escapeJson(event.getEventId());
-        return "{\"type\":\"api.deleted\",\"payload\":{\"apiId\":\"" + apiId
-                + "\"},\"timestamp\":\"" + escapeJson(timestamp) + "\",\"correlationId\":\"" + correlationId + "\"}";
+        PlatformGatewayWebSocketModels.ApiDeletePayload payload =
+                new PlatformGatewayWebSocketModels.ApiDeletePayload(event.getUuid());
+        return PlatformGatewayWebSocketJsonUtil.toJson(
+                new PlatformGatewayWebSocketModels.EventEnvelope<>(
+                        PlatformGatewayWebSocketConstants.EVENT_API_DELETED, payload, timestamp,
+                        event.getEventId(), null));
     }
 }

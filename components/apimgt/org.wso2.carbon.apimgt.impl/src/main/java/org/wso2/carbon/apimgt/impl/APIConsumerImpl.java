@@ -114,6 +114,7 @@ import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEvents;
 import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEventService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
@@ -648,19 +649,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         expiresAtIso = java.time.Instant.ofEpochMilli(expMs).toString();
                     }
                 }
-                eventService.broadcastAPIKeyCreated(
-                        api.getOrganization(),
-                        apiIdForGateway,
-                        apiKeyInfoDTO.getKeyId(),
-                        apiKey,
-                        keyNameForGateway,
-                        "*",
-                        null,
-                        expiresAtIso,
-                        null,
-                        null,
-                        keyNameForGateway,
-                        userName);
+                PlatformGatewayAPIKeyEvents.Created event = new PlatformGatewayAPIKeyEvents.Created(
+                        api.getOrganization(), apiIdForGateway, apiKey, keyNameForGateway)
+                        .withKeyUuid(apiKeyInfoDTO.getKeyId())
+                        .withExpiresAt(expiresAtIso)
+                        .withUserId(userName);
+                eventService.broadcastAPIKeyCreated(event);
             } catch (Exception e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Failed to broadcast apikey to platform gateways: " + e.getMessage());
@@ -4177,7 +4171,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     APIInfo apiInfo = getAPIInfoByUUID(apiId);
                     String organization = apiInfo != null ? apiInfo.getOrganization() : null;
                     if (StringUtils.isNotBlank(organization)) {
-                        eventService.broadcastAPIKeyRevoked(organization, apiId, keyName, userId);
+                        eventService.broadcastAPIKeyRevoked(
+                                new PlatformGatewayAPIKeyEvents.Revoked(organization, apiId, keyName)
+                                        .withUserId(userId));
                     }
                 } catch (Exception e) {
                     if (log.isDebugEnabled()) {
@@ -4232,7 +4228,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     String organization = resolveOrganizationForPlatformGatewayEvents(null, apiForHandle);
                     if (StringUtils.isNotBlank(organization)) {
                         eventService.broadcastAPIKeyRevoked(
-                                organization, apiIdForRevoke, keyNameGw, apiKeyInfo.getAuthUser());
+                                new PlatformGatewayAPIKeyEvents.Revoked(organization, apiIdForRevoke, keyNameGw)
+                                        .withUserId(apiKeyInfo.getAuthUser()));
                     }
                 } else if (StringUtils.isNotBlank(apiKeyInfo.getApplicationId())) {
                     Application app = apiMgtDAO.getApplicationByUUID(apiKeyInfo.getApplicationId());
@@ -4409,19 +4406,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 }
             }
             for (String apiId : apiIds) {
-                eventService.broadcastAPIKeyCreated(
-                        organization,
-                        apiId,
-                        null,
-                        apiKey,
-                        keyNameForGateway,
-                        "*",
-                        null,
-                        expiresAtIso,
-                        null,
-                        null,
-                        keyNameForGateway,
-                        userName);
+                PlatformGatewayAPIKeyEvents.Created event = new PlatformGatewayAPIKeyEvents.Created(
+                        organization, apiId, apiKey, keyNameForGateway)
+                        .withExpiresAt(expiresAtIso)
+                        .withUserId(userName);
+                eventService.broadcastAPIKeyCreated(event);
             }
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
@@ -4448,7 +4437,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
         Set<String> apiIds = getSubscribedPlatformGatewayApiIds(application);
         for (String apiId : apiIds) {
-            eventService.broadcastAPIKeyRevoked(organization, apiId, keyNameGateway, userId);
+            eventService.broadcastAPIKeyRevoked(
+                    new PlatformGatewayAPIKeyEvents.Revoked(organization, apiId, keyNameGateway)
+                            .withUserId(userId));
         }
     }
 
@@ -4489,19 +4480,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 }
             }
             for (String apiId : apiIds) {
-                eventService.broadcastAPIKeyUpdated(
-                        organization,
-                        apiId,
-                        null,
-                        keyNameForGateway,
-                        apiKey,
-                        null,
-                        "*",
-                        keyNameForGateway,
-                        expiresAtIso,
-                        null,
-                        null,
-                        userName);
+                PlatformGatewayAPIKeyEvents.Updated event = new PlatformGatewayAPIKeyEvents.Updated(
+                        organization, apiId, keyNameForGateway, apiKey)
+                        .withExpiresAt(expiresAtIso)
+                        .withUserId(userName);
+                eventService.broadcastAPIKeyUpdated(event);
             }
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
@@ -4602,19 +4585,12 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         expiresAtIso = Instant.ofEpochMilli(expMs).toString();
                     }
                 }
-                eventService.broadcastAPIKeyUpdated(
-                        resolvedOrganization,
-                        apiIdForGateway,
-                        apiKeyInfoDTO.getKeyId(),
-                        keyNameForGateway,
-                        apiKey,
-                        null,
-                        "*",
-                        keyNameForGateway,
-                        expiresAtIso,
-                        null,
-                        null,
-                        username);
+                PlatformGatewayAPIKeyEvents.Updated event = new PlatformGatewayAPIKeyEvents.Updated(
+                        resolvedOrganization, apiIdForGateway, keyNameForGateway, apiKey)
+                        .withKeyUuid(apiKeyInfoDTO.getKeyId())
+                        .withExpiresAt(expiresAtIso)
+                        .withUserId(username);
+                eventService.broadcastAPIKeyUpdated(event);
             } catch (Exception e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Failed to broadcast apikey.updated to platform gateways: " + e.getMessage());
