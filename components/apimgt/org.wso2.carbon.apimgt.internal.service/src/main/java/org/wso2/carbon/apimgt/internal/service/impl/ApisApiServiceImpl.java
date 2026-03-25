@@ -39,7 +39,6 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
-import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
@@ -168,57 +167,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         DeploymentAcknowledgmentResponseDTO response = new DeploymentAcknowledgmentResponseDTO();
         response.setStatus(DeploymentAcknowledgmentResponseDTO.StatusEnum.RECEIVED);
         return Response.ok().entity(response).build();
-    }
-
-    @Override
-    public Response apisApiIdSubscriptionsGet(String apiId, String apiKey, MessageContext messageContext)
-            throws APIManagementException {
-        if (StringUtils.isEmpty(apiKey)) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("Missing api-key header").build();
-        }
-        PlatformGatewayDAO.PlatformGateway gateway;
-        try {
-            gateway = PlatformGatewayTokenUtil.verifyToken(apiKey);
-        } catch (Exception e) {
-            log.error("Platform gateway token verification failed for subscriptions request", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Server error").build();
-        }
-        if (gateway == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Platform gateway token verification failed: invalid or expired api-key");
-            }
-            return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid api-key").build();
-        }
-        String organization = gateway.organizationId;
-        if (StringUtils.isEmpty(organization)) {
-            organization = RestApiUtil.getOrganization(messageContext);
-            organization = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
-        }
-        SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
-        List<Subscription> allSubs;
-        try {
-            allSubs = subscriptionValidationDAO.getAllSubscriptionsByOrganization(organization);
-        } catch (APIManagementException e) {
-            log.error("Error loading subscriptions for organization: " + organization, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Server error").build();
-        }
-        List<Map<String, Object>> result = new ArrayList<>();
-        for (Subscription sub : allSubs) {
-            if (apiId.equals(sub.getApiUUID())) {
-                Map<String, Object> item = new HashMap<>();
-                item.put("id", sub.getSubscriptionUUID());
-                item.put("apiId", sub.getApiUUID());
-                item.put("applicationId", sub.getApplicationUUID());
-                item.put("subscriptionToken", "");
-                item.put("subscriptionPlanId", sub.getPolicyId());
-                item.put("gatewayId", "");
-                item.put("status", sub.getSubscriptionState() != null ? sub.getSubscriptionState() : "ACTIVE");
-                item.put("createdAt", "1970-01-01T00:00:00Z");
-                item.put("updatedAt", "1970-01-01T00:00:00Z");
-                result.add(item);
-            }
-        }
-        return Response.ok().entity(result).build();
     }
 
     private Response getApiAsPlatformGatewayZip(String apiId, String organization, MessageContext messageContext)

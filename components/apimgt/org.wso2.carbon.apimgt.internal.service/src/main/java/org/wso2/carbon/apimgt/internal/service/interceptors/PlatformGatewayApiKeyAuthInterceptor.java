@@ -68,7 +68,6 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
     private static final String[] PLATFORM_GATEWAY_ALLOWED_PATH_SEGMENTS = {
             "apis",
             "api-keys",
-            "subscription-plans",
             "notify-gateway",
             "notify-api-deployment-status",
             "deployments"

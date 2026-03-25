@@ -3289,7 +3289,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 artifactService.deleteAllRevisionArtifactsForApi(apiUuid);
             }
         } catch (Exception e) {
-            log.warn("Failed to delete platform revision artifacts for API " + apiUuid + ": " + e.getMessage(), e);
+            log.error("Failed to delete platform revision artifacts for API " + apiUuid, e);
+            isError = true;
         }
         try {
             GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(apiUuid);
