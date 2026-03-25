@@ -26,7 +26,7 @@ import graphql.language.SchemaDefinition;
 import graphql.language.TypeDefinition;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
-import io.swagger.parser.OpenAPIParser;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -164,7 +164,7 @@ public class GraphQLSchemaDefinition {
         LinkedHashMap<String, Object> scopeBindings = null;
 
         if (swaggerDef != null) {
-            OpenAPIParser parser = new OpenAPIParser();
+            OpenAPIV3Parser parser = new OpenAPIV3Parser();
             openAPI = parser.readContents(swaggerDef, null, null).getOpenAPI();
         }
 

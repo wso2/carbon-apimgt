@@ -154,15 +154,6 @@
                                     <destFileName>httpmime-4.3.6.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.owasp.encoder</groupId>
-                                    <artifactId>encoder</artifactId>
-                                    <version>1.1</version>
-                                    <type>jar</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/external/libs</outputDirectory>
-                                    <destFileName>encoder-1.1.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>net.sf.saxon</groupId>
                                     <artifactId>Saxon-HE</artifactId>
                                     <version>9.5.1-8</version>

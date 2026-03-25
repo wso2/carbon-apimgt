@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.api.dto;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurityDTO;
 
 import java.util.List;
@@ -28,16 +28,16 @@ import java.util.List;
  */
 public class EndpointConfigDTO {
 
-    @SerializedName("endpoint_type")
+    @JsonProperty("endpoint_type")
     private String endpointType;
 
-    @SerializedName("sandbox_endpoints")
+    @JsonProperty("sandbox_endpoints")
     private EndpointDetails sandboxEndpoints;
 
-    @SerializedName("production_endpoints")
+    @JsonProperty("production_endpoints")
     private EndpointDetails productionEndpoints;
 
-    @SerializedName("endpoint_security")
+    @JsonProperty("endpoint_security")
     private EndpointSecurityConfig endpointSecurity;
 
     /**
@@ -125,10 +125,10 @@ public class EndpointConfigDTO {
      */
     public static class EndpointDetails {
 
-        @SerializedName("url")
+        @JsonProperty("url")
         private String url;
 
-        @SerializedName("config")
+        @JsonProperty("config")
         private Config config;
 
         /**
@@ -177,10 +177,10 @@ public class EndpointConfigDTO {
      */
     public static class EndpointSecurityConfig {
 
-        @SerializedName("production")
+        @JsonProperty("production")
         private EndpointSecurityDTO production;
 
-        @SerializedName("sandbox")
+        @JsonProperty("sandbox")
         private EndpointSecurityDTO sandbox;
 
         /**
@@ -229,31 +229,31 @@ public class EndpointConfigDTO {
      */
     public static class Config {
 
-        @SerializedName("actionDuration")
+        @JsonProperty("actionDuration")
         private String actionDuration;
 
-        @SerializedName("actionSelect")
+        @JsonProperty("actionSelect")
         private String actionSelect;
 
-        @SerializedName("factor")
+        @JsonProperty("factor")
         private String factor;
 
-        @SerializedName("retryDelay")
+        @JsonProperty("retryDelay")
         private String retryDelay;
 
-        @SerializedName("retryErroCode")
+        @JsonProperty("retryErroCode")
         private List<String> retryErrorCode;
 
-        @SerializedName("retryTimeOut")
+        @JsonProperty("retryTimeOut")
         private String retryTimeout;
 
-        @SerializedName("suspendDuration")
+        @JsonProperty("suspendDuration")
         private String suspendDuration;
 
-        @SerializedName("suspendErrorCode")
+        @JsonProperty("suspendErrorCode")
         private List<String> suspendErrorCode;
 
-        @SerializedName("suspendMaxDuration")
+        @JsonProperty("suspendMaxDuration")
         private String suspendMaxDuration;
 
         /**

@@ -851,12 +851,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.owasp.encoder</groupId>
-                <artifactId>encoder</artifactId>
-                <version>${owasp.encoder.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.jaggeryjs</groupId>
                 <artifactId>org.jaggeryjs.hostobjects.web</artifactId>
                 <version>${jaggery.version}</version>
@@ -2186,7 +2180,6 @@
         <apache.poi.version>5.2.5.wso2v1</apache.poi.version>
         <apache.poi.import.range>[5.0, 6.0)</apache.poi.import.range>
         <rhino.js.version>1.7.15.1.wso2v2</rhino.js.version>
-        <owasp.encoder.version>1.2.2</owasp.encoder.version>
 
         <httpclient.version>4.3.6.wso2v3</httpclient.version>
         <commons-logging.version>1.1.1</commons-logging.version>

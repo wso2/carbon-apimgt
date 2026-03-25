@@ -15,7 +15,7 @@
 
 package org.wso2.carbon.apimgt.api.gateway;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -24,10 +24,10 @@ import java.util.List;
  */
 public class FailoverPolicyDeploymentConfigDTO {
 
-    @SerializedName("targetModel")
+    @JsonProperty("targetModel")
     private ModelEndpointDTO targetModelEndpoint;
 
-    @SerializedName("fallbackModels")
+    @JsonProperty("fallbackModels")
     private List<ModelEndpointDTO> fallbackModelEndpoints;
 
     /**
