@@ -252,7 +252,7 @@ public class APIMgtGatewayConstants {
     public static final String MCP_SERVER_NAME = "name";
     public static final String MCP_SERVER_VERSION = "version";
     public static final String MCP_IS_ERROR = "isError";
-    public static final String MCP_ERROR_CODE = "mcpErrorCode";
+    public static final String MCP_ERROR_CODE = "errorCode";
     public static final String SERVER_INFO = "serverInfo";
     public static final String SERVER_NAME = "name";
     public static final String SERVER_VERSION = "version";
