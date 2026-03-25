@@ -228,10 +228,10 @@ public class JWTGenerator extends AbstractJWTGenerator {
             if (keymanager != null) {
                 try {
                     Map<String, String> tempClaims = keymanager.getUserClaims(username, properties);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Retrieved " + tempClaims.size() + " claims from key manager");
-                    }
                     if (tempClaims != null) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Retrieved " + tempClaims.size() + " claims from key manager");
+                        }
                         return tempClaims;
                     }
                 } catch (APIManagementException e) {
