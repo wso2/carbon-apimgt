@@ -147,8 +147,7 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
             log.debug("Converting API " + apiId + " revision " + revisionId + " to platform gateway YAML for "
                     + "organization " + organization);
         }
-        return PlatformGatewayAPIYamlConverter.toPlatformGatewayYaml(api, organization,
-                PlatformGatewayConstants.DEFAULT_ENVIRONMENT);
+        return PlatformGatewayAPIYamlConverter.toPlatformGatewayYaml(api);
     }
 
     /**
@@ -199,11 +198,8 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
             result.addInvalidField("api");
             return result;
         }
-        String env = StringUtils.isNotBlank(environment) ? environment : PlatformGatewayConstants.DEFAULT_ENVIRONMENT;
-        String org = StringUtils.isNotBlank(organization) ? organization : "";
-
         try {
-            String yaml = PlatformGatewayAPIYamlConverter.toPlatformGatewayYaml(api, org, env);
+            String yaml = PlatformGatewayAPIYamlConverter.toPlatformGatewayYaml(api);
             result.setConvertedYaml(yaml);
             sanitizeAndFillResult(yaml, result);
         } catch (APIManagementException e) {

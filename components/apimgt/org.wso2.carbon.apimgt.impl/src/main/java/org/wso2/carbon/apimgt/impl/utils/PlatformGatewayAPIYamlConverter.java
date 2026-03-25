@@ -55,30 +55,6 @@ public final class PlatformGatewayAPIYamlConverter {
     }
 
     /**
-     * Build API Platform format YAML string from on-prem API for platform-gateway deployment.
-     * Uses the API's own context (with {version} replaced by actual version), so invocation URL
-     * matches Synapse and other gateway types: no tenant or environment in the path.
-     * API-level and operation-level policies are included for gateway enforcement.
-     *
-     * @param api on-prem API (must have endpoint config)
-     * @param organization organization (tenant domain); used for validation/lookup only, not in URL path
-     * @param environment environment (unused in path; kept for API compatibility)
-     * @return YAML string (apiVersion, kind, metadata, spec with displayName, version, context, upstream, operations)
-     * @throws APIManagementException if API is invalid or endpoint URL cannot be resolved
-     */
-    public static String toPlatformGatewayYaml(API api, String organization, String environment)
-            throws APIManagementException {
-        String displayName = sanitizeDisplayName(
-                api.getDisplayName() != null ? api.getDisplayName() : (api.getId() != null ? api.getId().getApiName() : null));
-        String version = normalizeVersion(api.getId() != null ? api.getId().getVersion() : null);
-        String versionInPath = api.getId() != null && StringUtils.isNotBlank(api.getId().getVersion())
-                ? api.getId().getVersion() : "1.0";
-        String context = buildContextFromApi(api, versionInPath);
-        String metadataName = toMetadataName(displayName, version);
-        return buildYaml(api, displayName, version, context, metadataName);
-    }
-
-    /**
      * Build API Platform format YAML string from on-prem API (context from API definition).
      * API-level and operation-level policies are included for gateway enforcement.
      *
@@ -87,60 +63,11 @@ public final class PlatformGatewayAPIYamlConverter {
      * @throws APIManagementException if API is invalid or endpoint URL cannot be resolved
      */
     public static String toPlatformGatewayYaml(API api) throws APIManagementException {
-        String displayName = sanitizeDisplayName(
-                api.getDisplayName() != null ? api.getDisplayName() : (api.getId() != null ? api.getId().getApiName() : null));
-        String version = normalizeVersion(api.getId() != null ? api.getId().getVersion() : null);
-        String context = normalizeContext(api.getContextTemplate() != null ? api.getContextTemplate() : api.getContext());
+        String displayName = api.getDisplayName();
+        String version = api.getId().getVersion();
+        String context = api.getContext();
         String metadataName = toMetadataName(displayName, version);
         return buildYaml(api, displayName, version, context, metadataName);
-    }
-
-    /**
-     * Returns the platform gateway handle (metadata.name) for the given API.
-     * This is the same value the platform gateway stores when it deploys the API from our YAML;
-     * use it as apiId when sending apikey.created / apikey.revoked so the gateway can resolve config by handle.
-     *
-     * @param api on-prem API (id and displayName/version used)
-     * @return handle string (URL-safe, 3-63 chars), or null if api is null
-     */
-    public static String getPlatformGatewayHandleForAPI(API api) {
-        if (api == null) {
-            return null;
-        }
-        String displayName = sanitizeDisplayName(
-                api.getDisplayName() != null ? api.getDisplayName() : (api.getId() != null ? api.getId().getApiName() : null));
-        String version = normalizeVersion(api.getId() != null ? api.getId().getVersion() : null);
-        return toMetadataName(displayName, version);
-    }
-
-    /**
-     * Builds context from the API's context template and version. Uses version as-is in path (e.g. 1.0.0).
-     * Replaces {version} in the template with the actual version. Invocation path: e.g. /demo/1.0.0/
-     */
-    private static String buildContextFromApi(API api, String versionInPath) {
-        String template = api.getContextTemplate() != null ? api.getContextTemplate() : api.getContext();
-        if (StringUtils.isBlank(template)) {
-            String displayName = api.getDisplayName() != null ? api.getDisplayName()
-                    : (api.getId() != null ? api.getId().getApiName() : "api");
-            String apiNamePath = toApiNamePath(displayName);
-            return "/" + apiNamePath + "/" + versionInPath;
-        }
-        String ctx = template.trim();
-        if (!ctx.startsWith("/")) ctx = "/" + ctx;
-        if (ctx.contains(APIConstants.VERSION_PLACEHOLDER)) {
-            ctx = ctx.replace(APIConstants.VERSION_PLACEHOLDER, versionInPath);
-        } else if (!ctx.endsWith("/" + versionInPath)) {
-            ctx = ctx.endsWith("/") ? ctx + versionInPath : ctx + "/" + versionInPath;
-        }
-        return normalizeContext(ctx);
-    }
-
-    /** URL path segment from display name (e.g. "Reading List API 1" -> "reading-list-api-1"). Returns "api" if null, empty, or normalized to empty (e.g. only separators). */
-    private static String toApiNamePath(String displayName) {
-        if (displayName == null || displayName.isEmpty()) return "api";
-        String normalized = displayName.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
-        if (normalized == null || normalized.isEmpty()) return "api";
-        return normalized;
     }
 
     private static String buildYaml(API api, String displayName, String version, String context, String metadataName)
@@ -249,26 +176,6 @@ public final class PlatformGatewayAPIYamlConverter {
         } catch (NumberFormatException e) {
             return "v1";
         }
-    }
-
-    private static String sanitizeDisplayName(String name) {
-        if (name == null || name.isEmpty()) return "api";
-        return name.replaceAll("[^a-zA-Z0-9\\-_ .]", "-").trim();
-    }
-
-    private static String normalizeVersion(String v) {
-        if (v == null || v.isEmpty()) return "v1.0";
-        if (v.matches("^v\\d+\\.\\d+$")) return v;
-        if (v.matches("^\\d+\\.\\d+$")) return "v" + v;
-        return "v1.0";
-    }
-
-    private static String normalizeContext(String ctx) {
-        if (ctx == null || ctx.isEmpty()) return "/api";
-        String c = ctx.trim();
-        if (!c.startsWith("/")) c = "/" + c;
-        if (c.length() > 1 && c.endsWith("/")) c = c.substring(0, c.length() - 1);
-        return c;
     }
 
     private static String toMetadataName(String displayName, String version) {
