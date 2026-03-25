@@ -2030,7 +2030,9 @@ public class GatewayUtils {
     }
 
     private static String getDcrEndpoint() {
-        log.debug("Retrieving DCR endpoint for API UUID: " + apiUUID);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving DCR endpoint for API UUID: " + apiUUID);
+        }
         if (StringUtils.isEmpty(apiUUID)) {
             return null;
         }
@@ -2059,7 +2061,9 @@ public class GatewayUtils {
                 log.error("Error while retrieving key manager configuration for MCP DCR support", e);
             }
         }
-        log.debug("No suitable DCR endpoint found for API UUID: " + apiUUID);
+        if (log.isDebugEnabled()) {
+            log.debug("No suitable DCR endpoint found for API UUID: " + apiUUID);
+        }
         return null;
     }
 }

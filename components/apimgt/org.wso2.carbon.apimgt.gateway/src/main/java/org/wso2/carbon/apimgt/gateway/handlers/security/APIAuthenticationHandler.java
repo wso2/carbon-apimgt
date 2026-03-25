@@ -45,7 +45,11 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -465,7 +469,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     log.debug("Skipping authentication for MCP request"
                             + ", method: " + messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
                 }
-                log.info("Processing MCP no-auth request for method: " + messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
                 handleNoAuthentication(messageContext);
                 setAPIParametersToMessageContext(messageContext);
                 return ExtensionListenerUtil.postProcessRequest(messageContext, type);
@@ -727,7 +730,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         try {
             // If this is an MCP API, try to add DCR resource metadata to WWW-Authenticate header
             if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(this.apiType) && this.apiUUID != null) {
-                log.info("Adding DCR resource metadata to WWW-Authenticate header for MCP API: " + this.apiUUID);
+                if(log.isDebugEnabled()) {
+                    log.debug("Adding DCR resource metadata to WWW-Authenticate header for MCP API: " + this.apiUUID);
+                }
                 org.apache.axis2.context.MessageContext axis2MC =
                         ((Axis2MessageContext) messageContext).getAxis2MessageContext();
                 @SuppressWarnings("unchecked")
@@ -749,22 +754,13 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     }
                     for (String kmName : keyManagers) {
                         // pass an empty tenant domain string to match mocks that use Mockito.anyString()
-                        org.wso2.carbon.apimgt.impl.dto.KeyManagerDto kmDto =
-                                org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder.getKeyManagerByName("", kmName);
-                        if (kmDto == null) {
-                            continue;
-                        }
-                        org.wso2.carbon.apimgt.api.model.KeyManager keyManager = kmDto.getKeyManager();
-                        if (keyManager == null) {
-                            continue;
-                        }
-                        org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration kmConfig =
-                                keyManager.getKeyManagerConfiguration();
-                        if (kmConfig == null) {
-                            continue;
-                        }
-                        Object dcrEndpointParam =
-                                kmConfig.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
+                        KeyManagerDto kmDto = KeyManagerHolder.getKeyManagerByName("", kmName);
+                        KeyManager keyManager = kmDto != null ? kmDto.getKeyManager() : null;
+                        KeyManagerConfiguration kmConfig = keyManager != null ? keyManager.getKeyManagerConfiguration() : null;
+                        if (kmConfig == null) continue;
+
+                        Object dcrEndpointParam = kmConfig.getParameter(
+                                APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
                         String dcrEndpoint = dcrEndpointParam != null ? dcrEndpointParam.toString() : null;
                         if (dcrEndpoint != null) {
                             if (sb.length() > 0) {
@@ -779,7 +775,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 }
             }
         } catch (Exception ex) {
-            log.debug("Error while adding DCR metadata to WWW-Authenticate header", ex);
+            log.info("Error while adding DCR metadata to WWW-Authenticate header", ex);
         }
     }
 
