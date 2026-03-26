@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.io.File;
@@ -580,5 +581,39 @@ public class OASParserUtilTest {
         Assert.assertFalse(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " exists on resource level",
                 pathsObj.has(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
 
+    }
+
+    @Test
+    public void testParseYamlWithLimitBothLimitModes() throws Exception {
+
+        String yamlContent = "openapi: 3.0.0\ninfo:\n  title: Test API\n  version: 1.0.0";
+        OASParserOptions parserOptions = new OASParserOptions();
+        parserOptions.setYamlCodePointLimit("0");
+        JsonNode result = OASParserUtil.parseYamlWithLimit(yamlContent, parserOptions);
+
+        Assert.assertNotNull("Parsed JsonNode should not be null", result);
+        Assert.assertEquals("OpenAPI version should match", "3.0.0", result.get("openapi").asText());
+        Assert.assertEquals("API title should match", "Test API", result.get("info").get("title").asText());
+
+        // Test with high limit (covers yamlCodePointLimit > 0 path)
+        parserOptions.setYamlCodePointLimit("10");
+        result = OASParserUtil.parseYamlWithLimit(yamlContent, parserOptions);
+        Assert.assertNotNull("Should work with high limit", result);
+        Assert.assertEquals("Should parse correctly", "Test API", result.get("info").get("title").asText());
+    }
+
+    @Test
+    public void testPreprocessYamlWithLimitJsonPassThrough() throws Exception {
+
+        OASParserOptions parserOptions = new OASParserOptions();
+        parserOptions.setYamlCodePointLimit("10");
+
+        String jsonInput = "{\"openapi\": \"3.0.0\", \"info\": {\"title\": \"API\"}}";
+        String result = OASParserUtil.preprocessYamlWithLimit(jsonInput, parserOptions);
+        Assert.assertEquals("JSON should pass through unchanged", jsonInput, result);
+
+        String jsonWithSpace = "   {\"test\": \"value\"}";
+        result = OASParserUtil.preprocessYamlWithLimit(jsonWithSpace, parserOptions);
+        Assert.assertEquals("JSON with whitespace should pass through", jsonWithSpace, result);
     }
 }

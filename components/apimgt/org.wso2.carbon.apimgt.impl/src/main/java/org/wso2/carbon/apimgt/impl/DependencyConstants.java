@@ -24,6 +24,9 @@ public class DependencyConstants {
     public static final String DEPENDENCY_PROPERTIES_FILE =  "dependency.properties";
 
     public static final String SWAGGER_PARSER = "swaggerparser.";
+    public static final String SNAKE_YAML = "snakeyaml.";
 
-    public static final String EXPLICIT_STYLE_AND_EXPLODE =  SWAGGER_PARSER + "explicit_style_and_explode";
+    public static final String EXPLICIT_STYLE_AND_EXPLODE = SWAGGER_PARSER + "explicit_style_and_explode";
+
+    public static final String SNAKE_YAML_MAX_FILE_SIZE_LIMIT = SNAKE_YAML + "max_file_size_limit";
 }

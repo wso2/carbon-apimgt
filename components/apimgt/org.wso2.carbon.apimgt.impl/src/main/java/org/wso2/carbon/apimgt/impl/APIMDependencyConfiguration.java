@@ -111,5 +111,7 @@ public class APIMDependencyConfiguration {
         this.dependencyProperties = loadProperties(dependencyConfigFilePath);
         oasParserOptions.setExplicitStyleAndExplode(
                 this.dependencyProperties.getProperty(DependencyConstants.EXPLICIT_STYLE_AND_EXPLODE));
+        oasParserOptions.setYamlCodePointLimit(
+                this.dependencyProperties.getProperty(DependencyConstants.SNAKE_YAML_MAX_FILE_SIZE_LIMIT));
     }
 }

@@ -28,6 +28,7 @@ import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceOptions;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
@@ -36,6 +37,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.rule.validator.InvalidContentTypeException;
 import org.wso2.rule.validator.InvalidRulesetException;
+import org.wso2.rule.validator.validator.ValidationOptions;
 import org.wso2.rule.validator.validator.Validator;
 
 import java.nio.charset.StandardCharsets;
@@ -62,13 +64,27 @@ public class SpectralValidationEngine implements ValidationEngine {
      * @throws APIMGovernanceException If an error occurs while validating the ruleset
      */
     @Override
+    @Deprecated
     public void validateRulesetContent(Ruleset ruleset) throws APIMGovernanceException {
+        validateRulesetContent(ruleset, null);
+    }
+
+    /**
+     * Check if a ruleset is valid using the provided parser options.
+     *
+     * @param ruleset           Ruleset
+     * @param governanceOptions Governance options
+     * @throws APIMGovernanceException If an error occurs while validating the ruleset
+     */
+    @Override
+    public void validateRulesetContent(Ruleset ruleset, APIMGovernanceOptions governanceOptions)
+            throws APIMGovernanceException {
         RulesetContent content = ruleset.getRulesetContent();
         String rulesetContentString = new String(content.getContent(),
                 StandardCharsets.UTF_8);
         String jsonString;
         try {
-            jsonString = Validator.validateRuleset(rulesetContentString);
+            jsonString = Validator.validateRuleset(rulesetContentString, getValidationOptions(governanceOptions));
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(jsonString);
             boolean passed = rootNode.path("passed").asBoolean();
@@ -83,6 +99,14 @@ public class SpectralValidationEngine implements ValidationEngine {
         } catch (Throwable e) {
             throw new APIMGovernanceException("Unexpected error while validating ruleset content.", e);
         }
+    }
+
+    private ValidationOptions getValidationOptions(APIMGovernanceOptions governanceOptions) {
+        ValidationOptions validationOptions = ValidationOptions.defaults();
+        if (governanceOptions != null) {
+            validationOptions.setYamlCodePointLimit(governanceOptions.getYamlCodePointLimit());
+        }
+        return validationOptions;
     }
 
     /**
@@ -157,14 +181,31 @@ public class SpectralValidationEngine implements ValidationEngine {
      * @throws APIMGovernanceException If an error occurs while validating the target
      */
     @Override
+    @Deprecated
     public List<RuleViolation> validate(String target, Ruleset ruleset) throws APIMGovernanceException {
+        return validate(target, ruleset, null);
+    }
+
+    /**
+     * Validate a target against a ruleset
+     *
+     * @param target            Target to be validated
+     * @param ruleset           Ruleset
+     * @param governanceOptions Governance options
+     * @return List of rule violations
+     * @throws APIMGovernanceException If an error occurs while validating the target
+     */
+    @Override
+    public List<RuleViolation> validate(String target, Ruleset ruleset, APIMGovernanceOptions governanceOptions)
+            throws APIMGovernanceException {
 
         try {
             RulesetContent rulesetContent = ruleset.getRulesetContent();
             String rulesetContentString = new String(rulesetContent.getContent(),
                     StandardCharsets.UTF_8);
 
-            String resultJson = Validator.validateDocument(target, rulesetContentString);
+            String resultJson = Validator.validateDocument(target, rulesetContentString,
+                    getValidationOptions(governanceOptions));
             if (log.isDebugEnabled()) {
                 log.debug("Validation success for target: " + target);
             }
