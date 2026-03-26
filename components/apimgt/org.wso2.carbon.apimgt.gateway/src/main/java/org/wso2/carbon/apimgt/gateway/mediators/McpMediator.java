@@ -111,16 +111,20 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
 
         if (IN_FLOW.equals(mcpDirection)) {
-            if (StringUtils.equals(subType, APIConstants.API_SUBTYPE_SERVER_PROXY) &&
-                    !StringUtils.equals(APIConstants.MCP.METHOD_TOOL_LIST, mcpMethod)) {
-                // For server proxy APIs, we do not handle MCP requests
-                if (log.isDebugEnabled()) {
-                    log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
-                            matchedAPI.getVersion());
-                }
-                return true;
-            }
             if (path.startsWith(APIMgtGatewayConstants.MCP_RESOURCE) && httpMethod.equals(APIConstants.HTTP_POST)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Received MCP request for API: " + matchedAPI.getName() + ":" + matchedAPI.getVersion() +
+                            ". MCP Method: " + mcpMethod);
+                }
+                if (StringUtils.equals(subType, APIConstants.API_SUBTYPE_SERVER_PROXY) &&
+                        !StringUtils.equals(APIConstants.MCP.METHOD_TOOL_LIST, mcpMethod)) {
+                    // For server proxy APIs, we do not handle MCP requests
+                    if (log.isDebugEnabled()) {
+                        log.debug("Skipping MCP mediation for server proxy API: " + matchedAPI.getName() + ":" +
+                                matchedAPI.getVersion());
+                    }
+                    return true;
+                }
                 handleMcpRequest(messageContext, matchedAPI);
             } else if (path.startsWith(APIMgtGatewayConstants.MCP_RESOURCE) &&
                     httpMethod.equals(APIConstants.HTTP_GET)) {
@@ -147,7 +151,8 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                 handleMcpResponse(messageContext);
             } catch (McpException e) {
                 log.error("Error while handling MCP response", e);
-                MCPUtils.handleMCPFailure(messageContext, new McpResponseDto(e.getErrorMessage(), e.getErrorCode(), null));
+                MCPUtils.handleMCPFailure(messageContext,
+                        new McpResponseDto(e.getErrorMessage(), e.getErrorCode(), null));
                 return false;
             }
         }
@@ -161,10 +166,15 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
         McpResponseDto mcpResponse = McpRequestProcessor.processRequest(messageContext, matchedAPI, requestBody);
-
-        if (APIConstants.MCP.METHOD_INITIALIZE.equals(mcpMethod) || APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod)
-            || APIConstants.MCP.METHOD_PING.equals(mcpMethod) || APIConstants.MCP.METHOD_PROMPTS_LIST.equals(mcpMethod)
-            || (APIConstants.MCP.METHOD_TOOL_CALL.equals(mcpMethod) && mcpResponse != null)) {
+        if (log.isDebugEnabled()) {
+            log.debug("MCP request processing completed for API: " + matchedAPI.getName() + ":" +
+                    matchedAPI.getVersion() + ". MCP Method: " + mcpMethod + ". Response Status: " +
+                    (mcpResponse != null ? mcpResponse.getStatusCode() : "No response generated"));
+        }
+        if (APIConstants.MCP.METHOD_INITIALIZE.equals(mcpMethod) ||
+                APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod) || APIConstants.MCP.METHOD_PING.equals(mcpMethod) ||
+                APIConstants.MCP.METHOD_PROMPTS_LIST.equals(mcpMethod) ||
+                (APIConstants.MCP.METHOD_TOOL_CALL.equals(mcpMethod) && mcpResponse != null)) {
             messageContext.setProperty(MCP_PROCESSED, "true");
             if (mcpResponse != null) {
                 try {
@@ -186,8 +196,8 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                     setMCPErrorDetails(messageContext, mcpResponse.getResponse());
 
                     if (log.isDebugEnabled()) {
-                        log.debug("MCP request processed successfully. Method: " + mcpMethod +
-                                ", Status: " + mcpResponse.getStatusCode());
+                        log.debug("MCP request processed successfully. Method: " + mcpMethod + ", Status: " +
+                                mcpResponse.getStatusCode());
                     }
                 } catch (AxisFault e) {
                     log.error("Error while generating mcp payload " + axis2MessageContext.getLogIDString(), e);
@@ -250,7 +260,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         String resourceURL = serverURL + contextPath + APIMgtGatewayConstants.MCP_RESOURCE;
         oAuthProtectedResourceDTO.setResource(resourceURL);
 
-        if (APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManagers.get(0))) {
+        if (!keyManagers.isEmpty() && APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManagers.get(0))) {
             Map<String, KeyManagerDto> keyManagerMap =
                     KeyManagerHolder.getTenantKeyManagers(matchedAPI.getOrganization());
             if (keyManagerMap.size() > 1) {
@@ -258,7 +268,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             } else {
                 oAuthProtectedResourceDTO.addAuthorizationServer(keyManagerMap.values().iterator().next().getIssuer());
             }
-        } else if (!skipAuthServersAttribute) {
+        } else if (!skipAuthServersAttribute && !keyManagers.isEmpty()) {
             KeyManagerDto keyManager =
                     KeyManagerHolder.getKeyManagerByName(matchedAPI.getOrganization(), keyManagers.get(0));
             if (keyManager != null) {

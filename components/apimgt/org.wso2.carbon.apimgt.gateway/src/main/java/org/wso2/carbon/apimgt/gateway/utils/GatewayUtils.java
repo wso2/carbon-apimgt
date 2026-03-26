@@ -1993,16 +1993,6 @@ public class GatewayUtils {
                             headers.put(HttpHeaders.WWW_AUTHENTICATE,
                                     "Bearer resource_metadata=" + "\"" + resourceMetadata + "\"," + " error=\"invalid_token\"," + " error_description=\"Access token is missing or expired\"");
                         }
-
-                        String resourceMetadata = APIConstants.HTTPS_PROTOCOL + APIConstants.URL_SCHEME_SEPARATOR +
-                                hostHeader + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
-                        String dcrEndpoint = getDcrEndpoint();
-                        String wwwAuthenticate = "Bearer resource_metadata=\"" + resourceMetadata + "\"";
-                        if (StringUtils.isNotEmpty(dcrEndpoint)) {
-                            wwwAuthenticate += ", dcr=\"" + dcrEndpoint + "\"";
-                        }
-                        wwwAuthenticate += ", error=\"invalid_token\", error_description=\"Access token is missing or expired\"";
-                        headers.put(HttpHeaders.WWW_AUTHENTICATE, wwwAuthenticate);
                     }
                 } else {
                     headers.put(HttpHeaders.WWW_AUTHENTICATE, authenticatorsChallengeString +
