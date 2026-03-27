@@ -2321,7 +2321,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         }
-
+        if (log.isDebugEnabled()) {
+            if (securitySchemes.isEmpty()) {
+                log.debug("API " + api.getId() + " has no security schemes derived from hub policies");
+            } else {
+                log.debug("API " + api.getId() + " has security schemes derived from hub policies: "
+                        + securitySchemes);
+            }
+        }
         // Collect from operation-level (URITemplate) hub policies
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         if (uriTemplates != null) {
@@ -2732,7 +2739,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         environmentsToRemove.removeAll(environmentsToAdd);
         DeploymentTargets targets = DeploymentModeResolver.resolve(api.getOrganization(), environmentsToRemove);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        log.info("Undeploying API: " + api.getId().getApiName() + " from " + environmentsToRemove.size()
+        log.info("Undeploy API: " + api.getId().getApiName() + " from " + environmentsToRemove.size()
                 + " environments");
         gatewayManager.unDeployFromGateway(api, api.getOrganization(), targets.getSynapseLabels(), onDeleteOrRetire,
                 targets.getPlatformGatewayIds().isEmpty() ? null : targets.getPlatformGatewayIds());
