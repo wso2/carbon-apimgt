@@ -330,11 +330,16 @@ public class GatewayArtifactsMgtDAO {
 
     public void deleteGatewayArtifacts(String apiId) throws APIManagementException {
 
-        String deleteGWArtifact = SQLConstants.DELETE_GW_PUBLISHED_API_DETAILS;
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
             connection.setAutoCommit(false);
             try {
-                try (PreparedStatement preparedStatement = connection.prepareStatement(deleteGWArtifact)) {
+                try (PreparedStatement preparedStatement =
+                             connection.prepareStatement(SQLConstants.DELETE_FROM_AM_GW_API_ARTIFACTS_BY_API_ID)) {
+                    preparedStatement.setString(1, apiId);
+                    preparedStatement.executeUpdate();
+                }
+                try (PreparedStatement preparedStatement =
+                             connection.prepareStatement(SQLConstants.DELETE_GW_PUBLISHED_API_DETAILS)) {
                     preparedStatement.setString(1, apiId);
                     preparedStatement.executeUpdate();
                 }

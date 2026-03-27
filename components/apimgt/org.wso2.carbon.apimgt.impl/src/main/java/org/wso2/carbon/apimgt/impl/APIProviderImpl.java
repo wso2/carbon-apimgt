@@ -2358,6 +2358,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (hasJwtPolicy && api.getAuthorizationHeader() == null) {
                 api.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
             }
+        } else {
+            api.setApiSecurity(null);
+            api.setApiKeyHeader(null);
+            api.setAuthorizationHeader(null);
         }
     }
 
