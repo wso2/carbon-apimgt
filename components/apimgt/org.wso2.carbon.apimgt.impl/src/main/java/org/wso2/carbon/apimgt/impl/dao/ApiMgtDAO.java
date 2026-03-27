@@ -16212,7 +16212,7 @@ public class ApiMgtDAO {
 
         // Use provided UUID when set (e.g. platform gateways use gateway id as environment UUID); otherwise generate.
         String uuid;
-        if (environment.getGatewayType().equals(APIConstants.WSO2_API_PLATFORM_GATEWAY)) {
+        if (APIConstants.WSO2_API_PLATFORM_GATEWAY.equalsIgnoreCase(environment.getGatewayType())) {
             uuid = StringUtils.isNotBlank(environment.getUuid()) ? environment.getUuid() : UUID.randomUUID().toString();
         } else {
             uuid = UUID.randomUUID().toString();
