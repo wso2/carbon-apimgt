@@ -4172,7 +4172,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     String organization = apiInfo != null ? apiInfo.getOrganization() : null;
                     if (StringUtils.isNotBlank(organization)) {
                         eventService.broadcastAPIKeyRevoked(
-                                new PlatformGatewayAPIKeyEvents.Revoked(organization, apiId, keyName)
+                                new PlatformGatewayAPIKeyEvents.Revoked(organization, apiId,
+                                        keyName.toLowerCase(Locale.ROOT))
                                         .withUserId(userId));
                     }
                 } catch (Exception e) {
