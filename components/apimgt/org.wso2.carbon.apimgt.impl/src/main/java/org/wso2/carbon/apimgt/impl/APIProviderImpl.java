@@ -2321,7 +2321,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         }
-
+        if (log.isDebugEnabled()) {
+            if (securitySchemes.isEmpty()) {
+                log.debug("API " + api.getId() + " has no security schemes derived from hub policies");
+            } else {
+                log.debug("API " + api.getId() + " has security schemes derived from hub policies: "
+                        + securitySchemes);
+            }
+        }
         // Collect from operation-level (URITemplate) hub policies
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         if (uriTemplates != null) {
