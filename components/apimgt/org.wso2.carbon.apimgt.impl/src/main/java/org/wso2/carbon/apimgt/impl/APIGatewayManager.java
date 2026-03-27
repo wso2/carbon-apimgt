@@ -290,7 +290,7 @@ public class APIGatewayManager {
     public void unDeployFromGateway(API api, String tenantDomain, Set<String> gatewaysToRemove,
                                     boolean onDeleteOrRetire, Set<String> platformGatewayIds) {
         if (debugEnabled) {
-            log.debug("Undeploying API: " + api.getId().getName() + " version: " + api.getId().getVersion() +
+            log.debug("Undeploy API: " + api.getId().getName() + " version: " + api.getId().getVersion() +
                     " from gateways");
         }
         sendUnDeploymentEvent(api, tenantDomain, gatewaysToRemove, onDeleteOrRetire, platformGatewayIds);
