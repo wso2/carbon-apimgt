@@ -895,7 +895,6 @@ public class GatewayUtils {
         return api;
     }
 
-    
     /**
      * Validate whether the user is subscribed to the invoked API. If subscribed, return a APIKeyValidationInfoDTO
      * object containing the API information to authenticate API Keys.
@@ -1078,7 +1077,8 @@ public class GatewayUtils {
             }
             if (!isSubscriptionValidationChecked) {
 
-                boolean appendProductVersionToContext = APIConstants.API_PRODUCT.equalsIgnoreCase(
+                boolean appendProductVersionToContext = apiFromContext != null &&
+                        APIConstants.API_PRODUCT.equalsIgnoreCase(
                         apiFromContext.getApiType()) && APIConstants.API_PRODUCT_VERSION_1_0_0.equals(
                         apiFromContext.getApiVersion()) && StringUtils.isBlank(apiFromContext.getContextTemplate());
 

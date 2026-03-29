@@ -185,7 +185,7 @@ public class ApiKeyAuthenticator implements Authenticator {
                                 tenantDomain, payload);
                         ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(payload, GatewayUtils.getIp(axis2MessageContext),
                                 apiContext, apiVersion, referer);
-                        API apiFromContext = (API) synCtx.getProperty(APIMgtGatewayConstants.API_OBJECT);
+                        API apiFromContext = GatewayUtils.getAPI(synCtx);
                         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext,
                                 apiVersion, payload, splitToken[0], apiFromContext);
                         String endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO,
