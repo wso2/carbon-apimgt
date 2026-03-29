@@ -1049,6 +1049,8 @@ public class APIManagerComponent {
         int maxTotal = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_MAX_TOTAL));
         int defaultMaxPerRoute = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE));
         int connectionTimeout = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_CONNECTION_TIMEOUT));
+        int connectionRequestTimeout = Integer.parseInt(configuration.getFirstProperty(
+                APIConstants.HTTP_CLIENT_CONNECTION_REQUEST_TIMEOUT));
 
         boolean proxyEnabled = Boolean.parseBoolean(configuration.getFirstProperty(APIConstants.PROXY_ENABLE));
 
@@ -1086,7 +1088,7 @@ public class APIManagerComponent {
                 hostnameVerifier = new BrowserHostnameVerifier();
         }
         configuration.setHttpClientConfiguration(builder
-                .withConnectionParams(maxTotal, defaultMaxPerRoute, connectionTimeout)
+                .withConnectionParams(maxTotal, defaultMaxPerRoute, connectionTimeout, connectionRequestTimeout)
                 .withHostnameVerifier(hostnameVerifier).build());
     }
 
