@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.publishers.OpaqueApiKeyPublisher;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -184,8 +185,9 @@ public class ApiKeyAuthenticator implements Authenticator {
                                 tenantDomain, payload);
                         ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(payload, GatewayUtils.getIp(axis2MessageContext),
                                 apiContext, apiVersion, referer);
+                        API apiFromContext = (API) synCtx.getProperty(APIMgtGatewayConstants.API_OBJECT);
                         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext,
-                                apiVersion, payload, splitToken[0]);
+                                apiVersion, payload, splitToken[0], apiFromContext);
                         String endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO,
                                 jwtConfigurationDto, apiKey, signedJWT, payload, tokenIdentifier, apiContext, apiVersion,
                                 isGatewayTokenCacheEnabled);

@@ -895,6 +895,7 @@ public class GatewayUtils {
         return api;
     }
 
+    
     /**
      * Validate whether the user is subscribed to the invoked API. If subscribed, return a APIKeyValidationInfoDTO
      * object containing the API information to authenticate API Keys.
@@ -994,6 +995,138 @@ public class GatewayUtils {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                         APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
             }
+        }
+        return apiKeyValidationInfoDTO;
+    }
+
+    /**
+     * Validate whether the user is subscribed to the invoked API. If subscribed, return an APIKeyValidationInfoDTO
+     * containing the API information.
+     *
+     * @param apiContext     API context
+     * @param apiVersion     API version
+     * @param payload        The payload of the JWT token
+     * @param token          The token which was used to invoke the API
+     * @param apiFromContext API object retrieved from the message context
+     * @return an APIKeyValidationInfoDTO containing subscription validation information.
+     * If the subscription information is not found, return a null object.
+     * @throws APISecurityException if the user is not subscribed to the API
+     */
+    public static APIKeyValidationInfoDTO validateAPISubscription(String apiContext, String apiVersion,
+            JWTClaimsSet payload, String token, API apiFromContext)
+            throws APISecurityException {
+
+        APIKeyValidator apiKeyValidator = new APIKeyValidator();
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
+        String keyType = (String) payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE);
+        int appId = 0;
+        if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
+            try {
+                Map<String, Object> applicationObjMap =
+                        payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
+                JSONObject application = new JSONObject(applicationObjMap);
+                appId = Integer.parseInt(application.getAsString(APIConstants.JwtTokenConstants.APPLICATION_ID));
+            } catch (ParseException e) {
+                log.error("Error while parsing the application object from the JWT token.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+            }
+        }
+        // validate subscription
+        // if the appId is equal to 0 then it's a internal key
+        if (appId != 0) {
+            apiKeyValidationInfoDTO =
+                    apiKeyValidator.validateSubscription(apiContext, apiVersion, appId, getTenantDomain(), keyType);
+        }
+
+        if (payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS) != null) {
+            // Subscription validation
+            ArrayList subscribedAPIs =
+                    (ArrayList) payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
+            boolean isSubscriptionValidationChecked = false;
+            boolean subscriptionFound = false;
+            for (Object subscribedAPI : subscribedAPIs) {
+                String subscribedAPIsJSONString = gson.toJson(subscribedAPI);
+                JSONObject subscribedAPIsJSONObject = JSONValue.parse(subscribedAPIsJSONString, JSONObject.class);
+                if (apiContext
+                        .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
+                        apiVersion
+                                .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
+                                )) {
+                    isSubscriptionValidationChecked = true;
+                    // check whether the subscription is authorized
+                    if (appId != 0) {
+                        if (apiKeyValidationInfoDTO.isAuthorized()) {
+                            subscriptionFound = true;
+                            if (log.isDebugEnabled()) {
+                                log.debug("User is subscribed to the API: " + apiContext + ", " +
+                                        "version: " + apiVersion + ". Token: " + getMaskedToken(token));
+                            }
+                        }
+                    } else {
+                        apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+                        apiKeyValidationInfoDTO.setAuthorized(true);
+                        apiKeyValidationInfoDTO.setType(keyType);
+                        subscriptionFound = true;
+                        if (log.isDebugEnabled()) {
+                            log.debug("User is subscribed to the API: " + apiContext + ", " +
+                                    "version: " + apiVersion + ". Token: " + getMaskedToken(token));
+                        }
+                    }
+                    break;
+                }
+            }
+            if (!isSubscriptionValidationChecked) {
+
+                boolean appendProductVersionToContext = APIConstants.API_PRODUCT.equalsIgnoreCase(
+                        apiFromContext.getApiType()) && APIConstants.API_PRODUCT_VERSION_1_0_0.equals(
+                        apiFromContext.getApiVersion()) && StringUtils.isBlank(apiFromContext.getContextTemplate());
+
+                for (Object subscribedAPI : subscribedAPIs) {
+                    String subscribedAPIsJSONString = gson.toJson(subscribedAPI);
+                    JSONObject subscribedAPIsJSONObject = JSONValue.parse(subscribedAPIsJSONString, JSONObject.class);
+                    String subscribedApiContext = subscribedAPIsJSONObject.getAsString(
+                            APIConstants.JwtTokenConstants.API_CONTEXT);
+                    String subscribedApiVersion = subscribedAPIsJSONObject.getAsString(
+                            APIConstants.JwtTokenConstants.API_VERSION);
+                    if (appendProductVersionToContext) {
+                        subscribedApiContext = subscribedApiContext + "/" + APIConstants.API_PRODUCT_VERSION_1_0_0;
+                    }
+                    if (apiContext.equals(subscribedApiContext) && apiVersion.equals(subscribedApiVersion)) {
+                        if (appId != 0) {
+                            if (apiKeyValidationInfoDTO.isAuthorized()) {
+                                subscriptionFound = true;
+                                if (log.isDebugEnabled()) {
+                                    log.debug("User is subscribed to the API: " + apiContext + ", " + "version: "
+                                            + apiVersion + ". Token: " + getMaskedToken(token));
+                                }
+                            }
+                        } else {
+                            apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+                            apiKeyValidationInfoDTO.setAuthorized(true);
+                            apiKeyValidationInfoDTO.setType(keyType);
+                            subscriptionFound = true;
+                            if (log.isDebugEnabled()) {
+                                log.debug("User is subscribed to the API: " + apiContext + ", " + "version: "
+                                        + apiVersion + ". Token: " + getMaskedToken(token));
+                            }
+                        }
+                        break;
+                    }
+                }
+
+            }
+            if (!subscriptionFound) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User is not subscribed to access the API: " + apiContext +
+                            ", version: " + apiVersion + ". Token: " + getMaskedToken(token));
+                }
+                log.error("User is not subscribed to access the API.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                        APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+            }
+        } else {
+            log.debug("No subscription information found in the token.");
         }
         return apiKeyValidationInfoDTO;
     }
