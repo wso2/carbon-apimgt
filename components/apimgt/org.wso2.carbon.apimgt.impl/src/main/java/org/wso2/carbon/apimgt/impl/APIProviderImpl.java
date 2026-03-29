@@ -2691,6 +2691,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param api Relevant API that need to be validated.
      */
     private void validateAndSetAPISecurity(API api) {
+        if (isPlatformGatewayApi(api) && api.getApiSecurity() == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("API " + api.getId() + " is a Platform Gateway API with no derived auth policies");
+            }
+            return;
+        }
         String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
         String security = api.getApiSecurity();
         if (security != null) {
@@ -8077,10 +8083,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.deleteAllAPIMetadataRevision(apiId, apiRevisionId);
         apiMgtDAO.deleteAPIPrimaryEndpointMappingsByRevision(apiId, apiRevisionId);
         apiMgtDAO.deleteAIConfigurationRevision(apiRevision.getRevisionUUID());
-        PlatformGatewayArtifactService artifactService =
-                ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
-        if (artifactService != null) {
-            artifactService.deleteRevisionArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+        try {
+            PlatformGatewayArtifactService artifactService =
+                    ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
+            if (artifactService != null) {
+                artifactService.deleteRevisionArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+            }
+        } catch (Exception e) {
+            log.error("Failed to delete platform revision artifact for API " + apiRevision.getApiUUID()
+                    + " and revision " + apiRevision.getRevisionUUID(), e);
         }
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {
