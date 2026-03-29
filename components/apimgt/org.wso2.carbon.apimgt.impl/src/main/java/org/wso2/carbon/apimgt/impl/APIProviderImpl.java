@@ -7683,14 +7683,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
 
-                GatewayArtifactsMgtDAO.getInstance()
-                        .addAndRemovePublishedGatewayLabels(apiId, revisionUUID,
-                                targetEnvironments, gatewayVhosts, deploymentsToRemove);
                 try {
                     DeploymentTargets targets = DeploymentModeResolver.resolve(organization, targetEnvironments);
                     if (!targets.getPlatformGatewayIds().isEmpty()) {
                         warmPlatformRevisionArtifactCache(apiId, revisionUUID);
                     }
+                    GatewayArtifactsMgtDAO.getInstance()
+                            .addAndRemovePublishedGatewayLabels(apiId, revisionUUID,
+                                    targetEnvironments, gatewayVhosts, deploymentsToRemove);
                     log.info("Deploying API revision: " + revisionUUID + " to " + targetEnvironments.size()
                             + " environments");
                     gatewayManager.deployToGateway(api, organization, targets.getSynapseLabels(),
