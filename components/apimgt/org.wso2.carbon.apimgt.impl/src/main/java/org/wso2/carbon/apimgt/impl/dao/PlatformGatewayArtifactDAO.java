@@ -29,6 +29,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -146,9 +147,18 @@ public class PlatformGatewayArtifactDAO {
     public void saveArtifact(String apiId, String revisionId, String gatewayEnvUuid, String deploymentId,
                              String yamlContent)
             throws APIManagementException {
+        String validationError = "API ID, revision ID, gateway environment UUID and deployment ID are required";
         if (apiId == null || revisionId == null || gatewayEnvUuid == null || deploymentId == null) {
-            log.error("Cannot save platform artifact - API ID, revision ID, gateway environment UUID and deployment ID are required");
-            throw new APIManagementException("API ID, revision ID, gateway environment UUID and deployment ID are required");
+            log.error("Cannot save platform artifact - " + validationError);
+            throw new APIManagementException(validationError);
+        }
+        apiId = apiId.trim();
+        revisionId = revisionId.trim();
+        gatewayEnvUuid = gatewayEnvUuid.trim();
+        deploymentId = deploymentId.trim();
+        if (apiId.isEmpty() || revisionId.isEmpty() || gatewayEnvUuid.isEmpty() || deploymentId.isEmpty()) {
+            log.error("Cannot save platform artifact - " + validationError);
+            throw new APIManagementException(validationError);
         }
         if (yamlContent == null) {
             log.error("Cannot save platform artifact - YAML content is required for API: " + apiId);
@@ -163,21 +173,32 @@ public class PlatformGatewayArtifactDAO {
                     SQLConstants.PlatformGatewayArtifactSQLConstants.UPDATE_ARTIFACT_BY_API_AND_GATEWAY_SQL)) {
                 ps.setBytes(1, artifactBytes);
                 ps.setTimestamp(2, now);
-                ps.setString(3, revisionId.trim());
-                ps.setString(4, deploymentId.trim());
-                ps.setString(5, apiId.trim());
-                ps.setString(6, gatewayEnvUuid.trim());
+                ps.setString(3, revisionId);
+                ps.setString(4, deploymentId);
+                ps.setString(5, apiId);
+                ps.setString(6, gatewayEnvUuid);
                 int updated = ps.executeUpdate();
                 if (updated == 0) {
                     try (PreparedStatement insertPs = connection.prepareStatement(
                             SQLConstants.PlatformGatewayArtifactSQLConstants.INSERT_ARTIFACT_SQL)) {
                         insertPs.setBytes(1, artifactBytes);
                         insertPs.setTimestamp(2, now);
-                        insertPs.setString(3, apiId.trim());
-                        insertPs.setString(4, revisionId.trim());
-                        insertPs.setString(5, gatewayEnvUuid.trim());
-                        insertPs.setString(6, deploymentId.trim());
+                        insertPs.setString(3, apiId);
+                        insertPs.setString(4, revisionId);
+                        insertPs.setString(5, gatewayEnvUuid);
+                        insertPs.setString(6, deploymentId);
                         insertPs.executeUpdate();
+                    } catch (SQLIntegrityConstraintViolationException e) {
+                        try (PreparedStatement retryPs = connection.prepareStatement(
+                                SQLConstants.PlatformGatewayArtifactSQLConstants.UPDATE_ARTIFACT_BY_API_AND_GATEWAY_SQL)) {
+                            retryPs.setBytes(1, artifactBytes);
+                            retryPs.setTimestamp(2, now);
+                            retryPs.setString(3, revisionId);
+                            retryPs.setString(4, deploymentId);
+                            retryPs.setString(5, apiId);
+                            retryPs.setString(6, gatewayEnvUuid);
+                            retryPs.executeUpdate();
+                        }
                     }
                 }
             }

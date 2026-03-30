@@ -2313,6 +2313,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<OperationPolicy> apiLevelPolicies = api.getHubPolicies();
         if (apiLevelPolicies != null) {
             for (OperationPolicy policy : apiLevelPolicies) {
+                if (policy == null) {
+                    continue;
+                }
                 String policyName = policy.getPolicyName();
                 collectSecuritySchemeFromPolicy(policyName, securitySchemes);
                 if ("api-key-auth".equalsIgnoreCase(policyName)) {
@@ -2337,6 +2340,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 List<OperationPolicy> opPolicies = template.getHubPolicies();
                 if (opPolicies != null) {
                     for (OperationPolicy policy : opPolicies) {
+                        if (policy == null) {
+                            continue;
+                        }
                         String policyName = policy.getPolicyName();
                         collectSecuritySchemeFromPolicy(policyName, securitySchemes);
                         if ("api-key-auth".equalsIgnoreCase(policyName)) {
@@ -7965,7 +7971,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
             if (artifactService != null) {
                 for (String gatewayEnvUuid : targets.getPlatformGatewayIds()) {
-                    artifactService.deleteArtifactForGateway(apiId, gatewayEnvUuid);
+                    try {
+                        artifactService.deleteArtifactForGateway(apiId, gatewayEnvUuid);
+                    } catch (Exception e) {
+                        log.warn("Failed to delete platform gateway artifact for API " + apiId
+                                + " in gateway environment " + gatewayEnvUuid, e);
+                    }
                 }
             }
             logPlatformGatewayDeploymentAudit(api, apiRevisionId, targets.getPlatformGatewayIds(),

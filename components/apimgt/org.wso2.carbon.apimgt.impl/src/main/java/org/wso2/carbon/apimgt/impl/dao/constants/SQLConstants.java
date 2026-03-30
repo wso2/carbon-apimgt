@@ -5436,7 +5436,8 @@ public class SQLConstants {
                 "DELETE FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE + " WHERE API_ID = ?";
         public static final String DELETE_REVISION_ARTIFACTS_BY_ORG_SQL =
                 "DELETE FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE + " WHERE API_ID IN " +
-                        "(SELECT API_ID FROM AM_GW_PUBLISHED_API_DETAILS WHERE TENANT_DOMAIN = ?)";
+                        "(SELECT d.API_ID FROM AM_GW_PUBLISHED_API_DETAILS d JOIN AM_API a ON d.API_ID = a.API_UUID "
+                        + "WHERE a.ORGANIZATION = ?)";
         /** List all deployments for a gateway environment UUID from the deployed artifact cache table. */
         public static final String SELECT_DEPLOYMENTS_BY_GATEWAY_UUID =
                 "SELECT API_ID, DEPLOYMENT_ID, TIME_STAMP FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE
