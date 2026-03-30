@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -515,14 +516,21 @@ public class ApisApiServiceImpl implements ApisApiService {
                 } else {
                     if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiUUId, organization)) {
                         RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiUUId, log);
-                    } else {
-                        APIKeyInfo apiKeyInfo = apiConsumer.createAssociationToApp(apiUUId, keyUUID, body.getApplicationUUID(),
-                                RestApiCommonUtil.getLoggedInUserTenantDomain(), username);
-                        APIKeyAssociationDTO apiKeyAssociationDTO =
-                                ApplicationKeyMappingUtil.formApiAssociationToDTO(api.getDisplayName(),
-                                apiKeyInfo.getApplicationName(), apiKeyInfo.getKeyName());
-                        return Response.ok().entity(apiKeyAssociationDTO).build();
+                        return null;
                     }
+                    Application application =
+                            apiConsumer.getLightweightApplicationByUUID(body.getApplicationUUID());
+                    if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                        RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION,
+                                body.getApplicationUUID(), log);
+                        return null;
+                    }
+                    APIKeyInfo apiKeyInfo = apiConsumer.createAssociationToApp(api, keyUUID,
+                            application, RestApiCommonUtil.getLoggedInUserTenantDomain(), username);
+                    APIKeyAssociationDTO apiKeyAssociationDTO =
+                            ApplicationKeyMappingUtil.formApiAssociationToDTO(api.getDisplayName(),
+                                    apiKeyInfo.getApplicationName(), apiKeyInfo.getKeyName());
+                    return Response.ok().entity(apiKeyAssociationDTO).build();
                 }
             } catch (APIManagementException e) {
                 String msg = "Error while creating an association to the API Key " + keyUUID;
@@ -623,23 +631,24 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (api != null) {
                     if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiId, organization)) {
                         RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
-                    } else {
-                            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                            APIKeyInfo apiKeyInfo = apiConsumer.regenerateApiApiKey(apiId, keyUUID, tenantDomain,
-                                    organization, username);
-                            APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKeyInfo.getApiKey(),
-                                    (int) apiKeyInfo.getValidityPeriod(), apiKeyInfo.getKeyName());
-                            return Response.ok().entity(apiKeyDto).build();
+                        return null;
                     }
+                    String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                    APIKeyInfo apiKeyInfo = apiConsumer.regenerateApiApiKey(apiId, keyUUID, tenantDomain,
+                            organization, username);
+                    APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKeyInfo.getApiKey(),
+                            (int) apiKeyInfo.getValidityPeriod(), apiKeyInfo.getKeyName());
+                    return Response.ok().entity(apiKeyDto).build();
+
                 } else {
-                    if(log.isDebugEnabled()) {
+                    if (log.isDebugEnabled()) {
                         log.debug("API with given id " + apiId + " doesn't exist ");
                     }
                     RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, log);
                 }
             } catch (APIManagementException e) {
                 String msg = "Error while regenerating API Key of API " + apiId;
-                if(log.isDebugEnabled()) {
+                if (log.isDebugEnabled()) {
                     log.debug("Error while regenerating API Key of API " + apiId + " and API Key " + keyUUID);
                 }
                 RestApiUtil.handleInternalServerError(msg, e, log);

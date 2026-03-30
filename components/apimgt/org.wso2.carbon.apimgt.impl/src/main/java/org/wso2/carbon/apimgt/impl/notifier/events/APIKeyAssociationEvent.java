@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.impl.notifier.events;
 
+import java.util.UUID;
+
 public class APIKeyAssociationEvent extends Event {
     private String apiKeyHash;
     private String applicationUUId;
@@ -7,8 +9,9 @@ public class APIKeyAssociationEvent extends Event {
     private int apiId;
     private int applicationId;
 
-    public APIKeyAssociationEvent(String apiKeyHash, String applicationUUId, String apiUUId, int apiId,
-                                  int applicationId) {
+    public APIKeyAssociationEvent(String type,String apiKeyHash, String applicationUUId, String apiUUId, int apiId,
+                                  int applicationId,int tenantId,String tenantDomain) {
+        super(UUID.randomUUID().toString(), System.currentTimeMillis(), type, tenantId, tenantDomain);
         this.apiKeyHash = apiKeyHash;
         this.applicationUUId = applicationUUId;
         this.apiUUId = apiUUId;
@@ -16,6 +19,13 @@ public class APIKeyAssociationEvent extends Event {
         this.applicationId = applicationId;
     }
 
+    public APIKeyAssociationEvent(String type,String apiKeyHash, String applicationUUId,
+                                  int applicationId,int tenantId,String tenantDomain) {
+        super(UUID.randomUUID().toString(), System.currentTimeMillis(), type, tenantId, tenantDomain);
+        this.apiKeyHash = apiKeyHash;
+        this.applicationUUId = applicationUUId;
+        this.applicationId = applicationId;
+    }
     public String getApiKeyHash() {
         return apiKeyHash;
     }

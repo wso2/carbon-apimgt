@@ -174,4 +174,14 @@ public class APIKeyEvent extends Event {
         this.permittedIP = permittedIP;
         this.permittedReferer = permittedReferer;
     }
+
+    public APIKeyEvent(String type, int tenantId, String tenantDomain,
+                       String apiKeyHash, String uuid, String name, String keyType) {
+
+        super(UUID.randomUUID().toString(), System.currentTimeMillis(), type, tenantId, tenantDomain);
+        this.apiKeyHash = apiKeyHash;
+        this.uuid = uuid;
+        this.name = name;
+        this.keyType = keyType;
+    }
 }

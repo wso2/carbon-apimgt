@@ -32,8 +32,8 @@ public class APIKeyInfo {
     private String apiUUId;
     private String origin;
     private String keyType;
-    private String lastUsedTime;
-    private String createdTime;
+    private Long lastUsedTime;
+    private long createdTime;
     private String lookupKey;
     private long validityPeriod;
     private long expiresAt;
@@ -124,19 +124,19 @@ public class APIKeyInfo {
         this.keyType = keyType;
     }
 
-    public String getLastUsedTime() {
+    public Long getLastUsedTime() {
         return lastUsedTime;
     }
 
-    public void setLastUsedTime(String lastUsedTime) {
+    public void setLastUsedTime(Long lastUsedTime) {
         this.lastUsedTime = lastUsedTime;
     }
 
-    public String getCreatedTime() {
+    public long getCreatedTime() {
         return createdTime;
     }
 
-    public void setCreatedTime(String createdTime) {
+    public void setCreatedTime(long createdTime) {
         this.createdTime = createdTime;
     }
 

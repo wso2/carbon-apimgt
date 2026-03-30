@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.LLMProviderConfiguration;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
 import org.wso2.carbon.apimgt.common.jms.JMSConnectionEventListener;
@@ -518,7 +519,61 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                     log.error("Error while loading tenant into gateway.", e);
                 }
             }
+        } else if (EventType.API_KEY_CREATE.toString().equals(eventType) ||
+                EventType.API_KEY_DELETE.toString().equals(eventType)) {
+            APIKeyEvent apiKeyEvent = new Gson().fromJson(eventJson, APIKeyEvent.class);
+            if (!TenantUtils.isTenantAvailable(apiKeyEvent.getTenantDomain())){
+                return;
+            }
+            APIKeyInfo apiKeyInfo = fromAPIKeyEventToAPIKeyInfo(apiKeyEvent);
+            if (EventType.API_KEY_DELETE.toString().equals(eventType)) {
+                DataHolder.getInstance().removeOpaqueAPIKeyInfo(apiKeyInfo.getLookupKey());
+            } else {
+                DataHolder.getInstance().addOpaqueAPIKeyInfo(apiKeyInfo);
+            }
+        } else if (EventType.API_KEY_ASSOCIATION_CREATE.toString().equals(eventType) ||
+                EventType.API_KEY_ASSOCIATION_DELETE.toString().equals(eventType)) {
+            APIKeyAssociationEvent apiKeyAssociationEvent = new Gson().fromJson(eventJson, APIKeyAssociationEvent.class);
+            if (!TenantUtils.isTenantAvailable(apiKeyAssociationEvent.getTenantDomain())){
+                return;
+            }
+            String lookupKey = apiKeyAssociationEvent.getApiKeyHash();
+            APIKeyInfo apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKey);
+            if (apiKeyInfo != null) {
+                if (EventType.API_KEY_ASSOCIATION_CREATE.toString().equals(eventType)) {
+                    apiKeyInfo.setApplicationId(apiKeyAssociationEvent.getApplicationUUId());
+                    apiKeyInfo.setAppId(apiKeyAssociationEvent.getApplicationId());
+                } else {
+                    apiKeyInfo.setApplicationId(null);
+                    apiKeyInfo.setAppId(-1);
+                }
+                DataHolder.getInstance().addOpaqueAPIKeyInfo(apiKeyInfo);
+            }
         }
+    }
+
+    private APIKeyInfo fromAPIKeyEventToAPIKeyInfo(APIKeyEvent apiKeyEvent) {
+        APIKeyInfo apiKeyInfo = new APIKeyInfo();
+        apiKeyInfo.setApiId(apiKeyEvent.getApiId());
+        apiKeyInfo.setApiKeyHash(apiKeyEvent.getApiKeyHash());
+        apiKeyInfo.setAuthUser(apiKeyEvent.getUser());
+        apiKeyInfo.setCreatedTime(apiKeyEvent.getTimeCreated());
+        if (apiKeyEvent.getValidityPeriod() < 0) {
+            apiKeyInfo.setExpiresAt(Long.MAX_VALUE);
+        } else if (apiKeyInfo.getValidityPeriod() + apiKeyEvent.getTimeCreated() < 0) {
+            apiKeyInfo.setExpiresAt(Long.MAX_VALUE);
+        } else {
+            apiKeyInfo.setExpiresAt(apiKeyEvent.getValidityPeriod() + apiKeyEvent.getTimeCreated());
+        }
+        apiKeyInfo.setValidityPeriod(apiKeyEvent.getValidityPeriod());
+        apiKeyInfo.setKeyType(apiKeyEvent.getKeyType());
+        apiKeyInfo.setLookupKey(apiKeyEvent.getApiKeyHash());
+        apiKeyInfo.setApplicationId(apiKeyEvent.getApplicationUUId());
+        apiKeyInfo.setAppId(apiKeyEvent.getApplicationId());
+        apiKeyInfo.setApiUUId(apiKeyEvent.getApiUUId());
+        apiKeyInfo.setStatus(apiKeyEvent.getStatus());
+        apiKeyInfo.setProperties(apiKeyEvent.getProperties());
+        return apiKeyInfo;
     }
 
     private void addOrUpdateTenant(TenantEvent tenantEvent) throws TenantMgtException, UserStoreException {

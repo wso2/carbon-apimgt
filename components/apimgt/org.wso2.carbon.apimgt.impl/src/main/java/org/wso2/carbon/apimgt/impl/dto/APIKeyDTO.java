@@ -37,7 +37,7 @@ public class APIKeyDTO implements Serializable {
     private String authUser;
     private long validityPeriod;
     private long createdTime;
-    private String lastUsedTime;
+    private Long lastUsedTime;
     private String permittedIP;
     private String permittedReferer;
 
@@ -121,11 +121,11 @@ public class APIKeyDTO implements Serializable {
         this.createdTime = createdTime;
     }
 
-    public String getLastUsedTime() {
+    public Long getLastUsedTime() {
         return lastUsedTime;
     }
 
-    public void setLastUsedTime(String lastUsedTime) {
+    public void setLastUsedTime(Long lastUsedTime) {
         this.lastUsedTime = lastUsedTime;
     }
 
