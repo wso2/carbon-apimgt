@@ -18,8 +18,12 @@
 
 package org.wso2.carbon.apimgt.impl.dao;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -75,13 +79,18 @@ public class ApiKeyMgtDAO {
             String addApiKeySql = SQLConstants.ADD_API_KEY_SQL;
             String addApiKeyToApiMappingSql = SQLConstants.ADD_API_KEY_TO_API_MAPPING_SQL;
             String addApiKeyToAppMappingSql = SQLConstants.ADD_API_KEY_TO_APP_MAPPING_SQL;
+            ObjectMapper mapper = new ObjectMapper();
             try {
+                byte[] properties = mapper.writeValueAsBytes(keyInfoDTO.getApiKeyProperties());
+
                 try (PreparedStatement ps = conn.prepareStatement(addApiKeySql)) {
                     ps.setString(1, keyInfoDTO.getKeyId());
                     ps.setString(2, keyInfoDTO.getKeyName());
                     ps.setString(3, apiKeyHash);
                     ps.setString(4, keyInfoDTO.getKeyType());
-                    ps.setBytes(5, keyInfoDTO.getApiKeyProperties());
+                    try (InputStream inputStream = new ByteArrayInputStream(properties)) {
+                        ps.setBinaryStream(5, inputStream);
+                    }
                     ps.setString(6, keyInfoDTO.getAuthUser());
                     ps.setTimestamp(7, new Timestamp(keyInfoDTO.getCreatedTime()),
                             Calendar.getInstance(TimeZone.getTimeZone("UTC")));
@@ -112,6 +121,8 @@ public class ApiKeyMgtDAO {
                 }
             } catch (SQLException e) {
                 conn.rollback();
+                handleException("Failed to add generated API key", e);
+            } catch (IOException e) {
                 handleException("Failed to add generated API key", e);
             }
         } catch (SQLException e) {
@@ -321,7 +332,16 @@ public class ApiKeyMgtDAO {
                         keyInfo.setApplicationName(rs.getString("APPLICATION_NAME"));
                         keyInfo.setApiName(rs.getString("API_NAME"));
                         keyInfo.setKeyType(rs.getString("KEY_TYPE"));
-                        keyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
+                        try (InputStream apiKeyPropertiesInputStream = rs.getBinaryStream("API_KEY_PROPERTIES")) {
+                            if (apiKeyPropertiesInputStream != null) {
+                                ObjectMapper mapper = new ObjectMapper();
+                                Map<String, String> propertiesMap = mapper.readValue(apiKeyPropertiesInputStream,
+                                        Map.class);
+                                keyInfo.setProperties(propertiesMap);
+                            }
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                         keyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
                         keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
                         keyInfo.setStatus(rs.getString("STATUS"));
@@ -422,12 +442,59 @@ public class ApiKeyMgtDAO {
                         Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
                         keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
-                        keyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
+                        try (InputStream apiKeyProperties = rs.getBinaryStream("API_KEY_PROPERTIES")) {
+                            if (apiKeyProperties != null) {
+                                ObjectMapper mapper = new ObjectMapper();
+                                Map<String, String> propertiesMap = mapper.readValue(apiKeyProperties,
+                                        Map.class);
+                                keyInfo.setProperties(propertiesMap);
+                            }
+                        } catch (IOException e) {
+                            handleException("Failed to convert apiKeyProperties", e);
+                        }
                     }
                 }
             }
         } catch (SQLException e) {
             handleException("Failed to get the API key details for " + keyUUId, e);
+        }
+        return keyInfo;
+    }
+
+    public APIKeyInfo getAppBoundedAPIKey(String keyId, String applicationId, String username, String organization) {
+        APIKeyInfo keyInfo = new APIKeyInfo();
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            String sqlQuery = SQLConstants.GET_APP_BOUNDED_API_KEY_DETAILS_FROM_KEY_ID_SQL;
+            try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+                ps.setString(1, keyId);
+                ps.setString(2, applicationId);
+                ps.setString(3, username);
+                ps.setString(4, organization);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
+                        keyInfo.setKeyName(rs.getString("NAME"));
+                        keyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
+                        keyInfo.setKeyType(rs.getString("KEY_TYPE"));
+                        keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
+                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
+                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
+                        keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
+                        try (InputStream apiKeyProperties = rs.getBinaryStream("API_KEY_PROPERTIES")) {
+                            if (apiKeyProperties != null) {
+                                ObjectMapper mapper = new ObjectMapper();
+                                Map<String, String> propertiesMap = mapper.readValue(apiKeyProperties,
+                                        Map.class);
+                                keyInfo.setProperties(propertiesMap);
+                            }
+                        } catch (IOException e) {
+                            handleException("Failed to convert apiKeyProperties", e);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get the API key details for " + keyId, e);
         }
         return keyInfo;
     }
@@ -458,11 +525,18 @@ public class ApiKeyMgtDAO {
                         Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
                         keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
-                        keyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
+                        try (InputStream apiKeyProperties = rs.getBinaryStream("API_KEY_PROPERTIES")) {
+                            if (apiKeyProperties != null) {
+                                ObjectMapper mapper = new ObjectMapper();
+                                Map<String, String> propertiesMap = mapper.readValue(apiKeyProperties,
+                                        Map.class);
+                                keyInfo.setProperties(propertiesMap);
+                            }
+                        }
                     }
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Failed to get the API key details for " + keyUUId, e);
         }
         return keyInfo;
@@ -497,7 +571,16 @@ public class ApiKeyMgtDAO {
                         keyInfo.setApiUUId(apiUUId);
                         keyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
-                        keyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
+                        try (InputStream apiKeyProperties = rs.getBinaryStream("API_KEY_PROPERTIES")) {
+                            if (apiKeyProperties != null) {
+                                ObjectMapper mapper = new ObjectMapper();
+                                Map<String, String> propertiesMap = mapper.readValue(apiKeyProperties,
+                                        Map.class);
+                                keyInfo.setProperties(propertiesMap);
+                            }
+                        } catch (IOException e) {
+                            handleException("Failed to convert apiKeyProperties", e);
+                        }
                         keyInfo.setApplicationId(rs.getString("APPLICATION_UUID"));
                     }
                 }

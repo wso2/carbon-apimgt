@@ -923,7 +923,7 @@ public interface APIConsumer extends APIManager {
     /**
      * Regenerate opaque api key for the given key name with same properties.
      *
-     * @param applicationId Id of the application
+     * @param application    Application object which contains the application details
      * @param keyType       Key type of the token
      * @param keyUUId       Api key UUId
      * @param tenantDomain  Tenant domain
@@ -931,7 +931,7 @@ public interface APIConsumer extends APIManager {
      * @return API key info object
      * @throws APIManagementException
      */
-    APIKeyInfo regenerateApiKey(String applicationId, String keyType, String keyUUId, String tenantDomain,
+    APIKeyInfo regenerateApiKey(Application application, String keyType, String keyUUId, String tenantDomain,
                                 String username) throws APIManagementException;
 
     /**
