@@ -27,7 +27,6 @@ import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
@@ -157,36 +156,7 @@ public class ApiKeyAuthenticatorUtils {
         return isVerified;
     }
 
-    /**
-     * This method is used to verify the hash of the API Key. It uses the API Key cache to check the received APIKey
-     * is in it.
-     *
-     * @param isGatewayTokenCacheEnabled Whether the gateway token cache is enabled or not.
-     * @param apiKeyHash                 The api key hash.
-     * @param apiKey                     The API Key.
-     * @return true if the API Key is valid.
-     * @throws APISecurityException If the key is not valid and found in the invalid key cache or revoke map.
-     */
-    public static boolean verifyAPIKeyHashFromTokenCache(boolean isGatewayTokenCacheEnabled, String apiKeyHash, String apiKey)
-            throws APISecurityException {
 
-        boolean isVerified = false;
-        if (isGatewayTokenCacheEnabled) {
-            String cacheToken = (String) getGatewayApiKeyCache().get(apiKeyHash);
-            if (cacheToken != null) {
-                log.debug("Api Key retrieved from the Api Key cache.");
-                isVerified = true;
-            } else if (getInvalidGatewayApiKeyCache().get(apiKeyHash) != null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Api Key retrieved from the invalid Api Key cache. Api Key: " + GatewayUtils.getMaskedToken(apiKeyHash));
-                }
-                log.error("Invalid Api Key." + GatewayUtils.getMaskedToken(apiKeyHash));
-                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-            }
-        }
-        return isVerified;
-    }
 
     /**
      * Publish API key usage events to CP
@@ -328,13 +298,11 @@ public class ApiKeyAuthenticatorUtils {
     /**
      * This method is used to check whether the api key is expired or not.
      *
-     * @param isGatewayTokenCacheEnabled Whether the gateway token cache is enabled or not.
      * @param apiKeyHash                 The api key hash.
-     * @param tenantDomain               The tenant domain.
      * @param apiKeyInfo                 Api key info object.
      * @throws APISecurityException If the api key is expired.
      */
-    public static void checkApiKeyExpired(boolean isGatewayTokenCacheEnabled, String apiKeyHash, String tenantDomain, APIKeyInfo apiKeyInfo)
+    public static void checkApiKeyExpired(String apiKeyHash, APIKeyInfo apiKeyInfo)
             throws APISecurityException {
 
         log.debug("Api Key is verified and started checking whether the Api key is expired or not.");
@@ -345,10 +313,6 @@ public class ApiKeyAuthenticatorUtils {
             DataHolder.getInstance().removeOpaqueAPIKeyInfo(apiKeyHash);
         }
         if (isApiKeyExpired) {
-            if (isGatewayTokenCacheEnabled) {
-                getGatewayApiKeyCache().remove(apiKeyHash);
-                getInvalidGatewayApiKeyCache().put(apiKeyHash, tenantDomain);
-            }
             log.error("Api Key is expired");
             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);

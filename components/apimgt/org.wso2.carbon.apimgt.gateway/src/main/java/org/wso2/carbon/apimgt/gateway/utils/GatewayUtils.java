@@ -60,6 +60,7 @@ import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyConfigDTO;
 import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyDeploymentConfigDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.ModelEndpointDTO;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
@@ -957,43 +958,25 @@ public class GatewayUtils {
      *
      * @param apiContext API context
      * @param apiVersion API version
-     * @param keyType    The key type
-     * @param applicationId Application Id
-     * @param apiKey      The api key which was used to invoke the API
+     * @param apiKeyInfo    The key type
      * @return an APIKeyValidationInfoDTO containing APIKey validation information.
      * If the subscription information is not found, return a null object.
      * @throws APISecurityException if the user is not subscribed to the API
      */
-    public static APIKeyValidationInfoDTO validateAPISubscription(String apiContext, String apiVersion, String keyType,
-                                                                  int applicationId, String apiKey)
+    public static APIKeyValidationInfoDTO validateAPIKeySubscription(String apiContext, String apiVersion,
+                                                                     APIKeyInfo apiKeyInfo)
             throws APISecurityException {
 
         APIKeyValidator apiKeyValidator = new APIKeyValidator();
-        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
-        int appId = 0;
-        if (applicationId != 0) {
-            appId = applicationId;
-        }
-        // Validate subscription
-        // If the appId is equal to 0 then it's an internal key
-        if (appId != 0) {
-            apiKeyValidationInfoDTO =
-                    apiKeyValidator.validateSubscription(apiContext, apiVersion, appId, getTenantDomain(), keyType);
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO =
+                apiKeyValidator.validateAPIKeySubscription(apiContext, apiVersion, getTenantDomain(), apiKeyInfo);
             if (apiKeyValidationInfoDTO.isAuthorized()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("User is subscribed to the API: " + apiContext + ", " +
-                            "version: " + apiVersion + ". Token: " + getMaskedToken(apiKey));
-                }
-                apiKeyValidationInfoDTO.setType(keyType);
+                apiKeyValidationInfoDTO.setType(apiKeyInfo.getKeyType());
             } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("User is not subscribed to access the API: " + apiContext +
-                            ", version: " + apiVersion + ". Token: " + getMaskedToken(apiKey));
-                }
                 log.error("User is not subscribed to access the API.");
                 throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                         APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
-            }
+
         }
         return apiKeyValidationInfoDTO;
     }
