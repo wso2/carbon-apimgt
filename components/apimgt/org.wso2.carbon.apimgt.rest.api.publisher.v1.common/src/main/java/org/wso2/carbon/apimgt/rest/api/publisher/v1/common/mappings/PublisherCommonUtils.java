@@ -808,11 +808,8 @@ public class PublisherCommonUtils {
             }
         } else {
             if (apiSecurity != null) {
-                if (apiSecurity.contains(APIConstants.API_SECURITY_API_KEY) && condition) {
-                    throw new APIManagementException(
-                            "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
-                            ExceptionCodes.TIER_CANNOT_BE_NULL);
-                } else if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                if ((apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                        apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) && condition) {
                     // Internally set the default tier when no tiers are defined in order to support
                     // subscription validation disabling for OAuth2 secured APIs
                     if (tiersFromDTO != null && tiersFromDTO.isEmpty()) {
@@ -1050,11 +1047,8 @@ public class PublisherCommonUtils {
             }
         } else {
             if (apiSecurity != null) {
-                if (apiSecurity.contains(APIConstants.API_SECURITY_API_KEY) && condition) {
-                    throw new APIManagementException(
-                            "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
-                            ExceptionCodes.TIER_CANNOT_BE_NULL);
-                } else if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                if ((apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                        apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) && condition) {
                     // Internally set the default tier when no tiers are defined in order to support
                     // subscription validation disabling for OAuth2 secured APIs
                     if (tiersFromDTO != null && tiersFromDTO.isEmpty()) {
@@ -3775,12 +3769,8 @@ public class PublisherCommonUtils {
                 }
             }
         } else {
-            if (apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
-                if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
-                    throw new APIManagementException("No tier defined for the API Product",
-                            ExceptionCodes.TIER_CANNOT_BE_NULL);
-                }
-            } else if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+            if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                    apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
                 // Internally set the default tier when no tiers are defined in order to support
                 // subscription validation disabling for OAuth2 secured APIs
                 if (tiersFromDTO != null && tiersFromDTO.isEmpty()) {
