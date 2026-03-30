@@ -3231,13 +3231,15 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         Set<SubscribedAPI> subscribedAPISet = new HashSet<>();
         Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(organization, subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
-            if (identifier instanceof APIIdentifier && identifier.equals(api.getAPIIdentifier())) {
+            if (identifier instanceof APIIdentifier
+                    && isMatchingAPIIdentifier((APIIdentifier) identifier, api.getAPIIdentifier())) {
                 Set<APIKey> keys = getApplicationKeys(api.getApplication().getId());
                 for (APIKey key : keys) {
                     api.addKey(key);
                 }
                 subscribedAPISet.add(api);
-            } else if (identifier instanceof APIProductIdentifier && identifier.equals(api.getProductId())) {
+            } else if (identifier instanceof APIProductIdentifier
+                    && isMatchingAPIProductIdentifier((APIProductIdentifier) identifier, api.getProductId())) {
                 Set<APIKey> keys = getApplicationKeys(api.getApplication().getId());
                 for (APIKey key : keys) {
                     api.addKey(key);
@@ -3246,6 +3248,35 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
         }
         return subscribedAPISet;
+    }
+
+    private boolean isMatchingAPIIdentifier(APIIdentifier requestedIdentifier, APIIdentifier subscribedIdentifier) {
+
+        if (subscribedIdentifier == null) {
+            return false;
+        }
+        if (requestedIdentifier.equals(subscribedIdentifier)) {
+            return true;
+        }
+        return StringUtils.equals(requestedIdentifier.getName(), subscribedIdentifier.getName())
+                && StringUtils.equals(requestedIdentifier.getVersion(), subscribedIdentifier.getVersion())
+                && StringUtils.equals(APIUtil.replaceEmailDomainBack(requestedIdentifier.getProviderName()),
+                APIUtil.replaceEmailDomainBack(subscribedIdentifier.getProviderName()));
+    }
+
+    private boolean isMatchingAPIProductIdentifier(APIProductIdentifier requestedIdentifier,
+                                                   APIProductIdentifier subscribedIdentifier) {
+
+        if (subscribedIdentifier == null) {
+            return false;
+        }
+        if (requestedIdentifier.equals(subscribedIdentifier)) {
+            return true;
+        }
+        return StringUtils.equals(requestedIdentifier.getName(), subscribedIdentifier.getName())
+                && StringUtils.equals(requestedIdentifier.getVersion(), subscribedIdentifier.getVersion())
+                && StringUtils.equals(APIUtil.replaceEmailDomainBack(requestedIdentifier.getProviderName()),
+                APIUtil.replaceEmailDomainBack(subscribedIdentifier.getProviderName()));
     }
 
     /**
