@@ -286,7 +286,7 @@ public class ApplicationKeyMappingUtil {
                     APIKeyInfoDTO dto = new APIKeyInfoDTO();
                     dto.setKeyUUID(src.getKeyUUID());
                     dto.setKeyName(src.getKeyName());
-                    dto.setIssuedOn(src.getCreatedTime());
+                    dto.setIssuedOn(String.valueOf(src.getCreatedTime()));
                     dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
                     dto.setLastUsed(getLastUsedTimeOrDefault(src.getLastUsedTime()));
                     return dto;
@@ -309,7 +309,7 @@ public class ApplicationKeyMappingUtil {
                     dto.setKeyName(src.getKeyName());
                     dto.setApiName(src.getApiName());
                     dto.setApiUUID(src.getApiUUId());
-                    dto.setIssuedOn(src.getCreatedTime());
+                    dto.setIssuedOn(String.valueOf(src.getCreatedTime()));
                     dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
                     dto.setLastUsed(getLastUsedTimeOrDefault(src.getLastUsedTime()));
                     return dto;
@@ -330,7 +330,7 @@ public class ApplicationKeyMappingUtil {
                     APIAPIKeyInfoDTO dto = new APIAPIKeyInfoDTO();
                     dto.setKeyUUID(src.getKeyUUID());
                     dto.setKeyName(src.getKeyName());
-                    dto.setIssuedOn(src.getCreatedTime());
+                    dto.setIssuedOn(String.valueOf(src.getCreatedTime()));
                     dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
                     dto.setLastUsed(getLastUsedTimeOrDefault(src.getLastUsedTime()));
                     dto.setAssociatedApp(src.getApplicationName());
@@ -360,8 +360,8 @@ public class ApplicationKeyMappingUtil {
         return apiApiKeyInfoDTOList;
     }
 
-    private static String getLastUsedTimeOrDefault(String lastUsedTime) {
-        return lastUsedTime == null ? "NOT_USED" : lastUsedTime;
+    private static String getLastUsedTimeOrDefault(Long lastUsedTime) {
+        return lastUsedTime == null ? "NOT_USED" : lastUsedTime.toString();
     }
 
     private static int toSafeValidityPeriod(long validityPeriod) {

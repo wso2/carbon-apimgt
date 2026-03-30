@@ -98,7 +98,8 @@ public class ApiKeyMgtDAO {
                     if (keyInfoDTO.getLastUsedTime() == null) {
                         ps.setNull(9, Types.TIMESTAMP);
                     } else {
-                        ps.setString(9, keyInfoDTO.getLastUsedTime());
+                        ps.setTimestamp(9, new Timestamp(keyInfoDTO.getLastUsedTime()),
+                                Calendar.getInstance(TimeZone.getTimeZone("UTC")));
                     }
                     ps.setString(10, "ACTIVE");
                     ps.executeUpdate();
@@ -157,10 +158,10 @@ public class ApiKeyMgtDAO {
                         keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
                         keyInfo.setKeyName(rs.getString("NAME"));
                         Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
-                        keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
+                        keyInfo.setCreatedTime(createdTime != null ? createdTime.getTime() : null);
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                         Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
-                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
+                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
                         keyInfo.setApplicationId(applicationUUID);
                         keyInfo.setKeyType(keyType);
                         apiKeyInfoList.add(keyInfo);
@@ -202,10 +203,10 @@ public class ApiKeyMgtDAO {
                         keyInfo.setKeyName(rs.getString("NAME"));
                         keyInfo.setApiName(rs.getString("API_NAME"));
                         Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
-                        keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
+                        keyInfo.setCreatedTime(createdTime != null ? createdTime.getTime() : null);
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                         Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
-                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
+                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
                         keyInfo.setApplicationId(applicationUUID);
                         keyInfo.setKeyType(keyType);
                         keyInfo.setApiUUId(rs.getString("API_UUID"));
@@ -243,10 +244,10 @@ public class ApiKeyMgtDAO {
                         keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
                         keyInfo.setKeyName(rs.getString("NAME"));
                         Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
-                        keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
+                        keyInfo.setCreatedTime(createdTime != null ? createdTime.getTime() : null);
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                         Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
-                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
+                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
                         keyInfo.setApplicationId(rs.getString("APPLICATION_UUID"));
                         if (keyInfo.getApplicationId() == null) {
                             keyInfo.setApplicationName(APIConstants.NO_ASSOCIATION);
@@ -325,10 +326,10 @@ public class ApiKeyMgtDAO {
                         keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
                         keyInfo.setKeyName(rs.getString("NAME"));
                         Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
-                        keyInfo.setCreatedTime(createdTime != null ? createdTime.toString() : null);
+                        keyInfo.setCreatedTime(createdTime != null ? createdTime.getTime() : null);
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                         Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
-                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
+                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
                         keyInfo.setApplicationName(rs.getString("APPLICATION_NAME"));
                         keyInfo.setApiName(rs.getString("API_NAME"));
                         keyInfo.setKeyType(rs.getString("KEY_TYPE"));
@@ -440,7 +441,7 @@ public class ApiKeyMgtDAO {
                         keyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                         Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
-                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
+                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
                         keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
                         try (InputStream apiKeyProperties = rs.getBinaryStream("API_KEY_PROPERTIES")) {
                             if (apiKeyProperties != null) {
@@ -457,44 +458,6 @@ public class ApiKeyMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to get the API key details for " + keyUUId, e);
-        }
-        return keyInfo;
-    }
-
-    public APIKeyInfo getAppBoundedAPIKey(String keyId, String applicationId, String username, String organization) {
-        APIKeyInfo keyInfo = new APIKeyInfo();
-        try (Connection conn = APIMgtDBUtil.getConnection()) {
-            String sqlQuery = SQLConstants.GET_APP_BOUNDED_API_KEY_DETAILS_FROM_KEY_ID_SQL;
-            try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
-                ps.setString(1, keyId);
-                ps.setString(2, applicationId);
-                ps.setString(3, username);
-                ps.setString(4, organization);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
-                        keyInfo.setKeyName(rs.getString("NAME"));
-                        keyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
-                        keyInfo.setKeyType(rs.getString("KEY_TYPE"));
-                        keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
-                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
-                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
-                        keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
-                        try (InputStream apiKeyProperties = rs.getBinaryStream("API_KEY_PROPERTIES")) {
-                            if (apiKeyProperties != null) {
-                                ObjectMapper mapper = new ObjectMapper();
-                                Map<String, String> propertiesMap = mapper.readValue(apiKeyProperties,
-                                        Map.class);
-                                keyInfo.setProperties(propertiesMap);
-                            }
-                        } catch (IOException e) {
-                            handleException("Failed to convert apiKeyProperties", e);
-                        }
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get the API key details for " + keyId, e);
         }
         return keyInfo;
     }
@@ -523,7 +486,7 @@ public class ApiKeyMgtDAO {
                         keyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                         Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
-                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
+                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
                         keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
                         try (InputStream apiKeyProperties = rs.getBinaryStream("API_KEY_PROPERTIES")) {
                             if (apiKeyProperties != null) {
@@ -567,7 +530,7 @@ public class ApiKeyMgtDAO {
                         keyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                         Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
-                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.toString() : null);
+                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
                         keyInfo.setApiUUId(apiUUId);
                         keyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
@@ -743,29 +706,6 @@ public class ApiKeyMgtDAO {
             handleException("Failed to get the key type for " + keyUUId, e);
         }
         return apiKeyInfo;
-    }
-
-    /**
-     * Remove association of an api key provided by the key name
-     *
-     * @param keyUUId API key UUId
-     * @param tenantDomain Tenant domain
-     * @throws APIManagementException
-     */
-    public void removeAssociationOfAPIKey(String keyUUId, String tenantDomain) throws APIManagementException {
-
-        try (Connection conn = APIMgtDBUtil.getConnection()) {
-            conn.setAutoCommit(false);
-            String sqlQuery = SQLConstants.REMOVE_API_KEY_ASSOCIATION_SQL;
-            try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
-                ps.setString(1, keyUUId);
-                ps.setString(2, tenantDomain);
-                ps.executeUpdate();
-                conn.commit();
-            }
-        } catch (SQLException e) {
-            handleException("Failed to removing association of the API key", e);
-        }
     }
 
     /**

@@ -721,14 +721,14 @@ public interface APIConsumer extends APIManager {
     /**
      * Creates an association for a given API key.
      *
-     * @param apiUUId        API UUID of the API
+     * @param api             API Object that represents the API.
      * @param keyUUId        UUID of API key
-     * @param appUUId        UUID of the Application
+     * @param application      Application Object that represents the Application.
      * @param tenantDomain   Tenant domain
      * @param username       Username
      * @throws APIManagementException This is the custom exception class for API management.
      */
-    APIKeyInfo createAssociationToApp(String apiUUId, String keyUUId, String appUUId, String tenantDomain, String username)
+    APIKeyInfo createAssociationToApp(API api, String keyUUId, Application application, String tenantDomain, String username)
             throws APIManagementException;
 
     /**
@@ -912,13 +912,13 @@ public interface APIConsumer extends APIManager {
     /**
      * Remove association of an opaque api key.
      *
-     * @param appId   Id of the Application
+     * @param application   Application object which contains the application details
      * @param keyName Api key name
      * @param tenantDomain   Tenant domain
      * @param username       Username
      * @throws APIManagementException
      */
-    void removeApiKeyAssociationViaApp(String appId, String keyName, String tenantDomain, String username) throws APIManagementException;
+    void removeApiKeyAssociationViaApp(Application application, String keyName, String tenantDomain, String username) throws APIManagementException;
 
     /**
      * Regenerate opaque api key for the given key name with same properties.
@@ -1196,4 +1196,6 @@ public interface APIConsumer extends APIManager {
      */
     API getAPIWithoutPermissionCheck(String apiId, String organization)
             throws APIManagementException;
+
+    void revokeAppBoundedAPIKey(Application application, String keyUUID, String tenantDomain, String username);
 }
