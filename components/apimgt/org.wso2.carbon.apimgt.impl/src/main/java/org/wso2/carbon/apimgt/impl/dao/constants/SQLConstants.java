@@ -3454,6 +3454,7 @@ public class SQLConstants {
                     "FROM AM_API_OPERATION_MAPPING AOM " +
                     "JOIN AM_API_URL_MAPPING AUM ON AOM.REF_URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
                     "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID IS NULL";
+    public static final String GET_APP_BOUNDED_API_KEY_DETAILS_FROM_KEY_ID_SQL = "";
 
     /**
      * Throttle related constants

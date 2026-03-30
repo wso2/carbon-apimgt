@@ -915,7 +915,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                     "or SANDBOX", log);
                         } else {
                             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                            APIKeyInfo apiKeyInfo = apiConsumer.regenerateApiKey(applicationId, keyType, keyUUID,
+                            APIKeyInfo apiKeyInfo = apiConsumer.regenerateApiKey(application, keyType, keyUUID,
                                     tenantDomain, username);
                             APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKeyInfo.getApiKey(),
                                     (int) apiKeyInfo.getValidityPeriod(), apiKeyInfo.getKeyName());

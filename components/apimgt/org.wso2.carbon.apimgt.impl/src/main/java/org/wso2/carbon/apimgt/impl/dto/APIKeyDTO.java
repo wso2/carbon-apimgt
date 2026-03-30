@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * This class represent the API Key DTO.
@@ -32,7 +33,7 @@ public class APIKeyDTO implements Serializable {
     private String applicationId;
     private String apiId;
     private String keyType;
-    private byte[] apiKeyProperties;
+    private Map<String, String> apiKeyProperties;
     private String authUser;
     private long validityPeriod;
     private long createdTime;
@@ -88,11 +89,11 @@ public class APIKeyDTO implements Serializable {
         this.keyType = keyType;
     }
 
-    public byte[] getApiKeyProperties() {
+    public Map<String, String> getApiKeyProperties() {
         return apiKeyProperties;
     }
 
-    public void setApiKeyProperties(byte[] apiKeyProperties) {
+    public void setApiKeyProperties(Map<String, String> apiKeyProperties) {
         this.apiKeyProperties = apiKeyProperties;
     }
 

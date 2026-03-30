@@ -37,7 +37,7 @@ public class APIKeyInfo {
     private String lookupKey;
     private long validityPeriod;
     private long expiresAt;
-    private byte[] properties;
+    private Map<String, String> properties;
     private Map<String, String> additionalProperties;
     private String apiKeyHash;
     private String apiKey;
@@ -164,11 +164,11 @@ public class APIKeyInfo {
         this.expiresAt = expiresAt;
     }
 
-    public byte[] getProperties() {
+    public Map<String, String> getProperties() {
         return properties;
     }
 
-    public void setProperties(byte[] properties) {
+    public void setProperties(Map<String, String> properties) {
         this.properties = properties;
     }
 
