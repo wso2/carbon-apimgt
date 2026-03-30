@@ -30,14 +30,14 @@ import org.wso2.carbon.apimgt.api.model.PlatformGatewayArtifactValidationResult;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayArtifactDAO;
-import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayConstants;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayAPIYamlConverter;
+import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayDeploymentIdUtil;
 import org.wso2.carbon.context.CarbonContext;
 
 /**
  * Implementation of platform gateway artifact service. Uses a dedicated platform artifact cache table as a
- * read-through cache and falls back to building platform api.yaml via
- * {@link PlatformGatewayAPIYamlConverter} on cache miss.
+ * read-through cache for the currently deployed artifact per gateway environment and falls back to building
+ * platform api.yaml via {@link PlatformGatewayAPIYamlConverter} on cache miss.
  */
 public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifactService {
 
@@ -66,34 +66,66 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
     }
 
     @Override
-    public String getStoredRevisionArtifact(String apiId, String revisionId) throws APIManagementException {
-        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(revisionId)) {
+    public String getStoredArtifact(String apiId, String gatewayEnvUuid) throws APIManagementException {
+        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(gatewayEnvUuid)) {
             return null;
         }
         String trimmedApiId = apiId.trim();
-        String trimmedRevisionId = revisionId.trim();
+        String trimmedGatewayEnvUuid = gatewayEnvUuid.trim();
         if (log.isDebugEnabled()) {
-            log.debug("Fetching platform gateway artifact for API " + trimmedApiId + " revision " + trimmedRevisionId);
+            log.debug("Fetching platform gateway artifact for API " + trimmedApiId + " on gateway "
+                    + trimmedGatewayEnvUuid);
         }
         PlatformGatewayArtifactDAO artifactDAO = PlatformGatewayArtifactDAO.getInstance();
-        String storedArtifact = artifactDAO.getRevisionArtifact(trimmedApiId, trimmedRevisionId);
+        String storedArtifact = artifactDAO.getArtifact(trimmedApiId, trimmedGatewayEnvUuid);
         if (StringUtils.isNotBlank(storedArtifact)) {
             if (log.isDebugEnabled()) {
-                log.debug("Serving cached platform gateway artifact for API " + trimmedApiId + " revision "
-                        + trimmedRevisionId);
+                log.debug("Serving cached platform gateway artifact for API " + trimmedApiId + " on gateway "
+                        + trimmedGatewayEnvUuid);
             }
             return storedArtifact;
         }
 
+        String revisionId = artifactDAO.getRevisionUuidByApiAndGatewayEnvUuid(trimmedApiId, trimmedGatewayEnvUuid);
+        if (StringUtils.isBlank(revisionId)) {
+            return null;
+        }
+        String trimmedRevisionId = revisionId.trim();
         String generatedArtifact = buildPlatformGatewayYamlOnTheFly(trimmedApiId, trimmedRevisionId);
         if (StringUtils.isBlank(generatedArtifact)) {
             return generatedArtifact;
         }
-        artifactDAO.saveRevisionArtifact(trimmedApiId, trimmedRevisionId, generatedArtifact);
+        String deploymentId = PlatformGatewayDeploymentIdUtil.generate(trimmedApiId, trimmedGatewayEnvUuid,
+                trimmedRevisionId);
+        artifactDAO.saveArtifact(trimmedApiId, trimmedRevisionId, trimmedGatewayEnvUuid, deploymentId,
+                generatedArtifact);
         if (log.isDebugEnabled()) {
-            log.debug("Cached generated platform gateway artifact for API " + trimmedApiId + " revision "
-                    + trimmedRevisionId);
+            log.debug("Cached generated platform gateway artifact for API " + trimmedApiId + " on gateway "
+                    + trimmedGatewayEnvUuid + " with deployment " + deploymentId);
         }
+        return generatedArtifact;
+    }
+
+    @Override
+    public String ensureArtifact(String apiId, String revisionId, String gatewayEnvUuid, String deploymentId)
+            throws APIManagementException {
+        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(revisionId) || StringUtils.isBlank(gatewayEnvUuid)
+                || StringUtils.isBlank(deploymentId)) {
+            return null;
+        }
+        String trimmedApiId = apiId.trim();
+        String trimmedGatewayEnvUuid = gatewayEnvUuid.trim();
+        String storedArtifact = PlatformGatewayArtifactDAO.getInstance().getArtifact(trimmedApiId, trimmedGatewayEnvUuid);
+        if (StringUtils.isNotBlank(storedArtifact)) {
+            return storedArtifact;
+        }
+        String trimmedRevisionId = revisionId.trim();
+        String generatedArtifact = buildPlatformGatewayYamlOnTheFly(trimmedApiId, trimmedRevisionId);
+        if (StringUtils.isBlank(generatedArtifact)) {
+            return generatedArtifact;
+        }
+        PlatformGatewayArtifactDAO.getInstance().saveArtifact(trimmedApiId, trimmedRevisionId, trimmedGatewayEnvUuid,
+                deploymentId.trim(), generatedArtifact);
         return generatedArtifact;
     }
 
@@ -163,14 +195,17 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
     }
 
     @Override
-    public void saveRevisionArtifact(String apiId, String revisionId, String yamlContent) throws APIManagementException {
-        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(revisionId)) {
-            throw new APIManagementException("API ID and revision ID are required");
+    public void saveArtifact(String apiId, String revisionId, String gatewayEnvUuid, String deploymentId,
+                             String yamlContent) throws APIManagementException {
+        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(revisionId) || StringUtils.isBlank(gatewayEnvUuid)
+                || StringUtils.isBlank(deploymentId)) {
+            throw new APIManagementException("API ID, revision ID, gateway environment UUID and deployment ID are required");
         }
         if (yamlContent == null || yamlContent.trim().isEmpty()) {
             throw new APIManagementException("YAML content is required");
         }
-        PlatformGatewayArtifactDAO.getInstance().saveRevisionArtifact(apiId.trim(), revisionId.trim(), yamlContent);
+        PlatformGatewayArtifactDAO.getInstance().saveArtifact(apiId.trim(), revisionId.trim(), gatewayEnvUuid.trim(),
+                deploymentId.trim(), yamlContent);
     }
 
     @Override
@@ -179,6 +214,14 @@ public class PlatformGatewayArtifactServiceImpl implements PlatformGatewayArtifa
             return;
         }
         PlatformGatewayArtifactDAO.getInstance().deleteRevisionArtifact(apiId.trim(), revisionId.trim());
+    }
+
+    @Override
+    public void deleteArtifactForGateway(String apiId, String gatewayEnvUuid) throws APIManagementException {
+        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(gatewayEnvUuid)) {
+            return;
+        }
+        PlatformGatewayArtifactDAO.getInstance().deleteArtifactForGateway(apiId.trim(), gatewayEnvUuid.trim());
     }
 
     @Override

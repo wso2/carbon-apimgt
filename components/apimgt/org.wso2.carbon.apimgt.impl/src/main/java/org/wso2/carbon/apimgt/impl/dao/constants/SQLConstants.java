@@ -5410,36 +5410,49 @@ public class SQLConstants {
                 "SELECT drm.REVISION_UUID FROM AM_DEPLOYMENT_REVISION_MAPPING drm "
                         + "INNER JOIN AM_REVISION r ON drm.REVISION_UUID = r.REVISION_UUID "
                         + "WHERE r.API_UUID = ? AND drm.NAME = ?";
-        /** Get platform revision artifact (YAML bytes) from the dedicated platform cache table. */
-        public static final String SELECT_REVISION_ARTIFACT_SQL =
-                "SELECT ARTIFACT FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE + " WHERE API_ID = ? AND REVISION_ID = ?";
-        public static final String UPDATE_REVISION_ARTIFACT_SQL =
-                "UPDATE " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE + " SET ARTIFACT = ?, TIME_STAMP = ? "
-                        + "WHERE API_ID = ? AND REVISION_ID = ?";
-        public static final String INSERT_REVISION_ARTIFACT_SQL =
+        /** Resolve REVISION_UUID for (apiId, gateway environment UUID). */
+        public static final String SELECT_REVISION_UUID_BY_API_AND_GATEWAY_ENV_UUID =
+                "SELECT drm.REVISION_UUID FROM AM_DEPLOYMENT_REVISION_MAPPING drm "
+                        + "INNER JOIN AM_REVISION r ON drm.REVISION_UUID = r.REVISION_UUID "
+                        + "INNER JOIN AM_GATEWAY_ENVIRONMENT e ON drm.NAME = e.NAME "
+                        + "WHERE r.API_UUID = ? AND e.UUID = ?";
+        /** Get platform deployed artifact (YAML bytes) from the dedicated platform cache table. */
+        public static final String SELECT_ARTIFACT_BY_API_AND_GATEWAY_SQL =
+                "SELECT ARTIFACT FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE
+                        + " WHERE API_ID = ? AND GATEWAY_ENV_UUID = ?";
+        public static final String UPDATE_ARTIFACT_BY_API_AND_GATEWAY_SQL =
+                "UPDATE " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE
+                        + " SET ARTIFACT = ?, TIME_STAMP = ?, REVISION_ID = ?, DEPLOYMENT_ID = ? "
+                        + "WHERE API_ID = ? AND GATEWAY_ENV_UUID = ?";
+        public static final String INSERT_ARTIFACT_SQL =
                 "INSERT INTO " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE
-                        + " (ARTIFACT, TIME_STAMP, API_ID, REVISION_ID) VALUES (?, ?, ?, ?)";
-        public static final String DELETE_REVISION_ARTIFACT_SQL =
+                        + " (ARTIFACT, TIME_STAMP, API_ID, REVISION_ID, GATEWAY_ENV_UUID, DEPLOYMENT_ID) "
+                        + "VALUES (?, ?, ?, ?, ?, ?)";
+        public static final String DELETE_ARTIFACTS_BY_API_AND_REVISION_SQL =
                 "DELETE FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE + " WHERE API_ID = ? AND REVISION_ID = ?";
+        public static final String DELETE_ARTIFACT_BY_API_AND_GATEWAY_SQL =
+                "DELETE FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE + " WHERE API_ID = ? AND GATEWAY_ENV_UUID = ?";
         public static final String DELETE_REVISION_ARTIFACTS_BY_API_SQL =
                 "DELETE FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE + " WHERE API_ID = ?";
         public static final String DELETE_REVISION_ARTIFACTS_BY_ORG_SQL =
                 "DELETE FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE + " WHERE API_ID IN " +
                         "(SELECT API_ID FROM AM_GW_PUBLISHED_API_DETAILS WHERE TENANT_DOMAIN = ?)";
-        /** List all deployments (API_UUID, REVISION_UUID, DEPLOYED_TIME) for a gateway by name. */
-        public static final String SELECT_DEPLOYMENTS_BY_GATEWAY_NAME =
-                "SELECT r.API_UUID, drm.REVISION_UUID, drm.DEPLOYED_TIME FROM AM_DEPLOYMENT_REVISION_MAPPING drm "
-                        + "INNER JOIN AM_REVISION r ON drm.REVISION_UUID = r.REVISION_UUID WHERE drm.NAME = ?";
-        /** Same as above with optional since filter (DEPLOYED_TIME >= ?). */
-        public static final String SELECT_DEPLOYMENTS_BY_GATEWAY_NAME_SINCE =
-                "SELECT r.API_UUID, drm.REVISION_UUID, drm.DEPLOYED_TIME FROM AM_DEPLOYMENT_REVISION_MAPPING drm "
-                        + "INNER JOIN AM_REVISION r ON drm.REVISION_UUID = r.REVISION_UUID WHERE drm.NAME = ? AND drm.DEPLOYED_TIME >= ?";
-        /** Resolve REVISION_UUID to API_UUID for batch lookup. */
-        public static final String SELECT_API_UUID_BY_REVISION_UUID =
-                "SELECT API_UUID FROM AM_REVISION WHERE REVISION_UUID = ?";
-        /** Check if a revision is deployed to the given gateway (NAME = gateway env name). For batch authz. */
+        /** List all deployments for a gateway environment UUID from the deployed artifact cache table. */
+        public static final String SELECT_DEPLOYMENTS_BY_GATEWAY_UUID =
+                "SELECT API_ID, DEPLOYMENT_ID, TIME_STAMP FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE
+                        + " WHERE GATEWAY_ENV_UUID = ?";
+        /** Same as above with optional since filter (TIME_STAMP >= ?). */
+        public static final String SELECT_DEPLOYMENTS_BY_GATEWAY_UUID_SINCE =
+                "SELECT API_ID, DEPLOYMENT_ID, TIME_STAMP FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE
+                        + " WHERE GATEWAY_ENV_UUID = ? AND TIME_STAMP >= ?";
+        /** Resolve deployment ID to API_ID for batch lookup. */
+        public static final String SELECT_API_UUID_BY_DEPLOYMENT_AND_GATEWAY_SQL =
+                "SELECT API_ID FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE
+                        + " WHERE GATEWAY_ENV_UUID = ? AND DEPLOYMENT_ID = ?";
+        /** Check if a deployment is present on the given gateway environment UUID. */
         public static final String SELECT_DEPLOYMENT_ON_GATEWAY_EXISTS =
-                "SELECT 1 FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ? AND REVISION_UUID = ?";
+                "SELECT 1 FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE
+                        + " WHERE GATEWAY_ENV_UUID = ? AND DEPLOYMENT_ID = ?";
     }
 
     /** SQL for AM_GW_PLATFORM_EVENT (multi-CP WebSocket sync: persist then push on connect). */

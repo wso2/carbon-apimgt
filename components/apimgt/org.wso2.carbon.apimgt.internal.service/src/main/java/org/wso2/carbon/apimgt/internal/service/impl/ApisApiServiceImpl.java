@@ -51,7 +51,6 @@ import org.wso2.carbon.apimgt.internal.service.dto.DeploymentAcknowledgmentRespo
 import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
 import org.apache.cxf.message.Message;
 import org.wso2.carbon.apimgt.api.PlatformGatewayArtifactService;
-import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
@@ -200,38 +199,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (artifactService == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        String gatewayName = gateway.name;
-        if (StringUtils.isBlank(gatewayName)) {
-            PlatformGatewayService platformGatewayService =
-                    ServiceReferenceHolder.getInstance().getPlatformGatewayService();
-            if (platformGatewayService != null) {
-                try {
-                    org.wso2.carbon.apimgt.api.model.PlatformGateway gw =
-                            platformGatewayService.getGatewayById(gateway.id);
-                    if (gw != null && StringUtils.isNotBlank(gw.getName())) {
-                        gatewayName = gw.getName();
-                    }
-                } catch (APIManagementException e) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Could not resolve gateway name for " + gateway.id + ": " + e.getMessage());
-                    }
-                }
-            }
-        }
-        if (StringUtils.isBlank(gatewayName)) {
+        if (StringUtils.isBlank(gateway.id)) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        String revisionUuid = artifactService.getRevisionUuidByApiAndGatewayName(apiId, gatewayName);
-        if (StringUtils.isBlank(revisionUuid)) {
-            if (log.isDebugEnabled()) {
-                log.debug("No revision deployed for API " + apiId + " on gateway " + gatewayName);
-            }
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-        String yaml = artifactService.getStoredRevisionArtifact(apiId, revisionUuid);
+        String yaml = artifactService.getStoredArtifact(apiId, gateway.id);
         if (yaml == null) {
             if (log.isDebugEnabled()) {
-                log.debug("No platform gateway artifact for API " + apiId + " revision " + revisionUuid);
+                log.debug("No platform gateway artifact for API " + apiId + " on gateway " + gateway.id);
             }
             return Response.status(Response.Status.NOT_FOUND).build();
         }

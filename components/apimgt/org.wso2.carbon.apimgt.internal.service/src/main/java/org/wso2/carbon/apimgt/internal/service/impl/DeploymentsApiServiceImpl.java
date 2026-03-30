@@ -23,8 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.PlatformGatewayArtifactService;
-import org.wso2.carbon.apimgt.api.PlatformGatewayService;
-import org.wso2.carbon.apimgt.api.model.PlatformGateway;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayArtifactDAO;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -71,20 +69,19 @@ public class DeploymentsApiServiceImpl implements DeploymentsApiService {
         if (gateway == null) {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid api-key").build();
         }
-        String gatewayName = resolveGatewayName(gateway);
-        if (StringUtils.isBlank(gatewayName)) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("Gateway name not resolved").build();
+        if (StringUtils.isBlank(gateway.id)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Gateway id not resolved").build();
         }
 
         Timestamp sinceTs = parseSince(since);
         List<PlatformGatewayArtifactDAO.DeploymentRow> rows =
-                PlatformGatewayArtifactDAO.getInstance().listDeploymentsByGatewayName(gatewayName, sinceTs);
+                PlatformGatewayArtifactDAO.getInstance().listDeploymentsByGatewayEnvUuid(gateway.id, sinceTs);
 
         GatewayDeploymentsResponseDTO response = new GatewayDeploymentsResponseDTO();
         List<GatewayDeploymentInfoDTO> list = new ArrayList<>();
         for (PlatformGatewayArtifactDAO.DeploymentRow row : rows) {
             GatewayDeploymentInfoDTO info = new GatewayDeploymentInfoDTO();
-            info.setDeploymentId(row.getRevisionUuid());
+            info.setDeploymentId(row.getDeploymentId());
             info.setArtifactId(row.getApiUuid());
             info.setKind(GatewayDeploymentInfoDTO.KindEnum.RESTAPI);
             info.setUpdatedAt(row.getDeployedTime() != null
@@ -113,9 +110,8 @@ public class DeploymentsApiServiceImpl implements DeploymentsApiService {
         if (gateway == null) {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid api-key").build();
         }
-        String gatewayName = resolveGatewayName(gateway);
-        if (StringUtils.isBlank(gatewayName)) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("Gateway name not resolved").build();
+        if (StringUtils.isBlank(gateway.id)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Gateway id not resolved").build();
         }
         if (batchDeploymentsRequest == null || batchDeploymentsRequest.getDeploymentIds() == null
                 || batchDeploymentsRequest.getDeploymentIds().isEmpty()) {
@@ -135,20 +131,20 @@ public class DeploymentsApiServiceImpl implements DeploymentsApiService {
             if (StringUtils.isBlank(deploymentId)) {
                 continue;
             }
-            if (!dao.isDeploymentOnGateway(gatewayName, deploymentId)) {
+            if (!dao.isDeploymentOnGateway(gateway.id, deploymentId)) {
                 if (log.isWarnEnabled()) {
-                    log.warn("Batch request: deployment " + deploymentId + " is not on gateway " + gatewayName + "; skipping");
+                    log.warn("Batch request: deployment " + deploymentId + " is not on gateway " + gateway.id + "; skipping");
                 }
                 continue;
             }
-            String apiUuid = dao.getApiUuidByRevisionUuid(deploymentId);
+            String apiUuid = dao.getApiUuidByDeploymentId(gateway.id, deploymentId);
             if (apiUuid == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("No API found for deployment/revision ID: " + deploymentId);
                 }
                 continue;
             }
-            String yaml = artifactService.getStoredRevisionArtifact(apiUuid, deploymentId);
+            String yaml = artifactService.getStoredArtifact(apiUuid, gateway.id);
             if (yaml != null) {
                 entries.add(new DeploymentTarGzBuilder.DeploymentEntry(deploymentId, apiUuid, yaml));
             }
@@ -180,26 +176,6 @@ public class DeploymentsApiServiceImpl implements DeploymentsApiService {
         }
         String header = request.getHeader("api-key");
         return StringUtils.isBlank(header) ? null : header;
-    }
-
-    private static String resolveGatewayName(PlatformGatewayDAO.PlatformGateway gateway) {
-        if (StringUtils.isNotBlank(gateway.name)) {
-            return gateway.name;
-        }
-        PlatformGatewayService platformGatewayService = ServiceReferenceHolder.getInstance().getPlatformGatewayService();
-        if (platformGatewayService != null) {
-            try {
-                PlatformGateway gw = platformGatewayService.getGatewayById(gateway.id);
-                if (gw != null && StringUtils.isNotBlank(gw.getName())) {
-                    return gw.getName();
-                }
-            } catch (APIManagementException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Could not resolve gateway name for " + gateway.id + ": " + e.getMessage());
-                }
-            }
-        }
-        return null;
     }
 
     private static Timestamp parseSince(String since) {

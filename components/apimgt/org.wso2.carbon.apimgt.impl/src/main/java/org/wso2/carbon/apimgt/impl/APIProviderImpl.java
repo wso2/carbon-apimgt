@@ -180,6 +180,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.LifeCycleUtils;
 import org.wso2.carbon.apimgt.impl.utils.MCPUtils;
+import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayDeploymentIdUtil;
 import org.wso2.carbon.apimgt.impl.utils.SimpleContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
@@ -7686,7 +7687,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 try {
                     DeploymentTargets targets = DeploymentModeResolver.resolve(organization, targetEnvironments);
                     if (!targets.getPlatformGatewayIds().isEmpty()) {
-                        warmPlatformRevisionArtifactCache(apiId, revisionUUID);
+                        warmPlatformRevisionArtifactCache(apiId, revisionUUID, targets.getPlatformGatewayIds());
                     }
                     GatewayArtifactsMgtDAO.getInstance()
                             .addAndRemovePublishedGatewayLabels(apiId, revisionUUID,
@@ -7960,6 +7961,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             DeploymentTargets targets = DeploymentModeResolver.resolve(organization, environmentsToRemove);
             removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet(), onDeleteOrRetire);
+            PlatformGatewayArtifactService artifactService =
+                    ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
+            if (artifactService != null) {
+                for (String gatewayEnvUuid : targets.getPlatformGatewayIds()) {
+                    artifactService.deleteArtifactForGateway(apiId, gatewayEnvUuid);
+                }
+            }
             logPlatformGatewayDeploymentAudit(api, apiRevisionId, targets.getPlatformGatewayIds(),
                     environmentsToRemove, APIConstants.AuditLogConstants.UNDEPLOY);
         } catch (RuntimeException e) {
@@ -8157,13 +8165,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return revisionUUID;
     }
 
-    private void warmPlatformRevisionArtifactCache(String apiId, String revisionUUID) throws APIManagementException {
+    private void warmPlatformRevisionArtifactCache(String apiId, String revisionUUID, Set<String> gatewayEnvUuids)
+            throws APIManagementException {
         PlatformGatewayArtifactService artifactService =
                 ServiceReferenceHolder.getInstance().getPlatformGatewayArtifactService();
-        if (artifactService == null || StringUtils.isBlank(apiId) || StringUtils.isBlank(revisionUUID)) {
+        if (artifactService == null || StringUtils.isBlank(apiId) || StringUtils.isBlank(revisionUUID)
+                || gatewayEnvUuids == null || gatewayEnvUuids.isEmpty()) {
             return;
         }
-        artifactService.getStoredRevisionArtifact(apiId, revisionUUID);
+        for (String gatewayEnvUuid : gatewayEnvUuids) {
+            if (StringUtils.isBlank(gatewayEnvUuid)) {
+                continue;
+            }
+            artifactService.ensureArtifact(apiId, revisionUUID, gatewayEnvUuid,
+                    PlatformGatewayDeploymentIdUtil.generate(apiId, gatewayEnvUuid, revisionUUID));
+        }
     }
 
     private void logPlatformGatewayDeploymentAudit(API api, String revisionUUID, Set<String> platformGatewayIds,

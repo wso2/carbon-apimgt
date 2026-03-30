@@ -163,8 +163,16 @@ public class OperationPolicyMappingUtil {
 
             OperationPolicyData policyData = null;
 
-            // If apiUuid exists, look for API specific operation policy first
-            if (apiUuid != null && !apiUuid.isEmpty()) {
+            // If apiUuid exists, look for the exact API-specific operation policy first. This is important for cloned
+            // common policies because name-based API-specific lookup intentionally excludes cloned rows.
+            if (apiUuid != null && !apiUuid.isEmpty() && operationPolicy.getPolicyId() != null) {
+                log.debug("Looking for API specific operation policy by ID: " + operationPolicy.getPolicyId());
+                policyData = apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicy.getPolicyId(), apiUuid,
+                        tenantDomain, false);
+            }
+
+            // Fall back to name/version lookup for non-cloned API-specific policies when the exact ID is not available.
+            if (policyData == null && apiUuid != null && !apiUuid.isEmpty()) {
                 log.debug(
                         "Looking for API specific operation policy: " + operationPolicy.getPolicyName()
                                 + ", version: " + operationPolicy.getPolicyVersion());
@@ -179,6 +187,12 @@ public class OperationPolicyMappingUtil {
                                 + operationPolicy.getPolicyName() + ", version: " + operationPolicy.getPolicyVersion());
                 policyData = apiProvider.getCommonOperationPolicyByPolicyName(operationPolicy.getPolicyName(),
                         operationPolicy.getPolicyVersion(), tenantDomain, false);
+            }
+
+            // If this API-specific policy is a clone of a common policy, expose the original common policy ID in the
+            // DTO. The publisher uses this ID to fetch common policy details while editing an API.
+            if (policyData != null && policyData.getClonedCommonPolicyId() != null) {
+                dto.setPolicyId(policyData.getClonedCommonPolicyId());
             }
 
             // If policyData is found, check for Secret type attributes

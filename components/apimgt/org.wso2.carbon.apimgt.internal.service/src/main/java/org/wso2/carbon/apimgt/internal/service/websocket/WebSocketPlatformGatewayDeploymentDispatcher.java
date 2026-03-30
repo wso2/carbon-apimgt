@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayDeploymentDispatcher;
 import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayEventEnvelopeUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
+import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayDeploymentIdUtil;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -54,12 +55,13 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
         String apiId = event.getUuid();
         String revisionUuid = event.getEventId();
         for (String gatewayId : platformGatewayIds) {
-            String message = buildDeployMessage(event);
+            String deploymentId = PlatformGatewayDeploymentIdUtil.generate(apiId, gatewayId, revisionUuid);
+            String message = buildDeployMessage(event, deploymentId);
             if (eventService != null) {
                 try {
                     eventService.persistEvent(gatewayId, PlatformGatewayWebSocketConstants.EVENT_API_DEPLOYED,
                             PlatformGatewayEventEnvelopeUtil.wrapForStorage(message,
-                                    deploymentEventMetadata(apiId, revisionUuid)));
+                                    deploymentEventMetadata(apiId, revisionUuid, deploymentId)));
                 } catch (Exception e) {
                     log.error("Failed to persist deploy event for gateway " + gatewayId + ": " + e.getMessage(), e);
                 }
@@ -76,12 +78,13 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
         String apiId = event.getUuid();
         String revisionUuid = event.getEventId();
         for (String gatewayId : platformGatewayIds) {
-            String message = buildUndeployMessage(event);
+            String deploymentId = PlatformGatewayDeploymentIdUtil.generate(apiId, gatewayId, revisionUuid);
+            String message = buildUndeployMessage(event, deploymentId);
             if (eventService != null) {
                 try {
                     eventService.persistEvent(gatewayId, PlatformGatewayWebSocketConstants.EVENT_API_UNDEPLOYED,
                             PlatformGatewayEventEnvelopeUtil.wrapForStorage(message,
-                                    deploymentEventMetadata(apiId, revisionUuid)));
+                                    deploymentEventMetadata(apiId, revisionUuid, deploymentId)));
                 } catch (Exception e) {
                     log.error("Failed to persist undeploy event for gateway " + gatewayId + ": " + e.getMessage(), e);
                 }
@@ -105,7 +108,7 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
                 try {
                     eventService.persistEvent(gatewayId, PlatformGatewayWebSocketConstants.EVENT_API_DELETED,
                             PlatformGatewayEventEnvelopeUtil.wrapForStorage(message,
-                                    deploymentEventMetadata(apiId, revisionUuid)));
+                                    deploymentEventMetadata(apiId, revisionUuid, null)));
                 } catch (Exception e) {
                     log.error("Failed to persist delete event for gateway " + gatewayId + ": " + e.getMessage(), e);
                 }
@@ -129,13 +132,16 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
     /**
      * Arbitrary key/value pairs persisted in the envelope {@code metadata} object (not sent on the WebSocket wire).
      */
-    private static Map<String, String> deploymentEventMetadata(String apiId, String revisionUuid) {
-        Map<String, String> meta = new LinkedHashMap<>(2);
+    private static Map<String, String> deploymentEventMetadata(String apiId, String revisionUuid, String deploymentId) {
+        Map<String, String> meta = new LinkedHashMap<>(3);
         if (StringUtils.isNotBlank(apiId)) {
             meta.put("apiId", apiId.trim());
         }
         if (StringUtils.isNotBlank(revisionUuid)) {
             meta.put("revisionUuid", revisionUuid.trim());
+        }
+        if (StringUtils.isNotBlank(deploymentId)) {
+            meta.put("deploymentId", deploymentId.trim());
         }
         return meta;
     }
@@ -144,10 +150,10 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
      * Build message in the exact API Platform gateway-controller format:
      * type "api.deployed", payload { apiId, deploymentId, performedAt }, timestamp, correlationId.
      */
-    private static String buildDeployMessage(DeployAPIInGatewayEvent event) {
+    private static String buildDeployMessage(DeployAPIInGatewayEvent event, String deploymentId) {
         String timestamp = Instant.now().toString();
         PlatformGatewayWebSocketModels.ApiDeploymentPayload payload =
-                new PlatformGatewayWebSocketModels.ApiDeploymentPayload(event.getUuid(), event.getEventId(), timestamp);
+                new PlatformGatewayWebSocketModels.ApiDeploymentPayload(event.getUuid(), deploymentId, timestamp);
         return PlatformGatewayWebSocketJsonUtil.toJson(
                 new PlatformGatewayWebSocketModels.EventEnvelope<>(
                         PlatformGatewayWebSocketConstants.EVENT_API_DEPLOYED, payload, timestamp,
@@ -158,10 +164,10 @@ public class WebSocketPlatformGatewayDeploymentDispatcher implements PlatformGat
      * Build message in the exact API Platform gateway-controller format:
      * type "api.undeployed", payload { apiId, deploymentId, performedAt }, timestamp, correlationId.
      */
-    private static String buildUndeployMessage(DeployAPIInGatewayEvent event) {
+    private static String buildUndeployMessage(DeployAPIInGatewayEvent event, String deploymentId) {
         String timestamp = Instant.now().toString();
         PlatformGatewayWebSocketModels.ApiDeploymentPayload payload =
-                new PlatformGatewayWebSocketModels.ApiDeploymentPayload(event.getUuid(), event.getEventId(), timestamp);
+                new PlatformGatewayWebSocketModels.ApiDeploymentPayload(event.getUuid(), deploymentId, timestamp);
         return PlatformGatewayWebSocketJsonUtil.toJson(
                 new PlatformGatewayWebSocketModels.EventEnvelope<>(
                         PlatformGatewayWebSocketConstants.EVENT_API_UNDEPLOYED, payload, timestamp,
