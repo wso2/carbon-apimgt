@@ -22053,6 +22053,54 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Retrieves URL templates from APIs for a given product revision that do not have
+     * corresponding entries (e.g., missing or unmatched mappings).
+     *
+     * @param revisionUUID UUID of the product revision
+     * @return list of missing URITemplate objects, or null if an error occurs
+     * @throws APIManagementException if a database error occurs
+     */
+    public List<URITemplate> getMissingUrlTemplatesOfProductRevisionFromAPIs(String revisionUUID)
+            throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            String query = SQLConstants.APIRevisionSqlConstants.SELECT_REVISIONED_PRODUCT_URL_MAPPINGS_FROM_APIS;
+            ps = conn.prepareStatement(query);
+            ps.setString(1, revisionUUID);
+            List<URITemplate> urlMappingList = new ArrayList<>();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    URITemplate uriTemplate = new URITemplate();
+                    uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
+                    uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
+                    if (rs.getInt("API_ID") != 0) {
+                        uriTemplate.setId(rs.getInt("API_ID"));
+                    }
+                    urlMappingList.add(uriTemplate);
+                }
+            }
+            return urlMappingList;
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Error while rolling back the failed operation", e1);
+                }
+            }
+            handleException("Error in finding missing resources " + e.getMessage(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+        return null;
+    }
+
+    /**
      * Restore API Product revision database records as the Current API Product of an API Product
      *
      * @param apiRevision  content of the revision
