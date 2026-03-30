@@ -22057,7 +22057,7 @@ public class ApiMgtDAO {
      * corresponding entries (e.g., missing or unmatched mappings).
      *
      * @param revisionUUID UUID of the product revision
-     * @return list of missing URITemplate objects, or null if an error occurs
+     * @return list of missing URITemplate objects (empty when no missing mappings)
      * @throws APIManagementException if a database error occurs
      */
     public List<URITemplate> getMissingUrlTemplatesOfProductRevisionFromAPIs(String revisionUUID)
