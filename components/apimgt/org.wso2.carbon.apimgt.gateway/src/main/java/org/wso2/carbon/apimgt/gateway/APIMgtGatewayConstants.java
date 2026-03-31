@@ -61,6 +61,7 @@ public class APIMgtGatewayConstants {
     public static final String DUMMY_ENDPOINT_ADDRESS = "dummy_endpoint_address";
     public static final String CUSTOM_PROPERTY = "customProperty";
     public static final String RESOURCE_PATTERN = "^/.+?/.+?([/?].+)$";
+    public static final String AUTHENTICATORS_CHALLENGE_STRING = "API:authenticators_challenge_string";
 
     public static final String METHOD_NOT_FOUND_ERROR_MSG = "Method not allowed for given API resource";
     public static final String RESOURCE_NOT_FOUND_ERROR_MSG = "No matching resource found for given API Request";
@@ -252,7 +253,7 @@ public class APIMgtGatewayConstants {
     public static final String MCP_SERVER_NAME = "name";
     public static final String MCP_SERVER_VERSION = "version";
     public static final String MCP_IS_ERROR = "isError";
-    public static final String MCP_ERROR_CODE = "mcpErrorCode";
+    public static final String MCP_ERROR_CODE = "errorCode";
     public static final String SERVER_INFO = "serverInfo";
     public static final String SERVER_NAME = "name";
     public static final String SERVER_VERSION = "version";

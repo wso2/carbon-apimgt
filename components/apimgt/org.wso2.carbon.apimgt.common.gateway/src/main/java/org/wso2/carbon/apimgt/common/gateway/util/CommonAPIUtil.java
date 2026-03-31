@@ -93,6 +93,7 @@ public class CommonAPIUtil {
         int maxTotal = clientConfiguration.getConnectionLimit();
         int defaultMaxPerRoute = clientConfiguration.getMaximumConnectionsPerRoute();
         int connectionTimeout = clientConfiguration.getConnectionTimeout();
+        int connectionRequestTimeout = clientConfiguration.getConnectionRequestTimeout();
 
         boolean proxyEnabled = clientConfiguration.isProxyEnabled();
         String proxyHost = clientConfiguration.getProxyHost();
@@ -114,6 +115,7 @@ public class CommonAPIUtil {
 
         RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
         requestConfigBuilder.setConnectTimeout(connectionTimeout);
+        requestConfigBuilder.setConnectionRequestTimeout(connectionRequestTimeout);
         RequestConfig params = requestConfigBuilder.build();
 
         HttpClientBuilder clientBuilder = HttpClients.custom().setConnectionManager(pool)

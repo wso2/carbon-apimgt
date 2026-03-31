@@ -3041,8 +3041,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private String updateSwagger(String apiId, String apiDefinition, String organization)
             throws APIManagementException, FaultGatewaysException {
-        APIDefinitionValidationResponse response = OASParserUtil
-                .validateAPIDefinition(apiDefinition, true);
+        OASParserOptions oasParserOptions = CommonUtil.getOasParserOptions();
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(apiDefinition, true,
+                oasParserOptions);
         if (!response.isValid()) {
             RestApiUtil.handleBadRequest(response.getErrorItems(), log);
         }

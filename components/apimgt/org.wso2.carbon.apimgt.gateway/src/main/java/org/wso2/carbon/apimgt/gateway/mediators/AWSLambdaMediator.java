@@ -228,26 +228,30 @@ public class AWSLambdaMediator extends AbstractMediator implements ManagedLifecy
             }
             payload.add(PATH_PARAMETERS, pathParameters);
             payload.add(QUERY_STRING_PARAMETERS, queryStringParameters);
-            payload.addProperty(HTTP_METHOD, (String) messageContext.getProperty(APIConstants.REST_METHOD));
+            String httpMethod = (String) messageContext.getProperty(APIConstants.REST_METHOD);
+            payload.addProperty(HTTP_METHOD, httpMethod);
             payload.addProperty(PATH, (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE));
 
             // Set lambda backend invocation start time for analytics
             messageContext.setProperty(Constants.BACKEND_START_TIME_PROPERTY, System.currentTimeMillis());
 
-            String body = "{}";
-            if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
-                body = JsonUtil.jsonPayloadToString(axis2MessageContext);
-                if (isContentEncodingEnabled) {
-                    body = Base64.encodeBase64String(body.getBytes());
+            if (!APIConstants.HTTP_GET.equalsIgnoreCase(httpMethod) && !APIConstants.HTTP_HEAD.equalsIgnoreCase(httpMethod)) {
+                String body = "{}";
+                if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
+                    body = JsonUtil.jsonPayloadToString(axis2MessageContext);
+                    if (isContentEncodingEnabled) {
+                        body = Base64.encodeBase64String(body.getBytes());
+                    }
+                } else {
+                    String multipartContent = extractFormDataContent(axis2MessageContext);
+                    if (StringUtils.isNotEmpty(multipartContent)) {
+                        body = isContentEncodingEnabled ? Base64.encodeBase64String(multipartContent.getBytes()) :
+                                multipartContent;
+                    }
                 }
-            } else {
-                String multipartContent = extractFormDataContent(axis2MessageContext);
-                if (StringUtils.isNotEmpty(multipartContent)) {
-                    body = isContentEncodingEnabled ? Base64.encodeBase64String(multipartContent.getBytes()) :
-                            multipartContent;
-                }
+                payload.addProperty(BODY_PARAMETER, body);
             }
-            payload.addProperty(BODY_PARAMETER, body);
+
             payload.addProperty(IS_BASE64_ENCODED_PARAMETER, isContentEncodingEnabled);
 
             if (log.isDebugEnabled()) {

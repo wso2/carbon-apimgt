@@ -1852,6 +1852,7 @@ public final class APIConstants {
     public static final String HTTP_CLIENT_MAX_TOTAL = "HttpClient.MaxTotal";
     public static final String HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE = "HttpClient.DefaultMaxPerRoute";
     public static final String HTTP_CLIENT_CONNECTION_TIMEOUT = "HttpClient.ConnectionTimeout";
+    public static final String HTTP_CLIENT_CONNECTION_REQUEST_TIMEOUT = "HttpClient.ConnectionRequestTimeout";
 
     public static final String PROXY_ENABLE = "ProxyConfig.Enable";
     public static final String PROXY_HOST = "ProxyConfig.Host";
@@ -2519,6 +2520,7 @@ public final class APIConstants {
         public static final String DEPLOYED = "deployed";
         public static final String UNDEPLOYED = "undeployed";
         public static final String LIFECYCLE_CHANGED = "lifecycle-changed";
+        public static final String PROVIDER_CHANGED = "provider-changed";
 
         public static final String API = "API";
         public static final String SYSTEM = "SYSTEM";
@@ -2536,6 +2538,8 @@ public final class APIConstants {
         public static final String VERSION = "version";
         public static final String CONTEXT = "context";
         public static final String PROVIDER = "provider";
+        public static final String OLD_PROVIDER = "oldProvider";
+        public static final String NEW_PROVIDER = "newProvider";
         public static final String OWNER = "owner";
         public static final String TIER = "tier";
         public static final String API_ID = "apiId";
@@ -2662,6 +2666,7 @@ public final class APIConstants {
     public static final String API_TYPE_WEBSUB = "WEBSUB";
     public static final String API_TYPE_SSE = "SSE";
     public static final String API_TYPE_MCP = "MCP";
+    public static final String MCP_HTTP_METHOD = "MCP_HTTP_METHOD";
 
     public static final String API_TYPE_SOAP = "SOAP";
     public static final String API_TYPE_SOAPTOREST = "SOAPTOREST";
@@ -3047,6 +3052,9 @@ public final class APIConstants {
 
     public static final String DEFAULT_SCOPE_TYPE = "OAUTH2";
     public static final String DEFAULT_BINDING_TYPE = "DEFAULT";
+    public static final String COOKIE = "cookie";
+    public static final String BINDING_REF = "binding_ref";
+    public static final String BINDING_TYPE = "binding_type";
 
     public static class TokenIssuer {
 

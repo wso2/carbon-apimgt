@@ -709,8 +709,15 @@ public class OAS3Parser extends APIDefinition {
     }
 
     @Override
-    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent) throws APIManagementException {
-        return validateAPIDefinition(apiDefinition, "", returnJsonContent);
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
+            throws APIManagementException {
+        return validateAPIDefinition(apiDefinition, returnJsonContent, null);
+    }
+
+    @Override
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent,
+            OASParserOptions oasParserOptions) throws APIManagementException {
+        return validateAPIDefinition(apiDefinition, "", returnJsonContent, oasParserOptions);
     }
 
     /**
@@ -927,18 +934,37 @@ public class OAS3Parser extends APIDefinition {
      * This method validates the given OpenAPI definition by content
      *
      * @param apiDefinition     OpenAPI Definition content
-     * @param host OpenAPI Definition url
+     * @param host              OpenAPI Definition url
      * @param returnJsonContent whether to return the converted json form of the OpenAPI definition
+     * @return APIDefinitionValidationResponse object with validation information
+     * @deprecated Use {@link #validateAPIDefinition(String, String, boolean, OASParserOptions)} instead to support
+     *         configurable OpenAPI parser options.
+     */
+    @Deprecated
+    @Override
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String host,
+            boolean returnJsonContent) throws APIManagementException {
+        return validateAPIDefinition(apiDefinition, host, returnJsonContent, null);
+    }
+
+    /**
+     * This method validates the given OpenAPI definition by content with optional parser configuration.
+     *
+     * @param apiDefinition     OpenAPI Definition content
+     * @param host              OpenAPI Definition url
+     * @param returnJsonContent whether to return the converted json form of the OpenAPI definition
+     * @param parserOptions     optional OpenAPI parser options; may be {@code null} to use defaults
      * @return APIDefinitionValidationResponse object with validation information
      */
     @Override
-    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String host, boolean returnJsonContent)
-            throws APIManagementException {
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String host,
+            boolean returnJsonContent, OASParserOptions parserOptions) throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
+        String processedDefinition = OASParserUtil.preprocessYamlWithLimit(apiDefinition, parserOptions);
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(apiDefinition, null, options);
+        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(processedDefinition, null, options);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
             validationResponse.setValid(false);
             for (String message : parseAttemptForV3.getMessages()) {
@@ -1036,8 +1062,8 @@ public class OAS3Parser extends APIDefinition {
             validationResponse.setParser(this);
             if (returnJsonContent) {
                 if (!apiDefinition.trim().startsWith("{")) { // not a json (it is yaml)
-                    JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition);
-                    validationResponse.setJsonContent(jsonNode.toString());
+                    String jsonNodeString = OASParserUtil.preprocessYamlWithLimit(apiDefinition, parserOptions);
+                    validationResponse.setJsonContent(jsonNodeString);
                 } else {
                     validationResponse.setJsonContent(apiDefinition);
                 }

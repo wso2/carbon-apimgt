@@ -68,7 +68,6 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import java.security.cert.Certificate;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,6 +76,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.cache.Cache;
+
 
 /**
  * A Validator class to validate JWT tokens in an API request.

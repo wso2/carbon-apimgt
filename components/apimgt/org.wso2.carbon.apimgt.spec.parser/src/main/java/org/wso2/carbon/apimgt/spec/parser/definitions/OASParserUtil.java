@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.swagger.models.Path;
@@ -87,6 +88,7 @@ import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.spec.parser.definitions.mixin.License31Mixin;
+import org.yaml.snakeyaml.LoaderOptions;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -939,9 +941,26 @@ public class OASParserUtil {
      * @param returnContent whether to return the content of the definition in the response DTO
      * @return APIDefinitionValidationResponse
      * @throws APIManagementException if error occurred while parsing definition
+     * @deprecated Use {@link #extractAndValidateOpenAPIArchive(InputStream, boolean, OASParserOptions)} instead to
+     *         support configurable OpenAPI parser options.
      */
+    @Deprecated
     public static APIDefinitionValidationResponse extractAndValidateOpenAPIArchive(InputStream inputStream,
             boolean returnContent) throws APIManagementException {
+        return extractAndValidateOpenAPIArchive(inputStream, returnContent, null);
+    }
+
+    /**
+     * Extract the archive file and validates the openAPI definition
+     *
+     * @param inputStream      file as input stream
+     * @param returnContent    whether to return the content of the definition in the response DTO
+     * @param oasParserOptions optional OpenAPI parser options; may be {@code null} to use defaults
+     * @return APIDefinitionValidationResponse
+     * @throws APIManagementException if error occurred while parsing definition
+     */
+    public static APIDefinitionValidationResponse extractAndValidateOpenAPIArchive(InputStream inputStream,
+            boolean returnContent, OASParserOptions oasParserOptions) throws APIManagementException {
         String path = System.getProperty(APISpecParserConstants.JAVA_IO_TMPDIR) + File.separator +
                 APISpecParserConstants.OPENAPI_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
         String archivePath = path + File.separator + APISpecParserConstants.OPENAPI_ARCHIVE_ZIP_FILE;
@@ -993,7 +1012,8 @@ public class OASParserUtil {
             }
         }
         APIDefinitionValidationResponse apiDefinitionValidationResponse;
-        apiDefinitionValidationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
+        apiDefinitionValidationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent,
+                oasParserOptions);
         return apiDefinitionValidationResponse;
     }
 
@@ -1040,14 +1060,32 @@ public class OASParserUtil {
      * @param returnJsonContent whether to return definition as a json content
      * @return APIDefinitionValidationResponse
      * @throws APIManagementException if error occurred while parsing definition
+     * @deprecated Use {@link #validateAPIDefinition(String, boolean, OASParserOptions)} instead to support configurable
+     *         OpenAPI parser options.
      */
+    @Deprecated
     @UsedByMigrationClient
     public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
             throws APIManagementException {
+        return validateAPIDefinition(apiDefinition, returnJsonContent, null);
+    }
+
+    /**
+     * Try to validate a give openAPI definition using OpenAPI 3 parser with optional parser configuration.
+     *
+     * @param apiDefinition     definition
+     * @param returnJsonContent whether to return definition as a json content
+     * @param oasParserOptions  optional OpenAPI parser options; may be {@code null} to use defaults
+     * @return APIDefinitionValidationResponse
+     * @throws APIManagementException if error occurred while parsing definition
+     */
+    @UsedByMigrationClient
+    public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent,
+            OASParserOptions oasParserOptions) throws APIManagementException {
         String apiDefinitionProcessed = apiDefinition;
         if (!apiDefinition.trim().startsWith("{")) {
             try {
-                JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition, new SwaggerDeserializationResult());
+                JsonNode jsonNode = parseYamlWithLimit(apiDefinition, oasParserOptions);
                 apiDefinitionProcessed = jsonNode.toString();
             } catch (IOException e) {
                 throw new APIManagementException("Error while reading API definition yaml", e);
@@ -1060,7 +1098,7 @@ public class OASParserUtil {
             if (apiDefinitionProcessed != null) {
                 apiDefinition = apiDefinitionProcessed;
             }
-            validationResponse = oas3Parser.validateAPIDefinition(apiDefinition, returnJsonContent);
+            validationResponse = oas3Parser.validateAPIDefinition(apiDefinition, returnJsonContent, oasParserOptions);
             if (!validationResponse.isValid()) {
                 for (ErrorHandler handler : validationResponse.getErrorItems()) {
                     if (ExceptionCodes.INVALID_OAS3_FOUND.getErrorCode() == handler.getErrorCode()) {
@@ -1098,18 +1136,35 @@ public class OASParserUtil {
      * Try to validate a give openAPI definition using OpenAPI 3 parser
      *
      * @param apiDefinition     definition
-     * @param url OpenAPI definition url
+     * @param url               OpenAPI definition url
      * @param returnJsonContent whether to return definition as a json content
      * @return APIDefinitionValidationResponse
      * @throws APIManagementException if error occurred while parsing definition
+     * @deprecated Use {@link #validateAPIDefinition(String, String, boolean, OASParserOptions)} instead to support
+     *         configurable OpenAPI parser options.
      */
-    public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url ,
-                                                                        boolean returnJsonContent)
-            throws APIManagementException {
+    @Deprecated
+    public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url,
+            boolean returnJsonContent) throws APIManagementException {
+        return validateAPIDefinition(apiDefinition, url, returnJsonContent, null);
+    }
+
+    /**
+     * Try to validate a give openAPI definition using OpenAPI 3 parser with optional parser configuration.
+     *
+     * @param apiDefinition     definition
+     * @param url               OpenAPI definition url
+     * @param returnJsonContent whether to return definition as a json content
+     * @param oasParserOptions  optional OpenAPI parser options; may be {@code null} to use defaults
+     * @return APIDefinitionValidationResponse
+     * @throws APIManagementException if error occurred while parsing definition
+     */
+    public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url,
+            boolean returnJsonContent, OASParserOptions oasParserOptions) throws APIManagementException {
         String apiDefinitionProcessed = apiDefinition;
         if (!apiDefinition.trim().startsWith("{")) {
             try {
-                JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition, new SwaggerDeserializationResult());
+                JsonNode jsonNode = parseYamlWithLimit(apiDefinition, oasParserOptions);
                 apiDefinitionProcessed = jsonNode.toString();
             } catch (IOException e) {
                 throw new APIManagementException("Error while reading API definition yaml", e);
@@ -1119,8 +1174,8 @@ public class OASParserUtil {
         if (apiDefinitionProcessed != null) {
             apiDefinition = apiDefinitionProcessed;
         }
-        APIDefinitionValidationResponse validationResponse =
-                oas3Parser.validateAPIDefinition(apiDefinition, url, returnJsonContent);
+        APIDefinitionValidationResponse validationResponse = oas3Parser.validateAPIDefinition(apiDefinition, url,
+                returnJsonContent, oasParserOptions);
         if (!validationResponse.isValid()) {
             for (ErrorHandler handler : validationResponse.getErrorItems()) {
                 if (ExceptionCodes.INVALID_OAS3_FOUND.getErrorCode() == handler.getErrorCode()) {
@@ -1204,10 +1259,26 @@ public class OASParserUtil {
      * @param url               URL of the API definition
      * @param returnJsonContent whether to return the converted json form of the
      * @return APIDefinitionValidationResponse object with validation information
+     * @deprecated Use {@link #validateAPIDefinitionByURL(String, HttpClient, boolean, OASParserOptions)} instead to
+     *         support configurable OpenAPI parser options.
+     */
+    @Deprecated
+    public static APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, HttpClient httpClient,
+            boolean returnJsonContent) throws APIManagementException {
+        return validateAPIDefinitionByURL(url, httpClient, returnJsonContent, null);
+    }
+
+    /**
+     * This method validates the given OpenAPI definition by URL with optional parser configuration.
+     *
+     * @param url               URL of the API definition
+     * @param httpClient        HTTP client used to retrieve the API definition
+     * @param returnJsonContent whether to return the converted json form of the
+     * @param oasParserOptions  optional OpenAPI parser options; may be {@code null} to use defaults
+     * @return APIDefinitionValidationResponse object with validation information
      */
     public static APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, HttpClient httpClient,
-                                                                             boolean returnJsonContent)
-            throws APIManagementException {
+            boolean returnJsonContent, OASParserOptions oasParserOptions) throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         try {
             HttpGet httpGet = new HttpGet(url);
@@ -1218,7 +1289,7 @@ public class OASParserUtil {
                 String responseStrProcessed = responseStr;
                 if (!responseStr.trim().startsWith("{")) {
                     try {
-                        JsonNode jsonNode = DeserializationUtils.readYamlTree(responseStr, new SwaggerDeserializationResult());
+                        JsonNode jsonNode = parseYamlWithLimit(responseStr, oasParserOptions);
                         responseStrProcessed = jsonNode.toString();
                     } catch (IOException e) {
                         throw new APIManagementException("Error while reading API definition yaml", e);
@@ -1228,7 +1299,8 @@ public class OASParserUtil {
                 if (responseStrProcessed != null) {
                     responseStr = responseStrProcessed;
                 }
-                validationResponse = validateAPIDefinition(responseStr, new URL(url).getHost(), returnJsonContent);
+                validationResponse = validateAPIDefinition(responseStr, new URL(url).getHost(), returnJsonContent,
+                        oasParserOptions);
             } else {
                 validationResponse.setValid(false);
                 validationResponse.getErrorItems().add(ExceptionCodes.OPENAPI_URL_NO_200);
@@ -2205,5 +2277,54 @@ public class OASParserUtil {
         OASParserUtil.addErrorToValidationResponse(validationResponse,
                 "Multiple " + operation + " operations with the same resource path " + path +
                         " found in the " + definitionType + " definition");
+    }
+
+    /**
+     * Parses the given YAML string into a JsonNode, applying the configured code point limit to avoid large YAML
+     * parsing issues.
+     *
+     * @param yaml          YAML content as a string
+     * @param parserOptions parser options containing the YAML code point limit
+     * @return Parsed JsonNode
+     * @throws IOException If parsing the YAML fails
+     */
+    public static JsonNode parseYamlWithLimit(String yaml, OASParserOptions parserOptions) throws IOException {
+
+        Integer yamlCodePointLimit = parserOptions != null ? parserOptions.getYamlCodePointLimit() : null;
+
+        YAMLFactory yamlFactory;
+        if (yamlCodePointLimit != null && yamlCodePointLimit > 0) {
+            LoaderOptions options = new LoaderOptions();
+            options.setCodePointLimit(yamlCodePointLimit);
+            yamlFactory = YAMLFactory.builder().loaderOptions(options).build();
+        } else {
+            yamlFactory = new YAMLFactory();
+        }
+
+        ObjectMapper mapper = new ObjectMapper(yamlFactory);
+        return mapper.readTree(yaml);
+    }
+
+    /**
+     * Converts YAML input into JSON using the configured code point limit. If the input already looks like JSON, it is
+     * returned without changes.
+     *
+     * @param input         YAML or JSON string
+     * @param parserOptions parser options containing the YAML code point limit;
+     * @return JSON string after processing
+     * @throws APIManagementException If YAML parsing fails
+     */
+    public static String preprocessYamlWithLimit(String input, OASParserOptions parserOptions)
+            throws APIManagementException {
+
+        if (input.trim().startsWith("{")) {
+            return input;
+        }
+        try {
+            JsonNode node = parseYamlWithLimit(input, parserOptions);
+            return node.toString();
+        } catch (IOException e) {
+            throw new APIManagementException("Error while parsing YAML with configured codePointLimit", e);
+        }
     }
 }

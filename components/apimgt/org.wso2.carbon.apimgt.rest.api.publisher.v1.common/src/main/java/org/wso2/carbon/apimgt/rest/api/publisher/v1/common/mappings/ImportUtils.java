@@ -90,6 +90,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
@@ -2700,8 +2701,9 @@ public class ImportUtils {
     public static APIDefinitionValidationResponse retrieveValidatedSwaggerDefinition(String swaggerContent)
             throws APIManagementException {
 
-        APIDefinitionValidationResponse validationResponse = OASParserUtil
-                .validateAPIDefinition(swaggerContent, Boolean.TRUE);
+        APIDefinitionValidationResponse validationResponse = OASParserUtil.validateAPIDefinition(swaggerContent,
+                Boolean.TRUE, ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                        .getAPIMDependencyConfigurations().getOasParserOptions());
         if (!validationResponse.isValid()) {
             String errorDescription = "";
             if (validationResponse.getErrorItems().size() > 0) {
