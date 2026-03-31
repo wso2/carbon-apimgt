@@ -39,7 +39,7 @@ DeploymentsApiService delegate = new DeploymentsApiServiceImpl();
 
 
     @POST
-    @Path("/batch")
+    @Path("/fetch-batch")
     @Consumes({ "application/json" })
     @Produces({ "application/x-tar+gzip", "application/json" })
     @ApiOperation(value = "Batch fetch deployment content as TAR.GZ", notes = "Returns deployment content (platform api.yaml) for the given deployment IDs as a single application/x-tar+gzip archive. Used by the API Platform gateway for startup sync. Requires api-key header. ", response = File.class, tags={ "Gateway Internal APIs",  })

@@ -337,7 +337,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /deployments/batch:
+  /deployments/fetch-batch:
     post:
       tags:
         - Gateway Internal APIs
