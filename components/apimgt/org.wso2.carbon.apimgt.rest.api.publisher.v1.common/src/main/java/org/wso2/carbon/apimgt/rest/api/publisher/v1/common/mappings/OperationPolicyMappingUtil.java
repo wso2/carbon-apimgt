@@ -189,12 +189,6 @@ public class OperationPolicyMappingUtil {
                         operationPolicy.getPolicyVersion(), tenantDomain, false);
             }
 
-            // If this API-specific policy is a clone of a common policy, expose the original common policy ID in the
-            // DTO. The publisher uses this ID to fetch common policy details while editing an API.
-            if (policyData != null && policyData.getClonedCommonPolicyId() != null) {
-                dto.setPolicyId(policyData.getClonedCommonPolicyId());
-            }
-
             // If policyData is found, check for Secret type attributes
             // otherwise, do not mask any parameters
             if (policyData != null && policyData.getSpecification() != null) {

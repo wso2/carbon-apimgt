@@ -45,7 +45,7 @@ public class OperationPolicyMappingUtilTest {
     private static final String POLICY_VERSION = "v1";
 
     @Test
-    public void testFromOperationPolicyToDTOExposesCommonPolicyIdForClonedPolicy() throws Exception {
+    public void testFromOperationPolicyToDTORetainsApiSpecificIdForClonedCommonPolicy() throws Exception {
 
         APIProvider apiProvider = Mockito.mock(APIProvider.class);
         OperationPolicyData policyData = new OperationPolicyData();
@@ -61,8 +61,8 @@ public class OperationPolicyMappingUtilTest {
         OperationPolicyDTO dto = OperationPolicyMappingUtil.fromOperationPolicyToDTO(createOperationPolicy(),
                 API_UUID, false);
 
-        Assert.assertEquals("Expected cloned common policy ID to be exposed for publisher lookups",
-                COMMON_POLICY_ID, dto.getPolicyId());
+        Assert.assertEquals("Expected attached cloned common policy to retain the API-specific policy ID",
+                API_SPECIFIC_POLICY_ID, dto.getPolicyId());
     }
 
     @Test
