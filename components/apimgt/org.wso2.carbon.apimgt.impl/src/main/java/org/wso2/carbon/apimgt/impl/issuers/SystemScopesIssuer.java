@@ -588,6 +588,10 @@ public class SystemScopesIssuer implements ScopeValidator {
         String tenantDomain = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getTenantDomain();
 
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Attempting to retrieve IDP using metadata property: "
+                        + IdentityApplicationConstants.IDP_ISSUER_NAME + " with value: " + jwtIssuer);
+            }
             identityProvider = IdentityProviderManager.getInstance()
                     .getIdPByMetadataProperty(IdentityApplicationConstants.IDP_ISSUER_NAME, jwtIssuer, tenantDomain,
                             false);
