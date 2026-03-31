@@ -29,7 +29,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -188,7 +187,10 @@ public class PlatformGatewayArtifactDAO {
                         insertPs.setString(5, gatewayEnvUuid);
                         insertPs.setString(6, deploymentId);
                         insertPs.executeUpdate();
-                    } catch (SQLIntegrityConstraintViolationException e) {
+                    } catch (SQLException e) {
+                        if (!isIntegrityConstraintViolation(e)) {
+                            throw e;
+                        }
                         try (PreparedStatement retryPs = connection.prepareStatement(
                                 SQLConstants.PlatformGatewayArtifactSQLConstants.UPDATE_ARTIFACT_BY_API_AND_GATEWAY_SQL)) {
                             retryPs.setBytes(1, artifactBytes);
@@ -207,6 +209,28 @@ public class PlatformGatewayArtifactDAO {
                     + gatewayEnvUuid + " deployment " + deploymentId, e);
             throw new APIManagementException("Error saving platform deployed artifact", e);
         }
+    }
+
+    private static boolean isIntegrityConstraintViolation(SQLException exception) {
+        SQLException current = exception;
+        while (current != null) {
+            String sqlState = current.getSQLState();
+            int errorCode = current.getErrorCode();
+
+            if ((sqlState != null && sqlState.startsWith("23"))
+                    || isVendorSpecificConstraintViolation(errorCode)) {
+                return true;
+            }
+            current = current.getNextException();
+        }
+        return false;
+    }
+
+    private static boolean isVendorSpecificConstraintViolation(int errorCode) {
+        // Example mappings (you can expand)
+        return errorCode == 1        // Oracle unique constraint
+                || errorCode == 2627     // SQL Server unique constraint
+                || errorCode == 547;     // SQL Server FK violation
     }
 
     /**
