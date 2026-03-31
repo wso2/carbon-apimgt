@@ -8196,7 +8196,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
-        if (!apiMgtDAO.getMissingUrlTemplatesOfProductRevisionFromAPIs(apiRevisionId).isEmpty()) {
+        List<URITemplate> missingUriTemplateList = apiMgtDAO.getMissingUrlTemplatesOfProductRevisionFromAPIs(
+                apiRevisionId);
+        if (missingUriTemplateList != null && !missingUriTemplateList.isEmpty()) {
             throw new APIManagementException(
                     "Cannot restore revision as one or more resources are missing from the associated APIs",
                     ExceptionCodes.from(ExceptionCodes.API_PRODUCT_MISSING_RESOURCES_DURING_RESTORE,
