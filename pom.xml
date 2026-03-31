@@ -484,12 +484,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.core.services</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.wso2.carbon.identity.framework</groupId>
                 <artifactId>org.wso2.carbon.identity.application.mgt.stub</artifactId>
                 <version>${carbon.identity.version}</version>
@@ -498,12 +492,6 @@
             <dependency>
                 <groupId>org.wso2.carbon.identity.framework</groupId>
                 <artifactId>org.wso2.carbon.identity.mgt.stub</artifactId>
-                <version>${carbon.identity.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.identity.framework</groupId>
-                <artifactId>org.wso2.carbon.identity.claim.metadata.mgt.stub</artifactId>
                 <version>${carbon.identity.version}</version>
             </dependency>
 
@@ -851,30 +839,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.owasp.encoder</groupId>
-                <artifactId>encoder</artifactId>
-                <version>${owasp.encoder.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jaggeryjs</groupId>
-                <artifactId>org.jaggeryjs.hostobjects.web</artifactId>
-                <version>${jaggery.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jaggeryjs</groupId>
-                <artifactId>org.jaggeryjs.hostobjects.file</artifactId>
-                <version>${jaggery.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.multitenancy</groupId>
-                <artifactId>org.wso2.carbon.tenant.usage.agent</artifactId>
-                <version>${carbon.multitenancy.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.wso2.carbon.multitenancy</groupId>
                 <artifactId>org.wso2.carbon.tenant.mgt.stub</artifactId>
                 <version>${carbon.multitenancy.version}</version>
@@ -920,13 +884,6 @@
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.registry.core</artifactId>
                 <version>${carbon.kernel.version}</version>
-            </dependency>
-
-
-            <dependency>
-                <groupId>org.jaggeryjs</groupId>
-                <artifactId>org.jaggeryjs.scriptengine</artifactId>
-                <version>${jaggery.version}</version>
             </dependency>
 
             <dependency>
@@ -981,12 +938,6 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.tomcat</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.tomcat.ext</artifactId>
                 <version>${carbon.kernel.version}</version>
             </dependency>
 
@@ -1252,12 +1203,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon.commons</groupId>
-                <artifactId>org.wso2.carbon.application.mgt.stub</artifactId>
-                <version>${carbon.commons.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
                 <version>${google.code.gson.version}</version>
@@ -1273,12 +1218,6 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpmime</artifactId>
                 <version>${httpcomponents.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.ndatasource.core</artifactId>
-                <version>${carbon.kernel.version}</version>
             </dependency>
 
             <dependency>
@@ -1364,11 +1303,6 @@
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
                 <version>${reflection.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate.validator</groupId>
-                <artifactId>hibernate-validator</artifactId>
-                <version>${hibernate-validator.version}</version>
             </dependency>
 
             <dependency>
@@ -1660,11 +1594,6 @@
                 <version>${slf4j.api.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.commons</groupId>
-                <artifactId>org.wso2.carbon.tenant.common</artifactId>
-                <version>${carbon.commons.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.tracing</artifactId>
                 <version>${carbon.apimgt.version}</version>
@@ -1693,12 +1622,6 @@
                 <groupId>org.wso2.orbit.com.squareup.okio</groupId>
                 <artifactId>okio</artifactId>
                 <version>${okio.wso2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentracing</groupId>
-                <artifactId>opentracing-mock</artifactId>
-                <version>${opentracing.mock.version}</version>
-                <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>io.opentracing</groupId>
@@ -1783,16 +1706,6 @@
                 <version>${graphql.java.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.identity.saml.common</groupId>
-                <artifactId>org.wso2.carbon.identity.saml.common.util</artifactId>
-                <version>${saml.common.util.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.identity.saml.common</groupId>
-                <artifactId>org.wso2.carbon.identity.saml.common.util.feature</artifactId>
-                <version>${saml.common.util.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
                 <version>${apache.felix.scr.ds.annotations.version}</version>
@@ -1826,11 +1739,6 @@
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-models</artifactId>
-                <version>${swagger3.core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.swagger.core.v3</groupId>
-                <artifactId>swagger-jaxrs2</artifactId>
                 <version>${swagger3.core.version}</version>
             </dependency>
             <dependency>
@@ -1990,11 +1898,6 @@
                 <groupId>org.apache.xmlgraphics</groupId>
                 <artifactId>batik-all</artifactId>
                 <version>${batik.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.integration.transaction.counter</groupId>
-                <artifactId>transaction-count-handler</artifactId>
-                <version>${integration.transaction.counter.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.spotbugs</groupId>
