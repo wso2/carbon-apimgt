@@ -4027,21 +4027,22 @@ public class SQLConstants {
                     "WHERE KM.API_UUID = ? AND K.API_KEY_UUID = ? AND K.STATUS = 'ACTIVE' " +
                     "AND K.AUTHZ_USER = ?";
     public static final String REVOKE_API_KEY_SQL =
-            "UPDATE AM_API_KEY K SET K.STATUS = 'REVOKED' " +
-                    "WHERE K.API_KEY_UUID = ? " +
+            "UPDATE AM_API_KEY SET STATUS = 'REVOKED' " +
+                    "WHERE AM_API_KEY.API_KEY_UUID = ? " +
                     "AND EXISTS ( " +
                     "    SELECT 1 FROM AM_API_KEY_APPLICATION_MAPPING M " +
                     "    JOIN AM_APPLICATION A ON M.APPLICATION_UUID = A.UUID " +
-                    "    WHERE M.API_KEY_UUID = K.API_KEY_UUID AND A.ORGANIZATION = ? " +
+                    "    WHERE M.API_KEY_UUID = AM_API_KEY.API_KEY_UUID AND A.ORGANIZATION = ? " +
                     "    UNION " +
                     "    SELECT 1 FROM AM_API_KEY_API_MAPPING M " +
                     "    JOIN AM_API A ON M.API_UUID = A.API_UUID " +
-                    "    WHERE M.API_KEY_UUID = K.API_KEY_UUID AND A.ORGANIZATION = ? " +
+                    "    WHERE M.API_KEY_UUID = AM_API_KEY.API_KEY_UUID AND A.ORGANIZATION = ? " +
                     ") " +
-                    "AND K.STATUS != 'REVOKED'";
+                    "AND AM_API_KEY.STATUS != 'REVOKED'";
     public static final String REVOKE_API_KEY_VIA_USER_SQL =
-            "UPDATE AM_API_KEY K SET K.STATUS = 'REVOKED' " +
-                    "WHERE K.API_KEY_UUID = ? AND K.AUTHZ_USER = ? AND K.STATUS != 'REVOKED'";
+            "UPDATE AM_API_KEY SET STATUS = 'REVOKED' " +
+                    "WHERE AM_API_KEY.API_KEY_UUID = ? AND " +
+                    "AM_API_KEY.AUTHZ_USER = ? AND AM_API_KEY.STATUS != 'REVOKED'";
     public static final String UPDATE_API_KEY_LAST_USED_SQL =
             "UPDATE AM_API_KEY SET LAST_USED = ? WHERE API_KEY_HASH = ? AND STATUS = 'ACTIVE'";
     public static final String REMOVE_API_KEY_ASSOCIATION_SQL =
@@ -4459,6 +4460,11 @@ public class SQLConstants {
                 "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ? AND REVISION_UUID IS NULL";
         public static final String REMOVE_CURRENT_API_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING =
                 "DELETE FROM AM_API_URL_MAPPING WHERE REVISION_UUID = ?";
+        public static final String SELECT_REVISIONED_PRODUCT_URL_MAPPINGS_FROM_APIS =
+                "SELECT DISTINCT AUM.API_ID, AUM.HTTP_METHOD, AUM.URL_PATTERN FROM AM_API_URL_MAPPING AUM" +
+                " WHERE AUM.REVISION_UUID = ? AND NOT EXISTS (SELECT 1 FROM AM_API_URL_MAPPING AUM2" +
+                " WHERE AUM2.API_ID = AUM.API_ID AND AUM2.HTTP_METHOD = AUM.HTTP_METHOD AND AUM2.URL_PATTERN = AUM.URL_PATTERN" +
+                " AND AUM2.REVISION_UUID IS NULL)";
         public static final String GET_URL_MAPPINGS_WITH_SCOPE_PRODUCT_AND_BACKEND_BY_REVISION_UUID =
                 "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, " +
                 "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, AUM.SCHEMA_DEFINITION, AUM.DESCRIPTION, " +
