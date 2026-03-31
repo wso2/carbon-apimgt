@@ -7914,6 +7914,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
+        API revisionedAPI = getAPIbyUUID(apiRevisionId, organization);
+        List<APIResource> usedProductResources = getUsedProductResources(apiId);
+        Set<APIResource> revisionResources = revisionedAPI.getUriTemplates().stream()
+                .map(uri -> new APIResource(uri.getHTTPVerb(), uri.getUriTemplate())).collect(Collectors.toSet());
+        List<APIResource> missingResources = usedProductResources.stream()
+                .filter(res -> !revisionResources.contains(res)).collect(Collectors.toList());
+        if (!missingResources.isEmpty()) {
+            throw new APIManagementException(
+                    "Cannot remove following resource paths " + missingResources.toString()
+                            + " because they are used by one or more API Products",
+                    ExceptionCodes.from(ExceptionCodes.API_PRODUCT_USED_RESOURCES_DURING_RESTORE,
+                            apiIdentifier.getApiName(), apiIdentifier.getVersion()));
+        }
         apiIdentifier.setUuid(apiId);
         Set<URITemplate> uriTemplatesOfAPIRevision = apiMgtDAO.getURITemplatesOfAPIRevision(apiRevision);
         MCPUtils.validateMCPResources(apiId, organization, uriTemplatesOfAPIRevision);
@@ -8182,6 +8195,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (apiRevision == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
+        }
+        if (!apiMgtDAO.getMissingUrlTemplatesOfProductRevisionFromAPIs(apiRevisionId).isEmpty()) {
+            throw new APIManagementException(
+                    "Cannot restore revision as one or more resources are missing from the associated APIs",
+                    ExceptionCodes.from(ExceptionCodes.API_PRODUCT_MISSING_RESOURCES_DURING_RESTORE,
+                            apiProductIdentifier.getName(), apiProductIdentifier.getVersion()));
         }
         apiProductIdentifier.setUuid(apiProductId);
         try {

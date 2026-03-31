@@ -93,6 +93,12 @@ public enum ExceptionCodes implements ErrorHandler {
     API_PRODUCT_USED_RESOURCES(900344,
             "Cannot remove the resource paths because they are used by one or more API Products",
             409, "Cannot update API: %s:%s, due to the resources to remove are used by one or more API Products"),
+    API_PRODUCT_USED_RESOURCES_DURING_RESTORE(900364,
+            "Cannot remove the resource paths because they are used by one or more API Products",
+            400, "Cannot restore API %s:%s, as some resources used by one or more API Products will be removed"),
+    API_PRODUCT_MISSING_RESOURCES_DURING_RESTORE(900365,
+            "Cannot restore revision as one or more resources are missing from the associated APIs",
+            400, "Cannot restore API Product %s:%s, as one or more resources are missing from the associated APIs"),
     API_CATEGORY_INVALID(
             900345, "The API category is invalid.", 400, " The API category is invalid for API: %s"),
     INVALID_ADDITIONAL_PROPERTIES(900346, "Invalid additional properties", 400,
