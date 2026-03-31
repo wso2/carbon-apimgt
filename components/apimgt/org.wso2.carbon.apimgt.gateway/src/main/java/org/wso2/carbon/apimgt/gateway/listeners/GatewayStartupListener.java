@@ -588,6 +588,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             }
         }).start();
         retrieveAndDeployArtifacts(tenantDomain);
+        retrieveApiKeys();
         ServiceReferenceHolder.getInstance().addLoadedTenant(tenantDomain);
     }
 

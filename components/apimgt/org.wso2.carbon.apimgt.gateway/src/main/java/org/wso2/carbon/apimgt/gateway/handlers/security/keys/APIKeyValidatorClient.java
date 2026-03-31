@@ -136,6 +136,7 @@ public class APIKeyValidatorClient {
         try {
             return apiKeyValidationService.validateAPIKeySubscription(apiContext, apiVersion, tenantDomain, apiKeyInfo);
         } catch (APIKeyMgtException e) {
+            log.error("Error occurred while validating API key subscription: " + e.getMessage());
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error while accessing in-memory store for API subscription validation", e);
         }

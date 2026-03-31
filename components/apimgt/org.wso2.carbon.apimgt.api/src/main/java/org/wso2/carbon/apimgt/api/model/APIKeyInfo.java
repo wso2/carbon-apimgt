@@ -43,6 +43,7 @@ public class APIKeyInfo {
     private String apiKey;
     private String authUser;
     private String status;
+    private String keyBoundary;
 
     public String getKeyUUID() {
         return keyUUID;
@@ -210,5 +211,13 @@ public class APIKeyInfo {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getKeyBoundary() {
+        return keyBoundary;
+    }
+
+    public void setKeyBoundary(String keyBoundary) {
+        this.keyBoundary = keyBoundary;
     }
 }

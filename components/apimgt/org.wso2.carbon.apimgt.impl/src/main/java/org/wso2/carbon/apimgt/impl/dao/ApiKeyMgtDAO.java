@@ -88,9 +88,7 @@ public class ApiKeyMgtDAO {
                     ps.setString(2, keyInfoDTO.getKeyName());
                     ps.setString(3, apiKeyHash);
                     ps.setString(4, keyInfoDTO.getKeyType());
-                    try (InputStream inputStream = new ByteArrayInputStream(properties)) {
-                        ps.setBinaryStream(5, inputStream);
-                    }
+                    ps.setBinaryStream(5, new ByteArrayInputStream(properties), properties.length);
                     ps.setString(6, keyInfoDTO.getAuthUser());
                     ps.setTimestamp(7, new Timestamp(keyInfoDTO.getCreatedTime()),
                             Calendar.getInstance(TimeZone.getTimeZone("UTC")));
@@ -158,7 +156,7 @@ public class ApiKeyMgtDAO {
                         keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
                         keyInfo.setKeyName(rs.getString("NAME"));
                         Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
-                        keyInfo.setCreatedTime(createdTime != null ? createdTime.getTime() : null);
+                        keyInfo.setCreatedTime(createdTime.getTime());
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                         Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
@@ -203,7 +201,7 @@ public class ApiKeyMgtDAO {
                         keyInfo.setKeyName(rs.getString("NAME"));
                         keyInfo.setApiName(rs.getString("API_NAME"));
                         Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
-                        keyInfo.setCreatedTime(createdTime != null ? createdTime.getTime() : null);
+                        keyInfo.setCreatedTime(createdTime.getTime());
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                         Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
@@ -244,7 +242,7 @@ public class ApiKeyMgtDAO {
                         keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
                         keyInfo.setKeyName(rs.getString("NAME"));
                         Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
-                        keyInfo.setCreatedTime(createdTime != null ? createdTime.getTime() : null);
+                        keyInfo.setCreatedTime(createdTime.getTime());
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                         Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
@@ -320,20 +318,19 @@ public class ApiKeyMgtDAO {
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
                 ps.setString(1, tenantDomain);
                 ps.setString(2, tenantDomain);
+                ps.setString(3, tenantDomain);
+                ps.setString(4, tenantDomain);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         APIKeyInfo keyInfo = new APIKeyInfo();
                         keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
-                        keyInfo.setKeyName(rs.getString("NAME"));
+                        keyInfo.setKeyName(rs.getString("KEY_NAME"));
                         Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
-                        keyInfo.setCreatedTime(createdTime != null ? createdTime.getTime() : null);
-                        keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
+                        keyInfo.setCreatedTime(createdTime.getTime());
                         Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
-                        keyInfo.setApplicationName(rs.getString("APPLICATION_NAME"));
-                        keyInfo.setApiName(rs.getString("API_NAME"));
                         keyInfo.setKeyType(rs.getString("KEY_TYPE"));
-                        try (InputStream apiKeyPropertiesInputStream = rs.getBinaryStream("API_KEY_PROPERTIES")) {
+                        try (InputStream apiKeyPropertiesInputStream = rs.getBinaryStream("ADDITIONAL_PROPERTIES")) {
                             if (apiKeyPropertiesInputStream != null) {
                                 ObjectMapper mapper = new ObjectMapper();
                                 Map<String, String> propertiesMap = mapper.readValue(apiKeyPropertiesInputStream,
@@ -341,24 +338,30 @@ public class ApiKeyMgtDAO {
                                 keyInfo.setProperties(propertiesMap);
                             }
                         } catch (IOException e) {
-                            throw new RuntimeException(e);
+                            handleException("Failed to convert apiKeyProperties", e);
                         }
                         keyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
                         keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
                         keyInfo.setStatus(rs.getString("STATUS"));
-                        keyInfo.setAppId(rs.getInt("APPLICATION_ID"));
-                        Long validityPeriod = rs.getObject("VALIDITY_PERIOD", Long.class);
-                        long expiresAt = 0L;
-                        if (createdTime != null && validityPeriod != null && validityPeriod > 0) {
-                            long issuedTime = createdTime.getTime();
-                            long validityMillis = validityPeriod * 1000L;
-                            if (Long.MAX_VALUE - issuedTime < validityMillis) {
-                                expiresAt = Long.MAX_VALUE;
+                        keyInfo.setAppId(rs.getInt("APP_ID"));
+                        keyInfo.setApplicationId(rs.getString("APPLICATION_UUID"));
+                        keyInfo.setApiId(rs.getInt("API_ID"));
+                        keyInfo.setApiUUId(rs.getString("API_UUID"));
+                        long validityPeriodInSeconds = rs.getLong("VALIDITY_PERIOD");
+                        if (validityPeriodInSeconds < 0) {
+                            keyInfo.setExpiresAt(Long.MAX_VALUE);
+                        } else {
+                            long validityPeriodInMillis = validityPeriodInSeconds * 1000L;
+                            long createdTimeMillis = createdTime.getTime();
+                            // Guard against arithmetic overflow before adding
+                            if (validityPeriodInMillis < 0
+                                    || validityPeriodInMillis > Long.MAX_VALUE - createdTimeMillis) {
+                                keyInfo.setExpiresAt(Long.MAX_VALUE);
                             } else {
-                                expiresAt = issuedTime + validityMillis;
+                                keyInfo.setExpiresAt(createdTimeMillis + validityPeriodInMillis);
                             }
                         }
-                        keyInfo.setExpiresAt(expiresAt);
+                        keyInfo.setValidityPeriod(validityPeriodInSeconds);
                         apiKeyInfoList.add(keyInfo);
                     }
                 }
@@ -617,32 +620,62 @@ public class ApiKeyMgtDAO {
     /**
      * Returns the key details for association
      *
-     * @param apiUUId API UUID
-     * @param appUUId Application UUID
      * @param keyUUId UUID of the api key
      * @param username Username
      * @return APIKeyInfo
      * @throws APIManagementException
      */
-    public APIKeyInfo getKeyDetailsForAssociation(String apiUUId, String appUUId, String keyUUId, String username) throws APIManagementException {
+    public APIKeyInfo getKeyDetailsForAssociation(String keyUUId, String username) throws APIManagementException {
 
         APIKeyInfo apiKeyInfo = new APIKeyInfo();
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             String sqlQuery = SQLConstants.GET_KEY_DETAILS_FOR_ASSOCIATION_SQL;
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
-                ps.setString(1, appUUId);
-                ps.setString(2, apiUUId);
-                ps.setString(3, keyUUId);
-                ps.setString(4, username);
+                ps.setString(1, keyUUId);
+                ps.setString(2, username);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        apiKeyInfo.setApiName(rs.getString("API_NAME"));
-                        apiKeyInfo.setApplicationName(rs.getString("APPLICATION_NAME"));
-                        apiKeyInfo.setKeyName(rs.getString("NAME"));
-                        apiKeyInfo.setKeyType(rs.getString("KEY_TYPE"));
-                        apiKeyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
-                        apiKeyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
-                        apiKeyInfo.setAppId(rs.getInt("APPLICATION_ID"));
+                        APIKeyInfo keyInfo = new APIKeyInfo();
+                        keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
+                        keyInfo.setKeyName(rs.getString("KEY_NAME"));
+                        Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
+                        keyInfo.setCreatedTime(createdTime.getTime());
+                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
+                        keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
+                        keyInfo.setKeyType(rs.getString("KEY_TYPE"));
+                        try (InputStream apiKeyPropertiesInputStream = rs.getBinaryStream("ADDITIONAL_PROPERTIES")) {
+                            if (apiKeyPropertiesInputStream != null) {
+                                ObjectMapper mapper = new ObjectMapper();
+                                Map<String, String> propertiesMap = mapper.readValue(apiKeyPropertiesInputStream,
+                                        Map.class);
+                                keyInfo.setProperties(propertiesMap);
+                            }
+                        } catch (IOException e) {
+                            handleException("Failed to convert apiKeyProperties", e);
+                        }
+                        keyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
+                        keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
+                        keyInfo.setStatus(rs.getString("STATUS"));
+                        keyInfo.setAppId(rs.getInt("APP_ID"));
+                        keyInfo.setApplicationId(rs.getString("APPLICATION_UUID"));
+                        keyInfo.setApiId(rs.getInt("API_ID"));
+                        keyInfo.setApiUUId(rs.getString("API_UUID"));
+                        long validityPeriodInSeconds = rs.getLong("VALIDITY_PERIOD");
+                        if (validityPeriodInSeconds < 0) {
+                            keyInfo.setExpiresAt(Long.MAX_VALUE);
+                        } else {
+                            long validityPeriodInMillis = validityPeriodInSeconds * 1000L;
+                            long createdTimeMillis = createdTime.getTime();
+                            // Guard against arithmetic overflow before adding
+                            if (validityPeriodInMillis < 0
+                                    || validityPeriodInMillis > Long.MAX_VALUE - createdTimeMillis) {
+                                keyInfo.setExpiresAt(Long.MAX_VALUE);
+                            } else {
+                                keyInfo.setExpiresAt(createdTimeMillis + validityPeriodInMillis);
+                            }
+                        }
+                        keyInfo.setValidityPeriod(validityPeriodInSeconds);
+                        return keyInfo;
                     }
                 }
             }

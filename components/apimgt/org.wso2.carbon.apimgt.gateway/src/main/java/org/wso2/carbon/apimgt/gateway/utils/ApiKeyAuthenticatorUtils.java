@@ -306,6 +306,9 @@ public class ApiKeyAuthenticatorUtils {
             throws APISecurityException {
 
         log.debug("Api Key is verified and started checking whether the Api key is expired or not.");
+        if (log.isDebugEnabled()) {
+            log.debug("Checking API key expiry for key hash: " + GatewayUtils.getMaskedToken(apiKeyHash));
+        }
         boolean isApiKeyExpired = false;
         long expiresAt = apiKeyInfo.getExpiresAt();
         if (expiresAt > 0 && expiresAt < System.currentTimeMillis()) {
@@ -313,7 +316,9 @@ public class ApiKeyAuthenticatorUtils {
             DataHolder.getInstance().removeOpaqueAPIKeyInfo(apiKeyHash);
         }
         if (isApiKeyExpired) {
-            log.error("Api Key is expired");
+            if (log.isDebugEnabled()) {
+                log.debug("Expired API key hash: " + GatewayUtils.getMaskedToken(apiKeyHash));
+            }
             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
         }
@@ -584,7 +589,7 @@ public class ApiKeyAuthenticatorUtils {
         try {
             jwtClaimsSetVerifier.verify(payload, null);
             if (log.isDebugEnabled()) {
-                log.debug("Token is not expired. User: " + payload.getSubject());
+                log.debug("Token is not expired. User: " + GatewayUtils.getMaskedToken(payload.getSubject()));
             }
         } catch (BadJWTException e) {
             if ("Expired JWT".equals(e.getMessage())) {
@@ -592,7 +597,7 @@ public class ApiKeyAuthenticatorUtils {
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug("Token is not expired. User: " + payload.getSubject());
+            log.debug("Token is not expired. User: " + GatewayUtils.getMaskedToken(payload.getSubject()));
         }
         return false;
     }

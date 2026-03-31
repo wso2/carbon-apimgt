@@ -52,7 +52,6 @@ import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.api.model.ApplicationResponse;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -913,12 +912,12 @@ public interface APIConsumer extends APIManager {
      * Remove association of an opaque api key.
      *
      * @param application   Application object which contains the application details
-     * @param keyName Api key name
+     * @param keyUUId Api key UUId
      * @param tenantDomain   Tenant domain
      * @param username       Username
      * @throws APIManagementException
      */
-    void removeApiKeyAssociationViaApp(Application application, String keyName, String tenantDomain, String username) throws APIManagementException;
+    void removeApiKeyAssociationViaApp(Application application, String keyUUId, String tenantDomain, String username) throws APIManagementException;
 
     /**
      * Regenerate opaque api key for the given key name with same properties.
@@ -937,7 +936,7 @@ public interface APIConsumer extends APIManager {
     /**
      * Regenerate opaque api key for the given key name with same properties.
      *
-     * @param apiId        Id of the API
+     * @param api           API Object that represents the API.
      * @param keyUUId      Api key UUId
      * @param tenantDomain Tenant domain
      * @param organization Organization
@@ -945,7 +944,7 @@ public interface APIConsumer extends APIManager {
      * @return API key info object
      * @throws APIManagementException
      */
-    APIKeyInfo regenerateApiApiKey(String apiId, String keyUUId, String tenantDomain, String organization,
+    APIKeyInfo regenerateApiApiKey(API api, String keyUUId, String tenantDomain, String organization,
                                    String username) throws APIManagementException;
 
     /**
@@ -1197,5 +1196,4 @@ public interface APIConsumer extends APIManager {
     API getAPIWithoutPermissionCheck(String apiId, String organization)
             throws APIManagementException;
 
-    void revokeAppBoundedAPIKey(Application application, String keyUUID, String tenantDomain, String username);
 }

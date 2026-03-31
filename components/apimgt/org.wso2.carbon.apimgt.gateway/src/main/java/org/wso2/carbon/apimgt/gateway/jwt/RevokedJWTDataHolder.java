@@ -58,15 +58,6 @@ public class RevokedJWTDataHolder {
         return revokedJWTMap.containsKey(jwtSignature);
     }
 
-    /**
-     * Checks whether a given api key is in the map.
-     * @param apiKeyHash Api key hash to be checked.
-     * @return true if it exists and false otherwise.
-     */
-    public boolean isApiKeyExistsInRevokedMap(String apiKeyHash) {
-        return revokedJWTMap.containsKey(apiKeyHash);
-    }
-
     private RevokedJWTDataHolder() {
 
     }

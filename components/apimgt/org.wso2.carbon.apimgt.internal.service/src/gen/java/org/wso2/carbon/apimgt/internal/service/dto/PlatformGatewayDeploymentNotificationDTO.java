@@ -21,8 +21,10 @@ import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @ApiModel(description = "API Platform gateway deployment notification (sent by gateway after deploy).")
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 
 public class PlatformGatewayDeploymentNotificationDTO extends HashMap<String, Object>  {
   

@@ -25,8 +25,8 @@ import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
-
 @ApiModel(description = "Platform gateway response including the one-time registration token (POST create or regenerate-token).")
+
 
 public class GatewayResponseWithTokenDTO   {
   

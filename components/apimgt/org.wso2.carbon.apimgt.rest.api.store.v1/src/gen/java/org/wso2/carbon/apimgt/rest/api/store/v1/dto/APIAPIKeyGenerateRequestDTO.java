@@ -53,7 +53,7 @@ return null;
         }
     }
     private KeyTypeEnum keyType = null;
-    private Integer validityPeriod = null;
+    private Long validityPeriod = null;
     private Object additionalProperties = null;
 
   /**
@@ -95,7 +95,7 @@ return null;
   /**
    * API key validity period
    **/
-  public APIAPIKeyGenerateRequestDTO validityPeriod(Integer validityPeriod) {
+  public APIAPIKeyGenerateRequestDTO validityPeriod(Long validityPeriod) {
     this.validityPeriod = validityPeriod;
     return this;
   }
@@ -103,10 +103,10 @@ return null;
   
   @ApiModelProperty(example = "3600", value = "API key validity period")
   @JsonProperty("validityPeriod")
-  public Integer getValidityPeriod() {
+  public Long getValidityPeriod() {
     return validityPeriod;
   }
-  public void setValidityPeriod(Integer validityPeriod) {
+  public void setValidityPeriod(Long validityPeriod) {
     this.validityPeriod = validityPeriod;
   }
 
