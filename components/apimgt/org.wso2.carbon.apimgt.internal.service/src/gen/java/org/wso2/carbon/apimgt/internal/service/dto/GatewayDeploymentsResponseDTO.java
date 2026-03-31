@@ -21,8 +21,10 @@ import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @ApiModel(description = "Response for GET /deployments (platform contract).")
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 
 public class GatewayDeploymentsResponseDTO   {
   

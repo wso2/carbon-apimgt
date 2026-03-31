@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
-import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -544,19 +543,12 @@ public class APIKeyValidationService {
 
     public APIKeyValidationInfoDTO validateAPIKeySubscription(String apiContext, String apiVersion, String tenantDomain,
                                                               APIKeyInfo apiKeyInfo) throws APIKeyMgtException {
-        SubscriptionDataStore store = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
-        API api = store.getApiByContextAndVersion(apiContext, apiVersion);
-        if (!apiKeyInfo.getApiUUId().equals(api.getUuid())) {
-            if (log.isDebugEnabled()){
-                log.debug("API UUID in the APIKeyInfo doesn't match with the API UUID in the SubscriptionDataStore for " +
-                        "context: " + apiContext + " and version: " + apiVersion);
-            }
-            APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
-            info.setAuthorized(false);
-            return info;
-        }
         KeyValidationHandler keyValidationHandler =
                 ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
-        return keyValidationHandler.validateAPISubscription(apiContext, apiVersion, apiKeyInfo);
+        if (keyValidationHandler!= null){
+            return keyValidationHandler.validateAPISubscription(apiContext, apiVersion, apiKeyInfo);
+        }else {
+            throw new APIKeyMgtException("KeyValidationHandler is not initialized for tenant domain: " + tenantDomain);
+        }
     }
 }

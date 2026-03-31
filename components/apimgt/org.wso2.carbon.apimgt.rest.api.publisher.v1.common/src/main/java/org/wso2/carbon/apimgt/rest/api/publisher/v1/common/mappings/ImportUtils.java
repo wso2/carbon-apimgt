@@ -831,7 +831,8 @@ public class ImportUtils {
                 // Auto policy for published+oauth2 if subscription validation disabling allowed
                 if (APIStatus.PUBLISHED.toString().equalsIgnoreCase(targetStatus)
                         && importedApiDTO.getPolicies() != null && importedApiDTO.getPolicies().isEmpty()
-                        && (importedApiDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                        && importedApiDTO.getSecurityScheme() != null &&
+                        (importedApiDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
                         importedApiDTO.getSecurityScheme().contains(APIConstants.API_SECURITY_API_KEY))
                         && APIUtil.isSubscriptionValidationDisablingAllowed(organization)) {
                     importedApiDTO.setPolicies(

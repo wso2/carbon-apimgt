@@ -6563,7 +6563,7 @@ components:
           example: eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=
         validityPeriod:
           type: integer
-          format: int32
+          format: int64
           example: 3600
     APIKeyAssociation:
       title: API Key association
@@ -6600,17 +6600,19 @@ components:
           type: string
           description: The UUID of the API
         issuedOn:
-          type: string
+          type: integer
+          format: int64
           description: Created Time
           example: 2026-02-06 23:45:07
         validityPeriod:
           type: integer
-          format: int32
+          format: int64
           example: 3600
         lastUsed:
-          type: string
-          description: Last used time as epoch milliseconds (string), or `NOT_USED` if never used.
-          example: 2026-02-06 23:45:07
+          type: integer
+          format: int64
+          description: Last used time as epoch milliseconds.
+          example:
     APIKeyInfo:
       title: API Key details to invoke APIs
       type: object
@@ -6623,17 +6625,19 @@ components:
           description: API Key name
           example: Test_Key
         issuedOn:
-          type: string
+          type: integer
+          format: int64
           description: Created Time
-          example: 2026-02-06 23:45:07
+          example: 3600
         validityPeriod:
           type: integer
-          format: int32
+          format: int64
           example: 3600
         lastUsed:
-          type: string
-          description: Last used time as epoch milliseconds (string), or `NOT_USED` if never used.
-          example: 2026-02-06 23:45:07
+          type: integer
+          format: int64
+          description: Last used time as epoch milliseconds.
+          example: 3600
     APIWithKeyInfo:
       title: API with API Key
       type: object
@@ -6668,16 +6672,18 @@ components:
           description: Associated application
           example: DefaultApplication
         issuedOn:
-          type: string
+          type: integer
+          format: int64
           description: Created Time
           example: 2026-02-06 23:45:07
         validityPeriod:
           type: integer
-          format: int32
+          format: int64
           example: 3600
         lastUsed:
-          type: string
-          description: Last used time as epoch milliseconds (string), or `NOT_USED` if never used.
+          type: integer
+          format: int64
+          description: Last used time as epoch milliseconds.
           example: 2026-02-06 23:45:07
     APIAPIKeyList:
       title: API Keys List
@@ -6958,7 +6964,7 @@ components:
         validityPeriod:
           type: integer
           description: API key validity period
-          format: int32
+          format: int64
           example: 3600
         additionalProperties:
           type: object
@@ -6975,7 +6981,7 @@ components:
         validityPeriod:
           type: integer
           description: API key validity period
-          format: int32
+          format: int64
           example: 3600
         additionalProperties:
           type: object

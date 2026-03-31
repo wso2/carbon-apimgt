@@ -153,7 +153,10 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
     public APIKeyValidationInfoDTO validateAPISubscription(String apiContext, String apiVersion,
                                                               APIKeyInfo apiKeyInfo) throws APIKeyMgtException {
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO =  new APIKeyValidationInfoDTO();
-        return validateSubscriptionDetails(apiKeyValidationInfoDTO, apiContext, apiVersion, apiKeyInfo);
+        if (log.isDebugEnabled()) {
+            log.debug("Validating API key subscription for context: " + apiContext + ", version: " + apiVersion);
+        }
+        return validateSubscriptionDetails(apiContext, apiVersion, apiKeyValidationInfoDTO, apiKeyInfo);
     }
 
     private String getCachedJWTToken(TokenValidationContext validationContext) throws APIManagementException {
@@ -251,17 +254,6 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         validateSubscriptionDetails(infoDTO, context, version, appId, keyType);
     }
 
-    private void validateSubscriptionDetails(String context, String version,
-                                             APIKeyValidationInfoDTO infoDTO, APIKeyInfo apiKeyInfo) {
-
-        // Check if the api version has been prefixed with _default_
-        if (version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
-            // Remove the prefix from the version.
-            version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
-        }
-
-        validateSubscriptionDetails(infoDTO, context, version, apiKeyInfo);
-    }
 
     private APIKeyValidationInfoDTO validateSubscriptionDetails(APIKeyValidationInfoDTO infoDTO, String context,
             String version, String consumerKey, String keyManager) {
@@ -346,8 +338,16 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         return infoDTO;
     }
 
-    private APIKeyValidationInfoDTO validateSubscriptionDetails(APIKeyValidationInfoDTO infoDTO, String context,
-                                                                String version, APIKeyInfo apiKeyInfo) {
+    private APIKeyValidationInfoDTO validateSubscriptionDetails(String context,
+                                                                String version, APIKeyValidationInfoDTO infoDTO,
+                                                                APIKeyInfo apiKeyInfo) {
+
+        // Check if the api version has been prefixed with _default_
+        if (version != null && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
+            // Remove the prefix from the version.
+            version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
+        }
+
         String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(context);
         if (apiTenantDomain == null) {
             apiTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -386,7 +386,10 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
             log.error("Subscription datastore is not initialized for tenant domain " + apiTenantDomain);
         }
         if (api != null) {
-            if (api.getApiId() != apiKeyInfo.getApiId()) {
+            if (("API".equals(apiKeyInfo.getKeyBoundary())) && (api.getApiId() != apiKeyInfo.getApiId())) {
+                if (log.isDebugEnabled()){
+                    log.debug("API key does not belong to the API Invoked.");
+                }
                 // If API key not belongs to the API Invoked.
                 infoDTO.setAuthorized(false);
                 infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
@@ -426,13 +429,6 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                     }
                 }
             }
-        }
-        if (!infoDTO.isAuthorized() && infoDTO.getValidationStatus() == 0) {
-            //Scenario where validation failed and message is not set
-            infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
-        } else {
-            infoDTO.setAuthorized(false);
-            infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
         }
         return infoDTO;
     }
@@ -762,24 +758,24 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
     }
 
 
-    private APIKeyValidationInfoDTO validate(APIKeyValidationInfoDTO infoDTO, String apiTenantDomain, int tenantId,
-                                             SubscriptionDataStore datastore, API api, Application app, Subscription sub, String keyType) {
+    private void validate(APIKeyValidationInfoDTO infoDTO, String apiTenantDomain, int tenantId,
+                          SubscriptionDataStore datastore, API api, Application app, Subscription sub, String keyType) {
         String subscriptionStatus = sub.getSubscriptionState();
         if (APIConstants.SubscriptionStatus.BLOCKED.equals(subscriptionStatus)) {
             infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
             infoDTO.setAuthorized(false);
-            return infoDTO;
+            return;
         } else if (APIConstants.SubscriptionStatus.ON_HOLD.equals(subscriptionStatus)
                 || APIConstants.SubscriptionStatus.REJECTED.equals(subscriptionStatus)) {
             infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
             infoDTO.setAuthorized(false);
-            return infoDTO;
+            return;
         } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subscriptionStatus)
                 && !APIConstants.API_KEY_TYPE_SANDBOX.equals(keyType)) {
             infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
             infoDTO.setType(keyType);
             infoDTO.setAuthorized(false);
-            return infoDTO;
+            return;
         }
         infoDTO.setTier(sub.getPolicyId());
         infoDTO.setSubscriber(app.getSubName());
@@ -800,11 +796,11 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         String subscriberTenant = MultitenantUtils.getTenantDomain(app.getSubName());
 
         ApplicationPolicy appPolicy = datastore.getApplicationPolicyByName(app.getPolicy(),
-                tenantId);
+                APIUtil.getTenantIdFromTenantDomain(app.getOrganization()));
         if (appPolicy == null) {
             try {
                 appPolicy = new SubscriptionDataLoaderImpl()
-                        .getApplicationPolicy(app.getPolicy(), apiTenantDomain);
+                        .getApplicationPolicy(app.getPolicy(), app.getOrganization());
                 datastore.addOrUpdateApplicationPolicy(appPolicy);
             } catch (DataLoadingException e) {
                 log.error("Error while loading ApplicationPolicy");
@@ -882,7 +878,6 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         // condition id list for all throttling tiers associated with this API.
         infoDTO.setThrottlingDataList(list);
         infoDTO.setAuthorized(true);
-        return infoDTO;
     }
     protected long getTimeStampSkewInSeconds() {
 

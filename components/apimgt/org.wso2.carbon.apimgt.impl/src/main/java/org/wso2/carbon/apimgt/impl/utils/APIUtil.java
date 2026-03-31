@@ -638,7 +638,9 @@ public final class APIUtil {
      * @param notifierType eventType
      */
     public static void sendNotification(org.wso2.carbon.apimgt.impl.notifier.events.Event event, String notifierType) {
-
+        if (log.isDebugEnabled()) {
+            log.debug("Publishing event: " + event + " through notifier:" + notifierType);
+        }
         if (ServiceReferenceHolder.getInstance().getNotifiersMap().containsKey(notifierType)) {
             List<Notifier> notifierList = ServiceReferenceHolder.getInstance().getNotifiersMap().get(notifierType);
             notifierList.forEach((notifier) -> {

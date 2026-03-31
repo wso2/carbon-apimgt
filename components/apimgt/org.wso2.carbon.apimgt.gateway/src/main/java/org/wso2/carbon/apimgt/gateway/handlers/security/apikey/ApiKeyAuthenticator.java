@@ -257,13 +257,6 @@ public class ApiKeyAuthenticator implements Authenticator {
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
         APIKeyInfo apiKeyInfo;
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
-        if (RevokedJWTDataHolder.getInstance().isApiKeyExistsInRevokedMap(apiKeyHash)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Api Key is revoked already.");
-            }
-            throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_INACTIVE,
-                    APISecurityConstants.API_AUTH_ACCESS_TOKEN_INACTIVE_MESSAGE);
-        }
         apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(apiKeyHash);
         // Not found in cache or caching disabled
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null ||
@@ -271,8 +264,8 @@ public class ApiKeyAuthenticator implements Authenticator {
             if (log.isDebugEnabled()) {
                 log.debug("Invalid Api Key. Active API key information not available.");
             }
-            throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
-                    APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
         }
         // Check whether the provided API key is already there in the stored list and return false otherwise
         if (!MessageDigest.isEqual(apiKeyHash.getBytes(StandardCharsets.UTF_8),
@@ -354,11 +347,13 @@ private String extractApiKey(MessageContext mCtx) throws APISecurityException {
 }
 
 private String removeApiKeyFromQueryParameters(String queryParam, String apiKey) {
-    queryParam = queryParam.replace("?apikey=" + apiKey, "?");
-    queryParam = queryParam.replace("&apikey=" + apiKey, "");
-    queryParam = queryParam.replace("?&", "?");
-    if (queryParam.lastIndexOf("?") == (queryParam.length() - 1)) {
-        queryParam = queryParam.replace("?", "");
+    if (StringUtils.isNotBlank(queryParam)) {
+        queryParam = queryParam.replace("?apikey=" + apiKey, "?");
+        queryParam = queryParam.replace("&apikey=" + apiKey, "");
+        queryParam = queryParam.replace("?&", "?");
+        if (queryParam.lastIndexOf("?") == (queryParam.length() - 1)) {
+            queryParam = queryParam.replace("?", "");
+        }
     }
     return queryParam;
 }

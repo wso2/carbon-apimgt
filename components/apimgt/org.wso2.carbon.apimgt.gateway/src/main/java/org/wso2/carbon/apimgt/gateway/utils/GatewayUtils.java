@@ -968,9 +968,16 @@ public class GatewayUtils {
             throws APISecurityException {
 
         APIKeyValidator apiKeyValidator = new APIKeyValidator();
+        if (log.isDebugEnabled()) {
+            log.debug("Validating API key subscription for context: " + apiContext + ", version: " + apiVersion);
+        }
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO =
                 apiKeyValidator.validateAPIKeySubscription(apiContext, apiVersion, getTenantDomain(), apiKeyInfo);
             if (apiKeyValidationInfoDTO.isAuthorized()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User is subscribed to the API: " + apiContext + ", " +
+                            "version: " + apiVersion);
+                }
                 apiKeyValidationInfoDTO.setType(apiKeyInfo.getKeyType());
             } else {
                 log.error("User is not subscribed to access the API.");

@@ -162,14 +162,14 @@ public class ApplicationKeyMappingUtil {
     }
 
     @Deprecated
-    public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime){
+    public static APIKeyDTO formApiKeyToDTO(String apiKey, long validityTime){
         APIKeyDTO apiKeyDto = new APIKeyDTO();
         apiKeyDto.setApikey(apiKey);
         apiKeyDto.setValidityPeriod(validityTime);
         return apiKeyDto;
     }
 
-    public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime, String keyName){
+    public static APIKeyDTO formApiKeyToDTO(String apiKey, long validityTime, String keyName){
         APIKeyDTO apiKeyDto = new APIKeyDTO();
         apiKeyDto.setApikey(apiKey);
         apiKeyDto.setValidityPeriod(validityTime);
@@ -286,9 +286,9 @@ public class ApplicationKeyMappingUtil {
                     APIKeyInfoDTO dto = new APIKeyInfoDTO();
                     dto.setKeyUUID(src.getKeyUUID());
                     dto.setKeyName(src.getKeyName());
-                    dto.setIssuedOn(String.valueOf(src.getCreatedTime()));
-                    dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
-                    dto.setLastUsed(getLastUsedTimeOrDefault(src.getLastUsedTime()));
+                    dto.setIssuedOn(src.getCreatedTime());
+                    dto.setValidityPeriod(src.getValidityPeriod());
+                    dto.setLastUsed(src.getLastUsedTime());
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -309,9 +309,9 @@ public class ApplicationKeyMappingUtil {
                     dto.setKeyName(src.getKeyName());
                     dto.setApiName(src.getApiName());
                     dto.setApiUUID(src.getApiUUId());
-                    dto.setIssuedOn(String.valueOf(src.getCreatedTime()));
+                    dto.setIssuedOn(src.getCreatedTime());
                     dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
-                    dto.setLastUsed(getLastUsedTimeOrDefault(src.getLastUsedTime()));
+                    dto.setLastUsed(src.getLastUsedTime());
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -330,9 +330,9 @@ public class ApplicationKeyMappingUtil {
                     APIAPIKeyInfoDTO dto = new APIAPIKeyInfoDTO();
                     dto.setKeyUUID(src.getKeyUUID());
                     dto.setKeyName(src.getKeyName());
-                    dto.setIssuedOn(String.valueOf(src.getCreatedTime()));
-                    dto.setValidityPeriod(toSafeValidityPeriod(src.getValidityPeriod()));
-                    dto.setLastUsed(getLastUsedTimeOrDefault(src.getLastUsedTime()));
+                    dto.setIssuedOn(src.getCreatedTime());
+                    dto.setValidityPeriod(src.getValidityPeriod());
+                    dto.setLastUsed(src.getLastUsedTime());
                     dto.setAssociatedApp(src.getApplicationName());
                     return dto;
                 })
@@ -364,7 +364,7 @@ public class ApplicationKeyMappingUtil {
         return lastUsedTime == null ? "NOT_USED" : lastUsedTime.toString();
     }
 
-    private static int toSafeValidityPeriod(long validityPeriod) {
-        return (int) Math.min(validityPeriod, Integer.MAX_VALUE);
+    private static long toSafeValidityPeriod(long validityPeriod) {
+        return (long) Math.min(validityPeriod, Long.MAX_VALUE);
     }
 }
