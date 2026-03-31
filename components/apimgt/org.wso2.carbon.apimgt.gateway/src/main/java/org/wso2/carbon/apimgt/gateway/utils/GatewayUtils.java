@@ -953,6 +953,76 @@ public class GatewayUtils {
 
     /**
      * Validate whether the user is subscribed to the invoked API. If subscribed, return a APIKeyValidationInfoDTO
+     * object containing the API information to authenticate API Keys. This overload additionally handles API Products
+     * that did not have versioned contexts in previous APIM versions by retrying the subscription lookup with the
+     * version appended to the context when the initial lookup fails.
+     *
+     * @param apiContext     API context
+     * @param apiVersion     API version
+     * @param payload        The payload of the JWT token
+     * @param token          The token which was used to invoke the API
+     * @param apiFromContext API object retrieved from the message context
+     * @return an APIKeyValidationInfoDTO containing APIKey validation information.
+     * If the subscription information is not found, return a null object.
+     * @throws APISecurityException if the user is not subscribed to the API
+     */
+    public static APIKeyValidationInfoDTO validateAPISubscription(String apiContext, String apiVersion,
+            JWTClaimsSet payload, String token, API apiFromContext) throws APISecurityException {
+
+        APIKeyValidator apiKeyValidator = new APIKeyValidator();
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
+        String keyType = (String) payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE);
+        int appId = 0;
+        if (payload.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null) {
+            try {
+                Map<String, Object> applicationObjMap =
+                        payload.getJSONObjectClaim(APIConstants.JwtTokenConstants.APPLICATION);
+                JSONObject application = new JSONObject(applicationObjMap);
+                appId = ((Long) application.get(APIConstants.JwtTokenConstants.APPLICATION_ID)).intValue();
+            } catch (ParseException e) {
+                log.error("Error while parsing the application object from the JWT token.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                        APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+            }
+        }
+        // Validate subscription
+        // If the appId is equal to 0 then it's an internal key
+        if (appId != 0) {
+            apiKeyValidationInfoDTO =
+                    apiKeyValidator.validateSubscription(apiContext, apiVersion, appId, getTenantDomain(), keyType);
+            if (!apiKeyValidationInfoDTO.isAuthorized()) {
+                // For API Products with version 1.0.0 and no contextTemplate, subscriptions may have been stored
+                // with the version appended to the context in previous APIM versions. Retry the lookup accordingly.
+                boolean appendProductVersionToContext = APIConstants.API_PRODUCT.equalsIgnoreCase(
+                        apiFromContext.getApiType()) && APIConstants.API_PRODUCT_VERSION_1_0_0.equals(
+                        apiFromContext.getApiVersion()) && StringUtils.isBlank(apiFromContext.getContextTemplate());
+                if (appendProductVersionToContext) {
+                    String adjustedApiContext = apiContext + "/" + APIConstants.API_PRODUCT_VERSION_1_0_0;
+                    apiKeyValidationInfoDTO = apiKeyValidator.validateSubscription(adjustedApiContext, apiVersion,
+                            appId, getTenantDomain(), keyType);
+                }
+            }
+            if (apiKeyValidationInfoDTO.isAuthorized()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User is subscribed to the API: " + apiContext + ", " +
+                            "version: " + apiVersion + ". Token: " + getMaskedToken(token));
+                }
+                apiKeyValidationInfoDTO.setType(keyType);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("User is not subscribed to access the API: " + apiContext +
+                            ", version: " + apiVersion + ". Token: " + getMaskedToken(token));
+                }
+                log.error("User is not subscribed to access the API.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                        APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+            }
+        }
+        return apiKeyValidationInfoDTO;
+    }
+
+    /**
+     * Validate whether the user is subscribed to the invoked API. If subscribed, return a APIKeyValidationInfoDTO
      * object containing the API information to authenticate API Keys.
      *
      * @param apiContext API context
