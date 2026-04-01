@@ -55,6 +55,15 @@ public interface GatewayAgentConfiguration {
         return null;
     }
     /**
+     * Get the implementation class of the external gateway API key agent
+     *
+     * @return String implementation class name
+     */
+    default String getApiKeyConnectorImplementation() {
+        return null;
+    }
+
+    /**
      * Get vendor type of the external gateway
      *
      * @return String vendor name
