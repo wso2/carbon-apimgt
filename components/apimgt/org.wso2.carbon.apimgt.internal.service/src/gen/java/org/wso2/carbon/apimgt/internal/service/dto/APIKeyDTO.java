@@ -15,8 +15,10 @@ import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 
 public class APIKeyDTO   {
   
@@ -24,9 +26,47 @@ public class APIKeyDTO   {
     private String keyName = null;
     private String keyType = null;
     private String status = null;
-    private Integer expiresAt = null;
+    private Long expiresAt = null;
+    private String authUser = null;
     private Integer appId = null;
+    private Integer apiId = null;
+    private String applicationUUID = null;
+    private String apiUUID = null;
+    private Long validityPeriod = null;
+    private Long createdTime = null;
     private Object additionalProperties = null;
+
+    @XmlType(name="KeyBoundaryEnum")
+    @XmlEnum(String.class)
+    public enum KeyBoundaryEnum {
+        API("API"),
+        APPLICATION("APPLICATION");
+        private String value;
+
+        KeyBoundaryEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static KeyBoundaryEnum fromValue(String v) {
+            for (KeyBoundaryEnum b : KeyBoundaryEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private KeyBoundaryEnum keyBoundary = null;
 
   /**
    **/
@@ -98,7 +138,7 @@ public class APIKeyDTO   {
 
   /**
    **/
-  public APIKeyDTO expiresAt(Integer expiresAt) {
+  public APIKeyDTO expiresAt(Long expiresAt) {
     this.expiresAt = expiresAt;
     return this;
   }
@@ -106,11 +146,28 @@ public class APIKeyDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("expiresAt")
-  public Integer getExpiresAt() {
+  public Long getExpiresAt() {
     return expiresAt;
   }
-  public void setExpiresAt(Integer expiresAt) {
+  public void setExpiresAt(Long expiresAt) {
     this.expiresAt = expiresAt;
+  }
+
+  /**
+   **/
+  public APIKeyDTO authUser(String authUser) {
+    this.authUser = authUser;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("authUser")
+  public String getAuthUser() {
+    return authUser;
+  }
+  public void setAuthUser(String authUser) {
+    this.authUser = authUser;
   }
 
   /**
@@ -132,6 +189,91 @@ public class APIKeyDTO   {
 
   /**
    **/
+  public APIKeyDTO apiId(Integer apiId) {
+    this.apiId = apiId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("apiId")
+  public Integer getApiId() {
+    return apiId;
+  }
+  public void setApiId(Integer apiId) {
+    this.apiId = apiId;
+  }
+
+  /**
+   **/
+  public APIKeyDTO applicationUUID(String applicationUUID) {
+    this.applicationUUID = applicationUUID;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("applicationUUID")
+  public String getApplicationUUID() {
+    return applicationUUID;
+  }
+  public void setApplicationUUID(String applicationUUID) {
+    this.applicationUUID = applicationUUID;
+  }
+
+  /**
+   **/
+  public APIKeyDTO apiUUID(String apiUUID) {
+    this.apiUUID = apiUUID;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("apiUUID")
+  public String getApiUUID() {
+    return apiUUID;
+  }
+  public void setApiUUID(String apiUUID) {
+    this.apiUUID = apiUUID;
+  }
+
+  /**
+   **/
+  public APIKeyDTO validityPeriod(Long validityPeriod) {
+    this.validityPeriod = validityPeriod;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("validityPeriod")
+  public Long getValidityPeriod() {
+    return validityPeriod;
+  }
+  public void setValidityPeriod(Long validityPeriod) {
+    this.validityPeriod = validityPeriod;
+  }
+
+  /**
+   **/
+  public APIKeyDTO createdTime(Long createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("createdTime")
+  public Long getCreatedTime() {
+    return createdTime;
+  }
+  public void setCreatedTime(Long createdTime) {
+    this.createdTime = createdTime;
+  }
+
+  /**
+   **/
   public APIKeyDTO additionalProperties(Object additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
@@ -146,6 +288,23 @@ public class APIKeyDTO   {
   }
   public void setAdditionalProperties(Object additionalProperties) {
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   **/
+  public APIKeyDTO keyBoundary(KeyBoundaryEnum keyBoundary) {
+    this.keyBoundary = keyBoundary;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("keyBoundary")
+  public KeyBoundaryEnum getKeyBoundary() {
+    return keyBoundary;
+  }
+  public void setKeyBoundary(KeyBoundaryEnum keyBoundary) {
+    this.keyBoundary = keyBoundary;
   }
 
 
@@ -163,13 +322,20 @@ public class APIKeyDTO   {
         Objects.equals(keyType, apIKey.keyType) &&
         Objects.equals(status, apIKey.status) &&
         Objects.equals(expiresAt, apIKey.expiresAt) &&
+        Objects.equals(authUser, apIKey.authUser) &&
         Objects.equals(appId, apIKey.appId) &&
-        Objects.equals(additionalProperties, apIKey.additionalProperties);
+        Objects.equals(apiId, apIKey.apiId) &&
+        Objects.equals(applicationUUID, apIKey.applicationUUID) &&
+        Objects.equals(apiUUID, apIKey.apiUUID) &&
+        Objects.equals(validityPeriod, apIKey.validityPeriod) &&
+        Objects.equals(createdTime, apIKey.createdTime) &&
+        Objects.equals(additionalProperties, apIKey.additionalProperties) &&
+        Objects.equals(keyBoundary, apIKey.keyBoundary);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiKeyHash, keyName, keyType, status, expiresAt, appId, additionalProperties);
+    return Objects.hash(apiKeyHash, keyName, keyType, status, expiresAt, authUser, appId, apiId, applicationUUID, apiUUID, validityPeriod, createdTime, additionalProperties, keyBoundary);
   }
 
   @Override
@@ -182,8 +348,15 @@ public class APIKeyDTO   {
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    expiresAt: ").append(toIndentedString(expiresAt)).append("\n");
+    sb.append("    authUser: ").append(toIndentedString(authUser)).append("\n");
     sb.append("    appId: ").append(toIndentedString(appId)).append("\n");
+    sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
+    sb.append("    applicationUUID: ").append(toIndentedString(applicationUUID)).append("\n");
+    sb.append("    apiUUID: ").append(toIndentedString(apiUUID)).append("\n");
+    sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    keyBoundary: ").append(toIndentedString(keyBoundary)).append("\n");
     sb.append("}");
     return sb.toString();
   }

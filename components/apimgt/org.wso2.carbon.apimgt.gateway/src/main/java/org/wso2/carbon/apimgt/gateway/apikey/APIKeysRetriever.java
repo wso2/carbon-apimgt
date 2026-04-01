@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.gateway.apikey;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -88,8 +89,6 @@ public class APIKeysRetriever extends TimerTask {
                             mapper.readValue(responseString,
                                     new TypeReference<List<APIKeyDTO>>() {});
                     for (APIKeyDTO dto : dtoList) {
-                        Map<String, String> props = new HashMap<>();
-                        Map<String, String> oldProps = new HashMap<>();
                         // Convert DTO -> APIKeyInfo
                         APIKeyInfo info = new APIKeyInfo();
                         info.setLookupKey(dto.getApiKeyHash());
@@ -97,17 +96,27 @@ public class APIKeysRetriever extends TimerTask {
                         info.setKeyName(dto.getKeyName());
                         info.setKeyType(dto.getKeyType());
                         info.setStatus(dto.getStatus());
-                        info.setExpiresAt(dto.getExpiresAt());
-                        info.setAppId(dto.getAppId());
-                        byte[] apikeyProperties = dto.getAdditionalProperties();
-                        if (apikeyProperties != null && apikeyProperties.length != 0) {
-                            oldProps = mapper.readValue(apikeyProperties, new TypeReference<Map<String, String>>() {});
+                        if (dto.getExpiresAt() != null) {
+                            info.setExpiresAt(dto.getExpiresAt());
                         }
-                        props.put(APIConstants.JwtTokenConstants.PERMITTED_IP,
-                                oldProps.get(APIConstants.JwtTokenConstants.PERMITTED_IP));
-                        props.put(APIConstants.JwtTokenConstants.PERMITTED_REFERER,
-                                oldProps.get(APIConstants.JwtTokenConstants.PERMITTED_REFERER));
-                        info.setAdditionalProperties(props);
+                        if (dto.getAppId() != null) {
+                            info.setAppId(dto.getAppId());
+                        }
+                        if (dto.getApiId() != null) {
+                            info.setApiId(dto.getApiId());
+                        }
+                        info.setApiUUId(dto.getApiUUID());
+                        info.setApplicationId(dto.getApplicationUUID());
+                        if (dto.getCreatedTime() != null) {
+                            info.setCreatedTime(dto.getCreatedTime());
+                        }
+                        if (dto.getValidityPeriod() != null) {
+                            info.setValidityPeriod(dto.getValidityPeriod());
+                        }
+                        info.setAuthUser(dto.getAuthUser());
+                        info.setKeyBoundary(dto.getKeyBoundary());
+                        Map<String, String> properties = dto.getAdditionalProperties();
+                        info.setAdditionalProperties(properties);
                         DataHolder.getInstance().addOpaqueAPIKeyInfo(info);
                     }
                 } else {

@@ -7635,17 +7635,20 @@ components:
           description: Owner of the Application
           example: Bob
         issuedOn:
-          type: string
-          description: Created Time
-          example: 2026-02-06 23:45:07
+          type: integer
+          format: int64
+          description: Created time in Unix epoch milliseconds
+          example: 1599196134000
         validityPeriod:
           type: integer
-          format: int32
+          format: int64
           example: 3600
         lastUsed:
-          type: string
-          description: Last Used Time
-          example: 2026-02-06 23:45:07
+          type: integer
+          format: int64
+          nullable: true
+          description: Last used time in Unix epoch milliseconds
+          example: 1599196134000
     APIKeyList:
       title: API Keys List
       type: object

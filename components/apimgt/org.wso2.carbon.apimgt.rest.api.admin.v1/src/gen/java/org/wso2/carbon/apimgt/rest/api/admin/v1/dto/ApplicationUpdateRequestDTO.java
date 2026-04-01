@@ -18,8 +18,8 @@ import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
-
 @ApiModel(description = "Request body to update application attributes")
+
 
 public class ApplicationUpdateRequestDTO   {
   

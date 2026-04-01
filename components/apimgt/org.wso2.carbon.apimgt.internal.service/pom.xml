@@ -181,6 +181,7 @@
                                 </templateDirectory>
                                 <skipOverwrite>true</skipOverwrite>
                                 <modelNameSuffix>DTO</modelNameSuffix>
+                                <additionalProperties>ignoreUnknownProperties=true</additionalProperties>
                             </configuration>
                         </execution>
                     </executions>

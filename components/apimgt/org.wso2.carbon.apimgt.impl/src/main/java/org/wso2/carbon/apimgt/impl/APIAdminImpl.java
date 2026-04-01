@@ -79,6 +79,7 @@ import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
+import org.wso2.carbon.apimgt.impl.notifier.events.APIKeyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.LabelEvent;
 import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
@@ -387,14 +388,19 @@ public class APIAdminImpl implements APIAdmin {
      */
     @Override
     public void revokeAPIKey(String keyUUId, String tenantDomain) throws APIManagementException {
-
+        int tenantId = APIUtil.getTenantId(tenantDomain);
         // Load existing metadata before revocation (revocation may remove/alter it)
         APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKeyForTenant(keyUUId, tenantDomain);
-        if (apiKeyInfo.getKeyUUID() == null) {
+        if (apiKeyInfo == null || StringUtils.isEmpty(apiKeyInfo.getKeyUUID())) {
             throw new APIMgtResourceNotFoundException("Active API key not found for UUID: " + keyUUId);
         }
-        log.info("Revoking API key with UUID: " + keyUUId + " for tenant: " + tenantDomain);
+        if (log.isDebugEnabled()){
+            log.debug("Revoking API key with UUID: " + keyUUId + " for tenant: " + tenantDomain);
+        }
         apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
+        APIKeyEvent apiKeyEvent = new APIKeyEvent(APIConstants.EventType.API_KEY_DELETE.name(), tenantId, tenantDomain,
+                apiKeyInfo.getApiKeyHash(),apiKeyInfo.getKeyUUID(), apiKeyInfo.getKeyName(),apiKeyInfo.getKeyType());
+        APIUtil.sendNotification(apiKeyEvent, APIConstants.NotifierType.API_KEY.name());
     }
 
     /**

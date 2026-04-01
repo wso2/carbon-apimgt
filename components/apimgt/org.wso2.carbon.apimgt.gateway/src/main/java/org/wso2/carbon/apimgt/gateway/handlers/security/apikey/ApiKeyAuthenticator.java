@@ -53,7 +53,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
-import org.wso2.carbon.apimgt.impl.publishers.OpaqueApiKeyPublisher;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.net.URLEncoder;
@@ -63,8 +62,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
 
 public class ApiKeyAuthenticator implements Authenticator {
 
@@ -105,8 +102,8 @@ public class ApiKeyAuthenticator implements Authenticator {
             String tenantDomain = GatewayUtils.getTenantDomain();
             String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
             String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-            String httpMethod = (String) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
-                    getProperty(Constants.Configuration.HTTP_METHOD);
+            String httpMethod = (String) ((Axis2MessageContext) synCtx).getAxis2MessageContext()
+                    .getProperty(Constants.Configuration.HTTP_METHOD);
             String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
             OpenAPI openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
 
@@ -118,8 +115,8 @@ public class ApiKeyAuthenticator implements Authenticator {
                         APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF_ERROR_MESSAGE);
             }
 
-            String resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
-                    matchingResource, httpMethod);
+            String resourceCacheKey =
+                    APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion, matchingResource, httpMethod);
             VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
             verbInfoDTO.setHttpVerb(httpMethod);
             // Not doing resource level authentication
@@ -130,17 +127,16 @@ public class ApiKeyAuthenticator implements Authenticator {
             verbInfoList.add(verbInfoDTO);
             synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoList);
 
-            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx).
-                    getAxis2MessageContext();
-            Map<String, String> transportHeaderMap = (Map<String, String>)
-                    axis2MessageContext.getProperty
-                            (org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            org.apache.axis2.context.MessageContext axis2MessageContext =
+                    ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+            Map<String, String> transportHeaderMap = (Map<String, String>) axis2MessageContext.getProperty(
+                    org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             String referer = null;
             if (transportHeaderMap != null) {
                 referer = transportHeaderMap.get(APIMgtGatewayConstants.REFERER);
             }
-            ExtendedJWTConfigurationDto jwtConfigurationDto = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfiguration().getJwtConfigurationDto();
+            ExtendedJWTConfigurationDto jwtConfigurationDto =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
             boolean jwtGenerationEnabled = false;
             if (jwtConfigurationDto != null) {
                 jwtGenerationEnabled = jwtConfigurationDto.isEnabled();
@@ -169,34 +165,37 @@ public class ApiKeyAuthenticator implements Authenticator {
                     String cacheKey = GatewayUtils.getAccessTokenCacheKey(tokenIdentifier, apiContext, apiVersion,
                             matchingResource, httpMethod);
                     boolean isGatewayTokenCacheEnabled = GatewayUtils.isGatewayTokenCacheEnabled();
-                    boolean isVerified = ApiKeyAuthenticatorUtils.verifyAPIKeySignatureFromTokenCache(isGatewayTokenCacheEnabled,
-                            tokenIdentifier, cacheKey, apiKey, splitToken[0]);
+                    boolean isVerified =
+                            ApiKeyAuthenticatorUtils.verifyAPIKeySignatureFromTokenCache(isGatewayTokenCacheEnabled,
+                                    tokenIdentifier, cacheKey, apiKey, splitToken[0]);
                     if (!isVerified) {
                         // Not found in cache or caching disabled
                         isVerified = ApiKeyAuthenticatorUtils.verifyAPIKeySignature(signedJWT, certAlias);
                     }
-                    ApiKeyAuthenticatorUtils.addTokenToTokenCache(isGatewayTokenCacheEnabled, tokenIdentifier, isVerified,
-                            tenantDomain);
+                    ApiKeyAuthenticatorUtils.addTokenToTokenCache(isGatewayTokenCacheEnabled, tokenIdentifier,
+                            isVerified, tenantDomain);
                     // If Api Key signature is verified
                     if (isVerified) {
-                        ApiKeyAuthenticatorUtils.overridePayloadFromDataCache(isGatewayTokenCacheEnabled, cacheKey, payload);
-                        ApiKeyAuthenticatorUtils.checkTokenExpired(isGatewayTokenCacheEnabled, cacheKey, tokenIdentifier, apiKey,
-                                tenantDomain, payload);
-                        ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(payload, GatewayUtils.getIp(axis2MessageContext),
-                                apiContext, apiVersion, referer);
-                        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext,
-                                apiVersion, payload, splitToken[0]);
-                        String endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO,
-                                jwtConfigurationDto, apiKey, signedJWT, payload, tokenIdentifier, apiContext, apiVersion,
-                                isGatewayTokenCacheEnabled);
-                        AuthenticationContext authenticationContext = GatewayUtils.generateAuthenticationContext(tokenIdentifier,
-                                payload, apiKeyValidationInfoDTO, endUserToken);
+                        ApiKeyAuthenticatorUtils.overridePayloadFromDataCache(isGatewayTokenCacheEnabled, cacheKey,
+                                payload);
+                        ApiKeyAuthenticatorUtils.checkTokenExpired(isGatewayTokenCacheEnabled, cacheKey,
+                                tokenIdentifier, apiKey, tenantDomain, payload);
+                        ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(payload,
+                                GatewayUtils.getIp(axis2MessageContext), apiContext, apiVersion, referer);
+                        APIKeyValidationInfoDTO apiKeyValidationInfoDTO =
+                                GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload, splitToken[0]);
+                        String endUserToken =
+                                ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO, jwtConfigurationDto,
+                                        apiKey, signedJWT, payload, tokenIdentifier, apiContext, apiVersion,
+                                        isGatewayTokenCacheEnabled);
+                        AuthenticationContext authenticationContext =
+                                GatewayUtils.generateAuthenticationContext(tokenIdentifier, payload,
+                                        apiKeyValidationInfoDTO, endUserToken);
                         APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext,
                                 jwtGenerationEnabled ? getContextHeader() : null);
                         synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, authenticationContext.getUsername());
                         log.debug("User is authorized to access the resource using Api Key.");
-                        return new AuthenticationResponse(true, isMandatory, false,
-                                0, null);
+                        return new AuthenticationResponse(true, isMandatory, false, 0, null);
                     }
                     if (log.isDebugEnabled()) {
                         log.debug("Api Key signature verification failure. Api Key: " +
@@ -207,31 +206,29 @@ public class ApiKeyAuthenticator implements Authenticator {
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
             }
-            AuthenticationContext opaqueApiKeyAuthenticationContext = validateOpaqueApiKey(apiKey, apiContext,
-                    apiVersion, referer, GatewayUtils.getIp(axis2MessageContext), tenantDomain);
+            AuthenticationContext opaqueApiKeyAuthenticationContext =
+                    validateOpaqueApiKey(apiKey, apiContext, apiVersion, referer,
+                            GatewayUtils.getIp(axis2MessageContext), tenantDomain);
             if (opaqueApiKeyAuthenticationContext.isAuthenticated()) {
                 APISecurityUtils.setAuthenticationContext(synCtx, opaqueApiKeyAuthenticationContext,
                         jwtGenerationEnabled ? getContextHeader() : null);
-                synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, opaqueApiKeyAuthenticationContext.getUsername());
+                synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME,
+                        opaqueApiKeyAuthenticationContext.getUsername());
                 log.debug("User is authorized to access the resource using Api Key.");
-                return new AuthenticationResponse(true, isMandatory, false,
-                        0, null);
+                return new AuthenticationResponse(true, isMandatory, false, 0, null);
             }
         } catch (APISecurityException e) {
-            return new AuthenticationResponse(false, isMandatory, true,
-                    e.getErrorCode(), e.getMessage());
+            return new AuthenticationResponse(false, isMandatory, true, e.getErrorCode(), e.getMessage());
         } catch (ParseException e) {
             log.error("Error while parsing API Key", e);
-            return new AuthenticationResponse(false, isMandatory, true,
-                    APISecurityConstants.API_AUTH_GENERAL_ERROR,
+            return new AuthenticationResponse(false, isMandatory, true, APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         } catch (APIManagementException e) {
             log.error("Error while setting public cert/private key for backend jwt generation", e);
-            return new AuthenticationResponse(false, isMandatory, true,
-                    APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+            return new AuthenticationResponse(false, isMandatory, true, APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
-        return new AuthenticationResponse(false, isMandatory, true,
-                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+        return new AuthenticationResponse(false, isMandatory, true, APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                 APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
     }
 
@@ -247,151 +244,138 @@ public class ApiKeyAuthenticator implements Authenticator {
      * @return AuthenticationContext Authentication context with the API key validation info
      * @throws APIManagementException if an error occurs
      */
-    private AuthenticationContext validateOpaqueApiKey(String apiKey, String apiContext, String apiVersion, String referrer,
-                                                      String ip, String tenantDomain) throws APISecurityException, APIManagementException {
+    private AuthenticationContext validateOpaqueApiKey(String apiKey, String apiContext, String apiVersion,
+                                                       String referrer, String ip, String tenantDomain)
+            throws APISecurityException, APIManagementException {
 
         // Hash the provided API key
         String apiKeyHash = APIUtil.sha256Hash(apiKey);
-        String lookupKey = apiKeyHash;
         String endUserToken = null;
-        ExtendedJWTConfigurationDto jwtConfigurationDto = ServiceReferenceHolder.getInstance()
-            .getAPIManagerConfiguration().getJwtConfigurationDto();
+        boolean isGatewayTokenCacheEnabled = GatewayUtils.isGatewayTokenCacheEnabled();
+
+        ExtendedJWTConfigurationDto jwtConfigurationDto =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
         APIKeyInfo apiKeyInfo;
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = null;
-        if (RevokedJWTDataHolder.getInstance().isApiKeyExistsInRevokedMap(apiKeyHash)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Api Key is revoked already.");
-            }
-            throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_INACTIVE,
-                    APISecurityConstants.API_AUTH_ACCESS_TOKEN_INACTIVE_MESSAGE);
-        }
-        boolean isGatewayTokenCacheEnabled = GatewayUtils.isGatewayTokenCacheEnabled();
-        boolean isVerified = ApiKeyAuthenticatorUtils.verifyAPIKeyHashFromTokenCache(isGatewayTokenCacheEnabled,
-                apiKeyHash, apiKey);
-        apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(lookupKey);
+        apiKeyInfo = DataHolder.getInstance().getOpaqueAPIKeyInfo(apiKeyHash);
         // Not found in cache or caching disabled
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null ||
                 !APIConstants.NotificationEvent.ACTIVE.equals(apiKeyInfo.getStatus())) {
             if (log.isDebugEnabled()) {
                 log.debug("Invalid Api Key. Active API key information not available.");
             }
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+        }
+        // Check whether the provided API key is already there in the stored list and return false otherwise
+        if (!MessageDigest.isEqual(apiKeyHash.getBytes(StandardCharsets.UTF_8),
+                apiKeyInfo.getApiKeyHash().getBytes(StandardCharsets.UTF_8))) {
+            log.debug("Invalid Api Key. API key hash is not matched.");
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+        }
+        // Check Api key expiry
+        ApiKeyAuthenticatorUtils.checkApiKeyExpired(apiKeyHash, apiKeyInfo);
+        // Check for permittedIP and permittedReferrers
+        ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(ip, apiContext, apiVersion, referrer,
+                apiKeyInfo.getAdditionalProperties());
+
+        // Validate subscriptions
+        apiKeyValidationInfoDTO = GatewayUtils.validateAPIKeySubscription(apiContext, apiVersion, apiKeyInfo);
+        if (apiKeyValidationInfoDTO.isAuthorized()) {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "User is subscribed to the API: " + apiContext + ", " + "version: " + apiVersion + ". Token: " +
+                                apiKeyInfo.getKeyName());
+            }
+            endUserToken =
+                    ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO, jwtConfigurationDto, apiKey, null,
+                            null, apiKeyHash, apiContext, apiVersion, isGatewayTokenCacheEnabled);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("User is not subscribed to access the API: " + apiContext + ", version: " + apiVersion +
+                        ". Token: " + apiKeyInfo.getKeyName());
+            }
+            log.error("User is not subscribed to access the API.");
             throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                     APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
         }
-        if (!isVerified) {
-            // Check whether the provided API key is already there in the stored list and return false otherwise
-            if (!MessageDigest.isEqual(
-                    apiKeyHash.getBytes(StandardCharsets.UTF_8),
-                    apiKeyInfo.getApiKeyHash().getBytes(StandardCharsets.UTF_8))) {
-                log.debug("Invalid Api Key. API key hash is not matched.");
-                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
-                        APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
-            }
-            isVerified = true;
-        }
-        // If Api Key is verified
-        if (isVerified) {
-            // Check Api key expiry
-            ApiKeyAuthenticatorUtils.checkApiKeyExpired(isGatewayTokenCacheEnabled, apiKeyHash, tenantDomain, apiKeyInfo);
-            // Validate subscriptions
-            apiKeyValidationInfoDTO = GatewayUtils.validateAPISubscription(apiContext, apiVersion, apiKeyInfo.getKeyType(),
-                    apiKeyInfo.getAppId(), apiKey);
-            if (apiKeyValidationInfoDTO != null && apiKeyValidationInfoDTO.isAuthorized()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("User is subscribed to the API: " + apiContext + ", " +
-                            "version: " + apiVersion + ". Token: " + apiKeyInfo.getKeyName());
-                }
-                // Check for permittedIP and permittedReferrers
-                ApiKeyAuthenticatorUtils.validateAPIKeyRestrictions(ip,
-                        apiContext, apiVersion, referrer, apiKeyInfo.getAdditionalProperties());
-                endUserToken = ApiKeyAuthenticatorUtils.getEndUserToken(apiKeyValidationInfoDTO,
-                        jwtConfigurationDto, apiKey, null, null, apiKeyHash, apiContext, apiVersion,
-                        isGatewayTokenCacheEnabled);
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("User is not subscribed to access the API: " + apiContext +
-                            ", version: " + apiVersion + ". Token: " + apiKeyInfo.getKeyName());
-                }
-                log.error("User is not subscribed to access the API.");
-                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
-                        APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
-            }
-        }
-        ApiKeyAuthenticatorUtils.addTokenToTokenCache(isGatewayTokenCacheEnabled, apiKeyHash, isVerified,
-                tenantDomain);
         ApiKeyAuthenticatorUtils.updateApiKeyLastUsedTime(apiKeyHash, tenantDomain);
         // Set and return auth context
         return GatewayUtils.generateAuthenticationContext(apiKey, null, apiKeyValidationInfoDTO, endUserToken);
     }
 
-    private String extractApiKey(MessageContext mCtx) throws APISecurityException {
+private String extractApiKey(MessageContext mCtx) throws APISecurityException {
 
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) mCtx).getAxis2MessageContext();
-        String apiKey;
+    org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) mCtx).getAxis2MessageContext();
+    String apiKey;
 
-        //check headers to get apikey
-        Map headers = (Map) (axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
-        if (headers != null) {
-            apiKey = (String) headers.get(securityParam);
-            if (apiKey != null) {
-                //Remove apikey header from the request
-                headers.remove(securityParam);
-                return apiKey.trim();
-            }
+    //check headers to get apikey
+    Map headers = (Map) (axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
+    if (headers != null) {
+        apiKey = (String) headers.get(securityParam);
+        if (apiKey != null) {
+            //Remove apikey header from the request
+            headers.remove(securityParam);
+            return apiKey.trim();
         }
-        //check query params to get apikey
-        try {
-            apiKey = new SynapseXPath("$url:apikey").stringValueOf(mCtx);
-            if (StringUtils.isNotBlank(apiKey)) {
-                String rest_url_postfix = (String) axis2MC.getProperty(NhttpConstants.REST_URL_POSTFIX);
-                rest_url_postfix = removeApiKeyFromQueryParameters(rest_url_postfix, URLEncoder.encode(apiKey));
-                axis2MC.setProperty(NhttpConstants.REST_URL_POSTFIX, rest_url_postfix);
-                return apiKey.trim();
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Api Key Authentication failed: Header or Query parameter with the name '"
-                            .concat(securityParam).concat("' was not found."));
-                }
-                throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
-                        APISecurityConstants.API_AUTH_MISSING_CREDENTIALS_MESSAGE);
-            }
-        } catch (JaxenException e) {
+    }
+    //check query params to get apikey
+    try {
+        apiKey = new SynapseXPath("$url:apikey").stringValueOf(mCtx);
+        if (StringUtils.isNotBlank(apiKey)) {
+            String rest_url_postfix = (String) axis2MC.getProperty(NhttpConstants.REST_URL_POSTFIX);
+            rest_url_postfix = removeApiKeyFromQueryParameters(rest_url_postfix, URLEncoder.encode(apiKey));
+            axis2MC.setProperty(NhttpConstants.REST_URL_POSTFIX, rest_url_postfix);
+            return apiKey.trim();
+        } else {
             if (log.isDebugEnabled()) {
-                log.debug("Error while retrieving apikey from the request query params.", e);
+                log.debug(
+                        "Api Key Authentication failed: Header or Query parameter with the name '".concat(securityParam)
+                                .concat("' was not found."));
             }
             throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
                     APISecurityConstants.API_AUTH_MISSING_CREDENTIALS_MESSAGE);
         }
+    } catch (JaxenException e) {
+        if (log.isDebugEnabled()) {
+            log.debug("Error while retrieving apikey from the request query params.", e);
+        }
+        throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
+                APISecurityConstants.API_AUTH_MISSING_CREDENTIALS_MESSAGE);
     }
+}
 
-    private String removeApiKeyFromQueryParameters(String queryParam, String apiKey) {
+private String removeApiKeyFromQueryParameters(String queryParam, String apiKey) {
+    if (StringUtils.isNotBlank(queryParam)) {
         queryParam = queryParam.replace("?apikey=" + apiKey, "?");
         queryParam = queryParam.replace("&apikey=" + apiKey, "");
         queryParam = queryParam.replace("?&", "?");
         if (queryParam.lastIndexOf("?") == (queryParam.length() - 1)) {
             queryParam = queryParam.replace("?", "");
         }
-        return queryParam;
     }
+    return queryParam;
+}
 
-    private String getContextHeader() {
-        APIManagerConfiguration apimConf = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-        JWTConfigurationDto jwtConfigDto = apimConf.getJwtConfigurationDto();
-        return jwtConfigDto.getJwtHeader();
-    }
+private String getContextHeader() {
+    APIManagerConfiguration apimConf = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+    JWTConfigurationDto jwtConfigDto = apimConf.getJwtConfigurationDto();
+    return jwtConfigDto.getJwtHeader();
+}
 
-    @Override
-    public String getChallengeString() {
-        return "API Key realm=\"WSO2 API Manager\"";
-    }
+@Override
+public String getChallengeString() {
+    return "API Key realm=\"WSO2 API Manager\"";
+}
 
-    @Override
-    public String getRequestOrigin() {
-        return null;
-    }
+@Override
+public String getRequestOrigin() {
+    return null;
+}
 
-    @Override
-    public int getPriority() {
-        return 30;
-    }
+@Override
+public int getPriority() {
+    return 30;
+}
 }

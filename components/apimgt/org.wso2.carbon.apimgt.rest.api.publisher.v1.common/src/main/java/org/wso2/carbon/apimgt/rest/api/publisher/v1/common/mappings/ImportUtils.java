@@ -434,7 +434,8 @@ public class ImportUtils {
                         && importedApiDTO.getPolicies() != null
                         && importedApiDTO.getPolicies().isEmpty()
                         && importedApiDTO.getSecurityScheme() != null
-                        && importedApiDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        && (importedApiDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                        importedApiDTO.getSecurityScheme().contains(APIConstants.API_SECURITY_API_KEY))
                         && APIUtil.isSubscriptionValidationDisablingAllowed(organization)
                         && !PublisherCommonUtils.isThirdPartyAsyncAPI(importedApiDTO)) {
                    if (asyncAPI) {
@@ -830,8 +831,9 @@ public class ImportUtils {
                 // Auto policy for published+oauth2 if subscription validation disabling allowed
                 if (APIStatus.PUBLISHED.toString().equalsIgnoreCase(targetStatus)
                         && importedApiDTO.getPolicies() != null && importedApiDTO.getPolicies().isEmpty()
-                        && importedApiDTO.getSecurityScheme() != null && importedApiDTO.getSecurityScheme()
-                        .contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        && importedApiDTO.getSecurityScheme() != null &&
+                        (importedApiDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                        importedApiDTO.getSecurityScheme().contains(APIConstants.API_SECURITY_API_KEY))
                         && APIUtil.isSubscriptionValidationDisablingAllowed(organization)) {
                     importedApiDTO.setPolicies(
                             Arrays.asList(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
@@ -3638,7 +3640,8 @@ public class ImportUtils {
                         && importedApiProductDTO.getPolicies() != null
                         && importedApiProductDTO.getPolicies().isEmpty()
                         && importedApiProductDTO.getSecurityScheme() != null
-                        && importedApiProductDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        && (importedApiProductDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        || importedApiProductDTO.getSecurityScheme().contains(APIConstants.API_SECURITY_API_KEY))
                         && APIUtil.isSubscriptionValidationDisablingAllowed(organization)) {
                     importedApiProductDTO.setPolicies(Arrays
                                 .asList(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));

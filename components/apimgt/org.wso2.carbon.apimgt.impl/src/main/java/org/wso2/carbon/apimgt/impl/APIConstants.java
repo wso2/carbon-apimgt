@@ -3253,7 +3253,8 @@ public final class APIConstants {
         GATEWAY_POLICY,
         LLM_PROVIDER,
         LABEL,
-        TENANT
+        TENANT,
+        API_KEY
     }
 
     // Supported Event Types
@@ -3301,7 +3302,12 @@ public final class APIConstants {
         TENANT_UPDATE,
         TENANT_DELETE,
         TENANT_ACTIVATION,
-        TENANT_DEACTIVATION
+        TENANT_DEACTIVATION,
+        API_KEY_CREATE,
+        API_KEY_ASSOCIATION_CREATE,
+        API_KEY_ASSOCIATION_DELETE,
+        API_KEY_DELETE
+        
     }
 
     public enum EventAction {

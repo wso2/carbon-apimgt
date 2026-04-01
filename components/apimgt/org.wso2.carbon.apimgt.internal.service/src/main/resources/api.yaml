@@ -1583,12 +1583,31 @@ components:
           type: string
         expiresAt:
           type: integer
-          format: int32
+          format: int64
+        authUser:
+          type: string
         appId:
           type: integer
+        apiId:
+          type: integer
+        applicationUUID:
+          type: string
+        apiUUID:
+          type: string
+        validityPeriod:
+          type: integer
+          format: int64
+        createdTime:
+          type: integer
+          format: int64
         additionalProperties:
           type: object
           properties: { }
+        keyBoundary:
+          type: string
+          enum:
+            - API
+            - APPLICATION
     APIKeyList:
       title: API Key List
       type: object
