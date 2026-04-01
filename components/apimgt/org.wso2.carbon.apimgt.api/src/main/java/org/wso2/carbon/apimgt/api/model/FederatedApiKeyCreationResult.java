@@ -97,6 +97,9 @@ public class FederatedApiKeyCreationResult {
         }
 
         public FederatedApiKeyCreationResult build() {
+            if (remoteCredentialId == null || remoteCredentialId.trim().isEmpty()) {
+                throw new IllegalStateException("remoteCredentialId must not be blank");
+            }
             return new FederatedApiKeyCreationResult(this);
         }
     }

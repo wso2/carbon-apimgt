@@ -16436,16 +16436,20 @@ public class ApiMgtDAO {
             }
 
             Object tierMappingsObject = parsedMap.remove(ENV_CONFIG_TIER_MAPPINGS_KEY);
-            if (tierMappingsObject != null) {
-                List<GatewayTierMapping> parsedTierMappings = GSON.fromJson(GSON.toJson(tierMappingsObject),
-                        ENV_TIER_MAPPINGS_TYPE);
-                if (parsedTierMappings != null) {
-                    tierMappings = parsedTierMappings;
-                }
-            }
 
             for (Map.Entry<String, Object> entry : parsedMap.entrySet()) {
                 additionalProperties.put(entry.getKey(), entry.getValue() != null ? entry.getValue().toString() : null);
+            }
+            if (tierMappingsObject != null) {
+                try {
+                    List<GatewayTierMapping> parsedTierMappings = GSON.fromJson(GSON.toJson(tierMappingsObject),
+                            ENV_TIER_MAPPINGS_TYPE);
+                    if (parsedTierMappings != null) {
+                        tierMappings = parsedTierMappings;
+                    }
+                } catch (RuntimeException e) {
+                    log.error("Error while parsing gateway tier mappings in " + environmentUuid, e);
+                }
             }
         } catch (RuntimeException e) {
             log.error("Error while converting configurations in " + environmentUuid, e);
