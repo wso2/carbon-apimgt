@@ -163,8 +163,16 @@ public class OperationPolicyMappingUtil {
 
             OperationPolicyData policyData = null;
 
-            // If apiUuid exists, look for API specific operation policy first
-            if (apiUuid != null && !apiUuid.isEmpty()) {
+            // If apiUuid exists, look for the exact API-specific operation policy first. This is important for cloned
+            // common policies because name-based API-specific lookup intentionally excludes cloned rows.
+            if (apiUuid != null && !apiUuid.isEmpty() && operationPolicy.getPolicyId() != null) {
+                log.debug("Looking for API specific operation policy by ID: " + operationPolicy.getPolicyId());
+                policyData = apiProvider.getAPISpecificOperationPolicyByPolicyId(operationPolicy.getPolicyId(), apiUuid,
+                        tenantDomain, false);
+            }
+
+            // Fall back to name/version lookup for non-cloned API-specific policies when the exact ID is not available.
+            if (policyData == null && apiUuid != null && !apiUuid.isEmpty()) {
                 log.debug(
                         "Looking for API specific operation policy: " + operationPolicy.getPolicyName()
                                 + ", version: " + operationPolicy.getPolicyVersion());

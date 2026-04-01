@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.internal.service.websocket;
 
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -27,6 +28,9 @@ import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
 import org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig;
 import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.internal.service.dto.GatewayDeploymentStatusAcknowledgmentDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.GatewayDeploymentStatusAcknowledgmentListDTO;
+import org.wso2.carbon.apimgt.internal.service.impl.NotifyApiDeploymentStatusApiServiceImpl;
 import org.wso2.carbon.apimgt.impl.service.PlatformGatewayServiceImpl;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 
@@ -36,8 +40,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,6 +55,7 @@ import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
+import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
@@ -218,7 +226,7 @@ public class GatewayConnectEndpoint {
 
         sendPendingDeploymentEvents(session, gateway.id);
 
-        // Push any events persisted by other CP nodes while this gateway stays connected.
+        // Push any platform events persisted by other CP nodes while this gateway stays connected.
         startDeploymentEventPolling(session, gateway.id);
 
         startHeartbeat(session);
@@ -227,9 +235,9 @@ public class GatewayConnectEndpoint {
     }
 
     /**
-     * Push pending deploy/undeploy/delete events for this gateway (multi-CP sync).
-     * Uses getPendingEventsForGateway + send + markDelivered so events are only marked delivered
-     * after successful send; if the WebSocket drops mid-send, remaining events stay pending for next connect.
+     * Push pending platform events for this gateway (multi-CP sync).
+     * Claims a batch before sending so two CP nodes do not race to deliver the same row.
+     * Events are marked delivered only after a successful WebSocket send.
      */
     private static void sendPendingDeploymentEvents(Session session, String gatewayId) {
         PlatformGatewayDeploymentEventService eventService =
@@ -238,7 +246,8 @@ public class GatewayConnectEndpoint {
             return;
         }
         try {
-            List<PlatformGatewayDeploymentEventRecord> events = eventService.getPendingEventsForGateway(gatewayId);
+            List<PlatformGatewayDeploymentEventRecord> events =
+                    eventService.getAndMarkDeliveredPendingEventsForGateway(gatewayId);
             List<String> idsToMark = new ArrayList<>(events.size());
             for (PlatformGatewayDeploymentEventRecord event : events) {
                 if (!session.isOpen()) {
@@ -265,7 +274,7 @@ public class GatewayConnectEndpoint {
     }
 
     /**
-     * Poll for pending deployment events periodically and push them over the existing WS session.
+     * Poll for pending platform events periodically and push them over the existing WS session.
      * This enables "immediate update without reconnect" in a multi-CP setup where events are persisted
      * by one CP while the gateway is connected to another.
      */
@@ -318,8 +327,10 @@ public class GatewayConnectEndpoint {
     private static void sendConnectionAck(Session session, String gatewayId) {
         String connectionId = UUID.randomUUID().toString();
         String timestamp = Instant.now().toString();
-        String json = "{\"type\":\"connection.ack\",\"gatewayId\":\"" + escapeJson(gatewayId) + "\",\"connectionId\":\""
-                + escapeJson(connectionId) + "\",\"timestamp\":\"" + escapeJson(timestamp) + "\"}";
+        String json = PlatformGatewayWebSocketJsonUtil.toJson(
+                new PlatformGatewayWebSocketModels.ConnectionAck(
+                        PlatformGatewayWebSocketConstants.EVENT_CONNECTION_ACK, gatewayId, connectionId,
+                        timestamp));
         try {
             session.getBasicRemote().sendText(json);
         } catch (IOException e) {
@@ -327,9 +338,144 @@ public class GatewayConnectEndpoint {
         }
     }
 
-    private static String escapeJson(String s) {
-        if (s == null) return "";
-        return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
+    @OnMessage
+    public void onMessage(Session session, String message) {
+        PlatformGatewayDAO.PlatformGateway gateway =
+                (PlatformGatewayDAO.PlatformGateway) session.getUserProperties().get(GATEWAY_PROPERTY);
+        String gatewayId = gateway != null ? gateway.id : "unknown";
+        if (StringUtils.isBlank(message)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring empty gateway WebSocket message: gatewayId=" + gatewayId);
+            }
+            return;
+        }
+
+        try {
+            PlatformGatewayWebSocketModels.DeploymentAckMessage root =
+                    PlatformGatewayWebSocketJsonUtil.fromJson(message,
+                            PlatformGatewayWebSocketModels.DeploymentAckMessage.class);
+            String type = root != null ? root.getType() : null;
+            if (!PlatformGatewayWebSocketConstants.EVENT_DEPLOYMENT_ACK.equals(type)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Ignoring unsupported gateway WebSocket message type: gatewayId=" + gatewayId
+                            + ", type=" + type);
+                }
+                return;
+            }
+
+            if (gateway == null) {
+                log.warn("Ignoring deployment.ack because gateway session metadata is missing");
+                return;
+            }
+
+            GatewayDeploymentStatusAcknowledgmentDTO acknowledgment = buildDeploymentAcknowledgment(gateway, root);
+            if (acknowledgment == null) {
+                return;
+            }
+
+            GatewayDeploymentStatusAcknowledgmentListDTO acknowledgmentList =
+                    new GatewayDeploymentStatusAcknowledgmentListDTO();
+            acknowledgmentList.setCount(1);
+            acknowledgmentList.setList(Collections.singletonList(acknowledgment));
+
+            new NotifyApiDeploymentStatusApiServiceImpl()
+                    .processGatewayDeploymentStatusAcknowledgments(acknowledgmentList);
+        } catch (JsonSyntaxException | IllegalStateException e) {
+            log.warn("Failed to parse gateway WebSocket message as JSON: gatewayId=" + gatewayId + ", error="
+                    + e.getMessage());
+        } catch (APIManagementException e) {
+            log.warn("Failed to process gateway deployment.ack: gatewayId=" + gatewayId + ", error="
+                    + e.getMessage(), e);
+        } catch (RuntimeException e) {
+            log.warn("Unexpected error while processing gateway WebSocket message: gatewayId=" + gatewayId
+                    + ", error=" + e.getMessage(), e);
+        }
+    }
+
+    private static GatewayDeploymentStatusAcknowledgmentDTO buildDeploymentAcknowledgment(
+            PlatformGatewayDAO.PlatformGateway gateway, PlatformGatewayWebSocketModels.DeploymentAckMessage root) {
+        PlatformGatewayWebSocketModels.DeploymentAckPayload payload = root != null ? root.getPayload() : null;
+        if (payload == null) {
+            log.warn("Ignoring deployment.ack without payload: gatewayId=" + gateway.id);
+            return null;
+        }
+
+        String resourceType = payload.getResourceType();
+        String artifactId = payload.getArtifactId();
+        if (!PlatformGatewayWebSocketConstants.RESOURCE_TYPE_API.equals(resourceType)) {
+            return null;
+        }
+        if (StringUtils.isBlank(artifactId)) {
+            log.warn("Ignoring deployment.ack with empty artifactId: gatewayId=" + gateway.id);
+            return null;
+        }
+
+        GatewayDeploymentStatusAcknowledgmentDTO acknowledgment = new GatewayDeploymentStatusAcknowledgmentDTO();
+        acknowledgment.setGatewayId(gateway.id);
+        acknowledgment.setApiId(artifactId);
+        acknowledgment.setTenantDomain(gateway.organizationId);
+        acknowledgment.setRevisionId(payload.getDeploymentId());
+        acknowledgment.setAction(resolveAction(payload.getAction()));
+        acknowledgment.setDeploymentStatus(resolveStatus(payload.getStatus()));
+        acknowledgment.setTimeStamp(resolveTimestamp(payload));
+        acknowledgment.setErrorCode(parseErrorCode(payload.getErrorCode()));
+        if (acknowledgment.getDeploymentStatus()
+                == GatewayDeploymentStatusAcknowledgmentDTO.DeploymentStatusEnum.FAILURE) {
+            acknowledgment.setErrorMessage(payload.getErrorCode());
+        }
+
+        if (acknowledgment.getAction() == null || acknowledgment.getDeploymentStatus() == null) {
+            log.warn("Ignoring deployment.ack with unsupported action/status: gatewayId=" + gateway.id + ", action="
+                    + payload.getAction() + ", status=" + payload.getStatus());
+            return null;
+        }
+        return acknowledgment;
+    }
+
+    private static GatewayDeploymentStatusAcknowledgmentDTO.ActionEnum resolveAction(String action) {
+        String normalizedAction = action == null ? "" : action.toLowerCase(Locale.ROOT);
+        if (PlatformGatewayWebSocketConstants.ACTION_DEPLOY.equals(normalizedAction)) {
+            return GatewayDeploymentStatusAcknowledgmentDTO.ActionEnum.DEPLOY;
+        }
+        if (PlatformGatewayWebSocketConstants.ACTION_UNDEPLOY.equals(normalizedAction)) {
+            return GatewayDeploymentStatusAcknowledgmentDTO.ActionEnum.UNDEPLOY;
+        }
+        return null;
+    }
+
+    private static GatewayDeploymentStatusAcknowledgmentDTO.DeploymentStatusEnum resolveStatus(String status) {
+        String normalizedStatus = status == null ? "" : status.toLowerCase(Locale.ROOT);
+        if (PlatformGatewayWebSocketConstants.STATUS_SUCCESS.equals(normalizedStatus)) {
+            return GatewayDeploymentStatusAcknowledgmentDTO.DeploymentStatusEnum.SUCCESS;
+        }
+        if (PlatformGatewayWebSocketConstants.STATUS_FAILED.equals(normalizedStatus)
+                || PlatformGatewayWebSocketConstants.STATUS_FAILURE.equals(normalizedStatus)) {
+            return GatewayDeploymentStatusAcknowledgmentDTO.DeploymentStatusEnum.FAILURE;
+        }
+        return null;
+    }
+
+    private static long resolveTimestamp(PlatformGatewayWebSocketModels.DeploymentAckPayload payload) {
+        String performedAt = payload != null ? payload.getPerformedAt() : null;
+        if (StringUtils.isNotBlank(performedAt)) {
+            try {
+                return Instant.parse(performedAt).toEpochMilli();
+            } catch (DateTimeParseException e) {
+                // Fall through to current time when performedAt cannot be parsed.
+            }
+        }
+        return Instant.now().toEpochMilli();
+    }
+
+    private static Integer parseErrorCode(String errorCode) {
+        if (StringUtils.isBlank(errorCode)) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(errorCode);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     @OnError

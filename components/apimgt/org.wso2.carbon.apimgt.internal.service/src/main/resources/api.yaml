@@ -301,80 +301,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /apis/{apiId}/subscriptions:
-    get:
-      tags:
-        - Subscription Validation
-      summary: List subscriptions for an API (Platform Gateway format)
-      description: |
-        Returns subscriptions for the given API UUID in the format expected by the
-        API Platform gateway (array of subscription objects). Used when the gateway
-        is connected to on-prem APIM for bulk sync. Authenticated via api-key header.
-      operationId: apisApiIdSubscriptionsGet
-      parameters:
-        - name: apiId
-          in: path
-          required: true
-          description: API UUID.
-          schema:
-            type: string
-        - name: api-key
-          in: header
-          required: true
-          description: Platform gateway registration token.
-          schema:
-            type: string
-      responses:
-        '200':
-          description: List of subscriptions for the API.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PlatformGatewaySubscription'
-        '401':
-          description: Invalid or missing api-key.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: API not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        default:
-          description: Unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /subscription-plans:
-    get:
-      tags:
-        - Subscriptions
-      summary: List subscription plans (stub)
-      description: |
-        Temporary stub endpoint for platform gateway bulk sync.
-        Returns an empty list in this APIM version.
-      operationId: subscriptionPlansGet
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-        default:
-          description: Unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
   /deployments:
     get:
       tags:
@@ -411,7 +337,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /deployments/batch:
+  /deployments/fetch-batch:
     post:
       tags:
         - Gateway Internal APIs
@@ -2757,37 +2683,6 @@ components:
             - RECEIVED
             - DROPPED
           example: RECEIVED
-    PlatformGatewaySubscription:
-      description: Subscription in the format expected by the API Platform gateway.
-      type: object
-      properties:
-        id:
-          type: string
-          description: Subscription UUID.
-        apiId:
-          type: string
-          description: API UUID.
-        applicationId:
-          type: string
-          description: Application UUID (optional).
-        subscriptionToken:
-          type: string
-          description: Opaque token for subscription validation (on-prem may be empty).
-        subscriptionPlanId:
-          type: string
-          description: Subscription plan UUID (optional).
-        gatewayId:
-          type: string
-          description: Gateway ID (empty for on-prem).
-        status:
-          type: string
-          description: Subscription status (e.g. ACTIVE).
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
     BackendOperation:
       title: BackendOperation
       type: object

@@ -20,18 +20,29 @@ package org.wso2.carbon.apimgt.internal.service.websocket;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.PlatformGatewayDeploymentEventService;
+import org.wso2.carbon.apimgt.api.PlatformGatewayService;
+import org.wso2.carbon.apimgt.api.model.PlatformGateway;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEvents;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayEventEnvelopeUtil;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 /**
- * Broadcasts API key lifecycle events (apikey.created, apikey.updated, apikey.revoked) to all
- * connected platform gateways via WebSocket. Message format is aligned with API Platform
- * (api-platform gateway-controller) so the same gateway binary can work with on-prem APIM.
+ * Broadcasts API key lifecycle events (apikey.created, apikey.updated, apikey.revoked) to
+ * platform gateways via WebSocket. Events are also persisted to AM_GW_PLATFORM_EVENT so gateways
+ * connected to a different control-plane node still receive them in active-active deployments.
  * <p>
  * Call this from the opaque API key lifecycle: when an API key is created, updated, or revoked
  * (e.g. from DevPortal/Admin or internal API), invoke the corresponding broadcast method so
@@ -43,10 +54,6 @@ public class PlatformGatewayAPIKeyEventBroadcaster {
     private static final PlatformGatewayAPIKeyEventBroadcaster INSTANCE =
             new PlatformGatewayAPIKeyEventBroadcaster();
 
-    public static final String EVENT_APIKEY_CREATED = "apikey.created";
-    public static final String EVENT_APIKEY_UPDATED = "apikey.updated";
-    public static final String EVENT_APIKEY_REVOKED = "apikey.revoked";
-
     public static PlatformGatewayAPIKeyEventBroadcaster getInstance() {
         return INSTANCE;
     }
@@ -55,177 +62,165 @@ public class PlatformGatewayAPIKeyEventBroadcaster {
     }
 
     /**
-     * Broadcast apikey.created to all connected platform gateways.
-     * Payload must include apiId, apiKey (plain), name (URL-safe key identifier), operations;
-     * optional: externalRefId, expiresAt (ISO 8601), expiresIn, displayName, userId.
+     * Broadcast apikey.created to platform gateways in the given organization.
+     * Payload is kept aligned with the current gateway-controller contract.
      */
-    public void broadcastAPIKeyCreated(String apiId, String apiKey, String name, String operations,
-                                      String externalRefId, String expiresAt, Integer expiresInDuration,
-                                      String expiresInUnit, String displayName, String userId) {
-        if (apiId == null || apiKey == null || name == null || operations == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Skipping apikey.created broadcast: missing required field (apiId, apiKey, name, operations)");
-            }
+    public void broadcastAPIKeyCreated(PlatformGatewayAPIKeyEvents.Created event) {
+        if (event == null || event.getOrganizationId() == null || event.getApiId() == null
+                || event.getApiKey() == null || event.getKeyName() == null) {
             return;
         }
         String timestamp = Instant.now().toString();
         String correlationId = UUID.randomUUID().toString();
-        String userIdSafe = userId != null ? userId : "";
-        String apiKeyHashes = buildApiKeyHashesJson(apiKey);
-        String maskedApiKey = maskApiKey(apiKey);
+        String userIdSafe = event.getUserId() != null ? event.getUserId() : "";
+        String apiKeyHashes = buildApiKeyHashesJson(event.getApiKey());
+        String maskedApiKey = maskApiKey(event.getApiKey());
 
-        StringBuilder payload = new StringBuilder();
-        payload.append("\"apiId\":\"").append(escapeJson(apiId)).append("\"");
-        payload.append(",\"apiKey\":\"").append(escapeJson(apiKey)).append("\"");
-        if (apiKeyHashes != null && !apiKeyHashes.isEmpty()) {
-            payload.append(",\"apiKeyHashes\":\"").append(escapeJson(apiKeyHashes)).append("\"");
-        }
-        payload.append(",\"maskedApiKey\":\"").append(escapeJson(maskedApiKey)).append("\"");
-        payload.append(",\"name\":\"").append(escapeJson(name)).append("\"");
-        if (externalRefId != null && !externalRefId.isEmpty()) {
-            payload.append(",\"externalRefId\":\"").append(escapeJson(externalRefId)).append("\"");
-        }
-        payload.append(",\"operations\":\"").append(escapeJson(operations)).append("\"");
-        if (expiresAt != null && !expiresAt.isEmpty()) {
-            payload.append(",\"expiresAt\":\"").append(escapeJson(expiresAt)).append("\"");
-        }
-        if (expiresInDuration != null && expiresInUnit != null && !expiresInUnit.isEmpty()) {
-            payload.append(",\"expiresIn\":{\"duration\":").append(expiresInDuration)
-                    .append(",\"unit\":\"").append(escapeJson(expiresInUnit)).append("\"}");
-        }
-        if (displayName != null && !displayName.isEmpty()) {
-            payload.append(",\"displayName\":\"").append(escapeJson(displayName)).append("\"");
-        }
-
-        String message = "{\"type\":\"" + EVENT_APIKEY_CREATED + "\",\"payload\":{" + payload + "},\"timestamp\":\""
-                + escapeJson(timestamp) + "\",\"correlationId\":\"" + escapeJson(correlationId) + "\",\"userId\":\""
-                + escapeJson(userIdSafe) + "\"}";
-        sendToAllGateways(message, EVENT_APIKEY_CREATED);
+        PlatformGatewayWebSocketModels.ApiKeyCreatedPayload payload =
+                new PlatformGatewayWebSocketModels.ApiKeyCreatedPayload(
+                        event.getApiId(),
+                        blankToNull(event.getKeyUuid()),
+                        blankToNull(apiKeyHashes),
+                        maskedApiKey,
+                        event.getKeyName(),
+                        blankToNull(event.getExternalRefId()),
+                        blankToNull(event.getExpiresAt()),
+                        buildExpiresIn(event.getExpiresInDuration(), event.getExpiresInUnit()));
+        String message = PlatformGatewayWebSocketJsonUtil.toJson(
+                new PlatformGatewayWebSocketModels.EventEnvelope<>(
+                        PlatformGatewayWebSocketConstants.EVENT_APIKEY_CREATED, payload, timestamp,
+                        correlationId, userIdSafe));
+        dispatchToOrganizationGateways(event.getOrganizationId(), message,
+                PlatformGatewayWebSocketConstants.EVENT_APIKEY_CREATED,
+                apiKeyEventMetadata(event.getApiId(), event.getKeyUuid(), event.getKeyName()));
     }
 
     /**
-     * Broadcast apikey.updated to all connected platform gateways.
-     * Payload: apiId, keyName, apiKey (plain), externalRefId, operations, displayName;
-     * optional: expiresAt, expiresIn, userId.
+     * Broadcast apikey.updated to platform gateways in the given organization.
+     * Payload is kept aligned with the current gateway-controller contract.
      */
-    public void broadcastAPIKeyUpdated(String apiId, String keyName, String apiKey, String externalRefId,
-                                      String operations, String displayName, String expiresAt,
-                                      Integer expiresInDuration, String expiresInUnit, String userId) {
-        if (apiId == null || keyName == null || apiKey == null || displayName == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Skipping apikey.updated broadcast: missing required field (apiId, keyName, apiKey, displayName)");
-            }
+    public void broadcastAPIKeyUpdated(PlatformGatewayAPIKeyEvents.Updated event) {
+        if (event == null || event.getOrganizationId() == null || event.getApiId() == null
+                || event.getKeyName() == null || event.getApiKey() == null) {
             return;
         }
         String timestamp = Instant.now().toString();
         String correlationId = UUID.randomUUID().toString();
-        String userIdSafe = userId != null ? userId : "";
-        String externalRefIdSafe = externalRefId != null ? externalRefId : "";
-        String operationsSafe = operations != null ? operations : "";
-        String apiKeyHashes = buildApiKeyHashesJson(apiKey);
-        String maskedApiKey = maskApiKey(apiKey);
+        String userIdSafe = event.getUserId() != null ? event.getUserId() : "";
+        String apiKeyHashes = buildApiKeyHashesJson(event.getApiKey());
+        String maskedApiKey = maskApiKey(event.getApiKey());
 
-        StringBuilder payload = new StringBuilder();
-        payload.append("\"apiId\":\"").append(escapeJson(apiId)).append("\"");
-        payload.append(",\"keyName\":\"").append(escapeJson(keyName)).append("\"");
-        payload.append(",\"apiKey\":\"").append(escapeJson(apiKey)).append("\"");
-        if (apiKeyHashes != null && !apiKeyHashes.isEmpty()) {
-            payload.append(",\"apiKeyHashes\":\"").append(escapeJson(apiKeyHashes)).append("\"");
-        }
-        payload.append(",\"maskedApiKey\":\"").append(escapeJson(maskedApiKey)).append("\"");
-        payload.append(",\"externalRefId\":\"").append(escapeJson(externalRefIdSafe)).append("\"");
-        payload.append(",\"operations\":\"").append(escapeJson(operationsSafe)).append("\"");
-        if (expiresAt != null && !expiresAt.isEmpty()) {
-            payload.append(",\"expiresAt\":\"").append(escapeJson(expiresAt)).append("\"");
-        }
-        if (expiresInDuration != null && expiresInUnit != null && !expiresInUnit.isEmpty()) {
-            payload.append(",\"expiresIn\":{\"duration\":").append(expiresInDuration)
-                    .append(",\"unit\":\"").append(escapeJson(expiresInUnit)).append("\"}");
-        }
-        payload.append(",\"displayName\":\"").append(escapeJson(displayName)).append("\"");
-
-        String message = "{\"type\":\"" + EVENT_APIKEY_UPDATED + "\",\"payload\":{" + payload + "},\"timestamp\":\""
-                + escapeJson(timestamp) + "\",\"correlationId\":\"" + escapeJson(correlationId) + "\",\"userId\":\""
-                + escapeJson(userIdSafe) + "\"}";
-        sendToAllGateways(message, EVENT_APIKEY_UPDATED);
+        PlatformGatewayWebSocketModels.ApiKeyUpdatedPayload payload =
+                new PlatformGatewayWebSocketModels.ApiKeyUpdatedPayload(
+                        event.getApiId(),
+                        event.getKeyName(),
+                        blankToNull(apiKeyHashes),
+                        maskedApiKey,
+                        blankToNull(event.getExternalRefId()),
+                        blankToNull(event.getExpiresAt()),
+                        buildExpiresIn(event.getExpiresInDuration(), event.getExpiresInUnit()));
+        String message = PlatformGatewayWebSocketJsonUtil.toJson(
+                new PlatformGatewayWebSocketModels.EventEnvelope<>(
+                        PlatformGatewayWebSocketConstants.EVENT_APIKEY_UPDATED, payload, timestamp,
+                        correlationId, userIdSafe));
+        dispatchToOrganizationGateways(event.getOrganizationId(), message,
+                PlatformGatewayWebSocketConstants.EVENT_APIKEY_UPDATED,
+                apiKeyEventMetadata(event.getApiId(), event.getKeyUuid(), event.getKeyName()));
     }
 
     /**
-     * Broadcast apikey.revoked to all connected platform gateways.
+     * Broadcast apikey.revoked to platform gateways in the given organization.
      * Payload: apiId, keyName; optional userId.
      */
-    public void broadcastAPIKeyRevoked(String apiId, String keyName, String userId) {
-        if (apiId == null || keyName == null || apiId.isEmpty() || keyName.isEmpty()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Skipping apikey.revoked broadcast: apiId and keyName are required");
-            }
+    public void broadcastAPIKeyRevoked(PlatformGatewayAPIKeyEvents.Revoked event) {
+        if (event == null || event.getOrganizationId() == null || event.getApiId() == null
+                || event.getKeyName() == null || event.getApiId().isEmpty() || event.getKeyName().isEmpty()) {
             return;
         }
         String timestamp = Instant.now().toString();
         String correlationId = UUID.randomUUID().toString();
-        String userIdSafe = userId != null ? userId : "";
-
-        String payload = "\"apiId\":\"" + escapeJson(apiId) + "\",\"keyName\":\"" + escapeJson(keyName) + "\"";
-        String message = "{\"type\":\"" + EVENT_APIKEY_REVOKED + "\",\"payload\":{" + payload + "},\"timestamp\":\""
-                + escapeJson(timestamp) + "\",\"correlationId\":\"" + escapeJson(correlationId) + "\",\"userId\":\""
-                + escapeJson(userIdSafe) + "\"}";
-        sendToAllGateways(message, EVENT_APIKEY_REVOKED);
+        String userIdSafe = event.getUserId() != null ? event.getUserId() : "";
+        PlatformGatewayWebSocketModels.ApiKeyRevokedPayload payload =
+                new PlatformGatewayWebSocketModels.ApiKeyRevokedPayload(event.getApiId(), event.getKeyName());
+        String message = PlatformGatewayWebSocketJsonUtil.toJson(
+                new PlatformGatewayWebSocketModels.EventEnvelope<>(
+                        PlatformGatewayWebSocketConstants.EVENT_APIKEY_REVOKED, payload, timestamp,
+                        correlationId, userIdSafe));
+        dispatchToOrganizationGateways(event.getOrganizationId(), message,
+                PlatformGatewayWebSocketConstants.EVENT_APIKEY_REVOKED,
+                apiKeyEventMetadata(event.getApiId(), null, event.getKeyName()));
     }
 
-    private static void sendToAllGateways(String message, String eventType) {
-        PlatformGatewaySessionRegistry registry = PlatformGatewaySessionRegistry.getInstance();
-        Set<String> gatewayIds = registry.getConnectedGatewayIds();
+    private static void dispatchToOrganizationGateways(String organizationId, String message, String eventType,
+                                                       Map<String, String> metadata) {
+        Set<String> gatewayIds = resolveTargetGatewayIds(organizationId);
         if (gatewayIds.isEmpty()) {
-            if (log.isDebugEnabled()) {
-                log.debug("No connected platform gateways; skipping " + eventType + " broadcast");
-            }
             return;
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Broadcasting " + eventType + " to " + gatewayIds.size() + " platform gateway(s)");
-        }
-        registry.sendToGateways(gatewayIds, message);
-    }
-
-    private static String escapeJson(String s) {
-        if (s == null) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder(s.length() * 2);
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            switch (c) {
-                case '\\':
-                    sb.append("\\\\");
-                    break;
-                case '"':
-                    sb.append("\\\"");
-                    break;
-                case '\n':
-                    sb.append("\\n");
-                    break;
-                case '\r':
-                    sb.append("\\r");
-                    break;
-                case '\t':
-                    sb.append("\\t");
-                    break;
-                case '\b':
-                    sb.append("\\b");
-                    break;
-                case '\f':
-                    sb.append("\\f");
-                    break;
-                default:
-                    if (c <= 0x1F) {
-                        sb.append(String.format("\\u%04x", (int) c));
-                    } else {
-                        sb.append(c);
-                    }
-                    break;
+        PlatformGatewayDeploymentEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayDeploymentEventService();
+        if (eventService != null) {
+            for (String gatewayId : gatewayIds) {
+                try {
+                    eventService.persistEvent(gatewayId, eventType,
+                            PlatformGatewayEventEnvelopeUtil.wrapForStorage(message, metadata));
+                } catch (APIManagementException e) {
+                    log.error("Failed to persist " + eventType + " event for gateway " + gatewayId + ": "
+                            + e.getMessage(), e);
+                }
             }
         }
-        return sb.toString();
+        PlatformGatewaySessionRegistry.getInstance().sendToGateways(gatewayIds, message);
+    }
+
+    private static Set<String> resolveTargetGatewayIds(String organizationId) {
+        if (organizationId == null || organizationId.isEmpty()) {
+            return java.util.Collections.emptySet();
+        }
+        PlatformGatewayService platformGatewayService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        if (platformGatewayService == null) {
+            return java.util.Collections.emptySet();
+        }
+        try {
+            List<PlatformGateway> gateways = platformGatewayService.listGatewaysByOrganizationWithInstance(organizationId);
+            Set<String> gatewayIds = new LinkedHashSet<>(gateways.size());
+            for (PlatformGateway gateway : gateways) {
+                if (gateway != null && gateway.getId() != null && !gateway.getId().isEmpty()) {
+                    gatewayIds.add(gateway.getId());
+                }
+            }
+            return gatewayIds;
+        } catch (APIManagementException e) {
+            log.warn("Failed to resolve platform gateways for organization " + organizationId + ": "
+                    + e.getMessage(), e);
+            return java.util.Collections.emptySet();
+        }
+    }
+
+    private static Map<String, String> apiKeyEventMetadata(String apiId, String keyUuid, String keyName) {
+        Map<String, String> meta = new LinkedHashMap<>(3);
+        if (apiId != null && !apiId.isEmpty()) {
+            meta.put("apiId", apiId);
+        }
+        if (keyUuid != null && !keyUuid.isEmpty()) {
+            meta.put("keyUuid", keyUuid);
+        }
+        if (keyName != null && !keyName.isEmpty()) {
+            meta.put("keyName", keyName);
+        }
+        return meta;
+    }
+
+    private static PlatformGatewayWebSocketModels.ApiKeyExpiresIn buildExpiresIn(Integer duration, String unit) {
+        if (duration == null || unit == null || unit.isEmpty()) {
+            return null;
+        }
+        return new PlatformGatewayWebSocketModels.ApiKeyExpiresIn(duration, unit);
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isEmpty() ? null : value;
     }
 
     private static String buildApiKeyHashesJson(String apiKey) {
@@ -237,9 +232,7 @@ public class PlatformGatewayAPIKeyEventBroadcaster {
             byte[] hash = md.digest(apiKey.getBytes(StandardCharsets.UTF_8));
             return "{\"sha256\":\"" + toHex(hash) + "\"}";
         } catch (NoSuchAlgorithmException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Failed to compute sha256 hash for api key event payload: " + e.getMessage());
-            }
+            log.warn("Failed to compute sha256 hash for api key event payload: " + e.getMessage(), e);
             return "";
         }
     }

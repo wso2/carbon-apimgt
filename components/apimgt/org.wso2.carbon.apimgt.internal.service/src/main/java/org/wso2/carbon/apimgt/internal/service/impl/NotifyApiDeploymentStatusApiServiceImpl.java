@@ -46,6 +46,21 @@ public class NotifyApiDeploymentStatusApiServiceImpl implements NotifyApiDeploym
     public Response notifyApiDeploymentStatusPost(
             GatewayDeploymentStatusAcknowledgmentListDTO gatewayDeploymentStatusAcknowledgmentListDTO,
             MessageContext messageContext) throws APIManagementException {
+        processGatewayDeploymentStatusAcknowledgments(gatewayDeploymentStatusAcknowledgmentListDTO);
+        DeploymentAcknowledgmentResponseDTO response = new DeploymentAcknowledgmentResponseDTO();
+        response.setStatus(DeploymentAcknowledgmentResponseDTO.StatusEnum.RECEIVED);
+        return Response.ok().entity(response).build();
+    }
+
+    /**
+     * Processes gateway deployment acknowledgments independent of the transport used to receive them.
+     *
+     * @param gatewayDeploymentStatusAcknowledgmentListDTO the list of deployment status acknowledgments
+     * @throws APIManagementException if persistence fails
+     */
+    public void processGatewayDeploymentStatusAcknowledgments(
+            GatewayDeploymentStatusAcknowledgmentListDTO gatewayDeploymentStatusAcknowledgmentListDTO)
+            throws APIManagementException {
         if (gatewayDeploymentStatusAcknowledgmentListDTO == null
                 || gatewayDeploymentStatusAcknowledgmentListDTO.getList() == null
                 || gatewayDeploymentStatusAcknowledgmentListDTO.getList().isEmpty()) {
@@ -90,20 +105,13 @@ public class NotifyApiDeploymentStatusApiServiceImpl implements NotifyApiDeploym
                         if (dao.isDeploymentTimestampInorder(gatewayId, apiId, timeStamp)) {
                             dao.updateDeployment(gatewayId, apiId, tenantDomain, status, action, revisionUuid,
                                                  timeStamp);
-                        } else if (log.isDebugEnabled()) {
-                            log.debug("Acknowledgment ignored: Older timestamp for acknowledgment: " + acknowledgment);
                         }
                     } else {
                         dao.insertDeployment(gatewayId, apiId, tenantDomain, status, action, revisionUuid, timeStamp);
                     }
-                } else if (log.isDebugEnabled()) {
-                    log.debug("API ID does not exist for acknowledgment: " + acknowledgment);
                 }
 
             }
-            DeploymentAcknowledgmentResponseDTO response = new DeploymentAcknowledgmentResponseDTO();
-            response.setStatus(DeploymentAcknowledgmentResponseDTO.StatusEnum.RECEIVED);
-            return Response.ok().entity(response).build();
         } catch (APIManagementException e) {
             log.error("Error processing deployment status notifications", e);
             throw new APIManagementException(ExceptionCodes.GATEWAY_DEPLOYMENT_STATUS_INTERNAL_SERVER_ERROR);

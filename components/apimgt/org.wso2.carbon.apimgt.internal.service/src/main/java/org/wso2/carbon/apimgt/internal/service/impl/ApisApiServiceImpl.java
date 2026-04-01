@@ -39,7 +39,6 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
-import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
@@ -52,7 +51,6 @@ import org.wso2.carbon.apimgt.internal.service.dto.DeploymentAcknowledgmentRespo
 import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
 import org.apache.cxf.message.Message;
 import org.wso2.carbon.apimgt.api.PlatformGatewayArtifactService;
-import org.wso2.carbon.apimgt.api.PlatformGatewayService;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
@@ -170,57 +168,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity(response).build();
     }
 
-    @Override
-    public Response apisApiIdSubscriptionsGet(String apiId, String apiKey, MessageContext messageContext)
-            throws APIManagementException {
-        if (StringUtils.isEmpty(apiKey)) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity("Missing api-key header").build();
-        }
-        PlatformGatewayDAO.PlatformGateway gateway;
-        try {
-            gateway = PlatformGatewayTokenUtil.verifyToken(apiKey);
-        } catch (Exception e) {
-            log.error("Platform gateway token verification failed for subscriptions request", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Server error").build();
-        }
-        if (gateway == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Platform gateway token verification failed: invalid or expired api-key");
-            }
-            return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid api-key").build();
-        }
-        String organization = gateway.organizationId;
-        if (StringUtils.isEmpty(organization)) {
-            organization = RestApiUtil.getOrganization(messageContext);
-            organization = SubscriptionValidationDataUtil.validateTenantDomain(organization, messageContext);
-        }
-        SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
-        List<Subscription> allSubs;
-        try {
-            allSubs = subscriptionValidationDAO.getAllSubscriptionsByOrganization(organization);
-        } catch (APIManagementException e) {
-            log.error("Error loading subscriptions for organization: " + organization, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Server error").build();
-        }
-        List<Map<String, Object>> result = new ArrayList<>();
-        for (Subscription sub : allSubs) {
-            if (apiId.equals(sub.getApiUUID())) {
-                Map<String, Object> item = new HashMap<>();
-                item.put("id", sub.getSubscriptionUUID());
-                item.put("apiId", sub.getApiUUID());
-                item.put("applicationId", sub.getApplicationUUID());
-                item.put("subscriptionToken", "");
-                item.put("subscriptionPlanId", sub.getPolicyId());
-                item.put("gatewayId", "");
-                item.put("status", sub.getSubscriptionState() != null ? sub.getSubscriptionState() : "ACTIVE");
-                item.put("createdAt", "1970-01-01T00:00:00Z");
-                item.put("updatedAt", "1970-01-01T00:00:00Z");
-                result.add(item);
-            }
-        }
-        return Response.ok().entity(result).build();
-    }
-
     private Response getApiAsPlatformGatewayZip(String apiId, String organization, MessageContext messageContext)
             throws APIManagementException {
         // Platform gateway zip requires api-key: resolve gateway → revision → return stored artifact (or 404).
@@ -252,38 +199,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (artifactService == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        String gatewayName = gateway.name;
-        if (StringUtils.isBlank(gatewayName)) {
-            PlatformGatewayService platformGatewayService =
-                    ServiceReferenceHolder.getInstance().getPlatformGatewayService();
-            if (platformGatewayService != null) {
-                try {
-                    org.wso2.carbon.apimgt.api.model.PlatformGateway gw =
-                            platformGatewayService.getGatewayById(gateway.id);
-                    if (gw != null && StringUtils.isNotBlank(gw.getName())) {
-                        gatewayName = gw.getName();
-                    }
-                } catch (APIManagementException e) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Could not resolve gateway name for " + gateway.id + ": " + e.getMessage());
-                    }
-                }
-            }
-        }
-        if (StringUtils.isBlank(gatewayName)) {
+        if (StringUtils.isBlank(gateway.id)) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        String revisionUuid = artifactService.getRevisionUuidByApiAndGatewayName(apiId, gatewayName);
-        if (StringUtils.isBlank(revisionUuid)) {
-            if (log.isDebugEnabled()) {
-                log.debug("No revision deployed for API " + apiId + " on gateway " + gatewayName);
-            }
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-        String yaml = artifactService.getStoredRevisionArtifact(apiId, revisionUuid);
+        String yaml = artifactService.getStoredArtifact(apiId, gateway.id);
         if (yaml == null) {
             if (log.isDebugEnabled()) {
-                log.debug("No platform gateway artifact for API " + apiId + " revision " + revisionUuid);
+                log.debug("No platform gateway artifact for API " + apiId + " on gateway " + gateway.id);
             }
             return Response.status(Response.Status.NOT_FOUND).build();
         }
