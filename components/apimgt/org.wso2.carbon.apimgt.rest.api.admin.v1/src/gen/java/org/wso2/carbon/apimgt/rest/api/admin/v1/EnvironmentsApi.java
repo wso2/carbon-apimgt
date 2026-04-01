@@ -4,6 +4,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayInstanceListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RemotePlanListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RemotePlanLookupRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.EnvironmentsApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -117,7 +119,7 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
     @ApiOperation(value = "Get all registered Environments", notes = "Get all Registered Environments ", response = EnvironmentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:environment_read", description = "Retrieve gateway environments")
+            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
         })
     }, tags={ "Environments",  })
     @ApiResponses(value = { 
@@ -135,11 +137,30 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
         })
-    }, tags={ "Environments" })
+    }, tags={ "Environments",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created environment as entity in the body. ", response = EnvironmentDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
     public Response environmentsPost(@ApiParam(value = "Environment object that should to be added " ,required=true) EnvironmentDTO environmentDTO) throws APIManagementException{
         return delegate.environmentsPost(environmentDTO, securityContext);
+    }
+
+    @POST
+    @Path("/remote-plans")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "List Available Remote Plans for a Gateway Environment", notes = "Retrieve the list of plans available on the remote external gateway (e.g., AWS Usage Plans). Used by the Admin Portal to populate the plan mapping section during gateway onboarding using either a persisted environment id or a draft environment configuration. Only supported for gateway environments with federated subscription support. ", response = RemotePlanListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:environment_read", description = "Retrieve gateway environments")
+        })
+    }, tags={ "Environments" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. List of available remote plans returned. ", response = RemotePlanListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 501, message = "Not Implemented. The gateway type does not support listing remote plans. ", response = ErrorDTO.class) })
+    public Response getEnvironmentRemotePlans(@ApiParam(value = "Remote plan lookup request. Provide a persisted environmentId, a draft environment object, or both when previewing edits against a persisted environment with masked connector secrets. " ,required=true) RemotePlanLookupRequestDTO remotePlanLookupRequestDTO) throws APIManagementException{
+        return delegate.getEnvironmentRemotePlans(remotePlanLookupRequestDTO, securityContext);
     }
 }

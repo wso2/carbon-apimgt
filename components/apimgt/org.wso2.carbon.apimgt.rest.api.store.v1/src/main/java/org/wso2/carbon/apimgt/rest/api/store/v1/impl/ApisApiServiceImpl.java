@@ -541,11 +541,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                 return Response.ok().entity(apiKeyAssociationDTO).build();
 
             } catch (APIManagementException e) {
-                String msg = "Error while creating an association to the API Key " + keyUUID;
-                if(log.isDebugEnabled()) {
-                    log.debug("Error while creating an association to the API " + apiUUId + " and API key " + keyUUID);
+                Long errorCode = e.getErrorHandler() != null ? e.getErrorHandler().getErrorCode() : null;
+                if (errorCode != null && errorCode.equals(ExceptionCodes.SUBSCRIPTION_STATE_INVALID.getErrorCode())) {
+                    RestApiUtil.handleBadRequest(e.getMessage(), errorCode, log);
+                } else {
+                    String msg = "Error while creating an association to the API Key " + keyUUID;
+                    if(log.isDebugEnabled()) {
+                        log.debug("Error while creating an association to the API " + apiUUId
+                                + " and API key " + keyUUID);
+                    }
+                    RestApiUtil.handleInternalServerError(msg, e, log);
                 }
-                RestApiUtil.handleInternalServerError(msg, e, log);
             }
         } else {
             if (log.isDebugEnabled()) {

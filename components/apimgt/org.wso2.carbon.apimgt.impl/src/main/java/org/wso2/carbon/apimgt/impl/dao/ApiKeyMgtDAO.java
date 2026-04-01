@@ -458,6 +458,8 @@ public class ApiKeyMgtDAO {
                         } catch (IOException e) {
                             handleException("Failed to convert apiKeyProperties", e);
                         }
+                        keyInfo.setApiUUId(rs.getString("API_UUID"));
+                        keyInfo.setOrigin(rs.getString("ORGANIZATION"));
                     }
                 }
             }
@@ -584,6 +586,7 @@ public class ApiKeyMgtDAO {
                         apiKeyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         apiKeyInfo.setKeyName(rs.getString("NAME"));
                         apiKeyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
+                        apiKeyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
                         apiKeyInfo.setAppId(rs.getInt("APPLICATION_ID"));
                     }
                 }
@@ -734,6 +737,7 @@ public class ApiKeyMgtDAO {
                         apiKeyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         apiKeyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
                         apiKeyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
+                        apiKeyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
                     }
                 }
             }
