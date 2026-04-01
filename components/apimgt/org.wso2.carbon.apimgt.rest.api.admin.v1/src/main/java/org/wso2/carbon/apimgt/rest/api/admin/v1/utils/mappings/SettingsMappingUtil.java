@@ -17,6 +17,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -196,6 +198,11 @@ public class SettingsMappingUtil {
             settingsFederatedGatewayConfigurationDTO.setType(gatewayConfiguration.getType());
             settingsFederatedGatewayConfigurationDTO.setDisplayName(gatewayConfiguration.getType());
             settingsFederatedGatewayConfigurationDTO.setDefaultHostnameTemplate(gatewayConfiguration.getDefaultHostnameTemplate());
+            settingsFederatedGatewayConfigurationDTO.setSupportedApiTypes(resolveSupportedApiTypes(gatewayConfiguration));
+            settingsFederatedGatewayConfigurationDTO.setPlanMappingSupported(
+                    resolvePlanMappingSupport(gatewayConfiguration));
+            settingsFederatedGatewayConfigurationDTO.setSubscriptionlessSupported(
+                    resolveSubscriptionlessSupport(gatewayConfiguration));
             List<String> supportedModes = gatewayConfiguration.getSupportedModes();
             List<String> effectiveModes = (supportedModes == null) ? new ArrayList<>() : new ArrayList<>(supportedModes);
             if (effectiveModes.isEmpty()) {
@@ -229,11 +236,72 @@ public class SettingsMappingUtil {
                 }
                 gateway.setSupportedModes(supportedModes);
             }
+            gateway.setSupportedApiTypes(new ArrayList<>());
+            gateway.setPlanMappingSupported(false);
+            gateway.setSubscriptionlessSupported(false);
             if (list.stream().noneMatch(obj -> obj.getType().equals(type))) {
                 list.add(gateway);
             }
         }
         return list;
+    }
+
+    private static List<String> resolveSupportedApiTypes(GatewayAgentConfiguration gatewayConfiguration) {
+        try {
+            GatewayPortalConfiguration featureCatalog = gatewayConfiguration.getGatewayFeatureCatalog();
+            if (featureCatalog != null && featureCatalog.getSupportedAPITypes() != null) {
+                return new ArrayList<>(featureCatalog.getSupportedAPITypes());
+            }
+        } catch (APIManagementException e) {
+            log.warn(String.format("Failed to resolve supported API types for gateway '%s'",
+                    gatewayConfiguration.getType()), e);
+        }
+        return new ArrayList<>();
+    }
+
+    private static boolean resolvePlanMappingSupport(GatewayAgentConfiguration gatewayConfiguration) {
+        return resolveSubscriptionsCapabilityFlag(gatewayConfiguration, "supported");
+    }
+
+    private static boolean resolveSubscriptionlessSupport(GatewayAgentConfiguration gatewayConfiguration) {
+        return resolveSubscriptionsCapabilityFlag(gatewayConfiguration, "subscriptionless");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static boolean resolveSubscriptionsCapabilityFlag(GatewayAgentConfiguration gatewayConfiguration,
+                                                              String flagName) {
+        try {
+            GatewayPortalConfiguration featureCatalog = gatewayConfiguration.getGatewayFeatureCatalog();
+            if (featureCatalog == null || featureCatalog.getSupportedFeatures() == null) {
+                return false;
+            }
+
+            Object supportedFeatures = featureCatalog.getSupportedFeatures();
+            Map<String, Object> supportedFeaturesMap = null;
+            if (supportedFeatures instanceof JsonObject) {
+                supportedFeaturesMap = new Gson().fromJson((JsonObject) supportedFeatures, Map.class);
+            } else if (supportedFeatures instanceof Map) {
+                supportedFeaturesMap = (Map<String, Object>) supportedFeatures;
+            }
+
+            if (supportedFeaturesMap == null) {
+                return false;
+            }
+            Object subscriptions = supportedFeaturesMap.get("subscriptions");
+            if (!(subscriptions instanceof Map)) {
+                return false;
+            }
+            Object subscriptionSupport = ((Map<?, ?>) subscriptions).get(flagName);
+            if (subscriptionSupport == null) {
+                return false;
+            }
+            return Boolean.TRUE.equals(subscriptionSupport)
+                    || Boolean.parseBoolean(String.valueOf(subscriptionSupport));
+        } catch (APIManagementException | RuntimeException e) {
+            log.warn(String.format("Failed to resolve subscriptions capability flag '%s' for gateway '%s'",
+                    flagName, gatewayConfiguration.getType()), e);
+            return false;
+        }
     }
 
     private static GatewayConfigurationDTO fromConfigurationToConfigurationDTO(ConfigurationDto configuration) {

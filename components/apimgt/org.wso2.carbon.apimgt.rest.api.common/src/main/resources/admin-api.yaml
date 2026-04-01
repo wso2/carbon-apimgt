@@ -2116,7 +2116,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
-            - apim:environment_read
+            - apim:environment_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2296,6 +2296,56 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v4/environments/8d263942-a6df-4cc2-a804-7a2525501450/gateways"'
+
+  /environments/remote-plans:
+    post:
+      tags:
+        - Environments
+      summary: List Available Remote Plans for a Gateway Environment
+      description: |
+        Retrieve the list of plans available on the remote external gateway (e.g., AWS Usage Plans).
+        Used by the Admin Portal to populate the plan mapping section during gateway onboarding
+        using either a persisted environment id or a draft environment configuration.
+        Only supported for gateway environments with federated subscription support.
+      operationId: getEnvironmentRemotePlans
+      requestBody:
+        description: |
+          Remote plan lookup request. Provide a persisted environmentId, a draft environment object,
+          or both when previewing edits against a persisted environment with masked connector secrets.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemotePlanLookupRequest'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            List of available remote plans returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemotePlanList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        501:
+          description: |
+            Not Implemented.
+            The gateway type does not support listing remote plans.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:environment_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/environments/remote-plans"'
 
   ######################################################
   # The "Platform Gateways" resource API (platform / self-hosted gateway registration)
@@ -5830,6 +5880,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AdditionalProperty'
+        tierMappings:
+          type: array
+          description: Mappings between local WSO2 subscription tiers and remote gateway plans.
+          items:
+            $ref: '#/components/schemas/GatewayTierMapping'
         permissions:
           type: object
           properties:
@@ -6446,6 +6501,71 @@ components:
         value:
           type: string
           example: wso2
+    GatewayTierMapping:
+      title: Gateway Tier Mapping
+      description: Maps a local WSO2 subscription tier to a plan on the remote external gateway.
+      type: object
+      required:
+        - localTierName
+        - remotePlanReference
+      properties:
+        localTierName:
+          type: string
+          description: Name of the local WSO2 subscription tier (e.g., Unlimited, Gold).
+          example: Unlimited
+        remotePlanReference:
+          type: object
+          description: >
+            Opaque JSON blob representing the remote gateway plan. The structure is
+            gateway-specific (e.g., for AWS this contains usagePlanId and name).
+          additionalProperties: true
+          example:
+            id: abc123
+            name: AWS Unlimited Plan
+    RemotePlan:
+      title: Remote Gateway Plan
+      description: A plan available on an external gateway (e.g., an AWS Usage Plan).
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the remote plan.
+          example: abc123
+        name:
+          type: string
+          description: Display name of the remote plan.
+          example: AWS Unlimited Plan
+        description:
+          type: string
+          description: Description of the remote plan.
+          example: Unlimited requests per month
+        limits:
+          type: object
+          description: Gateway-specific limit details (rateLimit, burstLimit, quotaLimit, quotaPeriod).
+          additionalProperties:
+            type: string
+    RemotePlanList:
+      title: Remote Plan List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Number of remote plans returned.
+          example: 5
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/RemotePlan'
+    RemotePlanLookupRequest:
+      title: Remote Plan Lookup Request
+      type: object
+      properties:
+        environmentId:
+          type: string
+          description: Persisted environment UUID.
+          example: 8d263942-a6df-4cc2-a804-7a2525501450
+        environment:
+          $ref: '#/components/schemas/Environment'
     GatewayEnvironmentProtocolURI:
       title: Gateway Environment protocols and URIs
       required:
@@ -6667,6 +6787,19 @@ components:
                 items:
                   type: string
                   example: 'READ_WRITE'
+              supportedApiTypes:
+                type: array
+                items:
+                  type: string
+                  example: rest
+              planMappingSupported:
+                type: boolean
+                description: Whether plan mapping is supported for this gateway type.
+                example: true
+              subscriptionlessSupported:
+                type: boolean
+                description: Whether subscriptionless plans are supported for this gateway type.
+                example: false
               configurations:
                 type: array
                 items:

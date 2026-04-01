@@ -26,6 +26,9 @@ public class SettingsGatewayConfigurationDTO   {
     private String type = null;
     private String displayName = null;
     private List<String> supportedModes = new ArrayList<String>();
+    private List<String> supportedApiTypes = new ArrayList<String>();
+    private Boolean planMappingSupported = null;
+    private Boolean subscriptionlessSupported = null;
     private List<GatewayConfigurationDTO> configurations = new ArrayList<GatewayConfigurationDTO>();
     private String defaultHostnameTemplate = null;
 
@@ -82,6 +85,59 @@ public class SettingsGatewayConfigurationDTO   {
 
   /**
    **/
+  public SettingsGatewayConfigurationDTO supportedApiTypes(List<String> supportedApiTypes) {
+    this.supportedApiTypes = supportedApiTypes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("supportedApiTypes")
+  public List<String> getSupportedApiTypes() {
+    return supportedApiTypes;
+  }
+  public void setSupportedApiTypes(List<String> supportedApiTypes) {
+    this.supportedApiTypes = supportedApiTypes;
+  }
+
+  /**
+   * Whether plan mapping is supported for this gateway type.
+   **/
+  public SettingsGatewayConfigurationDTO planMappingSupported(Boolean planMappingSupported) {
+    this.planMappingSupported = planMappingSupported;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "Whether plan mapping is supported for this gateway type.")
+  @JsonProperty("planMappingSupported")
+  public Boolean isPlanMappingSupported() {
+    return planMappingSupported;
+  }
+  public void setPlanMappingSupported(Boolean planMappingSupported) {
+    this.planMappingSupported = planMappingSupported;
+  }
+
+  /**
+   * Whether subscriptionless plans are supported for this gateway type.
+   **/
+  public SettingsGatewayConfigurationDTO subscriptionlessSupported(Boolean subscriptionlessSupported) {
+    this.subscriptionlessSupported = subscriptionlessSupported;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Whether subscriptionless plans are supported for this gateway type.")
+  @JsonProperty("subscriptionlessSupported")
+  public Boolean isSubscriptionlessSupported() {
+    return subscriptionlessSupported;
+  }
+  public void setSubscriptionlessSupported(Boolean subscriptionlessSupported) {
+    this.subscriptionlessSupported = subscriptionlessSupported;
+  }
+
+  /**
+   **/
   public SettingsGatewayConfigurationDTO configurations(List<GatewayConfigurationDTO> configurations) {
     this.configurations = configurations;
     return this;
@@ -128,13 +184,16 @@ public class SettingsGatewayConfigurationDTO   {
     return Objects.equals(type, settingsGatewayConfiguration.type) &&
         Objects.equals(displayName, settingsGatewayConfiguration.displayName) &&
         Objects.equals(supportedModes, settingsGatewayConfiguration.supportedModes) &&
+        Objects.equals(supportedApiTypes, settingsGatewayConfiguration.supportedApiTypes) &&
+        Objects.equals(planMappingSupported, settingsGatewayConfiguration.planMappingSupported) &&
+        Objects.equals(subscriptionlessSupported, settingsGatewayConfiguration.subscriptionlessSupported) &&
         Objects.equals(configurations, settingsGatewayConfiguration.configurations) &&
         Objects.equals(defaultHostnameTemplate, settingsGatewayConfiguration.defaultHostnameTemplate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, displayName, supportedModes, configurations, defaultHostnameTemplate);
+    return Objects.hash(type, displayName, supportedModes, supportedApiTypes, planMappingSupported, subscriptionlessSupported, configurations, defaultHostnameTemplate);
   }
 
   @Override
@@ -145,6 +204,9 @@ public class SettingsGatewayConfigurationDTO   {
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    supportedModes: ").append(toIndentedString(supportedModes)).append("\n");
+    sb.append("    supportedApiTypes: ").append(toIndentedString(supportedApiTypes)).append("\n");
+    sb.append("    planMappingSupported: ").append(toIndentedString(planMappingSupported)).append("\n");
+    sb.append("    subscriptionlessSupported: ").append(toIndentedString(subscriptionlessSupported)).append("\n");
     sb.append("    configurations: ").append(toIndentedString(configurations)).append("\n");
     sb.append("    defaultHostnameTemplate: ").append(toIndentedString(defaultHostnameTemplate)).append("\n");
     sb.append("}");
