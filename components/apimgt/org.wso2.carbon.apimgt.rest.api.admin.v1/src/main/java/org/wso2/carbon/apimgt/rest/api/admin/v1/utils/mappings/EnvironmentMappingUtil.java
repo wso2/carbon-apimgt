@@ -364,7 +364,7 @@ public class EnvironmentMappingUtil {
                 } catch (JsonProcessingException e) {
                     String tierName = StringUtils.defaultIfBlank(dto.getLocalTierName(), "<unknown>");
                     throw new APIManagementException("Failed to serialize remote plan reference for tier: "
-                            + tierName, ExceptionCodes.PARAMETER_NOT_PROVIDED);
+                            + tierName, e, ExceptionCodes.INTERNAL_ERROR);
                 }
             }
             GatewayTierMapping mapping = new GatewayTierMapping();

@@ -2116,7 +2116,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
-            - apim:environment_manage
+            - apim:environment_read
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6559,6 +6559,11 @@ components:
     RemotePlanLookupRequest:
       title: Remote Plan Lookup Request
       type: object
+      anyOf:
+        - required:
+            - environmentId
+        - required:
+            - environment
       properties:
         environmentId:
           type: string

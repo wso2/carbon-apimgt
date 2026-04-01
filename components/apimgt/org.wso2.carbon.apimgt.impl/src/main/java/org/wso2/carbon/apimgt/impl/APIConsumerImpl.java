@@ -4239,7 +4239,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                     ? apiKeyInfo.getOrigin()
                     : apiMgtDAO.getOrganizationByAPIUUID(apiUuid);
             if (StringUtils.isNotBlank(organization)) {
-                API api = getLightweightAPIByUUID(apiUuid, organization);
+                API api = getInternalAPIByUUID(apiUuid, organization);
                 FederatedApiKeyConnector federatedApiKeyConnector = resolveFederatedApiKeyConnector(api, organization);
                 // --- Federated gateway: revoke remote key and return early ---
                 if (federatedApiKeyConnector != null) {
@@ -5073,7 +5073,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         if (StringUtils.isBlank(localTierName)) {
             throw new APIManagementException("Local application tier is required for usage plan mapping");
         }
-        for (GatewayTierMapping tierMapping : environment.getTierMappings()) {
+        List<GatewayTierMapping> tierMappings = environment.getTierMappings();
+        if (tierMappings == null || tierMappings.isEmpty()) {
+            throw new APIManagementException("No usage plan mappings configured for environment: " + envId);
+        }
+        for (GatewayTierMapping tierMapping : tierMappings) {
             if (tierMapping != null && StringUtils.equalsIgnoreCase(localTierName, tierMapping.getLocalTierName())) {
                 String remotePolicyId = agent.resolveRemotePolicyId(tierMapping.getRemotePlanReference());
                 if (StringUtils.isBlank(remotePolicyId)) {
@@ -5084,6 +5088,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
         }
         throw new APIManagementException("No usage plan mapping found for local tier: " + localTierName);
+    }
+
+    private API getInternalAPIByUUID(String uuid, String organization) throws APIManagementException {
+        ApiTypeWrapper apiTypeWrapper = getAPIorAPIProductByUUIDWithoutPermissionCheck(uuid, organization);
+        if (apiTypeWrapper.isAPIProduct()) {
+            throw new APIManagementException("Expected API but found API Product for UUID: " + uuid);
+        }
+        return apiTypeWrapper.getApi();
     }
 
     private SubscribedAPI findSubscribedApiForScope(String apiUuid, Application application)
