@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
@@ -80,6 +81,9 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.notifier.events.LabelEvent;
+import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEvents;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEventService;
 import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -114,12 +118,16 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
@@ -390,11 +398,98 @@ public class APIAdminImpl implements APIAdmin {
 
         // Load existing metadata before revocation (revocation may remove/alter it)
         APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKeyForTenant(keyUUId, tenantDomain);
-        if (apiKeyInfo.getKeyUUID() == null) {
+        if (apiKeyInfo == null || apiKeyInfo.getKeyUUID() == null) {
             throw new APIMgtResourceNotFoundException("Active API key not found for UUID: " + keyUUId);
         }
+        RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
+        Properties properties = new Properties();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        String eventID = UUID.randomUUID().toString();
+        properties.put(APIConstants.NotificationEvent.EVENT_ID, eventID);
+        properties.put(APIConstants.NotificationEvent.EVENT_TYPE, APIConstants.API_KEY_AUTH_TYPE);
+        properties.put(APIConstants.NotificationEvent.TOKEN_TYPE, APIConstants.API_KEY_AUTH_TYPE);
+        properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
+        properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
+        properties.put(APIConstants.NotificationEvent.STREAM_ID, APIConstants.TOKEN_REVOCATION_STREAM_ID);
         log.info("Revoking API key with UUID: " + keyUUId + " for tenant: " + tenantDomain);
         apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
+        revocationRequestPublisher.publishRevocationEvents(apiKeyInfo.getApiKeyHash(), properties);
+
+        PlatformGatewayAPIKeyEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+        if (eventService != null && StringUtils.isNotBlank(apiKeyInfo.getKeyName())) {
+            try {
+                String keyNameGw = apiKeyInfo.getKeyName().toLowerCase(java.util.Locale.ROOT);
+                if (StringUtils.isNotBlank(apiKeyInfo.getApiUUId())) {
+                    String organization = apiMgtDAO.getOrganizationByAPIUUID(apiKeyInfo.getApiUUId());
+                    if (StringUtils.isNotBlank(organization)) {
+                        eventService.broadcastAPIKeyRevoked(
+                                new PlatformGatewayAPIKeyEvents.Revoked(organization, apiKeyInfo.getApiUUId(),
+                                        keyNameGw).withUserId(apiKeyInfo.getAuthUser()));
+                    }
+                } else if (StringUtils.isNotBlank(apiKeyInfo.getApplicationId())) {
+                    Application app = apiMgtDAO.getApplicationByUUID(apiKeyInfo.getApplicationId());
+                    broadcastApplicationScopedOpaqueApiKeyRevokedToPlatformGateways(app, keyNameGw,
+                            apiKeyInfo.getAuthUser(), eventService);
+                }
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed to broadcast apikey.revoked to platform gateways: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    private Application resolveApplicationForSubscriptionLookup(Application application) throws APIManagementException {
+
+        if (application == null) {
+            return null;
+        }
+        if (application.getId() == 0 && StringUtils.isNotBlank(application.getUUID())) {
+            return apiMgtDAO.getApplicationByUUID(application.getUUID());
+        }
+        return application;
+    }
+
+    private Set<String> getSubscribedPlatformGatewayApiIds(Application application) throws APIManagementException {
+
+        Application app = resolveApplicationForSubscriptionLookup(application);
+        if (app == null || app.getId() == 0) {
+            return Collections.emptySet();
+        }
+        Set<SubscribedAPI> subscriptions = apiMgtDAO.getSubscribedAPIsByApplication(app);
+        Set<String> apiIds = new LinkedHashSet<>();
+        for (SubscribedAPI subscription : subscriptions) {
+            String subStatus = subscription.getSubStatus();
+            if (!APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus)
+                    && !APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
+                continue;
+            }
+            String apiUuid = subscription.getAPIUUId();
+            if (StringUtils.isBlank(apiUuid)) {
+                continue;
+            }
+            apiIds.add(apiUuid);
+        }
+        return apiIds;
+    }
+
+    private void broadcastApplicationScopedOpaqueApiKeyRevokedToPlatformGateways(Application application,
+            String keyNameGateway, String userId, PlatformGatewayAPIKeyEventService eventService)
+            throws APIManagementException {
+
+        if (application == null || StringUtils.isBlank(keyNameGateway)) {
+            return;
+        }
+        if (StringUtils.isBlank(application.getOrganization())) {
+            return;
+        }
+        Set<String> apiIds = getSubscribedPlatformGatewayApiIds(application);
+        for (String apiId : apiIds) {
+            eventService.broadcastAPIKeyRevoked(
+                    new PlatformGatewayAPIKeyEvents.Revoked(application.getOrganization(), apiId, keyNameGateway)
+                            .withUserId(userId));
+        }
     }
 
     /**
