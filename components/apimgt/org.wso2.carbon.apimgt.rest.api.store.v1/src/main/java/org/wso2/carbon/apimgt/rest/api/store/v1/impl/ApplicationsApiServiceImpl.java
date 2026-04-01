@@ -36,6 +36,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.EmptyCallbackURLForCodeGrantsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -728,10 +730,19 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationUUId, log);
                 return null;
             }
-
-
-            API api = apiConsumer.getLightweightAPIByUUID(apiUUId, organization);
-            if (api == null || !RestAPIStoreUtils.isUserAccessAllowedForAPI(api.getId())) {
+            API api = null;
+            try {
+                api = apiConsumer.getLightweightAPIByUUID(apiUUId, organization);
+            } catch (APIManagementException e) {
+                if (e instanceof APIMgtAuthorizationFailedException) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiUUId, log);
+                } else if (e instanceof APIMgtResourceNotFoundException) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiUUId, log);
+                } else {
+                    throw e;
+                }
+            }
+            if (api == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiUUId, log);
                 return null;
             }
