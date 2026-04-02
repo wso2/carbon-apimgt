@@ -1916,6 +1916,25 @@ public class APIMappingUtil {
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
+            // Merge scope displayName from API model since swagger doesn't store it
+            if (model.getScopes() != null && dto.getScopes() != null) {
+                Map<String, Scope> modelScopesByKey = new HashMap<>();
+                for (Scope scope : model.getScopes()) {
+                    if (scope.getKey() != null) {
+                        modelScopesByKey.put(scope.getKey(), scope);
+                    }
+                }
+                for (APIScopeDTO apiScopeDTO : dto.getScopes()) {
+                    if (apiScopeDTO == null || apiScopeDTO.getScope() == null
+                            || apiScopeDTO.getScope().getName() == null) {
+                        continue;
+                    }
+                    Scope modelScope = modelScopesByKey.get(apiScopeDTO.getScope().getName());
+                    if (modelScope != null && modelScope.getName() != null) {
+                        apiScopeDTO.getScope().setDisplayName(modelScope.getName());
+                    }
+                }
+            }
         } else {
             // Get from asyncapi definition
             List<APIOperationsDTO> apiOperationsDTO = getOperationsFromAPI(model, preserveCredentials);
