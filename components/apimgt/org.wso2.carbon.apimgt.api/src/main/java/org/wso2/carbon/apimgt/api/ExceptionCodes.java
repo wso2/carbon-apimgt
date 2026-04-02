@@ -132,7 +132,7 @@ public enum ExceptionCodes implements ErrorHandler {
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
-            "Updating the API is restricted as as it is %s."),
+            "Updating the API is restricted as it is %s."),
     UNSUPPORTED_LIFECYCLE_ACTION(900381, "Unsupported state change action", 400, "Lifecycle state change action %s is not allowed"),
     LIFECYCLE_STATE_INFORMATION_NOT_FOUND(900382, "Lifecycle state information not found", 500,"Lifecycle state change information for %s with %s cannot be found"),
 
@@ -908,7 +908,7 @@ public enum ExceptionCodes implements ErrorHandler {
     NO_MCP_SERVER_ARTIFACT_FOUND(904009, "No MCP Server artifacts found for given criteria", 404,
             "No MCP Server artifacts found for given criteria"),
     MCP_SERVER_UPDATE_FORBIDDEN_PER_LC(904010, "Insufficient permission to update the MCP Server", 403,
-            "Updating the MCP Server is restricted as as it is %s."),
+            "Updating the MCP Server is restricted as it is %s."),
     INVALID_MCP_SERVER_ID(904011, "Invalid MCP Server ID", 404,
             "The provided MCP SERVER ID is not found %s", false),
     INVALID_REFERENCE_API(904012, "Invalid reference API", 400,
