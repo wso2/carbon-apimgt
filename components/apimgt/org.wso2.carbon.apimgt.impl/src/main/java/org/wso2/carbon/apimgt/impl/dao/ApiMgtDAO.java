@@ -22067,17 +22067,11 @@ public class ApiMgtDAO {
      */
     public List<URITemplate> getMissingUrlTemplatesOfProductRevisionFromAPIs(String revisionUUID)
             throws APIManagementException {
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-
-            String query = SQLConstants.APIRevisionSqlConstants.SELECT_REVISIONED_PRODUCT_URL_MAPPINGS_FROM_APIS;
-            ps = conn.prepareStatement(query);
+        List<URITemplate> urlMappingList = new ArrayList<>();
+        try (Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = conn.prepareStatement(
+                        SQLConstants.APIRevisionSqlConstants.SELECT_REVISIONED_PRODUCT_URL_MAPPINGS_FROM_APIS)) {
             ps.setString(1, revisionUUID);
-            List<URITemplate> urlMappingList = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     URITemplate uriTemplate = new URITemplate();
@@ -22091,16 +22085,7 @@ public class ApiMgtDAO {
             }
             return urlMappingList;
         } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException e1) {
-                    log.error("Error while rolling back the failed operation", e1);
-                }
-            }
             handleException("Error in finding missing resources " + e.getMessage(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
         return null;
     }
