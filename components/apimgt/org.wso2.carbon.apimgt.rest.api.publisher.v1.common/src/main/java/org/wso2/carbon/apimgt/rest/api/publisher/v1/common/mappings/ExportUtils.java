@@ -545,9 +545,9 @@ public class ExportUtils {
                                 individualDocDirectoryPath + File.separator + localFileName);) {
                             IOUtils.copy(inputStream, outputStream);
                         }
-                    } else {
-                        // Log error and avoid throwing as we give the capability to export document artifact without
-                        // the content if does not exist
+                    } else if (!Documentation.DocumentSourceType.URL.toString().equalsIgnoreCase(sourceType)) {
+                        // Log only for non-URL type documents. URL type documents don't have file content
+                        // to export — they only have a source URL stored in the document metadata.
                         if (log.isDebugEnabled()) {
                             log.debug("Documentation resource for API/API Product: " + identifier.getName()
                                     + " document name: " + individualDocument.getName()
