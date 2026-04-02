@@ -10083,9 +10083,13 @@ public final class APIUtil {
                         Boolean.parseBoolean(enableTokenEncryption));
             }
             keyManagerConfigurationDTO.addProperty(APIConstants.REVOKE_URL, keyManagerUrl.split("/" +
-                    APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(APIConstants.IDENTITY_REVOKE_ENDPOINT));
+                    APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                    .concat(getTenantAwareContext(keyManagerConfigurationDTO.getOrganization()))
+                    .concat(APIConstants.IDENTITY_REVOKE_ENDPOINT));
             keyManagerConfigurationDTO.addProperty(APIConstants.TOKEN_URL, keyManagerUrl.split("/" +
-                    APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(APIConstants.IDENTITY_TOKEN_ENDPOINT_CONTEXT));
+                    APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                    .concat(getTenantAwareContext(keyManagerConfigurationDTO.getOrganization()))
+                    .concat(APIConstants.IDENTITY_TOKEN_ENDPOINT_CONTEXT));
             if (!keyManagerConfigurationDTO.getAdditionalProperties()
                     .containsKey(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE)) {
                 keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE,
