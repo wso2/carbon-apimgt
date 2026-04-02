@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl.indexing.indexer.util;
 
-import org.apache.pdfbox.pdfparser.PDFParser;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.PDFIndexer;
 import org.wso2.carbon.registry.indexing.AsyncIndexer;
@@ -24,17 +24,17 @@ import org.wso2.carbon.registry.indexing.AsyncIndexer;
 import java.io.IOException;
 
 public class PDFIndexerWrapper extends PDFIndexer {
-    private PDFParser pdfParser;
+    private PDDocument pdDocument;
     private PDFTextStripper pdfTextStripper;
 
-    public PDFIndexerWrapper(PDFParser pdfParser, PDFTextStripper stripper) {
-        this.pdfParser = pdfParser;
+    public PDFIndexerWrapper(PDDocument pdDocument, PDFTextStripper stripper) {
+        this.pdDocument = pdDocument;
         this.pdfTextStripper = stripper;
     }
 
     @Override
-    protected PDFParser getPdfParser(AsyncIndexer.File2Index fileData) throws IOException {
-        return pdfParser;
+    protected PDDocument loadPDF(AsyncIndexer.File2Index fileData) throws IOException {
+        return pdDocument;
     }
 
     @Override
