@@ -543,9 +543,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             } catch (APIManagementException e) {
                 Long errorCode = e.getErrorHandler() != null ? e.getErrorHandler().getErrorCode() : null;
                 if (errorCode != null && errorCode.equals(ExceptionCodes.SUBSCRIPTION_STATE_INVALID.getErrorCode())) {
+                    log.warn("Invalid subscription state for API: " + apiUUId + " and API key: " + keyUUID);
                     RestApiUtil.handleBadRequest(e.getMessage(), errorCode, log);
                 } else {
                     String msg = "Error while creating an association to the API Key " + keyUUID;
+                    log.error("Failed to create association between API: " + apiUUId + " and API key: "
+                            + keyUUID + ". Error: " + e.getMessage());
                     if(log.isDebugEnabled()) {
                         log.debug("Error while creating an association to the API " + apiUUId
                                 + " and API key " + keyUUID);

@@ -539,7 +539,14 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
      */
     private void applyDiscoveredSecurityToDto(APIDTO apiDto, API discoveredApi) {
         if (apiDto == null || discoveredApi == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping discovered security application because apiDto or discoveredApi is null");
+            }
             return;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Applying discovered security settings to API DTO");
         }
 
         String discoveredSecurity = discoveredApi.getApiSecurity();
@@ -551,12 +558,21 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                 }
             }
             apiDto.setSecurityScheme(securitySchemes);
+            if (log.isDebugEnabled()) {
+                log.debug("Applied discovered security schemes to API DTO: " + securitySchemes);
+            }
         }
 
         if (StringUtils.isNotBlank(discoveredApi.getApiKeyHeader())) {
             apiDto.setApiKeyHeader(discoveredApi.getApiKeyHeader());
+            if (log.isDebugEnabled()) {
+                log.debug("Applied discovered API key header to API DTO: " + discoveredApi.getApiKeyHeader());
+            }
         } else {
             apiDto.setApiKeyHeader(null);
+            if (log.isDebugEnabled()) {
+                log.debug("Cleared API key header on API DTO because discovered API does not define one");
+            }
         }
     }
 
