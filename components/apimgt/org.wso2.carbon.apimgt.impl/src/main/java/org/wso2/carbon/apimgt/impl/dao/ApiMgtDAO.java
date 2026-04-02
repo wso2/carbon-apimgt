@@ -713,6 +713,10 @@ public class ApiMgtDAO {
                 if (rs.next()) {
                     return rs.getString("UUID");
                 }
+                if (log.isDebugEnabled()) {
+                    log.debug("No subscription found for apiId: " + apiId + " and applicationId: "
+                            + applicationId);
+                }
             }
         } catch (SQLException e) {
             handleException("Error while retrieving subscription UUID for apiId: " + apiId

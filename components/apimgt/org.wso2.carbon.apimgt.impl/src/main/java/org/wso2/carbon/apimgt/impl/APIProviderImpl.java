@@ -554,6 +554,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (!skipKeyManagerValidationForExternalGateway) {
             validateKeyManagers(api);
             validateKeyManagerScopes(api, tenantDomain);
+        } else if (log.isDebugEnabled()) {
+            log.debug("Skipping key manager and scope validation for external gateway API: "
+                    + api.getId().getApiName());
         }
         // Validate and process API level and operation level policies
         validateAndProcessAPIPolicyParameters(api, null, tenantDomain);
@@ -1048,6 +1051,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         && (api.isInitiatedFromGateway() || existingAPI.isInitiatedFromGateway());
         if (!skipKeyManagerValidationForExternalGateway) {
             validateKeyManagers(api, existingAPI.getKeyManagers());
+        } else if (log.isDebugEnabled()) {
+            log.debug("Skipping key manager validation for external gateway API update: "
+                    + api.getId().getApiName());
         }
 
         if (api.getAdditionalProperties() != null) {
@@ -1056,6 +1062,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (!skipKeyManagerValidationForExternalGateway) {
             validateKeyManagerScopes(api, tenantDomain);
+        } else if (log.isDebugEnabled()) {
+            log.debug("Skipping key manager scope validation for external gateway API update: "
+                    + api.getId().getApiName());
         }
         // Validate and process API level and operation level policies
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())

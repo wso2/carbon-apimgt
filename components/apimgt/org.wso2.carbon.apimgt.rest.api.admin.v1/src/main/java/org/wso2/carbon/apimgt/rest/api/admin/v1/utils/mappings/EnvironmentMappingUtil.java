@@ -17,6 +17,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -50,6 +52,7 @@ import java.util.stream.Collectors;
  */
 public class EnvironmentMappingUtil {
 
+    private static final Log log = LogFactory.getLog(EnvironmentMappingUtil.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     /**
@@ -335,6 +338,8 @@ public class EnvironmentMappingUtil {
                     refMap = OBJECT_MAPPER.readValue(mapping.getRemotePlanReference(),
                             new TypeReference<Map<String, Object>>() {});
                 } catch (JsonProcessingException e) {
+                    log.warn("Invalid JSON in remote plan reference for tier: " + mapping.getLocalTierName()
+                            + ", treating it as a raw value");
                     // Stored value is not valid JSON; expose as-is under "raw" key
                     refMap = new HashMap<>();
                     refMap.put("raw", mapping.getRemotePlanReference());
@@ -363,6 +368,7 @@ public class EnvironmentMappingUtil {
                     refJson = OBJECT_MAPPER.writeValueAsString(dto.getRemotePlanReference());
                 } catch (JsonProcessingException e) {
                     String tierName = StringUtils.defaultIfBlank(dto.getLocalTierName(), "<unknown>");
+                    log.error("Failed to serialize remote plan reference for tier: " + tierName, e);
                     throw new APIManagementException("Failed to serialize remote plan reference for tier: "
                             + tierName, e, ExceptionCodes.INTERNAL_ERROR);
                 }
