@@ -68,7 +68,6 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import java.security.cert.Certificate;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,6 +76,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.cache.Cache;
+
 
 /**
  * A Validator class to validate JWT tokens in an API request.
@@ -173,11 +173,11 @@ public class JWTValidator {
 
         String apiType = (String) synCtx.getProperty(APIMgtGatewayConstants.API_TYPE);
         if (org.apache.commons.lang3.StringUtils.equals(APIConstants.API_TYPE_MCP, apiType)) {
-            Object mcpMethodProperty = synCtx.getProperty("MCP_HTTP_METHOD");
+            Object mcpMethodProperty = synCtx.getProperty(APIMgtGatewayConstants.MCP_HTTP_METHOD_KEY);
             if (mcpMethodProperty != null) {
                 httpMethod = mcpMethodProperty.toString();
             }
-            matchingResource = (String) synCtx.getProperty("MCP_API_ELECTED_RESOURCE");
+            matchingResource = (String) synCtx.getProperty(APIMgtGatewayConstants.MCP_API_ELECTED_RESOURCE_KEY);
         }
 
         // Check for CNF validation

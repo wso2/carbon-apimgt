@@ -64,12 +64,16 @@ import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayConstants;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEvents;
 import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.OperationPoliciesApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.AsyncApiParserImplUtil;
+import org.wso2.carbon.apimgt.impl.gateway.PlatformGatewayAPIKeyEventService;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -2980,7 +2984,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response updateAPISwagger(String apiId, String ifMatch, String apiDefinition, String url,
-                                     InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
+                                     InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext)
+            throws APIManagementException {
         try {
             String updatedSwagger;
             //validate if api exists
@@ -3017,11 +3022,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while updating swagger definition of API: " + apiId, e, log);
-            } else {
-                String errorMessage = "Error while updating the swagger definition of the API: " + apiId + " - "
-                        + e.getMessage();
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+            throw e;
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -3041,8 +3043,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private String updateSwagger(String apiId, String apiDefinition, String organization)
             throws APIManagementException, FaultGatewaysException {
-        APIDefinitionValidationResponse response = OASParserUtil
-                .validateAPIDefinition(apiDefinition, true);
+        OASParserOptions oasParserOptions = CommonUtil.getOasParserOptions();
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(apiDefinition, true,
+                oasParserOptions);
         if (!response.isValid()) {
             RestApiUtil.handleBadRequest(response.getErrorItems(), log);
         }
@@ -3917,6 +3920,22 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIKeyDTO apiKeyDTO = new APIKeyDTO();
         apiKeyDTO.setApikey(token);
         apiKeyDTO.setValidityTime(60 * 1000);
+        // Notify connected platform gateways so they can add the key to their cache
+        PlatformGatewayAPIKeyEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+        if (eventService != null) {
+            try {
+                eventService.broadcastAPIKeyCreated(
+                        new PlatformGatewayAPIKeyEvents.Created(organization, apiId, token,
+                                PlatformGatewayConstants.INTERNAL_API_KEY_NAME)
+                                .withUserId(userName));
+                log.info("Broadcast apikey.created to platform gateways for apiId=" + apiId);
+            } catch (Exception e) {
+                log.warn("Failed to broadcast apikey.created to platform gateways: " + e.getMessage(), e);
+            }
+        } else {
+            log.info("Platform gateway API key event service not available; skipping apikey.created broadcast for apiId=" + apiId);
+        }
         return Response.ok().entity(apiKeyDTO).build();
     }
 
@@ -4405,6 +4424,45 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
+     * Merge platform gateways into the environments map used for deploy/undeploy-revision validation only.
+     * Same pattern as Synapse environments: request body has name, vhost, displayOnDevportal; we validate
+     * against this map. GET /environments stays Synapse-only; UI uses GET /gateways for platform targets
+     * and calls the same deploy-revision/undeploy-revision with those names (no cross: one request = one gateway type).
+     */
+    private void addPlatformGatewaysToEnvironmentsMap(Map<String, Environment> environments, String organization)
+            throws APIManagementException {
+        org.wso2.carbon.apimgt.api.PlatformGatewayService platformGatewayService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayService();
+        if (platformGatewayService == null) {
+            return;
+        }
+        try {
+            List<PlatformGateway> gateways = platformGatewayService.listGatewaysByOrganization(organization);
+            if (gateways == null) {
+                return;
+            }
+            for (PlatformGateway gw : gateways) {
+                if (gw == null || StringUtils.isBlank(gw.getName()) || environments.containsKey(gw.getName())) {
+                    continue;
+                }
+                Environment env = new Environment();
+                env.setName(gw.getName());
+                env.setDisplayName(gw.getDisplayName() != null ? gw.getDisplayName() : gw.getName());
+                env.setMode(GatewayMode.WRITE_ONLY.getMode());
+                String vhostHost = StringUtils.isNotBlank(gw.getVhost()) ? gw.getVhost() : "default";
+                VHost vhost = new VHost();
+                vhost.setHost(vhostHost);
+                vhost.setWsHost(vhostHost);
+                env.setVhosts(Collections.singletonList(vhost));
+                environments.put(gw.getName(), env);
+            }
+        } catch (Exception e) {
+            log.error("Could not add platform gateways to environments map", e);
+            throw new APIManagementException("Failed to resolve platform gateways for environments", e);
+        }
+    }
+
+    /**
      * Get revision deployment list
      *
      * @param apiId          UUID of the API
@@ -4684,7 +4742,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         //validate websocket url and change transport types
-        if (PublisherCommonUtils.isValidWSAPI(apiDTOFromProperties)) {
+        if (APIDTO.TypeEnum.WS.equals(apiDTOFromProperties.getType()) && PublisherCommonUtils.isValidWSAPI(
+                apiDTOFromProperties)) {
             ArrayList<String> websocketTransports = new ArrayList<>();
             websocketTransports.add(APIConstants.WS_PROTOCOL);
             websocketTransports.add(APIConstants.WSS_PROTOCOL);

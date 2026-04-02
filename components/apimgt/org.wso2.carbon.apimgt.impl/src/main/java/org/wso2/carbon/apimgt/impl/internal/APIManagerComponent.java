@@ -52,6 +52,9 @@ import org.wso2.carbon.apimgt.eventing.EventPublisherException;
 import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfiguration;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationServiceImpl;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -60,10 +63,10 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
+import org.wso2.carbon.apimgt.impl.DependencyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
-import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
@@ -88,6 +91,7 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
+import org.wso2.carbon.apimgt.impl.utils.GatewayManagementUtils;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -162,6 +166,8 @@ public class APIManagerComponent {
 
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
 
+    private APIMDependencyConfiguration dependencyConfigurations = new APIMDependencyConfiguration();
+
     public static final String APPLICATION_ROOT_PERMISSION = "applications";
 
     public static final String API_RXT = "api.rxt";
@@ -189,6 +195,7 @@ public class APIManagerComponent {
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             configuration.load(filePath);
+            dependencyConfigurations.load(DependencyConstants.DEPENDENCY_PROPERTIES_FILE);
 
             //Registering Notifiers
             bundleContext.registerService(Notifier.class.getName(), new SubscriptionsNotifier(), null);
@@ -197,6 +204,8 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new ApplicationRegistrationNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new PolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new DeployAPIInGatewayNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new PlatformGatewayDeployNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new APIKeyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new ScopesNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new CertificateNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new GoogleAnalyticsNotifier(), null);
@@ -216,8 +225,14 @@ public class APIManagerComponent {
             }
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
+            APIMDependencyConfigurationServiceImpl dependencyConfigurationService = new APIMDependencyConfigurationServiceImpl(
+                    dependencyConfigurations);
+            ServiceReferenceHolder.getInstance().setAPIMDependencyConfigurationService(dependencyConfigurationService);
+            bundleContext.registerService(APIMDependencyConfigurationService.class, dependencyConfigurationService,
+                    null);
             APIMgtDBUtil.initialize();
             APIUtil.init();
+            GatewayManagementUtils.performPlatformGatewayConnectFromConfigIfConfigured();
             String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
             if (migrationEnabled == null) {
                 CommonConfigDeployer configDeployer = new CommonConfigDeployer();
@@ -1032,6 +1047,8 @@ public class APIManagerComponent {
         int maxTotal = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_MAX_TOTAL));
         int defaultMaxPerRoute = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE));
         int connectionTimeout = Integer.parseInt(configuration.getFirstProperty(APIConstants.HTTP_CLIENT_CONNECTION_TIMEOUT));
+        int connectionRequestTimeout = Integer.parseInt(configuration.getFirstProperty(
+                APIConstants.HTTP_CLIENT_CONNECTION_REQUEST_TIMEOUT));
 
         boolean proxyEnabled = Boolean.parseBoolean(configuration.getFirstProperty(APIConstants.PROXY_ENABLE));
 
@@ -1069,7 +1086,7 @@ public class APIManagerComponent {
                 hostnameVerifier = new BrowserHostnameVerifier();
         }
         configuration.setHttpClientConfiguration(builder
-                .withConnectionParams(maxTotal, defaultMaxPerRoute, connectionTimeout)
+                .withConnectionParams(maxTotal, defaultMaxPerRoute, connectionTimeout, connectionRequestTimeout)
                 .withHostnameVerifier(hostnameVerifier).build());
     }
 

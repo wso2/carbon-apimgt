@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.common.internal;
 
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
@@ -36,9 +37,13 @@ public class ServiceReferenceHolder {
 
     private APIManagerConfiguration apimConfiguration;
 
+    private APIMDependencyConfigurationService dependencyConfigurationService;
+
     private Map<String, JWTValidator> jwtValidatorMap;
 
     private List<RestAPIAuthenticator> authenticators = new ArrayList<>();
+
+    private byte[] urlSigningKey;
 
     public static ServiceReferenceHolder getInstance() {
         return instance;
@@ -49,6 +54,14 @@ public class ServiceReferenceHolder {
 
     public APIManagerConfiguration getAPIMConfiguration() {
         return apimConfiguration;
+    }
+
+    public void setAPIMDependencyConfigurationService(APIMDependencyConfigurationService service) {
+        this.dependencyConfigurationService = service;
+    }
+
+    public APIMDependencyConfigurationService getAPIMDependencyConfigurationService() {
+        return dependencyConfigurationService;
     }
 
     public void setAPIMConfigurationService(APIManagerConfigurationService configurationService) {
@@ -77,5 +90,13 @@ public class ServiceReferenceHolder {
 
     public List<RestAPIAuthenticator> getAuthenticators() {
         return authenticators;
+    }
+
+    public byte[] getUrlSigningKey() {
+        return urlSigningKey;
+    }
+
+    public void setUrlSigningKey(byte[] urlSigningKey) {
+        this.urlSigningKey = urlSigningKey;
     }
 }

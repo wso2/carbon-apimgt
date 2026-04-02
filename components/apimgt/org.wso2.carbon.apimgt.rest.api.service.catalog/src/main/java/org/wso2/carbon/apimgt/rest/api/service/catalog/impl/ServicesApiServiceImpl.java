@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -495,13 +496,14 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     private APIDefinitionValidationResponse validateOpenAPIDefinition(String url, String definitionContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
+        OASParserOptions parserOptions = CommonUtil.getOasParserOptions();
         if (definitionContent != null) {
-            validationResponse = OASParserUtil.validateAPIDefinition(definitionContent, true);
+            validationResponse = OASParserUtil.validateAPIDefinition(definitionContent, true, parserOptions);
         } else if (url != null) {
             try {
                 URL urlObj = new URL(url);
                 HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
-                validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, httpClient, true);
+                validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, httpClient, true, parserOptions);
             } catch (MalformedURLException e) {
                 throw new APIManagementException("Error while processing the API definition URL", e);
             }

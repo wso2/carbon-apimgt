@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -23,6 +26,40 @@ public class ApplicationInfoDTO   {
     private String applicationId = null;
     private String name = null;
     private String owner = null;
+
+    @XmlType(name="TokenTypeEnum")
+    @XmlEnum(String.class)
+    public enum TokenTypeEnum {
+        OAUTH("OAUTH"),
+        JWT("JWT");
+        private String value;
+
+        TokenTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static TokenTypeEnum fromValue(String v) {
+            for (TokenTypeEnum b : TokenTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private TokenTypeEnum tokenType = null;
+    private String createdTime = null;
+    private List<KeyManagerInfoDTO> keyManagers = new ArrayList<KeyManagerInfoDTO>();
     private String status = null;
     private String groupId = null;
 
@@ -79,6 +116,58 @@ public class ApplicationInfoDTO   {
 
   /**
    **/
+  public ApplicationInfoDTO tokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("tokenType")
+  public TokenTypeEnum getTokenType() {
+    return tokenType;
+  }
+  public void setTokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
+  }
+
+  /**
+   **/
+  public ApplicationInfoDTO createdTime(String createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1651555310208", value = "")
+  @JsonProperty("createdTime")
+  public String getCreatedTime() {
+    return createdTime;
+  }
+  public void setCreatedTime(String createdTime) {
+    this.createdTime = createdTime;
+  }
+
+  /**
+   **/
+  public ApplicationInfoDTO keyManagers(List<KeyManagerInfoDTO> keyManagers) {
+    this.keyManagers = keyManagers;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("keyManagers")
+  public List<KeyManagerInfoDTO> getKeyManagers() {
+    return keyManagers;
+  }
+  public void setKeyManagers(List<KeyManagerInfoDTO> keyManagers) {
+    this.keyManagers = keyManagers;
+  }
+
+  /**
+   **/
   public ApplicationInfoDTO status(String status) {
     this.status = status;
     return this;
@@ -124,13 +213,16 @@ public class ApplicationInfoDTO   {
     return Objects.equals(applicationId, applicationInfo.applicationId) &&
         Objects.equals(name, applicationInfo.name) &&
         Objects.equals(owner, applicationInfo.owner) &&
+        Objects.equals(tokenType, applicationInfo.tokenType) &&
+        Objects.equals(createdTime, applicationInfo.createdTime) &&
+        Objects.equals(keyManagers, applicationInfo.keyManagers) &&
         Objects.equals(status, applicationInfo.status) &&
         Objects.equals(groupId, applicationInfo.groupId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, owner, status, groupId);
+    return Objects.hash(applicationId, name, owner, tokenType, createdTime, keyManagers, status, groupId);
   }
 
   @Override
@@ -141,6 +233,9 @@ public class ApplicationInfoDTO   {
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
+    sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    groupId: ").append(toIndentedString(groupId)).append("\n");
     sb.append("}");

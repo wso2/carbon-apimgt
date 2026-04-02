@@ -110,6 +110,7 @@ import org.wso2.carbon.apimgt.impl.MCPInitializerAndToolFetcher;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
+import org.wso2.carbon.apimgt.impl.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -750,17 +751,15 @@ public class PublisherCommonUtils {
         List<API> usedMcpServers =
                 apiProvider.getMCPServersUsedByAPI(originalAPI.getUuid(), originalAPI.getOrganization());
         if (!usedMcpServers.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("API: " + originalAPI.getUuid() + " is using MCP servers. Validating MCP resources.");
+            }
             List<APIOperationsDTO> updatedOperations = apiDtoToUpdate.getOperations();
             if (updatedOperations != null && !updatedOperations.isEmpty()) {
-                List<URITemplate> removedResources = getRemovedResources(
-                        APIMappingUtil.fromOperationListToURITemplateList(updatedOperations),
-                        originalAPI.getUriTemplates());
-                if (!removedResources.isEmpty()) {
-                    log.error("Cannot update API with removed resources when MCP servers are in use. API: "
-                            + originalAPI.getId().getUUID());
-                    throw new APIManagementException(
-                            ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_MCP_USAGE));
-                }
+                Set<URITemplate> updatedUriTemplates =
+                        APIMappingUtil.fromOperationListToURITemplateList(updatedOperations);
+                MCPUtils.validateMCPResources(originalAPI.getId().getUUID(), originalAPI.getOrganization(),
+                        updatedUriTemplates);
             }
         }
 
@@ -809,11 +808,8 @@ public class PublisherCommonUtils {
             }
         } else {
             if (apiSecurity != null) {
-                if (apiSecurity.contains(APIConstants.API_SECURITY_API_KEY) && condition) {
-                    throw new APIManagementException(
-                            "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
-                            ExceptionCodes.TIER_CANNOT_BE_NULL);
-                } else if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                if ((apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                        apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) && condition) {
                     // Internally set the default tier when no tiers are defined in order to support
                     // subscription validation disabling for OAuth2 secured APIs
                     if (tiersFromDTO != null && tiersFromDTO.isEmpty()) {
@@ -897,7 +893,9 @@ public class PublisherCommonUtils {
                     .getOpenAPIDefinition(apiToUpdate.getUuid(), originalAPI.getOrganization());
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
-            String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
+            String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition,
+                    ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                            .getAPIMDependencyConfigurations().getOasParserOptions());
             apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition, originalAPI.getOrganization());
             if (!isGraphql) {
                 Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(newDefinition);
@@ -1049,11 +1047,8 @@ public class PublisherCommonUtils {
             }
         } else {
             if (apiSecurity != null) {
-                if (apiSecurity.contains(APIConstants.API_SECURITY_API_KEY) && condition) {
-                    throw new APIManagementException(
-                            "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
-                            ExceptionCodes.TIER_CANNOT_BE_NULL);
-                } else if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                if ((apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                        apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) && condition) {
                     // Internally set the default tier when no tiers are defined in order to support
                     // subscription validation disabling for OAuth2 secured APIs
                     if (tiersFromDTO != null && tiersFromDTO.isEmpty()) {
@@ -2452,21 +2447,15 @@ public class PublisherCommonUtils {
             apiToAdd.setVisibleOrganizations(organization);
         }
 
-        boolean isNotMCPServer = !APIConstants.API_TYPE_MCP.equals(apiToAdd.getType());
-
-        if (isNotMCPServer) {
-            Map<String, String> complianceResult = checkGovernanceComplianceSync(
-                    apiToAdd.getUuid(), APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
-            if (!complianceResult.isEmpty()
-                    && !Boolean.parseBoolean(complianceResult.get(GOVERNANCE_COMPLIANCE_KEY))) {
-                throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
-            }
+        Map<String, String> complianceResult = checkGovernanceComplianceSync(
+                apiToAdd.getUuid(), APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
+        if (!complianceResult.isEmpty()
+                && !Boolean.parseBoolean(complianceResult.get(GOVERNANCE_COMPLIANCE_KEY))) {
+            throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
         apiProvider.addAPI(apiToAdd);
-        if (isNotMCPServer) {
-            checkGovernanceComplianceAsync(apiToAdd.getUuid(),
-                    APIMGovernableState.API_CREATE, ArtifactType.API, organization);
-        }
+        checkGovernanceComplianceAsync(apiToAdd.getUuid(),
+                APIMGovernableState.API_CREATE, ArtifactType.API, organization);
         // Remove parentOrgTiers from OrganizationTiers list
         Set<OrganizationTiers> updatedOrganizationTiers = apiToAdd.getAvailableTiersForOrganizations();
         if (updatedOrganizationTiers != null) {
@@ -3207,7 +3196,9 @@ public class PublisherCommonUtils {
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organization); // TODO see why we need to get it
         //instead of passing same
-        return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
+        return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger,
+                ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                        .getAPIMDependencyConfigurations().getOasParserOptions());
     }
 
     /**
@@ -3229,9 +3220,13 @@ public class PublisherCommonUtils {
 
         String apiDefinition = response.getJsonContent();
         if (isServiceAPI) {
-            apiDefinition = oasParser.copyVendorExtensions(existingAPI.getSwaggerDefinition(), apiDefinition);
+            apiDefinition = oasParser.copyVendorExtensions(existingAPI.getSwaggerDefinition(), apiDefinition,
+                    ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                            .getAPIMDependencyConfigurations().getOasParserOptions());
         } else {
-            apiDefinition = OASParserUtil.preProcess(apiDefinition);
+            apiDefinition = OASParserUtil.preProcess(apiDefinition,
+                    ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                            .getAPIMDependencyConfigurations().getOasParserOptions());
         }
         if (APIConstants.API_TYPE_SOAPTOREST.equals(existingAPI.getType()) && genSoapToRestSequence) {
             List<SOAPToRestSequence> sequenceList = SequenceGenerator.generateSequencesFromSwagger(apiDefinition);
@@ -3269,16 +3264,7 @@ public class PublisherCommonUtils {
                             existingAPI.getId().getVersion()));
         }
 
-        List<API> usedMcpServers = apiProvider.getMCPServersUsedByAPI(apiId, organization);
-        if (usedMcpServers != null && !usedMcpServers.isEmpty()) {
-            List<URITemplate> removedResources = getRemovedResources(uriTemplates, existingAPI.getUriTemplates());
-            if (!removedResources.isEmpty()) {
-                log.error("Cannot update API with removed resources when MCP servers are in use. API: "
-                        + existingAPI.getId().getUUID());
-                throw new APIManagementException(
-                        ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_MCP_USAGE));
-            }
-        }
+        MCPUtils.validateMCPResources(apiId, organization, uriTemplates);
 
         //set existing operation policies to URI templates
         apiProvider.setOperationPoliciesToURITemplates(apiId, uriTemplates);
@@ -3389,7 +3375,9 @@ public class PublisherCommonUtils {
         PublisherCommonUtils.validateScopes(existingAPI);
         APIUtil.validateAndUpdateURITemplates(existingAPI, APIUtil.getInternalOrganizationId(organization));
         SwaggerData swaggerData = new SwaggerData(existingAPI);
-        String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
+        String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData,
+                ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                        .getAPIMDependencyConfigurations().getOasParserOptions());
 
         //Validate API with Federated Gateway before persisting to registry
         APIUtil.validateApiWithFederatedGateway(existingAPI);
@@ -3781,12 +3769,8 @@ public class PublisherCommonUtils {
                 }
             }
         } else {
-            if (apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
-                if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
-                    throw new APIManagementException("No tier defined for the API Product",
-                            ExceptionCodes.TIER_CANNOT_BE_NULL);
-                }
-            } else if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+            if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                    apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
                 // Internally set the default tier when no tiers are defined in order to support
                 // subscription validation disabling for OAuth2 secured APIs
                 if (tiersFromDTO != null && tiersFromDTO.isEmpty()) {

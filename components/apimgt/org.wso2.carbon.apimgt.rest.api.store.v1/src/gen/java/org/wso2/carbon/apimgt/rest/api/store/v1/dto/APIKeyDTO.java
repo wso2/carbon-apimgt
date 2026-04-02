@@ -20,8 +20,27 @@ import javax.validation.Valid;
 
 public class APIKeyDTO   {
   
+    private String keyName = null;
     private String apikey = null;
-    private Integer validityTime = null;
+    private Long validityPeriod = null;
+
+  /**
+   * API Key name
+   **/
+  public APIKeyDTO keyName(String keyName) {
+    this.keyName = keyName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Test_Key", value = "API Key name")
+  @JsonProperty("keyName")
+  public String getKeyName() {
+    return keyName;
+  }
+  public void setKeyName(String keyName) {
+    this.keyName = keyName;
+  }
 
   /**
    * API Key
@@ -43,19 +62,19 @@ public class APIKeyDTO   {
 
   /**
    **/
-  public APIKeyDTO validityTime(Integer validityTime) {
-    this.validityTime = validityTime;
+  public APIKeyDTO validityPeriod(Long validityPeriod) {
+    this.validityPeriod = validityPeriod;
     return this;
   }
 
   
   @ApiModelProperty(example = "3600", value = "")
-  @JsonProperty("validityTime")
-  public Integer getValidityTime() {
-    return validityTime;
+  @JsonProperty("validityPeriod")
+  public Long getValidityPeriod() {
+    return validityPeriod;
   }
-  public void setValidityTime(Integer validityTime) {
-    this.validityTime = validityTime;
+  public void setValidityPeriod(Long validityPeriod) {
+    this.validityPeriod = validityPeriod;
   }
 
 
@@ -68,13 +87,14 @@ public class APIKeyDTO   {
       return false;
     }
     APIKeyDTO apIKey = (APIKeyDTO) o;
-    return Objects.equals(apikey, apIKey.apikey) &&
-        Objects.equals(validityTime, apIKey.validityTime);
+    return Objects.equals(keyName, apIKey.keyName) &&
+        Objects.equals(apikey, apIKey.apikey) &&
+        Objects.equals(validityPeriod, apIKey.validityPeriod);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apikey, validityTime);
+    return Objects.hash(keyName, apikey, validityPeriod);
   }
 
   @Override
@@ -82,8 +102,9 @@ public class APIKeyDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIKeyDTO {\n");
     
+    sb.append("    keyName: ").append(toIndentedString(keyName)).append("\n");
     sb.append("    apikey: ").append(toIndentedString(apikey)).append("\n");
-    sb.append("    validityTime: ").append(toIndentedString(validityTime)).append("\n");
+    sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
     sb.append("}");
     return sb.toString();
   }

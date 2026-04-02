@@ -72,6 +72,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /api-keys:
+    get:
+      summary: An Array of API keys generated
+      description: |
+        This will provide API keys generated
+      parameters:
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be retrieved from.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: An array of API keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/APIKeyList'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /revokedjwt:
     get:
       summary: >-
@@ -171,6 +200,180 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /apis/{apiId}:
+    get:
+      tags:
+        - Subscription Validation
+      summary: Get API by ID (path)
+      description: |
+        Get a single API by UUID. When Accept is application/zip, returns a zip archive
+        containing api.yaml in API Platform Gateway format (for platform gateway fetch after api.deployed).
+      parameters:
+        - name: apiId
+          in: path
+          required: true
+          description: API UUID.
+          schema:
+            type: string
+        - name: Accept
+          in: header
+          description: application/zip for API Platform gateway format; application/json for APIList.
+          schema:
+            type: string
+            default: application/json
+      responses:
+        '200':
+          description: API definition (zip with api.yaml when Accept application/zip, else JSON).
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIList'
+        '404':
+          description: API not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /apis/{apiId}/gateway-deployments:
+    post:
+      tags:
+        - Gateway Monitoring
+      summary: Notify API deployment (API Platform gateway format)
+      description: |
+        Invoked by the API Platform gateway when an API is successfully deployed.
+        Uses the same path and JSON body as the platform control plane so the gateway
+        can call this endpoint when connected to on-prem (BaseURL/apis/{apiId}/gateway-deployments).
+        Authenticated via api-key header (platform gateway registration token).
+      operationId: apisApiIdGatewayDeploymentsPost
+      parameters:
+        - name: apiId
+          in: path
+          required: true
+          description: API UUID (must match the deployed API).
+          schema:
+            type: string
+        - name: deploymentId
+          in: query
+          required: false
+          description: Deployment/revision identifier.
+          schema:
+            type: string
+        - name: api-key
+          in: header
+          required: true
+          description: Platform gateway registration token.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformGatewayDeploymentNotification'
+      responses:
+        '200':
+          description: Deployment notification received.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentAcknowledgmentResponse'
+        '401':
+          description: Invalid or missing api-key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /deployments:
+    get:
+      tags:
+        - Gateway Internal APIs
+      summary: List deployments for platform gateway
+      description: |
+        Returns the list of deployments (API revisions) for the authenticated platform gateway.
+        Used by the API Platform gateway at startup for deployment sync. Requires api-key header.
+        Optional query 'since' (ISO8601) returns only deployments updated after that time.
+      operationId: deploymentsGet
+      parameters:
+        - name: since
+          in: query
+          required: false
+          description: Return only deployments updated at or after this timestamp (ISO8601 string).
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of deployments for this gateway.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayDeploymentsResponse'
+        '401':
+          description: Missing or invalid api-key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /deployments/fetch-batch:
+    post:
+      tags:
+        - Gateway Internal APIs
+      summary: Batch fetch deployment content as TAR.GZ
+      description: |
+        Returns deployment content (platform api.yaml) for the given deployment IDs as a single
+        application/x-tar+gzip archive. Used by the API Platform gateway for startup sync.
+        Requires api-key header.
+      operationId: deploymentsBatchPost
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchDeploymentsRequest'
+      responses:
+        '200':
+          description: TAR.GZ archive of deployment content.
+          content:
+            application/x-tar+gzip:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Missing or invalid api-key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: batchDeploymentsRequest
   /applications:
     get:
       tags:
@@ -1367,6 +1570,59 @@ components:
             $ref: '#/components/schemas/API'
         pagination:
           $ref: '#/components/schemas/Pagination'
+    APIKey:
+      type: object
+      properties:
+        apiKeyHash:
+          type: string
+        keyName:
+          type: string
+        keyType:
+          type: string
+        status:
+          type: string
+        expiresAt:
+          type: integer
+          format: int64
+        authUser:
+          type: string
+        appId:
+          type: integer
+        apiId:
+          type: integer
+        applicationUUID:
+          type: string
+        apiUUID:
+          type: string
+        validityPeriod:
+          type: integer
+          format: int64
+        createdTime:
+          type: integer
+          format: int64
+        additionalProperties:
+          type: object
+          properties: { }
+        keyBoundary:
+          type: string
+          enum:
+            - API
+            - APPLICATION
+    APIKeyList:
+      title: API Key List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of API Keys returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIKey'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
     DeployedAPIRevision:
       title: Deployed revision information
       type: object
@@ -1402,6 +1658,43 @@ components:
           minLength: 0
           type: string
           example: Default
+    GatewayDeploymentInfo:
+      description: Single deployment info for gateway sync (platform contract).
+      type: object
+      properties:
+        deploymentId:
+          type: string
+          description: Deployment/revision identifier (revision UUID on-prem).
+        artifactId:
+          type: string
+          description: Artifact identifier (API UUID on-prem).
+        kind:
+          type: string
+          description: Artifact type (e.g. RestAPI).
+          enum:
+            - RestAPI
+        updatedAt:
+          type: string
+          description: When the deployment was last updated (ISO-8601 date-time string).
+    GatewayDeploymentsResponse:
+      description: Response for GET /deployments (platform contract).
+      type: object
+      properties:
+        deployments:
+          type: array
+          items:
+            $ref: '#/components/schemas/GatewayDeploymentInfo'
+    BatchDeploymentsRequest:
+      description: Request body for POST /deployments/batch.
+      type: object
+      required:
+        - deploymentIds
+      properties:
+        deploymentIds:
+          type: array
+          items:
+            type: string
+          description: List of deployment IDs (revision UUIDs) to fetch.
     DeployedEnvInfo:
       title: Environment information
       type: object
@@ -2369,6 +2662,34 @@ components:
         errorMessage:
           type: string
           description: A descriptive error message, present only if deploymentStatus is 'FAILURE'.
+    PlatformGatewayDeploymentNotification:
+      description: API Platform gateway deployment notification (sent by gateway after deploy).
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+          description: API ID (deployed API).
+        status:
+          type: string
+          description: Deployment status (e.g. DEPLOYED).
+        configuration:
+          type: object
+          description: API configuration snapshot.
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deployedAt:
+          type: string
+          format: date-time
+        deployedVersion:
+          type: integer
+          format: int64
+        projectIdentifier:
+          type: string
     DeploymentAcknowledgmentResponse:
       type: object
       required:

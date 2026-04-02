@@ -93,6 +93,12 @@ public enum ExceptionCodes implements ErrorHandler {
     API_PRODUCT_USED_RESOURCES(900344,
             "Cannot remove the resource paths because they are used by one or more API Products",
             409, "Cannot update API: %s:%s, due to the resources to remove are used by one or more API Products"),
+    API_PRODUCT_USED_RESOURCES_DURING_RESTORE(900364,
+            "Cannot remove the resource paths because they are used by one or more API Products",
+            400, "Cannot restore API %s:%s, as some resources used by one or more API Products will be removed"),
+    API_PRODUCT_MISSING_RESOURCES_DURING_RESTORE(900365,
+            "Cannot restore revision as one or more resources are missing from the associated APIs",
+            400, "Cannot restore API Product %s:%s, as one or more resources are missing from the associated APIs"),
     API_CATEGORY_INVALID(
             900345, "The API category is invalid.", 400, " The API category is invalid for API: %s"),
     INVALID_ADDITIONAL_PROPERTIES(900346, "Invalid additional properties", 400,
@@ -181,6 +187,10 @@ public enum ExceptionCodes implements ErrorHandler {
             "Cannot delete the environment with UUID %s as active gateway policy deployment exist"),
     GATEWAY_ENVIRONMENT_API_REVISIONS_EXIST(900515, "API Revisions Deployed to Gateway Environment Exist", 409,
             "Cannot delete the environment with UUID %s as API revisions are deployed to it"),
+    UNIVERSAL_GATEWAY_NAME_ALREADY_EXISTS(900518, "Universal gateway name already exists", 409,
+            "A universal gateway with name '%s' already exists in the organization"),
+    UNIVERSAL_GATEWAY_NOT_FOUND(900519, "Universal gateway not found", 404,
+            "Universal gateway not found"),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -252,7 +262,9 @@ public enum ExceptionCodes implements ErrorHandler {
     NO_WSDL_AVAILABLE_FOR_API(900684, "WSDL Not Found", 404, "No WSDL Available for the API %s:%s"),
     CORRUPTED_STORED_WSDL(900685, "Corrupted Stored WSDL", 500, "The WSDL of the API %s is corrupted."),
     UNSUPPORTED_WSDL_FILE_EXTENSION(900686, "Unsupported WSDL File Extension", 400, "Unsupported extension. Only supported extensions are .wsdl and .zip"),
-
+    UNSUPPORTED_RESOURCE_TYPE(900687, "Unsupported resource type", 400, "Cannot generate URL for the unsupported resource type %s."),
+    API_TYPE_INCOMPATIBLE_WITH_RESOURCE(902057, "Resource type incompatible with API type", 400,
+            "Resource type '%s' is not supported for API type '%s'"),
 
     //OpenAPI/Swagger related codes [900750 900???)
     MALFORMED_OPENAPI_DEFINITON(900758, "Malformed OpenAPI Definition", 400, "The provided OpenAPI definition is not parsable as a valid JSON or YAML."),
@@ -317,6 +329,7 @@ public enum ExceptionCodes implements ErrorHandler {
     ACCESS_TOKEN_INACTIVE(900904, "Access Token Error", 401, " Access token is inactive."),
     USER_NOT_AUTHENTICATED(900905, "User is not Authenticated", 401, " User is not authenticated."),
     ACCESS_TOKEN_INVALID(900906, "Invalid Credentials", 401, " Access token is invalid."),
+    WSDL_URL_INVALID(900916, "Authorization Error", 401, " WSDL access URL is invalid."),
 
     INVALID_SCOPE(900910, "Invalid Scope", 403, " You are not authorized to access the resource."),
     INVALID_AUTHORIZATION_HEADER(900911, "Invalid Authorization header", 401,
@@ -363,6 +376,30 @@ public enum ExceptionCodes implements ErrorHandler {
             "Throttling Policy cannot be empty or null", 400, "Throttling Policy cannot be empty or null"),
     ALREADY_ASSIGNED_ADVANCED_POLICY_DELETE_ERROR(900971, "Cannot delete the advanced throttling policy", 403,
             "Cannot delete the advanced policy with the name %s because it is already assigned to an API/Resource"),
+
+    // Multiple client secret related codes
+    OPERATION_NOT_SUPPORTED_FOR_SINGLE_CLIENT_SECRET_MODE(900916,
+            "The requested operation is not supported", 400,
+            "This operation is not supported as the multiple client secret support is disabled" +
+                    " by server configuration."),
+    OPERATION_NOT_SUPPORTED_FOR_MULTIPLE_CLIENT_SECRET_MODE(900917,
+            "The requested operation is not supported", 400,
+            "This operation is not supported as the multiple client secret support is enabled" +
+                    " by server configuration. Use the client secret creation API" +
+                    " (POST /applications/{applicationId}/oauth-keys/{keyMappingId}/generate-secret) to generate" +
+                    " new client secrets."),
+    CLIENT_SECRET_GENERATION_FAILED(900918,
+            "Client secret generation failed", 500,
+            "Error occurred while generating a new client secret for the application with " +
+                    "consumer key %s."),
+    CLIENT_SECRET_DELETION_FAILED(900919,
+            "Client secret deletion failed", 500,
+            "Error occurred while deleting the client secret for the application with " +
+                    "consumer key %s."),
+    CLIENT_SECRET_RETRIEVAL_FAILED(900920,
+            "Client secret retrieval failed", 500,
+            "Error occurred while retrieving the client secret for the application with " +
+                    "consumer key %s."),
 
     //Throttle related codes
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
@@ -420,6 +457,14 @@ public enum ExceptionCodes implements ErrorHandler {
             "Invalid gateway label is provided"),
     DEDICATED_GATEWAY_DETAILS_NOT_FOUND(900999, "Dedicated gateway details not found for the API", 404, "Dedicated " +
             "gateway details not found for the API"),
+
+    //Thumbnail image processing related codes
+    THUMBNAIL_IMAGE_EMPTY(901003, "Thumbnail image is empty", 400,
+            "The provided thumbnail image is empty"),
+    THUMBNAIL_IMAGE_EXCEEDS_MAX_SIZE(901001, "Thumbnail image exceeds maximum allowed size", 400,
+            "Thumbnail image exceeds maximum allowed size of 1MB"),
+    THUMBNAIL_IMAGE_EXCEEDS_MAX_DIMENSIONS(901002, "Thumbnail dimensions exceed maximum allowed limits", 400,
+            "Thumbnail dimensions exceed maximum allowed limits"),
 
     //Comments related Codes
     NEED_COMMENT_MODERATOR_PERMISSION(901100, "Comment moderator permission needed", 403,

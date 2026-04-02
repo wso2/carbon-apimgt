@@ -94,17 +94,26 @@ public class JWTValidatorImpl implements JWTValidator {
     }
     private boolean isValidCertificateBoundAccessToken(SignedJWTInfo signedJWTInfo) throws ParseException { //Holder of Key token
 
-        if (isCertificateBoundAccessTokenEnabled()) {
-            if (signedJWTInfo.getClientCertificate() == null ||
-                    StringUtils.isEmpty(signedJWTInfo.getClientCertificateHash())) {
-                return true; // If cnf is not available - 200 success
-            }
-            if (signedJWTInfo.getClientCertificateHash().equals(signedJWTInfo.getCertificateThumbprint())) {
-                return true; // if cnf matches with truststore cert - 200 success
-            }
-            return false; // if cert is not in truststore or thumbprint does not match with the cert
+        // Feature toggle off -> ignore everything
+        if (!isCertificateBoundAccessTokenEnabled()) {
+            return true;
         }
-        return true; /// if config is not enabled - 200 success
+
+        String certificateThumbprint = signedJWTInfo.getCertificateThumbprint(); // cnf.x5t#S256
+
+        // CASE 1: Token is NOT certificate-bound (no cnf)
+        if (StringUtils.isBlank(certificateThumbprint)) {
+            return true; // bearer token semantics
+        }
+
+        // CASE 2: Token IS certificate-bound → cert is mandatory
+        if (signedJWTInfo.getClientCertificate() == null ||
+                StringUtils.isBlank(signedJWTInfo.getClientCertificateHash())) {
+            return false; // missing proof-of-possession
+        }
+
+        // CASE 3: Validate thumbprint
+        return certificateThumbprint.equals(signedJWTInfo.getClientCertificateHash());
     }
 
     private boolean isCertificateBoundAccessTokenEnabled() {

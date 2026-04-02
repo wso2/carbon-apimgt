@@ -25,11 +25,14 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretInfo;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -455,6 +458,16 @@ public interface APIConsumer extends APIManager {
     boolean updateApplicationOwner(String newUserId , String organization, Application application ) throws APIManagementException;
 
     /**
+     * Upgrades the token type for the specified application in the given organization.
+     *
+     * @param application  the application to upgrade
+     * @return true if the upgrade was successful, false otherwise
+     * @throws APIManagementException if the upgrade fails
+     */
+    boolean upgradeApplicationTokenType(String username, Application application)
+            throws APIManagementException;
+
+    /**
      * Returns a list of applications for a given subscriber
      *
      * @param subscriber   Subscriber
@@ -463,7 +476,7 @@ public interface APIConsumer extends APIManager {
      * @param offset
      * @param groupingId   the groupId to which the applications must belong.
      * @param organization Identifier of an organization
-     * @param sharedOrganization 
+     * @param sharedOrganization
      * @return Applications
      * @throws APIManagementException if failed to applications for given subscriber
      */
@@ -622,6 +635,102 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
+     * Generates a new api key
+     *
+     * @param application          The Application Object that represents the Application.
+     * @param userName             Username of the user requesting the api key.
+     * @param validityPeriod       Requested validity period for the api key.
+     * @param permittedIP          Permitted IP addresses for the api key.
+     * @param permittedReferer     Permitted referrers for the api key.
+     * @param keyName       Name of the api key.
+     * @return Generated api key.
+     * @throws APIManagementException
+     */
+    String generateApiKey(Application application, String userName, long validityPeriod, String permittedIP,
+                          String permittedReferer, String keyName)
+            throws APIManagementException;
+
+    /**
+     * Generates a new api bound api key
+     *
+     * @param api                  The API Object that represents the API.
+     * @param userName             Username of the user requesting the api key.
+     * @param validityPeriod       Requested validity period for the api key.
+     * @param permittedIP          Permitted IP addresses for the api key.
+     * @param permittedReferer     Permitted referrers for the api key.
+     * @param keyName       Name of the api key.
+     * @param keyType              Key type of the api key.
+     * @return Generated api key.
+     * @throws APIManagementException
+     */
+    String generateApiApiKey(API api, String userName, long validityPeriod, String permittedIP,
+                          String permittedReferer, String keyName, String keyType)
+            throws APIManagementException;
+
+    /**
+     * Returns a list of apis with api keys for a given application key type.
+     *
+     * @param applicationId Application Id of the application.
+     * @param keyType Key type of the api keys
+     * @param tenantDomain Tenant domain
+     * @param username Username
+     * @return A List of apis with api keys.
+     * @throws APIManagementException This is the custom exception class for API management.
+     */
+    List<APIKeyInfo> getApisWithApiKeys(String applicationId, String keyType, String tenantDomain, String username)
+            throws APIManagementException;
+
+    /**
+     * Returns a list of api keys for a given application key type.
+     *
+     * @param applicationId Application Id of the application.
+     * @param keyType Key type of the api keys
+     * @param tenantDomain Tenant domain
+     * @param username Username
+     * @return A List of api keys.
+     * @throws APIManagementException This is the custom exception class for API management.
+     */
+    List<APIKeyInfo> getApiKeys(String applicationId, String keyType, String tenantDomain, String username)
+            throws APIManagementException;
+
+    /**
+     * Returns a list of api key associations for a given application key type.
+     *
+     * @param applicationId Application Id of the application.
+     * @param keyType Key type of the api keys
+     * @param tenantDomain Tenant domain
+     * @param username Username
+     * @return A List of api keys.
+     * @throws APIManagementException This is the custom exception class for API management.
+     */
+    List<APIKeyInfo> getApiKeyAssociations(String applicationId, String keyType, String tenantDomain, String username)
+            throws APIManagementException;
+
+    /**
+     * Returns a list of api keys for a given API.
+     *
+     * @param apiId API Id of the API
+     * @param username Username
+     * @return A List of api keys
+     * @throws APIManagementException This is the custom exception class for API management.
+     */
+    List<APIKeyInfo> getApiApiKeys(String apiId, String username)
+            throws APIManagementException;
+
+    /**
+     * Creates an association for a given API key.
+     *
+     * @param api             API Object that represents the API.
+     * @param keyUUId        UUID of API key
+     * @param application      Application Object that represents the Application.
+     * @param tenantDomain   Tenant domain
+     * @param username       Username
+     * @throws APIManagementException This is the custom exception class for API management.
+     */
+    APIKeyInfo createAssociationToApp(API api, String keyUUId, Application application, String tenantDomain, String username)
+            throws APIManagementException;
+
+    /**
      * Regenerate new consumer secret.
      *
      * @param clientId For which consumer key we need to regenerate consumer secret.
@@ -630,6 +739,65 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException This is the custom exception class for API management.
      */
     String renewConsumerSecret(String clientId, String keyManagerName) throws APIManagementException;
+
+    /**
+     * Generates a new consumer secret for an OAuth application.
+     * <p>
+     * Implementations may override this method to support creating additional
+     * consumer secrets for a given client. The default implementation does not
+     * support this operation and will throw an {@link UnsupportedOperationException}.
+     *
+     * @param keyManagerName         name of the Key Manager associated with the OAuth application
+     * @param consumerSecretRequest  request containing information required to generate the consumer secret
+     * @return {@link ConsumerSecretInfo} containing details of the generated consumer secret
+     * @throws APIManagementException if an error occurs while generating the consumer secret
+     * @throws UnsupportedOperationException if the Key Manager does not support generating consumer secrets
+     */
+    default ConsumerSecretInfo generateConsumerSecret(String keyManagerName,
+                                                      ConsumerSecretRequest consumerSecretRequest)
+            throws APIManagementException {
+
+        throw new UnsupportedOperationException("Generating new consumer secret is not supported");
+    }
+
+    /**
+     * Retrieves all consumer secrets associated with a given OAuth client.
+     * <p>
+     * Implementations may override this method to support listing multiple
+     * consumer secrets for a client. The default implementation does not
+     * support this operation and will throw an {@link UnsupportedOperationException}.
+     *
+     * @param clientId       client ID of the application
+     * @param keyManagerName name of the Key Manager associated with the OAuth application
+     * @return list of {@link ConsumerSecretInfo} objects associated with the client
+     * @throws APIManagementException if an error occurs while retrieving consumer secrets
+     * @throws UnsupportedOperationException if the Key Manager does not support retrieving consumer secrets
+     */
+    default List<ConsumerSecretInfo> retrieveConsumerSecrets(String clientId, String keyManagerName)
+            throws APIManagementException {
+
+        throw new UnsupportedOperationException("Retrieving consumer secrets is not supported");
+    }
+
+    /**
+     * Deletes a specific consumer secret associated with an OAuth application.
+     * <p>
+     * Implementations may override this method to support deletion of
+     * individual consumer secrets. The default implementation does not
+     * support this operation and will throw an {@link UnsupportedOperationException}.
+     *
+     * @param secretId               identifier of the consumer secret to be deleted
+     * @param keyManagerName         name of the Key Manager associated with the OAuth application
+     * @param consumerSecretRequest  request containing additional information required for deletion
+     * @throws APIManagementException if an error occurs while deleting the consumer secret
+     * @throws UnsupportedOperationException if the Key Manager does not support deleting consumer secrets
+     */
+    default void deleteConsumerSecret(String secretId, String keyManagerName,
+                                      ConsumerSecretRequest consumerSecretRequest)
+            throws APIManagementException {
+
+        throw new UnsupportedOperationException("Deleting consumer secret is not supported");
+    }
 
     /**
      * Returns a set of scopes associated with a list of API uuids.
@@ -687,6 +855,21 @@ public interface APIConsumer extends APIManager {
      */
     ResourceFile getWSDL(API api, String environmentName, String environmentType, String organization)
             throws APIManagementException;
+
+    /**
+     * Returns the WSDL ResourceFile (Single WSDL) for the provided API and environment details with an option
+     * to include main WSDL content in the response in ZIP scenario
+     *
+     * @param api                          API
+     * @param fileFormat       whether to include main WSDL content in the response
+     * @param environmentName              environment name
+     * @param environmentType              environment type
+     * @param organization                 Identifier of an organization
+     * @return WSDL of the API
+     * @throws APIManagementException when error occurred while getting the WSDL
+     */
+    ResourceFile getWSDL(API api, String fileFormat, String environmentName, String environmentType,
+            String organization) throws APIManagementException;
     /**
      * Returns application attributes defined in configuration
      *
@@ -703,6 +886,81 @@ public interface APIConsumer extends APIManager {
     Set<APIKey> getApplicationKeysOfApplication(int applicationId, String xWso2Tenant) throws APIManagementException;
 
     void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Revoke opaque api key and delete from the DB.
+     *
+     * @param keyUUId      Api key UUID
+     * @param tenantDomain Tenant domain
+     * @param username User name
+     * @throws APIManagementException
+     */
+    void revokeApiKey(String keyUUId, String tenantDomain, String username) throws APIManagementException;
+
+    /**
+     * Remove association of an opaque api key.
+     *
+     * @param apiUUId UUId of the API
+     * @param keyUUID Api key UUID
+     * @param tenantDomain TenantDomain
+     * @param username User name
+     * @throws APIManagementException
+     */
+    void removeApiKeyAssociation(String apiUUId, String keyUUID, String tenantDomain, String username) throws APIManagementException;
+
+    /**
+     * Remove association of an opaque api key.
+     *
+     * @param application   Application object which contains the application details
+     * @param keyUUId Api key UUId
+     * @param tenantDomain   Tenant domain
+     * @param username       Username
+     * @throws APIManagementException
+     */
+    void removeApiKeyAssociationViaApp(Application application, String keyUUId, String tenantDomain, String username) throws APIManagementException;
+
+    /**
+     * Regenerate opaque api key for the given key name with same properties.
+     *
+     * @param application    Application object which contains the application details
+     * @param keyType       Key type of the token
+     * @param keyUUId       Api key UUId
+     * @param tenantDomain  Tenant domain
+     * @param username      User name
+     * @return API key info object
+     * @throws APIManagementException
+     */
+    APIKeyInfo regenerateApiKey(Application application, String keyType, String keyUUId, String tenantDomain,
+                                String username) throws APIManagementException;
+
+    /**
+     * Regenerate opaque api key for the given key name with same properties.
+     *
+     * @param api           API Object that represents the API.
+     * @param keyUUId      Api key UUId
+     * @param tenantDomain Tenant domain
+     * @param organization Organization
+     * @param username     User name
+     * @return API key info object
+     * @throws APIManagementException
+     */
+    APIKeyInfo regenerateApiApiKey(API api, String keyUUId, String tenantDomain, String organization,
+                                   String username) throws APIManagementException;
+
+    /**
+     * Revoke an API key and optionally notify connected platform gateways (when apiId and keyName are provided).
+     * Use this overload when revoking an opaque API key and the apiId/keyName are known (e.g. from opaque key store).
+     *
+     * @param apiKey       token identifier to revoke
+     * @param expiryTime   expiry time
+     * @param tenantDomain tenant domain
+     * @param apiId        API UUID (optional; when non-null and keyName non-null, apikey.revoked is broadcast to
+     *                     platform gateways)
+     * @param keyName      key name (optional)
+     * @param userId       user id (optional, for event payload)
+     */
+    void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain, String apiId, String keyName, String userId)
+            throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.
@@ -904,7 +1162,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     boolean removalKeys(Application application, String keyMappingId, String xWSO2Tenant) throws APIManagementException;
-    
+
     /**
      * @param searchQuery search query. ex : provider:admin
      * @param organizationInfo Identifier of an organization
@@ -926,4 +1184,16 @@ public interface APIConsumer extends APIManager {
      */
     Map<String, Object> searchPaginatedContent(String searchQuery, OrganizationInfo organizationInfo, int start, int end)
             throws APIManagementException;
+
+    /**
+     * This method is used to validate the signed URL and retrieve the API information related to the URL.
+     *
+     * @param apiId        API UUID
+     * @param organization Identifier of an organization
+     * @return API information related to the signed URL
+     * @throws APIManagementException if an error occurs while validating the signed URL or retrieving API information
+     */
+    API getAPIWithoutPermissionCheck(String apiId, String organization)
+            throws APIManagementException;
+
 }

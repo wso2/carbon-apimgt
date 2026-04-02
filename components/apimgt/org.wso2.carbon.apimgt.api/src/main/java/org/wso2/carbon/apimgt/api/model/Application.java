@@ -60,7 +60,7 @@ public class Application {
     private String keyManager;
     private String sharedOrganization;
     private String subOrganization; // organization of the application within the super organization.
-    
+
     public String getCreatedTime() {
         return createdTime;
     }

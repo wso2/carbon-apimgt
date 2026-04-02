@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.LLMProviderManager;
 import org.wso2.carbon.apimgt.gateway.TenancyLoader;
+import org.wso2.carbon.apimgt.gateway.apikey.APIKeysRetriever;
 import org.wso2.carbon.apimgt.gateway.notifiers.DeploymentStatusNotifier;
 import org.wso2.carbon.apimgt.gateway.notifiers.GatewayNotifier;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
@@ -240,6 +241,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             ServiceReferenceHolder.getInstance().addLoadedTenant(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             retrieveAndDeployArtifacts(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             retrieveBlockConditionsAndKeyTemplates();
+            retrieveApiKeys();
             WebhooksDataHolder.getInstance()
                     .registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             jmsTransportHandlerForTrafficManager
@@ -339,8 +341,19 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         syncModeDeploymentCount++;
         isAPIsDeployedInSyncMode = deployArtifactsAtStartup(tenantDomain);
         if (!isAPIsDeployedInSyncMode) {
-            log.error("Deployment attempt : " + syncModeDeploymentCount + " was unsuccessful");
+            String logMessage = "Deployment attempt : " + syncModeDeploymentCount
+                    + " was unsuccessful, Next retry in 1 second";
+            if (syncModeDeploymentCount >= 4) {
+                log.error(logMessage);
+            } else if (syncModeDeploymentCount == 3) {
+                log.warn(logMessage);
+            }
             if (!(syncModeDeploymentCount > retryCount)) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    // Ignore
+                }
                 deployAPIsInSyncMode(tenantDomain);
             } else {
                 log.error("Maximum retry limit exceeded. Server is starting without deploying all synapse artifacts");
@@ -365,9 +378,19 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         isGatewayPoliciesDeployedInSyncMode = deployGatewayPolicyArtifactsAtStartup(tenantDomain);
         DataHolder.getInstance().setAllGatewayPoliciesDeployed(isGatewayPoliciesDeployedInSyncMode);
         if (!isGatewayPoliciesDeployedInSyncMode) {
-            log.error("Gateway policy deployment attempt : " + syncModeGatewayPolicyDeploymentCount +
-                    " was unsuccessful");
+            String logMessage = "Gateway policy deployment attempt : " + syncModeGatewayPolicyDeploymentCount +
+                    " was unsuccessful, Next retry in 1 second";
+            if (syncModeGatewayPolicyDeploymentCount >= 4) {
+                log.error(logMessage);
+            } else if (syncModeGatewayPolicyDeploymentCount == 3) {
+                log.warn(logMessage);
+            }
             if (!(syncModeGatewayPolicyDeploymentCount > retryCount)) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    // Ignore
+                }
                 deployGatewayPoliciesInSyncMode(tenantDomain);
             } else {
                 log.error(
@@ -437,8 +460,13 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 if (!ExceptionCodes.ARTIFACT_SYNC_HTTP_REQUEST_FAILED.equals(e.getErrorHandler())) {
                     retryCount++;
                     if (retryCount <= maxRetryCount) {
-                        log.error("Unable to deploy synapse artifacts at gateway. Retry Attempt " + retryCount
-                                + " in " + (retryDuration / 1000) + " seconds");
+                        String logMessage = "Unable to deploy synapse artifacts at gateway. Retry Attempt " + retryCount
+                                + " in " + (retryDuration / 1000) + " seconds";
+                        if (retryCount >= 4) {
+                            log.error(logMessage);
+                        } else if (retryCount == 3) {
+                            log.warn(logMessage);
+                        }
                         try {
                             Thread.sleep(retryDuration);
                             retryDuration = (long) (retryDuration * reconnectionProgressionFactor);
@@ -483,8 +511,13 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 if (!ExceptionCodes.ARTIFACT_SYNC_HTTP_REQUEST_FAILED.equals(e.getErrorHandler())) {
                     retryCount++;
                     if (retryCount <= maxRetryCount) {
-                        log.error("Unable to deploy gateway policy artifacts at gateway. Retry Attempt " + retryCount
-                                + " in " + (retryDuration / 1000) + " seconds");
+                        String logMessage = "Unable to deploy gateway policy artifacts at gateway. Retry Attempt "
+                                + retryCount + " in " + (retryDuration / 1000) + " seconds";
+                        if (retryCount >= 4) {
+                            log.error(logMessage);
+                        } else if (retryCount == 3) {
+                            log.warn(logMessage);
+                        }
                         try {
                             Thread.sleep(retryDuration);
                             retryDuration = (long) (retryDuration * reconnectionProgressionFactor);
@@ -522,6 +555,13 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         }
     }
 
+    private void retrieveApiKeys() {
+
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        APIKeysRetriever webServiceAPIKeysRetriever = new APIKeysRetriever();
+        webServiceAPIKeysRetriever.startWebServiceApiKeyRetriever(tenantDomain);
+    }
+
     @Override
     public void createdConfigurationContext(ConfigurationContext configContext) {
 
@@ -548,6 +588,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             }
         }).start();
         retrieveAndDeployArtifacts(tenantDomain);
+        retrieveApiKeys();
         ServiceReferenceHolder.getInstance().addLoadedTenant(tenantDomain);
     }
 

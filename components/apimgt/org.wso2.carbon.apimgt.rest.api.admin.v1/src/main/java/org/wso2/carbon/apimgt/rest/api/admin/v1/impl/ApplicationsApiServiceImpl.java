@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationKeyManagerInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -35,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationUpdateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -77,6 +79,65 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             RestApiUtil.handleInternalServerError("Error while updating application owner " + applicationId, e, log);
         }
 
+        return null;
+    }
+
+    @Override
+    public Response updateApplicationSettings(String applicationId,
+            ApplicationUpdateRequestDTO applicationUpdateRequestDTO, MessageContext messageContext) {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer;
+        try {
+            if (applicationUpdateRequestDTO == null) {
+                RestApiUtil.handleBadRequest("Application settings payload cannot be null.", log);
+            }
+            apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            if (application == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+            boolean updated = false;
+            if (applicationUpdateRequestDTO.getOwner() != null) {
+                String newOwner = applicationUpdateRequestDTO.getOwner();
+                boolean ownerUpdated = apiConsumer.updateApplicationOwner(newOwner, organization, application);
+                if (!ownerUpdated) {
+                    RestApiUtil.handleInternalServerError("Error while updating application owner " + applicationId,
+                            log);
+                }
+                application = apiConsumer.getApplicationByUUID(applicationId, organization);
+                if (application == null) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+                String info = "Application ID:" + applicationId + " owner has been changed to " + newOwner;
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATIONS, info,
+                        APIConstants.AuditLogConstants.UPDATED, username);
+                updated = true;
+            }
+            if (APIConstants.JWT.equals(String.valueOf(applicationUpdateRequestDTO.getTokenType()))) {
+                boolean tokenUpdated = apiConsumer.upgradeApplicationTokenType(username, application);
+                if (!tokenUpdated) {
+                    RestApiUtil.handleInternalServerError(
+                            "Error while upgrading application token type for applicationId " + applicationId, log);
+                }
+                String info = "Application ID:" + applicationId + " token type has been upgraded to JWT";
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATIONS, info,
+                        APIConstants.AuditLogConstants.UPDATED, username);
+                updated = true;
+            }
+            if (!updated) {
+                RestApiUtil.handleBadRequest("No valid application settings provided for update.", log);
+            }
+            application = apiConsumer.getApplicationByUUID(applicationId, organization);
+            if (application == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+            ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
+            return Response.ok().entity(applicationDTO).build();
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError(
+                    "Error while updating application settings for applicationId " + applicationId, e, log);
+        }
         return null;
     }
 
@@ -144,14 +205,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     private static String getApplicationsSortByField(String sortBy) {
-        String updatedSortBy = StringUtils.EMPTY;
-        // Default sortBy field is name
-        if (sortBy == null || "name".equals(sortBy)) {
-            updatedSortBy = "NAME";
-        } else if ("owner".equals(sortBy)) {
-            updatedSortBy = "CREATED_BY";
-        }
-        return updatedSortBy;
+        return RestApiConstants.SORT_BY_OWNER.equalsIgnoreCase(sortBy) ? APIConstants.APPLICATION_CREATED_BY
+                : APIConstants.APPLICATION_NAME;
     }
 
     @Override

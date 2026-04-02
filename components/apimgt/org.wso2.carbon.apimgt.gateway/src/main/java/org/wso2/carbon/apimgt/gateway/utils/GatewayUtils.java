@@ -43,6 +43,8 @@ import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.json.JsonUtil;
@@ -51,19 +53,21 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.Pipe;
+import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyConfigDTO;
 import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyDeploymentConfigDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.ModelEndpointDTO;
-import org.wso2.carbon.apimgt.api.gateway.RBPolicyConfigDTO;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.IPRange;
 import org.wso2.carbon.apimgt.gateway.exception.OAuth2Exception;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -75,6 +79,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
@@ -129,6 +135,10 @@ public class GatewayUtils {
     private static final String HTTP_SC = "HTTP_SC";
     private static final String HTTP_SC_DESC = "HTTP_SC_DESC";
     private static final Gson gson = new Gson();
+    private static String apiUUID;
+    private static final String apiType = String.valueOf(APIConstants.ApiTypes.API);
+    private static final Pattern validHostHeaderPattern =
+            Pattern.compile("^[A-Za-z0-9][A-Za-z0-9.-]*(:\\d{1,5})?$");
 
     public static boolean isClusteringEnabled() {
 
@@ -696,7 +706,13 @@ public class GatewayUtils {
         AuthenticationContext authContext = new AuthenticationContext();
         authContext.setAuthenticated(true);
         authContext.setApiKey(tokenSignature);
-        authContext.setUsername(payload.getSubject());
+        if (payload != null) {
+            authContext.setUsername(payload.getSubject());
+        } else if (apiKeyValidationInfoDTO != null) {
+            authContext.setUsername(apiKeyValidationInfoDTO.getEndUserName());
+        } else {
+            authContext.setUsername(null);
+        }
 
         if (apiKeyValidationInfoDTO != null) {
             authContext.setApiTier(apiKeyValidationInfoDTO.getApiTier());
@@ -893,7 +909,7 @@ public class GatewayUtils {
      * @throws APISecurityException if the user is not subscribed to the API
      */
     public static APIKeyValidationInfoDTO validateAPISubscription(String apiContext, String apiVersion, JWTClaimsSet payload,
-                                                     String token)
+                                                                  String token)
             throws APISecurityException {
 
         APIKeyValidator apiKeyValidator = new APIKeyValidator();
@@ -912,8 +928,8 @@ public class GatewayUtils {
                         APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
             }
         }
-        // validate subscription
-        // if the appId is equal to 0 then it's a internal key
+        // Validate subscription
+        // If the appId is equal to 0 then it's a internal key
         if (appId != 0) {
             apiKeyValidationInfoDTO =
                     apiKeyValidator.validateSubscription(apiContext, apiVersion, appId, getTenantDomain(), keyType);
@@ -932,6 +948,42 @@ public class GatewayUtils {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                         APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
             }
+        }
+        return apiKeyValidationInfoDTO;
+    }
+
+    /**
+     * Validate whether the user is subscribed to the invoked API. If subscribed, return a APIKeyValidationInfoDTO
+     * object containing the API information to authenticate API Keys.
+     *
+     * @param apiContext API context
+     * @param apiVersion API version
+     * @param apiKeyInfo    The key type
+     * @return an APIKeyValidationInfoDTO containing APIKey validation information.
+     * If the subscription information is not found, return a null object.
+     * @throws APISecurityException if the user is not subscribed to the API
+     */
+    public static APIKeyValidationInfoDTO validateAPIKeySubscription(String apiContext, String apiVersion,
+                                                                     APIKeyInfo apiKeyInfo)
+            throws APISecurityException {
+
+        APIKeyValidator apiKeyValidator = new APIKeyValidator();
+        if (log.isDebugEnabled()) {
+            log.debug("Validating API key subscription for context: " + apiContext + ", version: " + apiVersion);
+        }
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTO =
+                apiKeyValidator.validateAPIKeySubscription(apiContext, apiVersion, getTenantDomain(), apiKeyInfo);
+            if (apiKeyValidationInfoDTO.isAuthorized()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User is subscribed to the API: " + apiContext + ", " +
+                            "version: " + apiVersion);
+                }
+                apiKeyValidationInfoDTO.setType(apiKeyInfo.getKeyType());
+            } else {
+                log.error("User is not subscribed to access the API.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                        APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+
         }
         return apiKeyValidationInfoDTO;
     }
@@ -1859,5 +1911,139 @@ public class GatewayUtils {
             }
         }
         return false;
+    }
+
+    public static void handleAuthFailure(org.apache.synapse.MessageContext messageContext, APISecurityException e,
+            String authorizationHeader, String apiKeyHeader, String authenticatorsChallengeString, String apiType) {
+        messageContext.setProperty(SynapseConstants.ERROR_CODE, e.getErrorCode());
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE,
+                APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
+        messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION, e);
+
+        Mediator sequence = messageContext.getSequence(APISecurityConstants.API_AUTH_FAILURE_HANDLER);
+
+        //Setting error description which will be available to the handler
+        String errorDetail = APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage());
+        // if custom auth header is configured, the error message should specify its name instead of default value
+        if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_CREDENTIALS) {
+            errorDetail = APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(),
+                    e.getMessage()) + "'" + authorizationHeader + " : Bearer ACCESS_TOKEN' or '" + authorizationHeader + " : Basic ACCESS_TOKEN' or '" + apiKeyHeader + " : API_KEY'";
+        }
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDetail);
+
+        // By default we send a 401 response back
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        // This property need to be set to avoid sending the content in pass-through pipe (request message)
+        // as the response.
+        axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
+        try {
+            RelayUtils.consumeAndDiscardMessage(axis2MC);
+        } catch (AxisFault axisFault) {
+            //In case of an error it is logged and the process is continued because we're setting a fault message in the payload.
+            log.error("Error occurred while consuming and discarding the message", axisFault);
+        }
+        axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/soap+xml");
+        int status;
+        if (e.getErrorCode() == APISecurityConstants.API_AUTH_GENERAL_ERROR || e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF) {
+            status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
+        } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_INCORRECT_API_RESOURCE || e.getErrorCode() == APISecurityConstants.API_AUTH_FORBIDDEN || e.getErrorCode() == APISecurityConstants.API_OAUTH_INVALID_AUDIENCES || e.getErrorCode() == APISecurityConstants.INVALID_SCOPE) {
+            status = HttpStatus.SC_FORBIDDEN;
+        } else {
+            status = HttpStatus.SC_UNAUTHORIZED;
+            Map<String, String> headers = (Map) axis2MC.getProperty(
+                    org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            if (headers != null) {
+                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
+                    String contextPath = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+                    if (StringUtils.isEmpty(contextPath)) {
+                        headers.put(HttpHeaders.WWW_AUTHENTICATE,
+                                authenticatorsChallengeString + " error=\"invalid_token\"" + ", error_description=\"The provided token is invalid\"");
+                    } else {
+                        // Derive the outward facing host and port from host header
+                        String hostHeader = headers.get(APIMgtGatewayConstants.HOST);
+
+                        if (StringUtils.isBlank(hostHeader) || !validHostHeaderPattern.matcher(hostHeader).matches()) {
+                            if (log.isDebugEnabled()) {
+                                log.debug(
+                                        "Missing or malformed host header in request.Extracting host header " + "from config.");
+                            }
+                            hostHeader = APIUtil.getHostAddress();
+                        }
+
+                        String gwURL = MCPUtils.getGatewayServerURL(hostHeader, contextPath);
+                        if (StringUtils.isEmpty(gwURL)) {
+                            headers.put(HttpHeaders.WWW_AUTHENTICATE,
+                                    authenticatorsChallengeString + " error=\"invalid_token\"" + ", error_description=\"The provided token is invalid\"");
+                        } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Constructed gateway URL for resource metadata: " + gwURL);
+                            }
+
+                            String resourceMetadata = gwURL + contextPath + APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE;
+                            headers.put(HttpHeaders.WWW_AUTHENTICATE,
+                                    "Bearer resource_metadata=" + "\"" + resourceMetadata + "\"," + " error=\"invalid_token\"," + " error_description=\"Access token is missing or expired\"");
+                        }
+                    }
+                } else {
+                    headers.put(HttpHeaders.WWW_AUTHENTICATE, authenticatorsChallengeString +
+                            " error=\"invalid_token\"" +
+                            ", error_description=\"The provided token is invalid\"");
+                }
+                axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+            }
+        }
+
+        messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE, status);
+
+        // Invoke the custom error handler specified by the user
+        if (sequence != null && !sequence.mediate(messageContext)) {
+            // If needed user should be able to prevent the rest of the fault handling
+            // logic from getting executed
+            return;
+        }
+
+        sendFault(messageContext, status);
+    }
+
+    protected static void sendFault(org.apache.synapse.MessageContext messageContext, int status) {
+        Utils.sendFault(messageContext, status);
+    }
+
+    private static String getDcrEndpoint() {
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving DCR endpoint for API UUID: " + apiUUID);
+        }
+        if (StringUtils.isEmpty(apiUUID)) {
+            return null;
+        }
+        List<String> keyManagers = DataHolder.getInstance().getKeyManagersFromUUID(apiUUID);
+        if (keyManagers == null || keyManagers.isEmpty()) {
+            return null;
+        }
+
+        String tenantDomain = GatewayUtils.getTenantDomain();
+        KeyManagerDto keyManagerDto = null;
+        if (APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManagers.get(0))) {
+            Map<String, KeyManagerDto> keyManagerMap = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
+            if (keyManagerMap.size() == 1) {
+                keyManagerDto = keyManagerMap.values().iterator().next();
+            }
+        } else if (keyManagers.size() == 1) {
+            keyManagerDto = KeyManagerHolder.getKeyManagerByName(tenantDomain, keyManagers.get(0));
+        }
+
+        if (keyManagerDto != null && keyManagerDto.getKeyManager() != null) {
+            try {
+                org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration config =
+                        keyManagerDto.getKeyManager().getKeyManagerConfiguration();
+                return (String) config.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT);
+            } catch (APIManagementException e) {
+                log.error("Error while retrieving key manager configuration for MCP DCR support", e);
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("No suitable DCR endpoint found for API UUID: " + apiUUID);
+        }
+        return null;
     }
 }

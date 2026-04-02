@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.33.7-SNAPSHOT</version>
+        <version>9.33.85-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -116,6 +116,12 @@
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
         </dependency>
+        <dependency>
+            <groupId>javax.websocket</groupId>
+            <artifactId>javax.websocket-api</artifactId>
+            <version>1.1</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <build>
             <plugins>
@@ -175,6 +181,7 @@
                                 </templateDirectory>
                                 <skipOverwrite>true</skipOverwrite>
                                 <modelNameSuffix>DTO</modelNameSuffix>
+                                <additionalProperties>ignoreUnknownProperties=true</additionalProperties>
                             </configuration>
                         </execution>
                     </executions>
