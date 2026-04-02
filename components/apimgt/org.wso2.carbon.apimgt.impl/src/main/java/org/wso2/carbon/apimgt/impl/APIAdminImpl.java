@@ -17,8 +17,6 @@
  */
 package org.wso2.carbon.apimgt.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -429,6 +427,8 @@ public class APIAdminImpl implements APIAdmin {
                                 .organizationId(organization)
                                  .environmentId(envId)
                                  .build();
+                        log.info("Revoking federated API key with remote ID: " +
+                                remoteApiKeyId + " for API: " + apiUuid);
                          federatedApiKeyConnector.revokeApiKey(context);
                      }
                      apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
@@ -2562,23 +2562,13 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     /**
-     * Deserializes API key properties from byte array to Map.
+     * Normalizes API key properties map to avoid null handling at call sites.
      *
-     * @param serializedProperties serialized properties byte array
-     * @return deserialized properties map
-     * @throws APIManagementException if deserialization fails
+     * @param properties API key properties map
+     * @return non-null properties map
      */
-    private Map<String, String> deserializeApiKeyProperties(byte[] serializedProperties)
-            throws APIManagementException {
+    private Map<String, String> deserializeApiKeyProperties(Map<String, String> properties) {
 
-        if (serializedProperties == null || serializedProperties.length == 0) {
-            return new HashMap<>();
-        }
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(serializedProperties, new TypeReference<Map<String, String>>() {});
-        } catch (IOException e) {
-            throw new APIManagementException("Error while deserializing API key properties", e);
-        }
+        return properties == null ? new HashMap<>() : properties;
     }
 }
