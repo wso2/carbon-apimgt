@@ -584,7 +584,16 @@ public class ApiKeyMgtDAO {
                         apiKeyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         apiKeyInfo.setKeyName(rs.getString("NAME"));
                         apiKeyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
-                        apiKeyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
+                        try (InputStream apiKeyProperties = rs.getBinaryStream("API_KEY_PROPERTIES")) {
+                            if (apiKeyProperties != null) {
+                                ObjectMapper mapper = new ObjectMapper();
+                                Map<String, String> propertiesMap = mapper.readValue(apiKeyProperties,
+                                        Map.class);
+                                apiKeyInfo.setProperties(propertiesMap);
+                            }
+                        } catch (IOException e) {
+                            handleException("Failed to convert apiKeyProperties", e);
+                        }
                         apiKeyInfo.setAppId(rs.getInt("APPLICATION_ID"));
                     }
                 }
@@ -735,7 +744,16 @@ public class ApiKeyMgtDAO {
                         apiKeyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         apiKeyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
                         apiKeyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
-                        apiKeyInfo.setProperties(rs.getBytes("API_KEY_PROPERTIES"));
+                        try (InputStream apiKeyProperties = rs.getBinaryStream("API_KEY_PROPERTIES")) {
+                            if (apiKeyProperties != null) {
+                                ObjectMapper mapper = new ObjectMapper();
+                                Map<String, String> propertiesMap = mapper.readValue(apiKeyProperties,
+                                        Map.class);
+                                apiKeyInfo.setProperties(propertiesMap);
+                            }
+                        } catch (IOException e) {
+                            handleException("Failed to convert apiKeyProperties", e);
+                        }
                     }
                 }
             }
