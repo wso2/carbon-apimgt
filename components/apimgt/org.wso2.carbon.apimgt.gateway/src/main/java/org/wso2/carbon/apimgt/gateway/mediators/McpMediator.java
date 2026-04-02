@@ -136,10 +136,10 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                                 return false;
                             }
                             String originalToolName = null;
-                            if (jsonObject.has("params")) {
+                            if (jsonObject.has("params") && jsonObject.get("params").isJsonObject()) {
                                 JsonObject params = jsonObject.getAsJsonObject("params");
                                 // Capture original tool name before modifying
-                                if (params.has("name")) {
+                                if (params.has("name") && params.get("name").isJsonPrimitive()) {
                                     originalToolName = params.get("name").getAsString();
                                 }
                                 params.addProperty("name", electedResource);
