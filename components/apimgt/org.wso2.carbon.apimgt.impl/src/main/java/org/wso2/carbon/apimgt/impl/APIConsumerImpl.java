@@ -633,7 +633,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public String generateApiApiKey(API api, String userName, long validityPeriod, String permittedIP,
                                     String permittedReferer, String keyName, String keyType)
             throws APIManagementException {
-        return generateApiApiKey(api, username, validityPeriod, permittedIP, permittedReferer, keyName, keyType,
+        return generateApiApiKey(api, userName, validityPeriod, permittedIP, permittedReferer, keyName, keyType,
                 null).getApiKey();
     }
 
