@@ -265,6 +265,7 @@ public class APIAdminImpl implements APIAdmin {
         }
         APIUtil.stopFederatedGatewayAPIDiscovery(existingEnv, tenantDomain);
         apiMgtDAO.deleteEnvironment(uuid);
+        FederatedApiKeyConnectorFactory.evictApiKeyConnector(tenantDomain, uuid);
     }
 
     public Environment getEnvironmentWithoutPropertyMasking(String tenantDomain, String uuid)
@@ -329,6 +330,7 @@ public class APIAdminImpl implements APIAdmin {
         environment.setId(existingEnv.getId());
         encryptGatewayConfigurationValues(existingEnv, environment);
         Environment updatedEnvironment = apiMgtDAO.updateEnvironment(environment);
+        FederatedApiKeyConnectorFactory.evictApiKeyConnector(tenantDomain, environment.getUuid());
         // If the update is successful without throwing an exception
         // Perform a separate task of updating gateway label names
         updateGatewayLabelNameForGatewayPolicies(existingEnv.getDisplayName(), updatedEnvironment.getDisplayName(),

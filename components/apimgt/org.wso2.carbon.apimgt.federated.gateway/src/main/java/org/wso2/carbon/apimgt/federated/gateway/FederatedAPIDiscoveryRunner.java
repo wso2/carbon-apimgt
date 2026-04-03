@@ -557,9 +557,14 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     securitySchemes.add(scheme.trim());
                 }
             }
-            apiDto.setSecurityScheme(securitySchemes);
+            apiDto.setSecurityScheme(securitySchemes.isEmpty() ? null : securitySchemes);
             if (log.isDebugEnabled()) {
                 log.debug("Applied discovered security schemes to API DTO: " + securitySchemes);
+            }
+        } else {
+            apiDto.setSecurityScheme(null);
+            if (log.isDebugEnabled()) {
+                log.debug("Cleared security scheme on API DTO because discovered API does not define one");
             }
         }
 

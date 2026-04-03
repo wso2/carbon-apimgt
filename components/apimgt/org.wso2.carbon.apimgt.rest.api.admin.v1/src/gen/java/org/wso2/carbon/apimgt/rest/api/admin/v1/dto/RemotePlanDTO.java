@@ -21,8 +21,8 @@ import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
-
 @ApiModel(description = "A plan available on an external gateway (e.g., an AWS Usage Plan).")
+
 
 public class RemotePlanDTO   {
   

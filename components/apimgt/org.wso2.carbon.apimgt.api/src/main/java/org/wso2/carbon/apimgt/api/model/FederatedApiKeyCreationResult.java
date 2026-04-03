@@ -24,17 +24,15 @@ import java.util.Map;
 
 /**
  * Result of a federated credential creation operation.
- * Captures the remote credential identifier and its type to support different gateway models.
+ * Captures the remote credential identifier and optional gateway-specific metadata.
  */
 public class FederatedApiKeyCreationResult {
 
     private final String remoteCredentialId;
-    private final String credentialType;
     private final Map<String, Object> metadata;
 
     private FederatedApiKeyCreationResult(Builder builder) {
         this.remoteCredentialId = builder.remoteCredentialId;
-        this.credentialType = builder.credentialType;
         this.metadata = builder.metadata != null ? 
             Collections.unmodifiableMap(new HashMap<>(builder.metadata)) : Collections.emptyMap();
     }
@@ -53,16 +51,6 @@ public class FederatedApiKeyCreationResult {
     }
 
     /**
-     * Gets the credential type for semantic clarity.
-     * Examples: "AWS_API_KEY", "KONG_CONSUMER", "AZURE_SUBSCRIPTION"
-     *
-     * @return credential type identifier
-     */
-    public String getCredentialType() {
-        return credentialType;
-    }
-
-    /**
      * Gets optional metadata about the created credential.
      * May include gateway-specific details like key value, consumer name, etc.
      *
@@ -78,16 +66,10 @@ public class FederatedApiKeyCreationResult {
 
     public static class Builder {
         private String remoteCredentialId;
-        private String credentialType;
         private Map<String, Object> metadata;
 
         public Builder remoteCredentialId(String remoteCredentialId) {
             this.remoteCredentialId = remoteCredentialId;
-            return this;
-        }
-
-        public Builder credentialType(String credentialType) {
-            this.credentialType = credentialType;
             return this;
         }
 

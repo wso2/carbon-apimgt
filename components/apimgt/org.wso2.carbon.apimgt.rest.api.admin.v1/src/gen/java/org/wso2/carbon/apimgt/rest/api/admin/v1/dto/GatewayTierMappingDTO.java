@@ -21,8 +21,8 @@ import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
-
 @ApiModel(description = "Maps a local WSO2 subscription tier to a plan on the remote external gateway.")
+
 
 public class GatewayTierMappingDTO   {
   

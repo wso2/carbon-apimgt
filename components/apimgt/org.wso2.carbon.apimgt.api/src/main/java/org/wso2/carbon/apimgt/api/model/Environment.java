@@ -58,6 +58,8 @@ public class Environment implements Serializable {
     private String provider;
     private String gatewayType;
     private Map<String, String> additionalProperties = new HashMap<>();
+    // This is for external federated gateway environments to hold mappings
+    // from subcription plans -> remote similar entity.
     private List<GatewayTierMapping> tierMappings = new ArrayList<>();
 
     private String[] visibilityRoles;
