@@ -546,8 +546,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateResourceThrottlingTiers(api, tenantDomain);
-        validateKeyManagers(api);
-        validateKeyManagerScopes(api, tenantDomain);
+        String normalizedGatewayVendor = APIUtil.setGatewayVendorBeforeInsertion(
+                api.getGatewayVendor(), api.getGatewayType());
+        boolean shouldValidateKeyManagers = !APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(
+                APIUtil.handleGatewayVendorRetrieval(normalizedGatewayVendor));
+        // Skip key manager and scope validations for external gateway vendors.
+        // Federated APIs imported via FederatedAPIDiscovery come with keyManagers null,
+        // causing import failures. External gateway vendors manage their own key managers and scopes.
+        if (shouldValidateKeyManagers) {
+            validateKeyManagers(api);
+            validateKeyManagerScopes(api, tenantDomain);
+        }
         // Validate and process API level and operation level policies
         validateAndProcessAPIPolicyParameters(api, null, tenantDomain);
         String apiName = api.getId().getApiName();
@@ -579,8 +588,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // For Choreo-Connect gateway, gateway vendor type in the DB will be "wso2/choreo-connect".
         // This value is determined considering the gateway type comes with the request.
-        api.setGatewayVendor(APIUtil.setGatewayVendorBeforeInsertion(
-                api.getGatewayVendor(), api.getGatewayType()));
+        api.setGatewayVendor(normalizedGatewayVendor);
         try {
             PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(api.getOrganization()),
                     APIMapper.INSTANCE.toPublisherApi(api));
@@ -1033,13 +1041,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // For Platform Gateway APIs, derive apiSecurity from hub policies
         deriveApiSecurityFromHubPolicies(api);
         validateAndSetAPISecurity(api);
-        validateKeyManagers(api, existingAPI.getKeyManagers());
+        String effectiveGatewayVendor = StringUtils.isNotBlank(api.getGatewayVendor()) ? api.getGatewayVendor()
+                : existingAPI.getGatewayVendor();
+        boolean shouldValidateKeyManagers = !APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(effectiveGatewayVendor);
+        // Skip key manager and scope validations for external gateway vendors.
+        // Federated APIs imported via FederatedAPIDiscovery come with keyManagers null,
+        // causing update failures. External gateway vendors manage their own key managers and scopes.
+        if (shouldValidateKeyManagers) {
+            validateKeyManagers(api, existingAPI.getKeyManagers());
+        }
 
         if (api.getAdditionalProperties() != null) {
             checkIfAdditionalPropertyValuesAreNullOrEmpty(new ApiTypeWrapper(api));
         }
 
-        validateKeyManagerScopes(api, tenantDomain);
+        if (shouldValidateKeyManagers) {
+            validateKeyManagerScopes(api, tenantDomain);
+        }
         // Validate and process API level and operation level policies
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
