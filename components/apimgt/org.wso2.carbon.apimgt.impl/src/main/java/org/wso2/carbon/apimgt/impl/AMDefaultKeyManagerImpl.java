@@ -995,16 +995,16 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (configuration.getParameter(APIConstants.KeyManager.TOKEN_ENDPOINT) != null) {
             tokenEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.TOKEN_ENDPOINT);
         } else {
-            tokenEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(
-                    "/oauth2/token");
+            tokenEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                    .concat(getTenantAwareContext().trim()).concat("/oauth2/token");
         }
         addKeyManagerConfigsAsSystemProperties(tokenEndpoint);
         String revokeEndpoint;
         if (configuration.getParameter(APIConstants.KeyManager.REVOKE_ENDPOINT) != null) {
             revokeEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.REVOKE_ENDPOINT);
         } else {
-            revokeEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(
-                    "/oauth2/revoke");
+            revokeEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
+                    .concat(getTenantAwareContext().trim()).concat("/oauth2/revoke");
         }
         String scopeEndpoint;
         if (configuration.getParameter(APIConstants.KeyManager.SCOPE_MANAGEMENT_ENDPOINT) != null) {
@@ -1075,14 +1075,17 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         introspectionClient = introspectionFeignBuilder.target(IntrospectionClient.class, introspectionEndpoint);
         scopeClient = scopeFeignBuilder.target(ScopeClient.class, scopeEndpoint);
         userClient = userFeignBuilder.target(UserClient.class, userInfoEndpoint);
-        authClient = Feign.builder()
+        Feign.Builder authFeignBuilder = Feign.builder()
                 .client(new ApacheFeignHttpClient(APIUtil.getHttpClient(tokenEndpoint)))
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .logger(new Slf4jLogger())
                 .errorDecoder(new KMClientErrorDecoder())
-                .encoder(new FormEncoder())
-                .target(AuthClient.class, tokenEndpoint);
+                .encoder(new FormEncoder());
+        if (configuration.getParameter(APIConstants.KEY_MANAGER_TENANT_DOMAIN) != null) {
+            authFeignBuilder.requestInterceptor(new TenantHeaderInterceptor(tenantDomain));
+        }
+        authClient = authFeignBuilder.target(AuthClient.class, tokenEndpoint);
 
         if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(configuration.getType())) {
             String revokeOneTimeTokenEndpoint;
