@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.tracing.telemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.propagation.ContextPropagators;
-import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.extension.trace.propagation.JaegerPropagator;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -56,17 +56,17 @@ public class JaegerTelemetry implements APIMOpenTelemetry {
                 Integer.parseInt(configuration.getFirstProperty(TelemetryConstants.JAEGER_CONFIG_PORT))
                 : TelemetryConstants.JAEGER_DEFAULT_PORT;
 
-        JaegerGrpcSpanExporter jaegerExporter = JaegerGrpcSpanExporter.builder()
-                .setEndpoint("http://" + hostname + ":" + port)
-                .setTimeout(30, TimeUnit.SECONDS)
-                .build();
+        OtlpGrpcSpanExporter spanExporter = OtlpGrpcSpanExporter.builder()
+            .setEndpoint("http://" + hostname + ":" + port)
+            .setTimeout(30, TimeUnit.SECONDS)
+            .build();
 
         if (log.isDebugEnabled()) {
-            log.debug("Jaeger exporter: " + jaegerExporter + " is configured at http://" + hostname + ":" + port);
+            log.debug("Jaeger OTLP gRPC exporter: " + spanExporter + " is configured at http://" + hostname + ":" + port);
         }
 
         sdkTracerProvider = SdkTracerProvider.builder()
-                .addSpanProcessor(BatchSpanProcessor.builder(jaegerExporter).build())
+            .addSpanProcessor(BatchSpanProcessor.builder(spanExporter).build())
                 .setResource(TelemetryUtil.getTracerProviderResource(serviceName))
                 .build();
 
