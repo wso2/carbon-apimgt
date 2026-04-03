@@ -13,7 +13,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayInstanceListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RemotePlanListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RemotePlanLookupRequestDTO;
 
 import java.util.List;
