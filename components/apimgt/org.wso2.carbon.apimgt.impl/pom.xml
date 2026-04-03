@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.33.7-SNAPSHOT</version>
+        <version>9.33.90-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -353,7 +353,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${fasterxml.jackson.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -659,7 +658,8 @@
                             osgi.service;objectClass=org.wso2.carbon.apimgt.impl.APIManagerConfigurationService,
                             osgi.service;objectClass=org.wso2.carbon.apimgt.impl.jwt.JWTValidationService,
                             osgi.service;objectClass=org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService,
-                            osgi.service;objectClass=org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService,
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService
                         </Provide-Capability>
                     </instructions>
                 </configuration>

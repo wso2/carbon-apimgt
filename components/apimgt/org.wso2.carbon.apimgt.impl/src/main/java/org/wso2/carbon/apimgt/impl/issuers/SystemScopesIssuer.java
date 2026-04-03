@@ -587,20 +587,40 @@ public class SystemScopesIssuer implements ScopeValidator {
         String jwtIssuer = claimsSet != null ? claimsSet.getIssuer() : null;
         String tenantDomain = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getTenantDomain();
 
+        if (StringUtils.isBlank(jwtIssuer)) {
+            log.error("Couldn't resolve JWT issuer from the token claims.");
+            return;
+        }
+
         try {
-            identityProvider = IdentityProviderManager.getInstance().getIdPByName(jwtIssuer, tenantDomain);
-            if (identityProvider != null) {
-                if (StringUtils.equalsIgnoreCase(identityProvider.getIdentityProviderName(), "default")) {
-                    identityProvider = this.getResidentIDPForIssuer(tenantDomain, jwtIssuer);
-                    if (identityProvider == null) {
-                        log.error("No Registered IDP found for the JWT with issuer name : " + jwtIssuer);
-                    }
+            if (log.isDebugEnabled()) {
+                log.debug("Attempting to retrieve IDP using metadata property: "
+                        + IdentityApplicationConstants.IDP_ISSUER_NAME + " with value: " + jwtIssuer);
+            }
+            identityProvider = IdentityProviderManager.getInstance()
+                    .getIdPByMetadataProperty(IdentityApplicationConstants.IDP_ISSUER_NAME, jwtIssuer, tenantDomain,
+                            false);
+
+            if (identityProvider == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("IDP not found when retrieving for IDP using property: "
+                            + IdentityApplicationConstants.IDP_ISSUER_NAME + " with value: " + jwtIssuer
+                            + ". Attempting to retrieve IDP using IDP Name as issuer.");
                 }
-            } else {
-                log.error("No Registered IDP found for the JWT with issuer name : " + jwtIssuer);
+                identityProvider = IdentityProviderManager.getInstance().getIdPByName(jwtIssuer, tenantDomain);
+            }
+
+            if (identityProvider != null
+                    && StringUtils.equalsIgnoreCase(identityProvider.getIdentityProviderName(), "default")) {
+                identityProvider = this.getResidentIDPForIssuer(tenantDomain, jwtIssuer);
             }
         } catch (IdentityProviderManagementException | IdentityOAuth2Exception e) {
             log.error("Couldn't initiate identity provider instance", e);
+        }
+
+        if (identityProvider == null) {
+            log.error("No registered IDP found for the JWT issuer: " + jwtIssuer);
+            return;
         }
 
         try {
@@ -628,7 +648,7 @@ public class SystemScopesIssuer implements ScopeValidator {
         if (roleClaim != null) {
             userAttributes
                     .put(ClaimMapping.build(roleClaim, roleClaim, null, false),
-                            updatedRoles.toString().replace(" ", ""));
+                            StringUtils.join(updatedRoles, FrameworkUtils.getMultiAttributeSeparator()));
             tokReqMsgCtx.addProperty(APIConstants.SystemScopeConstants.ROLE_CLAIM, roleClaim);
         }
         user.setUserAttributes(userAttributes);
@@ -885,4 +905,3 @@ public class SystemScopesIssuer implements ScopeValidator {
         return IdentityTenantUtil.getTenantIdOfUser(username);
     }
 }
-

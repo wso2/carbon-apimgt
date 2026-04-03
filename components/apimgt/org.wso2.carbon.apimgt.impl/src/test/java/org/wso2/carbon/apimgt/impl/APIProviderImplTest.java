@@ -37,6 +37,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -85,6 +86,7 @@ import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
@@ -154,7 +156,7 @@ import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_
         APIProviderImpl.class, APIManagerFactory.class, RegistryUtils.class,
         Caching.class, PaginationContext.class, MultitenantUtils.class, AbstractAPIManager.class, OASParserUtil.class,
         KeyManagerHolder.class, CertificateManagerImpl.class , PublisherAPI.class, Organization.class,
-        APIPersistence.class, GatewayArtifactsMgtDAO.class, RegistryPersistenceUtil.class})
+        APIPersistence.class, GatewayArtifactsMgtDAO.class, RegistryPersistenceUtil.class, MCPUtils.class})
 
 public class APIProviderImplTest {
 
@@ -1263,19 +1265,48 @@ public class APIProviderImplTest {
     public void testRestoreAPIRevision() throws APIManagementException, APIPersistenceException {
         ImportExportAPI importExportAPI = Mockito.mock(ImportExportAPI.class);
         ArtifactSaver artifactSaver = Mockito.mock(ArtifactSaver.class);
-        APIProviderImplWrapper apiProvider =
-                new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, importExportAPI, gatewayArtifactsMgtDAO,
-                        artifactSaver);
         APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
                 "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        APIIdentifier revisionedApiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+                "b55e0fc3-9829-4432-b99e-02056dc91838");
         API api = new API(apiId);
         api.setContext("/test");
         api.setStatus(APIConstants.CREATED);
         String apiPath = "/apimgt/applicationdata/provider/admin/PizzaShackAPI/1.0.0/api";
 
+        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
+
+        URITemplate uriTemplate1 = new URITemplate();
+        uriTemplate1.setHTTPVerb("POST");
+        uriTemplate1.setAuthType("Application");
+        uriTemplate1.setUriTemplate("/add");
+        uriTemplate1.setThrottlingTier("Gold");
+        uriTemplates.add(uriTemplate1);
+
+        List<APIResource> productResources = new ArrayList<>();
+
+        API revisionedApi = new API(revisionedApiId);
+        revisionedApi.setRevisionedApiId("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        revisionedApi.setRevision(true);
+        revisionedApi.setUriTemplates(uriTemplates);
+
         APIRevision apiRevision = new APIRevision();
         apiRevision.setApiUUID("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
         apiRevision.setDescription("test description revision 1");
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO,
+                importExportAPI, gatewayArtifactsMgtDAO, artifactSaver) {
+            @Override
+            public API getAPIbyUUID(String uuid, String org) {
+                return revisionedApi;
+            }
+
+            @Override
+            public List<APIResource> getUsedProductResources(String uuid) {
+                return productResources;
+            }
+        };
+
         Mockito.when(apimgtDAO.getRevisionCountByAPI(Mockito.anyString())).thenReturn(0);
         Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
         Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
@@ -1290,6 +1321,10 @@ public class APIProviderImplTest {
             Assert.fail(e.getMessage());
         }
         Mockito.when(apimgtDAO.getRevisionByRevisionUUID(Mockito.anyString())).thenReturn(apiRevision);
+        Mockito.when(apimgtDAO.getAPIOperationMappingsReferencedByAPIID(Mockito.anyInt())).thenReturn(new HashMap<>());
+        PowerMockito.mockStatic(MCPUtils.class);
+        PowerMockito.doNothing().when(MCPUtils.class);
+        MCPUtils.validateMCPResources(Mockito.anyString(), Mockito.anyString(), Mockito.anySet());
         PowerMockito.doNothing().when(apiPersistenceInstance).restoreAPIRevision(any(Organization.class),
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyInt());
         try {

@@ -268,6 +268,70 @@ public class JWTValidatorImplTest {
 
     }
 
+    /**
+     * Test to verify that when CBAT is enabled and the token contains a cnf claim,
+     * but the client does not provide a certificate, the validation should fail.
+     * This test covers the critical security fix where missing client certificate
+     * with a certificate-bound token should result in authentication failure.
+     */
+    @Test
+    @PrepareForTest({CertificateMgtUtils.class, JWTUtil.class, APIManagerConfiguration.class,
+            ServiceReferenceHolder.class,
+            APIManagerConfigurationService.class, APIUtil.class, X509CertUtils.class})
+    public void testValidateTokenFailsWhenCnfClaimPresentButNoCertificateProvided() {
+
+        TokenIssuerDto tokenIssuerDto = new TokenIssuerDto("https://localhost:9444/services");
+        Mockito.when(signedJWT.getHeader()).thenReturn(jwsHeader);
+        PowerMockito.mockStatic(JWTUtil.class);
+        try {
+            PowerMockito.when(JWTUtil.verifyTokenSignature(signedJWT, KeyId)).thenReturn(true);
+        } catch (APIManagementException e) {
+            log.info("Exception while signature verification. " + e);
+            Assert.fail();
+        }
+
+        // Create mock objects for API Manager Configuration
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(APIManagerConfiguration.class);
+        PowerMockito.mockStatic(APIManagerConfigurationService.class);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.mockStatic(CertificateMgtUtils.class);
+        PowerMockito.mockStatic(X509CertUtils.class);
+        APIManagerConfiguration apiManagerConfiguration = PowerMockito.mock(APIManagerConfiguration.class);
+        ServiceReferenceHolder serviceReferenceHolder = PowerMockito.mock(ServiceReferenceHolder.class);
+        APIManagerConfigurationService apiManagerConfigurationService = PowerMockito.mock(APIManagerConfigurationService.class);
+        OAuthServerConfiguration oAuthServerConfiguration = Mockito.mock(OAuthServerConfiguration.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(oAuthServerConfiguration.getTimeStampSkewInSeconds()).thenReturn(300L);
+        Mockito.when(serviceReferenceHolder.getOauthServerConfiguration()).thenReturn(oAuthServerConfiguration);
+
+        // Enable certificate bound access token feature
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN))
+                .thenReturn("true");
+
+        JWTValidatorImpl jwtValidator = new JWTValidatorImpl();
+        JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
+        tokenIssuerDto.setJwksConfigurationDTO(jwksConfigurationDTO);
+        jwksConfigurationDTO.setEnabled(false);
+        jwtValidator.loadTokenIssuerConfiguration(tokenIssuerDto);
+
+        // Critical security test: Token has cnf claim (CERT_HASH is set in setup())
+        // but client does NOT provide a certificate
+        signedJWTInfo.setClientCertificate(null);
+
+        try {
+            JWTValidationInfo validatedInfo = jwtValidator.validateToken(signedJWTInfo);
+            assertFalse(validatedInfo.isValid(),
+                    "Security vulnerability: JWT validation succeeded when token has cnf claim but " +
+                            "client did not provide a certificate. This should fail to prevent " +
+                            "certificate-bound access token bypass attacks.");
+        } catch (APIManagementException e) {
+            Assert.fail("Unexpected exception during validation: " + e.getMessage());
+        }
+    }
+
     public Certificate getClientCertificate(org.apache.axis2.context.MessageContext axis2MessageContext)
             throws APIManagementException {
 

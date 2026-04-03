@@ -38,6 +38,7 @@ public final class RestApiConstants {
     public static final String APPLICATION_XML = "application/xml";
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
     public static final String HEADER_X_WSO2_TENANT = "x-wso2-tenant";
+    public static final String QUERY_PARAM_X_WSO2_TENANT = "X-WSO2-Tenant-Q";
     public static final String ORGANIZATION = "organization";
     public static final String ORGANIZATION_INFO = "organization_info";
     public static final String SUB_ORGANIZATION = "sub_organization";
@@ -47,6 +48,8 @@ public final class RestApiConstants {
     public static final String OPAQUE_AUTHENTICATION = "oauth2";
     public static final String BASIC_AUTHENTICATION = "basic_auth";
     public static final String JWT_AUTHENTICATION = "jwt";
+    /** Set when request is authenticated via platform gateway api-key (Internal Data Service only). */
+    public static final String PLATFORM_GATEWAY_API_KEY = "platform_gateway_apikey";
     public static final String JWT_TOKEN = "JWT_TOKEN";
     public static final String DOT = ".";
     public static final long TIMESTAMP_SKEW_INSECONDS = 0;
@@ -124,6 +127,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
     public static final String RESOURCE_PATH_THROTTLING = "/throttling";
     public static final String RESOURCE_PATH_ENVIRONMENT = "/environments";
+    public static final String RESOURCE_PATH_PLATFORM_GATEWAYS = "/gateways";
     public static final String RESOURCE_PATH_SHARED_SCOPES =  "/scopes";
     public static final String RESOURCE_PATH_REVISIONS = "/revisions";
     public static final String RESOURCE_PATH_SHARED_SCOPES_SCOPE_ID =
@@ -368,6 +372,9 @@ public final class RestApiConstants {
             Arrays.asList("image/jpeg", "image/png", "image/gif", "image/svg+xml"));
 
     public static final String SVG_MEDIA_TYPE = "image/svg+xml";
+    public static final String JPEG_MEDIA_TYPE = "image/jpeg";
+    public static final String PNG_MEDIA_TYPE = "image/png";
+    public static final String GIF_MEDIA_TYPE = "image/gif";
 
     public static final int TAG_LIMIT_DEFAULT = 1000;
     public static final int TAG_OFFSET_DEFAULT = 0;

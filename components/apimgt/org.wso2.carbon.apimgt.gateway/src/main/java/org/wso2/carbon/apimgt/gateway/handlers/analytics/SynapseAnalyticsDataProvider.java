@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.mcp.request.Params;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
@@ -81,6 +82,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS;
 import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.API_OBJECT;
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.API_ELECTED_RESOURCE;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.MASK_VALUE;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_HEADERS;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_HEADER_MASK;
@@ -88,6 +90,8 @@ import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.RESPON
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.RESPONSE_HEADER_MASK;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.SEND_HEADER;
 import static org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.UNKNOWN_VALUE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.AI.MCP;
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_TYPE;
 
 public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
@@ -156,6 +160,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             return FaultCategory.THROTTLED;
         } else if (isTargetFaultRequest()) {
             return FaultCategory.TARGET_CONNECTIVITY;
+        } else if (isGuardrailFaultRequest()) {
+            return FaultCategory.GUARDRAIL_FAULT;
         } else {
             return FaultCategory.OTHER;
         }
@@ -240,6 +246,14 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
         if (authContext == null) {
+            String resourcePath = (String) messageContext.getProperty(Constants.RESOURCE_PATH);
+            if (resourcePath == null) {
+                resourcePath = (String) messageContext.getProperty(API_ELECTED_RESOURCE);
+            }
+            if (resourcePath != null && resourcePath.startsWith(APIMgtGatewayConstants.MCP_RESOURCE)) {
+                // Return a default application for MCP requests
+                return getAnonymousApp();
+            }
             throw new DataNotFoundException("Error occurred when getting Application information");
         }
         Application application = new Application();
@@ -247,6 +261,21 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         application.setApplicationName(authContext.getApplicationName());
         application.setApplicationOwner(authContext.getSubscriber());
         application.setKeyType(authContext.getKeyType());
+        return application;
+    }
+
+    /**
+     * Returns an anonymous application object with default values. This is used for MCP requests or other scenarios
+     * where authentication context is not available.
+     *
+     * @return Application object with anonymous/default values
+     */
+    public static Application getAnonymousApp() {
+        Application application = new Application();
+        application.setApplicationId(Constants.ANONYMOUS_VALUE);
+        application.setApplicationName(Constants.ANONYMOUS_VALUE);
+        application.setKeyType(Constants.ANONYMOUS_VALUE);
+        application.setApplicationOwner(Constants.ANONYMOUS_VALUE);
         return application;
     }
 
@@ -431,10 +460,17 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         custom.put(Constants.API_USER_NAME_KEY, getUserName());
         custom.put(Constants.API_CONTEXT_KEY, getApiContext());
         custom.put(Constants.RESPONSE_SIZE, getResponseSize());
+        custom.put(Constants.REQUEST_SIZE, getRequestSize());
         custom.put(Constants.RESPONSE_CONTENT_TYPE, getResponseContentType());
         custom.put(Constants.CERTIFICATE_COMMON_NAME, getCommonName());
 
-        // Headers (optional)
+        // Guardrail hit information
+        boolean guardrailHit = isGuardrailHit();
+        custom.put(Constants.IS_GUARDRAIL_HIT, guardrailHit);
+        if (guardrailHit) {
+            custom.put(Constants.GUARDRAIL_NAME, getGuardrailName());
+        }
+
         // Headers (optional)
         if (shouldSendHeaders()) {
             log.debug("Including headers in analytics event");
@@ -487,6 +523,9 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             long startTime = (startTimeObj instanceof Long) ? (Long) startTimeObj : 0L;
             int startHourUtc = getHourByUTC(startTime);
             getAiAnalyticsData((Map) aiMeta, startHourUtc, custom);
+        }
+        if (MCP.equals(messageContext.getProperty(API_TYPE))) {
+            getMCPAnalyticsData(custom);
         }
 
         return custom;
@@ -549,6 +588,99 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         customProperties.put(Constants.AI_TOKEN_USAGE, aiTokenUsage);
     }
 
+    private void getMCPAnalyticsData(Map<String, Object> customProperties) {
+        if (log.isDebugEnabled()) {
+            log.debug("Extracting MCP analytics data from message context");
+        }
+        Map<String, Object> mcpAnalytics = new HashMap<>();
+
+        // Extract Session ID, JsonRpcMethod, Capability, Client Info, Server Info, and Error Info from message context
+        String sessionId = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_SESSION_ID_KEY);
+        if (sessionId != null) {
+            mcpAnalytics.put(APIMgtGatewayConstants.MCP_SESSION_ID, sessionId);
+        }
+
+        String method = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
+        if (method != null) {
+            mcpAnalytics.put(Constants.MCP_METHOD, method);
+            if (APIMgtGatewayConstants.MCP_TOOL_CALL.equals(method)) {
+                mcpAnalytics.put(APIMgtGatewayConstants.MCP_CAPABILITY, APIMgtGatewayConstants.TOOL);
+            }
+        }
+
+        String capabilityName = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_CAPABILITY_NAME_KEY);
+        if (capabilityName != null) {
+            mcpAnalytics.put(APIMgtGatewayConstants.MCP_CAPABILITY_NAME, capabilityName);
+        }
+
+        Params.ClientInfo clientInfoObj = (Params.ClientInfo) messageContext.getProperty(
+                APIMgtGatewayConstants.MCP_CLIENT_INFO_KEY);
+        if (clientInfoObj != null) {
+            Map<String, Object> clientInfo = new HashMap<>();
+            clientInfo.put(APIMgtGatewayConstants.MCP_REQUESTED_PROTOCOL_VERSION,
+                    messageContext.getProperty(APIMgtGatewayConstants.MCP_REQUESTED_PROTOCOL_VERSION_KEY));
+            clientInfo.put(APIMgtGatewayConstants.MCP_CLIENT_NAME, clientInfoObj.getName());
+            clientInfo.put(APIMgtGatewayConstants.MCP_CLIENT_VERSION, clientInfoObj.getVersion());
+            mcpAnalytics.put(APIMgtGatewayConstants.MCP_CLIENT_INFO, clientInfo);
+        }
+
+        String protocolVersion = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_PROTOCOL_VERSION_KEY);
+        String serverName = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_SERVER_NAME_KEY);
+        String serverVersion = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_SERVER_VERSION_KEY);
+        if (protocolVersion != null || serverName != null || serverVersion != null) {
+            Map<String, Object> serverInfo = new HashMap<>();
+            serverInfo.put(APIMgtGatewayConstants.MCP_PROTOCOL_VERSION, protocolVersion);
+            serverInfo.put(APIMgtGatewayConstants.MCP_SERVER_NAME, serverName);
+            serverInfo.put(APIMgtGatewayConstants.MCP_SERVER_VERSION, serverVersion);
+            mcpAnalytics.put(APIMgtGatewayConstants.MCP_SERVER_INFO, serverInfo);
+        }
+
+        boolean isError = messageContext.getPropertyKeySet().contains(APIMgtGatewayConstants.MCP_IS_ERROR_KEY)
+                && (Boolean) messageContext.getProperty(APIMgtGatewayConstants.MCP_IS_ERROR_KEY);
+        mcpAnalytics.put(APIMgtGatewayConstants.MCP_IS_ERROR, isError);
+        if (isError) {
+            mcpAnalytics.put(APIMgtGatewayConstants.MCP_ERROR_CODE,
+                    messageContext.getProperty(APIMgtGatewayConstants.MCP_ERROR_CODE_KEY));
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("MCP analytics data extracted: " + gson.toJson(mcpAnalytics));
+        }
+        customProperties.put(APIMgtGatewayConstants.MCP_ANALYTICS, mcpAnalytics);
+    }
+
+    private String getGuardrailName() {
+        Object errorObj = messageContext.getProperty(SynapseConstants.ERROR_MESSAGE);
+        if (errorObj != null) {
+            String errorMessage = errorObj.toString();
+            String searchKey = "\"interveningGuardrail\":\"";
+            if (errorMessage.contains(searchKey)) {
+                try {
+                    // Extract the value after "interveningGuardrail":"
+                    int startIndex = errorMessage.indexOf(searchKey) +
+                            searchKey.length();
+                    int endIndex = errorMessage.indexOf("\"", startIndex);
+                    if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
+                        return errorMessage.substring(startIndex, endIndex).trim();
+                    }
+                } catch (Exception e) {
+                    log.warn("Error extracting guardrail name from error message", e);
+                }
+            }
+        }
+        return null;
+    }
+
+    private boolean isGuardrailHit() {
+        if (!messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE)) {
+            return false;
+        }
+
+        int errorCode = getErrorCode();
+        return errorCode >= Constants.ERROR_CODE_RANGES.GUARDRAIL_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.GUARDRAIL_FAILURE__END;
+    }
+
     private String getApiContext() {
 
         if (messageContext.getPropertyKeySet().contains(JWTConstants.REST_API_CONTEXT)) {
@@ -558,6 +690,14 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     private boolean isSuccessRequest() {
+
+        String resourcePath = (String) messageContext.getProperty(Constants.RESOURCE_PATH);
+        if (resourcePath == null) {
+            resourcePath = (String) messageContext.getProperty(API_ELECTED_RESOURCE);
+        }
+        if (resourcePath != null && resourcePath.startsWith(APIMgtGatewayConstants.MCP_RESOURCE)) {
+            return !messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE);
+        }
 
         return !messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE)
                 && APISecurityUtils.getAuthenticationContext(messageContext) != null;
@@ -589,6 +729,12 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         return (errorCode >= Constants.ERROR_CODE_RANGES.TARGET_FAILURE_START
                 && errorCode < Constants.ERROR_CODE_RANGES.TARGET_FAILURE__END)
                 || errorCode == Constants.ENDPOINT_SUSPENDED_ERROR_CODE;
+    }
+
+    private boolean isGuardrailFaultRequest() {
+        int errorCode = getErrorCode();
+        return errorCode >= Constants.ERROR_CODE_RANGES.GUARDRAIL_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.GUARDRAIL_FAILURE__END;
     }
 
     private int getErrorCode() {
@@ -699,6 +845,39 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             return (String) messageContext.getProperty(APIConstants.CERTIFICATE_COMMON_NAME);
         }
         return Constants.NOT_APPLICABLE_VALUE;
+    }
+
+    public long getRequestSize() {
+
+        if (APIConstants.AI.MCP.equals(messageContext.getProperty(APIConstants.API_TYPE))) {
+            Object mcpRequestSize = messageContext.getProperty(APIMgtGatewayConstants.MCP_REQUEST_SIZE_KEY);
+            if (mcpRequestSize != null) {
+                try {
+                    return Long.parseLong(mcpRequestSize.toString());
+                } catch (NumberFormatException e) {
+                    log.warn("Invalid MCP request size value", e);
+                }
+            }
+        }
+
+        org.apache.axis2.context.MessageContext axis2MC =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+
+        Map headers = (Map) axis2MC.getProperty(TRANSPORT_HEADERS);
+
+        if (headers != null) {
+            Object contentLength = headers.get(HttpHeaders.CONTENT_LENGTH);
+            if (contentLength != null) {
+                try {
+                    return Long.parseLong(contentLength.toString());
+                } catch (NumberFormatException e) {
+                    log.warn("Invalid Content-Length header value", e);
+                }
+            }
+        }
+
+        // If chunked encoding or header missing, return -1 to indicate unknown
+        return -1L;
     }
 
     /**

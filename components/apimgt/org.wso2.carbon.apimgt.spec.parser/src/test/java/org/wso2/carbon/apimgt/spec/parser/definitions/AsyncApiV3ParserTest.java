@@ -56,8 +56,11 @@ public class AsyncApiV3ParserTest {
         assertNotNull("getURITemplates result should not be null", templates);
         assertFalse("Expect at least one URI template for the V3 sample", templates.isEmpty());
         // verify expected channel keys are present as URI templates
-        boolean foundLighting = templates.stream().anyMatch(t -> "lightingMeasured".equals(t.getUriTemplate()));
-        boolean foundTurnOn = templates.stream().anyMatch(t -> "lightTurnOn".equals(t.getUriTemplate()));
+        boolean foundLighting = templates.stream().anyMatch(
+                t -> "smartylighting.streetlights.1.0.event.{streetlightId}.lighting.measured".equals(
+                        t.getUriTemplate()));
+        boolean foundTurnOn = templates.stream().anyMatch(
+                t -> "smartylighting.streetlights.1.0.action.{streetlightId}.turn.on".equals(t.getUriTemplate()));
         assertTrue("lightingMeasured channel template should be present", foundLighting);
         assertTrue("lightTurnOn channel template should be present", foundTurnOn);
     }

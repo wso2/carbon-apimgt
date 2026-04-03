@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,6 +62,9 @@ import java.util.Collections;
 public class WorkflowUtils {
 
     private static final Log log = LogFactory.getLog(WorkflowUtils.class);
+    private static final String APPLICATION_ATTRIBUTES_PROPERTY = "applicationAttributes";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     public static void sendNotificationAfterWFComplete(WorkflowDTO workflowDTO, String wfType)
             throws APIManagementException {
 
@@ -262,10 +267,15 @@ public class WorkflowUtils {
     protected static void setWorkflowParameters(APIStateWorkflowDTO apiStateWorkFlowDTO) {
 
         String callBackURL = apiStateWorkFlowDTO.getCallbackUrl();
-        String message = "Approval request for API state change action " + apiStateWorkFlowDTO.getApiLCAction() + " " +
-                "from " + apiStateWorkFlowDTO.getApiCurrentState() + " state for the API "
-                + apiStateWorkFlowDTO.getApiName() + " : " + apiStateWorkFlowDTO.getApiVersion() + " by "
-                + apiStateWorkFlowDTO.getApiProvider() + "";
+
+        String message = String.format(
+                "Approval request for API state change action %s from %s state for the API %s : %s by %s",
+                apiStateWorkFlowDTO.getApiLCAction(),
+                apiStateWorkFlowDTO.getApiCurrentState(),
+                apiStateWorkFlowDTO.getApiName(),
+                apiStateWorkFlowDTO.getApiVersion(),
+                apiStateWorkFlowDTO.getApiProvider()
+        );
         apiStateWorkFlowDTO.setWorkflowDescription(message);
         apiStateWorkFlowDTO.setMetadata("CurrentState", apiStateWorkFlowDTO.getApiCurrentState());
         apiStateWorkFlowDTO.setMetadata("Action", apiStateWorkFlowDTO.getApiLCAction());
@@ -276,11 +286,15 @@ public class WorkflowUtils {
         apiStateWorkFlowDTO.setMetadata("Invoker", apiStateWorkFlowDTO.getInvoker());
         apiStateWorkFlowDTO.setMetadata("TenantId", String.valueOf(apiStateWorkFlowDTO.getTenantId()));
 
-        apiStateWorkFlowDTO.setProperties("action", apiStateWorkFlowDTO.getApiLCAction());
         apiStateWorkFlowDTO.setProperties("apiName", apiStateWorkFlowDTO.getApiName());
         apiStateWorkFlowDTO.setProperties("apiVersion", apiStateWorkFlowDTO.getApiVersion());
+        apiStateWorkFlowDTO.setProperties("apiContext", apiStateWorkFlowDTO.getApiContext());
         apiStateWorkFlowDTO.setProperties("apiProvider", apiStateWorkFlowDTO.getApiProvider());
+        apiStateWorkFlowDTO.setProperties("invoker", apiStateWorkFlowDTO.getInvoker());
         apiStateWorkFlowDTO.setProperties("currentState", apiStateWorkFlowDTO.getApiCurrentState());
+        apiStateWorkFlowDTO.setProperties("requestedState", apiStateWorkFlowDTO.getApiLCAction().toUpperCase());
+        apiStateWorkFlowDTO.setProperties("tenantDomain", String.valueOf(apiStateWorkFlowDTO.getTenantDomain()));
+
     }
 
     /**
@@ -369,20 +383,6 @@ public class WorkflowUtils {
     }
 
     /**
-     * Construct a record with the current and the expected value for a given application attribute.
-     * @param attributeName
-     * @param current
-     * @param expected
-     */
-    protected static Map<String, String> constructApplicationUpdateRecord(String attributeName, String current, String expected) {
-        return Map.of(
-                "attributeName", attributeName,
-                "current", current == null ? "" : current,
-                "expected", expected == null ? "" : expected
-        );
-    }
-
-    /**
      * Identify newly added, removed and changed custom properties of an application.
      * @param oldMap
      * @param newMap
@@ -397,12 +397,12 @@ public class WorkflowUtils {
                     log.debug("Added key: " + key + ", value: " + newMap.get(key));
                 }
 
-                attribChanges.add(constructApplicationUpdateRecord(key, "N/A", newMap.get(key)));
+                attribChanges.add(constructUpdateRecord(key, "N/A", newMap.get(key)));
             } else if (!Objects.equals(oldMap.get(key), newMap.get(key))) {
                 if (log.isDebugEnabled()) {
                     log.debug("Changed key: " + key + ", from: " + oldMap.get(key) + " to: " + newMap.get(key));
                 }
-                attribChanges.add(constructApplicationUpdateRecord(key, oldMap.get(key), newMap.get(key)));
+                attribChanges.add(constructUpdateRecord(key, oldMap.get(key), newMap.get(key)));
             }
         }
 
@@ -412,30 +412,11 @@ public class WorkflowUtils {
                     log.debug("Removed key: " + key + ", value was: " + oldMap.get(key));
                 }
 
-                attribChanges.add(constructApplicationUpdateRecord(key, oldMap.get(key), "Removed"));
+                attribChanges.add(constructUpdateRecord(key, oldMap.get(key), "Removed"));
             }
         }
 
         return attribChanges;
-    }
-
-    /**
-     * Compare the current and the new value for a given attribute (ie: Application Name) and add it to the list
-     * if there is a difference.
-     * @param diffs
-     * @param label
-     * @param oldValue
-     * @param newValue
-     */
-    protected static void compareAndAddToApplicationUpdateDiffs (
-            List<Map<String, String>> diffs,
-            String label,
-            String oldValue,
-            String newValue
-    ) {
-        if (!Objects.equals(oldValue, newValue)) {
-            diffs.add(constructApplicationUpdateRecord(label, oldValue, newValue));
-        }
     }
 
     /**
@@ -446,5 +427,82 @@ public class WorkflowUtils {
         return APIConstants.DEFAULT_APP_SHARING_KEYWORD.equals(org)
                 ? APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_DISABLED
                 : APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_ENABLED;
+    }
+
+    /**
+     * Constructs a diff record representing a change in a specific attribute.
+     *
+     * @param attributeName The name of the attribute being updated
+     * @param current       The existing value of the attribute
+     * @param expected      The updated value of the attribute
+     * @return A map representing the attribute update record
+     */
+    protected static Map<String, String> constructUpdateRecord(String attributeName, String current, String expected) {
+        return Map.of(
+                "attributeName", attributeName,
+                "current", current == null ? "" : current,
+                "expected", expected == null ? "" : expected
+        );
+    }
+
+    /**
+     * Compare the current and the new value for a given attribute (ie: Application Name, Subscription Tier) and add it to the list
+     * if there is a difference.
+     *
+     * @param diffs    The list collecting detected attribute differences
+     * @param label    The display label or attribute name being compared
+     * @param oldValue The current value of the attribute
+     * @param newValue The proposed updated value of the attribute
+     */
+    protected static void compareAndAddToUpdateDiffs(
+            List<Map<String, String>> diffs,
+            String label,
+            String oldValue,
+            String newValue
+    ) {
+        if (!Objects.equals(oldValue, newValue)) {
+            diffs.add(constructUpdateRecord(label, oldValue, newValue));
+        }
+    }
+
+    /**
+     * Populates application attributes into the given {@link WorkflowDTO} if application attribute
+     * visibility is enabled and the application contains custom attributes.
+     * <p>
+     * The application attributes are serialized into a JSON string and stored as a workflow property
+     * using the {@code APPLICATION_ATTRIBUTES_PROPERTY} key. These properties can later be used
+     * during workflow execution or approval processes.
+     * </p>
+     * <p>
+     * Note: If the application does not contain any attributes or visibility is disabled,
+     * this method will not modify the provided workflow DTO.
+     * </p>
+     *
+     * @param workflowDTO The workflow DTO where the serialized application attributes will be stored
+     * @param application The application containing custom attributes
+     * @param applicationAttributesVisibility Indicates whether application attributes should be included in the workflow properties
+     * @throws WorkflowException If an error occurs while serializing the application attributes
+     */
+    public static void populateApplicationAttributes(
+            WorkflowDTO workflowDTO,
+            Application application,
+            boolean applicationAttributesVisibility) throws WorkflowException {
+        if (!applicationAttributesVisibility) {
+            return;
+        }
+        Map<String, String> applicationAttributes = application.getApplicationAttributes();
+        if (applicationAttributes == null || applicationAttributes.isEmpty()) {
+            return;
+        }
+        try {
+            workflowDTO.setProperties(
+                    APPLICATION_ATTRIBUTES_PROPERTY,
+                    OBJECT_MAPPER.writeValueAsString(applicationAttributes)
+            );
+        } catch (JsonProcessingException e) {
+            String msg = String.format("Failed to serialize custom attributes of application %s",
+                    application.getName());
+            throw new WorkflowException(msg, e);
+        }
     }
 }

@@ -16,8 +16,6 @@
 
 package org.wso2.carbon.apimgt.impl.indexing.indexer;
 
-import org.apache.pdfbox.cos.COSDocument;
-import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.solr.common.SolrException;
@@ -44,16 +42,10 @@ public class PDFIndexerTest {
     public void testShouldReturnIndexedDocumentWhenParameterCorrect() throws IOException {
         String mediaType = "application/pdf+test";
         final String MEDIA_TYPE = "mediaType";
-        PDFParser parser = Mockito.mock(PDFParser.class);
         PDDocument pdDocument = Mockito.mock(PDDocument.class);
-        COSDocument cosDoc = Mockito.mock(COSDocument.class);
         PDFTextStripper pdfTextStripper = Mockito.mock(PDFTextStripper.class);
-        Mockito.doThrow(IOException.class).when(cosDoc).close();
-        Mockito.when(parser.parse()).thenReturn(new PDDocument());
-
-        Mockito.when(pdDocument.getDocument()).thenReturn(new COSDocument()).thenReturn(cosDoc);
-        Mockito.when(pdfTextStripper.getText(new PDDocument())).thenReturn("");
-        PDFIndexer pdfIndexer = new PDFIndexerWrapper(parser, pdfTextStripper);
+        Mockito.when(pdfTextStripper.getText(Mockito.any(PDDocument.class))).thenReturn("");
+        PDFIndexer pdfIndexer = new PDFIndexerWrapper(pdDocument, pdfTextStripper);
 
         // should return the default media type when media type is not defined in file2Index
         IndexDocument pdf = pdfIndexer.getIndexedDocument(file2Index);
@@ -61,7 +53,7 @@ public class PDFIndexerTest {
             Assert.fail();
         }
 
-        // should return the media type we have set in the file2Index even if error occurs in finally block
+        // should return the media type we have set in the file2Index
         file2Index.mediaType = mediaType;
         pdf = pdfIndexer.getIndexedDocument(file2Index);
         if (!mediaType.equals(pdf.getFields().get(MEDIA_TYPE).get(0))) {

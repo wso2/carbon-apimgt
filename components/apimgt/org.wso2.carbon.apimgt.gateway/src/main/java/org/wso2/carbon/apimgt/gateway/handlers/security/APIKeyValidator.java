@@ -28,6 +28,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.api.Resource;
 import org.apache.synapse.api.dispatch.RESTDispatcher;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
@@ -443,19 +444,33 @@ public class APIKeyValidator {
                 Resource[] selectedAPIResources = selectedApi.getResources();
 
                 List<Resource> acceptableResourcesList = new LinkedList<>();
+                List<Resource> optionsResourcesList = new LinkedList<>();
+                boolean isOptionsRequest = RESTConstants.METHOD_OPTIONS.equals(httpMethod);
 
                 for (Resource resource : selectedAPIResources) {
-                    //If the requesting method is OPTIONS or if the Resource contains the requesting method
-                    if (RESTConstants.METHOD_OPTIONS.equals(httpMethod) &&
-                            (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
-                        acceptableResourcesList.add(0, resource);
-                    } else if (RESTConstants.METHOD_OPTIONS.equals(httpMethod) ||
-                            (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
+                    log.debug("Evaluating resource for acceptable methods");
+                    String[] methods = resource.getMethods();
+                    if (methods == null) {
+                        continue;
+                    }
+
+                    List<String> methodList = Arrays.asList(methods);
+
+                    // Handle OPTIONS request with single OPTIONS method defined
+                    if (isOptionsRequest && methods.length == 1 && methodList.contains(httpMethod)) {
+                        optionsResourcesList.add(resource);
+                    } else if (isOptionsRequest || methodList.contains(httpMethod)) {
                         acceptableResourcesList.add(resource);
                     }
                 }
 
-                Set<Resource> acceptableResources = new LinkedHashSet<>(acceptableResourcesList);
+                Set<Resource> acceptableResources = new LinkedHashSet<>();
+                acceptableResources.addAll(optionsResourcesList);
+                acceptableResources.addAll(acceptableResourcesList);
+                if (log.isDebugEnabled()) {
+                    log.debug("Found " + acceptableResources.size() +
+                            " acceptable resources for method: " + httpMethod);
+                }
 
                 if (acceptableResources.size() > 0) {
                     for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
@@ -843,5 +858,10 @@ public class APIKeyValidator {
 
     public Map<String, Scope> retrieveScopes(String tenantDomain) {
         return dataStore.retrieveScopes(tenantDomain);
+    }
+
+    public APIKeyValidationInfoDTO validateAPIKeySubscription(String apiContext, String apiVersion, String tenantDomain,
+                                                              APIKeyInfo apiKeyInfo) throws APISecurityException {
+        return dataStore.validateAPIKeySubscription(apiContext, apiVersion, tenantDomain, apiKeyInfo);
     }
 }

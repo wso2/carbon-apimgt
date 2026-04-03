@@ -15,12 +15,15 @@
  */
 package org.wso2.carbon.apimgt.gateway.internal;
 
+import java.io.File;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.commons.throttle.core.DistributedCounterManager;
 import org.apache.synapse.commons.throttle.core.internal.DistributedThrottleProcessor;
 import org.apache.synapse.commons.throttle.core.internal.ThrottleServiceDataHolder;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -30,11 +33,16 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+
+import org.wso2.carbon.apimgt.api.AILLMProviderService;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EmbeddingProviderService;
-import org.wso2.carbon.apimgt.api.VectorDBProviderService;
 import org.wso2.carbon.apimgt.api.GuardrailProviderService;
+import org.wso2.carbon.apimgt.api.LLMProviderService;
+import org.wso2.carbon.apimgt.api.VectorDBProviderService;
 import org.wso2.carbon.apimgt.api.dto.EmbeddingProviderConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.GuardrailProviderConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.LLMProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.VectorDBProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.common.analytics.AnalyticsCommonConfiguration;
 import org.wso2.carbon.apimgt.common.analytics.AnalyticsServiceReferenceHolder;
@@ -43,12 +51,16 @@ import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayUrlSafeJW
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.AWSBedrockGuardrailProviderServiceImpl;
+import org.wso2.carbon.apimgt.gateway.AzureContentSafetyGuardrailProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.AzureOpenAIEmbeddingProviderServiceImpl;
+import org.wso2.carbon.apimgt.gateway.AzureOpenAILLMProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.HybridThrottleProcessor;
 import org.wso2.carbon.apimgt.gateway.MistralEmbeddingProviderServiceImpl;
+import org.wso2.carbon.apimgt.gateway.MistralLLMProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.OpenAIEmbeddingProviderServiceImpl;
-import org.wso2.carbon.apimgt.gateway.ZillizVectorDBProviderServiceImpl;
+import org.wso2.carbon.apimgt.gateway.OpenAILLMProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.RedisBaseDistributedCountManager;
+import org.wso2.carbon.apimgt.gateway.ZillizVectorDBProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.WebSocketProcessor;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
@@ -56,12 +68,9 @@ import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
 import org.wso2.carbon.apimgt.gateway.listeners.ServerStartupListener;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.api.LLMProviderService;
-import org.wso2.carbon.apimgt.gateway.AzureContentSafetyGuardrailProviderServiceImpl;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
-import org.wso2.carbon.apimgt.api.dto.GuardrailProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
@@ -87,8 +96,6 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-
-import java.io.File;
 
 @Component(
         name = "org.wso2.carbon.apimgt.handlers",
@@ -234,6 +241,40 @@ public class APIHandlerServiceComponent {
             } catch (APIManagementException e) {
                 // TODO: Notify ACP
                 log.error("Error initializing Embedding provider service", e);
+            }
+        }
+
+        // Register the LLM provider services for chat completion
+        LLMProviderConfigurationDTO llmProviderConfigurationDTO =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getLLMProvider();
+        if (llmProviderConfigurationDTO.getType() != null) {
+            log.info("Initializing LLM provider service for type: " + llmProviderConfigurationDTO.getType());
+            try {
+                String llmProviderType = llmProviderConfigurationDTO.getType();
+                AILLMProviderService llmProviderService;
+                switch (llmProviderType) {
+                    case APIConstants.AI.OPENAI_LLM_PROVIDER_TYPE:
+                        llmProviderService = new OpenAILLMProviderServiceImpl();
+                        break;
+                    case APIConstants.AI.MISTRAL_LLM_PROVIDER_TYPE:
+                        llmProviderService = new MistralLLMProviderServiceImpl();
+                        break;
+                    case APIConstants.AI.AZURE_OPENAI_LLM_PROVIDER_TYPE:
+                        llmProviderService = new AzureOpenAILLMProviderServiceImpl();
+                        break;
+                    default:
+                        throw new APIManagementException("Unsupported LLM provider type: "
+                                + llmProviderType);
+                }
+                llmProviderService.init(llmProviderConfigurationDTO);
+                context.getBundleContext().registerService(
+                        AILLMProviderService.class.getName(),
+                        llmProviderService,
+                        null
+                );
+            } catch (APIManagementException e) {
+                // TODO: Notify ACP
+                log.error("Error initializing LLM provider service", e);
             }
         }
 

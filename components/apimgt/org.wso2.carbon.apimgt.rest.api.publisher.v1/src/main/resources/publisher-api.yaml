@@ -3048,6 +3048,120 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/7a2298c4-c905-403f-8fac-38c73301631f"'
       operationId: deleteMCPServer
 
+  /mcp-servers/{mcpServerId}/labels:
+    get:
+      tags:
+        - MCP Server Labels
+      summary: Get Labels of an MCP Server
+      description: |
+        This operation can be used to get the labels of an MCP Server.
+      parameters:
+        - $ref: '#/components/parameters/mcpServerId'
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with Label object list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelList'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:mcp_server_view
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+            - apim:mcp_server_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/96077508-fd01-4fae-bc64-5de0e2baf43c/labels"'
+      operationId: getLabelsOfMCPServer
+
+  /mcp-servers/{mcpServerId}/attach-labels:
+    post:
+      tags:
+        - MCP Server Labels Attach
+      summary: Attach Labels to an MCP Server
+      description: |
+        This operation can be used to attach labels to an MCP Server.
+      parameters:
+        - $ref: '#/components/parameters/mcpServerId'
+      requestBody:
+        description: |
+          List of labels to be attached to the MCP Server
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestLabelList'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated Label object list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+            - apim:mcp_server_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json
+            "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/01234567-0123-0123-0123-012345678901/attach-labels"'
+      operationId: attachLabelsToMCPServer
+
+  /mcp-servers/{mcpServerId}/detach-labels:
+    post:
+      tags:
+        - MCP Server Labels Detach
+      summary: Detach Labels from an MCP Server
+      description: |
+        This operation can be used to detach labels from an MCP Server.
+      parameters:
+        - $ref: '#/components/parameters/mcpServerId'
+      requestBody:
+        description: |
+          List of labels to be detached from the MCP Server
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestLabelList'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated Label object list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+            - apim:mcp_server_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json
+            "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/01234567-0123-0123-0123-012345678901/detach-labels"'
+      operationId: detachLabelsFromMCPServer
+
   /mcp-servers/{mcpServerId}/revisions:
     get:
       tags:
@@ -14047,6 +14161,11 @@ components:
             $ref: '#/components/schemas/MediationPolicy'
         apiPolicies:
           $ref: '#/components/schemas/APIOperationPolicies'
+        apiHubPolicies:
+          type: array
+          description: Policy Hub policies at API level (sibling to apiPolicies; not persisted to operation policy mapping).
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
         subscriptionAvailability:
           type: string
           description: The subscription availability. Accepts one of the following.
@@ -16342,6 +16461,10 @@ components:
         apiDefinition:
           type: string
           description: OpenAPI specification
+        deprecated:
+          type: boolean
+          description: Indicates if the LLM provider is deprecated
+          example: false
     AIServiceProviderSummaryResponse:
       title: AIServiceProviderSummaryResponse
       type: object
@@ -16367,6 +16490,10 @@ components:
           maxLength: 1023
           type: string
           example: OpenAI LLM Provider
+        deprecated:
+          type: boolean
+          description: Indicates if the LLM provider is deprecated
+          example: false
     AIServiceProviderSummaryResponseList:
       title: AIServiceProviderSummaryResponseList
       type: object
@@ -17033,6 +17160,11 @@ components:
           example: ""
         operationPolicies:
           $ref: '#/components/schemas/APIOperationPolicies'
+        operationHubPolicies:
+          type: array
+          description: Policy Hub policies at resource/operation level (sibling to operationPolicies).
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
     BackendOperationMapping:
       title: API Operation Backend Mapping
       type: object

@@ -90,6 +90,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
@@ -349,6 +350,16 @@ public class ImportUtils {
                     extractedFolderPath, targetApi, organization, importedApiDTO.getType().toString(),
                     apiProvider);
 
+            // Ignoring mediation policies if there are API or Operation level policies defined in the API.
+            // This scenario applies to migrated APIs that had mediation policies attached and were exported
+            // before completing the on-the-fly migration (i.e., before saving the API post-migration).
+            if ((importedApiDTO.getMediationPolicies() != null &&
+                    !importedApiDTO.getMediationPolicies().isEmpty()) &&
+                    ((extractedAPIPolicies != null && !extractedAPIPolicies.isEmpty()) ||
+                            (extractedPoliciesMap != null && !extractedPoliciesMap.isEmpty()))) {
+                importedApiDTO.setMediationPolicies(Collections.emptyList());
+            }
+
             // If the overwrite is set to true (which means an update), retrieve the existing API
             if (Boolean.TRUE.equals(overwrite) && targetApi != null) {
                 log.info("Existing API found, attempting to update it...");
@@ -423,7 +434,8 @@ public class ImportUtils {
                         && importedApiDTO.getPolicies() != null
                         && importedApiDTO.getPolicies().isEmpty()
                         && importedApiDTO.getSecurityScheme() != null
-                        && importedApiDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        && (importedApiDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                        importedApiDTO.getSecurityScheme().contains(APIConstants.API_SECURITY_API_KEY))
                         && APIUtil.isSubscriptionValidationDisablingAllowed(organization)
                         && !PublisherCommonUtils.isThirdPartyAsyncAPI(importedApiDTO)) {
                    if (asyncAPI) {
@@ -819,8 +831,9 @@ public class ImportUtils {
                 // Auto policy for published+oauth2 if subscription validation disabling allowed
                 if (APIStatus.PUBLISHED.toString().equalsIgnoreCase(targetStatus)
                         && importedApiDTO.getPolicies() != null && importedApiDTO.getPolicies().isEmpty()
-                        && importedApiDTO.getSecurityScheme() != null && importedApiDTO.getSecurityScheme()
-                        .contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        && importedApiDTO.getSecurityScheme() != null &&
+                        (importedApiDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
+                        importedApiDTO.getSecurityScheme().contains(APIConstants.API_SECURITY_API_KEY))
                         && APIUtil.isSubscriptionValidationDisablingAllowed(organization)) {
                     importedApiDTO.setPolicies(
                             Arrays.asList(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
@@ -2690,8 +2703,9 @@ public class ImportUtils {
     public static APIDefinitionValidationResponse retrieveValidatedSwaggerDefinition(String swaggerContent)
             throws APIManagementException {
 
-        APIDefinitionValidationResponse validationResponse = OASParserUtil
-                .validateAPIDefinition(swaggerContent, Boolean.TRUE);
+        APIDefinitionValidationResponse validationResponse = OASParserUtil.validateAPIDefinition(swaggerContent,
+                Boolean.TRUE, ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                        .getAPIMDependencyConfigurations().getOasParserOptions());
         if (!validationResponse.isValid()) {
             String errorDescription = "";
             if (validationResponse.getErrorItems().size() > 0) {
@@ -3626,7 +3640,8 @@ public class ImportUtils {
                         && importedApiProductDTO.getPolicies() != null
                         && importedApiProductDTO.getPolicies().isEmpty()
                         && importedApiProductDTO.getSecurityScheme() != null
-                        && importedApiProductDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        && (importedApiProductDTO.getSecurityScheme().contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                        || importedApiProductDTO.getSecurityScheme().contains(APIConstants.API_SECURITY_API_KEY))
                         && APIUtil.isSubscriptionValidationDisablingAllowed(organization)) {
                     importedApiProductDTO.setPolicies(Arrays
                                 .asList(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));

@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.33.7-SNAPSHOT</version>
+        <version>9.33.90-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -525,7 +525,8 @@
                         <Provide-Capability>
                             osgi.service;objectClass=org.wso2.carbon.apimgt.api.GuardrailProviderService,
                             osgi.service;objectClass=org.wso2.carbon.apimgt.api.EmbeddingProviderService,
-                            osgi.service;objectClass=org.wso2.carbon.apimgt.api.VectorDBProviderService
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.api.VectorDBProviderService,
+                            osgi.service;objectClass=org.wso2.carbon.apimgt.api.AILLMProviderService
                         </Provide-Capability>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>

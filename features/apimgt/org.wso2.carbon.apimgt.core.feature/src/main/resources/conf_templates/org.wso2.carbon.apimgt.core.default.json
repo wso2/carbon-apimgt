@@ -70,6 +70,7 @@
   "apim.http_client.max_total": "100",
   "apim.http_client.default_max_per_route": "50",
   "apim.http_client.connection_timeout": "-1",
+  "apim.http_client.connection_request_timeout": "-1",
   "apim.key_manager.service_url": "https://localhost:${mgt.transport.https.port}${carbon.context}services/",
   "apim.key_manager.username": "${admin.username}",
   "apim.key_manager.password": "${admin.password}",
@@ -113,6 +114,7 @@
   "apim.devportal.enable_forum": true,
   "apim.devportal.enable_key_provisioning": false,
   "apim.devportal.api_key_alias": "gateway_certificate_alias",
+  "apim.devportal.enable_legacy_api_keys": false,
   "apim.devportal.application_sharing_claim": "http://wso2.org/claims/organization",
   "apim.devportal.enable_anonymous_mode": true,
   "apim.devportal.enable_empty_values_in_application_attributes": false,
@@ -195,7 +197,7 @@
   "apimgt.mutual_ssl.certificate_header": "X-WSO2-CLIENT-CERTIFICATE",
   "apimgt.mutual_ssl.enable_client_validation": true,
   "apimgt.mutual_ssl.forward_client_certificate_header": false,
-  "database.local.url": "jdbc:h2:./repository/database/WSO2CARBON_DB;DB_CLOSE_ON_EXIT=FALSE",
+  "database.local.url": "jdbc:h2:./repository/database/WSO2CARBON_DB;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1",
   "apim.key_manager.enable": true,
   "apim.enable_change_password": true,
   "apim.endpoint_config.loadbalanced.enable_failover": true,
@@ -219,6 +221,7 @@
   "apim.cache_invalidation.topic_name":"globalCacheInvalidation",
   "apim.auth_manager.check_permissions_remotely": false,
   "apim.auth_manager.iskm_reverseproxy_enabled": false,
+  "apim.mediation.enable_secure_xml_processing": true,
   "apim.sync_runtime_artifacts.gateway.gateway_labels": ["Default"],
   "apim.sync_runtime_artifacts.gateway.artifact_retriever": "DBRetriever",
   "apim.sync_runtime_artifacts.gateway.deployment_retry_duration": "15000",
@@ -269,5 +272,6 @@
   "apim.synapse_artifact_generator.thread_pool.max_pool_size": "4",
   "apim.synapse_artifact_generator.thread_pool.keep_alive_time_ms": "60000",
   "apim.synapse_artifact_generator.thread_pool.queue_capacity": "50",
-  "apim.certificate_manager.events_enabled": true
+  "apim.certificate_manager.events_enabled": true,
+  "apim.universal_gateway.version": "0.11.0"
 }

@@ -173,7 +173,7 @@ public class OAS2ParserTest extends OASTestBase {
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2"
                         + File.separator + "oas_util_test_faulty_swagger.json"),
                 String.valueOf(StandardCharsets.UTF_8));
-        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true);
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true, null);
         Assert.assertFalse(response.isValid());
         Assert.assertEquals(3, response.getErrorItems().size());
         Assert.assertEquals(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorCode(),
@@ -189,7 +189,7 @@ public class OAS2ParserTest extends OASTestBase {
                         + File.separator + "oas2_paths_with_trailing_slash.json"),
                 "UTF-8");
 
-        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true);
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true, null);
         Assert.assertFalse(response.isValid());
         Assert.assertEquals(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorCode(),
                 response.getErrorItems().get(0).getErrorCode());
@@ -204,7 +204,8 @@ public class OAS2ParserTest extends OASTestBase {
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2"
                 + File.separator + "oas2_without_info_swagger.json"),
                 "UTF-8");
-        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(withoutInfoTagSwagger, true);
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(withoutInfoTagSwagger, true,
+                null);
         Assert.assertTrue(response.isValid());
         Assert.assertTrue(response.getInfo().getName().startsWith("API-Title-"));
         Assert.assertEquals("attribute info is missing",

@@ -35,7 +35,7 @@ public class RevokedJWTDataHolder {
     private static final Map<String, Long> revokedSubjectEntityAppMap = new ConcurrentHashMap<>();
     // User UUID (jwt claim) -> revoked timestamp
     private static final Map<String, Long> revokedSubjectEntityUserMap = new ConcurrentHashMap<>();
-    private static RevokedJWTDataHolder instance = new RevokedJWTDataHolder();
+    private static final RevokedJWTDataHolder instance = new RevokedJWTDataHolder();
 
     /**
      * Adds a given key,value pair to the revoke map.

@@ -17,17 +17,23 @@
 
 package org.wso2.carbon.apimgt.rest.api.common.internal;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
 import org.wso2.carbon.apimgt.rest.api.common.APIMConfigUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestAPIAuthenticator;
+
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,6 +59,7 @@ public class APIMRestAPICommonComponent {
             jwtValidatorMap.put(issuer, jwtValidator);
         });
         ServiceReferenceHolder.getInstance().setJwtValidatorMap(jwtValidatorMap);
+        initializeUrlSigningKey();
     }
 
     @Deactivate
@@ -93,5 +100,31 @@ public class APIMRestAPICommonComponent {
 
     protected void removeRestAPIAuthenticationService(RestAPIAuthenticator authenticator) {
         ServiceReferenceHolder.getInstance().removeAuthenticator(authenticator);
+    }
+
+    @Reference(name = "apim.dependency.config.service", service = org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService.class,
+            cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIMDependencyConfigurationService")
+    protected void setAPIMDependencyConfigurationService(APIMDependencyConfigurationService service) {
+
+        log.debug("Setting APIM Dependency Configuration Service");
+        ServiceReferenceHolder.getInstance().setAPIMDependencyConfigurationService(service);
+    }
+
+    protected void unsetAPIMDependencyConfigurationService(APIMDependencyConfigurationService service) {
+        ServiceReferenceHolder.getInstance().setAPIMDependencyConfigurationService(null);
+    }
+
+    private void initializeUrlSigningKey() {
+        String urlGenerationKey = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                .getFirstProperty(APIConstants.DEVPORTAL_URL_GENERATION_SECRET);
+        if (StringUtils.isNotEmpty(urlGenerationKey)) {
+            byte[] finalKey = urlGenerationKey.getBytes(StandardCharsets.UTF_8);
+            ServiceReferenceHolder.getInstance().setUrlSigningKey(finalKey);
+        } else {
+            byte[] urlGenerationKeyBytes = new byte[32];
+            new SecureRandom().nextBytes(urlGenerationKeyBytes);
+            ServiceReferenceHolder.getInstance().setUrlSigningKey(urlGenerationKeyBytes);
+        }
     }
 }

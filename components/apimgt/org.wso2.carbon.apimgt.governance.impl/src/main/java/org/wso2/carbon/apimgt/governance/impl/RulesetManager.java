@@ -67,8 +67,7 @@ public class RulesetManager {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();
-
-        validationEngine.validateRulesetContent(ruleset);
+        validationEngine.validateRulesetContent(ruleset, APIMGovernanceUtil.getAPIMGovernanceOptions());
         List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
 
         if (rules.isEmpty()) {
@@ -144,7 +143,7 @@ public class RulesetManager {
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();
 
-        validationEngine.validateRulesetContent(ruleset);
+        validationEngine.validateRulesetContent(ruleset, APIMGovernanceUtil.getAPIMGovernanceOptions());
         List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
 
         if (rules.isEmpty()) {

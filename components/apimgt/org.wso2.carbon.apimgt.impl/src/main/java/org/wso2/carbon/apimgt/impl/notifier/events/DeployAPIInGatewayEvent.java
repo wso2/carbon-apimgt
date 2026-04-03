@@ -12,6 +12,12 @@ public class DeployAPIInGatewayEvent extends Event {
     private String provider;
     private String apiType;
     private Set<String> gatewayLabels;
+    /**
+     * Platform (API Platform / Envoy) gateway IDs to which this deploy/undeploy event applies.
+     * When non-empty, PlatformGatewayDeployNotifier will dispatch to the platform path; when null or empty,
+     * only Synapse (JMS) path is used.
+     */
+    private Set<String> platformGatewayIds;
     private Set<APIEvent> associatedApis;
     private String context;
     private boolean deleted;
@@ -170,5 +176,18 @@ public class DeployAPIInGatewayEvent extends Event {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    /**
+     * Platform gateway IDs targeted by this event. When non-empty, the platform deploy notifier will dispatch.
+     *
+     * @return set of platform gateway IDs, or null if none
+     */
+    public Set<String> getPlatformGatewayIds() {
+        return platformGatewayIds;
+    }
+
+    public void setPlatformGatewayIds(Set<String> platformGatewayIds) {
+        this.platformGatewayIds = platformGatewayIds;
     }
 }

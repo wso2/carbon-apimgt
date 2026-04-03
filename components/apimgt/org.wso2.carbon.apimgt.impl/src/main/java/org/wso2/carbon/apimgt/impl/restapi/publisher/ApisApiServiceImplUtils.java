@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
 import org.wso2.carbon.apimgt.api.model.Backend;
 import org.apache.http.client.HttpClient;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.impl.MCPInitializerAndToolFetcher;
@@ -60,6 +61,7 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayMode;
+import org.wso2.carbon.apimgt.api.model.OASParserOptions;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -648,11 +650,14 @@ public class ApisApiServiceImplUtils {
                                                                             boolean returnContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
+        OASParserOptions parserOptions = ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                .getAPIMDependencyConfigurations().getOasParserOptions();
         if (url != null) {
             try {
                 URL urlObj = new URL(url);
                 HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
-                validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, httpClient, returnContent);
+                validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, httpClient, returnContent,
+                        parserOptions);
             } catch (MalformedURLException e) {
                 throw new APIManagementException("Error while processing the API definition URL", e);
             }
@@ -660,22 +665,24 @@ public class ApisApiServiceImplUtils {
             try {
                 if (fileName != null) {
                     if (fileName.endsWith(".zip")) {
-                        validationResponse =
-                                OASParserUtil.extractAndValidateOpenAPIArchive(inputStream, returnContent);
+                        validationResponse = OASParserUtil.extractAndValidateOpenAPIArchive(inputStream, returnContent,
+                                parserOptions);
                     } else {
                         String openAPIContent = IOUtils.toString(inputStream, CHARSET);
-                        validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
+                        validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent,
+                                parserOptions);
                     }
                 } else {
                     String openAPIContent = IOUtils.toString(inputStream, CHARSET);
-                    validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
+                    validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent,
+                            parserOptions);
                 }
             } catch (IOException e) {
                 throw new APIManagementException("Error while processing the file input",
                         e, ExceptionCodes.from(ExceptionCodes.OPENAPI_PARSE_EXCEPTION));
             }
         } else if (apiDefinition != null) {
-            validationResponse = OASParserUtil.validateAPIDefinition(apiDefinition, returnContent);
+            validationResponse = OASParserUtil.validateAPIDefinition(apiDefinition, returnContent, parserOptions);
         }
 
         return validationResponse;
@@ -727,11 +734,15 @@ public class ApisApiServiceImplUtils {
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             definitionToAdd = new OAS3Parser().generateAPIDefinition(swaggerData);
         } else {
-            definition = OASParserUtil.preProcess(definition);
+            definition = OASParserUtil.preProcess(definition,
+                    ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                            .getAPIMDependencyConfigurations().getOasParserOptions());
             if (syncOperations) {
                 validateScopes(apiToAdd, apiProvider, username);
                 SwaggerData swaggerData = new SwaggerData(apiToAdd);
-                definition = apiDefinition.populateCustomManagementInfo(definition, swaggerData);
+                definition = apiDefinition.populateCustomManagementInfo(definition, swaggerData,
+                        ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                                .getAPIMDependencyConfigurations().getOasParserOptions());
             }
             Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definition);
             applyDefaultThrottlingAndAuth(uriTemplates, defaultAPILevelPolicy);
@@ -744,8 +755,9 @@ public class ApisApiServiceImplUtils {
             if (!syncOperations) {
                 validateScopes(apiToAdd, apiProvider, username);
                 SwaggerData swaggerData = new SwaggerData(apiToAdd);
-                definition =
-                        apiDefinition.populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
+                definition = apiDefinition.populateCustomManagementInfo(validationResponse.getJsonContent(),
+                        swaggerData, ServiceReferenceHolder.getInstance().getAPIMDependencyConfigurationService()
+                                .getAPIMDependencyConfigurations().getOasParserOptions());
             }
             definitionToAdd = definition;
         }
