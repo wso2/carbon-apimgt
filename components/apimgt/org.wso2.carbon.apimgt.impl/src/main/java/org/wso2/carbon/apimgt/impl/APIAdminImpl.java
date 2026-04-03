@@ -431,14 +431,16 @@ public class APIAdminImpl implements APIAdmin {
                                  .build();
                         log.info("Revoking federated API key with remote ID: " +
                                 remoteApiKeyId + " for API: " + apiUuid);
-                         federatedApiKeyConnector.revokeApiKey(context);
-                     }
-                     apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
-                     APIKeyEvent apiKeyEvent = new APIKeyEvent(APIConstants.EventType.API_KEY_DELETE.name(),
-                             tenantId, tenantDomain, apiKeyInfo.getApiKeyHash(), apiKeyInfo.getKeyUUID(),
-                             apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType());
-                     APIUtil.sendNotification(apiKeyEvent, APIConstants.NotifierType.API_KEY.name());
-                     return;
+                        federatedApiKeyConnector.revokeApiKey(context);
+                    }
+                    apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
+                    // @coderabbit flag this in the discussion to decide whether publishing event needed for external
+                    // api keys.
+                    APIKeyEvent apiKeyEvent = new APIKeyEvent(APIConstants.EventType.API_KEY_DELETE.name(),
+                            tenantId, tenantDomain, apiKeyInfo.getApiKeyHash(), apiKeyInfo.getKeyUUID(),
+                            apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType());
+                    APIUtil.sendNotification(apiKeyEvent, APIConstants.NotifierType.API_KEY.name());
+                    return;
                  }
              }
         }
