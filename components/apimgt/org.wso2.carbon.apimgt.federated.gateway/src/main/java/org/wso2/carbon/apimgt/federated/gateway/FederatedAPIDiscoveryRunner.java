@@ -212,6 +212,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     continue;
                 }
                 APIDTO apidto = fromAPItoDTO(discoveredAPI.getApi());
+                applyDiscoveredSecurityToDto(apidto, discoveredAPI.getApi());
                 if (apidto.getPolicies() == null || apidto.getPolicies().isEmpty()) {
                     apidto.setPolicies(Collections.singletonList(DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS));
                 }
@@ -527,4 +528,57 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
         }
         return APIUtil.getApiExternalApiMappingReferenceByApiId(apiResult.getId(), environment.getUuid());
     }
+
+    /**
+     * Applies discovered security settings from the API model to the APIDTO.
+     * This ensures that security schemes and API key header configurations discovered
+     * from the external gateway are properly propagated to the DTO for import.
+     *
+     * @param apiDto        The APIDTO to update.
+     * @param discoveredApi The discovered API containing security information.
+     */
+    private void applyDiscoveredSecurityToDto(APIDTO apiDto, API discoveredApi) {
+        if (apiDto == null || discoveredApi == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping discovered security application because apiDto or discoveredApi is null");
+            }
+            return;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Applying discovered security settings to API DTO");
+        }
+
+        String discoveredSecurity = discoveredApi.getApiSecurity();
+        if (StringUtils.isNotBlank(discoveredSecurity)) {
+            List<String> securitySchemes = new ArrayList<>();
+            for (String scheme : discoveredSecurity.split(",")) {
+                if (StringUtils.isNotBlank(scheme)) {
+                    securitySchemes.add(scheme.trim());
+                }
+            }
+            apiDto.setSecurityScheme(securitySchemes.isEmpty() ? null : securitySchemes);
+            if (log.isDebugEnabled()) {
+                log.debug("Applied discovered security schemes to API DTO: " + securitySchemes);
+            }
+        } else {
+            apiDto.setSecurityScheme(null);
+            if (log.isDebugEnabled()) {
+                log.debug("Cleared security scheme on API DTO because discovered API does not define one");
+            }
+        }
+
+        if (StringUtils.isNotBlank(discoveredApi.getApiKeyHeader())) {
+            apiDto.setApiKeyHeader(discoveredApi.getApiKeyHeader());
+            if (log.isDebugEnabled()) {
+                log.debug("Applied discovered API key header to API DTO: " + discoveredApi.getApiKeyHeader());
+            }
+        } else {
+            apiDto.setApiKeyHeader(null);
+            if (log.isDebugEnabled()) {
+                log.debug("Cleared API key header on API DTO because discovered API does not define one");
+            }
+        }
+    }
+
 }

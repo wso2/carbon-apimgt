@@ -546,8 +546,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         validateResourceThrottlingTiers(api, tenantDomain);
-        validateKeyManagers(api);
-        validateKeyManagerScopes(api, tenantDomain);
+        // Skip key manager and scope validations for external gateway vendors.
+        // Federated APIs imported via FederatedAPIDiscovery come with keyManagers null,
+        // causing import failures. External gateway vendors manage their own key managers and scopes.
+        boolean skipKeyManagerValidationForExternalGateway =
+                APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(api.getGatewayVendor()) && api.isInitiatedFromGateway();
+        if (!skipKeyManagerValidationForExternalGateway) {
+            validateKeyManagers(api);
+            validateKeyManagerScopes(api, tenantDomain);
+        } else if (log.isDebugEnabled()) {
+            log.debug("Skipping key manager and scope validation for external gateway API: "
+                    + api.getId().getApiName());
+        }
         // Validate and process API level and operation level policies
         validateAndProcessAPIPolicyParameters(api, null, tenantDomain);
         String apiName = api.getId().getApiName();
@@ -1033,13 +1043,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // For Platform Gateway APIs, derive apiSecurity from hub policies
         deriveApiSecurityFromHubPolicies(api);
         validateAndSetAPISecurity(api);
-        validateKeyManagers(api, existingAPI.getKeyManagers());
+        // Skip key manager and scope validations for external gateway vendors.
+        // Federated APIs imported via FederatedAPIDiscovery come with keyManagers null,
+        // causing update failures. External gateway vendors manage their own key managers and scopes.
+        boolean skipKeyManagerValidationForExternalGateway =
+                APIConstants.EXTERNAL_GATEWAY_VENDOR.equals(api.getGatewayVendor())
+                        && (api.isInitiatedFromGateway() || existingAPI.isInitiatedFromGateway());
+        if (!skipKeyManagerValidationForExternalGateway) {
+            validateKeyManagers(api, existingAPI.getKeyManagers());
+        } else if (log.isDebugEnabled()) {
+            log.debug("Skipping key manager validation for external gateway API update: "
+                    + api.getId().getApiName());
+        }
 
         if (api.getAdditionalProperties() != null) {
             checkIfAdditionalPropertyValuesAreNullOrEmpty(new ApiTypeWrapper(api));
         }
 
-        validateKeyManagerScopes(api, tenantDomain);
+        if (!skipKeyManagerValidationForExternalGateway) {
+            validateKeyManagerScopes(api, tenantDomain);
+        } else if (log.isDebugEnabled()) {
+            log.debug("Skipping key manager scope validation for external gateway API update: "
+                    + api.getId().getApiName());
+        }
         // Validate and process API level and operation level policies
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {

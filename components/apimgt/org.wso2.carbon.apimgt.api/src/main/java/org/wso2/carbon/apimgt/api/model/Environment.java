@@ -58,6 +58,9 @@ public class Environment implements Serializable {
     private String provider;
     private String gatewayType;
     private Map<String, String> additionalProperties = new HashMap<>();
+    // This is for external federated gateway environments to hold mappings
+    // from subcription plans -> remote similar entity.
+    private List<GatewayTierMapping> tierMappings = new ArrayList<>();
 
     private String[] visibilityRoles;
     private String visibility;
@@ -86,6 +89,7 @@ public class Environment implements Serializable {
         this.mode = environment.mode;
         this.apiDiscoveryScheduledWindow = environment.apiDiscoveryScheduledWindow;
         this.additionalProperties = new HashMap<>(environment.additionalProperties);
+        this.tierMappings = new ArrayList<>(environment.tierMappings);
         this.visibilityRoles = environment.visibilityRoles;
         this.visibility = environment.visibility;
         this.permissions = environment.permissions;
@@ -313,6 +317,14 @@ public class Environment implements Serializable {
 
     public void setAdditionalProperties(Map<String, String> additionalProperties) {
         this.additionalProperties = additionalProperties;
+    }
+
+    public List<GatewayTierMapping> getTierMappings() {
+        return tierMappings;
+    }
+
+    public void setTierMappings(List<GatewayTierMapping> tierMappings) {
+        this.tierMappings = tierMappings != null ? tierMappings : new ArrayList<>();
     }
 
     public void setEndpointsAsVhost() throws APIManagementException {

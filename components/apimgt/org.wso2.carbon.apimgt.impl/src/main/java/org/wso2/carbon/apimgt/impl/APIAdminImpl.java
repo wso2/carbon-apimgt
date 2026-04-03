@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.FederatedApiKeyConnector;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -56,6 +57,7 @@ import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationUsages;
+import org.wso2.carbon.apimgt.api.model.FederatedApiKeyContext;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
@@ -76,6 +78,7 @@ import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
+import org.wso2.carbon.apimgt.impl.federated.gateway.FederatedApiKeyConnectorFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
@@ -146,6 +149,7 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getPaginatedApplicationL
 public class APIAdminImpl implements APIAdmin {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
+    private static final String FEDERATED_API_KEY_REMOTE_ID = "federated.remoteApiKeyId";
     protected ApiMgtDAO apiMgtDAO;
     protected ApiKeyMgtDAO apiKeyMgtDAO;
     protected LabelsDAO labelsDAO;
@@ -261,6 +265,7 @@ public class APIAdminImpl implements APIAdmin {
         }
         APIUtil.stopFederatedGatewayAPIDiscovery(existingEnv, tenantDomain);
         apiMgtDAO.deleteEnvironment(uuid);
+        FederatedApiKeyConnectorFactory.evictApiKeyConnector(tenantDomain, uuid);
     }
 
     public Environment getEnvironmentWithoutPropertyMasking(String tenantDomain, String uuid)
@@ -325,6 +330,7 @@ public class APIAdminImpl implements APIAdmin {
         environment.setId(existingEnv.getId());
         encryptGatewayConfigurationValues(existingEnv, environment);
         Environment updatedEnvironment = apiMgtDAO.updateEnvironment(environment);
+        FederatedApiKeyConnectorFactory.evictApiKeyConnector(tenantDomain, environment.getUuid());
         // If the update is successful without throwing an exception
         // Perform a separate task of updating gateway label names
         updateGatewayLabelNameForGatewayPolicies(existingEnv.getDisplayName(), updatedEnvironment.getDisplayName(),
@@ -389,10 +395,54 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public void revokeAPIKey(String keyUUId, String tenantDomain) throws APIManagementException {
         int tenantId = APIUtil.getTenantId(tenantDomain);
-        // Load existing metadata before revocation (revocation may remove/alter it)
         APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKeyForTenant(keyUUId, tenantDomain);
-        if (apiKeyInfo == null || StringUtils.isEmpty(apiKeyInfo.getKeyUUID())) {
-            throw new APIMgtResourceNotFoundException("Active API key not found for UUID: " + keyUUId);
+        if (apiKeyInfo == null || StringUtils.isBlank(apiKeyInfo.getApiKeyHash())) {
+            throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId,
+                    ExceptionCodes.RESOURCE_NOT_FOUND);
+        }
+
+        String apiUuid = apiKeyInfo.getApiUUId();
+        if (StringUtils.isNotBlank(apiUuid)) {
+            String organization = StringUtils.isNotBlank(apiKeyInfo.getOrigin())
+                    ? apiKeyInfo.getOrigin()
+                    : apiMgtDAO.getOrganizationByAPIUUID(apiUuid);
+            if (StringUtils.isNotBlank(organization)) {
+                FederatedApiKeyConnector federatedApiKeyConnector = resolveFederatedApiKeyConnector(apiUuid, organization);
+                // --- Federated gateway: revoke remote key and return early ---
+                if (federatedApiKeyConnector != null) {
+                    Map<String, String> props = deserializeApiKeyProperties(apiKeyInfo.getProperties());
+                    String remoteApiKeyId = props.get(FEDERATED_API_KEY_REMOTE_ID);
+                    if (StringUtils.isBlank(remoteApiKeyId)) {
+                        log.warn("Remote API key id is missing for federated API key UUID: " + keyUUId
+                                + ". Proceeding with local revocation only.");
+                    } else {
+                        String envId = apiMgtDAO.getGatewayEnvironmentIdForExternalApi(apiUuid);
+                        FederatedApiKeyContext context = FederatedApiKeyContext.builder()
+                                .apiUuid(apiUuid)
+                                .apiReferenceArtifact(null)
+                                .apiKeyUuid(keyUUId)
+                                .apiKeyName(apiKeyInfo.getKeyName())
+                                .apiKeyValue(null)
+                                .remoteApiKeyId(remoteApiKeyId)
+                                .authzUser(apiKeyInfo.getAuthUser())
+                                .applicationUuid(apiKeyInfo.getApplicationId())
+                                .organizationId(organization)
+                                 .environmentId(envId)
+                                 .build();
+                        log.info("Revoking federated API key with remote ID: " +
+                                remoteApiKeyId + " for API: " + apiUuid);
+                        federatedApiKeyConnector.revokeApiKey(context);
+                    }
+                    apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
+                    // @coderabbit flag this in the discussion to decide whether publishing event needed for external
+                    // api keys.
+                    APIKeyEvent apiKeyEvent = new APIKeyEvent(APIConstants.EventType.API_KEY_DELETE.name(),
+                            tenantId, tenantDomain, apiKeyInfo.getApiKeyHash(), apiKeyInfo.getKeyUUID(),
+                            apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType());
+                    APIUtil.sendNotification(apiKeyEvent, APIConstants.NotifierType.API_KEY.name());
+                    return;
+                 }
+             }
         }
         if (log.isDebugEnabled()){
             log.debug("Revoking API key with UUID: " + keyUUId + " for tenant: " + tenantDomain);
@@ -2468,5 +2518,61 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public void deleteOrganization(String organizationId, String tenantDomain) throws APIManagementException {
         apiMgtDAO.deleteOrganizationDetails(organizationId, tenantDomain);
+    }
+
+    /**
+     * Resolves the FederatedApiKeyConnector for an API if it's a federated gateway API.
+     *
+     * @param apiUuid API UUID
+     * @param organization organization identifier
+     * @return FederatedApiKeyConnector if applicable, null otherwise
+     * @throws APIManagementException if resolution fails
+     */
+    private FederatedApiKeyConnector resolveFederatedApiKeyConnector(String apiUuid, String organization)
+            throws APIManagementException {
+
+        if (StringUtils.isBlank(apiUuid) || StringUtils.isBlank(organization)) {
+            return null;
+        }
+
+        String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(apiUuid);
+        if (!APIConstants.EXTERNAL_GATEWAY_VENDOR.equalsIgnoreCase(gatewayVendor)) {
+            return null;
+        }
+
+        String envId = apiMgtDAO.getGatewayEnvironmentIdForExternalApi(apiUuid);
+        if (StringUtils.isBlank(envId)) {
+            return null;
+        }
+
+        Environment environment = apiMgtDAO.getEnvironment(organization, envId);
+        if (environment == null) {
+            log.warn("Gateway environment not found: " + envId + " for API: " + apiUuid);
+            return null;
+        }
+
+        GatewayAgentConfiguration agentConfiguration = ServiceReferenceHolder.getInstance()
+                .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
+        if (agentConfiguration == null || StringUtils.isBlank(agentConfiguration.getApiKeyConnectorImplementation())) {
+            return null;
+        }
+
+        FederatedApiKeyConnector federatedApiKeyConnector = FederatedApiKeyConnectorFactory.getApiKeyConnector(environment,
+                organization);
+        if (federatedApiKeyConnector == null || !federatedApiKeyConnector.isApiKeySupport()) {
+            return null;
+        }
+        return federatedApiKeyConnector;
+    }
+
+    /**
+     * Normalizes API key properties map to avoid null handling at call sites.
+     *
+     * @param properties API key properties map
+     * @return non-null properties map
+     */
+    private Map<String, String> deserializeApiKeyProperties(Map<String, String> properties) {
+
+        return properties == null ? new HashMap<>() : properties;
     }
 }

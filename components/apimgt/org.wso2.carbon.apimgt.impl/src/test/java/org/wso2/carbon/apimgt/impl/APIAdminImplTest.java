@@ -25,6 +25,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -33,17 +34,24 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.FederatedApiKeyConnector;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.APIKeyInfo;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
+import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.FederatedApiKeyContext;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
+import org.wso2.carbon.apimgt.impl.dao.ApiKeyMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
+import org.wso2.carbon.apimgt.impl.federated.gateway.FederatedApiKeyConnectorFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.DefaultWorkflowTaskService;
@@ -57,7 +65,8 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class, CarbonContext.class})
+@PrepareForTest({ServiceReferenceHolder.class, ApiKeyMgtDAO.class, ApiMgtDAO.class, APIUtil.class, CarbonContext.class,
+        FederatedApiKeyConnectorFactory.class})
 public class APIAdminImplTest {
 
     private static final String azureADKeyManagerType = "AzureAD";
@@ -69,21 +78,145 @@ public class APIAdminImplTest {
     ServiceReferenceHolder serviceReferenceHolder;
     APIMConfigService apimConfigService;
 
+    ApiKeyMgtDAO apiKeyMgtDAO;
     ApiMgtDAO apiMgtDAO;
 
     @Before
     public void setup() {
 
         PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.mockStatic(ApiKeyMgtDAO.class);
         PowerMockito.mockStatic(ApiMgtDAO.class);
         PowerMockito.mockStatic(CarbonContext.class);
+        PowerMockito.mockStatic(FederatedApiKeyConnectorFactory.class);
+        apiKeyMgtDAO = Mockito.mock(ApiKeyMgtDAO.class);
         apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        PowerMockito.when(ApiKeyMgtDAO.getInstance()).thenReturn(apiKeyMgtDAO);
         PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
         apimConfigService = Mockito.mock(APIMConfigService.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         Mockito.when(serviceReferenceHolder.getApimConfigService()).thenReturn(apimConfigService);
+    }
+
+    @Test
+    public void testRevokeAPIKeyFederatedWithRemoteId() throws Exception {
+
+        String tenantDomain = "carbon.super";
+        String organization = "org1";
+        String apiUuid = "api-uuid";
+        String environmentUuid = "env-uuid";
+        String keyUuid = "key-uuid";
+        String remoteApiKeyId = "remote-key-id";
+
+        APIKeyInfo apiKeyInfo = createAPIKeyInfo(keyUuid, apiUuid, organization);
+        Map<String, String> properties = new HashMap<>();
+        properties.put("federated.remoteApiKeyId", remoteApiKeyId);
+        apiKeyInfo.setProperties(properties);
+
+        Environment environment = new Environment();
+        environment.setUuid(environmentUuid);
+        environment.setGatewayType("aws");
+
+        FederatedApiKeyConnector federatedApiKeyConnector = Mockito.mock(FederatedApiKeyConnector.class);
+        GatewayAgentConfiguration gatewayAgentConfiguration = Mockito.mock(GatewayAgentConfiguration.class);
+
+        PowerMockito.when(APIUtil.getTenantId(tenantDomain)).thenReturn(-1234);
+        PowerMockito.doNothing().when(APIUtil.class, "sendNotification", Mockito.any(), Mockito.anyString());
+        Mockito.when(apiKeyMgtDAO.getAPIKeyForTenant(keyUuid, tenantDomain)).thenReturn(apiKeyInfo);
+        Mockito.when(apiMgtDAO.getGatewayVendorByAPIUUID(apiUuid)).thenReturn(APIConstants.EXTERNAL_GATEWAY_VENDOR);
+        Mockito.when(apiMgtDAO.getGatewayEnvironmentIdForExternalApi(apiUuid)).thenReturn(environmentUuid);
+        Mockito.when(apiMgtDAO.getEnvironment(organization, environmentUuid)).thenReturn(environment);
+        Mockito.when(serviceReferenceHolder.getExternalGatewayConnectorConfiguration("aws"))
+                .thenReturn(gatewayAgentConfiguration);
+        Mockito.when(gatewayAgentConfiguration.getApiKeyConnectorImplementation()).thenReturn("test.impl.Connector");
+        PowerMockito.when(FederatedApiKeyConnectorFactory.getApiKeyConnector(environment, organization))
+                .thenReturn(federatedApiKeyConnector);
+        Mockito.when(federatedApiKeyConnector.isApiKeySupport()).thenReturn(true);
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        apiAdmin.revokeAPIKey(keyUuid, tenantDomain);
+
+        ArgumentCaptor<FederatedApiKeyContext> contextCaptor = ArgumentCaptor.forClass(FederatedApiKeyContext.class);
+        Mockito.verify(federatedApiKeyConnector, Mockito.times(1)).revokeApiKey(contextCaptor.capture());
+        FederatedApiKeyContext context = contextCaptor.getValue();
+        Assert.assertEquals(apiUuid, context.getApiUuid());
+        Assert.assertEquals(keyUuid, context.getApiKeyUuid());
+        Assert.assertEquals(remoteApiKeyId, context.getRemoteApiKeyId());
+        Assert.assertEquals(organization, context.getOrganizationId());
+        Assert.assertEquals(environmentUuid, context.getEnvironmentId());
+        Assert.assertEquals(apiKeyInfo.getApplicationId(), context.getApplicationUuid());
+        Assert.assertEquals(apiKeyInfo.getAuthUser(), context.getAuthzUser());
+
+        Mockito.verify(apiKeyMgtDAO, Mockito.times(1)).revokeAPIKey(keyUuid, tenantDomain);
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.times(1));
+        APIUtil.sendNotification(Mockito.any(), Mockito.eq(APIConstants.NotifierType.API_KEY.name()));
+    }
+
+    @Test
+    public void testRevokeAPIKeyFederatedWithoutRemoteId() throws Exception {
+
+        String tenantDomain = "carbon.super";
+        String organization = "org1";
+        String apiUuid = "api-uuid";
+        String environmentUuid = "env-uuid";
+        String keyUuid = "key-uuid";
+
+        APIKeyInfo apiKeyInfo = createAPIKeyInfo(keyUuid, apiUuid, organization);
+        apiKeyInfo.setProperties(null);
+
+        Environment environment = new Environment();
+        environment.setUuid(environmentUuid);
+        environment.setGatewayType("aws");
+
+        FederatedApiKeyConnector federatedApiKeyConnector = Mockito.mock(FederatedApiKeyConnector.class);
+        GatewayAgentConfiguration gatewayAgentConfiguration = Mockito.mock(GatewayAgentConfiguration.class);
+
+        PowerMockito.when(APIUtil.getTenantId(tenantDomain)).thenReturn(-1234);
+        PowerMockito.doNothing().when(APIUtil.class, "sendNotification", Mockito.any(), Mockito.anyString());
+        Mockito.when(apiKeyMgtDAO.getAPIKeyForTenant(keyUuid, tenantDomain)).thenReturn(apiKeyInfo);
+        Mockito.when(apiMgtDAO.getGatewayVendorByAPIUUID(apiUuid)).thenReturn(APIConstants.EXTERNAL_GATEWAY_VENDOR);
+        Mockito.when(apiMgtDAO.getGatewayEnvironmentIdForExternalApi(apiUuid)).thenReturn(environmentUuid);
+        Mockito.when(apiMgtDAO.getEnvironment(organization, environmentUuid)).thenReturn(environment);
+        Mockito.when(serviceReferenceHolder.getExternalGatewayConnectorConfiguration("aws"))
+                .thenReturn(gatewayAgentConfiguration);
+        Mockito.when(gatewayAgentConfiguration.getApiKeyConnectorImplementation()).thenReturn("test.impl.Connector");
+        PowerMockito.when(FederatedApiKeyConnectorFactory.getApiKeyConnector(environment, organization))
+                .thenReturn(federatedApiKeyConnector);
+        Mockito.when(federatedApiKeyConnector.isApiKeySupport()).thenReturn(true);
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        apiAdmin.revokeAPIKey(keyUuid, tenantDomain);
+
+        Mockito.verify(federatedApiKeyConnector, Mockito.never()).revokeApiKey(Mockito.any(FederatedApiKeyContext.class));
+        Mockito.verify(apiKeyMgtDAO, Mockito.times(1)).revokeAPIKey(keyUuid, tenantDomain);
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.times(1));
+        APIUtil.sendNotification(Mockito.any(), Mockito.eq(APIConstants.NotifierType.API_KEY.name()));
+    }
+
+    @Test
+    public void testRevokeAPIKeyNonFederatedKeepsLocalBehavior() throws Exception {
+
+        String tenantDomain = "carbon.super";
+        String organization = "org1";
+        String apiUuid = "api-uuid";
+        String keyUuid = "key-uuid";
+
+        APIKeyInfo apiKeyInfo = createAPIKeyInfo(keyUuid, apiUuid, organization);
+
+        PowerMockito.when(APIUtil.getTenantId(tenantDomain)).thenReturn(-1234);
+        PowerMockito.doNothing().when(APIUtil.class, "sendNotification", Mockito.any(), Mockito.anyString());
+        Mockito.when(apiKeyMgtDAO.getAPIKeyForTenant(keyUuid, tenantDomain)).thenReturn(apiKeyInfo);
+        Mockito.when(apiMgtDAO.getGatewayVendorByAPIUUID(apiUuid)).thenReturn("wso2");
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        apiAdmin.revokeAPIKey(keyUuid, tenantDomain);
+
+        Mockito.verify(apiKeyMgtDAO, Mockito.times(1)).revokeAPIKey(keyUuid, tenantDomain);
+        Mockito.verify(apiMgtDAO, Mockito.never()).getGatewayEnvironmentIdForExternalApi(apiUuid);
+        PowerMockito.verifyStatic(APIUtil.class, Mockito.times(1));
+        APIUtil.sendNotification(Mockito.any(), Mockito.eq(APIConstants.NotifierType.API_KEY.name()));
     }
 
     @Test
@@ -451,5 +584,19 @@ public class APIAdminImplTest {
     private void assertUpdateDisabledKeyManagerConfigurationModification(APIManagementException exception) {
         Assert.assertTrue(exception.getMessage().contains("Modification of the Key Manager configuration"));
         Assert.assertEquals(ExceptionCodes.KEY_MANAGER_UPDATE_VIOLATION, exception.getErrorHandler());
+    }
+
+    private APIKeyInfo createAPIKeyInfo(String keyUuid, String apiUuid, String organization) {
+
+        APIKeyInfo apiKeyInfo = new APIKeyInfo();
+        apiKeyInfo.setKeyUUID(keyUuid);
+        apiKeyInfo.setKeyName("sample-key");
+        apiKeyInfo.setKeyType("PRODUCTION");
+        apiKeyInfo.setApiKeyHash("hash-value");
+        apiKeyInfo.setApiUUId(apiUuid);
+        apiKeyInfo.setOrigin(organization);
+        apiKeyInfo.setApplicationId("app-uuid");
+        apiKeyInfo.setAuthUser("admin");
+        return apiKeyInfo;
     }
 }

@@ -456,6 +456,8 @@ public class ApiKeyMgtDAO {
                         } catch (IOException e) {
                             handleException("Failed to convert apiKeyProperties", e);
                         }
+                        keyInfo.setApiUUId(rs.getString("API_UUID"));
+                        keyInfo.setOrigin(rs.getString("ORGANIZATION"));
                     }
                 }
             }
@@ -582,6 +584,16 @@ public class ApiKeyMgtDAO {
                         apiKeyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         apiKeyInfo.setKeyName(rs.getString("NAME"));
                         apiKeyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
+                        try (InputStream apiKeyProperties = rs.getBinaryStream("API_KEY_PROPERTIES")) {
+                            if (apiKeyProperties != null) {
+                                ObjectMapper mapper = new ObjectMapper();
+                                Map<String, String> propertiesMap = mapper.readValue(apiKeyProperties,
+                                        Map.class);
+                                apiKeyInfo.setProperties(propertiesMap);
+                            }
+                        } catch (IOException e) {
+                            handleException("Failed to convert apiKeyProperties", e);
+                        }
                         apiKeyInfo.setAppId(rs.getInt("APPLICATION_ID"));
                     }
                 }
@@ -732,6 +744,16 @@ public class ApiKeyMgtDAO {
                         apiKeyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         apiKeyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
                         apiKeyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
+                        try (InputStream apiKeyProperties = rs.getBinaryStream("API_KEY_PROPERTIES")) {
+                            if (apiKeyProperties != null) {
+                                ObjectMapper mapper = new ObjectMapper();
+                                Map<String, String> propertiesMap = mapper.readValue(apiKeyProperties,
+                                        Map.class);
+                                apiKeyInfo.setProperties(propertiesMap);
+                            }
+                        } catch (IOException e) {
+                            handleException("Failed to convert apiKeyProperties", e);
+                        }
                     }
                 }
             }
