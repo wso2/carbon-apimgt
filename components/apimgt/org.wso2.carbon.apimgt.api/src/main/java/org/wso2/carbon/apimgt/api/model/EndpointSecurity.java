@@ -81,6 +81,9 @@ public class EndpointSecurity {
         this.tokenUrl = endpointSecurity.tokenUrl;
         this.clientId = endpointSecurity.clientId;
         this.clientSecret = endpointSecurity.clientSecret;
+        this.apiKeyIdentifier = endpointSecurity.apiKeyIdentifier;
+        this.apiKeyValue = endpointSecurity.apiKeyValue;
+        this.apiKeyIdentifierType = endpointSecurity.apiKeyIdentifierType;
         this.customParameters = endpointSecurity.customParameters;
         this.additionalProperties = endpointSecurity.additionalProperties;
         this.connectionTimeoutDuration = endpointSecurity.connectionTimeoutDuration;
