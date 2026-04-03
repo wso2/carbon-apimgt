@@ -48,7 +48,8 @@ ExportConsumptionApiService delegate = new ExportConsumptionApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Consumption data exported successfully as a ZIP file. ", response = File.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class) })
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class) })
     public Response exportConsumptionData( @NotNull @ApiParam(value = "Start date of the export range (inclusive). Format: YYYY-MM-DD. ",required=true)  @QueryParam("fromDate") String fromDate,  @NotNull @ApiParam(value = "End date of the export range (inclusive). Format: YYYY-MM-DD. ",required=true)  @QueryParam("toDate") String toDate) throws APIManagementException{
         return delegate.exportConsumptionData(fromDate, toDate, securityContext);
     }

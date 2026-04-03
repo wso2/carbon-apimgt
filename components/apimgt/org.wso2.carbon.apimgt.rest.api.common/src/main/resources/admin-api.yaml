@@ -4683,6 +4683,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         401:
           $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
       security:
         - OAuth2Security:
             - apim:admin
@@ -4690,7 +4692,7 @@ paths:
         - lang: Curl
           source: |
             curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" \
-            "https://127.0.0.1:9443/api/am/admin/v1/export-consumption?fromDate=2026-01-01&toDate=2026-03-31" \
+            "https://127.0.0.1:9443/api/am/admin/v4/export-consumption?fromDate=2026-01-01&toDate=2026-03-31" \
             > consumption-report.zip
       operationId: exportConsumptionData
   ######################################################

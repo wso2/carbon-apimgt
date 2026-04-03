@@ -49,6 +49,25 @@ public class ExportConsumptionApiServiceImpl implements ExportConsumptionApiServ
         // Only super tenant is allowed to access consumption export
         RestApiAdminUtils.checkSuperTenantAccess("consumption export");
 
+        // Validate that date parameters are not null or empty
+        if (fromDate == null || fromDate.trim().isEmpty()) {
+            String msg = "fromDate parameter is required and cannot be empty";
+            ErrorDTO errorDTO = new ErrorDTO();
+            errorDTO.setCode((long) Response.Status.BAD_REQUEST.getStatusCode());
+            errorDTO.setMessage(Response.Status.BAD_REQUEST.toString());
+            errorDTO.setDescription(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+        }
+
+        if (toDate == null || toDate.trim().isEmpty()) {
+            String msg = "toDate parameter is required and cannot be empty";
+            ErrorDTO errorDTO = new ErrorDTO();
+            errorDTO.setCode((long) Response.Status.BAD_REQUEST.getStatusCode());
+            errorDTO.setMessage(Response.Status.BAD_REQUEST.toString());
+            errorDTO.setDescription(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+        }
+
         // Parse and validate date parameters
         LocalDate startDate;
         LocalDate endDate;
@@ -58,6 +77,16 @@ public class ExportConsumptionApiServiceImpl implements ExportConsumptionApiServ
         } catch (DateTimeParseException e) {
             String msg = "Invalid date format. Expected YYYY-MM-DD, got fromDate='"
                     + fromDate + "' toDate='" + toDate + "'";
+            ErrorDTO errorDTO = new ErrorDTO();
+            errorDTO.setCode((long) Response.Status.BAD_REQUEST.getStatusCode());
+            errorDTO.setMessage(Response.Status.BAD_REQUEST.toString());
+            errorDTO.setDescription(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+        }
+
+        // Validate that startDate is not after endDate
+        if (startDate.isAfter(endDate)) {
+            String msg = "Invalid date range: fromDate ('" + fromDate + "') cannot be after toDate ('" + toDate + "')";
             ErrorDTO errorDTO = new ErrorDTO();
             errorDTO.setCode((long) Response.Status.BAD_REQUEST.getStatusCode());
             errorDTO.setMessage(Response.Status.BAD_REQUEST.toString());
