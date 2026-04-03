@@ -77,7 +77,7 @@ public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
                 if (uriHost.matches(nonProxyHost)) {
                     if (log.isDebugEnabled()) {
                         log.debug(
-                                "sheme:'" + uriScheme + "', host:'" + uriHost + "' matches nonProxyHost '"
+                                "scheme:'" + uriScheme + "', host:'" + uriHost + "' matches nonProxyHost '"
                                         + nonProxyHost + "' : NO PROXY");
                     }
                     return true;
@@ -88,17 +88,15 @@ public class ExtendedProxyRoutePlanner extends DefaultProxyRoutePlanner {
             for (String targetProxyHost : targetProxyHosts) {
                 if ("*".equals(targetProxyHost)) {
                     if (log.isDebugEnabled()) {
-                        log.debug(
-                                "scheme:'" + uriScheme + "', host:'" + uriHost + "' matches targetProxyHost '"
-                                        + targetProxyHost + "' : PROXY");
+                        log.debug("scheme:'" + uriScheme + "', host:'" + uriHost + "' matches targetProxyHost '"
+                                + targetProxyHost + "' : PROXY");
                     }
                     return false;
                 }
                 if (uriHost.matches(targetProxyHost)) {
                     if (log.isDebugEnabled()) {
-                        log.debug(
-                                "scheme:'" + uriScheme + "', host:'" + uriHost + "' matches targetProxyHost '"
-                                        + targetProxyHost + "' : PROXY");
+                        log.debug("scheme:'" + uriScheme + "', host:'" + uriHost + "' matches targetProxyHost '"
+                                + targetProxyHost + "' : PROXY");
                     }
                     return false;
                 }
