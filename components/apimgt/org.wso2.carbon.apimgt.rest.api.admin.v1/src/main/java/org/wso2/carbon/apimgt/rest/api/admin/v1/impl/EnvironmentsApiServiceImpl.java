@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -21,9 +22,6 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.federated.gateway.FederatedApiKeyConnectorFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApiService;
-
-import org.apache.cxf.jaxrs.ext.MessageContext;
-
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
@@ -338,7 +336,12 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             return;
         }
 
-        for (ConfigurationDto configurationDto : gatewayConfiguration.getConnectionConfigurations()) {
+        List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
+        if (connectionConfigurations == null || connectionConfigurations.isEmpty()) {
+            return;
+        }
+
+        for (ConfigurationDto configurationDto : connectionConfigurations) {
             mergeMaskedGatewayConfigurationValue(configurationDto, draftProperties, persistedProperties);
         }
     }

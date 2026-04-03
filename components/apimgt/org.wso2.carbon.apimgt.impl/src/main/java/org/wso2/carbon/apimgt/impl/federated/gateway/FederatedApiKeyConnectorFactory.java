@@ -54,7 +54,7 @@ public class FederatedApiKeyConnectorFactory {
     public static FederatedApiKeyConnector getApiKeyConnector(Environment environment, String organization)
             throws APIManagementException {
 
-        String cacheKey = organization + ":" + environment.getUuid();
+        String cacheKey = getCacheKey(organization, environment.getUuid());
         FederatedApiKeyConnector cachedConnector = apiKeyConnectorCache.get(cacheKey);
         if (cachedConnector != null) {
             return cachedConnector;
@@ -96,6 +96,19 @@ public class FederatedApiKeyConnectorFactory {
                 throw new APIManagementException(msg, e);
             }
         }
+    }
+
+    /**
+     * Evicts the cached connector and synchronization lock for the given environment.
+     *
+     * @param organization organization name
+     * @param environmentUuid environment UUID
+     */
+    public static void evictApiKeyConnector(String organization, String environmentUuid) {
+
+        String cacheKey = getCacheKey(organization, environmentUuid);
+        apiKeyConnectorCache.remove(cacheKey);
+        lockMap.remove(cacheKey);
     }
 
     /**
@@ -150,5 +163,10 @@ public class FederatedApiKeyConnectorFactory {
                     + implementationClassName;
             throw new APIManagementException(msg, e);
         }
+    }
+
+    private static String getCacheKey(String organization, String environmentUuid) {
+
+        return organization + ":" + environmentUuid;
     }
 }

@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Context object for federated API key operations.
  */
@@ -28,7 +30,8 @@ public class FederatedApiKeyContext {
     private final String apiReferenceArtifact;
     private final String apiKeyUuid;
     private final String apiKeyName;
-    private final String apiKeyValue;
+    @JsonIgnore
+    private final transient String apiKeyValue;
     private final String remoteApiKeyId;
     private final String authzUser;
     private final String applicationUuid;
@@ -79,6 +82,12 @@ public class FederatedApiKeyContext {
         return apiKeyName;
     }
 
+    /**
+     * Returns the raw API key value for connector operations.
+     * This value is sensitive and must not be logged or serialized.
+     *
+     * @return API key value
+     */
     public String getApiKeyValue() {
         return apiKeyValue;
     }
@@ -157,6 +166,13 @@ public class FederatedApiKeyContext {
             return this;
         }
 
+        /**
+         * Sets the raw API key value for connector operations.
+         * The value is sensitive and must not be logged.
+         *
+         * @param apiKeyValue raw API key value
+         * @return builder instance
+         */
         public Builder apiKeyValue(String apiKeyValue) {
             this.apiKeyValue = apiKeyValue;
             return this;
