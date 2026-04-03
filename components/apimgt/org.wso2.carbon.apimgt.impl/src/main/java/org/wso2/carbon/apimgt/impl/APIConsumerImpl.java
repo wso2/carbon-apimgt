@@ -3207,13 +3207,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Set<SubscribedAPI> subscribedAPISet = new HashSet<>();
         Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(organization, subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
-            if (identifier instanceof APIIdentifier && identifier.equals(api.getAPIIdentifier())) {
+            if (identifier instanceof APIIdentifier
+                    && isMatchingIdentifier(identifier, api.getAPIIdentifier())) {
                 Set<APIKey> keys = getApplicationKeys(api.getApplication().getId());
                 for (APIKey key : keys) {
                     api.addKey(key);
                 }
                 subscribedAPISet.add(api);
-            } else if (identifier instanceof APIProductIdentifier && identifier.equals(api.getProductId())) {
+            } else if (identifier instanceof APIProductIdentifier
+                    && isMatchingIdentifier(identifier, api.getProductId())) {
                 Set<APIKey> keys = getApplicationKeys(api.getApplication().getId());
                 for (APIKey key : keys) {
                     api.addKey(key);
@@ -3222,6 +3224,28 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return subscribedAPISet;
+    }
+
+    /**
+     * Checks whether the requested identifier matches with the subscribed identifier.
+     *
+     * @param requestedIdentifier  requested identifier
+     * @param subscribedIdentifier subscribed identifier
+     * @return true if the requested identifier matches with the subscribed identifier, false otherwise
+     */
+    private boolean isMatchingIdentifier(Identifier requestedIdentifier, Identifier subscribedIdentifier) {
+
+        if (subscribedIdentifier == null) {
+            return false;
+        }
+        if (requestedIdentifier.getClass().equals(subscribedIdentifier.getClass())
+                && requestedIdentifier.equals(subscribedIdentifier)) {
+            return true;
+        }
+        return StringUtils.equals(requestedIdentifier.getName(), subscribedIdentifier.getName())
+                && StringUtils.equals(requestedIdentifier.getVersion(), subscribedIdentifier.getVersion())
+                && StringUtils.equals(APIUtil.replaceEmailDomainBack(requestedIdentifier.getProviderName()),
+                APIUtil.replaceEmailDomainBack(subscribedIdentifier.getProviderName()));
     }
 
     /**
