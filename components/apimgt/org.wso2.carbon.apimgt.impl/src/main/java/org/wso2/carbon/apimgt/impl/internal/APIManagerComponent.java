@@ -118,6 +118,7 @@ import org.wso2.carbon.registry.core.utils.AuthorizationUtils;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
+import org.wso2.carbon.usage.data.exporter.ConsumptionDataExportService;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
@@ -1157,5 +1158,19 @@ public class APIManagerComponent {
     }
     protected void unsetFederatedAPIDiscovery(FederatedAPIDiscoveryService federatedAPIDiscoveryService) {
         ServiceReferenceHolder.getInstance().setFederatedAPIDiscovery(null);
+    }
+
+    @Reference(
+            name = "consumption.data.export.service",
+            service = ConsumptionDataExportService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConsumptionDataExportService")
+    protected void setConsumptionDataExportService(ConsumptionDataExportService consumptionDataExportService) {
+        ServiceReferenceHolder.getInstance().setConsumptionDataExportService(consumptionDataExportService);
+    }
+
+    protected void unsetConsumptionDataExportService(ConsumptionDataExportService consumptionDataExportService) {
+        ServiceReferenceHolder.getInstance().setConsumptionDataExportService(null);
     }
 }

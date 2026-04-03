@@ -34,6 +34,7 @@ public class SettingsDTO   {
     private Boolean transactionCounterEnable = null;
     private Boolean isGatewayNotificationEnabled = false;
     private String universalGatewayVersion = null;
+    private Boolean consumptionExportEnabled = null;
 
   /**
    **/
@@ -212,6 +213,24 @@ public class SettingsDTO   {
     this.universalGatewayVersion = universalGatewayVersion;
   }
 
+  /**
+   * Whether the ConsumptionDataExportService OSGi service is available
+   **/
+  public SettingsDTO consumptionExportEnabled(Boolean consumptionExportEnabled) {
+    this.consumptionExportEnabled = consumptionExportEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Whether the ConsumptionDataExportService OSGi service is available")
+  @JsonProperty("consumptionExportEnabled")
+  public Boolean isConsumptionExportEnabled() {
+    return consumptionExportEnabled;
+  }
+  public void setConsumptionExportEnabled(Boolean consumptionExportEnabled) {
+    this.consumptionExportEnabled = consumptionExportEnabled;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -231,12 +250,13 @@ public class SettingsDTO   {
         Objects.equals(analyticsEnabled, settings.analyticsEnabled) &&
         Objects.equals(transactionCounterEnable, settings.transactionCounterEnable) &&
         Objects.equals(isGatewayNotificationEnabled, settings.isGatewayNotificationEnabled) &&
-        Objects.equals(universalGatewayVersion, settings.universalGatewayVersion);
+        Objects.equals(universalGatewayVersion, settings.universalGatewayVersion) &&
+        Objects.equals(consumptionExportEnabled, settings.consumptionExportEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable, isGatewayNotificationEnabled, universalGatewayVersion);
+    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable, isGatewayNotificationEnabled, universalGatewayVersion, consumptionExportEnabled);
   }
 
   @Override
@@ -254,6 +274,7 @@ public class SettingsDTO   {
     sb.append("    transactionCounterEnable: ").append(toIndentedString(transactionCounterEnable)).append("\n");
     sb.append("    isGatewayNotificationEnabled: ").append(toIndentedString(isGatewayNotificationEnabled)).append("\n");
     sb.append("    universalGatewayVersion: ").append(toIndentedString(universalGatewayVersion)).append("\n");
+    sb.append("    consumptionExportEnabled: ").append(toIndentedString(consumptionExportEnabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }

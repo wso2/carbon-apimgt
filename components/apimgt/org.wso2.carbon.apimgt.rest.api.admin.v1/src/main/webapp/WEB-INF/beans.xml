@@ -57,6 +57,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.LabelsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.AiServiceProvidersApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.ApiKeysApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.ExportConsumptionApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

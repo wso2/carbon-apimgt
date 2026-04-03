@@ -2050,6 +2050,11 @@
                 <artifactId>mcp-transformer-java</artifactId>
                 <version>${mcp.transformer.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.usage.data.exporter</artifactId>
+                <version>${carbon.usage.data.exporter.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -2076,6 +2081,9 @@
         <carbon.kernel.version>4.11.12</carbon.kernel.version>
         <carbon.kernel.feature.version>${carbon.kernel.version}</carbon.kernel.feature.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
+
+        <!-- Carbon usage data exporter version -->
+        <carbon.usage.data.exporter.version>1.0.1</carbon.usage.data.exporter.version>
 
         <carbon.commons.version>4.13.3</carbon.commons.version>
 

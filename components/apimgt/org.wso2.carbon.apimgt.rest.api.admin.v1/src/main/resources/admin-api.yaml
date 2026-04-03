@@ -4632,6 +4632,67 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+    ######################################################
+  # Export API Consumption Data
+  ######################################################
+  /export-consumption:
+    get:
+      tags:
+        - Consumption
+      summary: |
+        Export API Consumption Data
+      description: |
+        This operation provides a ZIP archive containing API consumption/usage data
+        for a given date range.
+      parameters:
+        - name: fromDate
+          in: query
+          description: |
+            Start date of the export range (inclusive). Format: YYYY-MM-DD.
+          required: true
+          schema:
+            type: string
+        - name: toDate
+          in: query
+          description: |
+            End date of the export range (inclusive). Format: YYYY-MM-DD.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            Consumption data exported successfully as a ZIP file.
+          headers:
+            Content-Disposition:
+              description: |
+                Indicates the filename for the download (e.g., consumption-report.zip).
+              schema:
+                type: string
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: |
+            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" \
+            "https://127.0.0.1:9443/api/am/admin/v1/export-consumption?fromDate=2026-01-01&toDate=2026-03-31" \
+            > consumption-report.zip
+      operationId: exportConsumptionData
   ######################################################
   # The "Label Collection" resource API
   ######################################################
@@ -6690,6 +6751,10 @@ components:
           type: string
           description: Universal Gateway version for quick-start guide (e.g. "0.11.0")
           example: "0.11.0"
+        consumptionExportEnabled:
+          type: boolean
+          description: Whether the ConsumptionDataExportService OSGi service is available
+          example: false
     ScopeList:
       title: Scope Role Mapping List
       type: object
