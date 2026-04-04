@@ -64,6 +64,8 @@ public class SettingsMappingUtil {
         settingsDTO.setOrgAccessControlEnabled(APIUtil.isOrganizationAccessControlEnabled());
         settingsDTO.setIsGatewayNotificationEnabled(APIUtil.isGatewayNotificationEnabled());
         settingsDTO.setUniversalGatewayVersion(resolveUniversalGatewayVersion());
+        settingsDTO.setConsumptionExportEnabled(
+                ServiceReferenceHolder.getInstance().getConsumptionDataExportService() != null);
         return settingsDTO;
     }
 

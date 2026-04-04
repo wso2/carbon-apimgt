@@ -21,6 +21,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -38,7 +40,11 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AIAPIQuotaLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.*;
@@ -53,6 +59,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class RestApiAdminUtils {
+
+    private static final Log log = LogFactory.getLog(RestApiAdminUtils.class);
 
     private RestApiAdminUtils() {}
 
@@ -483,6 +491,22 @@ public class RestApiAdminUtils {
                             combinedMessage
                     )
             );
+        }
+    }
+
+    /**
+     * Validates that the logged-in user belongs to the super tenant.
+     * Throws a ForbiddenException if the user is from a non-super tenant.
+     *
+     * @param resourceDescription a short description of the resource being accessed, used in the error message
+     * @throws ForbiddenException if the logged-in user is not from the super tenant
+     */
+    public static void checkSuperTenantAccess(String resourceDescription) throws ForbiddenException {
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            RestApiUtil.handleAuthorizationFailure("You are not allowed to access this resource",
+                    new APIManagementException("Tenant " + tenantDomain + " is not allowed to access " +
+                            resourceDescription + ". Only super tenant is allowed"), log);
         }
     }
 }

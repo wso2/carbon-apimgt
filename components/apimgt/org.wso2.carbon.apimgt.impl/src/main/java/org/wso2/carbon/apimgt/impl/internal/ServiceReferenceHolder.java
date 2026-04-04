@@ -52,6 +52,7 @@ import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
+import org.wso2.carbon.usage.data.exporter.ConsumptionDataExportService;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -94,6 +95,7 @@ public class ServiceReferenceHolder {
     private WorkflowTaskService workflowTaskService;
     private FederatedAPIDiscoveryService federatedAPIDiscoveryService;
     private OpaqueAPIKeyNotifier opaqueApiKeyNotifier;
+    private ConsumptionDataExportService consumptionDataExportService;
 
     private Map<String, LLMProviderService> llmProviderServiceMap = new HashMap();
 
@@ -488,4 +490,13 @@ public class ServiceReferenceHolder {
     public PlatformGatewayDeploymentEventService getPlatformGatewayDeploymentEventService() {
         return PlatformGatewayDeploymentEventServiceImpl.getInstance();
     }
+
+    public ConsumptionDataExportService getConsumptionDataExportService() {
+        return consumptionDataExportService;
+    }
+
+    public void setConsumptionDataExportService(ConsumptionDataExportService consumptionDataExportService) {
+        this.consumptionDataExportService = consumptionDataExportService;
+    }
+
 }
