@@ -28,9 +28,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.usage.data.exporter.ConsumptionDataExportService;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
@@ -111,23 +108,12 @@ public class ExportConsumptionApiServiceImpl implements ExportConsumptionApiServ
             String zipFilename = String.format(ZIP_FILENAME_TEMPLATE, fromDate, toDate);
             String jsonEntryFilename = String.format(JSON_ENTRY_FILENAME_TEMPLATE, fromDate, toDate);
             byte[] zipBytes = exportService.exportConsumptionDataAsZip(startDate, endDate, jsonEntryFilename);
-            File tempFile = File.createTempFile("consumption-export-", ".zip");
-            tempFile.deleteOnExit();
-            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
-                fos.write(zipBytes);
-            }
-            return Response.ok(tempFile)
+            return Response.ok(zipBytes)
                     .type(RestApiConstants.APPLICATION_ZIP)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                             "attachment; filename=\"" + zipFilename + "\"")
+                    .header("Content-Length", String.valueOf(zipBytes.length))
                     .build();
-        } catch (IOException e) {
-            String msg = "Error writing consumption zip to temporary file for range " + fromDate + " to " + toDate;
-            ErrorDTO errorDTO = new ErrorDTO();
-            errorDTO.setCode((long) Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-            errorDTO.setMessage(Response.Status.INTERNAL_SERVER_ERROR.toString());
-            errorDTO.setDescription(msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         } catch (Exception e) {
             String msg = "Error exporting consumption data for range " + fromDate + " to " + toDate;
             ErrorDTO errorDTO = new ErrorDTO();
