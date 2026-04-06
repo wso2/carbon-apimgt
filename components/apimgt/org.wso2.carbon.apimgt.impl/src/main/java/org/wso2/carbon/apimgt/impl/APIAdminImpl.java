@@ -2545,8 +2545,10 @@ public class APIAdminImpl implements APIAdmin {
             return null;
         }
 
-        Environment environment = apiMgtDAO.getEnvironment(organization, envId);
-        if (environment == null) {
+        Environment environment;
+        try {
+            environment = getEnvironmentWithoutPropertyMasking(organization, envId);
+        } catch (APIMgtResourceNotFoundException e) {
             log.warn("Gateway environment not found: " + envId + " for API: " + apiUuid);
             return null;
         }

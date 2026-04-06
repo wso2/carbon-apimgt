@@ -4262,9 +4262,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         String apiUuid = apiKeyInfo.getApiUUId();
         if (StringUtils.isNotBlank(apiUuid)) {
-            String organization = StringUtils.isNotBlank(apiKeyInfo.getOrigin())
-                    ? apiKeyInfo.getOrigin()
-                    : apiMgtDAO.getOrganizationByAPIUUID(apiUuid);
+            String organization = apiMgtDAO.getOrganizationByAPIUUID(apiUuid);
             if (StringUtils.isNotBlank(organization)) {
                 API api = getInternalAPIByUUID(apiUuid, organization);
                 FederatedApiKeyConnector federatedApiKeyConnector = resolveFederatedApiKeyConnector(api, organization);
@@ -4654,27 +4652,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             remoteApiKeyId = result.getRemoteCredentialId();
             props.put(FEDERATED_API_KEY_REMOTE_ID, remoteApiKeyId);
-            String remotePolicyId = resolveRemotePolicyIdForAssociatedSubscription(
-                    apiUUId, organization, envId, apiKeyInfo.getApplicationId(), federatedApiKeyConnector);
-            if (StringUtils.isNotBlank(remotePolicyId)) {
-                FederatedApiKeyContext associationContext = FederatedApiKeyContext.builder()
-                        .apiUuid(resolvedApi != null ? resolvedApi.getUuid() : null)
-                        .apiName(resolvedApi != null && resolvedApi.getId() != null ? resolvedApi.getId().getApiName() : null)
-                        .apiReferenceArtifact(apiReferenceArtifact)
-                        .apiKeyUuid(apiKeyUuid)
-                        .apiKeyName(apiKeyInfo.getKeyName())
-                        .apiKeyValue(null)
-                        .remoteApiKeyId(remoteApiKeyId)
-                        .authzUser(username)
-                        .applicationUuid(apiKeyInfo.getApplicationId())
-                        .organizationId(organization)
-                        .environmentId(envId)
-                        .build();
-                federatedApiKeyConnector.applyRateLimitPolicy(associationContext, remotePolicyId);
-            }
         }
         apiKeyInfoDTO.setApiKeyProperties(props);
         apiKeyInfoDTO.setApiKey(apiKey);
+        // Shared lookup used by the normal gateway flow below.
         Application application = null;
         if (StringUtils.isNotBlank(apiKeyInfo.getApplicationId())) {
             application = getLightweightApplicationByUUID(apiKeyInfo.getApplicationId());
@@ -4709,14 +4690,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         regeneratedApiKeyInfo.setKeyName(apiKeyInfo.getKeyName());
         regeneratedApiKeyInfo.setApiKey(apiKey);
         regeneratedApiKeyInfo.setValidityPeriod(apiKeyInfo.getValidityPeriod());
-        if (StringUtils.isNotBlank(apiKeyInfo.getApplicationId())) {
-            Application associatedApplication = getLightweightApplicationByUUID(apiKeyInfo.getApplicationId());
-            if (associatedApplication != null) {
-                createAssociationToApp(resolvedApi, apiKeyInfoDTO.getKeyId(), associatedApplication, tenantDomain,
-                        username);
+        if (application != null) {
+            createAssociationToApp(resolvedApi, apiKeyInfoDTO.getKeyId(), application, tenantDomain, username);
         }
-        }
-        // --- Normal gateway: publish events to platform ---
+        // Normal gateway events are published.
         if (federatedApiKeyConnector == null) {
             // Regenerate = same key name, new value: send apikey.updated so platform updates in place.
         PlatformGatewayAPIKeyEventService eventService =
@@ -4809,7 +4786,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             String subscriptionTierName = subscribedAPI.getTier() != null ? subscribedAPI.getTier().getName() : null;
             if (StringUtils.isBlank(subscriptionTierName)) {
-                throw new APIManagementException("Subscription tier is required for federated usage plan mapping",
+                throw new APIManagementException("Subscription tier is required for federated external tier mapping",
                         ExceptionCodes.SUBSCRIPTION_STATE_INVALID);
             }
             envId = resolveGatewayEnvironmentId(resolvedApi);
@@ -5017,7 +4994,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     private FederatedApiKeyConnector resolveFederatedApiKeyConnector(API api, String organization)
             throws APIManagementException {
-        if (!isFederatedGatewayApi(api) || StringUtils.isBlank(organization)) {
+        if (api == null || StringUtils.isBlank(organization)) {
+            return null;
+        }
+        populateGatewayVendor(api);
+        if (!isFederatedGatewayApi(api)) {
             return null;
         }
         String envId = resolveGatewayEnvironmentId(api);
@@ -5071,23 +5052,27 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException("Gateway environment not found: " + envId);
         }
         if (StringUtils.isBlank(localTierName)) {
-            throw new APIManagementException("Local application tier is required for usage plan mapping");
+            throw new APIManagementException("Local application tier is required for external tier mapping");
         }
         List<GatewayTierMapping> tierMappings = environment.getTierMappings();
         if (tierMappings == null || tierMappings.isEmpty()) {
-            throw new APIManagementException("No usage plan mappings configured for environment: " + envId);
+            throw new APIManagementException("No external tier mappings configured for environment: " + envId);
         }
         for (GatewayTierMapping tierMapping : tierMappings) {
             if (tierMapping != null && StringUtils.equalsIgnoreCase(localTierName, tierMapping.getLocalTierName())) {
+                if (StringUtils.isBlank(tierMapping.getRemotePlanReference())) {
+                    throw new APIManagementException("External tier is not configured for local tier: "
+                                     + localTierName);
+                }
                 String remotePolicyId = agent.resolveRemotePolicyId(tierMapping.getRemotePlanReference());
                 if (StringUtils.isBlank(remotePolicyId)) {
-                    throw new APIManagementException("Remote usage plan is not configured for local tier: "
+                    throw new APIManagementException("External tier is not configured for local tier: "
                             + localTierName);
                 }
                 return remotePolicyId;
             }
         }
-        throw new APIManagementException("No usage plan mapping found for local tier: " + localTierName);
+        throw new APIManagementException("No external tier mapping found for local tier: " + localTierName);
     }
 
     private API getInternalAPIByUUID(String uuid, String organization) throws APIManagementException {

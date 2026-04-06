@@ -101,27 +101,24 @@ public class ApiKeyMgtDAO {
                     }
                     ps.setString(10, "ACTIVE");
                     ps.executeUpdate();
-                    conn.commit();
                 }
                 if (keyInfoDTO.getApiId() != null) {
                     try (PreparedStatement ps = conn.prepareStatement(addApiKeyToApiMappingSql)) {
                         ps.setString(1, keyInfoDTO.getKeyId());
                         ps.setString(2, keyInfoDTO.getApiId());
                         ps.executeUpdate();
-                        conn.commit();
                     }
-                } if (keyInfoDTO.getApplicationId() != null) {
+                }
+                if (keyInfoDTO.getApplicationId() != null) {
                     try (PreparedStatement ps = conn.prepareStatement(addApiKeyToAppMappingSql)) {
                         ps.setString(1, keyInfoDTO.getKeyId());
                         ps.setString(2, keyInfoDTO.getApplicationId());
                         ps.executeUpdate();
-                        conn.commit();
                     }
                 }
-            } catch (SQLException e) {
+                conn.commit();
+            } catch (SQLException | IOException e) {
                 conn.rollback();
-                handleException("Failed to add generated API key", e);
-            } catch (IOException e) {
                 handleException("Failed to add generated API key", e);
             }
         } catch (SQLException e) {

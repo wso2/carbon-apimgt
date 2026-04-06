@@ -40,7 +40,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayTierMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -331,17 +330,15 @@ public class EnvironmentMappingUtil {
         for (GatewayTierMapping mapping : tierMappings) {
             GatewayTierMappingDTO dto = new GatewayTierMappingDTO();
             dto.setLocalTierName(mapping.getLocalTierName());
-            Map<String, Object> refMap = Collections.emptyMap();
+            Map<String, Object> refMap = null;
             if (mapping.getRemotePlanReference() != null) {
                 try {
                     refMap = OBJECT_MAPPER.readValue(mapping.getRemotePlanReference(),
                             new TypeReference<Map<String, Object>>() {});
                 } catch (JsonProcessingException e) {
-                    log.warn("Invalid JSON in remote plan reference for tier: " + mapping.getLocalTierName()
-                            + ", treating it as a raw value");
-                    // Stored value is not valid JSON; expose as-is under "raw" key
-                    refMap = new HashMap<>();
-                    refMap.put("raw", mapping.getRemotePlanReference());
+                    String tierName = StringUtils.defaultIfBlank(mapping.getLocalTierName(), "<unknown>");
+                    log.error("Failed to deserialize remote plan reference for tier: " + tierName, e);
+                    throw new IllegalArgumentException("Invalid remote plan reference for tier: " + tierName, e);
                 }
             }
             dto.setRemotePlanReference(refMap);
