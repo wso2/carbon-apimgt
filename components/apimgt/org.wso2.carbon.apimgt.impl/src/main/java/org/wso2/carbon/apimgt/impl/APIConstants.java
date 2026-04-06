@@ -3106,6 +3106,8 @@ public final class APIConstants {
         public static final String WSO2_IS7_KEY_MANAGER_TYPE = "WSO2-IS-7";
         public static final String SP_NAME_APPLICATION = "sp.name.application";
 
+        public static final String INITIAL_CONSUMER_SECRET = "INITIAL_CONSUMER_SECRET";
+
         public static final String ISSUER = "issuer";
         public static final String JWKS_ENDPOINT = "jwks_endpoint";
         public static final String USERINFO_ENDPOINT = "userinfo_endpoint";

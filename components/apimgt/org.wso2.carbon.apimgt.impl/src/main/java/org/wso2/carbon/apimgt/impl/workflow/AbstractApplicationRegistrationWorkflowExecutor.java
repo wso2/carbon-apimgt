@@ -152,6 +152,15 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             //createApplication on oAuthorization server.
             OAuthApplicationInfo oAuthApplication = keyManager.createApplication(workflowDTO.getAppInfoDTO());
 
+            // Store the initial consumer secret for one-time retrieval after approval workflow completion.
+            // When using approval workflows, the generate-keys response returns null (pending approval),
+            // so the user never sees the full secret. This parameter allows getApplicationKeys() to
+            // return the full secret on the first retrieval after approval.
+            if (oAuthApplication.getClientSecret() != null) {
+                oAuthApplication.addParameter(APIConstants.KeyManager.INITIAL_CONSUMER_SECRET,
+                        oAuthApplication.getClientSecret());
+            }
+
             //update associateApplication
             ApplicationUtils
                     .updateOAuthAppAssociation(application, workflowDTO.getKeyType(), oAuthApplication, keyManagerId);
