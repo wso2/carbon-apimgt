@@ -70,23 +70,29 @@ public class SchemaValidator extends AbstractHandler {
         logger.debug("Validating the API request Body content..");
         OpenAPI openAPI = (OpenAPI) messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
         if (openAPI != null) {
-            OpenApiInteractionValidator validator = getOpenAPIValidator(openAPI);
-            OpenAPIRequest request = new OpenAPIRequest(messageContext);
+            try {
+                OpenApiInteractionValidator validator = getOpenAPIValidator(openAPI);
+                OpenAPIRequest request = new OpenAPIRequest(messageContext);
 
-            ValidationReport validationReport = validator.validateRequest(request);
-            messageContext.setProperty(APIMgtGatewayConstants.SCHEMA_VALIDATION_REPORT, validationReport);
-            if (validationReport.hasErrors()) {
-                StringBuilder finalMessage = new StringBuilder();
-                for (ValidationReport.Message message : validationReport.getMessages()) {
-                    finalMessage.append(getErrorMessage(message)).append(", ");
+                ValidationReport validationReport = validator.validateRequest(request);
+                messageContext.setProperty(APIMgtGatewayConstants.SCHEMA_VALIDATION_REPORT, validationReport);
+                if (validationReport.hasErrors()) {
+                    StringBuilder finalMessage = new StringBuilder();
+                    for (ValidationReport.Message message : validationReport.getMessages()) {
+                        finalMessage.append(getErrorMessage(message)).append(", ");
+                    }
+                    // Remove the last comma and space, if present
+                    if (finalMessage.length() > 0) {
+                        finalMessage.setLength(finalMessage.length() - 2);
+                    }
+                    String errMessage = "Schema validation failed in the Request: ";
+                    logger.error(errMessage);
+                    GatewayUtils.handleThreat(messageContext, HTTP_SC_CODE, errMessage + finalMessage);
                 }
-                // Remove the last comma and space, if present
-                if (finalMessage.length() > 0) {
-                    finalMessage.setLength(finalMessage.length() - 2);
-                }
-                String errMessage = "Schema validation failed in the Request: ";
-                logger.error(errMessage);
-                GatewayUtils.handleThreat(messageContext, HTTP_SC_CODE, errMessage + finalMessage);
+            } catch (Throwable t) {
+                String errMessage = "Internal error while validating request schema: " + t.getMessage();
+                logger.error(errMessage, t);
+                GatewayUtils.handleThreat(messageContext, INTERNAL_ERROR_CODE, errMessage);
             }
         }
         return true;
@@ -97,23 +103,29 @@ public class SchemaValidator extends AbstractHandler {
 
         OpenAPI openAPI = (OpenAPI) messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
         if (openAPI != null) {
-            OpenApiInteractionValidator validator = getOpenAPIValidator(openAPI);
-            OpenAPIResponse response = new OpenAPIResponse(messageContext);
+            try {
+                OpenApiInteractionValidator validator = getOpenAPIValidator(openAPI);
+                OpenAPIResponse response = new OpenAPIResponse(messageContext);
 
-            ValidationReport validationReport = validator.validateResponse(response.getPath(), response.getMethod(),
-                    response);
-            if (validationReport.hasErrors()) {
-                StringBuilder finalMessage = new StringBuilder();
-                for (ValidationReport.Message message : validationReport.getMessages()) {
-                    finalMessage.append(getErrorMessage(message)).append(", ");
+                ValidationReport validationReport = validator.validateResponse(response.getPath(), response.getMethod(),
+                        response);
+                if (validationReport.hasErrors()) {
+                    StringBuilder finalMessage = new StringBuilder();
+                    for (ValidationReport.Message message : validationReport.getMessages()) {
+                        finalMessage.append(getErrorMessage(message)).append(", ");
+                    }
+                    // Remove the last comma and space, if present
+                    if (finalMessage.length() > 0) {
+                        finalMessage.setLength(finalMessage.length() - 2);
+                    }
+                    String errMessage = "Schema validation failed in the Response: ";
+                    logger.error(errMessage);
+                    GatewayUtils.handleThreat(messageContext, INTERNAL_ERROR_CODE, errMessage + finalMessage);
                 }
-                // Remove the last comma and space, if present
-                if (finalMessage.length() > 0) {
-                    finalMessage.setLength(finalMessage.length() - 2);
-                }
-                String errMessage = "Schema validation failed in the Response: ";
-                logger.error(errMessage);
-                GatewayUtils.handleThreat(messageContext, INTERNAL_ERROR_CODE, errMessage + finalMessage);
+            } catch (Throwable t) {
+                String errMessage = "Internal error while validating response schema: " + t.getMessage();
+                logger.error(errMessage, t);
+                GatewayUtils.handleThreat(messageContext, INTERNAL_ERROR_CODE, errMessage);
             }
         }
         return true;
