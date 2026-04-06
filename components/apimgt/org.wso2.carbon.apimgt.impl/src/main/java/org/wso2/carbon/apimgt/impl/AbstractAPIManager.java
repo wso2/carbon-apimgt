@@ -1143,6 +1143,7 @@ public abstract class AbstractAPIManager implements APIManager {
         Set<APIKey> resultantApiKeyList = new HashSet<>();
         for (APIKey apiKey : apiKeyList) {
             String keyManagerName = apiKey.getKeyManager();
+            String dbKeyManagerId = keyManagerName;
             String consumerKey = apiKey.getConsumerKey();
             String tenantDomain = this.tenantDomain;
             if (StringUtils.isNotEmpty(xWso2Tenant)) {
@@ -1214,6 +1215,27 @@ public abstract class AbstractAPIManager implements APIManager {
                                 if (StringUtils.isEmpty(oAuthApplicationInfo.getClientSecret()) &&
                                         StringUtils.isNotEmpty(storedOAuthApplicationInfo.getClientSecret())) {
                                     oAuthApplicationInfo.setClientSecret(storedOAuthApplicationInfo.getClientSecret());
+                                }
+                            }
+                            // Check for pending initial consumer secret from approval workflow.
+                            // When keys are generated via an approval workflow, the user never sees the
+                            // full secret. Return the stored full secret on the first retrieval and clear
+                            // the flag so subsequent retrievals return the masked secret from the KM.
+                            if (storedOAuthApplicationInfo != null) {
+                                Object initialSecret = storedOAuthApplicationInfo
+                                        .getParameter(APIConstants.KeyManager.INITIAL_CONSUMER_SECRET);
+                                if (initialSecret instanceof String) {
+                                    oAuthApplicationInfo.setClientSecret((String) initialSecret);
+                                    storedOAuthApplicationInfo
+                                            .removeParameter(APIConstants.KeyManager.INITIAL_CONSUMER_SECRET);
+                                    try {
+                                        apiMgtDAO.updateApplicationKeyTypeMetaData(applicationId,
+                                                apiKey.getType(),
+                                                dbKeyManagerId,
+                                                storedOAuthApplicationInfo);
+                                    } catch (APIManagementException e) {
+                                        log.error("Error clearing initial consumer secret flag", e);
+                                    }
                                 }
                             }
                         }
