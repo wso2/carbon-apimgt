@@ -38,10 +38,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Map;
 import java.util.List;
-import java.util.TimeZone;
+
 
 /**
  * This class represents the ApiKeyMgtDAO
@@ -90,14 +89,12 @@ public class ApiKeyMgtDAO {
                     ps.setString(4, keyInfoDTO.getKeyType());
                     ps.setBinaryStream(5, new ByteArrayInputStream(properties), properties.length);
                     ps.setString(6, keyInfoDTO.getAuthUser());
-                    ps.setTimestamp(7, new Timestamp(keyInfoDTO.getCreatedTime()),
-                            Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+                    ps.setTimestamp(7, new Timestamp(keyInfoDTO.getCreatedTime()));
                     ps.setLong(8, keyInfoDTO.getValidityPeriod());
                     if (keyInfoDTO.getLastUsedTime() == null) {
                         ps.setNull(9, Types.TIMESTAMP);
                     } else {
-                        ps.setTimestamp(9, new Timestamp(keyInfoDTO.getLastUsedTime()),
-                                Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+                        ps.setTimestamp(9, new Timestamp(keyInfoDTO.getLastUsedTime()));
                     }
                     ps.setString(10, "ACTIVE");
                     ps.executeUpdate();
