@@ -573,6 +573,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 null).getApiKey();
     }
 
+    /**
+     * Generates an API key
+     *
+     * @param application      The Application Object that represents the Application.
+     * @param userName         Username of the user requesting the api key.
+     * @param validityPeriod   Requested validity period for the api key.
+     * @param permittedIP      Permitted IP addresses for the api key.
+     * @param permittedReferer Permitted referrers for the api key.
+     * @param keyName          Name of the api key.
+     * @return
+     * @throws APIManagementException
+     */
     private APIKeyDTO generateApiKey(Application application, String userName, long validityPeriod, String permittedIP,
                                      String permittedReferer, String keyName, Long lastUsedTime)
             throws APIManagementException {
@@ -4377,8 +4389,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         regeneratedApiKeyInfo.setApiKey(apiKeyDTO.getApiKey());
         regeneratedApiKeyInfo.setValidityPeriod(apiKeyDTO.getValidityPeriod());
         regeneratedApiKeyInfo.setCreatedTime(apiKeyDTO.getCreatedTime());
-        broadcastApplicationScopedOpaqueApiKeyUpdatedToPlatformGateways(application, apiKeyDTO.getApiKey(),
-                apiKeyInfo.getKeyName(), apiKeyInfo.getValidityPeriod(), apiKeyDTO.getCreatedTime(), username);
         return regeneratedApiKeyInfo;
     }
 
@@ -4842,11 +4852,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         // --- Normal gateway: publish association event ---
         if (federatedApiKeyConnector == null) {
-        APIKeyAssociationEvent apiKeyAssociationEvent =
-                new APIKeyAssociationEvent(APIConstants.EventType.API_KEY_ASSOCIATION_CREATE.name(),
-                            apiKeyInfo.getApiKeyHash(), appUUId, apiUUId, api.getId().getId(),
-                            resolvedApplication.getId(), tenantId, tenantDomain);
-        APIUtil.sendNotification(apiKeyAssociationEvent, APIConstants.NotifierType.API_KEY.name());
+            int resolvedApiId = resolvedApi != null ? resolvedApi.getId().getId() : apiMgtDAO.getAPIID(apiUUId);
+            APIKeyAssociationEvent apiKeyAssociationEvent =
+                    new APIKeyAssociationEvent(APIConstants.EventType.API_KEY_ASSOCIATION_CREATE.name(),
+                                apiKeyInfo.getApiKeyHash(), appUUId, apiUUId, resolvedApiId,
+                                resolvedApplication.getId(), tenantId, tenantDomain);
+            APIUtil.sendNotification(apiKeyAssociationEvent, APIConstants.NotifierType.API_KEY.name());
         }
         apiKeyInfo.setApplicationName(resolvedApplication.getName());
         return apiKeyInfo;
