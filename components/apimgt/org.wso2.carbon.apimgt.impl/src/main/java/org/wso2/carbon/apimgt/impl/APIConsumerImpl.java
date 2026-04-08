@@ -46,7 +46,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.FederatedApiKeyConnector;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
@@ -77,11 +76,8 @@ import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.FederatedApiKeyContext;
-import org.wso2.carbon.apimgt.api.model.FederatedApiKeyCreationResult;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
-import org.wso2.carbon.apimgt.api.model.GatewayTierMapping;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
@@ -132,7 +128,6 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
-import org.wso2.carbon.apimgt.impl.federated.gateway.FederatedApiKeyConnectorFactory;
 import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
@@ -642,6 +637,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 null).getApiKey();
     }
 
+    /**
+     * Generates a new api bound api key
+     *
+     * @param api              The API Object that represents the API.
+     * @param userName         Username of the user requesting the api key.
+     * @param validityPeriod   Requested validity period for the api key.
+     * @param permittedIP      Permitted IP addresses for the api key.
+     * @param permittedReferer Permitted referrers for the api key.
+     * @param keyName          Name of the api key.
+     * @param keyType          Key type of the api key.
+     * @return Generated api key.
+     * @throws APIManagementException
+     */
     private APIKeyDTO generateApiApiKey(API api, String userName, long validityPeriod, String permittedIP,
                                         String permittedReferer, String keyName, String keyType, Long lastUsedTime)
             throws APIManagementException {
@@ -666,10 +674,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiKeyInfoDTO.setKeyId(apiKeyUuid);
         apiKeyInfoDTO.setLastUsedTime(lastUsedTime);
         apiKeyInfoDTO.setApiKey(apiKey);
-        // For federated gateways, set status to PENDING until async gateway sync completes
-        if (isFederated) {
-            apiKeyInfoDTO.setStatus(APIConstants.ApiKeyStatus.PENDING_GATEWAY_SYNC);
-        }
         apiKeyMgtDAO.addAPIKey(apiKeyHash, apiKeyInfoDTO);
 
         if (isFederated) {
@@ -4206,8 +4210,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public void revokeApiKey(String keyUUID, String tenantDomain, String username) throws APIManagementException {
 
         APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKey(keyUUID, username);
-        if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
-            throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUID);
+        if (apiKeyInfo == null || apiKeyInfo.getKeyUUID() == null) {
+            throw new APIMgtResourceNotFoundException("Active API key not found for UUID: " + keyUUID);
         }
         if (!isAuthorizedApiKeyUser(username, apiKeyInfo.getAuthUser())) {
             throw new APIMgtAuthorizationFailedException(
@@ -4583,11 +4587,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String apiKeyUuid = UUID.randomUUID().toString();
         apiKeyInfoDTO.setKeyId(apiKeyUuid);
         apiKeyInfoDTO.setApiKey(apiKey);
-
-        // For federated gateways, set status to PENDING until async gateway sync completes
-        if (isFederated) {
-            apiKeyInfoDTO.setStatus(APIConstants.ApiKeyStatus.PENDING_GATEWAY_SYNC);
-        }
 
         // Shared lookup used by the normal gateway flow below.
         Application application = null;

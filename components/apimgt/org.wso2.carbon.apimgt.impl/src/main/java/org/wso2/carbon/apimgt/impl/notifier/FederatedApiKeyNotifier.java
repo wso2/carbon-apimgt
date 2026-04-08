@@ -48,14 +48,6 @@ public class FederatedApiKeyNotifier implements Notifier {
     private static final Log log = LogFactory.getLog(FederatedApiKeyNotifier.class);
     private static final String FEDERATED_API_KEY_REMOTE_ID = "federated.remoteApiKeyId";
 
-    private final ApiKeyMgtDAO apiKeyMgtDAO;
-    private final ApiMgtDAO apiMgtDAO;
-
-    public FederatedApiKeyNotifier() {
-        this.apiKeyMgtDAO = ApiKeyMgtDAO.getInstance();
-        this.apiMgtDAO = ApiMgtDAO.getInstance();
-    }
-
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
         if (!(event instanceof FederatedApiKeyEvent)) {
@@ -87,7 +79,6 @@ public class FederatedApiKeyNotifier implements Notifier {
             return true;
         } catch (APIManagementException e) {
             log.error("Failed to process federated API key event: " + fedEvent, e);
-            updateStatusToFailed(fedEvent);
             throw new NotifierException("Failed to process federated API key event", e);
         }
     }
@@ -135,7 +126,7 @@ public class FederatedApiKeyNotifier implements Notifier {
             props.put(APIConstants.JwtTokenConstants.PERMITTED_REFERER, event.getPermittedReferer());
         }
 
-        apiKeyMgtDAO.updateApiKeyGatewaySync(event.getKeyUuid(), props, APIConstants.ApiKeyStatus.ACTIVE);
+        getApiKeyMgtDAO().updateApiKeyGatewaySync(event.getKeyUuid(), props);
         log.info("Successfully created federated API key on gateway. KeyUuid: " + event.getKeyUuid()
                 + ", RemoteId: " + result.getRemoteCredentialId());
     }
@@ -240,7 +231,7 @@ public class FederatedApiKeyNotifier implements Notifier {
     }
 
     private FederatedApiKeyConnector resolveConnector(FederatedApiKeyEvent event) throws APIManagementException {
-        Environment environment = apiMgtDAO.getEnvironment(event.getOrganization(), event.getEnvironmentId());
+        Environment environment = getApiMgtDAO().getEnvironment(event.getOrganization(), event.getEnvironmentId());
         if (environment == null) {
             throw new APIManagementException("Gateway environment not found: " + event.getEnvironmentId());
         }
@@ -249,7 +240,7 @@ public class FederatedApiKeyNotifier implements Notifier {
 
     private String resolveRemotePolicyId(String organization, String envId, String localTierName,
                                          FederatedApiKeyConnector connector) throws APIManagementException {
-        Environment environment = apiMgtDAO.getEnvironment(organization, envId);
+        Environment environment = getApiMgtDAO().getEnvironment(organization, envId);
         if (environment == null) {
             throw new APIManagementException("Gateway environment not found: " + envId);
         }
@@ -275,22 +266,11 @@ public class FederatedApiKeyNotifier implements Notifier {
         throw new APIManagementException("No external tier mapping found for local tier: " + localTierName);
     }
 
-    private void updateStatusToFailed(FederatedApiKeyEvent event) {
-        try {
-            Map<String, String> props = new HashMap<>();
-            if (StringUtils.isNotBlank(event.getPermittedIP())) {
-                props.put(APIConstants.JwtTokenConstants.PERMITTED_IP, event.getPermittedIP());
-            }
-            if (StringUtils.isNotBlank(event.getPermittedReferer())) {
-                props.put(APIConstants.JwtTokenConstants.PERMITTED_REFERER, event.getPermittedReferer());
-            }
-            if (StringUtils.isNotBlank(event.getRemoteApiKeyId())) {
-                props.put(FEDERATED_API_KEY_REMOTE_ID, event.getRemoteApiKeyId());
-            }
-            apiKeyMgtDAO.updateApiKeyGatewaySync(event.getKeyUuid(), props,
-                    APIConstants.ApiKeyStatus.GATEWAY_SYNC_FAILED);
-        } catch (APIManagementException e) {
-            log.error("Failed to update API key status to GATEWAY_SYNC_FAILED for key: " + event.getKeyUuid(), e);
-        }
+    private ApiKeyMgtDAO getApiKeyMgtDAO() {
+        return ApiKeyMgtDAO.getInstance();
+    }
+
+    private ApiMgtDAO getApiMgtDAO() {
+        return ApiMgtDAO.getInstance();
     }
 }

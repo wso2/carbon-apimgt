@@ -940,8 +940,6 @@ public final class APIConstants {
 
         public static final String ACTIVE = "ACTIVE";
         public static final String REVOKED = "REVOKED";
-        public static final String PENDING_GATEWAY_SYNC = "PENDING_GATEWAY_SYNC";
-        public static final String GATEWAY_SYNC_FAILED = "GATEWAY_SYNC_FAILED";
 
         private ApiKeyStatus() {
 
