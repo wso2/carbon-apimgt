@@ -642,39 +642,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 null).getApiKey();
     }
 
-    /**
-     * Generates a new api bound api key
-     *
-     * @param api              The API Object that represents the API.
-     * @param userName         Username of the user requesting the api key.
-     * @param validityPeriod   Requested validity period for the api key.
-     * @param permittedIP      Permitted IP addresses for the api key.
-     * @param permittedReferer Permitted referrers for the api key.
-     * @param keyName          Name of the api key.
-     * @param keyType          Key type of the api key.
-     * @return Generated api key.
-     * @throws APIManagementException
-     */
-    private APIKeyDTO generateApiApiKey(API api, String userName, long validityPeriod, String permittedIP,
-                                        String permittedReferer, String keyName, String keyType, Long lastUsedTime)
-            throws APIManagementException {
-        return generateApiApiKey(api, username, validityPeriod, permittedIP, permittedReferer, keyName, keyType,
-                null).getApiKey();
-    }
-
-    /**
-     * Generates a new api bound api key
-     *
-     * @param api              The API Object that represents the API.
-     * @param userName         Username of the user requesting the api key.
-     * @param validityPeriod   Requested validity period for the api key.
-     * @param permittedIP      Permitted IP addresses for the api key.
-     * @param permittedReferer Permitted referrers for the api key.
-     * @param keyName          Name of the api key.
-     * @param keyType          Key type of the api key.
-     * @return Generated api key.
-     * @throws APIManagementException
-     */
     private APIKeyDTO generateApiApiKey(API api, String userName, long validityPeriod, String permittedIP,
                                         String permittedReferer, String keyName, String keyType, Long lastUsedTime)
             throws APIManagementException {
