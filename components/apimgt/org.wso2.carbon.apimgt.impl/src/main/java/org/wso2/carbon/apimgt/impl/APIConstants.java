@@ -936,6 +936,18 @@ public final class APIConstants {
         }
     }
 
+    public static class ApiKeyStatus {
+
+        public static final String ACTIVE = "ACTIVE";
+        public static final String REVOKED = "REVOKED";
+        public static final String PENDING_GATEWAY_SYNC = "PENDING_GATEWAY_SYNC";
+        public static final String GATEWAY_SYNC_FAILED = "GATEWAY_SYNC_FAILED";
+
+        private ApiKeyStatus() {
+
+        }
+    }
+
     public static class SubscriptionStatus {
 
         public static final String BLOCKED = "BLOCKED";
@@ -3254,7 +3266,8 @@ public final class APIConstants {
         LLM_PROVIDER,
         LABEL,
         TENANT,
-        API_KEY
+        API_KEY,
+        FEDERATED_API_KEY
     }
 
     // Supported Event Types

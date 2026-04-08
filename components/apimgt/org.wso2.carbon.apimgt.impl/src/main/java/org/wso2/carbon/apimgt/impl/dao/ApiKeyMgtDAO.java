@@ -99,7 +99,9 @@ public class ApiKeyMgtDAO {
                         ps.setTimestamp(9, new Timestamp(keyInfoDTO.getLastUsedTime()),
                                 Calendar.getInstance(TimeZone.getTimeZone("UTC")));
                     }
-                    ps.setString(10, "ACTIVE");
+                    // Use provided status if available, otherwise default to ACTIVE
+                    String status = keyInfoDTO.getStatus() != null ? keyInfoDTO.getStatus() : "ACTIVE";
+                    ps.setString(10, status);
                     ps.executeUpdate();
                 }
                 if (keyInfoDTO.getApiId() != null) {
@@ -814,6 +816,42 @@ public class ApiKeyMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to batch update last used time for API keys", e);
+        }
+    }
+
+    /**
+     * Updates the API key gateway sync status and properties after async gateway operation.
+     * Used by FederatedApiKeyNotifier to update remoteCredentialId and status.
+     *
+     * @param keyUuid    the API key UUID
+     * @param properties updated properties map (including remoteCredentialId)
+     * @param status     the new status (ACTIVE, GATEWAY_SYNC_FAILED)
+     * @throws APIManagementException if database update fails
+     */
+    public void updateApiKeyGatewaySync(String keyUuid, Map<String, String> properties, String status)
+            throws APIManagementException {
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            String sqlQuery = SQLConstants.UPDATE_API_KEY_GATEWAY_SYNC_SQL;
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                byte[] propsBytes = mapper.writeValueAsBytes(properties);
+                try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+                    ps.setBinaryStream(1, new ByteArrayInputStream(propsBytes), propsBytes.length);
+                    ps.setString(2, status);
+                    ps.setString(3, keyUuid);
+                    int rowsUpdated = ps.executeUpdate();
+                    if (rowsUpdated == 0) {
+                        throw new APIManagementException("API key not found for UUID: " + keyUuid);
+                    }
+                    conn.commit();
+                }
+            } catch (IOException e) {
+                throw new APIManagementException("Failed to serialize API key properties", e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to update gateway sync status for API key: " + keyUuid, e);
         }
     }
 
