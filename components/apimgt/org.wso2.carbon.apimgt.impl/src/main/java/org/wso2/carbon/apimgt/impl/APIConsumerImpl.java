@@ -121,7 +121,6 @@ import org.wso2.carbon.apimgt.impl.notifier.events.APIKeyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyResetEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.FederatedApiKeyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
@@ -226,6 +225,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private final Object tagCacheMutex = new Object();
     private static final SecureRandom secureRandom = new SecureRandom();
     private static final String FEDERATED_API_KEY_REMOTE_ID = "federated.remoteApiKeyId";
+    private static final String FEDERATED_API_KEY_VALUE = "federated.apiKeyValue";
     protected String userNameWithoutChange;
 
     boolean orgWideAppUpdateEnabled = Boolean.getBoolean(APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
@@ -678,24 +678,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         if (isFederated) {
             // --- Federated gateway: emit async event for gateway sync ---
-            String envId = resolveGatewayEnvironmentId(api);
-            String apiReferenceArtifact = apiMgtDAO.getApiExternalApiMappingReference(api.getUuid(), envId);
-            FederatedApiKeyEvent event = FederatedApiKeyEvent.builder()
-                    .federatedEventType(FederatedApiKeyEvent.EventType.CREATE)
-                    .keyUuid(apiKeyUuid)
-                    .keyName(keyName)
-                    .apiKeyValue(apiKey)
-                    .apiUuid(api.getUuid())
-                    .apiName(api.getId() != null ? api.getId().getApiName() : null)
-                    .apiReferenceArtifact(apiReferenceArtifact)
-                    .applicationUuid(null)
-                    .authzUser(userName)
-                    .organization(organization)
-                    .environmentId(envId)
-                    .validityPeriod(validityPeriod)
-                    .permittedIP(permittedIP)
-                    .permittedReferer(permittedReferer)
-                    .build();
+            APIKeyEvent event =
+                    new APIKeyEvent(APIConstants.EventType.API_KEY_CREATE.name(), tenantId, tenantDomain, apiKeyHash,
+                            apiKeyUuid, keyName, keyType, userName, createFederatedEventProperties(apiKey),
+                            apiKeyInfoDTO.getCreatedTime(), validityPeriod, permittedIP, permittedReferer,
+                            "ACTIVE", "API");
+            event.setApiUUId(api.getUuid());
             APIUtil.sendNotification(event, APIConstants.NotifierType.FEDERATED_API_KEY.name());
         } else {
             // --- Normal gateway: publish events to platform ---
@@ -4241,19 +4229,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 log.warn("Remote API key id is missing for federated API key UUID: " + keyUUID
                         + ". Skipping remote revocation.");
             } else {
-                String envId = resolveGatewayEnvironmentId(api);
-                FederatedApiKeyEvent event = FederatedApiKeyEvent.builder()
-                        .federatedEventType(FederatedApiKeyEvent.EventType.REVOKE)
-                        .keyUuid(keyUUID)
-                        .keyName(apiKeyInfo.getKeyName())
-                        .remoteApiKeyId(remoteApiKeyId)
-                        .apiUuid(api != null ? api.getUuid() : null)
-                        .apiName(api != null && api.getId() != null ? api.getId().getApiName() : null)
-                        .applicationUuid(apiKeyInfo.getApplicationId())
-                        .authzUser(apiKeyInfo.getAuthUser())
-                        .organization(organization)
-                        .environmentId(envId)
-                        .build();
+                APIKeyEvent event = new APIKeyEvent(APIConstants.EventType.API_KEY_DELETE.name(), tenantId,
+                        tenantDomain, apiKeyInfo.getApiKeyHash(), keyUUID, apiKeyInfo.getKeyName(),
+                        apiKeyInfo.getKeyType());
+                event.setApiUUId(api != null ? api.getUuid() : null);
+                event.setApplicationUUId(apiKeyInfo.getApplicationId());
+                event.setUser(apiKeyInfo.getAuthUser());
+                event.setProperties(createFederatedRemoteIdProperties(remoteApiKeyId));
                 APIUtil.sendNotification(event, APIConstants.NotifierType.FEDERATED_API_KEY.name());
             }
         } else {
@@ -4555,12 +4537,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         API resolvedApi = getLightweightAPIByUUID(apiUUId, organization);
         boolean isFederated = isFederatedGatewayApi(resolvedApi);
-        String envId = null;
-        String apiReferenceArtifact = null;
-        if (isFederated) {
-            envId = resolveGatewayEnvironmentId(resolvedApi);
-            apiReferenceArtifact = apiMgtDAO.getApiExternalApiMappingReference(resolvedApi.getUuid(), envId);
-        }
 
         // Revoke the existing key (async for federated gateways)
         revokeApiKey(keyUUId, tenantDomain, username);
@@ -4597,22 +4573,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         if (isFederated) {
             // --- Federated gateway: emit async event for CREATE ---
-            FederatedApiKeyEvent event = FederatedApiKeyEvent.builder()
-                    .federatedEventType(FederatedApiKeyEvent.EventType.CREATE)
-                    .keyUuid(apiKeyUuid)
-                    .keyName(apiKeyInfo.getKeyName())
-                    .apiKeyValue(apiKey)
-                    .apiUuid(resolvedApi != null ? resolvedApi.getUuid() : null)
-                    .apiName(resolvedApi != null && resolvedApi.getId() != null ? resolvedApi.getId().getApiName() : null)
-                    .apiReferenceArtifact(apiReferenceArtifact)
-                    .applicationUuid(apiKeyInfo.getApplicationId())
-                    .authzUser(username)
-                    .organization(organization)
-                    .environmentId(envId)
-                    .validityPeriod(apiKeyInfo.getValidityPeriod())
-                    .permittedIP(permittedIP)
-                    .permittedReferer(permittedReferer)
-                    .build();
+            APIKeyEvent event =
+                    new APIKeyEvent(APIConstants.EventType.API_KEY_CREATE.name(), tenantId, tenantDomain, apiKeyHash,
+                            apiKeyUuid, apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType(), username,
+                            createFederatedEventProperties(apiKey), apiKeyInfoDTO.getCreatedTime(),
+                            apiKeyInfo.getValidityPeriod(), permittedIP, permittedReferer, "ACTIVE", "API");
+            event.setApiUUId(resolvedApi != null ? resolvedApi.getUuid() : null);
+            event.setApplicationUUId(apiKeyInfo.getApplicationId());
             APIUtil.sendNotification(event, APIConstants.NotifierType.FEDERATED_API_KEY.name());
         }
 
@@ -4706,24 +4673,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         boolean isFederated = isFederatedGatewayApi(resolvedApi);
 
         // For federated gateways, we need to validate subscription and prepare data for rate limit policy
-        String envId = null;
-        String subscriptionTierName = null;
-        String remoteApiKeyId = null;
         if (isFederated) {
             SubscribedAPI subscribedAPI = findSubscribedApiForScope(apiUUId, resolvedApplication);
             if (subscribedAPI == null || !APIConstants.SubscriptionStatus.UNBLOCKED.equals(subscribedAPI.getSubStatus())) {
                 throw new APIManagementException("API key association requires an active subscription for the selected "
                         + "application and API", ExceptionCodes.SUBSCRIPTION_STATE_INVALID);
             }
-            subscriptionTierName = subscribedAPI.getTier() != null ? subscribedAPI.getTier().getName() : null;
+            String subscriptionTierName = subscribedAPI.getTier() != null ? subscribedAPI.getTier().getName() : null;
             if (StringUtils.isBlank(subscriptionTierName)) {
                 throw new APIManagementException("Subscription tier is required for federated external tier mapping",
                         ExceptionCodes.SUBSCRIPTION_STATE_INVALID);
             }
-            envId = resolveGatewayEnvironmentId(resolvedApi);
             Map<String, String> props = deserializeApiKeyProperties(apiKeyInfo.getProperties());
-            remoteApiKeyId = props.get(FEDERATED_API_KEY_REMOTE_ID);
-            if (StringUtils.isBlank(remoteApiKeyId)) {
+            if (StringUtils.isBlank(props.get(FEDERATED_API_KEY_REMOTE_ID))) {
                 throw new APIManagementException("Remote API key ID is missing for federated API key: " + keyUUId);
             }
         }
@@ -4733,18 +4695,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         if (isFederated) {
             // --- Federated gateway: emit async event for APPLY_RATE_LIMIT_POLICY ---
-            FederatedApiKeyEvent event = FederatedApiKeyEvent.builder()
-                    .federatedEventType(FederatedApiKeyEvent.EventType.APPLY_RATE_LIMIT_POLICY)
-                    .keyUuid(keyUUId)
-                    .keyName(apiKeyInfo.getKeyName())
-                    .remoteApiKeyId(remoteApiKeyId)
-                    .apiUuid(resolvedApi != null ? resolvedApi.getUuid() : null)
-                    .apiName(resolvedApi != null && resolvedApi.getId() != null ? resolvedApi.getId().getApiName() : null)
-                    .applicationUuid(appUUId)
-                    .organization(organization)
-                    .environmentId(envId)
-                    .localTierName(subscriptionTierName)
-                    .build();
+            APIKeyEvent event = new APIKeyEvent(APIConstants.EventType.API_KEY_ASSOCIATION_CREATE.name(), tenantId,
+                    tenantDomain, apiKeyInfo.getApiKeyHash(), keyUUId, apiKeyInfo.getKeyName(),
+                    apiKeyInfo.getKeyType());
+            event.setApiUUId(resolvedApi != null ? resolvedApi.getUuid() : null);
+            event.setApplicationUUId(appUUId);
+            event.setUser(apiKeyInfo.getAuthUser());
             APIUtil.sendNotification(event, APIConstants.NotifierType.FEDERATED_API_KEY.name());
         } else {
             // --- Normal gateway: publish association event ---
@@ -4792,24 +4748,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         if (isFederated) {
             // --- Federated gateway: emit async event for REMOVE_RATE_LIMIT_POLICY ---
-            String envId = resolveGatewayEnvironmentId(api);
             Map<String, String> props = deserializeApiKeyProperties(apiKeyInfo.getProperties());
             String remoteApiKeyId = props.get(FEDERATED_API_KEY_REMOTE_ID);
             if (StringUtils.isBlank(remoteApiKeyId)) {
                 log.warn("Remote API key id is missing for federated API key UUID: " + keyUUId
                         + ". Skipping remote rate limit policy removal for application association cleanup.");
             } else {
-                FederatedApiKeyEvent event = FederatedApiKeyEvent.builder()
-                        .federatedEventType(FederatedApiKeyEvent.EventType.REMOVE_RATE_LIMIT_POLICY)
-                        .keyUuid(keyUUId)
-                        .keyName(apiKeyInfo.getKeyName())
-                        .remoteApiKeyId(remoteApiKeyId)
-                        .apiUuid(api != null ? api.getUuid() : null)
-                        .apiName(api != null && api.getId() != null ? api.getId().getApiName() : null)
-                        .applicationUuid(appUUId)
-                        .organization(organization)
-                        .environmentId(envId)
-                        .build();
+                APIKeyEvent event = new APIKeyEvent(APIConstants.EventType.API_KEY_ASSOCIATION_DELETE.name(),
+                        tenantId, tenantDomain, apiKeyInfo.getApiKeyHash(), keyUUId, apiKeyInfo.getKeyName(),
+                        apiKeyInfo.getKeyType());
+                event.setApiUUId(api != null ? api.getUuid() : null);
+                event.setApplicationUUId(appUUId);
+                event.setUser(apiKeyInfo.getAuthUser());
                 APIUtil.sendNotification(event, APIConstants.NotifierType.FEDERATED_API_KEY.name());
             }
         } else {
@@ -4853,24 +4803,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         if (isFederated) {
             // --- Federated gateway: emit async event for REMOVE_RATE_LIMIT_POLICY ---
-            String envId = resolveGatewayEnvironmentId(api);
             Map<String, String> props = deserializeApiKeyProperties(apiKeyInfo.getProperties());
             String remoteApiKeyId = props.get(FEDERATED_API_KEY_REMOTE_ID);
             if (StringUtils.isBlank(remoteApiKeyId)) {
                 log.warn("Remote API key id is missing for federated API key UUID: " + keyUUId
                         + ". Skipping remote rate limit policy removal for API association cleanup.");
             } else {
-                FederatedApiKeyEvent event = FederatedApiKeyEvent.builder()
-                        .federatedEventType(FederatedApiKeyEvent.EventType.REMOVE_RATE_LIMIT_POLICY)
-                        .keyUuid(keyUUId)
-                        .keyName(apiKeyInfo.getKeyName())
-                        .remoteApiKeyId(remoteApiKeyId)
-                        .apiUuid(api != null ? api.getUuid() : null)
-                        .apiName(api != null && api.getId() != null ? api.getId().getApiName() : null)
-                        .applicationUuid(appUUId)
-                        .organization(organization)
-                        .environmentId(envId)
-                        .build();
+                APIKeyEvent event = new APIKeyEvent(APIConstants.EventType.API_KEY_ASSOCIATION_DELETE.name(),
+                        tenantId, tenantDomain, apiKeyInfo.getApiKeyHash(), keyUUId, apiKeyInfo.getKeyName(),
+                        apiKeyInfo.getKeyType());
+                event.setApiUUId(api != null ? api.getUuid() : null);
+                event.setApplicationUUId(appUUId);
+                event.setUser(apiKeyInfo.getAuthUser());
                 APIUtil.sendNotification(event, APIConstants.NotifierType.FEDERATED_API_KEY.name());
             }
         } else {
@@ -4901,6 +4845,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     private Map<String, String> deserializeApiKeyProperties(Map<String, String> properties) {
         return properties == null ? new HashMap<>() : properties;
+    }
+
+    private Map<String, String> createFederatedEventProperties(String apiKeyValue) {
+        Map<String, String> properties = new HashMap<>();
+        properties.put(FEDERATED_API_KEY_VALUE, apiKeyValue);
+        return properties;
+    }
+
+    private Map<String, String> createFederatedRemoteIdProperties(String remoteApiKeyId) {
+        Map<String, String> properties = new HashMap<>();
+        properties.put(FEDERATED_API_KEY_REMOTE_ID, remoteApiKeyId);
+        return properties;
     }
 
     private API getInternalAPIByUUID(String uuid, String organization) throws APIManagementException {

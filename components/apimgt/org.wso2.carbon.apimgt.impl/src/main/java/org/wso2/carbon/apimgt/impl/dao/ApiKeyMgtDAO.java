@@ -491,6 +491,8 @@ public class ApiKeyMgtDAO {
                         keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
                         keyInfo.setKeyName(rs.getString("NAME"));
                         keyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
+                        keyInfo.setApiUUId(rs.getString("API_UUID"));
+                        keyInfo.setApplicationId(rs.getString("APPLICATION_UUID"));
                         keyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
                         Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
