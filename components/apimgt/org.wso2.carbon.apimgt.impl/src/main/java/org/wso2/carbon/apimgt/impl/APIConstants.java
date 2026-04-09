@@ -936,16 +936,6 @@ public final class APIConstants {
         }
     }
 
-    public static class ApiKeyStatus {
-
-        public static final String ACTIVE = "ACTIVE";
-        public static final String REVOKED = "REVOKED";
-
-        private ApiKeyStatus() {
-
-        }
-    }
-
     public static class SubscriptionStatus {
 
         public static final String BLOCKED = "BLOCKED";

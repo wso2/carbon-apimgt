@@ -4033,11 +4033,33 @@ public class SQLConstants {
                     "WHERE KM.API_UUID = ? AND K.AUTHZ_USER = ? AND K.STATUS = 'ACTIVE'";
     public static final String GET_API_KEY_DETAILS_FROM_KEY_UUID_SQL =
             "SELECT K.API_KEY_UUID, K.NAME, K.API_KEY_HASH, K.KEY_TYPE, K.API_KEY_PROPERTIES, K.AUTHZ_USER, " +
-                    "K.VALIDITY_PERIOD, K.LAST_USED, KM.API_UUID, API.ORGANIZATION " +
+                    "K.VALIDITY_PERIOD, K.LAST_USED, KM.API_UUID, AM.APPLICATION_UUID, API.ORGANIZATION " +
                     "FROM AM_API_KEY K " +
                     "LEFT JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "LEFT JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
                     "LEFT JOIN AM_API API ON KM.API_UUID = API.API_UUID " +
                     "WHERE K.API_KEY_UUID = ? AND K.STATUS = 'ACTIVE' " +
+                    "AND ( EXISTS ( " +
+                    "        SELECT 1 FROM AM_API_KEY_APPLICATION_MAPPING AKAM " +
+                    "        JOIN AM_APPLICATION A " +
+                    "        ON AKAM.APPLICATION_UUID = A.UUID " +
+                    "        WHERE AKAM.API_KEY_UUID = K.API_KEY_UUID " +
+                    "        AND A.ORGANIZATION = ? " +
+                    "    ) OR EXISTS ( " +
+                    "        SELECT 1 FROM AM_API_KEY_API_MAPPING AKAP " +
+                    "        JOIN AM_API API2 " +
+                    "        ON AKAP.API_UUID = API2.API_UUID " +
+                    "        WHERE AKAP.API_KEY_UUID = K.API_KEY_UUID " +
+                    "        AND API2.ORGANIZATION = ? " +
+                    "    ) )";
+    public static final String GET_API_KEY_DETAILS_FROM_KEY_UUID_ANY_STATUS_SQL =
+            "SELECT K.API_KEY_UUID, K.NAME, K.API_KEY_HASH, K.KEY_TYPE, K.API_KEY_PROPERTIES, K.AUTHZ_USER, " +
+                    "K.VALIDITY_PERIOD, K.LAST_USED, KM.API_UUID, AM.APPLICATION_UUID, API.ORGANIZATION " +
+                    "FROM AM_API_KEY K " +
+                    "LEFT JOIN AM_API_KEY_API_MAPPING KM ON K.API_KEY_UUID = KM.API_KEY_UUID " +
+                    "LEFT JOIN AM_API_KEY_APPLICATION_MAPPING AM ON K.API_KEY_UUID = AM.API_KEY_UUID " +
+                    "LEFT JOIN AM_API API ON KM.API_UUID = API.API_UUID " +
+                    "WHERE K.API_KEY_UUID = ? " +
                     "AND ( EXISTS ( " +
                     "        SELECT 1 FROM AM_API_KEY_APPLICATION_MAPPING AKAM " +
                     "        JOIN AM_APPLICATION A " +

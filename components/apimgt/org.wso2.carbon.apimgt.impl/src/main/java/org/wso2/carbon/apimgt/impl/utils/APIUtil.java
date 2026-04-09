@@ -664,10 +664,15 @@ public final class APIUtil {
         return properties;
     }
 
-    public static Map<String, String> createFederatedApiKeyRemoteIdProperties(String remoteApiKeyId) {
-        Map<String, String> properties = new HashMap<>();
-        properties.put("federated.remoteApiKeyId", remoteApiKeyId);
-        return properties;
+    public static boolean isFederatedGatewayApi(String apiUuid) throws APIManagementException {
+        if (StringUtils.isBlank(apiUuid)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping federated gateway API check because API UUID is blank. Assuming non-federated.");
+            }
+            return false;
+        }
+        String gatewayVendor = ApiMgtDAO.getInstance().getGatewayVendorByAPIUUID(apiUuid);
+        return APIConstants.EXTERNAL_GATEWAY_VENDOR.equalsIgnoreCase(gatewayVendor);
     }
 
     /**

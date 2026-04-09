@@ -224,7 +224,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private volatile long lastUpdatedTime;
     private final Object tagCacheMutex = new Object();
     private static final SecureRandom secureRandom = new SecureRandom();
-    private static final String FEDERATED_API_KEY_REMOTE_ID = "federated.remoteApiKeyId";
     protected String userNameWithoutChange;
 
     boolean orgWideAppUpdateEnabled = Boolean.getBoolean(APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
@@ -665,7 +664,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         props.put(APIConstants.JwtTokenConstants.PERMITTED_IP, permittedIP != null ? permittedIP : "");
         props.put(APIConstants.JwtTokenConstants.PERMITTED_REFERER, permittedReferer != null ? permittedReferer : "");
 
-        boolean isFederated = isFederatedGatewayApi(api);
+        boolean isFederated = APIUtil.isFederatedGatewayApi(api.getUuid());
 
         APIKeyDTO apiKeyInfoDTO =
                 generateAPIKeyInfoDTO(userName, validityPeriod, keyName, keyType, permittedIP, permittedReferer, props);
@@ -688,37 +687,35 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIUtil.sendNotification(apiKeyEvent, !isFederated ? APIConstants.NotifierType.API_KEY.name() :
                 APIConstants.NotifierType.FEDERATED_API_KEY.name());
 
-        if (!isFederated) {
-            // Notify platform gateways about the newly created API-bound opaque API key.
-            PlatformGatewayAPIKeyEventService eventService =
-                    ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
-            if (eventService != null) {
-                try {
-                    String apiIdForGateway = api.getUUID();
-                    if (log.isDebugEnabled()) {
-                        log.debug("Broadcasting API-bound opaque API key create to platform gateways for API: "
-                                + apiIdForGateway);
-                    }
-                    String keyNameForGateway = keyName.toLowerCase(java.util.Locale.ROOT);
-                    String expiresAtIso = null;
-                    if (validityPeriod > 0) {
-                        long expMs = calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(), validityPeriod);
-                        if (expMs > 0) {
-                            expiresAtIso = java.time.Instant.ofEpochMilli(expMs).toString();
-                        }
-                    }
-                    PlatformGatewayAPIKeyEvents.Created event = new PlatformGatewayAPIKeyEvents.Created(
-                            api.getOrganization(), apiIdForGateway, apiKey, keyNameForGateway)
-                            .withKeyUuid(apiKeyInfoDTO.getKeyId())
-                            .withExpiresAt(expiresAtIso)
-                            .withUserId(userName);
-                    eventService.broadcastAPIKeyCreated(event);
-                } catch (Exception e) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Failed to broadcast apikey to platform gateways: " + e.getMessage());
-                        }
+        // Notify platform gateways about the newly created API-bound opaque API key.
+        PlatformGatewayAPIKeyEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+        if (eventService != null) {
+            try {
+                String apiIdForGateway = api.getUUID();
+                if (log.isDebugEnabled()) {
+                    log.debug("Broadcasting API-bound opaque API key create to platform gateways for API: "
+                            + apiIdForGateway);
+                }
+                String keyNameForGateway = keyName.toLowerCase(java.util.Locale.ROOT);
+                String expiresAtIso = null;
+                if (validityPeriod > 0) {
+                    long expMs = calculateExpiresAt(apiKeyInfoDTO.getCreatedTime(), validityPeriod);
+                    if (expMs > 0) {
+                        expiresAtIso = java.time.Instant.ofEpochMilli(expMs).toString();
                     }
                 }
+                PlatformGatewayAPIKeyEvents.Created event = new PlatformGatewayAPIKeyEvents.Created(
+                        api.getOrganization(), apiIdForGateway, apiKey, keyNameForGateway)
+                        .withKeyUuid(apiKeyInfoDTO.getKeyId())
+                        .withExpiresAt(expiresAtIso)
+                        .withUserId(userName);
+                eventService.broadcastAPIKeyCreated(event);
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed to broadcast apikey to platform gateways: " + e.getMessage());
+                }
+            }
         }
         return apiKeyInfoDTO;
     }
@@ -4198,60 +4195,34 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     "User is not authorized to revoke the API key for UUID: " + keyUUID);
         }
         String apiUuid = apiKeyInfo.getApiUUId();
-        API api = null;
-        boolean isFederated = false;
-
-        if (StringUtils.isNotBlank(apiUuid)) {
-            String organization = apiMgtDAO.getOrganizationByAPIUUID(apiUuid);
-            if (StringUtils.isNotBlank(organization)) {
-                api = getLightweightAPIByUUID(apiUuid, organization);
-                isFederated = isFederatedGatewayApi(api);
-            }
-        }
-
-
+        boolean isFederated = APIUtil.isFederatedGatewayApi(apiUuid);
         apiKeyMgtDAO.revokeAPIKeyViaUser(keyUUID, username);
         APIKeyEvent apiKeyEvent = new APIKeyEvent(APIConstants.EventType.API_KEY_DELETE.name(), tenantId, tenantDomain,
                 apiKeyInfo.getApiKeyHash(), apiKeyInfo.getKeyUUID(), apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType());
-        if (isFederated) {
-            Map<String, String> props = deserializeApiKeyProperties(apiKeyInfo.getProperties());
-            String remoteApiKeyId = props.get(FEDERATED_API_KEY_REMOTE_ID);
-            if (StringUtils.isBlank(remoteApiKeyId)) {
-                log.warn("Remote API key id is missing for federated API key UUID: " + keyUUID
-                        + ". Skipping remote revocation.");
-                return;
-            }
-            apiKeyEvent.setApiUUId(apiUuid);
-            apiKeyEvent.setApplicationUUId(apiKeyInfo.getApplicationId());
-            apiKeyEvent.setUser(apiKeyInfo.getAuthUser());
-            apiKeyEvent.setProperties(APIUtil.createFederatedApiKeyRemoteIdProperties(remoteApiKeyId));
-        }
         APIUtil.sendNotification(apiKeyEvent, !isFederated ? APIConstants.NotifierType.API_KEY.name() :
                 APIConstants.NotifierType.FEDERATED_API_KEY.name());
-        if (!isFederated) {
-            // Notify connected platform gateways (platform expects handle = metadata.name, not API UUID)
-            PlatformGatewayAPIKeyEventService eventService =
-                    ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
-            if (eventService != null && StringUtils.isNotBlank(apiKeyInfo.getKeyName())) {
-                try {
-                    String keyNameGw = apiKeyInfo.getKeyName().toLowerCase(java.util.Locale.ROOT);
-                    if (StringUtils.isNotBlank(apiKeyInfo.getApiUUId())) {
-                        API apiForHandle = getLightweightAPIByUUID(apiKeyInfo.getApiUUId(), tenantDomain);
-                        String apiIdForRevoke = apiForHandle != null ? apiForHandle.getUUID() : apiKeyInfo.getApiUUId();
-                        String orgForEvent = resolveOrganizationForPlatformGatewayEvents(null, apiForHandle);
-                        if (StringUtils.isNotBlank(orgForEvent)) {
-                        eventService.broadcastAPIKeyRevoked(new PlatformGatewayAPIKeyEvents.Revoked(orgForEvent, apiIdForRevoke, keyNameGw)
-                                            .withUserId(apiKeyInfo.getAuthUser()));
-                        }
-                    } else if (StringUtils.isNotBlank(apiKeyInfo.getApplicationId())) {
-                        Application app = apiMgtDAO.getApplicationByUUID(apiKeyInfo.getApplicationId());
-                        broadcastApplicationScopedOpaqueApiKeyRevokedToPlatformGateways(app, keyNameGw,
-                                apiKeyInfo.getAuthUser(), eventService);
+        // Notify connected platform gateways (platform expects handle = metadata.name, not API UUID)
+        PlatformGatewayAPIKeyEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+        if (eventService != null && StringUtils.isNotBlank(apiKeyInfo.getKeyName())) {
+            try {
+                String keyNameGw = apiKeyInfo.getKeyName().toLowerCase(java.util.Locale.ROOT);
+                if (StringUtils.isNotBlank(apiKeyInfo.getApiUUId())) {
+                    API apiForHandle = getLightweightAPIByUUID(apiKeyInfo.getApiUUId(), tenantDomain);
+                    String apiIdForRevoke = apiForHandle != null ? apiForHandle.getUUID() : apiKeyInfo.getApiUUId();
+                    String organization = resolveOrganizationForPlatformGatewayEvents(null, apiForHandle);
+                    if (StringUtils.isNotBlank(organization)) {
+                    eventService.broadcastAPIKeyRevoked(new PlatformGatewayAPIKeyEvents.Revoked(organization, apiIdForRevoke, keyNameGw)
+                                        .withUserId(apiKeyInfo.getAuthUser()));
                     }
-                } catch (Exception e) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Failed to broadcast apikey.revoked to platform gateways: " + e.getMessage());
-                    }
+                } else if (StringUtils.isNotBlank(apiKeyInfo.getApplicationId())) {
+                    Application app = apiMgtDAO.getApplicationByUUID(apiKeyInfo.getApplicationId());
+                    broadcastApplicationScopedOpaqueApiKeyRevokedToPlatformGateways(app, keyNameGw,
+                            apiKeyInfo.getAuthUser(), eventService);
+                }
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed to broadcast apikey.revoked to platform gateways: " + e.getMessage());
                 }
             }
         }
@@ -4511,7 +4482,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIMgtAuthorizationFailedException(
                     "User is not authorized to regenerate the API key for UUID: " + keyUUId);
         }
-        boolean isFederated = isFederatedGatewayApi(api);
         // Revoke the existing key
         revokeApiKey(keyUUId, tenantDomain, username);
         // Generate a new key with the same name and other additional properties
@@ -4529,31 +4499,29 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         // Regenerate = same key name, new value: send apikey.updated so platform updates in place (avoids "name
         // already exists")
-        if (!isFederated) {
-            PlatformGatewayAPIKeyEventService eventService =
-                    ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
-            if (eventService != null && api != null) {
-                try {
-                    String apiIdForGateway = api.getUUID() != null ? api.getUUID() : api.getUuid();
-                    String resolvedOrganization = api.getOrganization();
-                    String keyNameForGateway = apiKeyInfo.getKeyName().toLowerCase(Locale.ROOT);
-                    String expiresAtIso = null;
-                    if (apiKeyInfo.getValidityPeriod() > 0) {
-                        long expMs = calculateExpiresAt(apiKeyDTO.getCreatedTime(), apiKeyInfo.getValidityPeriod());
-                        if (expMs > 0) {
-                            expiresAtIso = Instant.ofEpochMilli(expMs).toString();
-                        }
+        PlatformGatewayAPIKeyEventService eventService =
+                ServiceReferenceHolder.getInstance().getPlatformGatewayAPIKeyEventService();
+        if (eventService != null && api != null) {
+            try {
+                String apiIdForGateway = api.getUUID() != null ? api.getUUID() : api.getUuid();
+                String resolvedOrganization = api.getOrganization();
+                String keyNameForGateway = apiKeyInfo.getKeyName().toLowerCase(java.util.Locale.ROOT);
+                String expiresAtIso = null;
+                if (apiKeyInfo.getValidityPeriod() > 0) {
+                    long expMs = calculateExpiresAt(apiKeyDTO.getCreatedTime(), apiKeyInfo.getValidityPeriod());
+                    if (expMs > 0) {
+                        expiresAtIso = Instant.ofEpochMilli(expMs).toString();
                     }
-                    PlatformGatewayAPIKeyEvents.Updated event = new PlatformGatewayAPIKeyEvents.Updated(
-                            resolvedOrganization, apiIdForGateway, keyNameForGateway, apiKeyDTO.getApiKey())
-                            .withKeyUuid(apiKeyInfo.getKeyUUID())
-                            .withExpiresAt(expiresAtIso)
-                            .withUserId(username);
-                    eventService.broadcastAPIKeyUpdated(event);
-                } catch (Exception e) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Failed to broadcast apikey.updated to platform gateways: " + e.getMessage());
-                    }
+                }
+                PlatformGatewayAPIKeyEvents.Updated event = new PlatformGatewayAPIKeyEvents.Updated(
+                        resolvedOrganization, apiIdForGateway, keyNameForGateway, apiKeyInfo.getApiKey())
+                        .withKeyUuid(apiKeyInfo.getKeyUUID())
+                        .withExpiresAt(expiresAtIso)
+                        .withUserId(username);
+                eventService.broadcastAPIKeyUpdated(event);
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Failed to broadcast apikey.updated to platform gateways: " + e.getMessage());
                 }
             }
         }
@@ -4584,15 +4552,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public APIKeyInfo createAssociationToApp(API api, String keyUUId, Application application, String tenantDomain,
                                              String username) throws APIManagementException {
-        String apiUUId = api != null ? api.getUuid() : null;
-        if (StringUtils.isBlank(apiUUId)) {
-            throw new APIMgtResourceNotFoundException("API UUID is required for API key association");
-        }
-        Application resolvedApplication = resolveApplicationForSubscriptionLookup(application);
-        if (resolvedApplication == null || StringUtils.isBlank(resolvedApplication.getUUID())) {
-            throw new APIMgtResourceNotFoundException("Application UUID is required for API key association");
-        }
-        String appUUId = resolvedApplication.getUUID();
         APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getKeyDetailsForAssociation(keyUUId, username);
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId);
@@ -4601,19 +4560,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIMgtAuthorizationFailedException(
                     "User is not authorized to create association of the API key for UUID: " + keyUUId);
         }
-        boolean isFederated = isFederatedGatewayApi(api);
-
-        // Create local association first
-        apiKeyMgtDAO.createAssociationToApiKey(keyUUId, appUUId);
-
+        boolean isFederated = APIUtil.isFederatedGatewayApi(api.getUuid());
+        apiKeyMgtDAO.createAssociationToApiKey(keyUUId, application.getUUID());
         APIKeyAssociationEvent apiKeyAssociationEvent =
                 new APIKeyAssociationEvent(APIConstants.EventType.API_KEY_ASSOCIATION_CREATE.name(),
-                            apiKeyInfo.getApiKeyHash(), appUUId, apiUUId, api.getId().getId(),
-                            resolvedApplication.getId(), tenantId, tenantDomain);
+                        apiKeyInfo.getApiKeyHash(), application.getUUID(), api.getUuid(), api.getId().getId(),
+                        application.getId(), tenantId, tenantDomain);
         apiKeyAssociationEvent.setApiKeyUUId(keyUUId);
         APIUtil.sendNotification(apiKeyAssociationEvent, !isFederated ? APIConstants.NotifierType.API_KEY.name() :
                 APIConstants.NotifierType.FEDERATED_API_KEY.name());
-        apiKeyInfo.setApplicationName(resolvedApplication.getName());
+        apiKeyInfo.setApplicationName(application.getName());
         return apiKeyInfo;
     }
 
@@ -4627,12 +4583,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     public void removeApiKeyAssociationViaApp(Application application, String keyUUId, String tenantDomain,
                                               String username) throws APIManagementException {
-        Application resolvedApplication = resolveApplicationForSubscriptionLookup(application);
-        if (resolvedApplication == null || StringUtils.isBlank(resolvedApplication.getUUID())) {
-            throw new APIMgtResourceNotFoundException("Application UUID is required for API key association removal");
-        }
-        String appUUId = resolvedApplication.getUUID();
-        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKeyDetailsByKeyUUIDAndAppUUID(appUUId, keyUUId, username);
+        APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getKeyDetailsForAssociation(keyUUId, username);
         if (apiKeyInfo == null || apiKeyInfo.getApiKeyHash() == null) {
             throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId);
         }
@@ -4640,19 +4591,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIMgtAuthorizationFailedException(
                     "User is not authorized to remove association of the API key for UUID: " + keyUUId);
         }
-        String organization = apiMgtDAO.getOrganizationByAPIUUID(apiKeyInfo.getApiUUId());
-        API api = StringUtils.isNotBlank(organization)
-                ? getLightweightAPIByUUID(apiKeyInfo.getApiUUId(), organization) : null;
-        boolean isFederated = isFederatedGatewayApi(api);
-
-        // Remove local association first
-        apiKeyMgtDAO.removeAssociationOfAPIKeyViaApp(appUUId, keyUUId, tenantDomain);
-
+        boolean isFederated = APIUtil.isFederatedGatewayApi(apiKeyInfo.getApiUUId());
+        apiKeyMgtDAO.removeAssociationOfAPIKeyViaApp(application.getUUID(), keyUUId, tenantDomain);
         APIKeyAssociationEvent apiKeyAssociationEvent =
                 new APIKeyAssociationEvent(APIConstants.EventType.API_KEY_ASSOCIATION_DELETE.name(),
-                            apiKeyInfo.getApiKeyHash(), appUUId, resolvedApplication.getId(), tenantId, tenantDomain);
+                        apiKeyInfo.getApiKeyHash(), application.getUUID(), application.getId(), tenantId, tenantDomain);
         apiKeyAssociationEvent.setApiKeyUUId(keyUUId);
-        apiKeyAssociationEvent.setApiUUId(api != null ? api.getUuid() : apiKeyInfo.getApiUUId());
         APIUtil.sendNotification(apiKeyAssociationEvent, !isFederated ? APIConstants.NotifierType.API_KEY.name() :
                 APIConstants.NotifierType.FEDERATED_API_KEY.name());
     }
@@ -4675,70 +4619,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIMgtAuthorizationFailedException(
                     "User is not authorized to remove association of the API key for UUID: " + keyUUId);
         }
-        String organization = apiMgtDAO.getOrganizationByAPIUUID(apiUUId);
-        API api = StringUtils.isNotBlank(organization) ? getLightweightAPIByUUID(apiUUId, organization) : null;
-        boolean isFederated = isFederatedGatewayApi(api);
+        boolean isFederated = APIUtil.isFederatedGatewayApi(apiUUId);
 
-        String appUUId = apiKeyInfo.getApplicationId();
-        if (StringUtils.isBlank(appUUId)) {
-            throw new APIManagementException("Unable to remove API key association due to missing application mapping");
-        }
-
-        // Remove local association first
-        apiKeyMgtDAO.removeAssociationOfAPIKeyViaApp(appUUId, keyUUId, tenantDomain);
-
-        Application associatedApplication = getLightweightApplicationByUUID(appUUId);
+        Application application = getLightweightApplicationByUUID(apiKeyInfo.getApplicationId());
+        apiKeyMgtDAO.removeAssociationOfAPIKeyViaApp(application.getUUID(), keyUUId, tenantDomain);
         APIKeyAssociationEvent apiKeyAssociationEvent =
                 new APIKeyAssociationEvent(APIConstants.EventType.API_KEY_ASSOCIATION_DELETE.name(),
-                            apiKeyInfo.getApiKeyHash(), appUUId,
-                            associatedApplication != null ? associatedApplication.getId() : apiKeyInfo.getAppId(),
-                            tenantId, tenantDomain);
+                        apiKeyInfo.getApiKeyHash(), application.getUUID(), application.getId(), tenantId, tenantDomain);
         apiKeyAssociationEvent.setApiKeyUUId(keyUUId);
-        apiKeyAssociationEvent.setApiUUId(apiUUId);
         APIUtil.sendNotification(apiKeyAssociationEvent, !isFederated ? APIConstants.NotifierType.API_KEY.name() :
                 APIConstants.NotifierType.FEDERATED_API_KEY.name());
-    }
-
-    private String resolveApiOrganization(API api) throws APIManagementException {
-        if (api == null) {
-            return null;
-        }
-        if (StringUtils.isNotBlank(api.getOrganization())) {
-            return api.getOrganization();
-        }
-        return apiMgtDAO.getOrganizationByAPIUUID(api.getUuid());
-    }
-
-    private boolean isFederatedGatewayApi(API api) {
-        return api != null && APIConstants.EXTERNAL_GATEWAY_VENDOR.equalsIgnoreCase(api.getGatewayVendor());
-    }
-
-    private Map<String, String> deserializeApiKeyProperties(Map<String, String> properties) {
-        return properties == null ? new HashMap<>() : properties;
-    }
-
-    private SubscribedAPI findSubscribedApiForScope(String apiUuid, Application application)
-            throws APIManagementException {
-        int apiId = apiMgtDAO.getAPIID(apiUuid);
-        String subscriptionUuid = apiMgtDAO.getSubscriptionUuid(apiId, application.getId());
-        if (StringUtils.isBlank(subscriptionUuid)) {
-            return null;
-        }
-        SubscribedAPI subscribedAPI = getSubscriptionByUUID(subscriptionUuid);
-        if (subscribedAPI == null) {
-            throw new APIManagementException("Subscription not found: " + subscriptionUuid,
-                    ExceptionCodes.RESOURCE_NOT_FOUND);
-        }
-        return subscribedAPI;
-    }
-
-    private String resolveGatewayEnvironmentId(API api) throws APIManagementException {
-        String envId = apiMgtDAO.getGatewayEnvironmentIdForExternalApi(api.getUuid());
-        if (envId == null) {
-            throw new APIManagementException(
-                    "No external gateway environment mapping found for federated API: " + api.getUuid());
-        }
-        return envId;
     }
 
     /**

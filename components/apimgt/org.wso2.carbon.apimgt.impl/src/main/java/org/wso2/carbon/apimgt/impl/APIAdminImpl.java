@@ -146,7 +146,6 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getPaginatedApplicationL
 public class APIAdminImpl implements APIAdmin {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
-    private static final String FEDERATED_API_KEY_REMOTE_ID = "federated.remoteApiKeyId";
     protected ApiMgtDAO apiMgtDAO;
     protected ApiKeyMgtDAO apiKeyMgtDAO;
     protected LabelsDAO labelsDAO;
@@ -390,53 +389,20 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public void revokeAPIKey(String keyUUId, String tenantDomain) throws APIManagementException {
         int tenantId = APIUtil.getTenantId(tenantDomain);
+        // Load existing metadata before revocation (revocation may remove/alter it)
         APIKeyInfo apiKeyInfo = apiKeyMgtDAO.getAPIKeyForTenant(keyUUId, tenantDomain);
-        if (apiKeyInfo == null || StringUtils.isBlank(apiKeyInfo.getApiKeyHash())) {
-            throw new APIMgtResourceNotFoundException("API key not found for UUID: " + keyUUId,
-                    ExceptionCodes.RESOURCE_NOT_FOUND);
+        if (apiKeyInfo == null || StringUtils.isEmpty(apiKeyInfo.getKeyUUID())) {
+            throw new APIMgtResourceNotFoundException("Active API key not found for UUID: " + keyUUId);
         }
-
-        String apiUuid = apiKeyInfo.getApiUUId();
-        if (StringUtils.isNotBlank(apiUuid)) {
-            String organization = StringUtils.isNotBlank(apiKeyInfo.getOrigin())
-                    ? apiKeyInfo.getOrigin()
-                    : apiMgtDAO.getOrganizationByAPIUUID(apiUuid);
-            if (StringUtils.isNotBlank(organization)) {
-                String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(apiUuid);
-                if (APIConstants.EXTERNAL_GATEWAY_VENDOR.equalsIgnoreCase(gatewayVendor)) {
-                    Map<String, String> props = deserializeApiKeyProperties(apiKeyInfo.getProperties());
-                    String remoteApiKeyId = props.get(FEDERATED_API_KEY_REMOTE_ID);
-                    String envId = apiMgtDAO.getGatewayEnvironmentIdForExternalApi(apiUuid);
-                    if (StringUtils.isBlank(envId)) {
-                        log.warn("Gateway environment id is missing for federated API key UUID: " + keyUUId
-                                + ". Proceeding with local revocation only.");
-                    } else if (StringUtils.isBlank(remoteApiKeyId)) {
-                        log.warn("Remote API key id is missing for federated API key UUID: " + keyUUId
-                                + ". Proceeding with local revocation only.");
-                    }
-                    APIKeyEvent apiKeyEvent = new APIKeyEvent(APIConstants.EventType.API_KEY_DELETE.name(),
-                            tenantId, tenantDomain, apiKeyInfo.getApiKeyHash(), apiKeyInfo.getKeyUUID(),
-                            apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType());
-                    if (StringUtils.isNotBlank(remoteApiKeyId) && StringUtils.isNotBlank(envId)) {
-                        apiKeyEvent.setApiUUId(apiUuid);
-                        apiKeyEvent.setApplicationUUId(apiKeyInfo.getApplicationId());
-                        apiKeyEvent.setUser(apiKeyInfo.getAuthUser());
-                        apiKeyEvent.setProperties(APIUtil.createFederatedApiKeyRemoteIdProperties(remoteApiKeyId));
-                        APIUtil.sendNotification(apiKeyEvent, APIConstants.NotifierType.FEDERATED_API_KEY.name());
-                    }
-                    apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
-                    APIUtil.sendNotification(apiKeyEvent, APIConstants.NotifierType.API_KEY.name());
-                    return;
-                 }
-             }
-        }
+        boolean isFederated = APIUtil.isFederatedGatewayApi(apiKeyInfo.getApiUUId());
         if (log.isDebugEnabled()){
             log.debug("Revoking API key with UUID: " + keyUUId + " for tenant: " + tenantDomain);
         }
         apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
         APIKeyEvent apiKeyEvent = new APIKeyEvent(APIConstants.EventType.API_KEY_DELETE.name(), tenantId, tenantDomain,
                 apiKeyInfo.getApiKeyHash(),apiKeyInfo.getKeyUUID(), apiKeyInfo.getKeyName(),apiKeyInfo.getKeyType());
-        APIUtil.sendNotification(apiKeyEvent, APIConstants.NotifierType.API_KEY.name());
+        APIUtil.sendNotification(apiKeyEvent, !isFederated ? APIConstants.NotifierType.API_KEY.name() :
+                APIConstants.NotifierType.FEDERATED_API_KEY.name());
     }
 
     /**
@@ -2504,16 +2470,5 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public void deleteOrganization(String organizationId, String tenantDomain) throws APIManagementException {
         apiMgtDAO.deleteOrganizationDetails(organizationId, tenantDomain);
-    }
-
-    /**
-     * Normalizes API key properties map to avoid null handling at call sites.
-     *
-     * @param properties API key properties map
-     * @return non-null properties map
-     */
-    private Map<String, String> deserializeApiKeyProperties(Map<String, String> properties) {
-
-        return properties == null ? new HashMap<>() : properties;
     }
 }

@@ -148,12 +148,16 @@ public class FederatedApiKeyNotifier implements Notifier {
     }
 
     private void handleRevoke(APIKeyEvent event) throws APIManagementException {
-        String apiUuid = resolveApiUuid(event, null);
+        APIKeyInfo keyInfo = getApiKeyMgtDAO().getAPIKeyForTenantAnyStatus(event.getUuid(), event.getTenantDomain());
+        String apiUuid = resolveApiUuid(event, keyInfo);
         String organization = resolveOrganization(apiUuid);
         String environmentId = resolveEnvironmentId(apiUuid);
         String apiReferenceArtifact = resolveApiReferenceArtifact(apiUuid, environmentId);
         FederatedApiKeyConnector connector = resolveConnector(organization, environmentId);
         String remoteApiKeyId = getEventProperties(event).get(FEDERATED_API_KEY_REMOTE_ID);
+        if (StringUtils.isBlank(remoteApiKeyId)) {
+            remoteApiKeyId = resolveRemoteApiKeyId(keyInfo);
+        }
         if (StringUtils.isBlank(remoteApiKeyId)) {
             log.warn("Remote API key ID is missing for federated API key UUID: " + event.getUuid()
                     + ". Skipping remote revocation.");
@@ -168,8 +172,8 @@ public class FederatedApiKeyNotifier implements Notifier {
                 .apiKeyName(event.getName())
                 .apiKeyValue(null)
                 .remoteApiKeyId(remoteApiKeyId)
-                .authzUser(event.getUser())
-                .applicationUuid(event.getApplicationUUId())
+                .authzUser(resolveAuthUser(event, keyInfo))
+                .applicationUuid(resolveApplicationUuid(event, keyInfo))
                 .organizationId(organization)
                 .environmentId(environmentId)
                 .build();
