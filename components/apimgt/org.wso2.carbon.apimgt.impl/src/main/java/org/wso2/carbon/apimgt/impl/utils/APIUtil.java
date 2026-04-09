@@ -654,6 +654,22 @@ public final class APIUtil {
 
     }
 
+    public static Map<String, String> createFederatedApiKeyEventProperties(String apiKeyValue,
+                                                                           Map<String, String> existingProperties) {
+        Map<String, String> properties = new HashMap<>();
+        if (existingProperties != null) {
+            properties.putAll(existingProperties);
+        }
+        properties.put("federated.apiKeyValue", apiKeyValue);
+        return properties;
+    }
+
+    public static Map<String, String> createFederatedApiKeyRemoteIdProperties(String remoteApiKeyId) {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("federated.remoteApiKeyId", remoteApiKeyId);
+        return properties;
+    }
+
     /**
      * This method used to extract environment list configured with non empty URLs.
      *

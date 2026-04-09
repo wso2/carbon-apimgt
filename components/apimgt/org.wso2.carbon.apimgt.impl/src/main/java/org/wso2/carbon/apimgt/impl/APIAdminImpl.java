@@ -413,22 +413,18 @@ public class APIAdminImpl implements APIAdmin {
                     } else if (StringUtils.isBlank(remoteApiKeyId)) {
                         log.warn("Remote API key id is missing for federated API key UUID: " + keyUUId
                                 + ". Proceeding with local revocation only.");
-                    } else {
-                        APIKeyEvent event = new APIKeyEvent(APIConstants.EventType.API_KEY_DELETE.name(), tenantId,
-                                tenantDomain, apiKeyInfo.getApiKeyHash(), keyUUId, apiKeyInfo.getKeyName(),
-                                apiKeyInfo.getKeyType());
-                        event.setApiUUId(apiUuid);
-                        event.setApplicationUUId(apiKeyInfo.getApplicationId());
-                        event.setUser(apiKeyInfo.getAuthUser());
-                        Map<String, String> eventProperties = new HashMap<>();
-                        eventProperties.put(FEDERATED_API_KEY_REMOTE_ID, remoteApiKeyId);
-                        event.setProperties(eventProperties);
-                        APIUtil.sendNotification(event, APIConstants.NotifierType.FEDERATED_API_KEY.name());
                     }
-                    apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
                     APIKeyEvent apiKeyEvent = new APIKeyEvent(APIConstants.EventType.API_KEY_DELETE.name(),
                             tenantId, tenantDomain, apiKeyInfo.getApiKeyHash(), apiKeyInfo.getKeyUUID(),
                             apiKeyInfo.getKeyName(), apiKeyInfo.getKeyType());
+                    if (StringUtils.isNotBlank(remoteApiKeyId) && StringUtils.isNotBlank(envId)) {
+                        apiKeyEvent.setApiUUId(apiUuid);
+                        apiKeyEvent.setApplicationUUId(apiKeyInfo.getApplicationId());
+                        apiKeyEvent.setUser(apiKeyInfo.getAuthUser());
+                        apiKeyEvent.setProperties(APIUtil.createFederatedApiKeyRemoteIdProperties(remoteApiKeyId));
+                        APIUtil.sendNotification(apiKeyEvent, APIConstants.NotifierType.FEDERATED_API_KEY.name());
+                    }
+                    apiKeyMgtDAO.revokeAPIKey(keyUUId, tenantDomain);
                     APIUtil.sendNotification(apiKeyEvent, APIConstants.NotifierType.API_KEY.name());
                     return;
                  }

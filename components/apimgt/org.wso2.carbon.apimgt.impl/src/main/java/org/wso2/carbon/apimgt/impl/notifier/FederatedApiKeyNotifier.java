@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiKeyMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.federated.gateway.FederatedApiKeyConnectorFactory;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
+import org.wso2.carbon.apimgt.impl.notifier.events.APIKeyAssociationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIKeyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 
@@ -56,35 +57,39 @@ public class FederatedApiKeyNotifier implements Notifier {
 
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
-        if (!(event instanceof APIKeyEvent)) {
-            return true;
-        }
-
-        APIKeyEvent fedEvent = (APIKeyEvent) event;
         if (log.isDebugEnabled()) {
-            log.debug("Processing federated API key event: " + fedEvent);
+            log.debug("Processing federated API key event: " + event);
         }
 
         try {
-            switch (fedEvent.getType()) {
-                case "API_KEY_CREATE":
-                    handleCreate(fedEvent);
-                    break;
-                case "API_KEY_DELETE":
-                    handleRevoke(fedEvent);
-                    break;
-                case "API_KEY_ASSOCIATION_CREATE":
-                    handleApplyRateLimitPolicy(fedEvent);
-                    break;
-                case "API_KEY_ASSOCIATION_DELETE":
-                    handleRemoveRateLimitPolicy(fedEvent);
-                    break;
-                default:
-                    log.warn("Unknown federated API key event type: " + fedEvent.getType());
+            if (event instanceof APIKeyEvent) {
+                APIKeyEvent apiKeyEvent = (APIKeyEvent) event;
+                switch (apiKeyEvent.getType()) {
+                    case "API_KEY_CREATE":
+                        handleCreate(apiKeyEvent);
+                        break;
+                    case "API_KEY_DELETE":
+                        handleRevoke(apiKeyEvent);
+                        break;
+                    default:
+                        log.warn("Unknown federated API key event type: " + apiKeyEvent.getType());
+                }
+            } else if (event instanceof APIKeyAssociationEvent) {
+                APIKeyAssociationEvent associationEvent = (APIKeyAssociationEvent) event;
+                switch (associationEvent.getType()) {
+                    case "API_KEY_ASSOCIATION_CREATE":
+                        handleApplyRateLimitPolicy(associationEvent);
+                        break;
+                    case "API_KEY_ASSOCIATION_DELETE":
+                        handleRemoveRateLimitPolicy(associationEvent);
+                        break;
+                    default:
+                        log.warn("Unknown federated API key association event type: " + associationEvent.getType());
+                }
             }
             return true;
         } catch (APIManagementException e) {
-            log.error("Failed to process federated API key event: " + fedEvent, e);
+            log.error("Failed to process federated API key event: " + event, e);
             throw new NotifierException("Failed to process federated API key event", e);
         }
     }
@@ -174,8 +179,8 @@ public class FederatedApiKeyNotifier implements Notifier {
                 + ", RemoteId: " + remoteApiKeyId);
     }
 
-    private void handleApplyRateLimitPolicy(APIKeyEvent event) throws APIManagementException {
-        APIKeyInfo keyInfo = getApiKeyMgtDAO().getAPIKey(event.getUuid(), event.getUser());
+    private void handleApplyRateLimitPolicy(APIKeyAssociationEvent event) throws APIManagementException {
+        APIKeyInfo keyInfo = resolveAssociationKeyInfo(event);
         String apiUuid = resolveApiUuid(event, keyInfo);
         String applicationUuid = resolveApplicationUuid(event, keyInfo);
         String organization = resolveOrganization(apiUuid);
@@ -194,23 +199,23 @@ public class FederatedApiKeyNotifier implements Notifier {
                 .apiUuid(apiUuid)
                 .apiName(null)
                 .apiReferenceArtifact(apiReferenceArtifact)
-                .apiKeyUuid(event.getUuid())
-                .apiKeyName(event.getName())
+                .apiKeyUuid(event.getApiKeyUUId())
+                .apiKeyName(keyInfo.getKeyName())
                 .apiKeyValue(null)
                 .remoteApiKeyId(remoteApiKeyId)
-                .authzUser(resolveAuthUser(event, keyInfo))
+                .authzUser(keyInfo.getAuthUser())
                 .applicationUuid(applicationUuid)
                 .organizationId(organization)
                 .environmentId(environmentId)
                 .build();
 
         connector.applyRateLimitPolicy(context, remotePolicyId);
-        log.info("Successfully applied rate limit policy to federated API key. KeyUuid: " + event.getUuid()
+        log.info("Successfully applied rate limit policy to federated API key. KeyUuid: " + event.getApiKeyUUId()
                 + ", RemotePolicyId: " + remotePolicyId);
     }
 
-    private void handleRemoveRateLimitPolicy(APIKeyEvent event) throws APIManagementException {
-        APIKeyInfo keyInfo = getApiKeyMgtDAO().getAPIKey(event.getUuid(), event.getUser());
+    private void handleRemoveRateLimitPolicy(APIKeyAssociationEvent event) throws APIManagementException {
+        APIKeyInfo keyInfo = resolveAssociationKeyInfo(event);
         String apiUuid = resolveApiUuid(event, keyInfo);
         String applicationUuid = resolveApplicationUuid(event, keyInfo);
         String organization = resolveOrganization(apiUuid);
@@ -219,7 +224,7 @@ public class FederatedApiKeyNotifier implements Notifier {
         FederatedApiKeyConnector connector = resolveConnector(organization, environmentId);
         String remoteApiKeyId = resolveRemoteApiKeyId(keyInfo);
         if (StringUtils.isBlank(remoteApiKeyId)) {
-            log.warn("Remote API key ID is missing for federated API key UUID: " + event.getUuid()
+            log.warn("Remote API key ID is missing for federated API key UUID: " + event.getApiKeyUUId()
                     + ". Skipping remote policy removal.");
             return;
         }
@@ -228,18 +233,18 @@ public class FederatedApiKeyNotifier implements Notifier {
                 .apiUuid(apiUuid)
                 .apiName(null)
                 .apiReferenceArtifact(apiReferenceArtifact)
-                .apiKeyUuid(event.getUuid())
-                .apiKeyName(event.getName())
+                .apiKeyUuid(event.getApiKeyUUId())
+                .apiKeyName(keyInfo.getKeyName())
                 .apiKeyValue(null)
                 .remoteApiKeyId(remoteApiKeyId)
-                .authzUser(resolveAuthUser(event, keyInfo))
+                .authzUser(keyInfo.getAuthUser())
                 .applicationUuid(applicationUuid)
                 .organizationId(organization)
                 .environmentId(environmentId)
                 .build();
 
         connector.removeRateLimitPolicy(context);
-        log.info("Successfully removed rate limit policy from federated API key. KeyUuid: " + event.getUuid());
+        log.info("Successfully removed rate limit policy from federated API key. KeyUuid: " + event.getApiKeyUUId());
     }
 
     private FederatedApiKeyConnector resolveConnector(String organization, String environmentId)
@@ -314,7 +319,25 @@ public class FederatedApiKeyNotifier implements Notifier {
         return apiUuid;
     }
 
+    private String resolveApiUuid(APIKeyAssociationEvent event, APIKeyInfo keyInfo) throws APIManagementException {
+        String apiUuid = event.getApiUUId();
+        if (StringUtils.isBlank(apiUuid) && keyInfo != null) {
+            apiUuid = keyInfo.getApiUUId();
+        }
+        if (StringUtils.isBlank(apiUuid)) {
+            throw new APIManagementException("API UUID is required for federated API key event processing");
+        }
+        return apiUuid;
+    }
+
     private String resolveApplicationUuid(APIKeyEvent event, APIKeyInfo keyInfo) {
+        if (StringUtils.isNotBlank(event.getApplicationUUId())) {
+            return event.getApplicationUUId();
+        }
+        return keyInfo != null ? keyInfo.getApplicationId() : null;
+    }
+
+    private String resolveApplicationUuid(APIKeyAssociationEvent event, APIKeyInfo keyInfo) {
         if (StringUtils.isNotBlank(event.getApplicationUUId())) {
             return event.getApplicationUUId();
         }
@@ -363,6 +386,13 @@ public class FederatedApiKeyNotifier implements Notifier {
 
     private Map<String, String> getEventProperties(APIKeyEvent event) {
         return event.getProperties() == null ? Collections.emptyMap() : (Map<String, String>) event.getProperties();
+    }
+
+    private APIKeyInfo resolveAssociationKeyInfo(APIKeyAssociationEvent event) throws APIManagementException {
+        if (StringUtils.isBlank(event.getApiKeyUUId())) {
+            throw new APIManagementException("API key UUID is required for federated API key association");
+        }
+        return getApiKeyMgtDAO().getAPIKeyForTenant(event.getApiKeyUUId(), event.getTenantDomain());
     }
 
     private ApiKeyMgtDAO getApiKeyMgtDAO() {

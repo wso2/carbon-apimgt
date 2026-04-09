@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.notifier.events;
 import java.util.UUID;
 
 public class APIKeyAssociationEvent extends Event {
+    private String apiKeyUUId;
     private String apiKeyHash;
     private String applicationUUId;
     private String apiUUId;
@@ -49,6 +50,14 @@ public class APIKeyAssociationEvent extends Event {
     }
     public String getApiKeyHash() {
         return apiKeyHash;
+    }
+
+    public String getApiKeyUUId() {
+        return apiKeyUUId;
+    }
+
+    public void setApiKeyUUId(String apiKeyUUId) {
+        this.apiKeyUUId = apiKeyUUId;
     }
 
     public void setApiKeyHash(String apiKeyHash) {
