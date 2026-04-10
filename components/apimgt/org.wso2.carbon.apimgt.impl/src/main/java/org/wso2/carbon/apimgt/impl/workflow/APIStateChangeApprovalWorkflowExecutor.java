@@ -285,6 +285,11 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
             dto.setMetadata("EnforcementMode", enforcementMode);
             dto.setMetadata("LifecycleAction", action);
 
+            // Also set on properties so REST API exposes them to Admin Portal
+            dto.setProperties("governanceCheck", "true");
+            dto.setProperties("successorFound", String.valueOf(successorFound));
+            dto.setProperties("enforcementMode", enforcementMode);
+
             if (successorFound) {
                 attachSuccessorMetadata(dto, guideResult);
             } else {
@@ -292,6 +297,7 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
                 String riskReason = "API transitioned to " + action
                         + "d state without an identified successor";
                 dto.setMetadata("RiskReason", riskReason);
+                dto.setProperties("riskReason", riskReason);
                 log.info("[GOVERNANCE-WORKFLOW] WARN mode — no successor for API " + apiUuid
                         + ". Recording violation and allowing request to proceed to admin approval.");
 
@@ -335,6 +341,12 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
             dto.setMetadata("SuccessorApiVersion", successorVersion);
             dto.setMetadata("SimilarityPercentage", String.format("%.1f", similarity));
 
+            // Also set on properties for REST API visibility
+            dto.setProperties("successorApiName", successorName);
+            dto.setProperties("successorApiVersion", successorVersion);
+            dto.setProperties("similarityPercentage",
+                    String.format("%.1f", similarity));
+
             // Full candidate list — serialize as JSON for Admin Portal display
             try {
                 Method getAllCandidates = guideResult.getClass().getMethod("getAllCandidates");
@@ -363,6 +375,8 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
                     sb.append("]");
                     dto.setMetadata("SuccessorCandidates", sb.toString());
                     dto.setMetadata("CandidateCount", String.valueOf(candidates.size()));
+                    // Properties for REST API — JSON string will be parsed by frontend
+                    dto.setProperties("successorCandidates", sb.toString());
                 }
             } catch (NoSuchMethodException nsm) {
                 log.debug("[GOVERNANCE-WORKFLOW] getAllCandidates() not available in result");

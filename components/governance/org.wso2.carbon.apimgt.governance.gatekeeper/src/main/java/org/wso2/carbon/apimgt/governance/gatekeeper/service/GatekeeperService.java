@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -860,13 +860,31 @@ public class GatekeeperService {
         try {
             String dbContent = getLifecycleRulesetContentFromDb(organization);
             if (dbContent != null && !dbContent.isEmpty()) {
+                // Section-aware parsing: only read config from
+                // lifecycle_retirement section for combined rulesets
+                String currentSection = null;
                 for (String line : dbContent.split("\n")) {
                     String trimmed = line.trim();
+                    int indent = line.length() - line.stripLeading().length();
+                    // Track top-level sections (indent 0)
+                    if (indent == 0 && trimmed.endsWith(":")) {
+                        currentSection = trimmed.substring(
+                                0, trimmed.length() - 1);
+                    }
+                    // Skip settings under deduplication section
+                    if ("deduplication".equals(currentSection)
+                            && indent > 0) {
+                        continue;
+                    }
                     if (trimmed.startsWith("mode:")) {
                         String modeValue = trimmed.substring(5).trim()
                                 .replace("\"", "").replace("'", "");
                         if ("block".equalsIgnoreCase(modeValue)) {
-                            enforcementMode = DeprecationGuideResult.MODE_BLOCK;
+                            enforcementMode
+                                    = DeprecationGuideResult.MODE_BLOCK;
+                        } else if ("warn".equalsIgnoreCase(modeValue)) {
+                            enforcementMode
+                                    = DeprecationGuideResult.MODE_WARN;
                         }
                         configLoadedFromDb = true;
                     } else if (trimmed.startsWith("similarity_threshold:")) {
@@ -874,36 +892,45 @@ public class GatekeeperService {
                                 "similarity_threshold:".length()).trim();
                         try {
                             double t = Double.parseDouble(thresholdStr);
-                            // DB stores as 0.0-1.0 fraction
                             successorThreshold = t;
                         } catch (NumberFormatException nfe) {
-                            log.debug("[DEPRECATION-GUIDE] Invalid threshold in DB: " + thresholdStr);
+                            log.debug("[DEPRECATION-GUIDE] Invalid "
+                                    + "threshold in DB: " + thresholdStr);
                         }
-                    } else if (trimmed.startsWith("successor_similarity_threshold:")) {
+                    } else if (trimmed.startsWith(
+                            "successor_similarity_threshold:")) {
                         String thresholdStr = trimmed.substring(
-                                "successor_similarity_threshold:".length()).trim();
+                                "successor_similarity_threshold:"
+                                        .length()).trim();
                         try {
-                            successorThreshold = Double.parseDouble(thresholdStr);
+                            successorThreshold
+                                    = Double.parseDouble(thresholdStr);
                         } catch (NumberFormatException nfe) {
-                            log.debug("[DEPRECATION-GUIDE] Invalid successor threshold: " + thresholdStr);
+                            log.debug("[DEPRECATION-GUIDE] Invalid "
+                                    + "successor threshold: "
+                                    + thresholdStr);
                         }
                     } else if (trimmed.startsWith("sunset_period_days:")) {
-                        String daysStr = trimmed.substring("sunset_period_days:".length()).trim();
+                        String daysStr = trimmed.substring(
+                                "sunset_period_days:".length()).trim();
                         try {
                             sunsetPeriodDays = Integer.parseInt(daysStr);
                         } catch (NumberFormatException nfe) {
-                            log.debug("[DEPRECATION-GUIDE] Invalid sunset_period_days: " + daysStr);
+                            log.debug("[DEPRECATION-GUIDE] Invalid "
+                                    + "sunset_period_days: " + daysStr);
                         }
                     }
                 }
                 if (configLoadedFromDb) {
-                    log.debug("[DEPRECATION-GUIDE] Config loaded from DB — mode: "
-                            + enforcementMode + ", threshold: " + successorThreshold
+                    log.debug("[DEPRECATION-GUIDE] Config loaded from "
+                            + "DB — mode: " + enforcementMode
+                            + ", threshold: " + successorThreshold
                             + ", sunsetDays: " + sunsetPeriodDays);
                 }
             }
         } catch (Exception e) {
-            log.debug("[DEPRECATION-GUIDE] Could not read config from DB: " + e.getMessage());
+            log.debug("[DEPRECATION-GUIDE] Could not read config from DB: "
+                    + e.getMessage());
         }
 
         // ── 2. Fallback: YAML file on disk ──
@@ -1199,37 +1226,98 @@ public class GatekeeperService {
      * @return The YAML content string, or null if not found
      */
     private String getLifecycleRulesetContentFromDb(String organization) {
+        // Match by name OR by content containing lifecycle_retirement
+        // to support combined rulesets that don't have lifecycle/retirement in name
+        // Returns the content with the STRICTEST lifecycle mode (block > warn)
         String sql = "SELECT rc.CONTENT FROM GOV_RULESET_CONTENT rc "
                 + "JOIN GOV_RULESET r ON rc.RULESET_ID = r.RULESET_ID "
-                + "WHERE (LOWER(r.NAME) LIKE '%lifecycle%' OR LOWER(r.NAME) LIKE '%retirement%') "
-                + "AND r.RULE_CATEGORY = 'GENERIC' LIMIT 1";
+                + "WHERE r.RULE_CATEGORY = 'GENERIC' "
+                + "AND (LOWER(r.NAME) LIKE '%lifecycle%' "
+                + "OR LOWER(r.NAME) LIKE '%retirement%' "
+                + "OR CAST(rc.CONTENT AS CHAR(4000)) "
+                + "LIKE '%lifecycle\\_retirement:%')";
         java.sql.Connection conn = null;
         java.sql.PreparedStatement ps = null;
         java.sql.ResultSet rs = null;
         try {
-            conn = org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil.getConnection();
+            conn = org.wso2.carbon.apimgt.governance.impl.util
+                    .APIMGovernanceDBUtil.getConnection();
             ps = conn.prepareStatement(sql);
             rs = ps.executeQuery();
-            if (rs.next()) {
-                // CONTENT may be stored as BLOB or TEXT
+            String bestContent = null;
+            boolean foundBlock = false;
+            while (rs.next()) {
+                String content = null;
                 try {
                     java.sql.Blob blob = rs.getBlob("CONTENT");
                     if (blob != null) {
-                        byte[] bytes = blob.getBytes(1, (int) blob.length());
-                        return new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
+                        byte[] bytes = blob.getBytes(
+                                1, (int) blob.length());
+                        content = new String(bytes,
+                                java.nio.charset.StandardCharsets.UTF_8);
                     }
                 } catch (Exception blobEx) {
                     // Not a BLOB — try as string
                 }
-                return rs.getString("CONTENT");
+                if (content == null) {
+                    content = rs.getString("CONTENT");
+                }
+                if (content == null || content.isEmpty()) {
+                    continue;
+                }
+                // Parse lifecycle mode with section-aware logic
+                String lifecycleMode = extractLifecycleMode(content);
+                if ("block".equalsIgnoreCase(lifecycleMode)) {
+                    // Block is the strictest — return immediately
+                    log.debug("[DEPRECATION-GUIDE] Found lifecycle "
+                            + "content with mode=block");
+                    return content;
+                }
+                if (bestContent == null) {
+                    bestContent = content;
+                }
             }
+            return bestContent;
         } catch (Exception e) {
-            log.debug("[DEPRECATION-GUIDE] Could not read lifecycle ruleset content from DB: "
-                    + e.getMessage());
+            log.debug("[DEPRECATION-GUIDE] Could not read lifecycle "
+                    + "ruleset content from DB: " + e.getMessage());
         } finally {
-            if (rs != null) { try { rs.close(); } catch (Exception ignored) { } }
-            if (ps != null) { try { ps.close(); } catch (Exception ignored) { } }
-            if (conn != null) { try { conn.close(); } catch (Exception ignored) { } }
+            if (rs != null) {
+                try { rs.close(); } catch (Exception ignored) { }
+            }
+            if (ps != null) {
+                try { ps.close(); } catch (Exception ignored) { }
+            }
+            if (conn != null) {
+                try { conn.close(); } catch (Exception ignored) { }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Extract the lifecycle mode from YAML content using
+     * section-aware parsing. Returns "block", "warn", or null.
+     */
+    private String extractLifecycleMode(String content) {
+        String currentSection = null;
+        for (String line : content.split("\n")) {
+            String trimmed = line.trim();
+            int indent = line.length()
+                    - line.stripLeading().length();
+            if (indent == 0 && trimmed.endsWith(":")) {
+                currentSection = trimmed.substring(
+                        0, trimmed.length() - 1);
+            }
+            // Skip settings under deduplication section
+            if ("deduplication".equals(currentSection)
+                    && indent > 0) {
+                continue;
+            }
+            if (trimmed.startsWith("mode:")) {
+                return trimmed.substring(5).trim()
+                        .replace("\"", "").replace("'", "");
+            }
         }
         return null;
     }
@@ -1244,10 +1332,16 @@ public class GatekeeperService {
      */
     public boolean isLifecycleRulesetInActivePolicy(String organization) {
         String tenantDomain = organization != null ? organization : "carbon.super";
+        // Match by name OR by content containing lifecycle_retirement
+        // to support combined rulesets
         String sql = "SELECT COUNT(*) AS CNT FROM GOV_POLICY_RULESET pr "
                 + "JOIN GOV_RULESET r ON pr.RULESET_ID = r.RULESET_ID "
-                + "WHERE (LOWER(r.NAME) LIKE '%lifecycle%' OR LOWER(r.NAME) LIKE '%retirement%') "
-                + "AND r.RULE_CATEGORY = 'GENERIC' "
+                + "LEFT JOIN GOV_RULESET_CONTENT rc ON r.RULESET_ID = rc.RULESET_ID "
+                + "WHERE r.RULE_CATEGORY = 'GENERIC' "
+                + "AND (LOWER(r.NAME) LIKE '%lifecycle%' "
+                + "OR LOWER(r.NAME) LIKE '%retirement%' "
+                + "OR CAST(rc.CONTENT AS CHAR(4000)) "
+                + "LIKE '%lifecycle\\_retirement:%') "
                 + "AND (r.ORGANIZATION = ? OR r.ORGANIZATION = 'carbon.super')";
         java.sql.Connection conn = null;
         java.sql.PreparedStatement ps = null;
@@ -1305,17 +1399,35 @@ public class GatekeeperService {
         try {
             String dbContent = getLifecycleRulesetContentFromDb(organization);
             if (dbContent != null && !dbContent.isEmpty()) {
+                // Section-aware parsing: skip deduplication section
+                String currentSection = null;
                 for (String line : dbContent.split("\n")) {
                     String trimmed = line.trim();
+                    int indent = line.length()
+                            - line.stripLeading().length();
+                    if (indent == 0 && trimmed.endsWith(":")) {
+                        currentSection = trimmed.substring(
+                                0, trimmed.length() - 1);
+                    }
+                    if ("deduplication".equals(currentSection)
+                            && indent > 0) {
+                        continue;
+                    }
                     if (trimmed.startsWith("mode:")) {
                         String modeValue = trimmed.substring(5).trim()
                                 .replace("\"", "").replace("'", "");
                         if ("block".equalsIgnoreCase(modeValue)) {
-                            enforcementMode = DeprecationGuideResult.MODE_BLOCK;
+                            enforcementMode
+                                    = DeprecationGuideResult.MODE_BLOCK;
+                        } else if ("warn".equalsIgnoreCase(modeValue)) {
+                            enforcementMode
+                                    = DeprecationGuideResult.MODE_WARN;
                         }
                         configLoadedFromDb = true;
-                    } else if (trimmed.startsWith("sunset_period_days:")) {
-                        String daysStr = trimmed.substring("sunset_period_days:".length()).trim();
+                    } else if (trimmed.startsWith(
+                            "sunset_period_days:")) {
+                        String daysStr = trimmed.substring(
+                                "sunset_period_days:".length()).trim();
                         try {
                             sunsetPeriodDays = Integer.parseInt(daysStr);
                         } catch (NumberFormatException nfe) {
@@ -1325,7 +1437,8 @@ public class GatekeeperService {
                 }
             }
         } catch (Exception e) {
-            log.debug("[DEPRECATION-GUIDE] Could not read config from DB for known successor: "
+            log.debug("[DEPRECATION-GUIDE] Could not read config "
+                    + "from DB for known successor: "
                     + e.getMessage());
         }
 

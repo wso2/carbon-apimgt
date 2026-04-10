@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -88,16 +88,17 @@ public class GatekeeperValidationEngine implements ValidationEngine {
      */
     @Override
     public void validateRulesetContent(Ruleset ruleset) throws APIMGovernanceException {
-        // Lifecycle rulesets have their own YAML format — skip dedup-specific validation
-        if (isLifecycleRuleset(ruleset)) {
+        // Lifecycle-only rulesets have their own YAML format — skip dedup-specific validation.
+        // Combined rulesets (both dedup + lifecycle) still need dedup validation.
+        if (isLifecycleRuleset(ruleset) && !isCombinedRuleset(ruleset)) {
             if (log.isDebugEnabled()) {
                 log.debug("Validated lifecycle ruleset content: " + ruleset.getName());
             }
             return;
         }
 
-        // Only process DEDUPLICATION category rulesets
-        if (!isDeduplicationRuleset(ruleset)) {
+        // Only process GENERIC/deduplication category rulesets (or combined rulesets)
+        if (!isDeduplicationRuleset(ruleset) && !isCombinedRuleset(ruleset)) {
             if (log.isDebugEnabled()) {
                 log.debug("Skipping non-deduplication ruleset: " + ruleset.getName());
             }
@@ -191,9 +192,11 @@ public class GatekeeperValidationEngine implements ValidationEngine {
      */
     @Override
     public List<Rule> extractRulesFromRuleset(Ruleset ruleset) throws APIMGovernanceException {
-        // Handle lifecycle rulesets — produce a single lifecycle rule
+        List<Rule> rules = new ArrayList<>();
+        boolean combined = isCombinedRuleset(ruleset);
+
+        // Handle lifecycle rules (lifecycle-only or combined rulesets)
         if (isLifecycleRuleset(ruleset)) {
-            List<Rule> rules = new ArrayList<>();
             Rule lifecycleRule = new Rule();
             lifecycleRule.setId(java.util.UUID.randomUUID().toString());
             lifecycleRule.setName(LIFECYCLE_RULE_NAME);
@@ -208,15 +211,15 @@ public class GatekeeperValidationEngine implements ValidationEngine {
                 lifecycleRule.setContent(LIFECYCLE_RULE_NAME);
             }
             rules.add(lifecycleRule);
+            if (!combined) {
+                return rules;
+            }
+        }
+
+        // Handle dedup rules (dedup-only or combined rulesets)
+        if (!isDeduplicationRuleset(ruleset) && !combined) {
             return rules;
         }
-
-        // Only process GENERIC/deduplication category rulesets
-        if (!isDeduplicationRuleset(ruleset)) {
-            return Collections.emptyList();
-        }
-
-        List<Rule> rules = new ArrayList<>();
 
         RulesetContent content = ruleset.getRulesetContent();
         String contentString = new String(content.getContent(), StandardCharsets.UTF_8);
@@ -316,20 +319,27 @@ public class GatekeeperValidationEngine implements ValidationEngine {
                     + ", id=" + ruleset.getId() + ")");
         }
 
+        // ── Combined ruleset detection ──
+        boolean combined = isCombinedRuleset(ruleset);
+
         // ── Lifecycle ruleset handling (deprecation/retirement successor check) ──
         boolean lifecycle = isLifecycleRuleset(ruleset);
         if (log.isDebugEnabled()) {
-            log.debug("isLifecycleRuleset('" + ruleset.getName() + "') = " + lifecycle);
+            log.debug("isLifecycleRuleset('" + ruleset.getName() + "') = " + lifecycle
+                    + ", isCombined = " + combined);
         }
         if (lifecycle) {
             if (log.isDebugEnabled()) {
                 log.debug("Routing to validateLifecycleRuleset for: " + ruleset.getName());
             }
-            return validateLifecycleRuleset(target, ruleset);
+            violations.addAll(validateLifecycleRuleset(target, ruleset));
+            if (!combined) {
+                return violations;
+            }
         }
 
         // ── Deduplication ruleset handling ──
-        if (!isDeduplicationRuleset(ruleset)) {
+        if (!isDeduplicationRuleset(ruleset) && !combined) {
             if (log.isDebugEnabled()) {
                 log.debug("Skipping validation for non-deduplication ruleset: " + ruleset.getName());
             }
@@ -481,19 +491,24 @@ public class GatekeeperValidationEngine implements ValidationEngine {
         // Skip lifecycle evaluation if the ruleset is not attached to any
         // active governance policy.  This prevents stale compliance results
         // when the admin toggles the lifecycle ruleset off in the policy UI.
-        try {
-            if (!gatekeeperService.isLifecycleRulesetInActivePolicy(null)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Lifecycle ruleset '" + ruleset.getName()
-                            + "' is not attached to any active policy. "
-                            + "Skipping compliance evaluation.");
+        // For combined rulesets, the scheduler already ensures policy attachment
+        // via getRulesetsWithContentByPolicyId(), so skip the name-based SQL check
+        // (which wouldn't match combined ruleset names like "Strict Combined").
+        if (!isCombinedRuleset(ruleset)) {
+            try {
+                if (!gatekeeperService.isLifecycleRulesetInActivePolicy(null)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Lifecycle ruleset '" + ruleset.getName()
+                                + "' is not attached to any active policy. "
+                                + "Skipping compliance evaluation.");
+                    }
+                    return violations;
                 }
-                return violations;
+            } catch (Exception ex) {
+                log.warn("Could not verify lifecycle policy attachment for '"
+                        + ruleset.getName() + "': " + ex.getMessage()
+                        + ". Proceeding with evaluation (fail-open).");
             }
-        } catch (Exception ex) {
-            log.warn("Could not verify lifecycle policy attachment for '"
-                    + ruleset.getName() + "': " + ex.getMessage()
-                    + ". Proceeding with evaluation (fail-open).");
         }
 
         String mode = getLifecycleMode(ruleset);
@@ -711,6 +726,27 @@ public class GatekeeperValidationEngine implements ValidationEngine {
             }
         } catch (Exception e) {
             log.debug("Could not parse ruleset content for lifecycle detection", e);
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the ruleset is a combined ruleset containing BOTH deduplication
+     * AND lifecycle_retirement sections in its YAML content.
+     *
+     * @param ruleset The ruleset to check
+     * @return True if it contains both deduplication and lifecycle sections
+     */
+    private boolean isCombinedRuleset(Ruleset ruleset) {
+        try {
+            RulesetContent content = ruleset.getRulesetContent();
+            if (content != null && content.getContent() != null) {
+                String contentString = new String(content.getContent(), StandardCharsets.UTF_8);
+                return contentString.contains("deduplication:")
+                        && contentString.contains("lifecycle_retirement:");
+            }
+        } catch (Exception e) {
+            log.debug("Could not check for combined ruleset", e);
         }
         return false;
     }
