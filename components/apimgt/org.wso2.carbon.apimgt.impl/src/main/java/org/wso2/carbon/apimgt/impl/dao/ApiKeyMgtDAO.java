@@ -39,6 +39,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Calendar;
 import java.util.Map;
 import java.util.List;
 import java.util.TimeZone;
@@ -50,6 +51,7 @@ public class ApiKeyMgtDAO {
 
     private static final Log log = LogFactory.getLog(ApiKeyMgtDAO.class);
     private static ApiKeyMgtDAO instance = null;
+    private static final Calendar UTC_CALENDAR = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 
     private ApiKeyMgtDAO() {}
 
@@ -90,14 +92,12 @@ public class ApiKeyMgtDAO {
                     ps.setString(4, keyInfoDTO.getKeyType());
                     ps.setBinaryStream(5, new ByteArrayInputStream(properties), properties.length);
                     ps.setString(6, keyInfoDTO.getAuthUser());
-                    ps.setTimestamp(7, new Timestamp(keyInfoDTO.getCreatedTime()),
-                            Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+                    ps.setTimestamp(7, new Timestamp(keyInfoDTO.getCreatedTime()), UTC_CALENDAR);
                     ps.setLong(8, keyInfoDTO.getValidityPeriod());
                     if (keyInfoDTO.getLastUsedTime() == null) {
                         ps.setNull(9, Types.TIMESTAMP);
                     } else {
-                        ps.setTimestamp(9, new Timestamp(keyInfoDTO.getLastUsedTime()),
-                                Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+                        ps.setTimestamp(9, new Timestamp(keyInfoDTO.getLastUsedTime()), UTC_CALENDAR);
                     }
                     ps.setString(10, "ACTIVE");
                     ps.executeUpdate();
@@ -155,10 +155,10 @@ public class ApiKeyMgtDAO {
                         APIKeyInfo keyInfo = new APIKeyInfo();
                         keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
                         keyInfo.setKeyName(rs.getString("NAME"));
-                        Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
+                        Timestamp createdTime = rs.getTimestamp("TIME_CREATED", UTC_CALENDAR);
                         keyInfo.setCreatedTime(createdTime.getTime());
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
-                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
+                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED", UTC_CALENDAR);
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
                         keyInfo.setApplicationId(applicationUUID);
                         keyInfo.setKeyType(keyType);
@@ -200,10 +200,10 @@ public class ApiKeyMgtDAO {
                         keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
                         keyInfo.setKeyName(rs.getString("NAME"));
                         keyInfo.setApiName(rs.getString("API_NAME"));
-                        Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
+                        Timestamp createdTime = rs.getTimestamp("TIME_CREATED", UTC_CALENDAR);
                         keyInfo.setCreatedTime(createdTime.getTime());
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
-                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
+                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED", UTC_CALENDAR);
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
                         keyInfo.setApplicationId(applicationUUID);
                         keyInfo.setKeyType(keyType);
@@ -241,10 +241,10 @@ public class ApiKeyMgtDAO {
                         APIKeyInfo keyInfo = new APIKeyInfo();
                         keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
                         keyInfo.setKeyName(rs.getString("NAME"));
-                        Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
+                        Timestamp createdTime = rs.getTimestamp("TIME_CREATED", UTC_CALENDAR);
                         keyInfo.setCreatedTime(createdTime.getTime());
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
-                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
+                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED", UTC_CALENDAR);
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
                         keyInfo.setApplicationId(rs.getString("APPLICATION_UUID"));
                         if (keyInfo.getApplicationId() == null) {
@@ -325,9 +325,9 @@ public class ApiKeyMgtDAO {
                         APIKeyInfo keyInfo = new APIKeyInfo();
                         keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
                         keyInfo.setKeyName(rs.getString("KEY_NAME"));
-                        Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
+                        Timestamp createdTime = rs.getTimestamp("TIME_CREATED", UTC_CALENDAR);
                         keyInfo.setCreatedTime(createdTime.getTime());
-                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
+                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED", UTC_CALENDAR);
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
                         keyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         try (InputStream apiKeyPropertiesInputStream = rs.getBinaryStream("ADDITIONAL_PROPERTIES")) {
@@ -445,7 +445,7 @@ public class ApiKeyMgtDAO {
                         keyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
                         keyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
-                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
+                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED", UTC_CALENDAR);
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
                         keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
                         try (InputStream apiKeyProperties = rs.getBinaryStream("API_KEY_PROPERTIES")) {
@@ -490,7 +490,7 @@ public class ApiKeyMgtDAO {
                         keyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
                         keyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
-                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
+                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED", UTC_CALENDAR);
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
                         keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
                         try (InputStream apiKeyProperties = rs.getBinaryStream("API_KEY_PROPERTIES")) {
@@ -534,7 +534,7 @@ public class ApiKeyMgtDAO {
                         keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
                         keyInfo.setApiKeyHash(rs.getString("API_KEY_HASH"));
                         keyInfo.setValidityPeriod(rs.getLong("VALIDITY_PERIOD"));
-                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
+                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED", UTC_CALENDAR);
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
                         keyInfo.setApiUUId(apiUUId);
                         keyInfo.setKeyType(rs.getString("KEY_TYPE"));
@@ -640,9 +640,9 @@ public class ApiKeyMgtDAO {
                         APIKeyInfo keyInfo = new APIKeyInfo();
                         keyInfo.setKeyUUID(rs.getString("API_KEY_UUID"));
                         keyInfo.setKeyName(rs.getString("KEY_NAME"));
-                        Timestamp createdTime = rs.getTimestamp("TIME_CREATED");
+                        Timestamp createdTime = rs.getTimestamp("TIME_CREATED", UTC_CALENDAR);
                         keyInfo.setCreatedTime(createdTime.getTime());
-                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED");
+                        Timestamp lastUsedTime = rs.getTimestamp("LAST_USED", UTC_CALENDAR);
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
                         keyInfo.setKeyType(rs.getString("KEY_TYPE"));
                         try (InputStream apiKeyPropertiesInputStream = rs.getBinaryStream("ADDITIONAL_PROPERTIES")) {
@@ -756,7 +756,7 @@ public class ApiKeyMgtDAO {
             conn.setAutoCommit(false);
             String sqlQuery = SQLConstants.UPDATE_API_KEY_LAST_USED_SQL;
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
-                ps.setTimestamp(1, lastUsedTimestamp);
+                ps.setTimestamp(1, lastUsedTimestamp, UTC_CALENDAR);
                 ps.setString(2, apiKeyHash);
                 ps.executeUpdate();
                 conn.commit();
@@ -783,7 +783,7 @@ public class ApiKeyMgtDAO {
             String sqlQuery = SQLConstants.UPDATE_API_KEY_LAST_USED_SQL;
             try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
                 for (Map.Entry<String, Timestamp> entry : apiKeyUsageUpdates.entrySet()) {
-                    ps.setTimestamp(1, entry.getValue());
+                    ps.setTimestamp(1, entry.getValue(), UTC_CALENDAR);
                     ps.setString(2, entry.getKey());
                     ps.addBatch();
                 }
