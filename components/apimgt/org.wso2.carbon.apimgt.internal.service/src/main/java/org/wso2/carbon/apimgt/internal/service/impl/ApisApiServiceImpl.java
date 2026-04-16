@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,13 +28,17 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.dto.ImportedAPIDTO;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
@@ -42,13 +47,11 @@ import org.wso2.carbon.apimgt.api.model.subscription.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
+import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.internal.service.ApisApiService;
-import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.DeployedAPIRevisionDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.DeployedEnvInfoDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.DeploymentAcknowledgmentResponseDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.*;
 import org.apache.cxf.message.Message;
 import org.wso2.carbon.apimgt.api.PlatformGatewayArtifactService;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
@@ -56,6 +59,8 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 public class ApisApiServiceImpl implements ApisApiService {
@@ -289,6 +294,42 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         return Response.ok().build();
+    }
+
+    @Override
+    public Response importAPI(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite, Boolean preservePortalConfigurations, Boolean dryRun, String accept, MessageContext messageContext) throws APIManagementException {
+        // Check whether to update. If not specified, default value is false.
+        overwrite = overwrite != null && overwrite;
+
+        // Check if the URL parameter value is specified, otherwise the default value is true.
+        preserveProvider = preserveProvider == null || preserveProvider;
+        if (preservePortalConfigurations == null) {
+            preservePortalConfigurations = false;
+        }
+        accept = accept != null ? accept : RestApiConstants.TEXT_PLAIN;
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+        String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                .get(RestApiConstants.USER_REST_API_SCOPES);
+        ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
+
+        if (dryRun) {
+            String dryRunResults = PublisherCommonUtils
+                    .checkGovernanceComplianceDryRun(fileInputStream, organization);
+            return Response.ok(dryRunResults, MediaType.APPLICATION_JSON).build();
+        }
+        ImportedAPIDTO importedAPIDTO = importExportAPI.importAPI(fileInputStream, preserveProvider, rotateRevision, overwrite,
+                preservePortalConfigurations, tokenScopes, organization);
+        if (importedAPIDTO != null) {
+            if (RestApiConstants.APPLICATION_JSON.equals(accept)) {
+                ImportAPIResponseDTO responseDTO = new ImportAPIResponseDTO().message("API: " + importedAPIDTO.getApi().getId() + " imported successfully");
+                return Response.status(Response.Status.CREATED).entity(responseDTO).build();
+            } else {
+                return Response.status(Response.Status.CREATED).entity("API " + importedAPIDTO.getApi().getId() + "imported successfully.").build();
+            }
+        }
+        log.error("Error while importing the API for organization: " + organization);
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error while importing the API for organization: " + organization).build();
     }
 
     @Override

@@ -31,5 +31,6 @@ public interface ApisApiService {
       public Response apisApiIdGet(String apiId, String accept, MessageContext messageContext) throws APIManagementException;
       public Response apisGet(String xWSO2Tenant, String apiId, String context, String version, String gatewayLabel, Boolean expand, String accept, MessageContext messageContext) throws APIManagementException;
       public Response deployedAPIRevision(List<DeployedAPIRevisionDTO> deployedAPIRevisionDTOList, MessageContext messageContext) throws APIManagementException;
+      public Response importAPI(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite, Boolean preservePortalConfigurations, Boolean dryRun, String accept, MessageContext messageContext) throws APIManagementException;
       public Response unDeployedAPIRevision(UnDeployedAPIRevisionDTO unDeployedAPIRevisionDTO, MessageContext messageContext) throws APIManagementException;
 }

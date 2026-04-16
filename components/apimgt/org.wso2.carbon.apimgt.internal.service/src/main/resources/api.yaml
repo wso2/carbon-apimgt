@@ -240,6 +240,87 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /apis/import:
+    post:
+      tags:
+        - Import
+      summary: Import an API
+      description: |
+        This operation can be used to import an API from the API Platform gateway controller.
+      parameters:
+        - name: preserveProvider
+          in: query
+          description: |
+            Preserve Original Provider of the API. This is the user choice to keep or replace the API provider
+          required: false
+          schema:
+            type: boolean
+        - name: rotateRevision
+          in: query
+          description: |
+            Once the revision max limit reached, undeploy and delete the earliest revision and create a new revision
+          required: false
+          schema:
+            type: boolean
+        - name: overwrite
+          in: query
+          description: |
+            Whether to update the API or not. This is used when updating already existing APIs
+          required: false
+          schema:
+            type: boolean
+        - name: preservePortalConfigurations
+          in: query
+          description: |
+            Preserve Portal Configurations. This is used to preserve the portal configurations of the API
+          required: false
+          schema:
+            type: boolean
+        - name: dryRun
+          in: query
+          description: |
+            Dry Run. This is used to validate the API without importing it
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - $ref: '#/components/parameters/Accept'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  description: Zip archive consisting on exported API configuration
+                  format: binary
+      responses:
+        201:
+          description: |
+            Created.
+            API Imported Successfully.
+          content:
+            "text/plain":
+              schema:
+                type: string
+                example: API Imported Successfully
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/ImportAPIResponse'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -F file=@admin-PizzaShackAPI-1.0.0.zip "https://127.0.0.1:9443/api/am/publisher/v4/apis/import?preserveProvider=false&overwrite=false"'
+      operationId: importAPI
   /apis/{apiId}/gateway-deployments:
     post:
       tags:
@@ -2622,6 +2703,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GatewayDeploymentStatusAcknowledgment'
+    ImportAPIResponse:
+      title: Import API Response
+      type: object
+      properties:
+        message:
+          type: string
+          description: |
+            Response message to denote the API import status
     GatewayDeploymentStatusAcknowledgment:
       type: object
       required:
