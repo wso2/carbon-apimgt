@@ -207,6 +207,7 @@ public class ApiMgtDAO {
     private final Object scopeMutex = new Object();
     private boolean forceCaseInsensitiveComparisons = false;
     private boolean multiGroupAppSharingEnabled = false;
+    private boolean preserveSystemResourceOrdering = false;
     private String PublicAccessPermission = "PUBLIC";
     private static final String[] keyTypes =
             new String[]{APIConstants.API_KEY_TYPE_PRODUCTION, APIConstants.API_KEY_TYPE_SANDBOX};
@@ -223,6 +224,11 @@ public class ApiMgtDAO {
         }
 
         multiGroupAppSharingEnabled = APIUtil.isMultiGroupAppSharingEnabled();
+
+        String config = System.getProperty("preserveSystemResourceOrdering");
+        if (StringUtils.isNotEmpty(config)) {
+            preserveSystemResourceOrdering = Boolean.parseBoolean(config);
+        }
     }
 
     /**
@@ -17205,7 +17211,12 @@ public class ApiMgtDAO {
                     }
                 }
 
-                Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+                Map<String, URITemplate> uriTemplateMap;
+                if (preserveSystemResourceOrdering) {
+                    uriTemplateMap = new HashMap<>(1024, 0.9F);
+                } else {
+                    uriTemplateMap = new LinkedHashMap<>();
+                }
                 for (URITemplate urlMapping : urlMappingList) {
                     if (urlMapping.getScope() != null) {
                         URITemplate urlMappingNew = urlMapping;
@@ -20278,7 +20289,12 @@ public class ApiMgtDAO {
                     }
                 }
 
-                Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+                Map<String, URITemplate> uriTemplateMap;
+                if (preserveSystemResourceOrdering) {
+                    uriTemplateMap = new HashMap<>(1024, 0.9F);
+                } else {
+                    uriTemplateMap = new LinkedHashMap<>();
+                }
                 for (URITemplate urlMapping : urlMappingList) {
                     if (urlMapping.getScope() != null) {
                         URITemplate urlMappingNew = urlMapping;
@@ -21462,7 +21478,12 @@ public class ApiMgtDAO {
                     }
                 }
 
-                Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+                Map<String, URITemplate> uriTemplateMap;
+                if (preserveSystemResourceOrdering) {
+                    uriTemplateMap = new HashMap<>(1024, 0.9F);
+                } else {
+                    uriTemplateMap = new LinkedHashMap<>();
+                }
                 for (URITemplate urlMapping : urlMappingList) {
                     if (urlMapping.getScope() != null) {
                         URITemplate urlMappingNew = urlMapping;
@@ -21881,7 +21902,12 @@ public class ApiMgtDAO {
                     }
                 }
 
-                Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+                Map<String, URITemplate> uriTemplateMap;
+                if (preserveSystemResourceOrdering) {
+                    uriTemplateMap = new HashMap<>(1024, 0.9F);
+                } else {
+                    uriTemplateMap = new LinkedHashMap<>();
+                }
                 for (URITemplate urlMapping : urlMappingList) {
                     if (urlMapping.getScope() != null) {
                         URITemplate urlMappingNew = urlMapping;
