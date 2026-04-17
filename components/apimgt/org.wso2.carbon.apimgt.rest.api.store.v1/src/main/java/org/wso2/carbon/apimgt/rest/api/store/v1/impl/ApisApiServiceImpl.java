@@ -75,6 +75,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
@@ -1139,13 +1140,21 @@ public class ApisApiServiceImpl implements ApisApiService {
             // gets the first available environment if environment is not provided
             if (StringUtils.isEmpty(environmentName)) {
                 Map<String, Environment> existingEnvironments = APIUtil.getEnvironments(organization);
+                Set<String> deployedEnvironments = APIUtil.getDeployedEnvironments(apiId);
+
+                // get the intersection of existing environments and deployed environments to
+                // find the valid environments of the API
+                // there can be multiple environments that the api revision is deployed to.
+                Set<String> validEnvironments = existingEnvironments.keySet().stream()
+                        .filter(deployedEnvironments::contains)
+                        .collect(Collectors.toSet());
 
                 // find a valid environment name from API
                 // gateway environment may be invalid due to inconsistent state of the API
                 // example: publish an API and later rename gateway environment from configurations
                 //          then the old gateway environment name becomes invalid
                 for (String environmentNameOfApi : api.getEnvironments()) {
-                    if (existingEnvironments.get(environmentNameOfApi) != null) {
+                    if (validEnvironments.contains(environmentNameOfApi)) {
                         environmentName = environmentNameOfApi;
                         break;
                     }
