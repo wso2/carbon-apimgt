@@ -297,7 +297,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response importAPI(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite, Boolean preservePortalConfigurations, Boolean dryRun, String accept, MessageContext messageContext) throws APIManagementException {
+    public Response importAPI(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider,
+                              Boolean rotateRevision, Boolean overwrite, Boolean preservePortalConfigurations,
+                              Boolean dryRun, String accept, MessageContext messageContext)
+            throws APIManagementException {
         // Check whether to update. If not specified, default value is false.
         overwrite = overwrite != null && overwrite;
 
@@ -306,14 +309,17 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (preservePortalConfigurations == null) {
             preservePortalConfigurations = false;
         }
-        accept = accept != null ? accept : RestApiConstants.TEXT_PLAIN;
+        accept = StringUtils.isBlank(accept) ? MediaType.APPLICATION_JSON : accept;
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        log.debug("Starting API import process for organization:" + organization);
 
         String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                 .get(RestApiConstants.USER_REST_API_SCOPES);
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
 
         if (dryRun) {
+            log.info("Performing dry run for API import governance compliance check for import API belonging " +
+                    "to organization: " + organization);
             String dryRunResults = PublisherCommonUtils
                     .checkGovernanceComplianceDryRun(fileInputStream, organization);
             return Response.ok(dryRunResults, MediaType.APPLICATION_JSON).build();
@@ -321,7 +327,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         ImportedAPIDTO importedAPIDTO = importExportAPI.importAPI(fileInputStream, preserveProvider, rotateRevision, overwrite,
                 preservePortalConfigurations, tokenScopes, organization);
         if (importedAPIDTO != null) {
-            if (RestApiConstants.APPLICATION_JSON.equals(accept)) {
+            if (StringUtils.containsIgnoreCase(accept, MediaType.APPLICATION_JSON)) {
                 ImportAPIResponseDTO responseDTO = new ImportAPIResponseDTO().message("API: " + importedAPIDTO.getApi().getId() + " imported successfully");
                 return Response.status(Response.Status.CREATED).entity(responseDTO).build();
             } else {
@@ -329,7 +335,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         }
         log.error("Error while importing the API for organization: " + organization);
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error while importing the API for organization: " + organization).build();
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Server error").build();
     }
 
     @Override

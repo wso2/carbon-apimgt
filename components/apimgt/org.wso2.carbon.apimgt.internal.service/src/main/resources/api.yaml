@@ -286,6 +286,7 @@ paths:
             default: false
         - $ref: '#/components/parameters/Accept'
       requestBody:
+        required: true
         content:
           multipart/form-data:
             schema:
@@ -297,6 +298,12 @@ paths:
                   description: Zip archive consisting on exported API configuration
                   format: binary
       responses:
+        200:
+         description: Dry-run validation results.
+         content:
+           application/json:
+            schema:
+              type: string
         201:
           description: |
             Created.
@@ -309,14 +316,12 @@ paths:
             "application/json":
               schema:
                 $ref: '#/components/schemas/ImportAPIResponse'
-        403:
-          $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
-        409:
-          $ref: '#/components/responses/Conflict'
         500:
-          $ref: '#/components/responses/InternalServerError'
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -F file=@admin-PizzaShackAPI-1.0.0.zip "https://127.0.0.1:9443/api/am/publisher/v4/apis/import?preserveProvider=false&overwrite=false"'

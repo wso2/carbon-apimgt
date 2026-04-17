@@ -96,14 +96,12 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @POST
     @Path("/import")
     @Consumes({ "multipart/form-data" })
-    @Produces({ "text/plain", "application/json" })
+    @Produces({ "application/json", "text/plain",  })
     @ApiOperation(value = "Import an API", notes = "This operation can be used to import an API from the API Platform gateway controller. ", response = String.class, tags={ "Import",  })
     @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Dry-run validation results.", response = String.class),
         @ApiResponse(code = 201, message = "Created. API Imported Successfully. ", response = String.class),
-        @ApiResponse(code = 403, message = "", response = Void.class),
-        @ApiResponse(code = 404, message = "", response = Void.class),
-        @ApiResponse(code = 409, message = "", response = Void.class),
-        @ApiResponse(code = 500, message = "", response = Void.class) })
+        @ApiResponse(code = 500, message = "Internal server error.", response = ErrorDTO.class) })
     public Response importAPI( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider ")  @QueryParam("preserveProvider") Boolean preserveProvider,  @ApiParam(value = "Once the revision max limit reached, undeploy and delete the earliest revision and create a new revision ")  @QueryParam("rotateRevision") Boolean rotateRevision,  @ApiParam(value = "Whether to update the API or not. This is used when updating already existing APIs ")  @QueryParam("overwrite") Boolean overwrite,  @ApiParam(value = "Preserve Portal Configurations. This is used to preserve the portal configurations of the API ")  @QueryParam("preservePortalConfigurations") Boolean preservePortalConfigurations,  @ApiParam(value = "Dry Run. This is used to validate the API without importing it ", defaultValue="false") @DefaultValue("false") @QueryParam("dryRun") Boolean dryRun,  @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
         return delegate.importAPI(fileInputStream, fileDetail, preserveProvider, rotateRevision, overwrite, preservePortalConfigurations, dryRun, accept, securityContext);
     }
