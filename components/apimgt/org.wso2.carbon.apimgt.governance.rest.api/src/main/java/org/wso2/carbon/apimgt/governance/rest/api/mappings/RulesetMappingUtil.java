@@ -39,8 +39,10 @@ public class RulesetMappingUtil {
         rulesetInfoDTO.setDescription(rulesetInfo.getDescription());
         rulesetInfoDTO.setRuleCategory(RulesetInfoDTO.
                 RuleCategoryEnum.fromValue(String.valueOf(rulesetInfo.getRuleCategory())));
-        rulesetInfoDTO.setRuleType(RulesetInfoDTO.
-                RuleTypeEnum.fromValue(String.valueOf(rulesetInfo.getRuleType())));
+        if (rulesetInfo.getRuleType() != null) {
+            rulesetInfoDTO.setRuleType(RulesetInfoDTO.
+                    RuleTypeEnum.fromValue(rulesetInfo.getRuleType().name()));
+        }
         rulesetInfoDTO.setArtifactType(RulesetInfoDTO.
                 ArtifactTypeEnum.fromValue(String.valueOf(rulesetInfo.getArtifactType())));
         rulesetInfoDTO.setDocumentationLink(rulesetInfo.getDocumentationLink());

@@ -903,8 +903,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .entity(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE)).build();
             }
             apiProvider.updateAPI(updatedAPI, existingAPI);
-            PublisherCommonUtils.checkGovernanceComplianceAsync(updatedAPI.getUuid(), APIMGovernableState.API_UPDATE,
-                    ArtifactType.API, organization);
+            // Async compliance evaluation is now handled internally by checkGovernanceComplianceSync
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1058,8 +1057,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     PublisherCommonUtils.updateApi(originalAPI, new APIDTOTypeWrapper(body), apiProvider, tokenScopes,
                             organizationInfo);
 
-            PublisherCommonUtils.checkGovernanceComplianceAsync(originalAPI.getUuid(), APIMGovernableState.API_UPDATE,
-                    ArtifactType.API, originalAPI.getOrganization());
+            // Async compliance evaluation is now handled internally by checkGovernanceComplianceSync
             return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
@@ -1687,6 +1685,18 @@ public class ApisApiServiceImpl implements ApisApiService {
                 return null;
             }
             PublisherCommonUtils.clearArtifactComplianceInfo(apiId, RestApiConstants.RESOURCE_API , organization);
+            // [DORMANT] Stale deduplication violation cleanup — deactivated until
+            // APIMGovernanceService.cleanupViolationsReferencingApi() is implemented.
+            // PublisherCommonUtils.cleanupViolationsReferencingApi(apiId, organization);
+            // [DORMANT] Successor mapping cleanup — deactivated while
+            // AM_API_SUCCESSOR_MAPPING persistence is dormant. Will be re-enabled
+            // once successor selection flow is fully integrated.
+            // try {
+            //     org.wso2.carbon.apimgt.governance.gatekeeper.dao.impl.SuccessorMappingDAOImpl
+            //             .getInstance().deleteAllReferences(apiId, organization);
+            // } catch (Exception ex) {
+            //     log.warn("Failed to clean up successor mappings for deleted API: " + apiId, ex);
+            // }
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
@@ -2878,8 +2888,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                             .getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);
                     ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
                             .fromResourcePolicyStrToInfoDTO(updatedPolicyContent);
-                    PublisherCommonUtils.checkGovernanceComplianceAsync(api.getUuid(), APIMGovernableState.API_UPDATE,
-                            ArtifactType.API, organization);
+                    // Async compliance evaluation is now handled internally by checkGovernanceComplianceSync
                     return Response.ok().entity(resourcePolicyInfoDTO).build();
                 } else {
                     String errorMessage =
@@ -3528,8 +3537,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
             //This URI used to set the location header of the POST response
             createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
-            PublisherCommonUtils.checkGovernanceComplianceAsync(createdApi.getUuid(), APIMGovernableState.API_CREATE,
-                    ArtifactType.API, organization);
+            // Async compliance evaluation is now handled internally by checkGovernanceComplianceSync
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (IOException | URISyntaxException e) {
             RestApiUtil.handleInternalServerError("Error occurred while importing WSDL", e, log);
@@ -3604,8 +3612,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String apiDefinition = ApisApiServiceImplUtils.generateSOAPAPIDefinition(apiToAdd, soapOperation);
             apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition, organization);
             //Retrieve the newly added API to send in the response payload
-            PublisherCommonUtils.checkGovernanceComplianceAsync(apiToAdd.getUuid(), APIMGovernableState.API_CREATE,
-                    ArtifactType.API, organization);
+            // Async compliance evaluation is now handled internally by checkGovernanceComplianceSync
             return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization, APIConstants.API_IDENTIFIER_TYPE);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while importing WSDL to create a SOAP API", e, log);
@@ -3639,8 +3646,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             API createdApi = apiProvider.addAPI(apiToAdd);
 
-            PublisherCommonUtils.checkGovernanceComplianceAsync(apiToAdd.getUuid(), APIMGovernableState.API_CREATE,
-                    ArtifactType.API, organization);
+            // Async compliance evaluation is now handled internally by checkGovernanceComplianceSync
             String filename = null;
             if (fileDetail != null) {
                 filename = fileDetail.getContentDisposition().getFilename();
@@ -3726,7 +3732,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response changeAPILifecycle(String action, String apiId, String lifecycleChecklist, String ifMatch,
+    public Response changeAPILifecycle(String action, String apiId, String lifecycleChecklist,
+                                       String successorUuid, String ifMatch,
                                        MessageContext messageContext) throws APIManagementException {
 
         try {
@@ -3736,6 +3743,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIConstants.API_IDENTIFIER_TYPE));
             APIStateChangeResponse stateChangeResponse = PublisherCommonUtils.changeApiOrApiProductLifecycle(action,
                     apiWrapper, lifecycleChecklist, organization);
+
+            // ── Governance checks and compliance evaluation are now handled by
+            // APIStateChangeGovernanceWorkflowExecutor (execute() + complete()).
+            // The executor runs successor checks in runGovernanceCheck() and
+            // triggers compliance evaluation in triggerComplianceEvaluation()
+            // after admin approval. Direct GatekeeperService calls removed to
+            // avoid NoClassDefFoundError from webapp classloader context.
 
             //returns the current lifecycle state
             LifecycleStateDTO stateDTO = getLifecycleState(apiId, organization); // todo try to prevent this call
@@ -3750,6 +3764,178 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while updating the lifecycle of API " + apiId, e, log);
+            } else {
+                throw e;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get Deprecation / Retirement Guide for an API — returns structural successor
+     * recommendation using MinHash/LSH similarity from the Gatekeeper module.
+     *
+     * Supports both "Deprecate" and "Retire" lifecycle actions via the ?action= query param.
+     *
+     * Scenario A (successor found): Returns the successor API details + RFC 8594 headers
+     *                                + all candidate versions for user selection.
+     * Scenario B (no successor):    Returns a migration risk warning with enforcement mode.
+     */
+    public Response getDeprecationGuide(String apiId, MessageContext messageContext) throws APIManagementException {
+        try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+
+            // Validate API exists
+            CommonUtils.validateAPIExistence(apiId);
+
+            // Read lifecycle action from query parameter (?action=Deprecate or ?action=Retire)
+            String lifecycleAction = "Deprecate"; // default
+            try {
+                javax.servlet.http.HttpServletRequest request = messageContext.getHttpServletRequest();
+                String actionParam = request.getParameter("action");
+                if ("Retire".equalsIgnoreCase(actionParam)) {
+                    lifecycleAction = "Retire";
+                }
+            } catch (Exception qe) {
+                log.debug("[DEPRECATION-GUIDE] Could not read action query param, defaulting to Deprecate");
+            }
+
+            // Try to get GatekeeperService via reflection (loaded by OSGi, not webapp classloader)
+            try {
+                Class<?> gsClass = Class.forName(
+                        "org.wso2.carbon.apimgt.governance.gatekeeper.service.GatekeeperService");
+                java.lang.reflect.Method getInstanceMethod = gsClass.getMethod("getInstance");
+                Object gatekeeperService = getInstanceMethod.invoke(null);
+
+                java.lang.reflect.Method isInitMethod = gsClass.getMethod("isInitialized");
+                if (gatekeeperService == null ||
+                        !((Boolean) isInitMethod.invoke(gatekeeperService))) {
+                    log.warn("GatekeeperService not available for deprecation guide. " +
+                            "Returning no-successor result.");
+                    java.util.Map<String, Object> fallback = new java.util.LinkedHashMap<>();
+                    fallback.put("apiUuid", apiId);
+                    fallback.put("organization", organization);
+                    fallback.put("successorFound", false);
+                    fallback.put("migrationRisk", true);
+                    fallback.put("lifecycleAction", lifecycleAction);
+                    fallback.put("enforcementMode", "warn");
+                    fallback.put("message", "Deprecation Guide unavailable — GatekeeperService not initialized.");
+                    return Response.ok().entity(fallback).build();
+                }
+
+                java.lang.reflect.Method findSuccessorMethod = gsClass.getMethod(
+                        "findSuccessorForDeprecation", String.class, String.class, String.class);
+                Object guideResult = findSuccessorMethod.invoke(
+                        gatekeeperService, apiId, organization, lifecycleAction);
+
+                // Convert to a JSON-friendly map for the response
+                Class<?> grClass = guideResult.getClass();
+                java.util.Map<String, Object> response = new java.util.LinkedHashMap<>();
+                response.put("apiUuid", grClass.getMethod("getApiUuid").invoke(guideResult));
+                response.put("apiName", grClass.getMethod("getApiName").invoke(guideResult));
+                response.put("apiVersion", grClass.getMethod("getApiVersion").invoke(guideResult));
+                response.put("organization", grClass.getMethod("getOrganization").invoke(guideResult));
+                response.put("successorFound", grClass.getMethod("isSuccessorFound").invoke(guideResult));
+                response.put("migrationRisk", grClass.getMethod("isMigrationRisk").invoke(guideResult));
+                response.put("message", grClass.getMethod("getMessage").invoke(guideResult));
+
+                // ── New fields: lifecycleAction, enforcementMode, successorCarriedOver ──
+                try {
+                    java.lang.reflect.Method getAction =
+                            guideResult.getClass().getMethod("getLifecycleAction");
+                    response.put("lifecycleAction", getAction.invoke(guideResult));
+                } catch (NoSuchMethodException nsm) {
+                    response.put("lifecycleAction", lifecycleAction);
+                }
+                try {
+                    java.lang.reflect.Method getMode =
+                            guideResult.getClass().getMethod("getEnforcementMode");
+                    response.put("enforcementMode", getMode.invoke(guideResult));
+                } catch (NoSuchMethodException nsm) {
+                    response.put("enforcementMode", "warn");
+                }
+                try {
+                    java.lang.reflect.Method getCarried =
+                            guideResult.getClass().getMethod("isSuccessorCarriedOver");
+                    response.put("successorCarriedOver", getCarried.invoke(guideResult));
+                } catch (NoSuchMethodException nsm) {
+                    response.put("successorCarriedOver", false);
+                }
+
+                boolean successorFound = (Boolean) grClass.getMethod("isSuccessorFound").invoke(guideResult);
+                if (successorFound) {
+                    response.put("successorApiUuid", grClass.getMethod("getSuccessorApiUuid").invoke(guideResult));
+                    response.put("successorApiName", grClass.getMethod("getSuccessorApiName").invoke(guideResult));
+                    response.put("successorApiVersion", grClass.getMethod("getSuccessorApiVersion").invoke(guideResult));
+                    response.put("similarityPercentage", grClass.getMethod("getSimilarityPercentage").invoke(guideResult));
+                    // Use reflection so it works regardless of class version loaded by OSGi
+                    try {
+                        java.lang.reflect.Method getStatus =
+                                guideResult.getClass().getMethod("getSuccessorStatus");
+                        response.put("successorStatus", getStatus.invoke(guideResult));
+                    } catch (NoSuchMethodException nsm) {
+                        response.put("successorStatus", "PUBLISHED");
+                    }
+                    try {
+                        java.lang.reflect.Method getType =
+                                guideResult.getClass().getMethod("getSuccessorType");
+                        response.put("successorType", getType.invoke(guideResult));
+                    } catch (NoSuchMethodException nsm) {
+                        response.put("successorType", "UNKNOWN");
+                    }
+                    response.put("rfc8594LinkHeader", grClass.getMethod("getRfc8594LinkHeader").invoke(guideResult));
+                    response.put("rfc8594SunsetHeader", grClass.getMethod("getRfc8594SunsetHeader").invoke(guideResult));
+                }
+
+                // ── All Candidate Versions (multi-version successor list) ──────
+                try {
+                    java.lang.reflect.Method getCandidates =
+                            guideResult.getClass().getMethod("getAllCandidates");
+                    Object candidatesObj = getCandidates.invoke(guideResult);
+                    if (candidatesObj instanceof java.util.List) {
+                        java.util.List<?> candidatesList = (java.util.List<?>) candidatesObj;
+                        java.util.List<java.util.Map<String, Object>> candidateMaps = new java.util.ArrayList<>();
+                        for (Object cand : candidatesList) {
+                            java.util.Map<String, Object> cm = new java.util.LinkedHashMap<>();
+                            Class<?> candClass = cand.getClass();
+                            cm.put("apiUuid", candClass.getMethod("getApiUuid").invoke(cand));
+                            cm.put("apiName", candClass.getMethod("getApiName").invoke(cand));
+                            cm.put("apiVersion", candClass.getMethod("getApiVersion").invoke(cand));
+                            cm.put("similarityPercentage",
+                                    candClass.getMethod("getSimilarityPercentage").invoke(cand));
+                            cm.put("successorType",
+                                    candClass.getMethod("getSuccessorType").invoke(cand));
+                            cm.put("status", candClass.getMethod("getStatus").invoke(cand));
+                            cm.put("context", candClass.getMethod("getContext").invoke(cand));
+                            candidateMaps.add(cm);
+                        }
+                        response.put("allCandidates", candidateMaps);
+                    }
+                } catch (NoSuchMethodException nsm) {
+                    response.put("allCandidates", new java.util.ArrayList<>());
+                } catch (Exception candEx) {
+                    log.debug("[DEPRECATION-GUIDE] Could not serialize allCandidates: "
+                            + candEx.getMessage());
+                    response.put("allCandidates", new java.util.ArrayList<>());
+                }
+
+                return Response.ok().entity(response).build();
+
+            } catch (Exception e) {
+                log.error("Error computing deprecation guide for API " + apiId, e);
+                java.util.Map<String, Object> fallback = new java.util.LinkedHashMap<>();
+                fallback.put("apiUuid", apiId);
+                fallback.put("organization", organization);
+                fallback.put("successorFound", false);
+                fallback.put("migrationRisk", true);
+                fallback.put("lifecycleAction", lifecycleAction);
+                fallback.put("enforcementMode", "warn");
+                fallback.put("message", "Could not compute deprecation guide: " + e.getMessage());
+                return Response.ok().entity(fallback).build();
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
                 throw e;
             }
@@ -4278,8 +4464,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS
                     + "/" + createdApiRevisionDTO.getApiInfo().getId() + "/"
                     + RestApiConstants.RESOURCE_PATH_REVISIONS + "/" + createdApiRevisionDTO.getId());
-            PublisherCommonUtils.checkGovernanceComplianceAsync(apiId, APIMGovernableState.API_DEPLOY,
-                    ArtifactType.API, organization);
+            // Async compliance evaluation is now handled internally by checkGovernanceComplianceSync
             return Response.created(createdApiUri).entity(createdApiRevisionDTO).build();
         } catch (APIManagementException e) {
             if (e instanceof APIComplianceException) {
@@ -4417,8 +4602,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevisionDeploymentDTOS.add(APIMappingUtil.fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
         }
         Response.Status status = Response.Status.CREATED;
-        PublisherCommonUtils.checkGovernanceComplianceAsync(apiId, APIMGovernableState.API_DEPLOY,
-                ArtifactType.API, organization);
+        // Async compliance evaluation is now handled internally by checkGovernanceComplianceSync
+        // to avoid redundant duplicate dedup checks that caused 2-3 minute latency
         return Response.status(status).entity(apiRevisionDeploymentDTOS).build();
     }
 

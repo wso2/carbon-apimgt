@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyAdherenceSate;
+import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
@@ -44,9 +45,9 @@ import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulesetMgtDAOImpl;
-import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
+import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -498,9 +499,6 @@ public class ComplianceManager {
         AuditLogger.log("New Sync Eval Request", "Starting sync compliance evaluation for artifact %s in organization" +
                 " %s against policies %s", artifactRefId, organization, Arrays.toString(govPolicies.toArray()));
 
-        ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
-                .getValidationEngineService().getValidationEngine();
-
         ArtifactComplianceInfo artifactComplianceInfo = new ArtifactComplianceInfo();
 
         if (artifactProjectContent == null || artifactProjectContent.isEmpty()) {
@@ -545,6 +543,79 @@ public class ComplianceManager {
 
             // Validate the artifact against each ruleset
             for (Ruleset ruleset : rulesets) {
+
+                // Handle GENERIC rulesets (deduplication + lifecycle) - these need special
+                // handling as they don't match artifact types but use GatekeeperValidationEngine.
+                // GatekeeperValidationEngine internally routes lifecycle vs dedup rulesets
+                // to the appropriate validation path, so both types flow through here.
+                if (RuleCategory.GENERIC.equals(ruleset.getRuleCategory())) {
+
+                    log.debug("Processing GENERIC ruleset " + ruleset.getId() +
+                            " for artifact " + artifactRefId + " during sync evaluation.");
+                    try {
+                        List<RuleViolation> ruleViolations = performGenericRulesetValidation(
+                                artifactRefId, ruleset, artifactProjectContent, organization);
+
+                        if (!ruleViolations.isEmpty()) {
+                            // Read the deduplication mode from the ruleset YAML to determine
+                            // enforcement behavior. mode=block forces blocking at deploy time.
+                            String dedupMode = extractDedupModeFromRuleset(ruleset);
+
+                            if ("block".equalsIgnoreCase(dedupMode)
+                                    && state.ordinal() >= APIMGovernableState.API_DEPLOY.ordinal()) {
+                                // mode=block AND state is deploy or later:
+                                // Force ALL violations as blocking - bypass policy action check
+                                for (RuleViolation v : ruleViolations) {
+                                    v.setArtifactRefId(artifactRefId);
+                                    v.setArtifactType(artifactType);
+                                    v.setOrganization(organization);
+                                    v.setRuleType(new RulesetManager()
+                                            .getRulesetById(v.getRulesetId(), organization)
+                                            .getRuleType());
+                                }
+                                artifactComplianceInfo.addBlockingViolations(ruleViolations);
+                                log.info("BLOCK mode enforced: " + ruleViolations.size()
+                                        + " GENERIC violations forced as blocking for artifact "
+                                        + artifactRefId + " at state " + state);
+                            } else if ("block".equalsIgnoreCase(dedupMode)
+                                    && state.ordinal() < APIMGovernableState.API_DEPLOY.ordinal()) {
+                                // mode=block but state is create/update:
+                                // Allow creation/update - treat violations as non-blocking
+                                for (RuleViolation v : ruleViolations) {
+                                    v.setArtifactRefId(artifactRefId);
+                                    v.setArtifactType(artifactType);
+                                    v.setOrganization(organization);
+                                    v.setRuleType(new RulesetManager()
+                                            .getRulesetById(v.getRulesetId(), organization)
+                                            .getRuleType());
+                                }
+                                artifactComplianceInfo.addNonBlockingViolations(ruleViolations);
+                                log.debug("BLOCK mode: violations treated as non-blocking at state "
+                                        + state + " for artifact " + artifactRefId);
+                            } else {
+                                // Normal flow (mode=warn or default): use policy action framework
+                                Map<APIMGovernanceActionType, List<RuleViolation>> blockableAndNonBlockable =
+                                        filterBlockableAndNonBlockableRuleViolations(artifactRefId,
+                                                artifactType, policy, ruleViolations, state, organization);
+                                artifactComplianceInfo.addBlockingViolations(blockableAndNonBlockable
+                                        .get(APIMGovernanceActionType.BLOCK));
+                                artifactComplianceInfo.addNonBlockingViolations(blockableAndNonBlockable
+                                        .get(APIMGovernanceActionType.NOTIFY));
+                            }
+                            AuditLogger.log("Sync Eval Request",
+                                    "GENERIC ruleset %s found %d violations for artifact %s (mode=%s, state=%s)",
+                                    ruleset.getId(), ruleViolations.size(), artifactRefId, dedupMode, state);
+                        }
+                    } catch (Exception e) {
+                        log.warn("GENERIC ruleset evaluation failed for artifact " + artifactRefId
+                                + ": " + e.getMessage());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Stack trace:", e);
+                        }
+                    }
+                    continue;
+                }
+
                 ExtendedArtifactType extendedArtifactType = ruleset.getArtifactType();
 
                 // Check if ruleset's artifact type matches with the artifact's type
@@ -557,6 +628,14 @@ public class ComplianceManager {
                     if (contentToValidate == null) {
                         log.warn(ruleType + " content not found in artifact project for artifact " +
                                 artifactRefId + ". Skipping governance evaluation for ruleset " + ruleset.getId());
+                        continue;
+                    }
+
+                    // Use Factory to get appropriate validation engine for this ruleset
+                    ValidationEngine validationEngine = ValidationEngineFactory.getValidationEngine(ruleset);
+                    if (validationEngine == null) {
+                        log.warn("No validation engine available for ruleset " + ruleset.getId()
+                                + ". Skipping evaluation for artifact " + artifactRefId);
                         continue;
                     }
 
@@ -602,6 +681,53 @@ public class ComplianceManager {
      * @throws APIMGovernanceException If an error occurs while handling the API compliance evaluation
      */
 
+    /**
+     * Perform validation for a GENERIC ruleset (e.g., deduplication check).
+     * Enriches the API definition content with metadata and delegates to the
+     * GatekeeperValidationEngine via the ValidationEngineFactory.
+     *
+     * @param artifactRefId             The artifact UUID
+     * @param ruleset                   The GENERIC ruleset
+     * @param artifactProjectContentMap Content map of the artifact
+     * @param organization              The organization
+     * @return List of rule violations from the GENERIC validation
+     * @throws APIMGovernanceException If an error occurs during validation
+     */
+    private List<RuleViolation> performGenericRulesetValidation(String artifactRefId, Ruleset ruleset,
+                                                                 Map<RuleType, String> artifactProjectContentMap,
+                                                                 String organization)
+            throws APIMGovernanceException {
+
+        // Get the API definition content
+        RuleType ruleType = ruleset.getRuleType();
+        String contentToValidate = ruleType != null ? artifactProjectContentMap.get(ruleType) : null;
+        if (contentToValidate == null) {
+            contentToValidate = artifactProjectContentMap.get(RuleType.API_DEFINITION);
+        }
+
+        if (contentToValidate == null || contentToValidate.isEmpty()) {
+            log.debug("No API definition content available for GENERIC ruleset check of artifact "
+                    + artifactRefId);
+            return new ArrayList<>();
+        }
+
+        // Get the validation engine for GENERIC category
+        ValidationEngine validationEngine = ValidationEngineFactory.getValidationEngine(ruleset);
+        if (validationEngine == null) {
+            log.warn("No validation engine found for GENERIC ruleset " + ruleset.getId());
+            return new ArrayList<>();
+        }
+
+        // Enrich the content with metadata so GatekeeperValidationEngine knows
+        // which API UUID and organization to use for the dedup check
+        String enrichedContent = "###GATEKEEPER_CONTEXT:{\"apiUuid\":\"" + artifactRefId
+                + "\",\"organization\":\"" + organization + "\"}###\n" + contentToValidate;
+
+        // Perform the validation through the engine
+        List<RuleViolation> violations = validationEngine.validate(enrichedContent, ruleset);
+        return violations != null ? violations : new ArrayList<>();
+    }
+
     public ArtifactComplianceDryRunInfo handleComplianceEvalDryRun(ExtendedArtifactType artifactType,
                                                                    List<String> govPolicies, Map<RuleType, String>
                                                                            artifactProjectContent,
@@ -614,9 +740,6 @@ public class ComplianceManager {
         AuditLogger.log("New Dry Run Eval Request", "Starting dry run compliance evaluation for given artifact in " +
                 "organization %s against policies %s", organization, Arrays.toString(govPolicies.toArray()));
 
-
-        ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
-                .getValidationEngineService().getValidationEngine();
         ArtifactComplianceDryRunInfo artifactComplianceDryRunInfo = new ArtifactComplianceDryRunInfo();
 
         // If artifact content is not provided dry run is not possible
@@ -653,6 +776,9 @@ public class ComplianceManager {
                                 "evaluation for ruleset " + ruleset.getId());
                         continue;
                     }
+
+                    // Use Factory to get appropriate validation engine for this ruleset
+                    ValidationEngine validationEngine = ValidationEngineFactory.getValidationEngine(ruleset);
 
                     // Send target content and ruleset for validation
                     List<RuleViolation> ruleViolations = validationEngine.validate(contentToValidate, ruleset,
@@ -731,6 +857,57 @@ public class ComplianceManager {
     }
 
     /**
+     * Checks if any of the given policies contain GENERIC rulesets with mode=block
+     * in their YAML content. This is used to determine whether sync evaluation should
+     * be triggered for deduplication blocking enforcement, since GENERIC rulesets
+     * define blocking behavior in YAML content rather than in the GOV_POLICY_ACTION table.
+     *
+     * @param policyIds    List of applicable policy IDs
+     * @param state        Current governable state
+     * @param organization Organization
+     * @return True if any GENERIC ruleset has mode=block and state is deploy or later
+     * @throws APIMGovernanceException If an error occurs while checking rulesets
+     */
+    public boolean hasGenericBlockModeRulesets(List<String> policyIds, APIMGovernableState state,
+                                               String organization) throws APIMGovernanceException {
+        // Block mode enforcement only applies at deploy state or later
+        if (state.ordinal() < APIMGovernableState.API_DEPLOY.ordinal()) {
+            return false;
+        }
+        for (String policyId : policyIds) {
+            List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId, organization);
+            for (Ruleset ruleset : rulesets) {
+                if (RuleCategory.GENERIC.equals(ruleset.getRuleCategory())) {
+                    // Skip lifecycle rulesets — their mode=block is for lifecycle
+                    // transitions, not deploy-time enforcement.
+                    String rsetNameLc = ruleset.getName() != null
+                            ? ruleset.getName().toLowerCase() : "";
+                    String rsetContent = ruleset.getRulesetContent() != null
+                            && ruleset.getRulesetContent().getContent() != null
+                            ? new String(ruleset.getRulesetContent().getContent()) : "";
+                    boolean isLifecycleRuleset = rsetNameLc.contains("lifecycle")
+                            || rsetNameLc.contains("retirement")
+                            || rsetNameLc.contains("deprecation")
+                            || rsetContent.contains("compliance_exclusion: true")
+                            || rsetContent.contains("compliance_exclusion:true")
+                            || rsetContent.contains("lifecycle_retirement:");
+                    if (isLifecycleRuleset) {
+                        continue;
+                    }
+                    String mode = extractDedupModeFromRuleset(ruleset);
+                    if ("block".equalsIgnoreCase(mode)) {
+                        log.info("Found GENERIC ruleset " + ruleset.getId()
+                                + " with mode=block in policy " + policyId
+                                + ". Sync evaluation will be triggered.");
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Delete all governance data related to the artifact
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
@@ -742,6 +919,63 @@ public class ComplianceManager {
     public void deleteArtifact(String artifactRefId, ArtifactType artifactType, String organization)
             throws APIMGovernanceException {
         complianceMgtDAO.deleteArtifact(artifactRefId, artifactType, organization);
+    }
+
+    /**
+     * Delete violations from other APIs that reference the given API UUID in their violation messages.
+     * This is called when an API is deleted to clean up stale deduplication violations.
+     * Returns the list of affected artifact reference IDs so they can be re-evaluated.
+     *
+     * @param deletedApiUuid UUID of the deleted API
+     * @param organization   Organization
+     * @return List of artifact reference IDs (API UUIDs) whose violations were cleaned up
+     * @throws APIMGovernanceException If an error occurs during cleanup
+     */
+    public List<String> cleanupViolationsReferencingApi(String deletedApiUuid, String organization)
+            throws APIMGovernanceException {
+        // First, get the list of affected artifacts before deleting the violations
+        List<String> affectedArtifacts = complianceMgtDAO
+                .getAffectedArtifactsByReferencedApiUuid(deletedApiUuid, organization);
+        // Now delete the violations
+        complianceMgtDAO.deleteViolationsByReferencedApiUuid(deletedApiUuid, organization);
+        return affectedArtifacts;
+    }
+
+    /**
+     * Extracts the deduplication mode from a GENERIC ruleset's YAML content.
+     * Supports both root-level and nested 'deduplication' section.
+     *
+     * @param ruleset The GENERIC ruleset
+     * @return The mode string ("audit", "warn", or "block"), defaults to "audit"
+     */
+    @SuppressWarnings("unchecked")
+    private String extractDedupModeFromRuleset(Ruleset ruleset) {
+        try {
+            if (ruleset.getRulesetContent() != null && ruleset.getRulesetContent().getContent() != null) {
+                String contentString = new String(ruleset.getRulesetContent().getContent(),
+                        java.nio.charset.StandardCharsets.UTF_8);
+                com.fasterxml.jackson.databind.ObjectMapper yamlMapper =
+                        new com.fasterxml.jackson.databind.ObjectMapper(
+                                new com.fasterxml.jackson.dataformat.yaml.YAMLFactory());
+                Map<String, Object> config = yamlMapper.readValue(contentString, Map.class);
+
+                // Check root level
+                if (config.containsKey("mode")) {
+                    return String.valueOf(config.get("mode"));
+                }
+
+                // Check nested deduplication section
+                if (config.containsKey("deduplication") && config.get("deduplication") instanceof Map) {
+                    Map<String, Object> dedupConfig = (Map<String, Object>) config.get("deduplication");
+                    if (dedupConfig.containsKey("mode")) {
+                        return String.valueOf(dedupConfig.get("mode"));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Could not parse dedup mode from ruleset: " + e.getMessage());
+        }
+        return "audit"; // Default to audit
     }
 
     /**

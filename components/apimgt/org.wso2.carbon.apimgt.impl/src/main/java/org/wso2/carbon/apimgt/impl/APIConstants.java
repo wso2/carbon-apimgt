@@ -3786,6 +3786,22 @@ public final class APIConstants {
         public static final String SCHEDULER_QUEUE_SIZE = "QueueSize";
         public static final String SCHEDULER_TASK_CHECK_INTERVAL = "TaskCheckIntervalMinutes";
         public static final String SCHEDULER_TASK_CLEANUP_INTERVAL = "TaskCleanupIntervalMinutes";
+
+        // Deduplication configuration
+        public static final String DEDUPLICATION_CONFIG = "DeduplicationConfigurations";
+        public static final String DEDUP_ENABLED = "Enabled";
+        public static final String DEDUP_SIMILARITY_THRESHOLD = "SimilarityThreshold";
+        public static final String DEDUP_HIGH_CONFIDENCE_THRESHOLD = "HighConfidenceThreshold";
+        public static final String DEDUP_MODE = "Mode";
+        public static final String DEDUP_NUM_HASH_FUNCTIONS = "NumHashFunctions";
+        public static final String DEDUP_NUM_BANDS = "NumBands";
+        public static final String DEDUP_SHINGLE_SIZE = "ShingleSize";
+
+        // Deprecation Guide configuration
+        public static final String DEPRECATION_GUIDE_CONFIG = "DeprecationGuideConfigurations";
+        public static final String DEPRECATION_GUIDE_ENABLED = "Enabled";
+        public static final String DEPRECATION_GUIDE_SCAN_INTERVAL = "ScanIntervalMinutes";
+        public static final String DEPRECATION_GUIDE_SUCCESSOR_THRESHOLD = "SuccessorSimilarityThreshold";
     }
 
     public static class MCP {
