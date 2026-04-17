@@ -346,17 +346,18 @@ public class GatekeeperService {
                 continue;
             }
 
-            // Lifecycle-status filter: APIs that are DEPRECATED or RETIRED are no longer active
-            // and should not be reported as duplicate targets. They are effectively "done" and
-            // new APIs should not be flagged for resembling them.
+            // Lifecycle-status filter: Only APIs in PUBLISHED or DEPLOYED state should be
+            // reported as duplicate targets. Draft, testing, deprecated, retired, or blocked
+            // APIs are not active production APIs and should not trigger dedup conflicts.
             // NOTE: This filter is SKIPPED when skipFirstInRule=true (deprecation guide mode)
             // because the deprecation guide specifically needs to find successors among all APIs.
-            if (!skipFirstInRule && matchedApiStatus != null
-                    && ("DEPRECATED".equalsIgnoreCase(matchedApiStatus)
-                    || "RETIRED".equalsIgnoreCase(matchedApiStatus))) {
+            if (!skipFirstInRule
+                    && (matchedApiStatus == null
+                    || !("PUBLISHED".equalsIgnoreCase(matchedApiStatus)
+                    || "DEPLOYED".equalsIgnoreCase(matchedApiStatus)))) {
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("Lifecycle-status filter: Skipping match %s -> %s "
-                                    + "(matched API '%s' is %s)",
+                                    + "(matched API '%s' is %s, not in PUBLISHED/DEPLOYED state)",
                             apiUuid, similar.getApiUuid(), matchedApiName, matchedApiStatus));
                 }
                 continue;
