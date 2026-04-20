@@ -165,18 +165,57 @@ public class RegistryPersistenceDocUtil {
      * @param fileName file name
      * @return
      */
+    @Deprecated
     public static String getDocumentFilePath(String provider, String apiName, String version, String fileName) {
 
         return getDocumentPath(provider, apiName, version) + APIConstants.DOCUMENT_FILE_DIR
                 + RegistryConstants.PATH_SEPARATOR + fileName;
     }
-    
+
+    @Deprecated
     public static String getDocumentContentPath(String provider, String apiName, String version, String fileName) {
 
         return getDocumentPath(provider, apiName, version) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
                 + RegistryConstants.PATH_SEPARATOR + fileName;
     }
     
+    /**
+     * Get document base path from API source path (derived from artifact path).
+     * Use this instead of getDocumentPath(provider, name, version) to avoid
+     * provider name dependency.
+     *
+     * @param apiSourcePath the API source path (without trailing /api)
+     * @return document base path
+     */
+    public static String getDocumentBasePath(String apiSourcePath) {
+        return apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
+    }
+
+    /**
+     * Get file type content location from API source path.
+     *
+     * @param apiSourcePath the API source path
+     * @param fileName      file name
+     * @return document file path
+     */
+    public static String getDocumentFilePath(String apiSourcePath, String fileName) {
+        return getDocumentBasePath(apiSourcePath) + APIConstants.DOCUMENT_FILE_DIR
+                + RegistryConstants.PATH_SEPARATOR + fileName;
+    }
+
+    /**
+     * Get inline/markdown content location from API source path.
+     *
+     * @param apiSourcePath the API source path
+     * @param docName       documentation name
+     * @return document content path
+     */
+    public static String getDocumentContentPath(String apiSourcePath, String docName) {
+        return getDocumentBasePath(apiSourcePath) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
+                + RegistryConstants.PATH_SEPARATOR + docName;
+    }
+
     public static GenericArtifact createDocArtifactContent(GenericArtifact artifact, String apiName, String apiVersion,
             String apiProvider, Documentation documentation) throws DocumentationPersistenceException {
 
@@ -225,6 +264,7 @@ public class RegistryPersistenceDocUtil {
         return artifact;
     }
 
+    @Deprecated
     public static String getAPIDocPath(APIIdentifier id) {
         return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
                 + RegistryPersistenceUtil.replaceEmailDomain(id.getProviderName()) + RegistryConstants.PATH_SEPARATOR
@@ -232,10 +272,12 @@ public class RegistryPersistenceDocUtil {
                 + APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
     }
 
+    @Deprecated
     public static String getAPIDocContentPath(APIIdentifier id, String name) {
         return getAPIDocPath(id) + RegistryConstants.PATH_SEPARATOR + name;
     }
 
+    @Deprecated
     public static String getDocumentationFilePath(Identifier id, String fileName) {
         return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
                 + RegistryPersistenceUtil.replaceEmailDomain(id.getProviderName()) + RegistryConstants.PATH_SEPARATOR
