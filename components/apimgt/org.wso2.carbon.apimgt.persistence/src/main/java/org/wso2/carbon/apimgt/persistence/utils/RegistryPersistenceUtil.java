@@ -717,7 +717,7 @@ public class RegistryPersistenceUtil {
                                     throws APIManagementException {
         API api;
         try {
-            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String providerName = getProviderFromArtifact(artifact);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion, artifact.getId());
@@ -1771,7 +1771,7 @@ public class RegistryPersistenceUtil {
         APIProduct apiProduct;
         try {
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String providerName = getProviderFromArtifact(artifact);
             String productName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String productVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName,
@@ -2179,6 +2179,31 @@ public class RegistryPersistenceUtil {
      * @param apiPath the API path to check
      * @return true if the path is a revision path, false otherwise
      */
+    /**
+     * Reads the API provider from the artifact and normalizes the email domain encoding.
+     * The provider in the artifact may contain raw @ (for APIs where provider was changed
+     * before the encoding fix) or -AT- (normal creation / post-fix provider change).
+     * This method always returns the -AT- encoded form for consistency.
+     *
+     * @param artifact the API governance artifact
+     * @return the provider name with @ encoded as -AT-
+     * @throws GovernanceException if the attribute cannot be read
+     */
+    public static String getProviderFromArtifact(GenericArtifact artifact) throws GovernanceException {
+        return replaceEmailDomain(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
+    }
+
+    /**
+     * Reads the API provider from a GovernanceArtifact and normalizes the email domain encoding.
+     *
+     * @param artifact the API governance artifact
+     * @return the provider name with @ encoded as -AT-
+     * @throws GovernanceException if the attribute cannot be read
+     */
+    public static String getProviderFromArtifact(GovernanceArtifact artifact) throws GovernanceException {
+        return replaceEmailDomain(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
+    }
+
     public static boolean isRevisionPath(String apiPath) {
         return apiPath != null && apiPath.contains(APIConstants.API_REVISION_LOCATION);
     }
