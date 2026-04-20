@@ -559,11 +559,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response revokeAPIBoundAPIKey(String apiId, APIAPIKeyRevokeRequestDTO body, String ifMatch,
                                                MessageContext messageContext) throws APIManagementException {
-        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         String keyUUID = body.getKeyUUID();
         if (!StringUtils.isEmpty(keyUUID)) {
             try {
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                String username = RestApiCommonUtil.getLoggedInUsername();
+                APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username, organization);
                 if (apiConsumer.getLightweightAPIByUUID(apiId, organization) == null) {
                     RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, log);
                 } else {
@@ -571,7 +572,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
                     } else {
                         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                        apiConsumer.revokeApiKey(keyUUID, tenantDomain, RestApiCommonUtil.getLoggedInUsername());
+                        apiConsumer.revokeApiKey(keyUUID, tenantDomain, username);
                         return Response.ok().build();
                     }
                 }
@@ -633,8 +634,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         String keyUUID = body.getKeyUUID();
         if (!StringUtils.isEmpty(keyUUID)) {
             try {
-                APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username, organization);
                 API api = apiConsumer.getLightweightAPIByUUID(apiId, organization);
                 if (api != null) {
                     if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(apiId, organization)) {

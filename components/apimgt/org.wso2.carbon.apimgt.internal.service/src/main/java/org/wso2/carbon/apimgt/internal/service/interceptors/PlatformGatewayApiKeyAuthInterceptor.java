@@ -25,11 +25,7 @@ import org.apache.cxf.interceptor.security.AuthenticationException;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.PlatformGatewayDAO;
-import org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig;
-import org.wso2.carbon.apimgt.impl.dto.PlatformGatewayConnectConfig;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.PlatformGatewayTokenUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -53,12 +49,6 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
 
     /** Message property set when this interceptor started the tenant flow; cleanup interceptor uses it to call endTenantFlow(). */
     public static final String MESSAGE_PROPERTY_TENANT_FLOW_STARTED = "PlatformGatewayTenantFlowStarted";
-    /** Set when request is allowed using config registration_token (gateway will be created on first REGISTER). */
-    public static final String MESSAGE_PROPERTY_CONNECT_WITH_TOKEN = "PlatformGatewayConnectWithToken";
-    /** ThreadLocal set when auth used config token so notify impl can create gateway on first REGISTER. */
-    public static final ThreadLocal<Boolean> CONNECT_WITH_TOKEN_AUTH = new ThreadLocal<>();
-    /** ThreadLocal set to the connect config that matched (for multiple gateways). */
-    public static final ThreadLocal<ConnectGatewayConfig> CONNECT_WITH_TOKEN_MATCHED_ENTRY = new ThreadLocal<>();
 
     /**
      * Path segments for which platform gateway api-key auth is allowed (no leading slash; matched
@@ -99,54 +89,6 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
             throw new AuthenticationException("Unauthenticated request");
         }
         if (gateway == null) {
-            PlatformGatewayConnectConfig connectConfig = null;
-            try {
-                connectConfig = ServiceReferenceHolder.getInstance()
-                        .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                        .getPlatformGatewayConnectConfig();
-            } catch (Exception e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Could not get platform gateway connect config", e);
-                }
-            }
-            ConnectGatewayConfig matchedEntry = null;
-            if (connectConfig != null) {
-                for (ConnectGatewayConfig entry : connectConfig.getConnectGateways()) {
-                    if (entry != null && StringUtils.isNotBlank(entry.getRegistrationToken())
-                            && apiKey.trim().equals(entry.getRegistrationToken().trim())) {
-                        matchedEntry = entry;
-                        break;
-                    }
-                }
-            }
-            if (matchedEntry != null) {
-                message.put(MESSAGE_PROPERTY_CONNECT_WITH_TOKEN, Boolean.TRUE);
-                CONNECT_WITH_TOKEN_AUTH.set(Boolean.TRUE);
-                CONNECT_WITH_TOKEN_MATCHED_ENTRY.set(matchedEntry);
-                String org = getCurrentOrganization();
-                message.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.PLATFORM_GATEWAY_API_KEY);
-                message.put(RestApiConstants.ORGANIZATION, org);
-                PrivilegedCarbonContext.startTenantFlow();
-                try {
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(org);
-                    try {
-                        int tenantId = APIUtil.getTenantIdFromTenantDomain(org);
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
-                    } catch (Exception e) {
-                        log.error("Could not resolve tenant id for org " + org + "; rejecting request", e);
-                        PrivilegedCarbonContext.endTenantFlow();
-                        throw new AuthenticationException("Unauthenticated request");
-                    }
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername("admin@" + org);
-                    message.put(MESSAGE_PROPERTY_TENANT_FLOW_STARTED, Boolean.TRUE);
-                } finally {
-                    // endTenantFlow in cleanup interceptor
-                }
-                if (log.isDebugEnabled()) {
-                    log.debug("Request allowed via connect-with-token config; gateway will be created on REGISTER");
-                }
-                return;
-            }
             throw new AuthenticationException("Unauthenticated request");
         }
         message.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.PLATFORM_GATEWAY_API_KEY);
@@ -182,14 +124,6 @@ public class PlatformGatewayApiKeyAuthInterceptor extends AbstractPhaseIntercept
         } finally {
             // endTenantFlow() is called in PlatformGatewayTenantFlowCleanupInterceptor (POST_INVOKE) so tenant remains set for resource invocation
         }
-    }
-
-    /**
-     * When config does not provide an explicit org, use the current APIM tenant (from CarbonContext).
-     */
-    private static String getCurrentOrganization() {
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        return StringUtils.isNotBlank(tenantDomain) ? tenantDomain : APIConstants.GatewayNotification.WSO2_ALL_TENANTS;
     }
 
     /**

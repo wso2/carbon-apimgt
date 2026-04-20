@@ -2324,6 +2324,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param api The API object to process
      */
     private void deriveApiSecurityFromHubPolicies(API api) {
+        String EmptyApiSecurity = "";
         if (!isPlatformGatewayApi(api)) {
             return;
         }
@@ -2389,7 +2390,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
             }
         } else {
-            api.setApiSecurity(null);
+            api.setApiSecurity(EmptyApiSecurity);
             api.setApiKeyHeader(null);
             api.setAuthorizationHeader(null);
         }

@@ -3676,7 +3676,7 @@ public final class APIConstants {
     public static final String EXTERNAL_GATEWAY_VENDOR = "external";
     public static final String WSO2_APK_GATEWAY = "wso2/apk";
     public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
-    public static final String WSO2_API_PLATFORM_GATEWAY = "Universal";
+    public static final String WSO2_API_PLATFORM_GATEWAY = "APIPlatform";
     public static final String EXTERNAL_AWS_GATEWAY = "AWS";
     public static final List<String> API_TYPES = Arrays.asList("rest", "soap", "graphql", "ws", "wh", "sse", "ai", "mcp");
     public static final String SOLACE = "solace";
@@ -3983,15 +3983,8 @@ public final class APIConstants {
         public static final int DEFAULT_CLEANUP_STARTUP_DELAY = 60;
 
         public static final String PLATFORM_GATEWAY_CONNECT_CONFIGURATION = "PlatformGatewayConnectConfiguration";
-        public static final String UNIVERSAL_GATEWAY_VERSIONS = "UniversalGatewayVersions";
+        public static final String PLATFORM_GATEWAY_VERSIONS = "PlatformGatewayVersions";
         public static final String VERSION = "Version";
-        public static final String CONNECT_GATEWAYS = "ConnectGateways";
-        public static final String CONNECT = "Connect";
-        public static final String REGISTRATION_TOKEN = "RegistrationToken";
-        public static final String CONNECT_NAME = "Name";
-        public static final String CONNECT_DISPLAY_NAME = "DisplayName";
-        public static final String CONNECT_DESCRIPTION = "Description";
-        public static final String CONNECT_URL = "Url";
         public static final String API_KEY_NOTIFICATION = "APIKeyNotification";
         public static final String QUEUE_SIZE = "QueueSize";
 

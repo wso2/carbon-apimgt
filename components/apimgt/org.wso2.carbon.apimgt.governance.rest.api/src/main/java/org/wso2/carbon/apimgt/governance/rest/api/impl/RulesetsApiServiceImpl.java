@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -99,7 +100,12 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         }
 
         Ruleset ruleset = new Ruleset();
+        String fileName = rulesetContentDetail != null ? rulesetContentDetail.getDataHandler().getName() : null;
         try {
+            if (StringUtils.isBlank(fileName)) {
+                throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                        "Ruleset content file is missing in the request");
+            }
             ruleset.setName(name);
             ruleCategory = ruleCategory != null ? ruleCategory : RuleCategory.SPECTRAL.toString();
             ruleset.setRuleCategory(RuleCategory.fromString(ruleCategory));
@@ -111,7 +117,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
 
             RulesetContent rulesetContent = new RulesetContent();
             rulesetContent.setContent(IOUtils.toByteArray(rulesetContentInputStream));
-            rulesetContent.setFileName(rulesetContentDetail.getContentDisposition().getFilename());
+            rulesetContent.setFileName(fileName);
             ruleset.setRulesetContent(rulesetContent);
 
             String username = APIMGovernanceAPIUtil.getLoggedInUsername();
@@ -174,7 +180,12 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
                             "the maximum length of 1024 characters", description));
         }
 
+        String fileName = rulesetContentDetail != null ? rulesetContentDetail.getDataHandler().getName() : null;
         try {
+            if (StringUtils.isBlank(fileName)) {
+                throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                        "Ruleset content file is missing in the request");
+            }
             Ruleset ruleset = new Ruleset();
             ruleset.setName(name);
             ruleCategory = ruleCategory != null ? ruleCategory : RuleCategory.SPECTRAL.toString();
@@ -188,7 +199,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
 
             RulesetContent rulesetContent = new RulesetContent();
             rulesetContent.setContent(IOUtils.toByteArray(rulesetContentInputStream));
-            rulesetContent.setFileName(rulesetContentDetail.getContentDisposition().getFilename());
+            rulesetContent.setFileName(fileName);
             ruleset.setRulesetContent(rulesetContent);
 
             String username = APIMGovernanceAPIUtil.getLoggedInUsername();

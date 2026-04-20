@@ -503,6 +503,14 @@ public class ApiKeyMgtDAO {
                                 Calendar.getInstance(TimeZone.getTimeZone(APIConstants.UTC_TIME_ZONE)));
                         keyInfo.setLastUsedTime(lastUsedTime != null ? lastUsedTime.getTime() : null);
                         keyInfo.setAuthUser(rs.getString("AUTHZ_USER"));
+                        String mappedApiUuid = rs.getString("API_UUID");
+                        if (mappedApiUuid != null && !mappedApiUuid.isEmpty()) {
+                            keyInfo.setApiUUId(mappedApiUuid);
+                        }
+                        String mappedApplicationUuid = rs.getString("APPLICATION_UUID");
+                        if (mappedApplicationUuid != null && !mappedApplicationUuid.isEmpty()) {
+                            keyInfo.setApplicationId(mappedApplicationUuid);
+                        }
                         try (InputStream apiKeyProperties = rs.getBinaryStream("API_KEY_PROPERTIES")) {
                             if (apiKeyProperties != null) {
                                 ObjectMapper mapper = new ObjectMapper();

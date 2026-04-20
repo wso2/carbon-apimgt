@@ -30,6 +30,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -222,6 +223,12 @@ public class APIMWSDLReaderTest {
                     .getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration()
                     .getApiGatewayEnvironments()).thenReturn(gatewayEnvironments);
+
+            PowerMockito.when(ServiceReferenceHolder.getInstance()
+                            .getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration()
+                            .getFirstProperty(APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT))
+                    .thenReturn(APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB);
 
             ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
             PowerMockito.mockStatic(ApiMgtDAO.class);

@@ -4046,8 +4046,10 @@ public class SQLConstants {
                     "        AND API.ORGANIZATION = ? " +
                     "    ) )";
     public static final String GET_API_KEY_DETAILS_FROM_KEY_UUID_WITHOUT_TENANT_SQL =
-            "SELECT K.API_KEY_UUID, K.NAME, K.API_KEY_HASH, K.KEY_TYPE, K.API_KEY_PROPERTIES, K.AUTHZ_USER, K.VALIDITY_PERIOD, K.LAST_USED " +
-                    "FROM AM_API_KEY K WHERE K.API_KEY_UUID = ? AND K.STATUS = 'ACTIVE' AND K.AUTHZ_USER = ?";
+            "SELECT K.API_KEY_UUID, K.NAME, K.API_KEY_HASH, K.KEY_TYPE, K.API_KEY_PROPERTIES, K.AUTHZ_USER, K.VALIDITY_PERIOD, K.LAST_USED, "
+                    + "(SELECT KM.API_UUID FROM AM_API_KEY_API_MAPPING KM WHERE KM.API_KEY_UUID = K.API_KEY_UUID) AS API_UUID, "
+                    + "(SELECT AKAM.APPLICATION_UUID FROM AM_API_KEY_APPLICATION_MAPPING AKAM WHERE AKAM.API_KEY_UUID = K.API_KEY_UUID) AS APPLICATION_UUID "
+                    + "FROM AM_API_KEY K WHERE K.API_KEY_UUID = ? AND K.STATUS = 'ACTIVE' AND K.AUTHZ_USER = ?";
     public static final String GET_API_API_KEY_DETAILS_FROM_KEY_UUID_SQL =
             "SELECT AM.APPLICATION_UUID, K.API_KEY_UUID, K.NAME, K.API_KEY_HASH, K.KEY_TYPE, K.API_KEY_PROPERTIES, K.AUTHZ_USER, K.VALIDITY_PERIOD, K.LAST_USED " +
                     "FROM AM_API_KEY K " +
@@ -5465,6 +5467,14 @@ public class SQLConstants {
         public static final String SELECT_ARTIFACT_DEPLOYMENT_BY_API_AND_GATEWAY_SQL =
                 "SELECT DEPLOYMENT_ID FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE
                         + " WHERE API_ID = ? AND GATEWAY_ENV_UUID = ?";
+        /**
+         * Resolve REVISION_ID (revision UUID) for a gateway environment and deployment id from the artifact cache.
+         * {@code DEPLOYMENT_ID} is the table primary key (see AM_GW_PLATFORM_API_ARTIFACTS DDL), so this returns
+         * at most one row on a conforming database; callers should still guard against duplicate rows if data is corrupt.
+         */
+        public static final String SELECT_ARTIFACT_REVISION_BY_GATEWAY_AND_DEPLOYMENT_SQL =
+                "SELECT REVISION_ID FROM " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE
+                        + " WHERE GATEWAY_ENV_UUID = ? AND DEPLOYMENT_ID = ?";
         public static final String UPDATE_ARTIFACT_BY_API_AND_GATEWAY_SQL =
                 "UPDATE " + PLATFORM_GATEWAY_ARTIFACT_CACHE_TABLE
                         + " SET ARTIFACT = ?, TIME_STAMP = ?, REVISION_ID = ?, DEPLOYMENT_ID = ? "

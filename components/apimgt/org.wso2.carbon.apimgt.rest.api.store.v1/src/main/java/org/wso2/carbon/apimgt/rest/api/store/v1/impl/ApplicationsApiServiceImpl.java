@@ -927,7 +927,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String keyUUID = body.getKeyUUID();
         if (!StringUtils.isEmpty(keyUUID)) {
             try {
-                APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+                String organization = RestApiUtil.getValidatedOrganization(messageContext);
+                APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username, organization);
                 Application application = apiConsumer.getApplicationByUUID(applicationId);
                 if (application != null) {
                     if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)
