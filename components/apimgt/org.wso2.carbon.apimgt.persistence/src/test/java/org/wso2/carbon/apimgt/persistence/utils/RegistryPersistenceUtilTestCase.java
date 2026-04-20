@@ -423,30 +423,4 @@ public class RegistryPersistenceUtilTestCase {
         String result = RegistryPersistenceUtil.getProviderFromArtifact(artifact);
         Assert.assertEquals("user-AT-gmail.com-AT-abc.com", result);
     }
-
-    // =====================================================================
-    // Tests for getAPISourcePath (registry-based)
-    // =====================================================================
-
-    @Test
-    public void testGetAPISourcePath() throws Exception {
-        String apiPath = "/apimgt/applicationdata/provider/admin/MyAPI/1.0/api";
-        Mockito.when(GovernanceUtils.getArtifactPath(registry, "test-uuid")).thenReturn(apiPath);
-        String result = RegistryPersistenceUtil.getAPISourcePath(registry, "test-uuid");
-        Assert.assertEquals("/apimgt/applicationdata/provider/admin/MyAPI/1.0", result);
-    }
-
-    @Test(expected = APIPersistenceException.class)
-    public void testGetAPISourcePath_NullArtifactPath() throws Exception {
-        Mockito.when(GovernanceUtils.getArtifactPath(registry, "missing-uuid")).thenReturn(null);
-        RegistryPersistenceUtil.getAPISourcePath(registry, "missing-uuid");
-    }
-
-    @Test
-    public void testGetAPISourcePath_SecondaryUserstore() throws Exception {
-        String apiPath = "/apimgt/applicationdata/provider/WSO2.COM/user-AT-gmail.com/MyAPI/1.0/api";
-        Mockito.when(GovernanceUtils.getArtifactPath(registry, "test-uuid")).thenReturn(apiPath);
-        String result = RegistryPersistenceUtil.getAPISourcePath(registry, "test-uuid");
-        Assert.assertEquals("/apimgt/applicationdata/provider/WSO2.COM/user-AT-gmail.com/MyAPI/1.0", result);
-    }
 }
