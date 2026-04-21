@@ -573,8 +573,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             GenericArtifact updateApiArtifact = RegistryPersistenceUtil.createAPIArtifactContent(artifact, api);
             String artifactPath = updateApiArtifact.getPath();
             String apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(artifactPath);
-            String originalProvider = RegistryPersistenceUtil.extractProvider(artifactPath,
-                    api.getId().getApiName());
+            String originalProvider = RegistryPersistenceUtil.extractProviderFromPath(artifactPath,
+                    api.getId().getApiName(), api.getId().getVersion());
             org.wso2.carbon.registry.core.Tag[] oldTags = registry.getTags(artifactPath);
             if (oldTags != null) {
                 for (org.wso2.carbon.registry.core.Tag tag : oldTags) {
@@ -984,8 +984,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             // Derive paths from actual artifact location before deletion
             String artifactRegistryPath = apiArtifact.getPath();
             String apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(artifactRegistryPath);
-            String providerName = RegistryPersistenceUtil.extractProvider(artifactRegistryPath,
-                    identifier.getApiName());
+            String providerName = RegistryPersistenceUtil.extractProviderFromPath(artifactRegistryPath,
+                    identifier.getApiName(), identifier.getVersion());
 
             //Delete the dependencies associated  with the api artifact
             GovernanceArtifact[] dependenciesArray = apiArtifact.getDependencies();
@@ -2076,8 +2076,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             // Derive source path and original provider from the actual artifact path in registry
             String apiPath = apiArtifact.getPath();
             String apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(apiPath);
-            String originalProvider = RegistryPersistenceUtil.extractProvider(apiPath,
-                    apiName, registry);
+            String originalProvider = RegistryPersistenceUtil.extractProviderFromPath(apiPath,
+                    apiName, apiVersion, registry);
 
             String wsdlResourcePath = null;
             boolean isZip = false;
@@ -2168,8 +2168,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             // Derive source path and original provider from the actual artifact path
             String apiPath = apiArtifact.getPath();
             String apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(apiPath);
-            String originalProvider = RegistryPersistenceUtil.extractProvider(apiPath,
-                    apiName, registry);
+            String originalProvider = RegistryPersistenceUtil.extractProviderFromPath(apiPath,
+                    apiName, apiVersion, registry);
 
             // Construct WSDL resource paths
             String wsdlResourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
@@ -2511,10 +2511,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     APIConstants.API_KEY);
 
             GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
-            String apiProviderName = RegistryPersistenceUtil.extractProvider(apiArtifact.getPath(),
-                    apiArtifact.getQName().getLocalPart());
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            String apiProviderName = RegistryPersistenceUtil.extractProviderFromPath(
+                    apiArtifact.getPath(), apiName, apiVersion);
             String apiPath = apiArtifact.getPath();
             GenericArtifactManager docArtifactManager = new GenericArtifactManager(registry,
                     APIConstants.DOCUMENTATION_KEY);
@@ -2583,8 +2583,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            String originalApiProviderName = RegistryPersistenceUtil.extractProvider(apiArtifact.getPath(),
-                    apiName);
+            String originalApiProviderName = RegistryPersistenceUtil.extractProviderFromPath(
+                    apiArtifact.getPath(), apiName, apiVersion);
 
             GenericArtifactManager artifactManager = RegistryPersistenceDocUtil.getDocumentArtifactManager(registry);
             GenericArtifact artifact = artifactManager.getGenericArtifact(documentation.getId());
@@ -2775,10 +2775,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     APIConstants.API_KEY);
 
             GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
-            String apiProviderName = RegistryPersistenceUtil.extractProvider(apiArtifact.getPath(),
-                    apiArtifact.getQName().getLocalPart());
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            String apiProviderName = RegistryPersistenceUtil.extractProviderFromPath(
+                    apiArtifact.getPath(), apiName, apiVersion);
             String apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(apiArtifact.getPath());
 
             GenericArtifactManager docArtifactManager = RegistryPersistenceDocUtil
@@ -3165,8 +3165,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             // Derive paths from actual artifact location, not from provider attribute
             String apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(apiArtifact.getPath());
-            String originalProvider = RegistryPersistenceUtil.extractProvider(apiArtifact.getPath(),
-                    apiName);
+            String originalProvider = RegistryPersistenceUtil.extractProviderFromPath(
+                    apiArtifact.getPath(), apiName, apiVersion);
             String artifactOldPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR
                     + originalProvider + RegistryConstants.PATH_SEPARATOR + apiName
                     + RegistryConstants.PATH_SEPARATOR + apiVersion;
@@ -3211,8 +3211,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             // Derive paths from actual artifact location, not from provider attribute
             String apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(apiArtifact.getPath());
-            String originalProvider = RegistryPersistenceUtil.extractProvider(apiArtifact.getPath(),
-                    apiName);
+            String originalProvider = RegistryPersistenceUtil.extractProviderFromPath(
+                    apiArtifact.getPath(), apiName, apiVersion);
             String artifactOldPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR
                     + originalProvider + RegistryConstants.PATH_SEPARATOR + apiName
                     + RegistryConstants.PATH_SEPARATOR + apiVersion;
@@ -3534,7 +3534,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
         // path still uses the original provider. These fields ensure correct path construction.
         String artifactPath = apiArtifact.getPath();
         api.apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(artifactPath);
-        api.originalProvider = RegistryPersistenceUtil.extractProvider(artifactPath, api.apiName);
+        api.originalProvider = RegistryPersistenceUtil.extractProviderFromPath(artifactPath,
+                api.apiName, api.apiVersion);
 
         return api;
     }

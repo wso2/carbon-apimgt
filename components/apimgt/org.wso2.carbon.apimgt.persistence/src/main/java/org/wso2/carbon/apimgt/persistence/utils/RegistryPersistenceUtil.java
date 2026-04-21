@@ -2032,10 +2032,49 @@ public class RegistryPersistenceUtil {
      * @param apiName the API name
      * @return the provider name
      */
+    /**
+     * @deprecated Use {@link #extractProviderFromPath(String, String, String)} instead which
+     * handles the edge case where API name matches the provider name (e.g., secondary userstore
+     * WSO2.COM/admin with API named "admin").
+     */
+    @Deprecated
     public static String extractProvider(String apiPath, String apiName) {
         int startIndex = apiPath.indexOf(APIConstants.API_PROVIDER_SUFFIX_SLASH) +
                 APIConstants.API_PROVIDER_SUFFIX_SLASH.length();
         int endIndex = apiPath.indexOf("/" + apiName + "/");
+        return apiPath.substring(startIndex, endIndex);
+    }
+
+    /**
+     * Extracts the provider name from the API artifact path using the full /{name}/{version}/api
+     * segment to unambiguously locate where the provider segment ends.
+     * This handles the edge case where the API name appears in the provider segment
+     * (e.g., secondary userstore: WSO2.COM/admin with API named "admin").
+     *
+     * @param apiPath    the full artifact path (ending with /api)
+     * @param apiName    the API name
+     * @param apiVersion the API version
+     * @return the provider name as it appears in the registry path
+     * @throws APIPersistenceException if the path format is invalid
+     */
+    public static String extractProviderFromPath(String apiPath, String apiName, String apiVersion)
+            throws APIPersistenceException {
+        if (apiPath == null) {
+            throw new APIPersistenceException("API path cannot be null");
+        }
+        String nameVersionApiSegment = RegistryConstants.PATH_SEPARATOR + apiName
+                + RegistryConstants.PATH_SEPARATOR + apiVersion + APIConstants.API_RESOURCE_NAME;
+        int endIndex = apiPath.lastIndexOf(nameVersionApiSegment);
+        if (endIndex < 0) {
+            throw new APIPersistenceException("Unable to extract provider from path: " + apiPath
+                    + ". Expected segment '" + nameVersionApiSegment + "' not found.");
+        }
+        int startIndex = apiPath.indexOf(APIConstants.API_PROVIDER_SUFFIX_SLASH);
+        if (startIndex < 0) {
+            throw new APIPersistenceException("Unable to extract provider from path: " + apiPath
+                    + ". Provider prefix not found.");
+        }
+        startIndex += APIConstants.API_PROVIDER_SUFFIX_SLASH.length();
         return apiPath.substring(startIndex, endIndex);
     }
 
@@ -2147,6 +2186,10 @@ public class RegistryPersistenceUtil {
      * @return the provider name
      * @throws APIPersistenceException if path parsing fails
      */
+    /**
+     * @deprecated Use {@link #extractProviderFromPath(String, String, String, Registry)} instead.
+     */
+    @Deprecated
     public static String extractProvider(String apiPath, String apiName, Registry registry)
             throws APIPersistenceException {
         if (apiPath == null || StringUtils.isBlank(apiName)) {
@@ -2171,6 +2214,31 @@ public class RegistryPersistenceUtil {
         } catch (IndexOutOfBoundsException e) {
             throw new APIPersistenceException("Invalid API path format for current: " + apiPath, e);
         }
+    }
+
+    /**
+     * Extracts the provider name from the API artifact path, with revision path support.
+     * Uses the full /{name}/{version}/api segment to unambiguously locate the provider.
+     *
+     * @param apiPath    the registry path of the API artifact
+     * @param apiName    the API name
+     * @param apiVersion the API version
+     * @param registry   Registry instance (used to resolve revision paths)
+     * @return the original provider name as it appears in the registry path
+     * @throws APIPersistenceException if the provider cannot be extracted
+     */
+    public static String extractProviderFromPath(String apiPath, String apiName, String apiVersion,
+            Registry registry) throws APIPersistenceException {
+        if (isRevisionPath(apiPath)) {
+            String apiUuid = extractApiIdFromRevisionPath(apiPath);
+            try {
+                String currentApiPath = GovernanceUtils.getArtifactPath(registry, apiUuid);
+                return extractProviderFromPath(currentApiPath, apiName, apiVersion);
+            } catch (GovernanceException e) {
+                throw new APIPersistenceException("Error retrieving current API path for revision: " + apiPath, e);
+            }
+        }
+        return extractProviderFromPath(apiPath, apiName, apiVersion);
     }
 
     /**

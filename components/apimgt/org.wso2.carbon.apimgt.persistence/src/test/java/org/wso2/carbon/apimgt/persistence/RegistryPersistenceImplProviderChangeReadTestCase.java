@@ -217,7 +217,7 @@ public class RegistryPersistenceImplProviderChangeReadTestCase {
         PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))
                 .thenReturn(manager);
         PowerMockito.when(RegistryPersistenceUtil.extractApiSourcePath(anyString())).thenCallRealMethod();
-        PowerMockito.when(RegistryPersistenceUtil.extractProvider(anyString(), anyString()))
+        PowerMockito.when(RegistryPersistenceUtil.extractProviderFromPath(anyString(), anyString(), anyString()))
                 .thenCallRealMethod();
         PowerMockito.when(RegistryPersistenceUtil.getProviderFromArtifact(any(GenericArtifact.class)))
                 .thenCallRealMethod();

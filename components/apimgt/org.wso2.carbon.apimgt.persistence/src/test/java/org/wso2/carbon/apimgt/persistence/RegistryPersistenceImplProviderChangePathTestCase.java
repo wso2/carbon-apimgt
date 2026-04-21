@@ -64,9 +64,9 @@ public class RegistryPersistenceImplProviderChangePathTestCase {
                     + oldProviderEncoded + RegistryConstants.PATH_SEPARATOR + apiName
                     + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR + "api";
 
-            // These are exactly what the production code computes via extractApiSourcePath/extractProvider
+            // These are exactly what the production code computes via extractApiSourcePath/extractProviderFromPath
             apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(oldPath);
-            originalProvider = RegistryPersistenceUtil.extractProvider(oldPath, apiName);
+            originalProvider = RegistryPersistenceUtil.extractProviderFromPath(oldPath, apiName, apiVersion);
         }
 
         String getExpectedWsdlFilePath() {
