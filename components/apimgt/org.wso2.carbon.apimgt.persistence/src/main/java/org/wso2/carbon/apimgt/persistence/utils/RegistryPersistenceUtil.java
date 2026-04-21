@@ -2062,6 +2062,12 @@ public class RegistryPersistenceUtil {
         if (apiPath == null) {
             throw new APIPersistenceException("API path cannot be null");
         }
+        if (StringUtils.isBlank(apiName)) {
+            throw new APIPersistenceException("API name cannot be null or empty. Path: " + apiPath);
+        }
+        if (StringUtils.isBlank(apiVersion)) {
+            throw new APIPersistenceException("API version cannot be null or empty. Path: " + apiPath);
+        }
         String nameVersionApiSegment = RegistryConstants.PATH_SEPARATOR + apiName
                 + RegistryConstants.PATH_SEPARATOR + apiVersion + APIConstants.API_RESOURCE_NAME;
         int endIndex = apiPath.lastIndexOf(nameVersionApiSegment);
@@ -2072,9 +2078,13 @@ public class RegistryPersistenceUtil {
         int startIndex = apiPath.indexOf(APIConstants.API_PROVIDER_SUFFIX_SLASH);
         if (startIndex < 0) {
             throw new APIPersistenceException("Unable to extract provider from path: " + apiPath
-                    + ". Provider prefix not found.");
+                    + ". Provider prefix '" + APIConstants.API_PROVIDER_SUFFIX_SLASH + "' not found.");
         }
         startIndex += APIConstants.API_PROVIDER_SUFFIX_SLASH.length();
+        if (startIndex >= endIndex) {
+            throw new APIPersistenceException("Unable to extract provider from path: " + apiPath
+                    + ". Provider segment is empty between prefix and '" + nameVersionApiSegment + "'.");
+        }
         return apiPath.substring(startIndex, endIndex);
     }
 
