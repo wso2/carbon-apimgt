@@ -294,16 +294,19 @@ public class RegistryPersistenceImplProviderChangeReadTestCase {
             throws Exception {
         Registry registry = Mockito.mock(UserRegistry.class);
         Resource resource = new ResourceImpl();
-        Mockito.when(registry.get(anyString())).thenReturn(resource);
         Tag[] tags = new Tag[1];
         Tag tag = new Tag();
         tag.setTagName("testTag");
         tags[0] = tag;
-        Mockito.when(registry.getTags(anyString())).thenReturn(tags);
 
         GenericArtifact artifact = createProviderChangedArtifact(newProvider, oldProviderEncoded);
         String apiUUID = artifact.getId();
-        Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(artifact.getPath());
+        String expectedArtifactPath = artifact.getPath();
+
+        // Mock registry to respond to the old provider path specifically
+        Mockito.when(registry.get(expectedArtifactPath)).thenReturn(resource);
+        Mockito.when(registry.getTags(expectedArtifactPath)).thenReturn(tags);
+        Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(expectedArtifactPath);
 
         APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
         PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(
@@ -311,6 +314,8 @@ public class RegistryPersistenceImplProviderChangeReadTestCase {
 
         Assert.assertNotNull("Publisher API should not be null after provider change", publisherAPI);
         Assert.assertEquals("API UUID should match", apiUUID, publisherAPI.getId());
+        // Verify the old provider path was used, not the new provider path
+        Mockito.verify(registry, times(1)).get(expectedArtifactPath);
     }
 
     // =====================================================================
