@@ -3916,12 +3916,14 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             /* remove empty directories */
             // Use full "/{name}/{version}" to unambiguously locate the product segment in the path.
-            // This avoids false matches when the product name appears in the provider
-            // (e.g., secondary userstore: WSO2.COM/admin with product named "admin").
             String nameVersionSegment = RegistryConstants.PATH_SEPARATOR + identifier.getName()
                     + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
-            String productProviderPath = apiSourcePath.substring(0,
-                    apiSourcePath.lastIndexOf(nameVersionSegment));
+            int nameVersionSegmentIndex = apiSourcePath.lastIndexOf(nameVersionSegment);
+            if (nameVersionSegmentIndex < 0) {
+                throw new APIPersistenceException("Failed to clean up API Product registry paths. Expected " +
+                        "segment '" + nameVersionSegment + "' was not found in source path: " + apiSourcePath);
+            }
+            String productProviderPath = apiSourcePath.substring(0, nameVersionSegmentIndex);
             String apiProductCollectionPath = productProviderPath + RegistryConstants.PATH_SEPARATOR
                     + identifier.getName();
 
