@@ -2986,12 +2986,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
             isTenantFlowStarted = holder.isTenantFlowStarted();
             BasicAPI api = getbasicAPIInfo(apiId, registry);
             if (api == null) {
-                throw new MediationPolicyPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
+                throw new MediationPolicyPersistenceException("API not found ", ExceptionCodes.API_NOT_FOUND);
             }
-            String apiResourcePath = api.apiSourcePath;
+            String apiResourcePath = api.apiSourcePath + RegistryConstants.PATH_SEPARATOR;
             String policyPath = GovernanceUtils.getArtifactPath(registry, mediationPolicyId);
             if (!policyPath.toLowerCase().startsWith(apiResourcePath.toLowerCase())) {
-                throw new MediationPolicyPersistenceException("Policy not foud ", ExceptionCodes.POLICY_NOT_FOUND);
+                throw new MediationPolicyPersistenceException("Policy not found ", ExceptionCodes.POLICY_NOT_FOUND);
             }
             Resource mediationResource = registry.get(policyPath);
             if (mediationResource != null) {
