@@ -1116,6 +1116,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
             } else {
                 result = searchPaginatedPublisherAPIs(sysRegistry, tenantIDLocal, modifiedQuery, start, offset);
             }
+            if (result != null && !PersistenceUtil.isAdminUser(ctx) && Boolean.parseBoolean(
+                    System.getProperty(APIConstants.CASE_SENSITIVE_ROLE_VALIDATION))) {
+                result = filterByCaseSensitivePublisherRoles(result, sysRegistry, ctx.getRoles());
+            }
         } catch (APIManagementException e) {
             throw new APIPersistenceException("Error while searching APIs ", e);
         } finally {
@@ -1123,6 +1127,45 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
+        return result;
+    }
+
+    private PublisherAPISearchResult filterByCaseSensitivePublisherRoles(PublisherAPISearchResult result,
+            Registry registry, String[] userRoles) {
+        List<PublisherAPIInfo> filtered = new ArrayList<>();
+        for (PublisherAPIInfo apiInfo : result.getPublisherAPIInfoList()) {
+            try {
+                String artifactPath = GovernanceUtils.getArtifactPath(registry, apiInfo.getId());
+                Resource apiResource = registry.get(artifactPath);
+                String accessControl = apiResource.getProperty(APIConstants.ACCESS_CONTROL);
+                if (accessControl == null || APIConstants.NO_ACCESS_CONTROL.equalsIgnoreCase(accessControl)) {
+                    filtered.add(apiInfo);
+                    continue;
+                }
+                String displayRoles = apiResource.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES);
+                if (displayRoles == null || APIConstants.NULL_USER_ROLE_LIST.equals(displayRoles)) {
+                    filtered.add(apiInfo);
+                    continue;
+                }
+                if (userRoles != null) {
+                    for (String acRole : displayRoles.split(",")) {
+                        for (String userRole : userRoles) {
+                            if (userRole.equals(acRole.trim())) {
+                                filtered.add(apiInfo);
+                                break;
+                            }
+                        }
+                    }
+                }
+            } catch (RegistryException e) {
+                log.warn("Error checking publisher access control for API " + apiInfo.getId()
+                        + " during case-sensitive filtering", e);
+                filtered.add(apiInfo);
+            }
+        }
+        result.setPublisherAPIInfoList(filtered);
+        result.setTotalAPIsCount(filtered.size());
+        result.setReturnedAPIsCount(filtered.size());
         return result;
     }
 

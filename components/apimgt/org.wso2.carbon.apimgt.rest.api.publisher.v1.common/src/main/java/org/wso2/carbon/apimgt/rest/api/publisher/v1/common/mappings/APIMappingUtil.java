@@ -403,7 +403,12 @@ public class APIMappingUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Setting access control roles for API: " + apiId);
             }
-            model.setAccessControlRoles(StringUtils.join(accessControlRoles, ',').toLowerCase());
+            String joinedRoles = StringUtils.join(accessControlRoles, ',');
+            if (Boolean.parseBoolean(System.getProperty(APIConstants.CASE_SENSITIVE_CHECK_PATH))) {
+                model.setAccessControlRoles(joinedRoles);
+            } else {
+                model.setAccessControlRoles(joinedRoles.toLowerCase());
+            }
             model.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY);
         }
 
@@ -725,7 +730,12 @@ public class APIMappingUtil {
             model.setAccessControl(APIConstants.NO_ACCESS_CONTROL);
             model.setAccessControlRoles("null");
         } else {
-            model.setAccessControlRoles(StringUtils.join(accessControlRoles, ',').toLowerCase());
+            String joinedRoles = StringUtils.join(accessControlRoles, ',');
+            if (Boolean.parseBoolean(System.getProperty(APIConstants.CASE_SENSITIVE_CHECK_PATH))) {
+                model.setAccessControlRoles(joinedRoles);
+            } else {
+                model.setAccessControlRoles(joinedRoles.toLowerCase());
+            }
             model.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY);
         }
 
@@ -4331,7 +4341,12 @@ public class APIMappingUtil {
             product.setAccessControl(APIConstants.NO_ACCESS_CONTROL);
             product.setAccessControlRoles("null");
         } else {
-            product.setAccessControlRoles(StringUtils.join(accessControlRoles, ',').toLowerCase());
+            String joinedRoles = StringUtils.join(accessControlRoles, ',');
+            if (Boolean.parseBoolean(System.getProperty(APIConstants.CASE_SENSITIVE_CHECK_PATH))) {
+                product.setAccessControlRoles(joinedRoles);
+            } else {
+                product.setAccessControlRoles(joinedRoles.toLowerCase());
+            }
             product.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY);
         }
 
