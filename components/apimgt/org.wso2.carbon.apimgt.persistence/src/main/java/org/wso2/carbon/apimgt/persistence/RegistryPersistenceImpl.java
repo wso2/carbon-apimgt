@@ -3535,7 +3535,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         String artifactPath = apiArtifact.getPath();
         api.apiSourcePath = RegistryPersistenceUtil.extractApiSourcePath(artifactPath);
         api.originalProvider = RegistryPersistenceUtil.extractProviderFromPath(artifactPath,
-                api.apiName, api.apiVersion);
+                api.apiName, api.apiVersion, registry);
 
         return api;
     }

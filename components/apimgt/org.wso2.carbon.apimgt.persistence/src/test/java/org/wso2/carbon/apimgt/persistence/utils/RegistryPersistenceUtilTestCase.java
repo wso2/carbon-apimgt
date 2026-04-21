@@ -420,6 +420,26 @@ public class RegistryPersistenceUtilTestCase {
         Assert.assertEquals("user-AT-gmail.com-AT-abc.com", result);
     }
 
+    @Test
+    public void testExtractProvider4Arg_RevisionPathWithSecondaryUserstore() throws Exception {
+        String revisionPath = "/apimgt/applicationdata/apis/88e758b7-6924-4e9f-8882-431070b6492b/1/api";
+        String currentApiPath = "/apimgt/applicationdata/provider/WSO2.COM/admin/MyAPI/1.0/api";
+        Mockito.when(GovernanceUtils.getArtifactPath(registry,
+                 "88e758b7-6924-4e9f-8882-431070b6492b")).thenReturn(currentApiPath);
+        String result = RegistryPersistenceUtil.extractProviderFromPath(revisionPath, "MyAPI", "1.0", registry);
+        Assert.assertEquals("WSO2.COM/admin", result);
+    }
+
+    @Test
+    public void testExtractProvider4Arg_RevisionPathWithSecondaryUserstoreEmailTenant() throws Exception {
+        String revisionPath = "/apimgt/applicationdata/apis/88e758b7-6924-4e9f-8882-431070b6492b/2/api";
+        String currentApiPath = "/apimgt/applicationdata/provider/WSO2.COM/user-AT-gmail.com-AT-abc.com/MyAPI/1.0/api";
+        Mockito.when(GovernanceUtils.getArtifactPath(registry,
+                "88e758b7-6924-4e9f-8882-431070b6492b")).thenReturn(currentApiPath);
+        String result = RegistryPersistenceUtil.extractProviderFromPath(revisionPath, "MyAPI", "1.0", registry);
+        Assert.assertEquals("WSO2.COM/user-AT-gmail.com-AT-abc.com", result);
+    }
+
     // =====================================================================
     // Tests for getProviderFromArtifact — handles state B (@) and state A/C (-AT-)
     // =====================================================================
