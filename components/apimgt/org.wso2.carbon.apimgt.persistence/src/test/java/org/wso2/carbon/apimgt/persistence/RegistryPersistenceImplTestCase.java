@@ -485,6 +485,52 @@ public class RegistryPersistenceImplTestCase {
     }
 
     @Test
+    public void testGetGraphQLSchema_RevisionArtifact() throws GraphQLPersistenceException, RegistryException {
+        Registry registry = Mockito.mock(Registry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
+        String apiUUID = artifact.getId();
+
+        String apiProviderName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+
+        // The current (non-revision) artifact path
+        String currentApiPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
+                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
+                + RegistryConstants.PATH_SEPARATOR + "api";
+
+        // Set the artifact path to a revision path — simulates loading a revision artifact
+        String revisionPath = APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + apiUUID + RegistryConstants.PATH_SEPARATOR + "1" + RegistryConstants.PATH_SEPARATOR + "api";
+        ((GenericArtifactWrapper) artifact).setArtifactPath(revisionPath);
+
+        // When resolving revision UUID to current path, return the normal provider path
+        Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(currentApiPath);
+
+        // GraphQL schema resource sits under the revision source path
+        String revisionSourcePath = revisionPath.substring(0, revisionPath.lastIndexOf("/api"));
+        String schemaName = apiProviderName + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR + apiName
+                + apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+        String schemaResourcePath = revisionSourcePath + RegistryConstants.PATH_SEPARATOR + schemaName;
+
+        String schema = "{\n"
+                + "  hero {\n"
+                + "    name\n"
+                + "  }\n"
+                + "}";
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+        Mockito.when(registry.resourceExists(schemaResourcePath)).thenReturn(true);
+        Resource schemaResource = new ResourceImpl();
+        schemaResource.setContent(schema.getBytes());
+        Mockito.when(registry.get(schemaResourcePath)).thenReturn(schemaResource);
+
+        String def = apiPersistenceInstance.getGraphQLSchema(org, apiUUID);
+        Assert.assertEquals("GraphQL schema should be retrievable from revision artifact", schema, def);
+    }
+
+    @Test
     public void testGetOASDefinition() throws OASPersistenceException, RegistryException {
         Registry registry = Mockito.mock(Registry.class);
         GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
