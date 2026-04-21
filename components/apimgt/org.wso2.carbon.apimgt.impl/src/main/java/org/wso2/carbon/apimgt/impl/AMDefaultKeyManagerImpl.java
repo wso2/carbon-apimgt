@@ -777,6 +777,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String encodedClientId = Base64.getUrlEncoder()
                 .encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
         String encodedSecretId = Base64.getUrlEncoder().encodeToString(secretId.getBytes(StandardCharsets.UTF_8));
+        if (isMostRecentlyAddedSecret(encodedClientId, secretId)) {
+            throw new APIManagementException("Cannot remove the most recently added consumer secret of clientId : "
+                    + clientId,
+                    ExceptionCodes.from(ExceptionCodes.CANNOT_REMOVE_LATEST_CLIENT_SECRET, clientId));
+        }
         try {
             dcrClient.deleteApplicationSecret(encodedClientId, encodedSecretId);
             if (log.isDebugEnabled()) {
@@ -786,6 +791,26 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             String errMsg = "Error while deleting consumer secret of clientId : " + clientId;
             throw new APIManagementException(errMsg, e, ExceptionCodes
                     .from(ExceptionCodes.CLIENT_SECRET_DELETION_FAILED, clientId));
+        }
+    }
+
+    private boolean isMostRecentlyAddedSecret(String encodedClientId, String secretId) {
+
+        try {
+            ClientSecretList clientSecretList = dcrClient.getApplicationSecrets(encodedClientId);
+            if (clientSecretList == null || clientSecretList.getList() == null
+                    || clientSecretList.getList().isEmpty()) {
+                return false;
+            }
+            List<ClientSecret> secrets = clientSecretList.getList();
+            ClientSecret latest = secrets.get(secrets.size() - 1);
+            return latest != null && secretId.equals(latest.getSecretId());
+        } catch (KeyManagerClientException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Could not pre-check whether secretId " + secretId
+                        + " is the most recently added; deferring to delete call.", e);
+            }
+            return false;
         }
     }
 

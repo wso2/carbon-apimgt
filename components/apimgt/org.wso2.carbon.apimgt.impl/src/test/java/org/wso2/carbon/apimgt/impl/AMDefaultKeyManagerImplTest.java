@@ -33,12 +33,16 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.ConsumerSecretRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.KeyManagerClientException;
 import org.wso2.carbon.apimgt.impl.kmclient.model.ClientInfo;
+import org.wso2.carbon.apimgt.impl.kmclient.model.ClientSecret;
+import org.wso2.carbon.apimgt.impl.kmclient.model.ClientSecretList;
 import org.wso2.carbon.apimgt.impl.kmclient.model.DCRClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectionClient;
@@ -47,9 +51,11 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
@@ -520,6 +526,181 @@ public class AMDefaultKeyManagerImplTest {
 //        Assert.assertFalse(tokenInfo.isTokenValid());
 //    }
 
+
+    @Test
+    public void testDeleteApplicationConsumerSecret_lastSecret_throwsClientError() throws Exception {
+        String clientId = "cvOZA28GfOftYnmV_bJwCYMuLJoa";
+        String latestSecretId = "e28683d7-3c48-4632-93ef-c0a6ee20930b";
+        String olderSecretId = "aac624d6-1111-2222-3333-444444444444";
+        String encodedClientId = java.util.Base64.getUrlEncoder()
+                .encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
+
+        ClientSecret older = new ClientSecret();
+        older.setSecretId(olderSecretId);
+        ClientSecret latest = new ClientSecret();
+        latest.setSecretId(latestSecretId);
+        List<ClientSecret> secrets = new ArrayList<>();
+        secrets.add(older);
+        secrets.add(latest);
+        ClientSecretList list = new ClientSecretList();
+        list.setList(secrets);
+        list.setCount(secrets.size());
+
+        Mockito.when(dcrClient.getApplicationSecrets(encodedClientId)).thenReturn(list);
+
+        ConsumerSecretRequest request = new ConsumerSecretRequest();
+        request.setClientId(clientId);
+
+        try {
+            keyManager.deleteApplicationConsumerSecret(latestSecretId, request);
+            Assert.fail("Expected APIManagementException for last-secret deletion");
+        } catch (APIManagementException e) {
+            Assert.assertNotNull(e.getErrorHandler());
+            Assert.assertEquals(ExceptionCodes.CANNOT_REMOVE_LATEST_CLIENT_SECRET.getErrorCode(),
+                    e.getErrorHandler().getErrorCode());
+            Assert.assertEquals(400, e.getErrorHandler().getHttpStatusCode());
+        }
+        Mockito.verify(dcrClient, Mockito.never())
+                .deleteApplicationSecret(Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testDeleteApplicationConsumerSecret_olderSecret_succeeds() throws Exception {
+        String clientId = "cvOZA28GfOftYnmV_bJwCYMuLJoa";
+        String olderSecretId = "aac624d6-1111-2222-3333-444444444444";
+        String latestSecretId = "e28683d7-3c48-4632-93ef-c0a6ee20930b";
+        String encodedClientId = java.util.Base64.getUrlEncoder()
+                .encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
+        String encodedOlderSecretId = java.util.Base64.getUrlEncoder()
+                .encodeToString(olderSecretId.getBytes(StandardCharsets.UTF_8));
+
+        ClientSecret older = new ClientSecret();
+        older.setSecretId(olderSecretId);
+        ClientSecret latest = new ClientSecret();
+        latest.setSecretId(latestSecretId);
+        List<ClientSecret> secrets = new ArrayList<>();
+        secrets.add(older);
+        secrets.add(latest);
+        ClientSecretList list = new ClientSecretList();
+        list.setList(secrets);
+        list.setCount(secrets.size());
+
+        Mockito.when(dcrClient.getApplicationSecrets(encodedClientId)).thenReturn(list);
+
+        ConsumerSecretRequest request = new ConsumerSecretRequest();
+        request.setClientId(clientId);
+
+        keyManager.deleteApplicationConsumerSecret(olderSecretId, request);
+
+        Mockito.verify(dcrClient, Mockito.times(1))
+                .deleteApplicationSecret(encodedClientId, encodedOlderSecretId);
+    }
+
+    @Test
+    public void testDeleteApplicationConsumerSecret_genericFailure_stillMapsTo500() throws Exception {
+        String clientId = "cvOZA28GfOftYnmV_bJwCYMuLJoa";
+        String secretId = "aac624d6-1111-2222-3333-444444444444";
+        String encodedClientId = java.util.Base64.getUrlEncoder()
+                .encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
+
+        // Pre-check returns a list where the requested secret is NOT the last one,
+        // so the pre-check will not short-circuit; we then simulate a generic failure
+        // from the DCR delete call.
+        ClientSecret target = new ClientSecret();
+        target.setSecretId(secretId);
+        ClientSecret latest = new ClientSecret();
+        latest.setSecretId("some-other-latest-id");
+        List<ClientSecret> secrets = new ArrayList<>();
+        secrets.add(target);
+        secrets.add(latest);
+        ClientSecretList list = new ClientSecretList();
+        list.setList(secrets);
+        list.setCount(secrets.size());
+
+        Mockito.when(dcrClient.getApplicationSecrets(encodedClientId)).thenReturn(list);
+        Mockito.doThrow(new KeyManagerClientException(500, "Internal server error"))
+                .when(dcrClient)
+                .deleteApplicationSecret(Mockito.eq(encodedClientId), Mockito.anyString());
+
+        ConsumerSecretRequest request = new ConsumerSecretRequest();
+        request.setClientId(clientId);
+
+        try {
+            keyManager.deleteApplicationConsumerSecret(secretId, request);
+            Assert.fail("Expected APIManagementException for generic delete failure");
+        } catch (APIManagementException e) {
+            Assert.assertNotNull(e.getErrorHandler());
+            Assert.assertEquals(ExceptionCodes.CLIENT_SECRET_DELETION_FAILED.getErrorCode(),
+                    e.getErrorHandler().getErrorCode());
+            Assert.assertEquals(500, e.getErrorHandler().getHttpStatusCode());
+        }
+    }
+
+    @Test
+    public void testDeleteApplicationConsumerSecret_emptySecretList_proceedsToDelete() throws Exception {
+        String clientId = "cvOZA28GfOftYnmV_bJwCYMuLJoa";
+        String secretId = "aac624d6-1111-2222-3333-444444444444";
+        String encodedClientId = java.util.Base64.getUrlEncoder()
+                .encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
+        String encodedSecretId = java.util.Base64.getUrlEncoder()
+                .encodeToString(secretId.getBytes(StandardCharsets.UTF_8));
+
+        ClientSecretList emptyList = new ClientSecretList();
+        emptyList.setList(new ArrayList<>());
+        emptyList.setCount(0);
+
+        Mockito.when(dcrClient.getApplicationSecrets(encodedClientId)).thenReturn(emptyList);
+
+        ConsumerSecretRequest request = new ConsumerSecretRequest();
+        request.setClientId(clientId);
+
+        keyManager.deleteApplicationConsumerSecret(secretId, request);
+
+        Mockito.verify(dcrClient, Mockito.times(1))
+                .deleteApplicationSecret(encodedClientId, encodedSecretId);
+    }
+
+    @Test
+    public void testDeleteApplicationConsumerSecret_preCheckException_proceedsToDelete() throws Exception {
+        String clientId = "cvOZA28GfOftYnmV_bJwCYMuLJoa";
+        String secretId = "aac624d6-1111-2222-3333-444444444444";
+        String encodedClientId = java.util.Base64.getUrlEncoder()
+                .encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
+        String encodedSecretId = java.util.Base64.getUrlEncoder()
+                .encodeToString(secretId.getBytes(StandardCharsets.UTF_8));
+
+        // Pre-check itself fails — should be swallowed and the delete call should still happen.
+        Mockito.when(dcrClient.getApplicationSecrets(encodedClientId))
+                .thenThrow(new KeyManagerClientException(500, "boom"));
+
+        ConsumerSecretRequest request = new ConsumerSecretRequest();
+        request.setClientId(clientId);
+
+        keyManager.deleteApplicationConsumerSecret(secretId, request);
+
+        Mockito.verify(dcrClient, Mockito.times(1))
+                .deleteApplicationSecret(encodedClientId, encodedSecretId);
+    }
+
+    @Test
+    public void testDeleteApplicationConsumerSecret_nullSecretList_proceedsToDelete() throws Exception {
+        String clientId = "cvOZA28GfOftYnmV_bJwCYMuLJoa";
+        String secretId = "aac624d6-1111-2222-3333-444444444444";
+        String encodedClientId = java.util.Base64.getUrlEncoder()
+                .encodeToString(clientId.getBytes(StandardCharsets.UTF_8));
+        String encodedSecretId = java.util.Base64.getUrlEncoder()
+                .encodeToString(secretId.getBytes(StandardCharsets.UTF_8));
+
+        Mockito.when(dcrClient.getApplicationSecrets(encodedClientId)).thenReturn(null);
+
+        ConsumerSecretRequest request = new ConsumerSecretRequest();
+        request.setClientId(clientId);
+
+        keyManager.deleteApplicationConsumerSecret(secretId, request);
+
+        Mockito.verify(dcrClient, Mockito.times(1))
+                .deleteApplicationSecret(encodedClientId, encodedSecretId);
+    }
 
     private String getJSONString() {
         Map<String, String> parameters = new HashMap<String, String>();

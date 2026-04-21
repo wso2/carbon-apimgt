@@ -400,6 +400,10 @@ public enum ExceptionCodes implements ErrorHandler {
             "Client secret retrieval failed", 500,
             "Error occurred while retrieving the client secret for the application with " +
                     "consumer key %s."),
+    CANNOT_REMOVE_LATEST_CLIENT_SECRET(900921,
+            "Cannot remove the latest consumer secret", 400,
+            "Cannot remove the most recently added consumer secret for the application with " +
+                    "consumer key %s."),
 
     //Throttle related codes
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
