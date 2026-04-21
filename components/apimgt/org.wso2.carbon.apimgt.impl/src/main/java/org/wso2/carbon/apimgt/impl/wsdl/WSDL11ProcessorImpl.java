@@ -21,6 +21,7 @@ import com.google.common.primitives.Bytes;
 import com.ibm.wsdl.extensions.http.HTTPAddressImpl;
 import com.ibm.wsdl.extensions.soap.SOAPAddressImpl;
 import com.ibm.wsdl.extensions.soap12.SOAP12AddressImpl;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -29,8 +30,10 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.FileSizeLimitExceededException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -136,17 +139,33 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
         wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
         wsdlReader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
         try {
-            wsdlDefinition = wsdlReader.readWSDL(url.toString(), getSecuredParsedDocumentFromURL(url));
+            String maxWSDLSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration().getFirstProperty(
+                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT);
+            if (maxWSDLSizeStr == null || maxWSDLSizeStr.trim().isEmpty()) {
+                maxWSDLSizeStr = org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB;
+            }
+            long maxFileSize = Long.parseLong(maxWSDLSizeStr) * 1024L * 1024L;
+            wsdlDefinition = wsdlReader.readWSDL(url.toString(), getSecuredParsedDocumentFromURL(url, maxFileSize));
             if (log.isDebugEnabled()) {
                 log.debug("Successfully initialized an instance of " + this.getClass().getSimpleName()
                         + " with a single WSDL.");
             }
         } catch (WSDLException | APIManagementException e) {
-            //This implementation class cannot process the WSDL.
-            log.debug("Cannot process the WSDL by " + this.getClass().getName(), e);
-            setError(new ErrorItem(ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorMessage(), e.getMessage(),
-                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorCode(),
-                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getHttpStatusCode()));
+            if (log.isDebugEnabled()) {
+                //This implementation class cannot process the WSDL.
+                log.debug("Cannot process the WSDL by " + this.getClass().getName(), e);
+            }
+            if (ExceptionUtils.indexOfThrowable(e, FileSizeLimitExceededException.class) != -1) {
+                setError(new ErrorItem(ExceptionCodes.FILE_TOO_LARGE.getErrorMessage(),
+                        ExceptionCodes.FILE_TOO_LARGE.getErrorDescription(),
+                        ExceptionCodes.FILE_TOO_LARGE.getErrorCode(),
+                        ExceptionCodes.FILE_TOO_LARGE.getHttpStatusCode()));
+            } else {
+                setError(new ErrorItem(ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorMessage(), e.getMessage(),
+                        ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getErrorCode(),
+                        ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT.getHttpStatusCode()));
+            }
         }
         return !hasError;
     }

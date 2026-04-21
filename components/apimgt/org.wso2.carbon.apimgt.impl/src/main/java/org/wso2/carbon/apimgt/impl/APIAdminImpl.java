@@ -1096,13 +1096,21 @@ public class APIAdminImpl implements APIAdmin {
             JsonElement encryptedJsonValue = new JsonParser().parse(value);
             if (encryptedJsonValue instanceof JsonObject) {
                 JsonObject jsonObject = (JsonObject) encryptedJsonValue;
-                JsonPrimitive encryptedValue = jsonObject.getAsJsonPrimitive(APIConstants.ENCRYPTED_VALUE);
-                if (encryptedValue.isBoolean()) {
-                    JsonPrimitive valueElement = jsonObject.getAsJsonPrimitive(APIConstants.VALUE);
-                    if (encryptedValue.getAsBoolean()) {
-                        if (valueElement.isString()) {
+                JsonElement encryptedElement = jsonObject.get(APIConstants.ENCRYPTED_VALUE);
+                if (encryptedElement == null || !encryptedElement.isJsonPrimitive()) {
+                    return value;
+                }
+                JsonPrimitive encryptedValue = encryptedElement.getAsJsonPrimitive();
+                if (!encryptedValue.isBoolean()) {
+                    return value;
+                }
+                if (encryptedValue.getAsBoolean()) {
+                    JsonElement valueElement = jsonObject.get(APIConstants.VALUE);
+                    if (valueElement != null && valueElement.isJsonPrimitive()) {
+                        JsonPrimitive valuePrimitive = valueElement.getAsJsonPrimitive();
+                        if (valuePrimitive.isString()) {
                             CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-                            return new String(cryptoUtil.decrypt(valueElement.getAsString().getBytes()));
+                            return new String(cryptoUtil.decrypt(valuePrimitive.getAsString().getBytes()));
                         }
                     }
                 }

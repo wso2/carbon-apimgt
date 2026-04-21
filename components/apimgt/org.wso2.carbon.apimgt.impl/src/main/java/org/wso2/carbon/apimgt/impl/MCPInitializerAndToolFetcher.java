@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,8 +32,13 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.FileSizeLimitExceededException;
+import org.wso2.carbon.apimgt.api.SizeLimitedInputStream;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -170,18 +176,49 @@ public class MCPInitializerAndToolFetcher {
 
         request.setEntity(new StringEntity(jsonBody.toString(), StandardCharsets.UTF_8));
 
+        String maxFileSizeStr = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration()
+                .getFirstProperty(org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT);
+        if (maxFileSizeStr == null || maxFileSizeStr.trim().isEmpty()) {
+            maxFileSizeStr = org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT_DEFAULT_MB;
+        }
+        final long maxBytes = Long.parseLong(maxFileSizeStr) * 1024L * 1024L;
+
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             final int status = response.getStatusLine() != null ? response.getStatusLine().getStatusCode() : 0;
             if (status < 200 || status >= 300) {
                 String reason = response.getStatusLine() != null ?
                         response.getStatusLine().getReasonPhrase() : "Unknown";
-                String bodySnippet = response.getEntity() != null
-                        ? EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8) : StringUtils.EMPTY;
+                String bodySnippet = StringUtils.EMPTY;
+                if (response.getEntity() != null) {
+                    try (InputStream rawStream = response.getEntity().getContent();
+                            SizeLimitedInputStream limitedStream = new SizeLimitedInputStream(rawStream, maxBytes)) {
+                        bodySnippet = IOUtils.toString(limitedStream, StandardCharsets.UTF_8);
+                    } catch (FileSizeLimitExceededException e) {
+                        log.error(
+                                "MCP error response body exceeds the maximum allowed size of " + maxFileSizeStr + " MB. Truncating body snippet.",
+                                e);
+                        bodySnippet = "[Response body too large to display]";
+                    } catch (IOException e) {
+                        log.error("Failed to read MCP error response body.", e);
+                    }
+                }
                 throw new APIManagementException("MCP request failed: HTTP " + status + " " + reason + " Body: "
                         + bodySnippet);
             }
-            String body = response.getEntity() != null ?
-                    EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8) : StringUtils.EMPTY;
+            String body = StringUtils.EMPTY;
+            if (response.getEntity() != null) {
+                try (InputStream rawStream = response.getEntity().getContent();
+                        SizeLimitedInputStream limitedStream = new SizeLimitedInputStream(rawStream, maxBytes)) {
+                    body = IOUtils.toString(limitedStream, StandardCharsets.UTF_8);
+                } catch (FileSizeLimitExceededException e) {
+                    throw new APIManagementException(
+                            "MCP response body exceeds the maximum allowed size of " + maxFileSizeStr + " MB.",
+                            ExceptionCodes.FILE_TOO_LARGE);
+                } catch (IOException e) {
+                    throw new APIManagementException("Failed to read MCP response body.", e);
+                }
+            }
             Header sessionHeader = response.getFirstHeader(APIConstants.MCP.HEADER_MCP_SESSION_ID);
             String returnedSessionId = sessionHeader != null ? sessionHeader.getValue() : null;
 

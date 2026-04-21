@@ -679,7 +679,37 @@ public class APIManagerConfiguration {
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
                 String value = MiscellaneousUtil.resolve(element, secretResolver);
-                addToConfiguration(key, APIUtil.replaceSystemProperty(value));
+                if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT.equals(key)) {
+                    String maxFileSize = StringUtils.isNumeric(value) ?
+                            value :
+                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB;
+                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
+                } else if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT.equals(
+                        key)) {
+                    String maxFileSize = StringUtils.isNumeric(value) ?
+                            value :
+                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_ASYNC_FILE_SIZE_LIMIT_DEFAULT_MB;
+                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
+                } else if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT.equals(
+                        key)) {
+                    String maxFileSize = StringUtils.isNumeric(value) ?
+                            value :
+                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_WSDL_FILE_SIZE_LIMIT_DEFAULT_MB;
+                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
+                } else if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT.equals(key)) {
+                    String maxFileSize = StringUtils.isNumeric(value) ?
+                            value :
+                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_GRAPHQL_FILE_SIZE_LIMIT_DEFAULT_MB;
+                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
+                } else if (org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT.equals(
+                        key)) {
+                    String maxFileSize = StringUtils.isNumeric(value) ?
+                            value :
+                            org.wso2.carbon.apimgt.api.APIConstants.API_PUBLISHER_IMPORT_MCP_FILE_SIZE_LIMIT_DEFAULT_MB;
+                    addToConfiguration(key, APIUtil.replaceSystemProperty(maxFileSize));
+                } else {
+                    addToConfiguration(key, APIUtil.replaceSystemProperty(value));
+                }
             } else if ("Environments".equals(localName)) {
                 Iterator environmentIterator = element.getChildrenWithLocalName("Environment");
                 apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
@@ -3587,72 +3617,26 @@ public class APIManagerConfiguration {
             }
         }
 
-        // New: platform gateway connect-with-token configuration (separate element)
+        // Platform Gateway version metadata for UI quick-start (separate element under gateway notification).
         OMElement pgConnectElem = omElement.getFirstChildWithName(
                 new QName(APIConstants.GatewayNotification.PLATFORM_GATEWAY_CONNECT_CONFIGURATION));
         if (pgConnectElem != null) {
-            List<org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig> connectGateways = new ArrayList<>();
-            List<String> universalGatewayVersions = new ArrayList<>();
-            OMElement universalGatewayVersionsEl = pgConnectElem.getFirstChildWithName(
-                    new QName(APIConstants.GatewayNotification.UNIVERSAL_GATEWAY_VERSIONS));
-            if (universalGatewayVersionsEl != null) {
-                Iterator<?> versionIterator = universalGatewayVersionsEl.getChildrenWithName(
+            List<String> platformGatewayVersions = new ArrayList<>();
+            OMElement platformGatewayVersionsEl = pgConnectElem.getFirstChildWithName(
+                    new QName(APIConstants.GatewayNotification.PLATFORM_GATEWAY_VERSIONS));
+            if (platformGatewayVersionsEl != null) {
+                Iterator<?> versionIterator = platformGatewayVersionsEl.getChildrenWithName(
                         new QName(APIConstants.GatewayNotification.VERSION));
                 while (versionIterator != null && versionIterator.hasNext()) {
                     OMElement versionElement = (OMElement) versionIterator.next();
                     if (versionElement != null && versionElement.getText() != null
                             && !versionElement.getText().trim().isEmpty()) {
-                        universalGatewayVersions.add(versionElement.getText().trim());
+                        platformGatewayVersions.add(versionElement.getText().trim());
                     }
                 }
             }
-            if (!universalGatewayVersions.isEmpty()) {
-                platformGatewayConnectConfig.setUniversalGatewayVersions(universalGatewayVersions);
-            }
-            OMElement connectGatewaysElem = pgConnectElem.getFirstChildWithName(
-                    new QName(APIConstants.GatewayNotification.CONNECT_GATEWAYS));
-            if (connectGatewaysElem != null) {
-                Iterator<?> connectIt = connectGatewaysElem.getChildrenWithName(
-                        new QName(APIConstants.GatewayNotification.CONNECT));
-                while (connectIt != null && connectIt.hasNext()) {
-                    OMElement connectElem = (OMElement) connectIt.next();
-                    if (connectElem == null) {
-                        continue;
-                    }
-                    org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig entry =
-                            new org.wso2.carbon.apimgt.impl.dto.ConnectGatewayConfig();
-                    OMElement rt = connectElem.getFirstChildWithName(
-                            new QName(APIConstants.GatewayNotification.REGISTRATION_TOKEN));
-                    if (rt != null && rt.getText() != null && !rt.getText().trim().isEmpty()) {
-                        entry.setRegistrationToken(rt.getText().trim());
-                    }
-                    OMElement nameEl = connectElem.getFirstChildWithName(
-                            new QName(APIConstants.GatewayNotification.CONNECT_NAME));
-                    if (nameEl != null && nameEl.getText() != null) {
-                        entry.setName(nameEl.getText().trim());
-                    }
-                    OMElement displayEl = connectElem.getFirstChildWithName(
-                            new QName(APIConstants.GatewayNotification.CONNECT_DISPLAY_NAME));
-                    if (displayEl != null && displayEl.getText() != null) {
-                        entry.setDisplayName(displayEl.getText().trim());
-                    }
-                    OMElement descEl = connectElem.getFirstChildWithName(
-                            new QName(APIConstants.GatewayNotification.CONNECT_DESCRIPTION));
-                    if (descEl != null && descEl.getText() != null) {
-                        entry.setDescription(descEl.getText().trim());
-                    }
-                    OMElement urlEl = connectElem.getFirstChildWithName(
-                            new QName(APIConstants.GatewayNotification.CONNECT_URL));
-                    if (urlEl != null && urlEl.getText() != null && !urlEl.getText().trim().isEmpty()) {
-                        entry.setUrl(urlEl.getText().trim());
-                    }
-                    if (!entry.getRegistrationToken().isEmpty()) {
-                        connectGateways.add(entry);
-                    }
-                }
-            }
-            if (!connectGateways.isEmpty()) {
-                platformGatewayConnectConfig.setConnectGateways(connectGateways);
+            if (!platformGatewayVersions.isEmpty()) {
+                platformGatewayConnectConfig.setPlatformGatewayVersions(platformGatewayVersions);
             }
         }
     }
@@ -3662,8 +3646,7 @@ public class APIManagerConfiguration {
     }
 
     /**
-     * Connect-with-token config ([[apim.universal_gateway.connect]]). Use this for the connect flow only;
-     * notification/heartbeat code should use {@link #getGatewayNotificationConfiguration()}.
+     * API Platform Gateway metadata config (e.g. supported versions for UI).
      */
     public PlatformGatewayConnectConfig getPlatformGatewayConnectConfig() {
         return platformGatewayConnectConfig;

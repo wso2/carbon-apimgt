@@ -28,7 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.io.TikaInputStream;
@@ -113,8 +112,7 @@ public class RestApiPublisherUtils {
         }
 
         try {
-            ContentDisposition contentDisposition = fileDetails.getContentDisposition();
-            String filename = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+            String filename = fileDetails == null ? null : fileDetails.getDataHandler().getName();
             if (StringUtils.isBlank(filename)) {
                 filename = RestApiConstants.DOC_NAME_DEFAULT + randomFolderName;
                 log.warn(
@@ -203,8 +201,7 @@ public class RestApiPublisherUtils {
         }
 
         try {
-            ContentDisposition contentDisposition = fileDetails.getContentDisposition();
-            String filename = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+            String filename = fileDetails == null ? null : fileDetails.getDataHandler().getName();
             if (StringUtils.isBlank(filename)) {
                 filename = RestApiConstants.DOC_NAME_DEFAULT + randomFolderName;
                 log.warn(
@@ -753,7 +750,7 @@ public class RestApiPublisherUtils {
         OpenAPIDefinitionValidationResponseDTO responseDTO;
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         if (fileDetail != null) {
-            fileName = fileDetail.getContentDisposition().getFilename();
+            fileName = fileDetail.getDataHandler().getName();
         }
         validationResponse = ApisApiServiceImplUtils.validateOpenAPIDefinition(url, fileInputStream, apiDefinition,
                 fileName, returnContent);
@@ -778,7 +775,7 @@ public class RestApiPublisherUtils {
 
         String msg = "";
         boolean isFileSpecified = (fileInputStream != null && fileDetail != null &&
-                fileDetail.getContentDisposition() != null && fileDetail.getContentDisposition().getFilename() != null)
+                fileDetail.getDataHandler() != null && fileDetail.getDataHandler().getName() != null)
                 || (fileInputStream != null && isServiceAPI);
         if (url == null && !isFileSpecified && apiDefinition == null) {
             msg = "One out of 'file' or 'url' or 'inline definition' should be specified";

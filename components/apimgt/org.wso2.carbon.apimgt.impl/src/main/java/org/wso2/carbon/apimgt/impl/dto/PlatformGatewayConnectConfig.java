@@ -23,41 +23,25 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Config for the Universal Gateway connect feature ([[apim.universal_gateway.connect]]).
- * Separate from {@link GatewayNotificationConfiguration} so existing notification/heartbeat
- * code is unchanged. Used only by the connect-with-token flow.
+ * Config for API Platform Gateway metadata (e.g. versions advertised to the UI).
+ * Separate from {@link GatewayNotificationConfiguration} for notification/heartbeat settings.
  */
 public class PlatformGatewayConnectConfig {
-    private List<ConnectGatewayConfig> connectGateways = new ArrayList<>();
-    private List<String> universalGatewayVersions = new ArrayList<>();
+    private List<String> platformGatewayVersions = new ArrayList<>();
 
     /**
-     * Global Universal Gateway versions (e.g. ["0.9.0", "0.11.0"]).
+     * Global API Platform Gateway versions (e.g. ["0.11.0","1.0.0"]).
      */
-    public List<String> getUniversalGatewayVersions() {
-        if (universalGatewayVersions == null) {
-            universalGatewayVersions = new ArrayList<>();
+    public List<String> getPlatformGatewayVersions() {
+        if (platformGatewayVersions == null) {
+            platformGatewayVersions = new ArrayList<>();
         }
-        return Collections.unmodifiableList(universalGatewayVersions);
+        return Collections.unmodifiableList(platformGatewayVersions);
     }
 
-    public void setUniversalGatewayVersions(List<String> universalGatewayVersions) {
-        this.universalGatewayVersions = universalGatewayVersions != null
-                ? new ArrayList<>(universalGatewayVersions)
+    public void setPlatformGatewayVersions(List<String> platformGatewayVersions) {
+        this.platformGatewayVersions = platformGatewayVersions != null
+                ? new ArrayList<>(platformGatewayVersions)
                 : new ArrayList<>();
-    }
-
-    /**
-     * Connect configs (one per gateway) for connect-with-token. If empty, platform connect is disabled.
-     */
-    public List<ConnectGatewayConfig> getConnectGateways() {
-        if (connectGateways == null) {
-            connectGateways = new ArrayList<>();
-        }
-        return connectGateways;
-    }
-
-    public void setConnectGateways(List<ConnectGatewayConfig> connectGateways) {
-        this.connectGateways = connectGateways != null ? new ArrayList<>(connectGateways) : new ArrayList<>();
     }
 }

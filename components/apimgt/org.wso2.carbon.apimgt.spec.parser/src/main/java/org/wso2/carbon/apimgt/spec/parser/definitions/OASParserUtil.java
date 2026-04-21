@@ -73,12 +73,15 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.FileSizeLimitExceededException;
+import org.wso2.carbon.apimgt.api.SizeLimitedInputStream;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
@@ -90,11 +93,14 @@ import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.spec.parser.definitions.mixin.License31Mixin;
 import org.yaml.snakeyaml.LoaderOptions;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -1265,7 +1271,8 @@ public class OASParserUtil {
     @Deprecated
     public static APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, HttpClient httpClient,
             boolean returnJsonContent) throws APIManagementException {
-        return validateAPIDefinitionByURL(url, httpClient, returnJsonContent, null);
+        return validateAPIDefinitionByURL(url, httpClient, returnJsonContent, null,
+                APIConstants.API_PUBLISHER_IMPORT_OAS_FILE_SIZE_LIMIT_DEFAULT_MB);
     }
 
     /**
@@ -1278,29 +1285,48 @@ public class OASParserUtil {
      * @return APIDefinitionValidationResponse object with validation information
      */
     public static APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, HttpClient httpClient,
-            boolean returnJsonContent, OASParserOptions oasParserOptions) throws APIManagementException {
+            boolean returnJsonContent, OASParserOptions oasParserOptions, String maxFileSize) throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         try {
             HttpGet httpGet = new HttpGet(url);
             HttpResponse response = httpClient.execute(httpGet);
 
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
-                String responseStr = EntityUtils.toString(response.getEntity(), "UTF-8");
-                String responseStrProcessed = responseStr;
-                if (!responseStr.trim().startsWith("{")) {
-                    try {
-                        JsonNode jsonNode = parseYamlWithLimit(responseStr, oasParserOptions);
-                        responseStrProcessed = jsonNode.toString();
-                    } catch (IOException e) {
-                        throw new APIManagementException("Error while reading API definition yaml", e);
+                if (response.getEntity() == null) {
+                    throw new IllegalArgumentException("Response entity is null for the provided URL: " + url);
+                }
+                long maxSize = Long.parseLong(maxFileSize) * 1024L * 1024L;
+                try (InputStream responseStream = response.getEntity().getContent();
+                        BufferedInputStream bufferedStream = new BufferedInputStream(responseStream, 4096);
+                        SizeLimitedInputStream limitedStream = new SizeLimitedInputStream(bufferedStream, maxSize);
+                        ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+                    byte[] chunk = new byte[4096];
+                    int n;
+                    while ((n = limitedStream.read(chunk)) != -1) {
+                        buffer.write(chunk, 0, n);
                     }
+                    String responseStr = buffer.toString(StandardCharsets.UTF_8.name());
+                    String responseStrProcessed = responseStr;
+                    if (!responseStr.trim().startsWith("{")) {
+                        try {
+                            JsonNode jsonNode = parseYamlWithLimit(responseStr, oasParserOptions);
+                            responseStrProcessed = jsonNode.toString();
+                        } catch (IOException e) {
+                            throw new APIManagementException("Error while reading API definition yaml", e);
+                        }
+                    }
+                    responseStrProcessed = removeUnsupportedBlocksFromResources(responseStrProcessed);
+                    if (responseStrProcessed != null) {
+                        responseStr = responseStrProcessed;
+                    }
+                    validationResponse = validateAPIDefinition(responseStr, new URL(url).getHost(), returnJsonContent,
+                            oasParserOptions);
+                } catch (FileSizeLimitExceededException ex) {
+                    ErrorHandler errorHandler = ExceptionCodes.FILE_TOO_LARGE;
+                    log.error(errorHandler.getErrorDescription());
+                    validationResponse.setValid(false);
+                    validationResponse.getErrorItems().add(errorHandler);
                 }
-                responseStrProcessed = removeUnsupportedBlocksFromResources(responseStrProcessed);
-                if (responseStrProcessed != null) {
-                    responseStr = responseStrProcessed;
-                }
-                validationResponse = validateAPIDefinition(responseStr, new URL(url).getHost(), returnJsonContent,
-                        oasParserOptions);
             } else {
                 validationResponse.setValid(false);
                 validationResponse.getErrorItems().add(ExceptionCodes.OPENAPI_URL_NO_200);

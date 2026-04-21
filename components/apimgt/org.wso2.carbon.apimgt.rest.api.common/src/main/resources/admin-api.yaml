@@ -5914,7 +5914,7 @@ components:
         status:
           type: string
           readOnly: true
-          description: For platform gateway environments (gatewayType Universal), connection status to the control plane (Active or Inactive).
+          description: For platform gateway environments (gatewayType APIPlatform), connection status to the control plane (Active or Inactive).
           example: Active
           default: Active
           enum:
@@ -5926,13 +5926,13 @@ components:
           readOnly: true
           description: For platform gateway environments, the gateway URL (e.g. https://host:9443). Same as Platform Gateways API; only set when this environment represents a platform gateway.
           example: https://mg.wso2.com
-        universalGatewayVersions:
+        platformGatewayVersions:
           type: array
           readOnly: true
-          description: Universal Gateway versions from config. Set for deploy targets so UI can show version choices in the quick-start guide.
+          description: API Platform Gateway versions from config. Set for deploy targets so UI can show version choices in the quick-start guide.
           items:
             type: string
-            example: "0.11.0"
+            example: "1.0.0"
     EnvironmentList:
       title: Environment List
       type: object
@@ -6753,12 +6753,12 @@ components:
           type: boolean
           description: Is Gateway Notification Enabled
           default: false
-        universalGatewayVersions:
+        platformGatewayVersions:
           type: array
-          description: Universal Gateway versions for the quick-start guide.
+          description: API Platform Gateway versions for the quick-start guide.
           items:
             type: string
-            example: "0.11.0"
+            example: "1.0.0"
         consumptionExportEnabled:
           type: boolean
           description: Whether the ConsumptionDataExportService OSGi service is available

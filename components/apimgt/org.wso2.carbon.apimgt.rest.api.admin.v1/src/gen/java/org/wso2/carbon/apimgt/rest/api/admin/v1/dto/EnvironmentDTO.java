@@ -106,7 +106,7 @@ return null;
     }
     private StatusEnum status = StatusEnum.ACTIVE;
     private URI vhost = null;
-    private List<String> universalGatewayVersions = new ArrayList<String>();
+    private List<String> platformGatewayVersions = new ArrayList<String>();
 
   /**
    **/
@@ -355,7 +355,7 @@ return null;
   }
 
   /**
-   * For platform gateway environments (gatewayType Universal), connection status to the control plane (Active or Inactive).
+   * For platform gateway environments (gatewayType APIPlatform), connection status to the control plane (Active or Inactive).
    **/
   public EnvironmentDTO status(StatusEnum status) {
     this.status = status;
@@ -363,7 +363,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "Active", value = "For platform gateway environments (gatewayType Universal), connection status to the control plane (Active or Inactive).")
+  @ApiModelProperty(example = "Active", value = "For platform gateway environments (gatewayType APIPlatform), connection status to the control plane (Active or Inactive).")
   @JsonProperty("status")
   public StatusEnum getStatus() {
     return status;
@@ -391,21 +391,21 @@ return null;
   }
 
   /**
-   * Universal Gateway versions from config. Set for deploy targets so UI can show version choices in the quick-start guide.
+   * API Platform Gateway versions from config. Set for deploy targets so UI can show version choices in the quick-start guide.
    **/
-  public EnvironmentDTO universalGatewayVersions(List<String> universalGatewayVersions) {
-    this.universalGatewayVersions = universalGatewayVersions;
+  public EnvironmentDTO platformGatewayVersions(List<String> platformGatewayVersions) {
+    this.platformGatewayVersions = platformGatewayVersions;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Universal Gateway versions from config. Set for deploy targets so UI can show version choices in the quick-start guide.")
-  @JsonProperty("universalGatewayVersions")
-  public List<String> getUniversalGatewayVersions() {
-    return universalGatewayVersions;
+  @ApiModelProperty(value = "API Platform Gateway versions from config. Set for deploy targets so UI can show version choices in the quick-start guide.")
+  @JsonProperty("platformGatewayVersions")
+  public List<String> getPlatformGatewayVersions() {
+    return platformGatewayVersions;
   }
-  public void setUniversalGatewayVersions(List<String> universalGatewayVersions) {
-    this.universalGatewayVersions = universalGatewayVersions;
+  public void setPlatformGatewayVersions(List<String> platformGatewayVersions) {
+    this.platformGatewayVersions = platformGatewayVersions;
   }
 
 
@@ -434,12 +434,12 @@ return null;
         Objects.equals(permissions, environment.permissions) &&
         Objects.equals(status, environment.status) &&
         Objects.equals(vhost, environment.vhost) &&
-        Objects.equals(universalGatewayVersions, environment.universalGatewayVersions);
+        Objects.equals(platformGatewayVersions, environment.platformGatewayVersions);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, provider, type, gatewayType, description, isReadOnly, mode, apiDiscoveryScheduledWindow, vhosts, endpointURIs, additionalProperties, permissions, status, vhost, universalGatewayVersions);
+    return Objects.hash(id, name, displayName, provider, type, gatewayType, description, isReadOnly, mode, apiDiscoveryScheduledWindow, vhosts, endpointURIs, additionalProperties, permissions, status, vhost, platformGatewayVersions);
   }
 
   @Override
@@ -463,7 +463,7 @@ return null;
     sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
-    sb.append("    universalGatewayVersions: ").append(toIndentedString(universalGatewayVersions)).append("\n");
+    sb.append("    platformGatewayVersions: ").append(toIndentedString(platformGatewayVersions)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -156,6 +156,8 @@ public final class PlatformGatewayWebSocketModels {
     public static final class DeploymentAckPayload {
         private String deploymentId;
         private String artifactId;
+        /** API revision UUID (AM_REVISION); must not be the synthetic WebSocket deploymentId. */
+        private String revisionUuid;
         private String resourceType;
         private String action;
         private String status;
@@ -168,6 +170,10 @@ public final class PlatformGatewayWebSocketModels {
 
         public String getArtifactId() {
             return artifactId;
+        }
+
+        public String getRevisionUuid() {
+            return revisionUuid;
         }
 
         public String getResourceType() {
