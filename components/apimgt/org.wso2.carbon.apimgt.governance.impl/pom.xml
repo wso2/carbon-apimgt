@@ -119,6 +119,7 @@
                             org.wso2.carbon.apimgt.common.jms.*;version="[9.29,10)",
                             *;resolution:=optional
                         </Import-Package>
+                        <DynamicImport-Package>org.yaml.snakeyaml.*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

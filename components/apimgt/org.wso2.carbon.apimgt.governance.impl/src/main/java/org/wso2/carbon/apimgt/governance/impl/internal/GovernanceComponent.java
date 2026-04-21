@@ -172,7 +172,7 @@ public class GovernanceComponent {
     @Reference(
             name = "apim.dependency.config.service",
             service = org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
+            cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetAPIMDependencyConfigurationService")
     protected void setAPIMDependencyConfigurationService(APIMDependencyConfigurationService service) {
