@@ -2031,8 +2031,6 @@ public class RegistryPersistenceUtil {
      * @param apiPath the current API path containing "provider/" (e.g., /apimgt/applicationdata/provider/admin/WSDL/1.0.0/api)
      * @param apiName the API name
      * @return the provider name
-     */
-    /**
      * @deprecated Use {@link #extractProviderFromPath(String, String, String)} instead which
      * handles the edge case where API name matches the provider name (e.g., secondary userstore
      * WSO2.COM/admin with API named "admin").
@@ -2195,8 +2193,6 @@ public class RegistryPersistenceUtil {
      * @param registry the registry to lookup current API path for revisions
      * @return the provider name
      * @throws APIPersistenceException if path parsing fails
-     */
-    /**
      * @deprecated Use {@link #extractProviderFromPath(String, String, String, Registry)} instead.
      */
     @Deprecated
