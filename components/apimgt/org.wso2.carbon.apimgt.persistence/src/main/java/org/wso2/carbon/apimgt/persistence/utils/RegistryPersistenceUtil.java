@@ -2242,12 +2242,6 @@ public class RegistryPersistenceUtil {
     }
 
     /**
-     * Checks if the given API path is a revision path.
-     *
-     * @param apiPath the API path to check
-     * @return true if the path is a revision path, false otherwise
-     */
-    /**
      * Reads the API provider from the artifact and normalizes the email domain encoding.
      * The provider in the artifact may contain raw @ (for APIs where provider was changed
      * before the encoding fix) or -AT- (normal creation / post-fix provider change).
@@ -2272,6 +2266,12 @@ public class RegistryPersistenceUtil {
         return replaceEmailDomain(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
     }
 
+    /**
+     * Checks if the given API path is a revision path.
+     *
+     * @param apiPath the API path to check
+     * @return true if the path is a revision path, false otherwise
+     */
     public static boolean isRevisionPath(String apiPath) {
         return apiPath != null && apiPath.contains(APIConstants.API_REVISION_LOCATION);
     }
