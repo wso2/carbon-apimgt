@@ -772,7 +772,7 @@ public class RegistryPersistenceImplTestCase {
         String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
         String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
 
-        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        Organization org = new Organization(TENANT_DOMAIN);
         APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
 
         String sourcePath = getSourcePathFromArtifact(artifact);
@@ -795,7 +795,7 @@ public class RegistryPersistenceImplTestCase {
         String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
         String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
 
-        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        Organization org = new Organization(TENANT_DOMAIN);
         APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
 
         String sourcePath = getSourcePathFromArtifact(artifact);
@@ -831,7 +831,7 @@ public class RegistryPersistenceImplTestCase {
         PowerMockito.when(RegistryPersistenceUtil.replaceEmailDomain(anyString())).thenCallRealMethod();
         Mockito.when(manager.getGenericArtifact(apiUUID)).thenReturn(artifact);
 
-        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        Organization org = new Organization(TENANT_DOMAIN);
         APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
 
         String sourcePath = getSourcePathFromArtifact(artifact);
@@ -859,7 +859,7 @@ public class RegistryPersistenceImplTestCase {
         Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(apiPath);
 
         String definition = "{\"swagger\":\"2.0\"}";
-        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        Organization org = new Organization(TENANT_DOMAIN);
         APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
         Mockito.when(registry.resourceExists(expectedDefinitionPath)).thenReturn(true);
         Resource oasResource = new ResourceImpl();
@@ -891,7 +891,7 @@ public class RegistryPersistenceImplTestCase {
         Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(apiPath);
 
         String definition = "{\"asyncapi\":\"2.0.0\"}";
-        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        Organization org = new Organization(TENANT_DOMAIN);
         APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
         Mockito.when(registry.resourceExists(expectedDefinitionPath)).thenReturn(true);
         Resource asyncResource = new ResourceImpl();
@@ -919,7 +919,7 @@ public class RegistryPersistenceImplTestCase {
         Mockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(apiPath);
 
         APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
-        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        Organization org = new Organization(TENANT_DOMAIN);
         PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, apiUUID);
 
         Assert.assertNotNull("Publisher API should not be null for tenant user", publisherAPI);
@@ -927,7 +927,7 @@ public class RegistryPersistenceImplTestCase {
     }
 
     @Test
-    public void testGetPublisherAPIProduct_TenantUser() throws Exception {
+    public void testGetPublisherAPIProduct_SuperTenantUser() throws Exception {
         Registry registry = Mockito.mock(UserRegistry.class);
         Resource resource = new ResourceImpl();
         Mockito.when(registry.get(anyString())).thenReturn(resource);
