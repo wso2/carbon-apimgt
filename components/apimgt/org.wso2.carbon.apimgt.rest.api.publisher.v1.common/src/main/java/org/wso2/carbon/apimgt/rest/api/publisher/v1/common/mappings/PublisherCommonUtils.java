@@ -906,6 +906,10 @@ public class PublisherCommonUtils {
                 Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(newDefinition);
 
                 // Set operation policies from the original API payload.
+                if (log.isDebugEnabled()) {
+                    log.debug("Setting operation policies and hub policies from original API payload for API update: "
+                            + apiToUpdate.getUuid());
+                }
                 Set<URITemplate> uriTemplatesFromPayload = apiToUpdate.getUriTemplates();
                 Map<String, List<OperationPolicy>> operationPoliciesPerURITemplate = new HashMap<>();
                 Map<String, List<OperationPolicy>> operationHubPoliciesPerURITemplate = new HashMap<>();

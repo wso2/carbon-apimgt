@@ -26325,6 +26325,10 @@ public class ApiMgtDAO {
     private String resolvePolicyIdentifier(OperationPolicy policy) {
         String policyIdentifier = policy.getPolicyId();
         if (StringUtils.isBlank(policyIdentifier)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Policy ID is blank for policy: " + policy.getPolicyName()
+                        + ". Using name::version format.");
+            }
             // Platform Gateway external/hub policies can come without a policyId.
             // Use incoming version when available, and only then default the version.
             String policyVersion = StringUtils.defaultIfBlank(policy.getPolicyVersion(), "1.0");
