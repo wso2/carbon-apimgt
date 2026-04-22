@@ -905,13 +905,18 @@ public class PublisherCommonUtils {
             if (!isGraphql) {
                 Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(newDefinition);
 
-                //set operation policies from the original API Payload
+                // Set operation policies from the original API payload.
                 Set<URITemplate> uriTemplatesFromPayload = apiToUpdate.getUriTemplates();
                 Map<String, List<OperationPolicy>> operationPoliciesPerURITemplate = new HashMap<>();
+                Map<String, List<OperationPolicy>> operationHubPoliciesPerURITemplate = new HashMap<>();
                 for (URITemplate uriTemplate : uriTemplatesFromPayload) {
                     if (!uriTemplate.getOperationPolicies().isEmpty()) {
                         String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                         operationPoliciesPerURITemplate.put(key, uriTemplate.getOperationPolicies());
+                    }
+                    if (uriTemplate.getHubPolicies() != null && !uriTemplate.getHubPolicies().isEmpty()) {
+                        String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                        operationHubPoliciesPerURITemplate.put(key, uriTemplate.getHubPolicies());
                     }
                 }
 
@@ -919,6 +924,9 @@ public class PublisherCommonUtils {
                     String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
                     if (operationPoliciesPerURITemplate.containsKey(key)) {
                         uriTemplate.setOperationPolicies(operationPoliciesPerURITemplate.get(key));
+                    }
+                    if (operationHubPoliciesPerURITemplate.containsKey(key)) {
+                        uriTemplate.setHubPolicies(operationHubPoliciesPerURITemplate.get(key));
                     }
                 }
 
