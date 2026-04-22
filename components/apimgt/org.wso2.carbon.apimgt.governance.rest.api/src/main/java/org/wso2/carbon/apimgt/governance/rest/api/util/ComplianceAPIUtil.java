@@ -70,7 +70,7 @@ public class ComplianceAPIUtil {
     private static final Log log = LogFactory.getLog(ComplianceAPIUtil.class);
 
     /**
-     * Regex pattern to extract the matched API UUID from a Gatekeeper violation path.
+     * Regex pattern to extract the matched API UUID from a Generic violation path.
      * Violation path format: "Similarity: XX% | Matched API: Name vVer | API_UUID:uuid"
      */
     private static final Pattern MATCHED_API_UUID_PATTERN =
@@ -644,7 +644,7 @@ public class ComplianceAPIUtil {
      * If the user does not have scope (apim:api_view) or the matched API belongs to a different tenant,
      * the API name and UUID are masked with "[Access Restricted]".
      *
-     * Only applies to Gatekeeper dedup violation paths that contain the API_UUID pattern.
+     * Only applies to Generic dedup violation paths that contain the API_UUID pattern.
      * Non-dedup violation paths are returned unchanged.
      *
      * @param violatedPath  the violation path string

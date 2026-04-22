@@ -545,8 +545,8 @@ public class ComplianceManager {
             for (Ruleset ruleset : rulesets) {
 
                 // Handle GENERIC rulesets (deduplication + lifecycle) - these need special
-                // handling as they don't match artifact types but use GatekeeperValidationEngine.
-                // GatekeeperValidationEngine internally routes lifecycle vs dedup rulesets
+                // handling as they don't match artifact types but use GenericValidationEngine.
+                // GenericValidationEngine internally routes lifecycle vs dedup rulesets
                 // to the appropriate validation path, so both types flow through here.
                 if (RuleCategory.GENERIC.equals(ruleset.getRuleCategory())) {
 
@@ -684,7 +684,7 @@ public class ComplianceManager {
     /**
      * Perform validation for a GENERIC ruleset (e.g., deduplication check).
      * Enriches the API definition content with metadata and delegates to the
-     * GatekeeperValidationEngine via the ValidationEngineFactory.
+     * GenericValidationEngine via the ValidationEngineFactory.
      *
      * @param artifactRefId             The artifact UUID
      * @param ruleset                   The GENERIC ruleset
@@ -718,7 +718,7 @@ public class ComplianceManager {
             return new ArrayList<>();
         }
 
-        // Enrich the content with metadata so GatekeeperValidationEngine knows
+        // Enrich the content with metadata so GenericValidationEngine knows
         // which API UUID and organization to use for the dedup check
         String enrichedContent = "###GATEKEEPER_CONTEXT:{\"apiUuid\":\"" + artifactRefId
                 + "\",\"organization\":\"" + organization + "\"}###\n" + contentToValidate;

@@ -50,7 +50,7 @@ import java.util.Map;
  * This class represents the Spectral Validation Engine for SPECTRAL rulesets.
  * <p>
  * This engine handles validation of OpenAPI/AsyncAPI specifications using Spectral rules.
- * GENERIC (deduplication) rulesets are handled by GatekeeperValidationEngine and are
+ * GENERIC (deduplication) rulesets are handled by GenericValidationEngine and are
  * routed via ValidationEngineFactory.
  */
 @Component(
@@ -71,7 +71,7 @@ public class SpectralValidationEngine implements ValidationEngine {
     @Deprecated
     public void validateRulesetContent(Ruleset ruleset) throws APIMGovernanceException {
         
-        // Check if this is a deduplication ruleset - delegate to Gatekeeper validation
+        // Check if this is a deduplication ruleset - delegate to Generic validation
         if (isDeduplicationRuleset(ruleset)) {
             if (log.isDebugEnabled()) {
                 log.debug("Deduplication ruleset detected, using custom validation for: " + ruleset.getName());
@@ -222,12 +222,12 @@ public class SpectralValidationEngine implements ValidationEngine {
     public List<RuleViolation> validate(String target, Ruleset ruleset, APIMGovernanceOptions governanceOptions)
             throws APIMGovernanceException {
 
-        // DEDUPLICATION rulesets are handled by the Gatekeeper module, not by Spectral.
+        // DEDUPLICATION rulesets are handled by the Generic module, not by Spectral.
         // Return empty list as deduplication checks are done during API creation via event listeners.
         if (isDeduplicationRuleset(ruleset)) {
             if (log.isDebugEnabled()) {
                 log.debug("Skipping Spectral validation for DEDUPLICATION ruleset: " + ruleset.getName() +
-                        ". Deduplication is handled by the Gatekeeper module.");
+                        ". Deduplication is handled by the Generic module.");
             }
             return Collections.emptyList();
         }
@@ -306,7 +306,7 @@ public class SpectralValidationEngine implements ValidationEngine {
      * Checks if a ruleset is a deduplication/GENERIC ruleset.
      * <p>
      * NOTE: This method is DEPRECATED. GENERIC rulesets are now handled by the
-     * GatekeeperValidationEngine via the ValidationEngineFactory. The factory
+     * GenericValidationEngine via the ValidationEngineFactory. The factory
      * routes rulesets to the appropriate engine based on their RuleCategory.
      * <p>
      * This method always returns false to ensure SpectralValidationEngine only
@@ -314,12 +314,12 @@ public class SpectralValidationEngine implements ValidationEngine {
      * it should be routed through the Factory instead.
      *
      * @param ruleset The ruleset to check
-     * @return always false - GENERIC rulesets are handled by GatekeeperValidationEngine
+     * @return always false - GENERIC rulesets are handled by GenericValidationEngine
      * @deprecated Use ValidationEngineFactory.getValidationEngine(ruleset) instead
      */
     @Deprecated
     private boolean isDeduplicationRuleset(Ruleset ruleset) {
-        // GENERIC/Deduplication rulesets are now handled by GatekeeperValidationEngine
+        // GENERIC/Deduplication rulesets are now handled by GenericValidationEngine
         // via the ValidationEngineFactory. This method always returns false.
         // 
         // If you need to check for deduplication rulesets, use:
@@ -329,25 +329,25 @@ public class SpectralValidationEngine implements ValidationEngine {
     }
 
     // NOTE: The following methods are deprecated and kept for backward compatibility.
-    // GENERIC/Deduplication rulesets are now handled by GatekeeperValidationEngine.
+    // GENERIC/Deduplication rulesets are now handled by GenericValidationEngine.
     // These methods are never called since isDeduplicationRuleset() always returns false.
 
     /**
-     * @deprecated Deduplication validation is handled by GatekeeperValidationEngine
+     * @deprecated Deduplication validation is handled by GenericValidationEngine
      */
     @Deprecated
     private void validateDeduplicationRulesetContent(Ruleset ruleset) throws APIMGovernanceException {
-        // This method is deprecated - deduplication validation is now handled by GatekeeperValidationEngine
-        throw new APIMGovernanceException("Deduplication rulesets should be validated by GatekeeperValidationEngine");
+        // This method is deprecated - deduplication validation is now handled by GenericValidationEngine
+        throw new APIMGovernanceException("Deduplication rulesets should be validated by GenericValidationEngine");
     }
 
     /**
-     * @deprecated Deduplication rule extraction is handled by GatekeeperValidationEngine
+     * @deprecated Deduplication rule extraction is handled by GenericValidationEngine
      */
     @Deprecated
     private List<Rule> extractDeduplicationRules(Ruleset ruleset) throws APIMGovernanceException {
-        // This method is deprecated - deduplication rule extraction is now handled by GatekeeperValidationEngine
-        throw new APIMGovernanceException("Deduplication rulesets should be processed by GatekeeperValidationEngine");
+        // This method is deprecated - deduplication rule extraction is now handled by GenericValidationEngine
+        throw new APIMGovernanceException("Deduplication rulesets should be processed by GenericValidationEngine");
     }
 
 }

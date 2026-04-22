@@ -40,7 +40,7 @@ import static org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils.setWorkflowPara
  * <p>For configured state transitions (via the {@code stateList} property):
  * <ul>
  *   <li><b>Deprecate / Retire:</b> Calls {@code DeprecationGuideScheduler.findSuccessors()}
- *       via GatekeeperService to identify structural successor APIs. If enforcement mode is
+ *       via GenericService to identify structural successor APIs. If enforcement mode is
  *       BLOCK and no PUBLISHED successor exists, the transition is rejected immediately with a
  *       {@link WorkflowException}. In WARN mode without a successor, the request proceeds to
  *       admin approval but the violation is recorded in GOV_RULE_VIOLATION and the risk reason
@@ -64,7 +64,7 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
     private static final Log log = LogFactory.getLog(APIStateChangeApprovalWorkflowExecutor.class);
 
     private static final String GATEKEEPER_SERVICE_CLASS =
-            "org.wso2.carbon.apimgt.governance.gatekeeper.service.GatekeeperService";
+            "org.wso2.carbon.apimgt.governance.generic.service.GenericService";
     private static final String GOV_SERVICE_IMPL_CLASS =
             "org.wso2.carbon.apimgt.governance.impl.service.APIMGovernanceServiceImpl";
 
@@ -91,7 +91,7 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
     /**
      * Execute the API state change workflow with governance awareness.
      *
-     * <p>For Deprecate/Retire transitions, calls GatekeeperService.findSuccessorForDeprecation()
+     * <p>For Deprecate/Retire transitions, calls GenericService.findSuccessorForDeprecation()
      * to identify successor APIs. Enforces BLOCK/WARN policy and attaches metadata to the
      * WorkflowDTO for Admin Portal task visibility.
      *
@@ -213,7 +213,7 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
     // ─────────────────────────────────────────────────────────────────────────────
 
     /**
-     * Run governance successor check via GatekeeperService (reflection-based
+     * Run governance successor check via GenericService (reflection-based
      * to maintain OSGi module isolation).
      *
      * <ul>
@@ -235,19 +235,19 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
             ClassLoader bundleCl = this.getClass().getClassLoader();
             Class<?> gsClass = bundleCl.loadClass(GATEKEEPER_SERVICE_CLASS);
             Method getInstance = gsClass.getMethod("getInstance");
-            Object gatekeeperService = getInstance.invoke(null);
+            Object genericService = getInstance.invoke(null);
 
             Method isInitialized = gsClass.getMethod("isInitialized");
-            if (!(boolean) isInitialized.invoke(gatekeeperService)) {
-                log.warn("[GOVERNANCE-WORKFLOW] GatekeeperService not initialized. "
+            if (!(boolean) isInitialized.invoke(genericService)) {
+                log.warn("[GOVERNANCE-WORKFLOW] GenericService not initialized. "
                         + "Skipping governance check for API " + apiUuid);
                 return;
             }
 
-            // Call DeprecationGuideEngine.findSuccessors() via GatekeeperService
+            // Call DeprecationGuideEngine.findSuccessors() via GenericService
             Method findSuccessor = gsClass.getMethod("findSuccessorForDeprecation",
                     String.class, String.class, String.class);
-            Object guideResult = findSuccessor.invoke(gatekeeperService, apiUuid, organization, action);
+            Object guideResult = findSuccessor.invoke(genericService, apiUuid, organization, action);
 
             if (guideResult == null) {
                 log.warn("[GOVERNANCE-WORKFLOW] Null deprecation guide result for API "
@@ -308,7 +308,7 @@ public class APIStateChangeApprovalWorkflowExecutor extends WorkflowExecutor {
         } catch (WorkflowException we) {
             throw we;
         } catch (ClassNotFoundException cnfe) {
-            log.warn("[GOVERNANCE-WORKFLOW] GatekeeperService not available in classpath. "
+            log.warn("[GOVERNANCE-WORKFLOW] GenericService not available in classpath. "
                     + "Skipping governance check for API " + apiUuid
                     + ". Class: " + cnfe.getMessage());
         } catch (Exception e) {

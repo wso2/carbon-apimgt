@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityIn
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.InlineResponse200DTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.IntegratedAPIResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;

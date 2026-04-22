@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Factory class to provide the appropriate ValidationEngine based on Ruleset category.
  * This factory pattern allows different validation engines to handle different rule categories:
- * - GENERIC: Handled by GatekeeperValidationEngine (for deduplication/similarity checks)
+ * - GENERIC: Handled by GenericValidationEngine (for deduplication/similarity checks)
  * - SPECTRAL: Handled by SpectralValidationEngine (for OpenAPI/Spectral rule validation)
  * - AI: Can be extended for AI-based validation engines
  */

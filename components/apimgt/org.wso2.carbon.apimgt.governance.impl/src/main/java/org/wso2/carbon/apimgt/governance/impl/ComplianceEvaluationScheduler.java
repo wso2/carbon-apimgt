@@ -325,8 +325,8 @@ public class ComplianceEvaluationScheduler {
             List<RuleViolation> ruleViolations = new ArrayList<>();
 
             // Handle GENERIC rulesets (deduplication + lifecycle) by performing real-time check
-            // via GatekeeperValidationEngine (writes violations to GOV_RULE_VIOLATION).
-            // GatekeeperValidationEngine internally differentiates between dedup and lifecycle
+            // via GenericValidationEngine (writes violations to GOV_RULE_VIOLATION).
+            // GenericValidationEngine internally differentiates between dedup and lifecycle
             // rulesets, so both types are processed here — lifecycle violations appear in
             // the Compliance/Adherence Summary as "Failed" when an API is deprecated
             // without a successor.
@@ -536,7 +536,7 @@ public class ComplianceEvaluationScheduler {
      * Perform a real-time deduplication check for an artifact through the ValidationEngine.
      * This is called when no pending alerts exist, which happens for APIs created while
      * the dedup policy was disabled. The content is enriched with metadata (apiUuid and
-     * organization) so the GatekeeperValidationEngine can identify which API to check.
+     * organization) so the GenericValidationEngine can identify which API to check.
      *
      * @param artifactRefId             The artifact UUID
      * @param ruleset                   The deduplication ruleset
@@ -592,7 +592,7 @@ public class ComplianceEvaluationScheduler {
                         + "': " + validationEngine.getClass().getName());
             }
 
-            // Enrich the content with metadata so GatekeeperValidationEngine knows
+            // Enrich the content with metadata so GenericValidationEngine knows
             // which API UUID and organization to use for the dedup check
             String enrichedContent = buildEnrichedContent(contentToValidate, artifactRefId, organization);
 
@@ -617,7 +617,7 @@ public class ComplianceEvaluationScheduler {
     }
 
     /**
-     * Builds an enriched content string with metadata prefix for the GatekeeperValidationEngine.
+     * Builds an enriched content string with metadata prefix for the GenericValidationEngine.
      * Format: first line is metadata header, rest is the actual API definition.
      *
      * @param content       The API definition content

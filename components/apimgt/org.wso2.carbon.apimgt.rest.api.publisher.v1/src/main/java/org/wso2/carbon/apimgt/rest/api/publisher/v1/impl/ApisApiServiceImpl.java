@@ -1688,7 +1688,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             // AM_API_SUCCESSOR_MAPPING persistence is dormant. Will be re-enabled
             // once successor selection flow is fully integrated.
             // try {
-            //     org.wso2.carbon.apimgt.governance.gatekeeper.dao.impl.SuccessorMappingDAOImpl
+            //     org.wso2.carbon.apimgt.governance.generic.dao.impl.SuccessorMappingDAOImpl
             //             .getInstance().deleteAllReferences(apiId, organization);
             // } catch (Exception ex) {
             //     log.warn("Failed to clean up successor mappings for deleted API: " + apiId, ex);
@@ -3744,7 +3744,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             // APIStateChangeGovernanceWorkflowExecutor (execute() + complete()).
             // The executor runs successor checks in runGovernanceCheck() and
             // triggers compliance evaluation in triggerComplianceEvaluation()
-            // after admin approval. Direct GatekeeperService calls removed to
+            // after admin approval. Direct GenericService calls removed to
             // avoid NoClassDefFoundError from webapp classloader context.
 
             //returns the current lifecycle state
@@ -3769,7 +3769,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Get Deprecation / Retirement Guide for an API — returns structural successor
-     * recommendation using MinHash/LSH similarity from the Gatekeeper module.
+     * recommendation using MinHash/LSH similarity from the Generic module.
      *
      * Supports both "Deprecate" and "Retire" lifecycle actions via the ?action= query param.
      *
@@ -3796,17 +3796,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                 log.debug("[DEPRECATION-GUIDE] Could not read action query param, defaulting to Deprecate");
             }
 
-            // Try to get GatekeeperService via reflection (loaded by OSGi, not webapp classloader)
+            // Try to get GenericService via reflection (loaded by OSGi, not webapp classloader)
             try {
                 Class<?> gsClass = Class.forName(
-                        "org.wso2.carbon.apimgt.governance.gatekeeper.service.GatekeeperService");
+                        "org.wso2.carbon.apimgt.governance.generic.service.GenericService");
                 java.lang.reflect.Method getInstanceMethod = gsClass.getMethod("getInstance");
-                Object gatekeeperService = getInstanceMethod.invoke(null);
+                Object genericService = getInstanceMethod.invoke(null);
 
                 java.lang.reflect.Method isInitMethod = gsClass.getMethod("isInitialized");
-                if (gatekeeperService == null ||
-                        !((Boolean) isInitMethod.invoke(gatekeeperService))) {
-                    log.warn("GatekeeperService not available for deprecation guide. " +
+                if (genericService == null ||
+                        !((Boolean) isInitMethod.invoke(genericService))) {
+                    log.warn("GenericService not available for deprecation guide. " +
                             "Returning no-successor result.");
                     java.util.Map<String, Object> fallback = new java.util.LinkedHashMap<>();
                     fallback.put("apiUuid", apiId);
@@ -3815,14 +3815,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                     fallback.put("migrationRisk", true);
                     fallback.put("lifecycleAction", lifecycleAction);
                     fallback.put("enforcementMode", "warn");
-                    fallback.put("message", "Deprecation Guide unavailable — GatekeeperService not initialized.");
+                    fallback.put("message", "Deprecation Guide unavailable — GenericService not initialized.");
                     return Response.ok().entity(fallback).build();
                 }
 
                 java.lang.reflect.Method findSuccessorMethod = gsClass.getMethod(
                         "findSuccessorForDeprecation", String.class, String.class, String.class);
                 Object guideResult = findSuccessorMethod.invoke(
-                        gatekeeperService, apiId, organization, lifecycleAction);
+                        genericService, apiId, organization, lifecycleAction);
 
                 // Convert to a JSON-friendly map for the response
                 Class<?> grClass = guideResult.getClass();
