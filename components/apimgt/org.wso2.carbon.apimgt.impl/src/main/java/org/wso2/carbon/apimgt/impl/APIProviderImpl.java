@@ -2171,7 +2171,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                              List<OperationPolicy> existingPoliciesList,
                                                              String tenantDomain) throws APIManagementException {
         List<OperationPolicy> validatedPolicies = new ArrayList<>();
+        if (apiPoliciesList == null || apiPoliciesList.isEmpty()) {
+            return validatedPolicies;
+        }
         for (OperationPolicy policy : apiPoliciesList) {
+            if (policy == null) {
+                continue;
+            }
             String policyId = policy.getPolicyId();
             OperationPolicyData policyData = null;
             if (policyId != null) {
