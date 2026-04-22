@@ -27,23 +27,37 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.APIResource;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfiguration;
+import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -63,7 +77,8 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.API_ENDPOINT_CONFIG_PROTO
 import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils.addDocumentationToAPI;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({RestApiCommonUtil.class, WorkflowExecutorFactory.class, APIUtil.class})
+@PrepareForTest({RestApiCommonUtil.class, WorkflowExecutorFactory.class, APIUtil.class, APIMappingUtil.class,
+        OASParserUtil.class, ServiceReferenceHolder.class})
 public class PublisherCommonUtilsTest {
 
     private static final String PROVIDER = "admin";
@@ -653,6 +668,115 @@ public class PublisherCommonUtilsTest {
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Document name cannot contain illegal characters  "));
         }
+    }
+
+    @Test
+    public void testPrepareForUpdateApiPreservesOperationHubPolicies() throws Exception {
+
+        APIProvider apiProvider = Mockito.mock(APIProvider.class);
+        APIIdentifier apiIdentifier = new APIIdentifier(PROVIDER, "SampleAPI", "1.0.0", UUID);
+        API originalAPI = new API(apiIdentifier);
+        originalAPI.setUUID(UUID);
+        originalAPI.setOrganization(ORGANIZATION);
+        originalAPI.setType(APIConstants.APITransportType.HTTP.toString());
+        originalAPI.setSubtype("default");
+        originalAPI.setStatus(APIConstants.CREATED);
+        originalAPI.setEndpointConfig("{}");
+        originalAPI.setContextTemplate("/sample");
+
+        APIDTO apiDtoToUpdate = Mockito.mock(APIDTO.class);
+        AdvertiseInfoDTO advertiseInfoDTO = Mockito.mock(AdvertiseInfoDTO.class);
+        List<APIOperationsDTO> operations = new ArrayList<>();
+        operations.add(Mockito.mock(APIOperationsDTO.class));
+        List<String> policies = new ArrayList<>();
+        List<OrganizationPoliciesDTO> orgPolicies = new ArrayList<>();
+
+        Mockito.when(apiDtoToUpdate.getEndpointConfig()).thenReturn(new HashMap<>());
+        Mockito.when(apiDtoToUpdate.getType()).thenReturn(APIDTO.TypeEnum.HTTP);
+        Mockito.when(apiDtoToUpdate.getName()).thenReturn("SampleAPI");
+        Mockito.when(apiDtoToUpdate.getVisibility()).thenReturn(APIDTO.VisibilityEnum.PUBLIC);
+        Mockito.when(apiDtoToUpdate.getVisibleRoles()).thenReturn(new ArrayList<>());
+        Mockito.when(apiDtoToUpdate.getAdditionalProperties()).thenReturn(null);
+        Mockito.when(apiDtoToUpdate.getOperations()).thenReturn(operations);
+        Mockito.when(apiDtoToUpdate.getSecurityScheme()).thenReturn(new ArrayList<>());
+        Mockito.when(apiDtoToUpdate.getPolicies()).thenReturn(policies);
+        Mockito.when(apiDtoToUpdate.getOrganizationPolicies()).thenReturn(orgPolicies);
+        Mockito.when(apiDtoToUpdate.getAdvertiseInfo()).thenReturn(advertiseInfoDTO);
+        Mockito.when(advertiseInfoDTO.isAdvertised()).thenReturn(false);
+        Mockito.when(apiDtoToUpdate.getDisplayName()).thenReturn("SampleAPI");
+        Mockito.when(apiDtoToUpdate.getVersion()).thenReturn("1.0.0");
+        Mockito.when(apiDtoToUpdate.getGatewayType()).thenReturn(null);
+        Mockito.when(apiDtoToUpdate.getWsdlUrl()).thenReturn(null);
+
+        API mappedApi = new API(apiIdentifier);
+        mappedApi.setUUID(UUID);
+        mappedApi.setOrganization(ORGANIZATION);
+        mappedApi.setType(APIConstants.APITransportType.HTTP.toString());
+        mappedApi.setApiCategories(new ArrayList<APICategory>());
+        mappedApi.setUriTemplates(new HashSet<URITemplate>());
+
+        URITemplate payloadTemplate = new URITemplate();
+        payloadTemplate.setHTTPVerb("GET");
+        payloadTemplate.setUriTemplate("/pets");
+        OperationPolicy hubPolicy = new OperationPolicy();
+        hubPolicy.setPolicyName("jwt-auth");
+        hubPolicy.setPolicyVersion("v1");
+        payloadTemplate.setHubPolicies(Arrays.asList(hubPolicy));
+        mappedApi.getUriTemplates().add(payloadTemplate);
+
+        URITemplate generatedTemplate = new URITemplate();
+        generatedTemplate.setHTTPVerb("GET");
+        generatedTemplate.setUriTemplate("/pets");
+        Set<URITemplate> regeneratedTemplates = new HashSet<>();
+        regeneratedTemplates.add(generatedTemplate);
+
+        APIDefinition apiDefinition = Mockito.mock(APIDefinition.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        APIMDependencyConfigurationService dependencyConfigurationService =
+                Mockito.mock(APIMDependencyConfigurationService.class);
+        APIMDependencyConfiguration dependencyConfigurations = Mockito.mock(APIMDependencyConfiguration.class);
+
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.mockStatic(APIMappingUtil.class);
+        PowerMockito.mockStatic(OASParserUtil.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(ORGANIZATION);
+        PowerMockito.when(APIUtil.isOnPremResolver()).thenReturn(false);
+        PowerMockito.when(APIUtil.isSubscriptionValidationDisablingAllowed(Mockito.anyString())).thenReturn(false);
+        PowerMockito.doNothing().when(APIUtil.class, "validateAPIEndpointConfig", Mockito.any(), Mockito.anyString(),
+                Mockito.anyString());
+        PowerMockito.when(APIUtil.isOrganizationAccessControlEnabled()).thenReturn(false);
+        PowerMockito.when(APIUtil.validateAPICategories(Mockito.anyList(), Mockito.anyString())).thenReturn(true);
+        PowerMockito.when(APIMappingUtil.fromDTOtoAPI(Mockito.eq(apiDtoToUpdate), Mockito.anyString()))
+                .thenReturn(mappedApi);
+        PowerMockito.when(OASParserUtil.getOASParser(Mockito.anyString())).thenReturn(apiDefinition);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+
+        Mockito.when(serviceReferenceHolder.getAPIMDependencyConfigurationService())
+                .thenReturn(dependencyConfigurationService);
+        Mockito.when(dependencyConfigurationService.getAPIMDependencyConfigurations()).thenReturn(dependencyConfigurations);
+        Mockito.when(dependencyConfigurations.getOasParserOptions()).thenReturn(new HashMap<>());
+
+        Mockito.when(apiProvider.getTiers()).thenReturn(new HashSet<Tier>());
+        Mockito.when(apiProvider.getOpenAPIDefinition(UUID, ORGANIZATION)).thenReturn("openapi: 3.0.0");
+        Mockito.when(apiDefinition.generateAPIDefinition(Mockito.any(), Mockito.anyString(), Mockito.any()))
+                .thenReturn("openapi: 3.0.0");
+        Mockito.when(apiDefinition.getURITemplates(Mockito.anyString())).thenReturn(regeneratedTemplates);
+        Mockito.when(apiProvider.getMCPServersUsedByAPI(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(new ArrayList<API>());
+        Mockito.when(apiProvider.getAPIResourcesFromAPIProductWithAPIResourceScope(Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(new ArrayList<APIResource>());
+
+        API updatedApi = Whitebox.invokeMethod(PublisherCommonUtils.class, "prepareForUpdateApi", originalAPI,
+                apiDtoToUpdate, apiProvider, new String[] {"apim:api_update"});
+
+        URITemplate updatedTemplate = updatedApi.getUriTemplates().iterator().next();
+        Assert.assertNotNull(updatedTemplate.getHubPolicies());
+        Assert.assertEquals(1, updatedTemplate.getHubPolicies().size());
+        Assert.assertEquals("jwt-auth", updatedTemplate.getHubPolicies().get(0).getPolicyName());
     }
 
 }
