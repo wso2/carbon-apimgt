@@ -9218,9 +9218,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String policyMappingUUID = UUID.randomUUID().toString();
 
         // Validate and process the policies before adding them to DB
-        validateAndProcessPolicies(gatewayGlobalPoliciesList, null, null, orgId);
+        List<OperationPolicy> validatedPolicies = validateAndProcessPolicies(gatewayGlobalPoliciesList, null, null, orgId);
+        if (validatedPolicies == null || validatedPolicies.isEmpty()) {
+            throw new APIManagementException("Cannot apply gateway global policies. Policy list is empty after " +
+                    "validation.");
+        }
 
-        return apiMgtDAO.addGatewayGlobalPolicy(gatewayGlobalPoliciesList, description, name, orgId, policyMappingUUID);
+        return apiMgtDAO.addGatewayGlobalPolicy(validatedPolicies, description, name, orgId, policyMappingUUID);
     }
 
     /**
@@ -9358,14 +9362,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // Validate and process the policies before deleting the existing policies
         // The secret policy attributes will be encrypted during this
-        validateAndProcessPolicies(gatewayGlobalPolicyList, null, policyList, orgId);
+        List<OperationPolicy> validatedPolicies = validateAndProcessPolicies(gatewayGlobalPolicyList, null, policyList,
+                orgId);
+        if (validatedPolicies == null || validatedPolicies.isEmpty()) {
+            throw new APIManagementException("Cannot update gateway global policies. Policy list is empty after " +
+                    "validation.");
+        }
 
         // Keep the existing deployments and update the policy mapping.
         Set<String> activeGatewayLabels = apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(policyMappingId,
                 orgId);
         apiMgtDAO.deleteGatewayPolicyMappingByPolicyId(policyMappingId, false);
 
-        String mappingID = apiMgtDAO.updateGatewayGlobalPolicy(gatewayGlobalPolicyList, description, name, orgId, policyMappingId);
+        String mappingID = apiMgtDAO.updateGatewayGlobalPolicy(validatedPolicies, description, name, orgId,
+                policyMappingId);
         // Redeploy the updated policy mappings to the gateways.
         if (activeGatewayLabels.size() > 0) {
             APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
