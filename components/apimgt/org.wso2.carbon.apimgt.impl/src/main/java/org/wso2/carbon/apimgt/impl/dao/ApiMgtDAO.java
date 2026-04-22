@@ -24836,9 +24836,14 @@ public class ApiMgtDAO {
         String name = resolvedExternalPolicyId;
         String version = "1.0";
         int colonIdx = resolvedExternalPolicyId.indexOf("::");
-        if (colonIdx > 0) {
+        if (colonIdx >= 0) {
             name = resolvedExternalPolicyId.substring(0, colonIdx);
             version = StringUtils.defaultIfBlank(resolvedExternalPolicyId.substring(colonIdx + 2), "1.0");
+        }
+        name = StringUtils.trimToEmpty(name);
+        if (StringUtils.isBlank(name) || "null".equalsIgnoreCase(name)) {
+            throw new APIManagementException("External policy name cannot be empty when creating placeholder " +
+                    "policy data.");
         }
         OperationPolicySpecification spec = new OperationPolicySpecification();
         spec.setName(name);
@@ -25948,6 +25953,9 @@ public class ApiMgtDAO {
                 // Handle operation-level Policy Hub policies (direction 'hub'; no direction in UI, flow inside policy)
                 if (template.getHubPolicies() != null) {
                     for (OperationPolicy policy : template.getHubPolicies()) {
+                        if (policy == null) {
+                            continue;
+                        }
                         handlePolicyCloning(policy, apiUUID, tenantDomain, connection, updatedPoliciesMap,
                                 usedClonedPolicies, toBeClonedPolicyDetails);
                         Gson gson = new Gson();
@@ -26008,6 +26016,9 @@ public class ApiMgtDAO {
             // Handle API-level Policy Hub policies (direction 'hub'; no direction in UI, flow inside policy)
             if (apiHubPolicies != null && !apiHubPolicies.isEmpty()) {
                 for (OperationPolicy policy : apiHubPolicies) {
+                    if (policy == null) {
+                        continue;
+                    }
                     handlePolicyCloning(policy, apiUUID, tenantDomain, connection, updatedPoliciesMap,
                             usedClonedPolicies, toBeClonedPolicyDetails);
                     Gson gson = new Gson();
@@ -26324,17 +26335,21 @@ public class ApiMgtDAO {
         }
     }
 
-    private String resolvePolicyIdentifier(OperationPolicy policy) {
+    private String resolvePolicyIdentifier(OperationPolicy policy) throws APIManagementException {
         String policyIdentifier = policy.getPolicyId();
         if (StringUtils.isBlank(policyIdentifier)) {
+            String policyName = StringUtils.trimToEmpty(policy.getPolicyName());
+            if (StringUtils.isBlank(policyName) || "null".equalsIgnoreCase(policyName)) {
+                throw new APIManagementException("Operation policy name cannot be empty when policyId is missing.");
+            }
             if (log.isDebugEnabled()) {
-                log.debug("Policy ID is blank for policy: " + policy.getPolicyName()
+                log.debug("Policy ID is blank for policy: " + policyName
                         + ". Using name::version format.");
             }
             // Platform Gateway external/hub policies can come without a policyId.
             // Use incoming version when available, and only then default the version.
             String policyVersion = StringUtils.defaultIfBlank(policy.getPolicyVersion(), "1.0");
-            policyIdentifier = policy.getPolicyName() + "::" + policyVersion;
+            policyIdentifier = policyName + "::" + StringUtils.trim(policyVersion);
         }
         return policyIdentifier;
     }
@@ -26582,6 +26597,9 @@ public class ApiMgtDAO {
                 // Operation-level Policy Hub policies
                 if (urlMapping.getHubPolicies() != null) {
                     for (OperationPolicy policy : urlMapping.getHubPolicies()) {
+                        if (policy == null) {
+                            continue;
+                        }
                         handlePolicyCloningWhenRevisioning(policy, apiRevision.getApiUUID(),
                                 apiRevision.getRevisionUUID(), clonedPolicyMap, toBeClonedPolicyDetails);
                         Gson gson = new Gson();
@@ -26638,6 +26656,9 @@ public class ApiMgtDAO {
             // API-level Policy Hub policies
             List<OperationPolicy> apiHubPolicies = getAPIHubPolicyMapping(apiRevision.getApiUUID(), null, connection);
             for (OperationPolicy policy : apiHubPolicies) {
+                if (policy == null) {
+                    continue;
+                }
                 handlePolicyCloningWhenRevisioning(policy, apiRevision.getApiUUID(), apiRevision.getRevisionUUID(),
                         clonedPolicyMap, toBeClonedPolicyDetails);
                 Gson gson = new Gson();

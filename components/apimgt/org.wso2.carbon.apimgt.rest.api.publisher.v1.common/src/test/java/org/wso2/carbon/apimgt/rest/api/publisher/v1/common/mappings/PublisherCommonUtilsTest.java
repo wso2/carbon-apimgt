@@ -28,24 +28,24 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.APIResource;
-import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIResource;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMDependencyConfiguration;
 import org.wso2.carbon.apimgt.impl.APIMDependencyConfigurationService;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.OASParserUtil;
@@ -756,7 +756,8 @@ public class PublisherCommonUtilsTest {
 
         Mockito.when(serviceReferenceHolder.getAPIMDependencyConfigurationService())
                 .thenReturn(dependencyConfigurationService);
-        Mockito.when(dependencyConfigurationService.getAPIMDependencyConfigurations()).thenReturn(dependencyConfigurations);
+        Mockito.when(dependencyConfigurationService.getAPIMDependencyConfigurations())
+                .thenReturn(dependencyConfigurations);
         Mockito.when(dependencyConfigurations.getOasParserOptions()).thenReturn(new HashMap<>());
 
         Mockito.when(apiProvider.getTiers()).thenReturn(new HashSet<Tier>());
@@ -766,8 +767,9 @@ public class PublisherCommonUtilsTest {
         Mockito.when(apiDefinition.getURITemplates(Mockito.anyString())).thenReturn(regeneratedTemplates);
         Mockito.when(apiProvider.getMCPServersUsedByAPI(Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(new ArrayList<API>());
-        Mockito.when(apiProvider.getAPIResourcesFromAPIProductWithAPIResourceScope(Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+        Mockito.when(apiProvider.getAPIResourcesFromAPIProductWithAPIResourceScope(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString()))
                 .thenReturn(new ArrayList<APIResource>());
 
         API updatedApi = Whitebox.invokeMethod(PublisherCommonUtils.class, "prepareForUpdateApi", originalAPI,

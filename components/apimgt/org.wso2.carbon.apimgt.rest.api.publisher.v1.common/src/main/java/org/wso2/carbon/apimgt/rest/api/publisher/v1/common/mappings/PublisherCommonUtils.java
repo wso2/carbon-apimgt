@@ -919,8 +919,16 @@ public class PublisherCommonUtils {
                         operationPoliciesPerURITemplate.put(key, uriTemplate.getOperationPolicies());
                     }
                     if (uriTemplate.getHubPolicies() != null && !uriTemplate.getHubPolicies().isEmpty()) {
-                        String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
-                        operationHubPoliciesPerURITemplate.put(key, uriTemplate.getHubPolicies());
+                        List<OperationPolicy> filteredHubPolicies = new ArrayList<>();
+                        for (OperationPolicy hubPolicy : uriTemplate.getHubPolicies()) {
+                            if (hubPolicy != null) {
+                                filteredHubPolicies.add(hubPolicy);
+                            }
+                        }
+                        if (!filteredHubPolicies.isEmpty()) {
+                            String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                            operationHubPoliciesPerURITemplate.put(key, filteredHubPolicies);
+                        }
                     }
                 }
 
