@@ -24826,12 +24826,17 @@ public class ApiMgtDAO {
     private OperationPolicyData createPlaceholderPolicyDataForExternalPolicy(String commonPolicyId,
                                                                               String clonedPolicyId,
                                                                               String organization) {
-        String name = commonPolicyId;
+        String resolvedExternalPolicyId = commonPolicyId;
+        if (StringUtils.isBlank(resolvedExternalPolicyId)) {
+            throw new IllegalArgumentException("External policy identifier cannot be empty when creating placeholder " +
+                    "policy data.");
+        }
+        String name = resolvedExternalPolicyId;
         String version = "1.0";
-        int colonIdx = commonPolicyId.indexOf("::");
+        int colonIdx = resolvedExternalPolicyId.indexOf("::");
         if (colonIdx > 0) {
-            name = commonPolicyId.substring(0, colonIdx);
-            version = commonPolicyId.substring(colonIdx + 2);
+            name = resolvedExternalPolicyId.substring(0, colonIdx);
+            version = StringUtils.defaultIfBlank(resolvedExternalPolicyId.substring(colonIdx + 2), "1.0");
         }
         OperationPolicySpecification spec = new OperationPolicySpecification();
         spec.setName(name);
@@ -25919,7 +25924,7 @@ public class ApiMgtDAO {
                                     + apiUUID + " to URL mapping Id " + template.getId());
                         }
 
-                        operationPolicyMappingStatement.setString(1, updatedPoliciesMap.get(policy.getPolicyId()));
+                        operationPolicyMappingStatement.setString(1, updatedPoliciesMap.get(resolvePolicyIdentifier(policy)));
                         operationPolicyMappingStatement.setString(2, policy.getDirection());
 
                         try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
@@ -25949,7 +25954,7 @@ public class ApiMgtDAO {
                             log.debug("Adding operation hub policy " + policy.getPolicyName() + " for API "
                                     + apiUUID + " to URL mapping Id " + template.getId());
                         }
-                        operationPolicyMappingStatement.setString(1, updatedPoliciesMap.get(policy.getPolicyId()));
+                        operationPolicyMappingStatement.setString(1, updatedPoliciesMap.get(resolvePolicyIdentifier(policy)));
                         operationPolicyMappingStatement.setString(2, APIConstants.OPERATION_SEQUENCE_TYPE_HUB);
                         try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
                             operationPolicyMappingStatement.setBinaryStream(3, paramInputStream, paramJSON.length());
@@ -25981,7 +25986,7 @@ public class ApiMgtDAO {
 
                     apiLevelPolicyMappingStatement.setString(1, apiUUID);
                     apiLevelPolicyMappingStatement.setString(2, null);
-                    apiLevelPolicyMappingStatement.setString(3, updatedPoliciesMap.get(policy.getPolicyId()));
+                    apiLevelPolicyMappingStatement.setString(3, updatedPoliciesMap.get(resolvePolicyIdentifier(policy)));
                     apiLevelPolicyMappingStatement.setString(4, policy.getDirection());
 
                     try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
@@ -26010,7 +26015,7 @@ public class ApiMgtDAO {
                     }
                     apiLevelPolicyMappingStatement.setString(1, apiUUID);
                     apiLevelPolicyMappingStatement.setString(2, null);
-                    apiLevelPolicyMappingStatement.setString(3, updatedPoliciesMap.get(policy.getPolicyId()));
+                    apiLevelPolicyMappingStatement.setString(3, updatedPoliciesMap.get(resolvePolicyIdentifier(policy)));
                     apiLevelPolicyMappingStatement.setString(4, APIConstants.OPERATION_SEQUENCE_TYPE_HUB);
                     try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
                         apiLevelPolicyMappingStatement.setBinaryStream(5, paramInputStream, paramJSON.length());
@@ -26254,7 +26259,7 @@ public class ApiMgtDAO {
 
                 statement.setString(1, apiUUID);
                 statement.setString(2, revisionUUID);
-                statement.setString(3, updatedPoliciesMap.get(policy.getPolicyId()));
+                statement.setString(3, updatedPoliciesMap.get(resolvePolicyIdentifier(policy)));
                 statement.setString(4, policy.getDirection());
 
                 try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
@@ -26283,12 +26288,13 @@ public class ApiMgtDAO {
                                      Map<String, String> updatedPoliciesMap, Set<String> usedClonedPolicies,
                                      List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails) throws SQLException, APIManagementException {
 
-        if (!updatedPoliciesMap.keySet().contains(policy.getPolicyId())) {
+        String policyIdentifier = resolvePolicyIdentifier(policy);
+        if (!updatedPoliciesMap.keySet().contains(policyIdentifier)) {
             //Check whether API specific policies available
             OperationPolicyData existingPolicy =
-                    getAPISpecificOperationPolicyByPolicyID(connection, policy.getPolicyId(), apiUUID, tenantDomain,
+                    getAPISpecificOperationPolicyByPolicyID(connection, policyIdentifier, apiUUID, tenantDomain,
                             false);
-            String clonedPolicyId = policy.getPolicyId();
+            String clonedPolicyId = policyIdentifier;
             if (existingPolicy != null) {
                 if (existingPolicy.isClonedPolicy()) {
                     usedClonedPolicies.add(clonedPolicyId);
@@ -26297,12 +26303,12 @@ public class ApiMgtDAO {
                 // Even though the policy ID attached is not in the API specific policy list,
                 // it can be a common policy and we need to verify that it has not been previously cloned
                 // for the API before cloning again.
-                clonedPolicyId = getClonedPolicyIdForCommonPolicyId(connection, policy.getPolicyId(), apiUUID);
+                clonedPolicyId = getClonedPolicyIdForCommonPolicyId(connection, policyIdentifier, apiUUID);
                 if (clonedPolicyId == null) {
                     clonedPolicyId = UUID.randomUUID().toString();
                     ClonePolicyMetadataDTO toBeClonedSinglePolicyData = new ClonePolicyMetadataDTO();
                     toBeClonedSinglePolicyData.setClonedPolicyUUID(clonedPolicyId);
-                    toBeClonedSinglePolicyData.setCurrentPolicyUUID(policy.getPolicyId());
+                    toBeClonedSinglePolicyData.setCurrentPolicyUUID(policyIdentifier);
                     toBeClonedPolicyDetails.add(toBeClonedSinglePolicyData);
                 }
                 usedClonedPolicies.add(clonedPolicyId);
@@ -26312,8 +26318,19 @@ public class ApiMgtDAO {
             // Updated policies map will record the updated policy ID for the used policy ID.
             // If the policy has been cloned to the API specific policy list, we need to use the
             // updated policy Id.
-            updatedPoliciesMap.put(policy.getPolicyId(), clonedPolicyId);
+            updatedPoliciesMap.put(policyIdentifier, clonedPolicyId);
         }
+    }
+
+    private String resolvePolicyIdentifier(OperationPolicy policy) {
+        String policyIdentifier = policy.getPolicyId();
+        if (StringUtils.isBlank(policyIdentifier)) {
+            // Platform Gateway external/hub policies can come without a policyId.
+            // Use incoming version when available, and only then default the version.
+            String policyVersion = StringUtils.defaultIfBlank(policy.getPolicyVersion(), "1.0");
+            policyIdentifier = policy.getPolicyName() + "::" + policyVersion;
+        }
+        return policyIdentifier;
     }
 
     /**
