@@ -3255,10 +3255,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (subscribedIdentifier == null) {
             return false;
         }
-        if (requestedIdentifier.getClass().equals(subscribedIdentifier.getClass())
-                && requestedIdentifier.equals(subscribedIdentifier)) {
-            return true;
-        }
         return StringUtils.equals(requestedIdentifier.getName(), subscribedIdentifier.getName())
                 && StringUtils.equals(requestedIdentifier.getVersion(), subscribedIdentifier.getVersion())
                 && StringUtils.equals(APIUtil.replaceEmailDomainBack(requestedIdentifier.getProviderName()),
