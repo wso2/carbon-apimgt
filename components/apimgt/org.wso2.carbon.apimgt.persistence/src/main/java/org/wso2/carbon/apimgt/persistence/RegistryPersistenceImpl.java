@@ -1132,8 +1132,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     private PublisherAPISearchResult filterByCaseSensitivePublisherRoles(PublisherAPISearchResult result,
             Registry registry, String[] userRoles) {
+        List<PublisherAPIInfo> apiInfoList = result.getPublisherAPIInfoList();
+        if (apiInfoList == null) {
+            return result;
+        }
         List<PublisherAPIInfo> filtered = new ArrayList<>();
-        for (PublisherAPIInfo apiInfo : result.getPublisherAPIInfoList()) {
+        for (PublisherAPIInfo apiInfo : apiInfoList) {
             try {
                 String artifactPath = GovernanceUtils.getArtifactPath(registry, apiInfo.getId());
                 Resource apiResource = registry.get(artifactPath);
@@ -1148,13 +1152,20 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     continue;
                 }
                 if (userRoles != null) {
+                    boolean hasMatchingRole = false;
                     for (String acRole : displayRoles.split(",")) {
                         for (String userRole : userRoles) {
                             if (userRole.equals(acRole.trim())) {
-                                filtered.add(apiInfo);
+                                hasMatchingRole = true;
                                 break;
                             }
                         }
+                        if (hasMatchingRole) {
+                            break;
+                        }
+                    }
+                    if (hasMatchingRole) {
+                        filtered.add(apiInfo);
                     }
                 }
             } catch (RegistryException e) {
