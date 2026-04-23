@@ -275,6 +275,12 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.LC_RETIRE_LC_STATE;
 class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private static final Log log = LogFactory.getLog(APIProviderImpl.class);
+    /**
+     * HTTP header field-name token allowlist (RFC 9110 {@code token}); matches Policy Hub patterns for
+     * api-key-auth {@code key} (header mode) and jwt-auth {@code headerName}.
+     */
+    private static final Pattern VALID_HTTP_HEADER_NAME_PATTERN =
+            Pattern.compile("^[!#$%&'*+.^_`|~0-9A-Za-z-]+$");
     private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX = "endpointConfig:";
     private ServiceCatalogDAO serviceCatalogDAO = ServiceCatalogDAO.getInstance();
 
@@ -2319,7 +2325,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * For Platform Gateway APIs, derives apiSecurity from hub policies at both API-level and operation-level.
      * This ensures DevPortal functionalities work correctly by populating apiSecurity from the
      * attached authentication policies.
-     * Maps: api-key-auth → api_key, basic-auth → basic_auth, jwt-auth → oauth2
+     * Maps: api-key-auth → api_key, basic-auth → basic_auth, jwt-auth → oauth2.
+     * For api-key-auth, the policy parameter {@code key} (when {@code in} is header) is copied to
+     * {@link API#getApiKeyHeader()} so Dev Portal try-out matches the hub policy configuration.
+     * For jwt-auth, the policy parameter {@code headerName} is copied to {@link API#getAuthorizationHeader()}
+     * (same semantics as Publisher Runtime “Authorization Header”).
      *
      * @param api The API object to process
      */
@@ -2330,8 +2340,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         Set<String> securitySchemes = new LinkedHashSet<>();
-        boolean hasApiKeyPolicy = false;
+        boolean hasAnyApiKeyPolicy = false;
+        boolean hasHeaderApiKeyPolicy = false;
         boolean hasJwtPolicy = false;
+        String apiKeyHeaderFromHubPolicy = null;
+        String authorizationHeaderFromJwtPolicy = null;
 
         // Collect from API-level hub policies
         List<OperationPolicy> apiLevelPolicies = api.getHubPolicies();
@@ -2343,9 +2356,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String policyName = policy.getPolicyName();
                 collectSecuritySchemeFromPolicy(policyName, securitySchemes);
                 if ("api-key-auth".equalsIgnoreCase(policyName)) {
-                    hasApiKeyPolicy = true;
+                    hasAnyApiKeyPolicy = true;
+                    if (isApiKeyHeaderPolicy(policy)) {
+                        hasHeaderApiKeyPolicy = true;
+                    }
+                    if (hasHeaderApiKeyPolicy && apiKeyHeaderFromHubPolicy == null) {
+                        apiKeyHeaderFromHubPolicy = extractApiKeyHeaderNameFromHubPolicy(policy);
+                    }
                 } else if ("jwt-auth".equalsIgnoreCase(policyName)) {
                     hasJwtPolicy = true;
+                    if (authorizationHeaderFromJwtPolicy == null) {
+                        authorizationHeaderFromJwtPolicy = extractJwtAuthorizationHeaderFromHubPolicy(policy);
+                    }
                 }
             }
         }
@@ -2370,9 +2392,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         String policyName = policy.getPolicyName();
                         collectSecuritySchemeFromPolicy(policyName, securitySchemes);
                         if ("api-key-auth".equalsIgnoreCase(policyName)) {
-                            hasApiKeyPolicy = true;
+                            hasAnyApiKeyPolicy = true;
+                            if (isApiKeyHeaderPolicy(policy)) {
+                                hasHeaderApiKeyPolicy = true;
+                            }
+                            if (hasHeaderApiKeyPolicy && apiKeyHeaderFromHubPolicy == null) {
+                                apiKeyHeaderFromHubPolicy = extractApiKeyHeaderNameFromHubPolicy(policy);
+                            }
                         } else if ("jwt-auth".equalsIgnoreCase(policyName)) {
                             hasJwtPolicy = true;
+                            if (authorizationHeaderFromJwtPolicy == null) {
+                                authorizationHeaderFromJwtPolicy = extractJwtAuthorizationHeaderFromHubPolicy(policy);
+                            }
                         }
                     }
                 }
@@ -2383,10 +2414,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (!securitySchemes.isEmpty()) {
             api.setApiSecurity(String.join(",", securitySchemes));
 
-            if (hasApiKeyPolicy && api.getApiKeyHeader() == null) {
+            if (hasHeaderApiKeyPolicy) {
+                if (apiKeyHeaderFromHubPolicy != null) {
+                    api.setApiKeyHeader(apiKeyHeaderFromHubPolicy);
+                } else {
+                    api.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+                }
+            } else if (hasAnyApiKeyPolicy) {
+                // api-key-auth exists only in query mode; no API key header should be advertised.
+                api.setApiKeyHeader(null);
+            } else {
                 api.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
             }
-            if (hasJwtPolicy && api.getAuthorizationHeader() == null) {
+            if (hasJwtPolicy && authorizationHeaderFromJwtPolicy != null) {
+                api.setAuthorizationHeader(authorizationHeaderFromJwtPolicy);
+            } else {
                 api.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
             }
         } else {
@@ -2410,6 +2452,66 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else if ("jwt-auth".equalsIgnoreCase(policyName)) {
             securitySchemes.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
         }
+    }
+
+    /**
+     * Returns the API key header name from an api-key-auth hub policy ({@code key} when {@code in} is header).
+     */
+    private String extractApiKeyHeaderNameFromHubPolicy(OperationPolicy policy) {
+        if (!isApiKeyHeaderPolicy(policy)) {
+            return null;
+        }
+        Map<String, Object> params = policy.getParameters();
+        if (MapUtils.isEmpty(params)) {
+            return null;
+        }
+        Object keyVal = params.get("key");
+        if (keyVal == null) {
+            return null;
+        }
+        String key = keyVal.toString().trim();
+        if (StringUtils.isEmpty(key)) {
+            return null;
+        }
+        return VALID_HTTP_HEADER_NAME_PATTERN.matcher(key).matches() ? key : null;
+    }
+
+    /**
+     * Returns true if the given policy is an api-key-auth policy that uses header transport.
+     * If {@code in} is not defined, this method defaults to header semantics for backward compatibility.
+     */
+    private boolean isApiKeyHeaderPolicy(OperationPolicy policy) {
+        if (policy == null || !"api-key-auth".equalsIgnoreCase(policy.getPolicyName())) {
+            return false;
+        }
+
+        Map<String, Object> params = policy.getParameters();
+        if (MapUtils.isEmpty(params) || params.get("in") == null) {
+            return true;
+        }
+        return "header".equalsIgnoreCase(params.get("in").toString().trim());
+    }
+
+    /**
+     * Returns the HTTP header name for JWT from a jwt-auth hub policy ({@code headerName}).
+     */
+    private String extractJwtAuthorizationHeaderFromHubPolicy(OperationPolicy policy) {
+        if (policy == null || !"jwt-auth".equalsIgnoreCase(policy.getPolicyName())) {
+            return null;
+        }
+        Map<String, Object> params = policy.getParameters();
+        if (MapUtils.isEmpty(params)) {
+            return null;
+        }
+        Object headerNameVal = params.get("headerName");
+        if (headerNameVal == null) {
+            return null;
+        }
+        String headerName = headerNameVal.toString().trim();
+        if (StringUtils.isEmpty(headerName)) {
+            return null;
+        }
+        return VALID_HTTP_HEADER_NAME_PATTERN.matcher(headerName).matches() ? headerName : null;
     }
 
     @Override

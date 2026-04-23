@@ -4,6 +4,8 @@ import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,64 @@ public class VerbInfoDTO implements Serializable {
     private boolean contentAware;
 
     private BackendOperationMapping backendAPIOperationMapping;
+
+    public VerbInfoDTO() {
+    }
+
+    /**
+     * Deep clone constructor. Creates a new VerbInfoDTO as a deep copy of the given instance.
+     *
+     * @param other the VerbInfoDTO to deep clone
+     */
+    public VerbInfoDTO(VerbInfoDTO other) {
+        this.httpVerb = other.httpVerb;
+        this.authType = other.authType;
+        this.throttling = other.throttling;
+        this.applicableLevel = other.applicableLevel;
+        this.requestKey = other.requestKey;
+        this.contentAware = other.contentAware;
+        this.throttlingConditions = other.throttlingConditions != null
+                ? new ArrayList<>(other.throttlingConditions) : new ArrayList<>();
+        if (other.conditionGroups != null) {
+            this.conditionGroups = new ConditionGroupDTO[other.conditionGroups.length];
+            for (int i = 0; i < other.conditionGroups.length; i++) {
+                ConditionGroupDTO src = other.conditionGroups[i];
+                if (src != null) {
+                    ConditionGroupDTO copy = new ConditionGroupDTO();
+                    copy.setConditionGroupId(src.getConditionGroupId());
+                    if (src.getConditions() != null) {
+                        ConditionDTO[] condCopy = new ConditionDTO[src.getConditions().length];
+                        for (int j = 0; j < src.getConditions().length; j++) {
+                            ConditionDTO c = src.getConditions()[j];
+                            if (c != null) {
+                                ConditionDTO cd = new ConditionDTO();
+                                cd.setConditionName(c.getConditionName());
+                                cd.setConditionType(c.getConditionType());
+                                cd.setConditionValue(c.getConditionValue());
+                                cd.isInverted(c.isInverted());
+                                condCopy[j] = cd;
+                            }
+                        }
+                        copy.setConditions(condCopy);
+                    }
+                    this.conditionGroups[i] = copy;
+                }
+            }
+        }
+        if (other.backendAPIOperationMapping != null) {
+            BackendOperationMapping bom = new BackendOperationMapping();
+            bom.setBackendId(other.backendAPIOperationMapping.getBackendId());
+            if (other.backendAPIOperationMapping.getBackendOperation() != null) {
+                org.wso2.carbon.apimgt.api.model.BackendOperation bo =
+                        new org.wso2.carbon.apimgt.api.model.BackendOperation();
+                bo.setTarget(other.backendAPIOperationMapping.getBackendOperation().getTarget());
+                bo.setVerb(other.backendAPIOperationMapping.getBackendOperation().getVerb());
+                bo.setRefUriMappingId(other.backendAPIOperationMapping.getBackendOperation().getRefUriMappingId());
+                bom.setBackendOperation(bo);
+            }
+            this.backendAPIOperationMapping = bom;
+        }
+    }
 
     public String getThrottling() {
         return throttling;
