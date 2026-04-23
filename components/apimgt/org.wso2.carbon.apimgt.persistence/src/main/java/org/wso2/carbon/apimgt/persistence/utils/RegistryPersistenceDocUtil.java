@@ -163,20 +163,24 @@ public class RegistryPersistenceDocUtil {
      * @param apiName api name  
      * @param version version
      * @param fileName file name
-     * @return
+     * @return document file path
      */
     @Deprecated
     public static String getDocumentFilePath(String provider, String apiName, String version, String fileName) {
 
-        return getDocumentPath(provider, apiName, version) + APIConstants.DOCUMENT_FILE_DIR
-                + RegistryConstants.PATH_SEPARATOR + fileName;
+        String apiSourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                RegistryPersistenceUtil.replaceEmailDomain(provider) + RegistryConstants.PATH_SEPARATOR +
+                apiName + RegistryConstants.PATH_SEPARATOR + version;
+        return getDocumentFilePath(apiSourcePath, fileName);
     }
 
     @Deprecated
     public static String getDocumentContentPath(String provider, String apiName, String version, String fileName) {
 
-        return getDocumentPath(provider, apiName, version) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
-                + RegistryConstants.PATH_SEPARATOR + fileName;
+        String apiSourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                RegistryPersistenceUtil.replaceEmailDomain(provider) + RegistryConstants.PATH_SEPARATOR +
+                apiName + RegistryConstants.PATH_SEPARATOR + version;
+        return getDocumentContentPath(apiSourcePath, fileName);
     }
     
     /**
@@ -266,23 +270,25 @@ public class RegistryPersistenceDocUtil {
 
     @Deprecated
     public static String getAPIDocPath(APIIdentifier id) {
-        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
+
+        return getDocumentBasePath(APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
                 + RegistryPersistenceUtil.replaceEmailDomain(id.getProviderName()) + RegistryConstants.PATH_SEPARATOR
-                + id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion() + RegistryConstants.PATH_SEPARATOR
-                + APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
+                + id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion());
     }
 
     @Deprecated
     public static String getAPIDocContentPath(APIIdentifier id, String name) {
-        return getAPIDocPath(id) + RegistryConstants.PATH_SEPARATOR + name;
+
+        return getDocumentBasePath(APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + RegistryPersistenceUtil.replaceEmailDomain(id.getProviderName()) + RegistryConstants.PATH_SEPARATOR
+                + id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion()) + name;
     }
 
     @Deprecated
     public static String getDocumentationFilePath(Identifier id, String fileName) {
-        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
+
+        return getDocumentFilePath(APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
                 + RegistryPersistenceUtil.replaceEmailDomain(id.getProviderName()) + RegistryConstants.PATH_SEPARATOR
-                + id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion() + RegistryConstants.PATH_SEPARATOR
-                + APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR + APIConstants.DOCUMENT_FILE_DIR
-                + RegistryConstants.PATH_SEPARATOR + fileName;
+                + id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion(), fileName);
     }
 }

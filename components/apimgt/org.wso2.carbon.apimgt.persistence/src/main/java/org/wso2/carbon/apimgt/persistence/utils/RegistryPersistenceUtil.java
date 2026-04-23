@@ -2037,10 +2037,18 @@ public class RegistryPersistenceUtil {
      */
     @Deprecated
     public static String extractProvider(String apiPath, String apiName) {
-        int startIndex = apiPath.indexOf(APIConstants.API_PROVIDER_SUFFIX_SLASH) +
-                APIConstants.API_PROVIDER_SUFFIX_SLASH.length();
-        int endIndex = apiPath.indexOf("/" + apiName + "/");
-        return apiPath.substring(startIndex, endIndex);
+
+        String provider = null;
+        String segment = RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR;
+        int startIndex = apiPath.lastIndexOf(segment) + segment.length();
+        int endIndex = apiPath.lastIndexOf(APIConstants.API_RESOURCE_NAME);
+        String apiVersion = apiPath.substring(startIndex, endIndex);
+        try {
+             provider = extractProviderFromPath(apiPath, apiName, apiVersion);
+        } catch (APIPersistenceException e) {
+            log.error("Error while extracting provider : "  + e);
+        }
+        return provider;
     }
 
     /**
