@@ -939,6 +939,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION " +
                                     "or SANDBOX", log);
                         } else {
+                            if (APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)) {
+                                application.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+                            } else {
+                                application.setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
+                            }
                             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
                             APIKeyInfo apiKeyInfo = apiConsumer.regenerateApiKey(application, keyType, keyUUID,
                                     tenantDomain, username);
