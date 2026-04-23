@@ -1136,6 +1136,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
         if (apiInfoList == null) {
             return result;
         }
+        Set<String> userRoleSet = new HashSet<>();
+        if (userRoles != null) {
+            Collections.addAll(userRoleSet, userRoles);
+        }
         List<PublisherAPIInfo> filtered = new ArrayList<>();
         for (PublisherAPIInfo apiInfo : apiInfoList) {
             try {
@@ -1151,21 +1155,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     filtered.add(apiInfo);
                     continue;
                 }
-                if (userRoles != null) {
-                    boolean hasMatchingRole = false;
-                    for (String acRole : displayRoles.split(",")) {
-                        for (String userRole : userRoles) {
-                            if (userRole.equals(acRole.trim())) {
-                                hasMatchingRole = true;
-                                break;
-                            }
-                        }
-                        if (hasMatchingRole) {
-                            break;
-                        }
-                    }
-                    if (hasMatchingRole) {
+                for (String acRole : displayRoles.split(",")) {
+                    if (userRoleSet.contains(acRole.trim())) {
                         filtered.add(apiInfo);
+                        break;
                     }
                 }
             } catch (RegistryException e) {
