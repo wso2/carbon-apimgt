@@ -1578,7 +1578,7 @@ public class RegistryPersistenceUtil {
 
         return provider + "--" + apiName + apiVersion + ".wsdl";
     }
-    
+
     public static String getAPIBasePath(String provider, String apiName, String version) {
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + replaceEmailDomain(provider)
                 + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + version;
@@ -2039,14 +2039,15 @@ public class RegistryPersistenceUtil {
     public static String extractProvider(String apiPath, String apiName) {
 
         String provider = null;
-        String segment = RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR;
-        int startIndex = apiPath.lastIndexOf(segment) + segment.length();
-        int endIndex = apiPath.lastIndexOf(APIConstants.API_RESOURCE_NAME);
-        String apiVersion = apiPath.substring(startIndex, endIndex);
         try {
-             provider = extractProviderFromPath(apiPath, apiName, apiVersion);
-        } catch (APIPersistenceException e) {
-            log.error("Error while extracting provider : "  + e);
+            String segment = RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR;
+            int startIndex = apiPath.lastIndexOf(segment) + segment.length();
+            int endIndex = apiPath.lastIndexOf(APIConstants.API_RESOURCE_NAME);
+            String apiVersion = apiPath.substring(startIndex, endIndex);
+            provider = extractProviderFromPath(apiPath, apiName, apiVersion);
+        } catch (APIPersistenceException | StringIndexOutOfBoundsException e) {
+            log.error("Error while extracting provider from path: " + apiPath
+                    + ", apiName: " + apiName, e);
         }
         return provider;
     }
@@ -2247,6 +2248,11 @@ public class RegistryPersistenceUtil {
             String apiUuid = extractApiIdFromRevisionPath(apiPath);
             try {
                 String currentApiPath = GovernanceUtils.getArtifactPath(registry, apiUuid);
+                if (currentApiPath == null) {
+                    throw new APIPersistenceException(
+                            "Unable to find current API path for revision: " + apiPath
+                                    + ". Artifact may be missing or unindexed for UUID: " + apiUuid);
+                }
                 return extractProviderFromPath(currentApiPath, apiName, apiVersion);
             } catch (GovernanceException e) {
                 throw new APIPersistenceException("Error retrieving current API path for revision: " + apiPath, e);
