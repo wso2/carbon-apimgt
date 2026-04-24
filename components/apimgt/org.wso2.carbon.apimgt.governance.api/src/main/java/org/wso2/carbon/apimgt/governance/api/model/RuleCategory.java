@@ -26,9 +26,13 @@ import java.util.Locale;
 public enum RuleCategory {
     SPECTRAL,
     AI,
-    GENERIC;
+    GENERIC,
+    EXTERNAL;
 
     public static RuleCategory fromString(String text) {
+        if (text == null || text.equalsIgnoreCase("null")) {
+            return null;
+        }
         try {
             return RuleCategory.valueOf(text.toUpperCase(Locale.ENGLISH));
         } catch (IllegalArgumentException e) {

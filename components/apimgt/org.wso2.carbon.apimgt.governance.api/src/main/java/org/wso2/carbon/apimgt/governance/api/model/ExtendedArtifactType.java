@@ -29,6 +29,9 @@ public enum ExtendedArtifactType {
     MCP;
 
     public static ExtendedArtifactType fromString(String text) {
+        if (text == null || text.equalsIgnoreCase("null")) {
+            return null;
+        }
         try {
             return ExtendedArtifactType.valueOf(text.toUpperCase(Locale.ENGLISH));
         } catch (IllegalArgumentException e) {
@@ -36,5 +39,4 @@ public enum ExtendedArtifactType {
         }
     }
 }
-
 

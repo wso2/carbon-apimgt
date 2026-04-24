@@ -32,7 +32,8 @@ public class RulesetInputDTO   {
     @XmlEnum(String.class)
     public enum RuleCategoryEnum {
         SPECTRAL("SPECTRAL"),
-        GENERIC("GENERIC");
+        GENERIC("GENERIC"),
+        EXTERNAL("EXTERNAL");
         private String value;
 
         RuleCategoryEnum (String v) {

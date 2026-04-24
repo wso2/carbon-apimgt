@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManager;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.RulesetsApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetInfoDTO;
@@ -87,38 +88,15 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
                                   MessageContext messageContext) throws APIMGovernanceException {
         RulesetInfoDTO createdRulesetDTO;
         URI createdRulesetURI;
-
-        // Validation done manually for multipart form data
-        if (name != null && name.length() > 256) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
-                    String.format("Rule name `%s` exceeds " +
-                            "the maximum length of 256 characters", name));
-        } else if (description != null && description.length() > 1024) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
-                    String.format("Rule description `%s` exceeds " +
-                            "the maximum length of 1024 characters", description));
-        }
-
-        Ruleset ruleset = new Ruleset();
         String fileName = rulesetContentDetail != null ? rulesetContentDetail.getDataHandler().getName() : null;
         try {
             if (StringUtils.isBlank(fileName)) {
                 throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
                         "Ruleset content file is missing in the request");
             }
-            ruleset.setName(name);
-            ruleCategory = ruleCategory != null ? ruleCategory : RuleCategory.SPECTRAL.toString();
-            ruleset.setRuleCategory(RuleCategory.fromString(ruleCategory));
-            ruleset.setRuleType(RuleType.fromString(ruleType));
-            ruleset.setArtifactType(ExtendedArtifactType.fromString(artifactType));
-            ruleset.setProvider(provider);
-            ruleset.setDescription(description);
-            ruleset.setDocumentationLink(documentationLink);
-
-            RulesetContent rulesetContent = new RulesetContent();
-            rulesetContent.setContent(IOUtils.toByteArray(rulesetContentInputStream));
-            rulesetContent.setFileName(fileName);
-            ruleset.setRulesetContent(rulesetContent);
+            byte[] rulesetContentBytes = IOUtils.toByteArray(rulesetContentInputStream);
+            Ruleset ruleset = buildRuleset(name, rulesetContentBytes, fileName, ruleType, artifactType,
+                    description, ruleCategory, documentationLink, provider);
 
             String username = APIMGovernanceAPIUtil.getLoggedInUsername();
             String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
@@ -168,39 +146,16 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
                                       String description, String ruleCategory, String documentationLink,
                                       String provider, MessageContext messageContext)
             throws APIMGovernanceException {
-
-        // Validation done manually to multipart form data
-        if (name != null && name.length() > 256) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
-                    String.format("Rule name `%s` exceeds " +
-                            "the maximum length of 256 characters", name));
-        } else if (description != null && description.length() > 1024) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
-                    String.format("Rule description `%s` exceeds " +
-                            "the maximum length of 1024 characters", description));
-        }
-
         String fileName = rulesetContentDetail != null ? rulesetContentDetail.getDataHandler().getName() : null;
         try {
             if (StringUtils.isBlank(fileName)) {
                 throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
                         "Ruleset content file is missing in the request");
             }
-            Ruleset ruleset = new Ruleset();
-            ruleset.setName(name);
-            ruleCategory = ruleCategory != null ? ruleCategory : RuleCategory.SPECTRAL.toString();
-            ruleset.setRuleCategory(RuleCategory.fromString(ruleCategory));
-            ruleset.setRuleType(RuleType.fromString(ruleType));
-            ruleset.setArtifactType(ExtendedArtifactType.fromString(artifactType));
-            ruleset.setProvider(provider);
+            byte[] rulesetContentBytes = IOUtils.toByteArray(rulesetContentInputStream);
+            Ruleset ruleset = buildRuleset(name, rulesetContentBytes, fileName, ruleType, artifactType,
+                    description, ruleCategory, documentationLink, provider);
             ruleset.setId(rulesetId);
-            ruleset.setDescription(description);
-            ruleset.setDocumentationLink(documentationLink);
-
-            RulesetContent rulesetContent = new RulesetContent();
-            rulesetContent.setContent(IOUtils.toByteArray(rulesetContentInputStream));
-            rulesetContent.setFileName(fileName);
-            ruleset.setRulesetContent(rulesetContent);
 
             String username = APIMGovernanceAPIUtil.getLoggedInUsername();
             String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
@@ -223,14 +178,15 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
                     isComplianceExcluded = true;
                 }
             }
-            if (name != null && (name.toLowerCase().contains("lifecycle")
-                    || name.toLowerCase().contains("retirement"))) {
+            String resolvedRulesetName = ruleset.getName();
+            if (resolvedRulesetName != null && (resolvedRulesetName.toLowerCase().contains("lifecycle")
+                    || resolvedRulesetName.toLowerCase().contains("retirement"))) {
                 isComplianceExcluded = true;
             }
             if (!isComplianceExcluded) {
                 new ComplianceManager().handleRulesetChangeEvent(rulesetId, organization);
             } else {
-                log.info("Skipping compliance re-evaluation for transition-based ruleset: " + name
+                log.info("Skipping compliance re-evaluation for transition-based ruleset: " + resolvedRulesetName
                         + " (compliance_exclusion=true)");
             }
 
@@ -416,5 +372,112 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         paginationDTO.setNext(paginatedNext);
 
         return paginatedRulesetListDTO;
+    }
+
+    private Ruleset buildRuleset(String name, byte[] rulesetContentBytes, String fileName, String ruleType,
+                                 String artifactType, String description, String ruleCategory,
+                                 String documentationLink, String provider) throws APIMGovernanceException {
+
+        Ruleset ruleset = new Ruleset();
+        RulesetContent rulesetContent = new RulesetContent();
+        rulesetContent.setContent(rulesetContentBytes);
+        rulesetContent.setFileName(fileName);
+        ruleset.setRulesetContent(rulesetContent);
+
+        Map<String, Object> yamlMetadata = getRulesetYamlMetadata(ruleCategory, rulesetContent, fileName);
+        RuleCategory yamlRuleCategory = getRuleCategoryFromMetadata(yamlMetadata);
+        RuleCategory resolvedRuleCategory = RuleCategory.fromString(ruleCategory);
+        if (resolvedRuleCategory == null) {
+            resolvedRuleCategory = yamlRuleCategory != null ? yamlRuleCategory : RuleCategory.SPECTRAL;
+            if (log.isDebugEnabled()) {
+                log.debug("Resolved rule category " + resolvedRuleCategory + " for ruleset file: " + fileName);
+            }
+        }
+
+        boolean useYamlMetadata = RuleCategory.EXTERNAL.equals(resolvedRuleCategory)
+                || RuleCategory.EXTERNAL.equals(yamlRuleCategory);
+        if (useYamlMetadata && log.isDebugEnabled()) {
+            log.debug("Applying YAML metadata fallback for external ruleset file: " + fileName);
+        }
+
+        ruleset.setName(resolveMetadataValue(name, yamlMetadata, "name", useYamlMetadata));
+        ruleset.setDescription(resolveMetadataValue(description, yamlMetadata, "description", useYamlMetadata));
+        ruleset.setDocumentationLink(resolveMetadataValue(documentationLink, yamlMetadata,
+                "documentationLink", useYamlMetadata));
+        ruleset.setProvider(resolveMetadataValue(provider, yamlMetadata, "provider", useYamlMetadata));
+        ruleset.setRuleCategory(resolvedRuleCategory);
+        ruleset.setRuleType(RuleType.fromString(resolveMetadataValue(ruleType, yamlMetadata, "ruleType",
+                useYamlMetadata)));
+        ruleset.setArtifactType(ExtendedArtifactType.fromString(resolveMetadataValue(artifactType, yamlMetadata,
+                "artifactType", useYamlMetadata)));
+
+        validateResolvedRulesetRequest(ruleset);
+        return ruleset;
+    }
+
+    private Map<String, Object> getRulesetYamlMetadata(String ruleCategory, RulesetContent rulesetContent,
+                                                       String fileName) throws APIMGovernanceException {
+
+        if (!RulesetContent.ContentType.YAML.equals(rulesetContent.getContentType())) {
+            return null;
+        }
+        if (StringUtils.isNotBlank(ruleCategory) && !RuleCategory.EXTERNAL.name().equalsIgnoreCase(ruleCategory)) {
+            return null;
+        }
+
+        Map<String, Object> yamlMetadata = APIMGovernanceUtil.getMapFromYAMLStringContent(
+                new String(rulesetContent.getContent(), StandardCharsets.UTF_8));
+        if (log.isDebugEnabled()) {
+            log.debug("Parsed top-level YAML metadata for ruleset file: " + fileName);
+        }
+        return yamlMetadata;
+    }
+
+    private RuleCategory getRuleCategoryFromMetadata(Map<String, Object> yamlMetadata) {
+
+        if (yamlMetadata == null) {
+            return null;
+        }
+        return RuleCategory.fromString(asString(yamlMetadata.get("ruleCategory")));
+    }
+
+    private String resolveMetadataValue(String requestValue, Map<String, Object> yamlMetadata, String metadataKey,
+                                        boolean useYamlMetadata) {
+
+        if (StringUtils.isNotBlank(requestValue) || !useYamlMetadata || yamlMetadata == null) {
+            return requestValue;
+        }
+        return asString(yamlMetadata.get(metadataKey));
+    }
+
+    private void validateResolvedRulesetRequest(Ruleset ruleset) throws APIMGovernanceException {
+
+        if (StringUtils.isBlank(ruleset.getName())) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                    "Rule name is required for the ruleset request");
+        }
+        if (ruleset.getName().length() > 256) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                    String.format("Rule name `%s` exceeds the maximum length of 256 characters",
+                            ruleset.getName()));
+        }
+        if (ruleset.getDescription() != null && ruleset.getDescription().length() > 1024) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                    String.format("Rule description `%s` exceeds the maximum length of 1024 characters",
+                            ruleset.getDescription()));
+        }
+        if (ruleset.getRuleType() == null) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                    "Rule type is required for the ruleset request");
+        }
+        if (ruleset.getArtifactType() == null) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                    "Artifact type is required for the ruleset request");
+        }
+    }
+
+    private String asString(Object value) {
+
+        return value != null ? String.valueOf(value) : null;
     }
 }

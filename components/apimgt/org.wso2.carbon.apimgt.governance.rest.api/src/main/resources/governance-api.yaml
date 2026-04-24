@@ -1004,6 +1004,7 @@ components:
           enum:
             - SPECTRAL
             - GENERIC
+            - EXTERNAL
           example: SPECTRAL
           default: SPECTRAL
         ruleType:
@@ -1062,6 +1063,7 @@ components:
           enum:
             - SPECTRAL
             - GENERIC
+            - EXTERNAL
           example: SPECTRAL
         ruleType:
           type: string
