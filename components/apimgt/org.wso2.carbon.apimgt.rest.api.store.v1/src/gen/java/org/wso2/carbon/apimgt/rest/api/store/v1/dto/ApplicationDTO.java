@@ -27,6 +27,7 @@ import javax.validation.Valid;
 public class ApplicationDTO   {
   
     private String applicationId = null;
+    private String templateId = null;
     private String name = null;
     private String throttlingPolicy = null;
     private String description = null;
@@ -120,6 +121,24 @@ return null;
   }
   public void setApplicationId(String applicationId) {
     this.applicationId = applicationId;
+  }
+
+  /**
+   **/
+  public ApplicationDTO templateId(String templateId) {
+    this.templateId = templateId;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "123e4567-e89b-12d3-a456-426614174000",
+      value = "Optional Devportal Governance template UUID used to initialize this application.")
+  @JsonProperty("templateId")
+  public String getTemplateId() {
+    return templateId;
+  }
+  public void setTemplateId(String templateId) {
+    this.templateId = templateId;
   }
 
   /**
@@ -394,6 +413,7 @@ return null;
     }
     ApplicationDTO application = (ApplicationDTO) o;
     return Objects.equals(applicationId, application.applicationId) &&
+        Objects.equals(templateId, application.templateId) &&
         Objects.equals(name, application.name) &&
         Objects.equals(throttlingPolicy, application.throttlingPolicy) &&
         Objects.equals(description, application.description) &&
@@ -413,7 +433,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner, hashEnabled, createdTime, updatedTime, visibility);
+    return Objects.hash(applicationId, templateId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner, hashEnabled, createdTime, updatedTime, visibility);
   }
 
   @Override
@@ -422,6 +442,7 @@ return null;
     sb.append("class ApplicationDTO {\n");
     
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
+    sb.append("    templateId: ").append(toIndentedString(templateId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
@@ -452,4 +473,3 @@ return null;
     return o.toString().replace("\n", "\n    ");
   }
 }
-

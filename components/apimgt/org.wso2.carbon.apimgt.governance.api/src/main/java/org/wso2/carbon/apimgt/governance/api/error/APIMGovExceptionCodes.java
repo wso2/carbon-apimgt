@@ -272,6 +272,38 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
     ERROR_WHILE_CHECKING_API_VISIBILITY(990616, "Error while checking API visibility.",
             500, "Error while checking API visibility for API with ID: %s", true),
 
+    // Devportal Governance Template related codes
+    DEVPORTAL_TEMPLATE_ALREADY_EXISTS(990700, "Devportal Governance template already exists.",
+            409, "Devportal Governance template with name: '%s' in the organization: '%s' already exists."),
+
+    DEVPORTAL_TEMPLATE_NOT_FOUND(990701, "Devportal Governance template not found.",
+            404, "Devportal Governance template with ID: %s not found"),
+
+    ERROR_WHILE_CREATING_DEVPORTAL_TEMPLATE(990702, "Devportal Governance template creation failed.",
+            500, "Error while creating Devportal Governance template: %s in organization: %s", true),
+
+    ERROR_WHILE_RETRIEVING_DEVPORTAL_TEMPLATE(990703,
+            "Retrieving Devportal Governance template failed.",
+            500, "Error while retrieving Devportal Governance template with ID: %s", true),
+
+    ERROR_WHILE_RETRIEVING_DEVPORTAL_TEMPLATES(990704,
+            "Retrieving Devportal Governance templates failed.",
+            500, "Error while retrieving Devportal Governance templates for organization: %s", true),
+
+    ERROR_WHILE_UPDATING_DEVPORTAL_TEMPLATE(990705, "Devportal Governance template update failed.",
+            500, "Error while updating Devportal Governance template with ID: %s", true),
+
+    ERROR_WHILE_DELETING_DEVPORTAL_TEMPLATE(990706, "Devportal Governance template deletion failed.",
+            500, "Error while deleting Devportal Governance template with ID: %s", true),
+
+    ERROR_WHILE_CAPTURING_DEVPORTAL_GOVERNANCE_SNAPSHOT(990707,
+            "Devportal Governance application snapshot capture failed.",
+            500, "Error while capturing Devportal Governance snapshot for application: %s", true),
+
+    ERROR_WHILE_RETRIEVING_DEVPORTAL_GOVERNANCE_SNAPSHOT(990708,
+            "Retrieving Devportal Governance application snapshot failed.",
+            500, "Error while retrieving Devportal Governance snapshot for application: %s", true),
+
     ;
 
     private final long errorCode;

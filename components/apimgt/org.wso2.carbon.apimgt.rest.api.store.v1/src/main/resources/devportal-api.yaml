@@ -5938,6 +5938,10 @@ components:
           type: string
           readOnly: true
           example: 01234567-0123-0123-0123-012345678901
+        templateId:
+          type: string
+          description: Optional Devportal Governance template UUID used to initialize this application.
+          example: 123e4567-e89b-12d3-a456-426614174000
         name:
           maxLength: 100
           minLength: 1
@@ -6022,6 +6026,10 @@ components:
         applicationId:
           type: string
           example: 01234567-0123-0123-0123-012345678901
+        templateId:
+          type: string
+          description: Devportal Governance template UUID associated with this application.
+          example: 123e4567-e89b-12d3-a456-426614174000
         name:
           type: string
           example: CalculatorApp

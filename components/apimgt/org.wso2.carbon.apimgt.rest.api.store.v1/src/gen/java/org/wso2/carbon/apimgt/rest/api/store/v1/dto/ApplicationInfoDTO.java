@@ -23,6 +23,7 @@ import javax.validation.Valid;
 public class ApplicationInfoDTO   {
   
     private String applicationId = null;
+    private String templateId = null;
     private String name = null;
     private String throttlingPolicy = null;
     private String description = null;
@@ -50,6 +51,24 @@ public class ApplicationInfoDTO   {
   }
   public void setApplicationId(String applicationId) {
     this.applicationId = applicationId;
+  }
+
+  /**
+   **/
+  public ApplicationInfoDTO templateId(String templateId) {
+    this.templateId = templateId;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "123e4567-e89b-12d3-a456-426614174000",
+      value = "Devportal Governance template UUID associated with this application.")
+  @JsonProperty("templateId")
+  public String getTemplateId() {
+    return templateId;
+  }
+  public void setTemplateId(String templateId) {
+    this.templateId = templateId;
   }
 
   /**
@@ -251,6 +270,7 @@ public class ApplicationInfoDTO   {
     }
     ApplicationInfoDTO applicationInfo = (ApplicationInfoDTO) o;
     return Objects.equals(applicationId, applicationInfo.applicationId) &&
+        Objects.equals(templateId, applicationInfo.templateId) &&
         Objects.equals(name, applicationInfo.name) &&
         Objects.equals(throttlingPolicy, applicationInfo.throttlingPolicy) &&
         Objects.equals(description, applicationInfo.description) &&
@@ -266,7 +286,8 @@ public class ApplicationInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, throttlingPolicy, description, status, groups, subscriptionCount, attributes, owner, tokenType, createdTime, updatedTime);
+    return Objects.hash(applicationId, templateId, name, throttlingPolicy, description, status, groups,
+        subscriptionCount, attributes, owner, tokenType, createdTime, updatedTime);
   }
 
   @Override
@@ -275,6 +296,7 @@ public class ApplicationInfoDTO   {
     sb.append("class ApplicationInfoDTO {\n");
     
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
+    sb.append("    templateId: ").append(toIndentedString(templateId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
@@ -301,4 +323,3 @@ public class ApplicationInfoDTO   {
     return o.toString().replace("\n", "\n    ");
   }
 }
-
