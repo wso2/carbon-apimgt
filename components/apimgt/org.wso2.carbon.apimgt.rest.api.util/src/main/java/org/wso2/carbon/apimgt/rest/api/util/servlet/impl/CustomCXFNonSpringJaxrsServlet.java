@@ -537,7 +537,6 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
                 String errorMsg = "Resource class " + cls.getName() + " can not be instantiated due to InvocationTargetException";
                 if (cause != null) {
                     errorMsg += ". Root cause: " + cause.getClass().getName() + ": " + cause.getMessage();
-                    cause.printStackTrace(System.err);
                 }
                 throw new ServletException(errorMsg, cause);
             }
