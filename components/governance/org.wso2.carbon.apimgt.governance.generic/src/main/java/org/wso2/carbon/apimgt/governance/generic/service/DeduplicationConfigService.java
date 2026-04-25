@@ -458,7 +458,7 @@ public class DeduplicationConfigService {
 
             return config;
 
-        } catch (Exception e) {
+        } catch (com.fasterxml.jackson.core.JsonProcessingException | RuntimeException e) {
             log.warn("Error parsing deduplication config YAML: " + e.getMessage(), e);
             return null;
         }

@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.governance.generic.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -82,7 +83,7 @@ public class DuplicateCheckResult {
      * @return List of similar APIs
      */
     public List<SimilarAPI> getSimilarAPIs() {
-        return similarAPIs;
+        return similarAPIs != null ? Collections.unmodifiableList(similarAPIs) : null;
     }
 
     /**
@@ -91,7 +92,7 @@ public class DuplicateCheckResult {
      * @param similarAPIs List of similar APIs
      */
     public void setSimilarAPIs(List<SimilarAPI> similarAPIs) {
-        this.similarAPIs = similarAPIs;
+        this.similarAPIs = similarAPIs != null ? new ArrayList<>(similarAPIs) : null;
     }
 
     /**

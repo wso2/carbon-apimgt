@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.governance.generic.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,7 +77,7 @@ public class ConflictReport implements Serializable {
      * Builder class for ConflictReport.
      */
     public static class Builder {
-        private final ConflictReport report;
+        private ConflictReport report;
 
         public Builder() {
             this.report = new ConflictReport();
@@ -143,7 +144,9 @@ public class ConflictReport implements Serializable {
         }
 
         public ConflictReport build() {
-            return report;
+            ConflictReport built = report;
+            report = new ConflictReport();
+            return built;
         }
     }
 
@@ -196,11 +199,11 @@ public class ConflictReport implements Serializable {
     }
 
     public Map<String, Object> getMetadataSimilarity() {
-        return metadataSimilarity;
+        return metadataSimilarity != null ? Collections.unmodifiableMap(metadataSimilarity) : null;
     }
 
     public void setMetadataSimilarity(Map<String, Object> metadataSimilarity) {
-        this.metadataSimilarity = metadataSimilarity;
+        this.metadataSimilarity = metadataSimilarity != null ? new HashMap<>(metadataSimilarity) : null;
     }
 
     public double getPathSimilarity() {

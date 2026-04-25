@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -123,11 +124,11 @@ public class DeduplicationResult implements Serializable {
     }
 
     public List<ConflictReport> getConflictReports() {
-        return conflictReports;
+        return conflictReports != null ? Collections.unmodifiableList(conflictReports) : null;
     }
 
     public void setConflictReports(List<ConflictReport> conflictReports) {
-        this.conflictReports = conflictReports;
+        this.conflictReports = conflictReports != null ? new ArrayList<>(conflictReports) : null;
     }
 
     public void addConflictReport(ConflictReport report) {
