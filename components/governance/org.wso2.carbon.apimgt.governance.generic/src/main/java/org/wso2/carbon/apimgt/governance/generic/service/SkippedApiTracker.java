@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.generic.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -46,6 +47,7 @@ public class SkippedApiTracker {
      *
      * @return SkippedApiTracker instance
      */
+    @SuppressFBWarnings("MS_EXPOSE_REP")
     public static SkippedApiTracker getInstance() {
         if (instance == null) {
             synchronized (SkippedApiTracker.class) {

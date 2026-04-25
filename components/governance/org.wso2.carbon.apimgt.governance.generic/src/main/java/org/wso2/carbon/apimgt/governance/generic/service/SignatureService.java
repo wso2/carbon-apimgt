@@ -236,7 +236,7 @@ public class SignatureService {
         private int shingleCount;
 
         // Transient - not serialized to JSON
-        private transient byte[] signatureBlob;
+        private byte[] signatureBlob;
 
         public String getApiUuid() {
             return apiUuid;
@@ -255,7 +255,7 @@ public class SignatureService {
         }
 
         public int[] getSignatureArray() {
-            return signatureArray != null ? signatureArray.clone() : null;
+            return signatureArray != null ? signatureArray.clone() : new int[0];
         }
 
         public void setSignatureArray(int[] signatureArray) {
@@ -271,7 +271,7 @@ public class SignatureService {
         }
 
         public byte[] getSignatureBlob() {
-            return signatureBlob != null ? signatureBlob.clone() : null;
+            return signatureBlob != null ? signatureBlob.clone() : new byte[0];
         }
 
         public void setSignatureBlob(byte[] signatureBlob) {

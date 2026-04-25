@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -176,7 +177,7 @@ public final class APIPruningUtil {
      */
     private static String normalizePath(String path) {
         // Replace path parameters like {id}, {userId} with {param}
-        return path.replaceAll("\\{[^}]+\\}", "{param}").toLowerCase();
+        return path.replaceAll("\\{[^}]+\\}", "{param}").toLowerCase(Locale.ENGLISH);
     }
 
     /**
@@ -220,11 +221,11 @@ public final class APIPruningUtil {
      */
     private static void addOperationDetails(Set<String> paths, String method, String path, Operation operation) {
         if (operation.getOperationId() != null) {
-            paths.add(method + " " + path + " operationId:" + operation.getOperationId().toLowerCase());
+            paths.add(method + " " + path + " operationId:" + operation.getOperationId().toLowerCase(Locale.ENGLISH));
         }
         if (operation.getTags() != null) {
             for (String tag : operation.getTags()) {
-                paths.add(method + " " + path + " tag:" + tag.toLowerCase());
+                paths.add(method + " " + path + " tag:" + tag.toLowerCase(Locale.ENGLISH));
             }
         }
     }
@@ -252,7 +253,7 @@ public final class APIPruningUtil {
             if (openAPI.getComponents() != null && openAPI.getComponents().getSchemas() != null) {
                 Map<String, Schema> schemas = openAPI.getComponents().getSchemas();
                 for (Map.Entry<String, Schema> entry : schemas.entrySet()) {
-                    String schemaName = entry.getKey().toLowerCase();
+                    String schemaName = entry.getKey().toLowerCase(Locale.ENGLISH);
                     Schema schema = entry.getValue();
 
                     normalizedSchemas.add("schema:" + schemaName);
@@ -260,11 +261,12 @@ public final class APIPruningUtil {
                     // Add property information
                     if (schema.getProperties() != null) {
                         Map<String, Schema> properties = schema.getProperties();
-                        for (String propName : properties.keySet()) {
-                            Schema propSchema = properties.get(propName);
+                        for (Map.Entry<String, Schema> propEntry : properties.entrySet()) {
+                            String propName = propEntry.getKey();
+                            Schema propSchema = propEntry.getValue();
                             String propType = propSchema.getType() != null ? propSchema.getType() : "object";
-                            normalizedSchemas.add("schema:" + schemaName + "." + propName.toLowerCase() + 
-                                                  ":" + propType.toLowerCase());
+                            normalizedSchemas.add("schema:" + schemaName + "." + propName.toLowerCase(Locale.ENGLISH) +
+                                                  ":" + propType.toLowerCase(Locale.ENGLISH));
                         }
                     }
                 }

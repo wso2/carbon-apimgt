@@ -18,12 +18,13 @@
 
 package org.wso2.carbon.apimgt.governance.generic.internal;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 
 /**
  * Service reference holder for the Generic component.
  */
-public class GenericServiceReferenceHolder {
+public final class GenericServiceReferenceHolder {
 
     private static final GenericServiceReferenceHolder instance = new GenericServiceReferenceHolder();
 
@@ -33,6 +34,7 @@ public class GenericServiceReferenceHolder {
         // Private constructor
     }
 
+    @SuppressFBWarnings("MS_EXPOSE_REP")
     public static GenericServiceReferenceHolder getInstance() {
         return instance;
     }

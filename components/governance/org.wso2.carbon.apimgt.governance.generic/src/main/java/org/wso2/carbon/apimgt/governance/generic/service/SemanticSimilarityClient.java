@@ -76,7 +76,7 @@ public class SemanticSimilarityClient {
                                    List<SemanticCandidate> topCandidates) {
             this.matchesFound = matchesFound;
             this.candidateCount = candidateCount;
-            this.topCandidates = topCandidates;
+            this.topCandidates = new ArrayList<>(topCandidates);
         }
 
         public boolean isMatchesFound() {
@@ -88,7 +88,7 @@ public class SemanticSimilarityClient {
         }
 
         public List<SemanticCandidate> getTopCandidates() {
-            return topCandidates;
+            return new ArrayList<>(topCandidates);
         }
     }
 
@@ -168,10 +168,12 @@ public class SemanticSimilarityClient {
             String responseBody = post(endpoint, config, requestJson);
             return parseResponse(responseBody);
         } catch (IOException e) {
-            log.warn("SemanticSimilarityClient: could not reach AI service — semantic check skipped. " + e.getMessage());
+            log.warn("SemanticSimilarityClient: could not reach AI service "
+                    + "— semantic check skipped. " + e.getMessage());
             return null;
         } catch (Exception e) {
-            log.warn("SemanticSimilarityClient: unexpected error during semantic check — skipping. " + e.getMessage(), e);
+            log.warn("SemanticSimilarityClient: unexpected error during semantic check "
+                    + "— skipping. " + e.getMessage(), e);
             return null;
         }
     }
@@ -197,12 +199,12 @@ public class SemanticSimilarityClient {
 
     private String buildRequestJson(String draftApiContent, String tenantDomain,
                                     int limit, double threshold) throws IOException {
-        return MAPPER.writeValueAsString(new java.util.LinkedHashMap<String, Object>() {{
-            put("draft_api_content", draftApiContent);
-            put("tenant_domain", tenantDomain);
-            put("limit", limit);
-            put("threshold", threshold);
-        }});
+        java.util.LinkedHashMap<String, Object> requestBody = new java.util.LinkedHashMap<>();
+        requestBody.put("draft_api_content", draftApiContent);
+        requestBody.put("tenant_domain", tenantDomain);
+        requestBody.put("limit", limit);
+        requestBody.put("threshold", threshold);
+        return MAPPER.writeValueAsString(requestBody);
     }
 
     private String post(String baseEndpoint, MarketplaceAssistantConfigurationDTO config,

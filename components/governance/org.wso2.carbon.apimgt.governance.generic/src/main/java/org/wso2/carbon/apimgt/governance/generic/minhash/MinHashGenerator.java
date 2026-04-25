@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.generic.minhash;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.wso2.carbon.apimgt.governance.generic.GenericConstants;
 
 import java.io.Serializable;
@@ -44,6 +45,7 @@ public class MinHashGenerator implements Serializable {
      * @param numHashFunctions Number of hash functions to use
      * @param seed             Random seed for reproducibility
      */
+    @SuppressFBWarnings("DMI_RANDOM_USED_ONLY_ONCE")
     public MinHashGenerator(int numHashFunctions, long seed) {
         this.numHashFunctions = numHashFunctions;
         this.coeffA = new long[numHashFunctions];
@@ -56,8 +58,8 @@ public class MinHashGenerator implements Serializable {
         Random random = new Random(seed);
         for (int i = 0; i < numHashFunctions; i++) {
             // Coefficients must be positive and less than largePrime
-            coeffA[i] = Math.abs(random.nextLong()) % (largePrime - 1) + 1;
-            coeffB[i] = Math.abs(random.nextLong()) % largePrime;
+            coeffA[i] = (random.nextLong() & Long.MAX_VALUE) % (largePrime - 1) + 1;
+            coeffB[i] = (random.nextLong() & Long.MAX_VALUE) % largePrime;
         }
     }
 
