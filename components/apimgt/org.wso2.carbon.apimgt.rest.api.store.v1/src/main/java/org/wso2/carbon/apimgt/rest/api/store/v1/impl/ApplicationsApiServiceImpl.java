@@ -98,6 +98,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.models.ExportedApplication;
 import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ImportUtils;
+import org.wso2.carbon.apimgt.rest.api.store.v1.utils.DevportalGovernanceValidationUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -363,9 +364,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+            DevportalGovernanceValidationUtil.validateApplicationCreate(body, organization, log);
             Application createdApplication = preProcessAndAddApplication(username, body, organization,
                     orgInfo.getOrganizationId());
+            DevportalGovernanceValidationUtil.captureApplicationSnapshot(createdApplication, body.getTemplateId(),
+                    organization, log);
             ApplicationDTO createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
+            createdApplicationDTO.setTemplateId(body.getTemplateId());
 
             //to be set as the Location header
             URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
@@ -502,6 +507,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String ifMatch, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
 
@@ -527,6 +533,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 }
             }
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+            DevportalGovernanceValidationUtil.validateApplicationUpdate(oldApplication, body, organization, log);
             Application updatedApplication = preProcessAndUpdateApplication(username, body, oldApplication,
                     applicationId, orgInfo);
             ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
@@ -1189,6 +1196,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
+            if (body == null) {
+                RestApiUtil.handleBadRequest("Key generation request body is required", log);
+            }
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             if (!(apiConsumer.isKeyManagerAllowedForUser(body.getKeyManager(), username))) {
                 throw new APIManagementException("Key Manager is permission restricted",
@@ -1202,6 +1213,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         RestApiUtil.handleBadRequest(
                                 "Cannot generate keys for applications that are not yet approved.", log);
                     }
+                    DevportalGovernanceValidationUtil.validateKeyGeneration(application, body, organization, log);
                     String[] accessAllowDomainsArray = {"ALL"};
                     JSONObject jsonParamObj = new JSONObject();
                     jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
@@ -1239,7 +1251,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     if (StringUtils.isNotEmpty(body.getKeyManager())) {
                         keyManagerName = body.getKeyManager();
                     }
-                    String organization = RestApiUtil.getValidatedOrganization(messageContext);
                     Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
                             username, application, body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes,

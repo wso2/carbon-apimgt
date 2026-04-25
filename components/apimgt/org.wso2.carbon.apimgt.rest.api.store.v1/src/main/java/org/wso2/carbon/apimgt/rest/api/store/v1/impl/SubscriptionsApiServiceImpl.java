@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.AdditionalSubscriptionInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SubscriptionMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.utils.DevportalGovernanceValidationUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -241,6 +242,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
             apiTypeWrapper.setTier(body.getThrottlingPolicy());
 
+            DevportalGovernanceValidationUtil.validateSubscriptionCreate(application, body, apiTypeWrapper,
+                    organization, log);
             SubscriptionResponse subscriptionResponse = apiConsumer
                     .addSubscription(apiTypeWrapper, username, application);
             SubscribedAPI addedSubscribedAPI = apiConsumer

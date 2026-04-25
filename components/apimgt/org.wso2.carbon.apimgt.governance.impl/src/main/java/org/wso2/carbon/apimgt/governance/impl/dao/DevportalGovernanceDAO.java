@@ -307,6 +307,32 @@ public class DevportalGovernanceDAO {
     }
 
     /**
+     * Retrieve live template-bound rulesets as in-memory snapshots for pre-persistence validation.
+     *
+     * @param templateId   selected template ID, or null to resolve the default template
+     * @param organization organization
+     * @return in-memory ruleset snapshots
+     * @throws APIMGovernanceException if an error occurs while retrieving the rulesets
+     */
+    public List<DevportalGovernanceRulesetSnapshot> getRulesetSnapshotsForTemplate(String templateId,
+                                                                                   String organization)
+            throws APIMGovernanceException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            DevportalGovernanceTemplate template = resolveSnapshotTemplate(connection, templateId, organization);
+            if (template == null) {
+                throw new APIMGovernanceException(APIMGovExceptionCodes.DEVPORTAL_TEMPLATE_NOT_FOUND,
+                        templateId == null ? "default" : templateId);
+            }
+            return getRulesetSnapshotsForTemplate(connection, null, template.getId());
+        } catch (JsonProcessingException | NoSuchAlgorithmException | SQLException e) {
+            throw new APIMGovernanceException(
+                    APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_DEVPORTAL_GOVERNANCE_SNAPSHOT, e,
+                    templateId == null ? "default" : templateId);
+        }
+    }
+
+    /**
      * Capture a point-in-time application governance snapshot from a live template.
      *
      * @param applicationId   application database ID
@@ -575,6 +601,20 @@ public class DevportalGovernanceDAO {
                                                                          String templateId)
             throws SQLException, NoSuchAlgorithmException {
 
+        List<DevportalGovernanceRulesetSnapshot> rulesetSnapshots =
+                getRulesetSnapshotsForTemplate(connection, snapshotId, templateId);
+        for (DevportalGovernanceRulesetSnapshot rulesetSnapshot : rulesetSnapshots) {
+            addRulesetSnapshot(connection, rulesetSnapshot);
+            addRulesetSnapshotKeyManagerScopes(connection, rulesetSnapshot.getKeyManagerScopes());
+        }
+        return rulesetSnapshots;
+    }
+
+    private List<DevportalGovernanceRulesetSnapshot> getRulesetSnapshotsForTemplate(Connection connection,
+                                                                                    String snapshotId,
+                                                                                    String templateId)
+            throws SQLException, NoSuchAlgorithmException {
+
         List<DevportalGovernanceRulesetSnapshot> rulesetSnapshots = new ArrayList<>();
         try (PreparedStatement prepStmt =
                      connection.prepareStatement(SQLConstants.GET_TEMPLATE_RULESET_SNAPSHOT_SOURCES)) {
@@ -583,8 +623,7 @@ public class DevportalGovernanceDAO {
                 while (resultSet.next()) {
                     DevportalGovernanceRulesetSnapshot rulesetSnapshot =
                             getRulesetSnapshotFromTemplateBinding(resultSet, snapshotId);
-                    addRulesetSnapshot(connection, rulesetSnapshot);
-                    rulesetSnapshot.setKeyManagerScopes(addRulesetSnapshotKeyManagerScopes(connection,
+                    rulesetSnapshot.setKeyManagerScopes(getRulesetSnapshotKeyManagerScopesFromBinding(connection,
                             resultSet.getString("BINDING_ID"), rulesetSnapshot.getSnapshotRulesetId()));
                     rulesetSnapshots.add(rulesetSnapshot);
                 }
@@ -632,32 +671,43 @@ public class DevportalGovernanceDAO {
         }
     }
 
-    private List<DevportalGovernanceRulesetSnapshotKeyManagerScope> addRulesetSnapshotKeyManagerScopes(
+    private List<DevportalGovernanceRulesetSnapshotKeyManagerScope> getRulesetSnapshotKeyManagerScopesFromBinding(
             Connection connection, String bindingId, String snapshotRulesetId) throws SQLException {
 
         List<DevportalGovernanceRulesetSnapshotKeyManagerScope> keyManagerScopes = new ArrayList<>();
         try (PreparedStatement getScopesStmt =
                      connection.prepareStatement(SQLConstants.GET_TEMPLATE_RULESET_SNAPSHOT_KM_SCOPES)) {
             getScopesStmt.setString(1, bindingId);
-            try (ResultSet resultSet = getScopesStmt.executeQuery();
-                 PreparedStatement insertScopeStmt =
-                         connection.prepareStatement(SQLConstants.CREATE_APP_RULESET_SNAPSHOT_KM_SCOPE)) {
+            try (ResultSet resultSet = getScopesStmt.executeQuery()) {
                 while (resultSet.next()) {
                     DevportalGovernanceRulesetSnapshotKeyManagerScope keyManagerScope =
                             new DevportalGovernanceRulesetSnapshotKeyManagerScope();
                     keyManagerScope.setSnapshotRulesetId(snapshotRulesetId);
                     keyManagerScope.setKeyManagerUuid(resultSet.getString("KEY_MANAGER_UUID"));
                     keyManagerScope.setKeyManagerName(resultSet.getString("KEY_MANAGER_NAME"));
-                    insertScopeStmt.setString(1, snapshotRulesetId);
-                    insertScopeStmt.setString(2, keyManagerScope.getKeyManagerUuid());
-                    insertScopeStmt.setString(3, keyManagerScope.getKeyManagerName());
-                    insertScopeStmt.addBatch();
                     keyManagerScopes.add(keyManagerScope);
                 }
-                insertScopeStmt.executeBatch();
             }
         }
         return keyManagerScopes;
+    }
+
+    private void addRulesetSnapshotKeyManagerScopes(Connection connection,
+            List<DevportalGovernanceRulesetSnapshotKeyManagerScope> keyManagerScopes) throws SQLException {
+
+        if (keyManagerScopes.isEmpty()) {
+            return;
+        }
+        try (PreparedStatement prepStmt =
+                     connection.prepareStatement(SQLConstants.CREATE_APP_RULESET_SNAPSHOT_KM_SCOPE)) {
+            for (DevportalGovernanceRulesetSnapshotKeyManagerScope keyManagerScope : keyManagerScopes) {
+                prepStmt.setString(1, keyManagerScope.getSnapshotRulesetId());
+                prepStmt.setString(2, keyManagerScope.getKeyManagerUuid());
+                prepStmt.setString(3, keyManagerScope.getKeyManagerName());
+                prepStmt.addBatch();
+            }
+            prepStmt.executeBatch();
+        }
     }
 
     private void resetDefaultTemplate(Connection connection, String organization, boolean global, String username,
