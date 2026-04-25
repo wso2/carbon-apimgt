@@ -63,6 +63,11 @@ public class ExternalServiceClient {
         if (!containsHeader(effectiveHeaders, "Content-Type")) {
             effectiveHeaders.put("Content-Type", "application/json");
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Prepared external validation headers for target "
+                    + evaluationContext.getTargetIdentifier() + ": "
+                    + maskSensitiveHeaders(effectiveHeaders));
+        }
 
         String requestPayload;
         try {
@@ -75,6 +80,7 @@ public class ExternalServiceClient {
         long retryDelay = INITIAL_RETRY_DELAY_MILLIS;
         ExternalServiceException lastFailure = null;
         for (int attempt = 1; attempt <= retryAttempts; attempt++) {
+            long attemptStartTime = System.currentTimeMillis();
             try {
                 if (log.isDebugEnabled()) {
                     log.debug("Calling external validation service. ruleTarget="
@@ -86,15 +92,23 @@ public class ExternalServiceClient {
                         timeoutMillis);
             } catch (ExternalServiceException e) {
                 lastFailure = e;
+                if (e.isAuthenticationFailure()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Skipping retries for target " + evaluationContext.getTargetIdentifier()
+                                + " because the external service returned an authentication failure.");
+                    }
+                    break;
+                }
                 if (attempt >= retryAttempts) {
                     break;
                 }
+                long waitBeforeRetryMillis = resolveWaitBeforeRetry(attemptStartTime, timeoutMillis, retryDelay);
                 if (log.isDebugEnabled()) {
                     log.debug("External validation call failed on attempt " + attempt + " for target "
                             + evaluationContext.getTargetIdentifier() + ". Retrying in "
-                            + retryDelay + "ms. Cause: " + e.getMessage());
+                            + waitBeforeRetryMillis + "ms. Cause: " + e.getMessage());
                 }
-                sleepBeforeRetry(retryDelay, e);
+                sleepBeforeRetry(waitBeforeRetryMillis, e);
                 retryDelay *= 2;
             }
         }
@@ -130,7 +144,8 @@ public class ExternalServiceClient {
             String responseBody = readResponseBody(statusCode, connection);
             if (statusCode < 200 || statusCode >= 300) {
                 throw new ExternalServiceException("External validation service returned HTTP " + statusCode
-                        + (responseBody != null && !responseBody.isEmpty() ? ": " + responseBody : ""));
+                        + (responseBody != null && !responseBody.isEmpty() ? ": " + responseBody : ""),
+                        statusCode);
             }
             if (responseBody == null || responseBody.trim().isEmpty()) {
                 throw new ExternalServiceException("External validation service returned an empty response body");
@@ -180,6 +195,49 @@ public class ExternalServiceClient {
         return false;
     }
 
+    private String maskSensitiveHeaders(Map<String, String> headers) {
+
+        StringBuilder headerLog = new StringBuilder("{");
+        boolean first = true;
+        for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
+            if (!first) {
+                headerLog.append(", ");
+            }
+            first = false;
+            headerLog.append(headerEntry.getKey()).append("=");
+            if (isSensitiveHeader(headerEntry.getKey())) {
+                headerLog.append(maskHeaderValue(headerEntry.getValue()));
+            } else {
+                headerLog.append(headerEntry.getValue());
+            }
+        }
+        headerLog.append("}");
+        return headerLog.toString();
+    }
+
+    private boolean isSensitiveHeader(String headerName) {
+
+        if (headerName == null) {
+            return false;
+        }
+        String normalizedHeaderName = headerName.toLowerCase(Locale.ENGLISH);
+        return normalizedHeaderName.contains("authorization")
+                || normalizedHeaderName.contains("key")
+                || normalizedHeaderName.contains("token");
+    }
+
+    private String maskHeaderValue(String headerValue) {
+
+        if (headerValue == null) {
+            return "null";
+        }
+        if (headerValue.length() <= 12) {
+            return "***(" + headerValue.length() + " chars)";
+        }
+        return headerValue.substring(0, 6) + "..." + headerValue.substring(headerValue.length() - 4)
+                + " (" + headerValue.length() + " chars)";
+    }
+
     private boolean requiresRequestBody(String method) {
 
         return !("GET".equals(method) || "DELETE".equals(method));
@@ -210,6 +268,20 @@ public class ExternalServiceClient {
         return DEFAULT_RETRY_ATTEMPTS;
     }
 
+    private long resolveWaitBeforeRetry(long attemptStartTime, int timeoutMillis, long retryDelay) {
+
+        long elapsedTimeMillis = System.currentTimeMillis() - attemptStartTime;
+        long remainingAttemptWindowMillis = timeoutMillis - elapsedTimeMillis;
+        if (remainingAttemptWindowMillis > retryDelay) {
+            if (log.isDebugEnabled()) {
+                log.debug("Extending retry wait to honor configured timeout window. elapsed="
+                        + elapsedTimeMillis + "ms, remaining=" + remainingAttemptWindowMillis + "ms");
+            }
+            return remainingAttemptWindowMillis;
+        }
+        return retryDelay;
+    }
+
     private void sleepBeforeRetry(long retryDelay, ExternalServiceException failure)
             throws ExternalServiceException {
 
@@ -226,14 +298,30 @@ public class ExternalServiceClient {
      */
     public static class ExternalServiceException extends Exception {
 
+        private final Integer statusCode;
+
         public ExternalServiceException(String message) {
 
             super(message);
+            this.statusCode = null;
         }
 
         public ExternalServiceException(String message, Throwable cause) {
 
             super(message, cause);
+            this.statusCode = null;
+        }
+
+        public ExternalServiceException(String message, int statusCode) {
+
+            super(message);
+            this.statusCode = statusCode;
+        }
+
+        public boolean isAuthenticationFailure() {
+
+            return Integer.valueOf(HttpURLConnection.HTTP_UNAUTHORIZED).equals(statusCode)
+                    || Integer.valueOf(HttpURLConnection.HTTP_FORBIDDEN).equals(statusCode);
         }
     }
 }

@@ -80,7 +80,7 @@ public final class ExternalTemplateUtils {
         }
         for (Map.Entry<String, Object> headerEntry : headers.entrySet()) {
             Object renderedValue = renderTemplate(headerEntry.getValue(), templateContext);
-            renderedHeaders.put(headerEntry.getKey(), stringifyValue(renderedValue));
+            renderedHeaders.put(headerEntry.getKey(), stringifyValue(renderedValue).trim());
         }
         return renderedHeaders;
     }
