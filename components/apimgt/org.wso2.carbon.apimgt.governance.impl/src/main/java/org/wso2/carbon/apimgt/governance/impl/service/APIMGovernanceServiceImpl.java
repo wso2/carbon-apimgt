@@ -80,17 +80,23 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                                                      String organization)
             throws APIMGovernanceException {
 
-        log.info("[BLOCK-CHECK] isPoliciesWithBlockingActionExist called for artifact " + artifactRefId
-                + " at state " + state + " in org " + organization);
+        if (log.isDebugEnabled()) {
+            log.debug("[BLOCK-CHECK] isPoliciesWithBlockingActionExist called for artifact " + artifactRefId
+                    + " at state " + state + " in org " + organization);
+        }
 
         List<String> applicablePolicyIds = APIMGovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactRefId,
                 artifactType, state, organization);
-        log.info("[BLOCK-CHECK] State-filtered policies (" + state + "): " + applicablePolicyIds.size()
-                + " -> " + applicablePolicyIds);
+        if (log.isDebugEnabled()) {
+            log.debug("[BLOCK-CHECK] State-filtered policies (" + state + "): " + applicablePolicyIds.size()
+                    + " -> " + applicablePolicyIds);
+        }
 
         // Check for explicit BLOCK actions in the GOV_POLICY_ACTION table
         if (APIMGovernanceUtil.isBlockingActionsPresent(applicablePolicyIds, state, organization)) {
-            log.info("[BLOCK-CHECK] Explicit BLOCK action found in policy action table. Returning true.");
+            if (log.isDebugEnabled()) {
+                log.debug("[BLOCK-CHECK] Explicit BLOCK action found in policy action table. Returning true.");
+            }
             return true;
         }
 
@@ -102,11 +108,15 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         Map<String, String> allPolicies = APIMGovernanceUtil.getApplicablePoliciesForArtifact(artifactRefId,
                 artifactType, organization);
         List<String> allPolicyIds = new ArrayList<>(allPolicies.keySet());
-        log.info("[BLOCK-CHECK] All policies (no state filter): " + allPolicyIds.size()
-                + " -> " + allPolicyIds);
+        if (log.isDebugEnabled()) {
+            log.debug("[BLOCK-CHECK] All policies (no state filter): " + allPolicyIds.size()
+                    + " -> " + allPolicyIds);
+        }
 
         boolean hasGenericBlock = complianceManager.hasGenericBlockModeRulesets(allPolicyIds, state, organization);
-        log.info("[BLOCK-CHECK] hasGenericBlockModeRulesets result: " + hasGenericBlock);
+        if (log.isDebugEnabled()) {
+            log.debug("[BLOCK-CHECK] hasGenericBlockModeRulesets result: " + hasGenericBlock);
+        }
         return hasGenericBlock;
     }
 
@@ -336,6 +346,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
     @Override
     public List<String> cleanupViolationsReferencingApi(String apiUuid, String organization)
             throws APIMGovernanceException {
+        log.info("Cleaning up violations referencing deleted API: " + apiUuid);
         return complianceManager.cleanupViolationsReferencingApi(apiUuid, organization);
     }
 

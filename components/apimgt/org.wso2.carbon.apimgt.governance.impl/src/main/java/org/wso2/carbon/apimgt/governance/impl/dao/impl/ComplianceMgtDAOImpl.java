@@ -113,6 +113,11 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                             // the same artifact. The EVAL_CONSTRAINT (UNIQUE on STATUS, ARTIFACT_KEY)
                             // prevents duplicates. When this happens, rollback the partial transaction,
                             // find the existing pending request, and use it instead.
+                            // SQLState "23" prefix covers integrity constraint violations across DBs.
+                            String sqlState = constraintEx.getSQLState();
+                            if (sqlState == null || !sqlState.startsWith("23")) {
+                                throw constraintEx;
+                            }
                             connection.rollback();
                             connection.setAutoCommit(false);
                             requestId = getPendingEvalRequest(connection, artifactRefId,
@@ -128,6 +133,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 }
                 addRequestPolicyMappings(connection, requestId, policyIds);
                 connection.commit();
+                log.info("Added compliance evaluation request '" + requestId + "' for artifact: " + artifactRefId);
             } catch (SQLException e) {
                 connection.rollback();
                 throw e;

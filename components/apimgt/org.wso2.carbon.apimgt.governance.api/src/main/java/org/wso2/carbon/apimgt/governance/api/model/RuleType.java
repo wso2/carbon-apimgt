@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.Locale;
 
 /**
@@ -28,8 +31,11 @@ public enum RuleType {
     API_DEFINITION,
     API_DOCUMENTATION;
 
+    private static final Log log = LogFactory.getLog(RuleType.class);
+
     public static RuleType fromString(String ruleTypeString) {
         if (ruleTypeString == null || ruleTypeString.equalsIgnoreCase("null")) {
+            log.debug("Received null or 'null' string for ruleTypeString, returning null");
             return null;
         }
         try {

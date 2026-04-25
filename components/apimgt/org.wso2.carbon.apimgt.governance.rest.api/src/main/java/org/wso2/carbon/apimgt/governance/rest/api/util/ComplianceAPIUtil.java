@@ -50,9 +50,6 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.SeverityBasedRuleViolation
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

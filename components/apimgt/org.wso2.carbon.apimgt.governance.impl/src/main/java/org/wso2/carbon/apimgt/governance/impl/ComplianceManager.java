@@ -49,12 +49,14 @@ import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -555,6 +557,11 @@ public class ComplianceManager {
                     try {
                         List<RuleViolation> ruleViolations = performGenericRulesetValidation(
                                 artifactRefId, ruleset, artifactProjectContent, organization);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Generic ruleset validation completed for artifact " + artifactRefId
+                                    + " against ruleset " + ruleset.getId() + ", violations: "
+                                    + ruleViolations.size());
+                        }
 
                         if (!ruleViolations.isEmpty()) {
                             // Read the deduplication mode from the ruleset YAML to determine
@@ -606,7 +613,7 @@ public class ComplianceManager {
                                     "GENERIC ruleset %s found %d violations for artifact %s (mode=%s, state=%s)",
                                     ruleset.getId(), ruleViolations.size(), artifactRefId, dedupMode, state);
                         }
-                    } catch (Exception e) {
+                    } catch (APIMGovernanceException | RuntimeException e) {
                         log.warn("GENERIC ruleset evaluation failed for artifact " + artifactRefId
                                 + ": " + e.getMessage());
                         if (log.isDebugEnabled()) {
@@ -881,10 +888,11 @@ public class ComplianceManager {
                     // Skip lifecycle rulesets — their mode=block is for lifecycle
                     // transitions, not deploy-time enforcement.
                     String rsetNameLc = ruleset.getName() != null
-                            ? ruleset.getName().toLowerCase() : "";
+                            ? ruleset.getName().toLowerCase(Locale.ENGLISH) : "";
                     String rsetContent = ruleset.getRulesetContent() != null
                             && ruleset.getRulesetContent().getContent() != null
-                            ? new String(ruleset.getRulesetContent().getContent()) : "";
+                            ? new String(ruleset.getRulesetContent().getContent(),
+                                    StandardCharsets.UTF_8) : "";
                     boolean isLifecycleRuleset = rsetNameLc.contains("lifecycle")
                             || rsetNameLc.contains("retirement")
                             || rsetNameLc.contains("deprecation")
@@ -933,6 +941,7 @@ public class ComplianceManager {
      */
     public List<String> cleanupViolationsReferencingApi(String deletedApiUuid, String organization)
             throws APIMGovernanceException {
+        log.info("Cleaning up violations referencing deleted API: " + deletedApiUuid);
         // First, get the list of affected artifacts before deleting the violations
         List<String> affectedArtifacts = complianceMgtDAO
                 .getAffectedArtifactsByReferencedApiUuid(deletedApiUuid, organization);
@@ -972,7 +981,7 @@ public class ComplianceManager {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (com.fasterxml.jackson.core.JsonProcessingException | RuntimeException e) {
             log.debug("Could not parse dedup mode from ruleset: " + e.getMessage());
         }
         return "audit"; // Default to audit
