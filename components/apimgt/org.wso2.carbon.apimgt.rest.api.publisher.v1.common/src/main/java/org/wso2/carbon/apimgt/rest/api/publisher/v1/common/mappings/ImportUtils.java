@@ -2005,7 +2005,7 @@ public class ImportUtils {
             OperationPolicyDefinition synapseGatewayDefinition = null;
             OperationPolicyDefinition ccGatewayDefinition = null;
 
-            String fileName = Paths.get(pathToArchive).getFileName().toString();
+            String fileName = new File(pathToArchive).getName();
             policySpecification = getOperationPolicySpecificationFromFile(pathToArchive, fileName);
             if (policySpecification == null) {
                 throw new APIManagementException("Policy Specification Cannot be null",
