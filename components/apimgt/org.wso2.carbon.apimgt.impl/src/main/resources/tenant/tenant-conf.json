@@ -86,6 +86,14 @@
         "Roles": "admin"
       },
       {
+        "Name": "apim:admin_discovery_view",
+        "Roles": "admin,Internal/devops"
+      },
+      {
+        "Name": "apim:admin_discovery_manage",
+        "Roles": "admin"
+      },
+      {
         "Name": "apim:app_owner_change",
         "Roles": "admin"
       },
