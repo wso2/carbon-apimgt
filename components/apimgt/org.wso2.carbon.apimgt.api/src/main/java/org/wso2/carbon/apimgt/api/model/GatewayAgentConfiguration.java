@@ -55,6 +55,15 @@ public interface GatewayAgentConfiguration {
         return null;
     }
     /**
+     * Get the implementation class of the external gateway API key agent
+     *
+     * @return String implementation class name
+     */
+    default String getApiKeyConnectorImplementation() {
+        return null;
+    }
+
+    /**
      * Get vendor type of the external gateway
      *
      * @return String vendor name
@@ -67,6 +76,25 @@ public interface GatewayAgentConfiguration {
      * @return  List<ConfigurationDto> connectionConfigurations
      */
     List<ConfigurationDto> getConnectionConfigurations();
+
+    /**
+     * This method returns the Configurations related to external gateway with WSO2-local context when needed.
+     *
+     * @param context WSO2-local context for connector configuration generation
+     * @return List<ConfigurationDto> connectionConfigurations
+     */
+    default List<ConfigurationDto> getConnectionConfigurations(GatewayConfigurationContext context) {
+        return getConnectionConfigurations();
+    }
+
+    /**
+     * Validate the external gateway environment configuration before persisting it.
+     *
+     * @param environment external gateway environment with plain text connector configurations
+     * @throws APIManagementException if the environment cannot be validated
+     */
+    default void validateEnvironment(Environment environment) throws APIManagementException {
+    }
 
     /**
      * This method returns the Gateway Feature Catalog

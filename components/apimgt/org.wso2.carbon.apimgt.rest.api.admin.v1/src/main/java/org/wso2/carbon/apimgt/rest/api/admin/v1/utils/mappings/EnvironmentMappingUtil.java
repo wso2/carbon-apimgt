@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.PlatformGateway;
@@ -39,7 +40,6 @@ import java.util.stream.Collectors;
  * This class manage Environment mapping to EnvironmentDTO
  */
 public class EnvironmentMappingUtil {
-
     /**
      * Convert list of Environment to EnvironmentListDTO
      *
@@ -188,6 +188,7 @@ public class EnvironmentMappingUtil {
         }
         return additionalPropertyDTOList;
     }
+
     /**
      * Convert VHost to VHostDTO
      *
@@ -211,7 +212,8 @@ public class EnvironmentMappingUtil {
      * @param envListDto EnvironmentListDTO
      * @return EnvironmentListDTO containing Environment list
      */
-    public static List<Environment> fromEnvListDtoToEnvList(EnvironmentListDTO envListDto) {
+    public static List<Environment> fromEnvListDtoToEnvList(EnvironmentListDTO envListDto)
+            throws APIManagementException {
         List<Environment> envList = new ArrayList<>(envListDto.getCount());
         for (EnvironmentDTO envDto : envListDto.getList()) {
             envList.add(fromEnvDtoToEnv(envDto));
@@ -225,7 +227,7 @@ public class EnvironmentMappingUtil {
      * @param envDTO EnvironmentDTO
      * @return Environment
      */
-    public static Environment fromEnvDtoToEnv(EnvironmentDTO envDTO) {
+    public static Environment fromEnvDtoToEnv(EnvironmentDTO envDTO) throws APIManagementException {
         Environment env = new Environment();
         env.setUuid(envDTO.getId());
         env.setName(envDTO.getName());
@@ -245,8 +247,9 @@ public class EnvironmentMappingUtil {
         env.setApiDiscoveryScheduledWindow(envDTO.getApiDiscoveryScheduledWindow());
         env.setVhosts(envDTO.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostDtoToVHost)
                 .collect(Collectors.toList()));
-        env.setAdditionalProperties(fromAdditionalPropertiesDTOToAdditionalProperties
-                (envDTO.getAdditionalProperties()));
+        Map<String, String> additionalProperties = fromAdditionalPropertiesDTOToAdditionalProperties(
+                envDTO.getAdditionalProperties());
+        env.setAdditionalProperties(additionalProperties);
         EnvironmentPermissionsDTO permissions = envDTO.getPermissions();
         if (permissions != null && permissions.getPermissionType() != null) {
             GatewayVisibilityPermissionConfigurationDTO permissionsConfiguration = new GatewayVisibilityPermissionConfigurationDTO();
@@ -292,9 +295,13 @@ public class EnvironmentMappingUtil {
      * @param additionalPropertiesDTOs Set of additional propertyDTOs
      * @return Map<String, String> of Additional properties
      */
-    public static Map<String, String>  fromAdditionalPropertiesDTOToAdditionalProperties(List<AdditionalPropertyDTO>
-                                                                                                 additionalPropertiesDTOs) {
+    public static Map<String, String> fromAdditionalPropertiesDTOToAdditionalProperties(List<AdditionalPropertyDTO>
+                                                                                                 additionalPropertiesDTOs)
+            throws APIManagementException {
         Map<String,String> additionalProperties = new HashMap<>();
+        if (additionalPropertiesDTOs == null) {
+            return additionalProperties;
+        }
         for (AdditionalPropertyDTO entry : additionalPropertiesDTOs) {
             additionalProperties.putIfAbsent(entry.getKey(),entry.getValue());
         }

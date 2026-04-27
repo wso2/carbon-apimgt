@@ -609,6 +609,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             apiKeyInfoDTO.getAuthUser(), apiKeyInfoDTO.getApiKeyProperties(),
                             apiKeyInfoDTO.getCreatedTime(), apiKeyInfoDTO.getValidityPeriod(),
                             apiKeyInfoDTO.getPermittedIP(), apiKeyInfoDTO.getPermittedReferer(), "ACTIVE", "APPLICATION");
+            apiKeyEvent.setApiKey(apiKey);
             apiKeyEvent.setApplicationId(application.getId());
             apiKeyEvent.setApplicationUUId(application.getUUID());
             APIUtil.sendNotification(apiKeyEvent, APIConstants.NotifierType.API_KEY.name());
@@ -686,6 +687,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             apiKeyInfoDTO.getAuthUser(), apiKeyInfoDTO.getApiKeyProperties(),
                             apiKeyInfoDTO.getCreatedTime(), apiKeyInfoDTO.getValidityPeriod(),
                             apiKeyInfoDTO.getPermittedIP(), apiKeyInfoDTO.getPermittedReferer(), "ACTIVE", "API");
+            apiKeyEvent.setApiKey(apiKey);
             apiKeyEvent.setApiUUId(api.getUuid());
             apiKeyEvent.setApiId(api.getId().getId());
             APIUtil.sendNotification(apiKeyEvent, APIConstants.NotifierType.API_KEY.name());
@@ -4637,6 +4639,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 new APIKeyRegenerationEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                         APIConstants.EventType.API_KEY_REGENERATE.name(), tenantId, tenantDomain,
                         apiKeyInfo.getApiKeyHash(), apiKeyDTO.getApikeyHash());
+        apiKeyRegenerationEvent.setOldApiKeyUuid(keyUUId);
+        apiKeyRegenerationEvent.setNewApiKeyUuid(apiKeyDTO.getKeyId());
+        apiKeyRegenerationEvent.setApiUuid(api.getUuid());
+        apiKeyRegenerationEvent.setApplicationUuid(apiKeyInfo.getApplicationId());
+        apiKeyRegenerationEvent.setApiKey(apiKeyDTO.getApiKey());
         APIUtil.sendNotification(apiKeyRegenerationEvent, APIConstants.NotifierType.API_KEY.name());
         APIKeyInfo regeneratedApiKeyInfo = new APIKeyInfo();
         regeneratedApiKeyInfo.setKeyName(apiKeyInfo.getKeyName());
@@ -4678,6 +4685,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 new APIKeyAssociationEvent(APIConstants.EventType.API_KEY_ASSOCIATION_CREATE.name(),
                         apiKeyInfo.getApiKeyHash(), application.getUUID(), api.getUuid(), api.getId().getId(),
                         application.getId(), tenantId, tenantDomain);
+        apiKeyAssociationEvent.setApiKeyUUId(keyUUId);
         APIUtil.sendNotification(apiKeyAssociationEvent, APIConstants.NotifierType.API_KEY.name());
         apiKeyInfo.setApplicationName(application.getName());
         return apiKeyInfo;
@@ -4713,6 +4721,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIKeyAssociationEvent apiKeyAssociationEvent =
                 new APIKeyAssociationEvent(APIConstants.EventType.API_KEY_ASSOCIATION_DELETE.name(),
                         apiKeyInfo.getApiKeyHash(), application.getUUID(), application.getId(), tenantId, tenantDomain);
+        apiKeyAssociationEvent.setApiKeyUUId(keyUUId);
+        apiKeyAssociationEvent.setApiUUId(apiKeyInfo.getApiUUId());
         APIUtil.sendNotification(apiKeyAssociationEvent, APIConstants.NotifierType.API_KEY.name());
 
     }
@@ -4740,6 +4750,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIKeyAssociationEvent apiKeyAssociationEvent =
                 new APIKeyAssociationEvent(APIConstants.EventType.API_KEY_ASSOCIATION_DELETE.name(),
                         apiKeyInfo.getApiKeyHash(), application.getUUID(), application.getId(), tenantId, tenantDomain);
+        apiKeyAssociationEvent.setApiKeyUUId(keyUUId);
+        apiKeyAssociationEvent.setApiUUId(apiUUId);
         APIUtil.sendNotification(apiKeyAssociationEvent, APIConstants.NotifierType.API_KEY.name());
     }
 

@@ -676,6 +676,18 @@ public final class APIUtil {
 
     }
 
+    public static boolean isFederatedGatewayApi(String apiUuid) throws APIManagementException {
+        if (StringUtils.isBlank(apiUuid)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping federated gateway API check because API UUID is blank. Assuming non-federated.");
+            }
+            return false;
+        }
+        String gatewayVendor = ApiMgtDAO.getInstance().getGatewayVendorByAPIUUID(apiUuid);
+        String normalizedGatewayVendor = handleGatewayVendorRetrieval(gatewayVendor);
+        return APIConstants.EXTERNAL_GATEWAY_VENDOR.equalsIgnoreCase(normalizedGatewayVendor);
+    }
+
     /**
      * This method used to extract environment list configured with non empty URLs.
      *
@@ -8835,7 +8847,7 @@ public final class APIUtil {
      * Get all the external api mapping references of an API
      *
      * @param apiId UUID of the API
-     * @return Map of environmentId and referenceArtifact
+     * @return Map of environment name and reference artifact
      * @throws APIManagementException if an error occurs while getting the mapping references
      */
     public static Map<String, String> getApiExternalApiMappingReferenceByApiId(String apiId)

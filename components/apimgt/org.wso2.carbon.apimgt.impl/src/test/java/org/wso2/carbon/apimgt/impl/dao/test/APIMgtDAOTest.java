@@ -200,6 +200,59 @@ public class APIMgtDAOTest {
         assertNotNull(apiKeyInfoDTO);
         assertTrue(apiKeyInfoDTO.length > 1);
     }
+
+    @Test
+    public void testApiKeyExternalApiKeyMappingLifecycle() throws Exception {
+        String oldApiKeyUuid = UUID.randomUUID().toString();
+        String newApiKeyUuid = UUID.randomUUID().toString();
+        String gatewayEnvUuid = UUID.randomUUID().toString();
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "INSERT INTO AM_API_KEY (API_KEY_UUID, NAME, API_KEY_HASH, KEY_TYPE, AUTHZ_USER) "
+                            + "VALUES (?, ?, ?, ?, ?)")) {
+                statement.setString(1, oldApiKeyUuid);
+                statement.setString(2, "old-key");
+                statement.setString(3, UUID.randomUUID().toString());
+                statement.setString(4, "PRODUCTION");
+                statement.setString(5, "admin");
+                statement.executeUpdate();
+
+                statement.setString(1, newApiKeyUuid);
+                statement.setString(2, "new-key");
+                statement.setString(3, UUID.randomUUID().toString());
+                statement.setString(4, "PRODUCTION");
+                statement.setString(5, "admin");
+                statement.executeUpdate();
+            }
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "INSERT INTO AM_GATEWAY_ENVIRONMENT (UUID, NAME, PROVIDER, GATEWAY_TYPE, ORGANIZATION) "
+                            + "VALUES (?, ?, ?, ?, ?)")) {
+                statement.setString(1, gatewayEnvUuid);
+                statement.setString(2, "env-" + gatewayEnvUuid);
+                statement.setString(3, "external");
+                statement.setString(4, "external");
+                statement.setString(5, "carbon.super");
+                statement.executeUpdate();
+            }
+        }
+
+        String initialReferenceArtifact = "{\"credential\":\"initial\"}";
+        String updatedReferenceArtifact = "{\"credential\":\"updated\"}";
+        apiMgtDAO.addOrUpdateApiKeyExternalApiKeyMapping(oldApiKeyUuid, gatewayEnvUuid, initialReferenceArtifact);
+        Map<String, String> initialMappings = apiMgtDAO.getApiKeyExternalApiKeyMappings(oldApiKeyUuid);
+        assertEquals(1, initialMappings.size());
+        assertEquals(initialReferenceArtifact, initialMappings.get(gatewayEnvUuid));
+
+        apiMgtDAO.addOrUpdateApiKeyExternalApiKeyMapping(oldApiKeyUuid, gatewayEnvUuid, updatedReferenceArtifact);
+        Map<String, String> mappings = apiMgtDAO.getApiKeyExternalApiKeyMappings(oldApiKeyUuid);
+        assertEquals(1, mappings.size());
+        assertEquals(updatedReferenceArtifact, mappings.get(gatewayEnvUuid));
+
+        apiMgtDAO.deleteApiKeyExternalApiKeyMappings(oldApiKeyUuid);
+        assertTrue(apiMgtDAO.getApiKeyExternalApiKeyMappings(oldApiKeyUuid).isEmpty());
+    }
+
     @Test
     public void testGetSubscriber() throws Exception {
         Subscriber subscriber = apiMgtDAO.getInstance().getSubscriber("SUMEDHA");

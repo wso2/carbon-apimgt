@@ -25,6 +25,11 @@ package org.wso2.carbon.apimgt.impl.notifier.events;
 public class APIKeyRegenerationEvent extends Event {
     private String oldApiKeyHash;
     private String newApiKeyHash;
+    private String oldApiKeyUuid;
+    private String newApiKeyUuid;
+    private String apiUuid;
+    private String applicationUuid;
+    private transient String apiKey;
 
     public APIKeyRegenerationEvent(String eventId, long timeStamp, String type, int tenantId, String tenantDomain,
                                    String oldApiKeyHash, String newApiKeyHash) {
@@ -50,5 +55,45 @@ public class APIKeyRegenerationEvent extends Event {
 
     public void setNewApiKeyHash(String newApiKeyHash) {
         this.newApiKeyHash = newApiKeyHash;
+    }
+
+    public String getOldApiKeyUuid() {
+        return oldApiKeyUuid;
+    }
+
+    public void setOldApiKeyUuid(String oldApiKeyUuid) {
+        this.oldApiKeyUuid = oldApiKeyUuid;
+    }
+
+    public String getNewApiKeyUuid() {
+        return newApiKeyUuid;
+    }
+
+    public void setNewApiKeyUuid(String newApiKeyUuid) {
+        this.newApiKeyUuid = newApiKeyUuid;
+    }
+
+    public String getApiUuid() {
+        return apiUuid;
+    }
+
+    public void setApiUuid(String apiUuid) {
+        this.apiUuid = apiUuid;
+    }
+
+    public String getApplicationUuid() {
+        return applicationUuid;
+    }
+
+    public void setApplicationUuid(String applicationUuid) {
+        this.applicationUuid = applicationUuid;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
     }
 }

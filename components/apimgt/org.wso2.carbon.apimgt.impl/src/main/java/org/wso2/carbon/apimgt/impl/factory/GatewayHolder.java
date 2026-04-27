@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.factory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.FederatedApiKeyConnector;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
@@ -69,5 +70,49 @@ public class GatewayHolder {
             }
         }
         return null;
+    }
+
+    public static FederatedApiKeyConnector getTenantApiKeyConnectorInstance(Environment environment)
+            throws APIManagementException {
+
+        synchronized (environment.getUuid().intern()) {
+            GatewayAgentConfiguration agentConfiguration = ServiceReferenceHolder.getInstance()
+                    .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
+            if (agentConfiguration == null) {
+                throw new APIManagementException("Gateway Agent Configuration not found for type: "
+                        + environment.getGatewayType());
+            }
+
+            String implementationClassName = agentConfiguration.getApiKeyConnectorImplementation();
+            if (implementationClassName == null || implementationClassName.isEmpty()) {
+                throw new APIManagementException("API Key Connector Implementation class not found for gateway type: "
+                        + environment.getGatewayType());
+            }
+
+            try {
+                APIAdminImpl apiAdmin = new APIAdminImpl();
+                Environment resolvedEnvironment = environment;
+                resolvedEnvironment = apiAdmin.decryptGatewayConfigurationValues(resolvedEnvironment);
+
+                Class<?> clazz = Class.forName(implementationClassName);
+                if (!FederatedApiKeyConnector.class.isAssignableFrom(clazz)) {
+                    throw new APIManagementException("Configured API Key Connector class " + implementationClassName
+                            + " does not implement " + FederatedApiKeyConnector.class.getName());
+                }
+                FederatedApiKeyConnector connector = (FederatedApiKeyConnector) clazz.getDeclaredConstructor()
+                        .newInstance();
+                connector.init(resolvedEnvironment);
+                return connector;
+            } catch (ReflectiveOperationException e) {
+                String msg = "Error while initializing Federated API Key Connector for type: "
+                        + environment.getGatewayType();
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } catch (RuntimeException e) {
+                String msg = "Error while instantiating Federated API Key Connector implementation: "
+                        + implementationClassName;
+                throw new APIManagementException(msg, e);
+            }
+        }
     }
 }
