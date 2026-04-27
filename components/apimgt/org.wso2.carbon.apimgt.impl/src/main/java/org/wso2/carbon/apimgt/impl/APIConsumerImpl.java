@@ -3245,15 +3245,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     /**
      * Checks whether the requested identifier matches with the subscribed identifier.
-     *
-     * @param requestedIdentifier  requested identifier
-     * @param subscribedIdentifier subscribed identifier
-     * @return true if the requested identifier matches with the subscribed identifier, false otherwise
-     */
-    /**
-     * Checks whether the requested identifier matches with the subscribed identifier.
-     * Compares by name, version and organization rather than provider name, since
-     * provider name encoding may differ between sources (@ vs -AT-).
+     * Normalizes provider name encoding before comparison to handle @ vs -AT- mismatch
+     * that can occur after a provider change.
      *
      * @param requestedIdentifier  requested identifier
      * @param subscribedIdentifier subscribed identifier
@@ -3266,8 +3259,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return StringUtils.equals(requestedIdentifier.getName(), subscribedIdentifier.getName())
                 && StringUtils.equals(requestedIdentifier.getVersion(), subscribedIdentifier.getVersion())
-                && StringUtils.equals(requestedIdentifier.getOrganization(),
-                subscribedIdentifier.getOrganization());
+                && StringUtils.equals(APIUtil.replaceEmailDomainBack(requestedIdentifier.getProviderName()),
+                APIUtil.replaceEmailDomainBack(subscribedIdentifier.getProviderName()));
     }
 
     /**
