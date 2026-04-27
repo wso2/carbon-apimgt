@@ -8421,3 +8421,5 @@ components:
             apim:gov_rule_manage: Manage governance rules
             apim:organization_manage: Manage Organizations
             apim:organization_read: Read Organizations
+            apim:admin_discovery_view: View discovered unmanaged APIs (Governance)
+            apim:admin_discovery_manage: Manage discovered unmanaged APIs (Governance)
