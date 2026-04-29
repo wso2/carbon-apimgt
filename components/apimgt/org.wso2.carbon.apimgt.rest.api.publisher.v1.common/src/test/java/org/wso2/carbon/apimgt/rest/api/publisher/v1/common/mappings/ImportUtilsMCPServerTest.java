@@ -25,7 +25,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
+
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -48,7 +48,6 @@ import java.util.List;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ImportUtils.class, RestApiCommonUtil.class, APIControllerUtil.class,
         MultitenantUtils.class, APIUtil.class, PublisherCommonUtils.class})
-@SuppressStaticInitializationFor({"org.wso2.carbon.apimgt.impl.utils.APIUtil"})
 public class ImportUtilsMCPServerTest {
 
     private static final String ORGANIZATION = "carbon.super";
