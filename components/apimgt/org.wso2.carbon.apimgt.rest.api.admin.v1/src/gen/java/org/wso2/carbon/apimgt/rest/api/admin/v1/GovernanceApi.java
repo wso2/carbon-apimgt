@@ -46,7 +46,7 @@ GovernanceApiService delegate = new GovernanceApiServiceImpl();
     @ApiOperation(value = "Get discovered API detail", notes = "", response = DiscoveredAPIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:admin_discovery_view", description = "")
+            @AuthorizationScope(scope = "apim:admin_discovery_view", description = "View discovered unmanaged APIs (Governance)")
         })
     }, tags={ "Unmanaged APIs",  })
     @ApiResponses(value = { 
@@ -64,7 +64,7 @@ GovernanceApiService delegate = new GovernanceApiServiceImpl();
     @ApiOperation(value = "List discovered APIs", notes = "Paginated list of unmanaged discovered APIs. Filterable by classification, service, and internal-only flag. ", response = DiscoveredAPIListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:admin_discovery_view", description = "")
+            @AuthorizationScope(scope = "apim:admin_discovery_view", description = "View discovered unmanaged APIs (Governance)")
         })
     }, tags={ "Unmanaged APIs",  })
     @ApiResponses(value = { 
@@ -81,7 +81,7 @@ GovernanceApiService delegate = new GovernanceApiServiceImpl();
     @ApiOperation(value = "Get summary of discovered APIs by classification ", notes = "Returns aggregate counts of discovered APIs by classification (shadow, drift), reachability (external, internal), and service. ", response = DiscoverySummaryDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:admin_discovery_view", description = "")
+            @AuthorizationScope(scope = "apim:admin_discovery_view", description = "View discovered unmanaged APIs (Governance)")
         })
     }, tags={ "Unmanaged APIs",  })
     @ApiResponses(value = { 
@@ -98,7 +98,7 @@ GovernanceApiService delegate = new GovernanceApiServiceImpl();
     @ApiOperation(value = "List untrafficked managed APIs", notes = "Managed APIs registered in APIM but with no observed traffic. Useful for identifying dead APIs or DeepFlow coverage gaps. ", response = UntraffickedListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
-            @AuthorizationScope(scope = "apim:admin_discovery_view", description = "")
+            @AuthorizationScope(scope = "apim:admin_discovery_view", description = "View discovered unmanaged APIs (Governance)")
         })
     }, tags={ "Unmanaged APIs" })
     @ApiResponses(value = { 

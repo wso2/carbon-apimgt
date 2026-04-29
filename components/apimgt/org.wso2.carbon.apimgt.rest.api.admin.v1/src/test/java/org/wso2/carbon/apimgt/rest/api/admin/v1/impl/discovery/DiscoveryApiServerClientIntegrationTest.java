@@ -83,7 +83,7 @@ public class DiscoveryApiServerClientIntegrationTest {
             client().getApiById(token(),
                     "00000000-0000-0000-0000-000000000000");
         } catch (DiscoveryApiServerClient.NotFoundException expected) {
-            System.out.println("LIVE detail 404: " + expected.getMessage());
+            // Expected path — sentinel UUID returns 404. No assertion needed.
             return;
         }
         // If the daemon returned 200 for a sentinel UUID, that's fine too;

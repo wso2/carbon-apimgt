@@ -32,6 +32,7 @@ public class SettingsDTO   {
     private List<SettingsGatewayConfigurationDTO> gatewayConfiguration = new ArrayList<SettingsGatewayConfigurationDTO>();
     private Boolean analyticsEnabled = null;
     private Boolean transactionCounterEnable = null;
+    private Boolean discoveryEnabled = false;
     private Boolean isGatewayNotificationEnabled = false;
     private List<String> platformGatewayVersions = new ArrayList<String>();
     private Boolean consumptionExportEnabled = null;
@@ -178,6 +179,24 @@ public class SettingsDTO   {
   }
 
   /**
+   * To determine whether the API Discovery integration is enabled (controls visibility of the Unmanaged APIs tab)
+   **/
+  public SettingsDTO discoveryEnabled(Boolean discoveryEnabled) {
+    this.discoveryEnabled = discoveryEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "To determine whether the API Discovery integration is enabled (controls visibility of the Unmanaged APIs tab)")
+  @JsonProperty("discoveryEnabled")
+  public Boolean isDiscoveryEnabled() {
+    return discoveryEnabled;
+  }
+  public void setDiscoveryEnabled(Boolean discoveryEnabled) {
+    this.discoveryEnabled = discoveryEnabled;
+  }
+
+  /**
    * Is Gateway Notification Enabled
    **/
   public SettingsDTO isGatewayNotificationEnabled(Boolean isGatewayNotificationEnabled) {
@@ -249,6 +268,7 @@ public class SettingsDTO   {
         Objects.equals(gatewayConfiguration, settings.gatewayConfiguration) &&
         Objects.equals(analyticsEnabled, settings.analyticsEnabled) &&
         Objects.equals(transactionCounterEnable, settings.transactionCounterEnable) &&
+        Objects.equals(discoveryEnabled, settings.discoveryEnabled) &&
         Objects.equals(isGatewayNotificationEnabled, settings.isGatewayNotificationEnabled) &&
         Objects.equals(platformGatewayVersions, settings.platformGatewayVersions) &&
         Objects.equals(consumptionExportEnabled, settings.consumptionExportEnabled);
@@ -256,7 +276,7 @@ public class SettingsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable, isGatewayNotificationEnabled, platformGatewayVersions, consumptionExportEnabled);
+    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable, discoveryEnabled, isGatewayNotificationEnabled, platformGatewayVersions, consumptionExportEnabled);
   }
 
   @Override
@@ -272,6 +292,7 @@ public class SettingsDTO   {
     sb.append("    gatewayConfiguration: ").append(toIndentedString(gatewayConfiguration)).append("\n");
     sb.append("    analyticsEnabled: ").append(toIndentedString(analyticsEnabled)).append("\n");
     sb.append("    transactionCounterEnable: ").append(toIndentedString(transactionCounterEnable)).append("\n");
+    sb.append("    discoveryEnabled: ").append(toIndentedString(discoveryEnabled)).append("\n");
     sb.append("    isGatewayNotificationEnabled: ").append(toIndentedString(isGatewayNotificationEnabled)).append("\n");
     sb.append("    platformGatewayVersions: ").append(toIndentedString(platformGatewayVersions)).append("\n");
     sb.append("    consumptionExportEnabled: ").append(toIndentedString(consumptionExportEnabled)).append("\n");

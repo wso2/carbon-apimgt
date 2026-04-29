@@ -27,11 +27,20 @@ import java.util.List;
  * already pulls in transitively.
  *
  * <p>Configuration keys (read via APIManagerConfiguration; provisioned by
- * deployment.toml.j2's {@code [apim.governance.discovery]} block in
- * product-apim):</p>
+ * deployment.toml's {@code [apim.governance.discovery]} block, rendered
+ * into api-manager.xml's {@code <APIDiscovery>} element):</p>
  * <pre>
- *   APIM.Governance.Discovery.Endpoint    https://ads.internal:8443
- *   APIM.Governance.Discovery.TimeoutMs   5000   (default if unset)
+ *   APIDiscovery.Enabled    true | false (default: false)
+ *   APIDiscovery.Endpoint   https://ads.internal:8443
+ *   APIDiscovery.TimeoutMs  5000  (default if unset)
+ * </pre>
+ *
+ * <p>Operators enable the feature in {@code deployment.toml}:</p>
+ * <pre>
+ *   [apim.governance.discovery]
+ *   enabled    = true
+ *   endpoint   = "https://ads.internal:8443"
+ *   timeout_ms = 5000
  * </pre>
  *
  * <p>Bearer token strategy: the BFF FORWARDS the user's incoming bearer
@@ -47,8 +56,10 @@ public class DiscoveryApiServerClient {
 
     private static final Log LOG = LogFactory.getLog(DiscoveryApiServerClient.class);
 
-    private static final String CFG_ENDPOINT     = "APIM.Governance.Discovery.Endpoint";
-    private static final String CFG_TIMEOUT_MS   = "APIM.Governance.Discovery.TimeoutMs";
+    private static final String CFG_ENABLED      = "APIDiscovery.Enabled";
+    private static final String CFG_ENDPOINT     = "APIDiscovery.Endpoint";
+    private static final String CFG_TIMEOUT_MS   = "APIDiscovery.TimeoutMs";
+    private static final String CFG_VERIFY_SSL   = "APIDiscovery.VerifySSL";
     private static final String DEFAULT_ENDPOINT = "https://localhost:8443";
     private static final int    DEFAULT_TIMEOUT_MS = 5000;
 
@@ -97,6 +108,28 @@ public class DiscoveryApiServerClient {
         instance = mock;
     }
 
+    /**
+     * Whether the API Discovery integration is enabled. Sourced from
+     * the {@code <APIDiscovery><Enabled>} block in api-manager.xml,
+     * which is rendered from {@code [apim.governance.discovery] enabled}
+     * in deployment.toml. Defaults to {@code false} when the block is
+     * absent — the feature ships disabled.
+     *
+     * <p>The admin portal reads this through SettingsApiServiceImpl and
+     * hides the "Unmanaged APIs" tab when disabled.</p>
+     *
+     * @return true when the toml flag is set to "true"
+     */
+    public static boolean isEnabled() {
+        final APIManagerConfiguration cfg = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        if (cfg == null) {
+            return false;
+        }
+        return Boolean.parseBoolean(cfg.getFirstProperty(CFG_ENABLED));
+    }
+
     private static DiscoveryApiServerClient build() {
         final APIManagerConfiguration cfg = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService()
@@ -104,7 +137,7 @@ public class DiscoveryApiServerClient {
 
         String endpoint = cfg.getFirstProperty(CFG_ENDPOINT);
         if (endpoint == null || endpoint.isEmpty()) {
-            endpoint = System.getProperty(CFG_ENDPOINT, DEFAULT_ENDPOINT);
+            endpoint = DEFAULT_ENDPOINT;
         }
         if (endpoint.endsWith("/")) {
             endpoint = endpoint.substring(0, endpoint.length() - 1);

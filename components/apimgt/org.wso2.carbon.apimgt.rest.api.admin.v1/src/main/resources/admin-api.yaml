@@ -7023,6 +7023,11 @@ components:
           type: boolean
           description: To determine whether the transaction counter is enabled or not
           example: false
+        discoveryEnabled:
+          type: boolean
+          description: To determine whether the API Discovery integration is enabled (controls visibility of the Unmanaged APIs tab)
+          example: false
+          default: false
         isGatewayNotificationEnabled:
           type: boolean
           description: Is Gateway Notification Enabled
