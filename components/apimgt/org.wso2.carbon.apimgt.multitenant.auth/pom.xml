@@ -76,26 +76,26 @@
                             org.wso2.carbon.apimgt.multitenant.auth.internal
                         </Private-Package>
                         <Import-Package>
-                            com.nimbusds.jose.*; version="${nimbusds.osgi.version.range}",
-                            com.nimbusds.jwt; version="${nimbusds.osgi.version.range}",
-                            javax.servlet.http;version="${javax.servlet.version.range}",
-                            org.apache.commons.lang;version="${apache.commons.version.range}",
-                            org.apache.commons.logging;version="${apache.commons.logging.version.range}",
-                            org.json;version="${json.version.range}",
-                            org.osgi.framework;version="${osgi.framework.version.range}",
-                            org.osgi.service.component;version="${osgi.service.component.imp.pkg.version.range}",
+                            com.nimbusds.jose.*; version="${imp.pkg.version.com.nimbus}",
+                            com.nimbusds.jwt; version="${imp.pkg.version.com.nimbus}",
+                            javax.servlet.http;version="${javax.servlet.imp.pkg.version}",
+                            org.apache.commons.lang3;version="${apache.commons.lang3.version}",
+                            org.apache.commons.logging;version="${commons.logging.imp.pkg.version}",
+                            org.json;version="${org.json.version.range}",
+                            org.osgi.framework;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.component;version="${imp.package.version.osgi.service}",
                             org.wso2.carbon.context;version="${carbon.kernel.package.import.version.range}",
-                            org.wso2.carbon.identity.application.authentication.framework.*;version="${identity.framework.package.import.version.range}",
+                            org.wso2.carbon.identity.application.authentication.framework.*;version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.identity.application.authenticator.oidc;
-                            version="${identity.outbound.auth.oidc.version.range}",
-                            org.wso2.carbon.identity.application.common.model;version="${identity.framework.package.import.version.range}",
-                            org.wso2.carbon.identity.application.mgt;version="${identity.framework.package.import.version.range}",
-                            org.wso2.carbon.identity.core.util;version="${identity.framework.package.import.version.range}"
+                            version="${carbon.identity-application-authenticator-oidc}",
+                            org.wso2.carbon.identity.application.common.model;version="${carbon.identity.imp.pkg.version}",
+                            org.wso2.carbon.identity.application.mgt;version="${carbon.identity.imp.pkg.version}",
+                            org.wso2.carbon.identity.core.util;version="${carbon.identity.imp.pkg.version}"
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.multitenant.auth.internal,
                             org.wso2.carbon.apimgt.multitenant.auth.*;
-                              version="${carbon.identity.package.export.project.version}",
+                              version="${carbon.apimgt.version}",
                         </Export-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
