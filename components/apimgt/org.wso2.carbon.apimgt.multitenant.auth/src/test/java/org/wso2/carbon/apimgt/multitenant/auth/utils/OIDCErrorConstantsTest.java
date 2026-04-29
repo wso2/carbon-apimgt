@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.apimgt.multitenant.auth.utils;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * Unit tests for {@link OIDCErrorConstants}.
@@ -32,7 +32,7 @@ public class OIDCErrorConstantsTest {
         OIDCErrorConstants.ErrorMessages error =
                 OIDCErrorConstants.ErrorMessages.JWT_TOKEN_AUD_CLAIM_VALIDATION_FAILED;
 
-        Assert.assertEquals(error.getCode(), "OID-60018");
+        Assert.assertEquals("OID-60018", error.getCode());
         Assert.assertNotNull(error.getMessage());
         Assert.assertTrue(error.getMessage().contains("audience"));
     }
@@ -43,7 +43,7 @@ public class OIDCErrorConstantsTest {
         OIDCErrorConstants.ErrorMessages error =
                 OIDCErrorConstants.ErrorMessages.JWT_TOKEN_ISS_CLAIM_VALIDATION_FAILED;
 
-        Assert.assertEquals(error.getCode(), "OID-65016");
+        Assert.assertEquals("OID-65016", error.getCode());
         Assert.assertNotNull(error.getMessage());
         Assert.assertTrue(error.getMessage().contains("iss"));
     }
@@ -54,7 +54,7 @@ public class OIDCErrorConstantsTest {
         OIDCErrorConstants.ErrorMessages error =
                 OIDCErrorConstants.ErrorMessages.JWT_TOKEN_SIGNATURE_VALIDATION_FAILED;
 
-        Assert.assertEquals(error.getCode(), "OID-65017");
+        Assert.assertEquals("OID-65017", error.getCode());
         Assert.assertNotNull(error.getMessage());
         Assert.assertTrue(error.getMessage().contains("signature"));
     }

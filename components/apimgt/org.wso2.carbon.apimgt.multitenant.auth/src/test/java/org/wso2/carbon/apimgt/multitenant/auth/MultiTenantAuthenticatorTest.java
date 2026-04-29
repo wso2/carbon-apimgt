@@ -18,13 +18,12 @@
 
 package org.wso2.carbon.apimgt.multitenant.auth;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.testng.MockitoTestNGListener;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.wso2.carbon.identity.application.common.model.Property;
 
 import java.util.HashMap;
@@ -32,7 +31,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.wso2.carbon.apimgt.multitenant.auth.MultiTenantAuthenticatorConstants.AUTHENTICATOR_FRIENDLY_NAME;
 import static org.wso2.carbon.apimgt.multitenant.auth.MultiTenantAuthenticatorConstants.AUTHENTICATOR_NAME;
@@ -43,7 +41,7 @@ import static org.wso2.carbon.apimgt.multitenant.auth.MultiTenantAuthenticatorCo
 /**
  * Unit tests for {@link MultiTenantAuthenticator}.
  */
-@Listeners(MockitoTestNGListener.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class MultiTenantAuthenticatorTest {
 
     private MultiTenantAuthenticator authenticator;
@@ -51,7 +49,7 @@ public class MultiTenantAuthenticatorTest {
     @Mock
     private HttpServletRequest mockRequest;
 
-    @BeforeMethod
+    @Before
     public void setUp() {
 
         authenticator = new MultiTenantAuthenticator();
@@ -60,13 +58,13 @@ public class MultiTenantAuthenticatorTest {
     @Test
     public void testGetFriendlyName() {
 
-        Assert.assertEquals(authenticator.getFriendlyName(), AUTHENTICATOR_FRIENDLY_NAME);
+        Assert.assertEquals(AUTHENTICATOR_FRIENDLY_NAME, authenticator.getFriendlyName());
     }
 
     @Test
     public void testGetName() {
 
-        Assert.assertEquals(authenticator.getName(), AUTHENTICATOR_NAME);
+        Assert.assertEquals(AUTHENTICATOR_NAME, authenticator.getName());
     }
 
     @Test
@@ -85,37 +83,32 @@ public class MultiTenantAuthenticatorTest {
                 hasTenantSelectionUrl = true;
             }
         }
-        Assert.assertTrue(hasCommonSpName, "CommonSPName property should be present");
-        Assert.assertTrue(hasTenantSelectionUrl, "TenantSelectionPageUrl property should be present");
+        Assert.assertTrue("CommonSPName property should be present", hasCommonSpName);
+        Assert.assertTrue("TenantSelectionPageUrl property should be present", hasTenantSelectionUrl);
     }
 
-    @DataProvider(name = "canHandleDataProvider")
-    public Object[][] canHandleDataProvider() {
+    @Test
+    public void testCanHandleWithTenantIdentifier() {
 
-        return new Object[][]{
-                {TENANT_IDENTIFIER, "abc.com", true},
-                {null, null, false},
-        };
+        when(mockRequest.getParameter(TENANT_IDENTIFIER)).thenReturn("abc.com");
+        Assert.assertTrue(authenticator.canHandle(mockRequest));
     }
 
-    @Test(dataProvider = "canHandleDataProvider")
-    public void testCanHandle(String paramName, String paramValue, boolean expected) {
+    @Test
+    public void testCanHandleWithoutTenantIdentifier() {
 
-        if (paramName != null) {
-            lenient().when(mockRequest.getParameter(TENANT_IDENTIFIER)).thenReturn(paramValue);
-        }
-        Assert.assertEquals(authenticator.canHandle(mockRequest), expected);
+        Assert.assertFalse(authenticator.canHandle(mockRequest));
     }
 
     @Test
     public void testGetScopeBlank() {
 
-        Assert.assertEquals(authenticator.getScope("", new HashMap<>()), "openid groups");
+        Assert.assertEquals("openid groups", authenticator.getScope("", new HashMap<>()));
     }
 
     @Test
     public void testGetScopeNonBlank() {
 
-        Assert.assertEquals(authenticator.getScope("openid email", new HashMap<>()), "openid email");
+        Assert.assertEquals("openid email", authenticator.getScope("openid email", new HashMap<>()));
     }
 }

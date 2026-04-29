@@ -20,22 +20,22 @@ package org.wso2.carbon.apimgt.multitenant.auth.utils;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.testng.MockitoTestNGListener;
-import org.testng.Assert;
-import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.application.common.model.IdentityProvider;
 import org.wso2.carbon.identity.oauth2.util.JWTSignatureValidationUtils;
 
-import static org.mockito.Mockito.mockStatic;
-
 /**
  * Unit tests for {@link OIDCTokenValidationUtil}.
  */
-@Listeners(MockitoTestNGListener.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({JWTSignatureValidationUtils.class})
 public class OIDCTokenValidationUtilTest {
 
     private static final String TEST_ISSUER = "https://localhost:9443/oauth2/token";
@@ -54,7 +54,7 @@ public class OIDCTokenValidationUtilTest {
                 .build();
 
         String issuer = OIDCTokenValidationUtil.getIssuer(claimsSet);
-        Assert.assertEquals(issuer, TEST_ISSUER);
+        Assert.assertEquals(TEST_ISSUER, issuer);
     }
 
     @Test
@@ -69,27 +69,21 @@ public class OIDCTokenValidationUtilTest {
     @Test
     public void testPassValidateSignature() throws Exception {
 
-        try (MockedStatic<JWTSignatureValidationUtils> sigMock =
-                     mockStatic(JWTSignatureValidationUtils.class)) {
+        PowerMockito.mockStatic(JWTSignatureValidationUtils.class);
+        PowerMockito.when(JWTSignatureValidationUtils.validateSignature(mockSignedJWT, mockIdentityProvider))
+                .thenReturn(true);
 
-            sigMock.when(() -> JWTSignatureValidationUtils.validateSignature(mockSignedJWT, mockIdentityProvider))
-                    .thenReturn(true);
-
-            OIDCTokenValidationUtil.validateSignature(mockSignedJWT, mockIdentityProvider);
-        }
+        OIDCTokenValidationUtil.validateSignature(mockSignedJWT, mockIdentityProvider);
     }
 
-    @Test(expectedExceptions = AuthenticationFailedException.class)
+    @Test(expected = AuthenticationFailedException.class)
     public void testFailValidateSignature() throws Exception {
 
-        try (MockedStatic<JWTSignatureValidationUtils> sigMock =
-                     mockStatic(JWTSignatureValidationUtils.class)) {
+        PowerMockito.mockStatic(JWTSignatureValidationUtils.class);
+        PowerMockito.when(JWTSignatureValidationUtils.validateSignature(mockSignedJWT, mockIdentityProvider))
+                .thenReturn(false);
 
-            sigMock.when(() -> JWTSignatureValidationUtils.validateSignature(mockSignedJWT, mockIdentityProvider))
-                    .thenReturn(false);
-
-            OIDCTokenValidationUtil.validateSignature(mockSignedJWT, mockIdentityProvider);
-        }
+        OIDCTokenValidationUtil.validateSignature(mockSignedJWT, mockIdentityProvider);
     }
 
     @Test
@@ -102,7 +96,7 @@ public class OIDCTokenValidationUtilTest {
         OIDCTokenValidationUtil.validateIssuerClaim(claimsSet);
     }
 
-    @Test(expectedExceptions = AuthenticationFailedException.class)
+    @Test(expected = AuthenticationFailedException.class)
     public void testFailValidateIssuerClaimBlank() throws AuthenticationFailedException {
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
@@ -112,7 +106,7 @@ public class OIDCTokenValidationUtilTest {
         OIDCTokenValidationUtil.validateIssuerClaim(claimsSet);
     }
 
-    @Test(expectedExceptions = AuthenticationFailedException.class)
+    @Test(expected = AuthenticationFailedException.class)
     public void testFailValidateIssuerClaimNull() throws AuthenticationFailedException {
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().build();
