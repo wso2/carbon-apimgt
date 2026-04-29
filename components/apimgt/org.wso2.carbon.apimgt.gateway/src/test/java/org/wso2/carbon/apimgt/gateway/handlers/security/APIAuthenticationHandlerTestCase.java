@@ -377,7 +377,7 @@ public class APIAuthenticationHandlerTestCase {
       APIAuthenticationHandler apiAuthenticationHandler = new APIAuthenticationHandler();
         Mockito.when(context.stop()).thenReturn(1000L);
         apiAuthenticationHandler.stopMetricTimer(context);
-        Assert.assertTrue(true);
+        Mockito.verify(context, Mockito.times(1)).stop();
     }
 
 }
