@@ -5167,6 +5167,35 @@ components:
                 type: string
               apimApiVersion:
                 type: string
+        topClients:
+          type: array
+          description: Top callers of this finding ranked by observation count, capped at 20 entries.
+          items:
+            type: object
+            properties:
+              identity:
+                type: string
+                description: Stable identity. "k8s:<namespace>/<workload>" for K8s pods or "host:<ip>" for legacy hosts.
+              kind:
+                type: string
+                enum: [k8s, legacy]
+              namespace:
+                type: string
+                description: K8s namespace (only when kind = k8s).
+              workload:
+                type: string
+                description: K8s workload name (only when kind = k8s).
+              ip:
+                type: string
+                description: Caller IP address.
+              port:
+                type: integer
+                format: int32
+                description: Sample source port. Source ports rotate per connection so this is illustrative only.
+              observations:
+                type: integer
+                format: int64
+                description: Observation count for this caller in the latest cycle window.
 
     DiscoveredAPIList:
       type: object

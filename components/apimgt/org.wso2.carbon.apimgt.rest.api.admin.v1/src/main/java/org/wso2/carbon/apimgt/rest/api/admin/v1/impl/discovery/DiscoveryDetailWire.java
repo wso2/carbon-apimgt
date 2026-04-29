@@ -34,6 +34,7 @@ public class DiscoveryDetailWire {
     @JsonProperty("matched_apim_api_ids")    private List<String> matchedApimApiIds;
     @JsonProperty("matched_apim_apis")       private List<APIRef> matchedApimAPIs;
     @JsonProperty("service_managed_apis")    private List<APIRef> serviceManagedAPIs;
+    @JsonProperty("top_clients")             private List<ClientObservation> topClients;
 
     public String getId() { return id; }
     public void setId(final String id) { this.id = id; }
@@ -131,6 +132,45 @@ public class DiscoveryDetailWire {
     public List<APIRef> getServiceManagedAPIs() { return serviceManagedAPIs; }
     public void setServiceManagedAPIs(final List<APIRef> serviceManagedAPIs) {
         this.serviceManagedAPIs = serviceManagedAPIs;
+    }
+
+    public List<ClientObservation> getTopClients() { return topClients; }
+    public void setTopClients(final List<ClientObservation> topClients) {
+        this.topClients = topClients;
+    }
+
+    /** Per-finding top caller, ranked by observation count. */
+    public static class ClientObservation {
+        @JsonProperty("identity")     private String identity;
+        @JsonProperty("kind")         private String kind;
+        @JsonProperty("namespace")    private String namespace;
+        @JsonProperty("workload")     private String workload;
+        @JsonProperty("ip")           private String ip;
+        @JsonProperty("port")         private int port;
+        @JsonProperty("observations") private long observations;
+
+        public String getIdentity() { return identity; }
+        public void setIdentity(final String identity) { this.identity = identity; }
+
+        public String getKind() { return kind; }
+        public void setKind(final String kind) { this.kind = kind; }
+
+        public String getNamespace() { return namespace; }
+        public void setNamespace(final String namespace) { this.namespace = namespace; }
+
+        public String getWorkload() { return workload; }
+        public void setWorkload(final String workload) { this.workload = workload; }
+
+        public String getIp() { return ip; }
+        public void setIp(final String ip) { this.ip = ip; }
+
+        public int getPort() { return port; }
+        public void setPort(final int port) { this.port = port; }
+
+        public long getObservations() { return observations; }
+        public void setObservations(final long observations) {
+            this.observations = observations;
+        }
     }
 
     /** Trimmed APIM-API reference embedded in the detail. */

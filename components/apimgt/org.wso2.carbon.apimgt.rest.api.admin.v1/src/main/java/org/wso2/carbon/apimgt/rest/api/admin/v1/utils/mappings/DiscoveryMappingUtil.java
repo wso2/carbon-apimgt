@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.DiscoveredAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.DiscoveredAPIListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.DiscoveredAPIServiceManagedAPIsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.DiscoveredAPITopClientsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.DiscoverySummaryByReachabilityDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.DiscoverySummaryByServiceDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.DiscoverySummaryByTypeDTO;
@@ -148,7 +149,34 @@ public final class DiscoveryMappingUtil {
             }
         }
         dto.setServiceManagedAPIs(svcManaged);
+
+        final List<DiscoveredAPITopClientsDTO> clients = new ArrayList<>();
+        if (wire.getTopClients() != null) {
+            for (DiscoveryDetailWire.ClientObservation c : wire.getTopClients()) {
+                final DiscoveredAPITopClientsDTO out = new DiscoveredAPITopClientsDTO();
+                out.setIdentity(c.getIdentity());
+                out.setKind(toClientKindEnum(c.getKind()));
+                out.setNamespace(c.getNamespace());
+                out.setWorkload(c.getWorkload());
+                out.setIp(c.getIp());
+                out.setPort(c.getPort());
+                out.setObservations(c.getObservations());
+                clients.add(out);
+            }
+        }
+        dto.setTopClients(clients);
         return dto;
+    }
+
+    private static DiscoveredAPITopClientsDTO.KindEnum toClientKindEnum(final String kind) {
+        if (kind == null) {
+            return null;
+        }
+        switch (kind.toLowerCase()) {
+            case "k8s":    return DiscoveredAPITopClientsDTO.KindEnum.K8S;
+            case "legacy": return DiscoveredAPITopClientsDTO.KindEnum.LEGACY;
+            default:       return null;
+        }
     }
 
     /**

@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.DiscoveredAPIServiceManagedAPIsDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.DiscoveredAPITopClientsDTO;
 import javax.validation.constraints.*;
 
 
@@ -108,6 +109,7 @@ return null;
     private BigDecimal avgDurationUs = null;
     private List<String> matchedApimApiIds = new ArrayList<String>();
     private List<DiscoveredAPIServiceManagedAPIsDTO> serviceManagedAPIs = new ArrayList<DiscoveredAPIServiceManagedAPIsDTO>();
+    private List<DiscoveredAPITopClientsDTO> topClients = new ArrayList<DiscoveredAPITopClientsDTO>();
 
   /**
    **/
@@ -468,6 +470,25 @@ return null;
     this.serviceManagedAPIs = serviceManagedAPIs;
   }
 
+  /**
+   * Top callers of this finding ranked by observation count, capped at 20 entries.
+   **/
+  public DiscoveredAPIDTO topClients(List<DiscoveredAPITopClientsDTO> topClients) {
+    this.topClients = topClients;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Top callers of this finding ranked by observation count, capped at 20 entries.")
+      @Valid
+  @JsonProperty("topClients")
+  public List<DiscoveredAPITopClientsDTO> getTopClients() {
+    return topClients;
+  }
+  public void setTopClients(List<DiscoveredAPITopClientsDTO> topClients) {
+    this.topClients = topClients;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -498,12 +519,13 @@ return null;
         Objects.equals(statusCodes, discoveredAPI.statusCodes) &&
         Objects.equals(avgDurationUs, discoveredAPI.avgDurationUs) &&
         Objects.equals(matchedApimApiIds, discoveredAPI.matchedApimApiIds) &&
-        Objects.equals(serviceManagedAPIs, discoveredAPI.serviceManagedAPIs);
+        Objects.equals(serviceManagedAPIs, discoveredAPI.serviceManagedAPIs) &&
+        Objects.equals(topClients, discoveredAPI.topClients);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, serviceIdentity, envKind, namespace, serviceName, samplePod, sampleWorkload, method, normalizedPath, rawPathSamples, classification, isInternal, firstSeenAt, lastSeenAt, observationCount, distinctClientCount, distinctClientsSample, statusCodes, avgDurationUs, matchedApimApiIds, serviceManagedAPIs);
+    return Objects.hash(id, serviceIdentity, envKind, namespace, serviceName, samplePod, sampleWorkload, method, normalizedPath, rawPathSamples, classification, isInternal, firstSeenAt, lastSeenAt, observationCount, distinctClientCount, distinctClientsSample, statusCodes, avgDurationUs, matchedApimApiIds, serviceManagedAPIs, topClients);
   }
 
   @Override
@@ -532,6 +554,7 @@ return null;
     sb.append("    avgDurationUs: ").append(toIndentedString(avgDurationUs)).append("\n");
     sb.append("    matchedApimApiIds: ").append(toIndentedString(matchedApimApiIds)).append("\n");
     sb.append("    serviceManagedAPIs: ").append(toIndentedString(serviceManagedAPIs)).append("\n");
+    sb.append("    topClients: ").append(toIndentedString(topClients)).append("\n");
     sb.append("}");
     return sb.toString();
   }
